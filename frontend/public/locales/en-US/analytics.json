@@ -101,6 +101,7 @@
   },
   "metadata": {
     "description": "You can view and manage metadata for events and user attributes here.",
+    "scanTriggeredSuccessfully": "Scan triggered successfully, please wait for execution to complete",
     "event": {
       "title": "Events",
       "description": "This table lists out all the events in the selected App.",

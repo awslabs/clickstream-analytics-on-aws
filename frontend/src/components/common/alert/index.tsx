@@ -16,7 +16,6 @@ import classnames from 'classnames';
 import React, { useEffect, useState } from 'react';
 
 import './style.scss';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 
 const CommonAlert: React.FC = () => {
   const [alertVisible, setAlertVisible] = useState(false);
@@ -59,7 +58,7 @@ const CommonAlert: React.FC = () => {
         visible={alertVisible}
         dismissAriaLabel="Close"
         type={alertProps.alertType}
-        dismissible={alertProps.alertType === COMMON_ALERT_TYPE.Success}
+        dismissible={alertProps.alertType === 'success'}
       >
         {alertProps.alertTxt}
       </Alert>

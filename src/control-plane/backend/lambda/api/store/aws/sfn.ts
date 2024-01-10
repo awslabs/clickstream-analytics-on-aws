@@ -17,19 +17,18 @@ import {
   ExecutionDoesNotExist,
   SFNClient, StartExecutionCommand, StartExecutionCommandOutput,
 } from '@aws-sdk/client-sfn';
-import { stackWorkflowStateMachineArn } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 
-export const startExecution = async (region: string, executionName: string, input: string) => {
+export const startExecution = async (region: string, stateMachineArn: string, executionName: string, input: string) => {
   try {
     const client = new SFNClient({
       ...aws_sdk_client_common_config,
       region,
     });
     const params: StartExecutionCommand = new StartExecutionCommand({
-      stateMachineArn: stackWorkflowStateMachineArn,
+      stateMachineArn: stateMachineArn,
       input: input,
       name: executionName,
     });

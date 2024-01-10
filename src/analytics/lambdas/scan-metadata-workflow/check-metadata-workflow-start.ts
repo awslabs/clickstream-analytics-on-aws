@@ -119,6 +119,7 @@ async function handleEventFromUpstreamWorkflow() {
       status: WorkflowStatus.CONTINUE,
       scanEndDate: scanEndDate,
       jobStartTimestamp: currentTimestamp,
+      eventSource: 'LoadDataFlow',
       scanStartDate: '',
     };
   }

@@ -44,7 +44,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
-  COMMON_ALERT_TYPE,
   POSITIVE_INTEGER_REGEX,
   POSITIVE_INTEGER_REGEX_INCLUDE_ZERO,
 } from 'ts/const';
@@ -281,10 +280,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -419,10 +415,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     try {
       const body = getAttributionRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');
