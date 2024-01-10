@@ -125,7 +125,7 @@ export class MetadataEventServ {
       const { projectId } = req.body;
       const trigger = await clickStreamStore.isManualTrigger(projectId);
       if (trigger) {
-        return res.status(400).json(new ApiFail('Do not trigger metadata scans frequently, please try again in 10 minutes.'));
+        return res.status(429).json(new ApiFail('Do not trigger metadata scans frequently, please try again in 10 minutes.'));
       }
       const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
       if (!pipeline) {
@@ -139,7 +139,7 @@ export class MetadataEventServ {
       if (!scanMetadataWorkflowArn) {
         return res.status(400).json(new ApiFail('Scan metadata workflow not found'));
       }
-      const executionArn = await startExecution(
+      await startExecution(
         pipeline.region,
         `manual-trigger-${new Date().getTime()}`,
         scanMetadataWorkflowArn,
@@ -148,9 +148,6 @@ export class MetadataEventServ {
           scanEndDate: getLocalDateISOString(new Date()),
         }),
       );
-      if (!executionArn) {
-        return res.status(400).json(new ApiFail('Trigger failed'));
-      }
       await clickStreamStore.saveManualTrigger(projectId);
       return res.json(new ApiSuccess(null, 'Trigger success'));
     } catch (error) {

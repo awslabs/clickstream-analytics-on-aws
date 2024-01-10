@@ -2901,7 +2901,7 @@ describe('Metadata Scan test', () => {
         projectId: MOCK_PROJECT_ID,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(429);
     expect(res.body).toEqual({
       success: false,
       message: 'Do not trigger metadata scans frequently, please try again in 10 minutes.',
