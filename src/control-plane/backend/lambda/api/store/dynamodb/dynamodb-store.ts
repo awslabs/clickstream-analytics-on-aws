@@ -1203,12 +1203,12 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async isManualTrigger(projectId: string): Promise<boolean> {
+  public async isManualTrigger(projectId: string, appId: string): Promise<boolean> {
     try {
       const params: GetCommand = new GetCommand({
         TableName: clickStreamTableName,
         Key: {
-          id: `MANUAL_TRIGGER_${projectId}`,
+          id: `MANUAL_TRIGGER_${projectId}_${appId}`,
           type: 'MANUAL_TRIGGER',
         },
       });
@@ -1223,12 +1223,12 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async saveManualTrigger(projectId: string): Promise<void> {
+  public async saveManualTrigger(projectId: string, appId: string): Promise<void> {
     try {
       const params: PutCommand = new PutCommand({
         TableName: clickStreamTableName,
         Item: {
-          id: `MANUAL_TRIGGER_${projectId}`,
+          id: `MANUAL_TRIGGER_${projectId}_${appId}`,
           type: 'MANUAL_TRIGGER',
           ttl: Date.now() / 1000 + 600,
         },

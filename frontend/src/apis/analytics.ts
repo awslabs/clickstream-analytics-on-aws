@@ -242,10 +242,10 @@ export const getPathNodes = async (projectId: string, appId: string) => {
   return result;
 };
 
-export const triggerScan = async (projectId: string, appIds: string[]) => {
+export const triggerScan = async (projectId: string, appId: string) => {
   const result: any = await apiRequest('post', '/metadata/trigger', {
     projectId: projectId,
-    appIds: appIds.join(','),
+    appIds: appId,
   });
   return result;
 };

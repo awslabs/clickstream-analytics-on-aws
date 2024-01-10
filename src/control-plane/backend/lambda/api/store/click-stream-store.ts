@@ -71,6 +71,6 @@ export interface ClickStreamStore {
   saveRequestId: (id: string) => Promise<void>;
   deleteRequestId: (id: string) => Promise<void>;
 
-  isManualTrigger: (projectId: string) => Promise<boolean>;
-  saveManualTrigger: (projectId: string) => Promise<void>;
+  isManualTrigger: (projectId: string, appId: string) => Promise<boolean>;
+  saveManualTrigger: (projectId: string, appId: string) => Promise<void>;
 }
