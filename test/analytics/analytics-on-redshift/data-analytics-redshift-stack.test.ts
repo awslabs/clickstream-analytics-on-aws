@@ -3777,35 +3777,47 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
   });
 
   test('redshiftServerlessStack has CreateApplicationSchemasRedshiftSchemasCustomResource', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
-        ServiceToken: {
-          'Fn::GetAtt': [
-            Match.anyValue(),
-            'Arn',
-          ],
-        },
-        projectId: RefAnyValue,
-        appIds: RefAnyValue,
-        odsTableNames: {
-          event: 'event',
-          event_parameter: 'event_parameter',
-          user: 'user',
-          item: 'item',
-        },
+    const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+    nestedTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'Arn',
+        ],
+      },
+      projectId: RefAnyValue,
+      appIds: RefAnyValue,
+      odsTableNames: {
+        event: 'event',
+        event_parameter: 'event_parameter',
+        user: 'user',
+        item: 'item',
+      },
+      databaseName: RefAnyValue,
+      dataAPIRole: RefAnyValue,
+      lastModifiedTime: Match.anyValue(),
+      serverlessRedshiftProps: {
         databaseName: RefAnyValue,
-        dataAPIRole: RefAnyValue,
-        lastModifiedTime: Match.anyValue(),
-        serverlessRedshiftProps: {
-          databaseName: RefAnyValue,
-          namespaceId: RefAnyValue,
-          workgroupName: RefAnyValue,
-          workgroupId: RefAnyValue,
-          dataAPIRoleArn: RefAnyValue,
-        },
-      });
-    }
+        namespaceId: RefAnyValue,
+        workgroupName: RefAnyValue,
+        workgroupId: RefAnyValue,
+        dataAPIRoleArn: RefAnyValue,
+      },
+      redshiftBIUserParameter: {
+        'Fn::Join': [
+          '',
+          [
+            '/clickstream/reporting/user/',
+            {
+              Ref: Match.anyValue(),
+            },
+          ],
+        ],
+      },
+      redshiftBIUsernamePrefix: 'clickstream_bi_',
+      reportingViewsDef: Match.not(Match.absent()),
+      schemaDefs: Match.not(Match.absent()),
+    });
   });
 
   test('Should has lambda CreateApplicationSchemasCreateSchemaForApplicationsFn', () => {
