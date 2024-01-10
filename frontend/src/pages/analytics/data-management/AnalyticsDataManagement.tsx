@@ -43,6 +43,7 @@ const AnalyticsDataManagement: React.FC = () => {
 
   const [loadingData, setLoadingData] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
+  const [scanLoading, setScanLoading] = useState(false);
   const [analysisStudioEnabled, setAnalysisStudioEnabled] = useState(false);
   const [curMetadata, setCurMetadata] = useState<IMetadataType | null>(null);
   const [curType, setCurType] = useState<
@@ -63,16 +64,19 @@ const AnalyticsDataManagement: React.FC = () => {
   ];
 
   const onClickTriggerScan = async () => {
+    setScanLoading(true);
     try {
       const { success }: ApiResponse<any> = await triggerScan(
         defaultStr(projectId),
         defaultStr(appId)
       );
+      setScanLoading(false);
       if (success) {
         alertMsg(t('analytics:metadata.scanTriggeredSuccessfully'), 'success');
       }
     } catch (error) {
       console.log(error);
+      setScanLoading(false);
     }
   };
 
@@ -146,7 +150,11 @@ const AnalyticsDataManagement: React.FC = () => {
                   description={t('analytics:metadata.description')}
                   actions={
                     <SpaceBetween size="xs" direction="horizontal">
-                      <Button iconName="refresh" onClick={onClickTriggerScan}>
+                      <Button
+                        loading={scanLoading}
+                        iconName="refresh"
+                        onClick={onClickTriggerScan}
+                      >
                         {t('common:button.scanMetadata')}
                       </Button>
                     </SpaceBetween>

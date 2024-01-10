@@ -237,6 +237,9 @@ function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
       case 408:
         alertMsg('Request timed out');
         break;
+      case 429:
+        alertMsg('Too many requests');
+        break;
       case 500:
         alertMsg('Internal server error');
         break;
