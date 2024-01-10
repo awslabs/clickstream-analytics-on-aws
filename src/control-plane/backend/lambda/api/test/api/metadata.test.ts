@@ -2523,7 +2523,7 @@ describe('Metadata User Attribute test V2', () => {
     const res = await request(app)
       .get(`/api/metadata/user_attributes?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.body).toBe(200);
+    expect(res.statusCode).toBe(200);
     expect(res.body.data.totalCount).toEqual(8);
   });
 
