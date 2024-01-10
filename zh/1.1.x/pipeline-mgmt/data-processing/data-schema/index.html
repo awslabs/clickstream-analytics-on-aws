@@ -2814,7 +2814,7 @@
 <p>本文解释了在亚马逊云科技点击流分析中的数据模式和格式。此解决方案使用基于<strong>事件</strong>的数据模型来存储和分析点击流数据，客户端上的每一项活动（例如，点击，查看）都被模型化为具有多个维度的事件。所有事件都有公共维度，但是客户可以灵活地使用JSON对象将值存储到某些维度（例如，事件参数，用户属性）中，以满足收集特定于其业务的信息的需求。这些JSON将存储在允许客户在分析引擎中取消嵌套值的特殊数据类型中。</p>
 <h2 id="_2">数据库和表</h2>
 <p>对于每个项目，该解决方案在Redshift和Athena中创建一个名为<code>&lt;project-id&gt;</code>的数据库。每个应用将具有一个名为<code>app_id</code>的数据模式（schema），其中与事件相关的数据存储在<code>event</code>和<code>event_parameter</code>表中，与用户相关的数据存储在<code>user</code>表中，与对象相关的数据存储在<code>item</code>表中。在Athena中，所有表都增加了<code>app_id</code>、<code>year</code>、<code>month</code>和<code>day</code>的分区。下面的图表说明了表之间的关系。</p>
-<p><a class="glightbox" href="../../../images/pipe-mgmt/table_relationship.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="table-relationship" src="../../../images/pipe-mgmt/table_relationship.png" /></a></p>
+<p><a class="glightbox" href="../../../images/pipe-mgmt/table_relationship.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="table-relationship" src="../../../images/pipe-mgmt/table_relationship.png" /></a></p>
 <h2 id="_3">列</h2>
 <p>表中的每一列都表示事件、用户或对象的特定参数。请注意，某些参数嵌套在Redshift的Super字段中或在Athena的Array中，这些字段（例如，items、user_properties 和 item properties）包含可重复的参数。表格列的描述如下。</p>
 <h3 id="_4">事件字段</h3>

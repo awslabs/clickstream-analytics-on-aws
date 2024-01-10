@@ -2947,12 +2947,12 @@
 </li>
 <li>
 <p>如果您的托管 UI 设置完毕，您应该能够看到如下所示的内容。</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
 </li>
 <li>
 <p>将应用客户端 ID、用户池 ID 和 AWS 区域保存到一个文件中，稍后会用到。</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
-   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
+   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
 </li>
 </ol>
 <p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Cognito 用户池的以下参数。</p>
@@ -2970,7 +2970,7 @@
 <li>输入 <strong>Application Name</strong> 和 <strong>Subdomain</strong>。</li>
 <li>
 <p>从 Endpoint Information 将 <code>App ID</code>（即 <code>client_id</code>）和 <code>Issuer</code> 保存到一个文本文件中，稍后会用到。</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
 </li>
 <li>
 <p>将 <code>Login Callback URL</code> 和 <code>Logout Callback URL</code> 更新, 注意，您需要在<code>Login Callback URL</code>里添加 <strong><code>/signin</code></strong>， 如下:</p>
@@ -2981,7 +2981,7 @@
 </li>
 <li>
 <p>设置授权配置。</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
 </li>
 </ol>
 <p>您已成功创建了 Authing 自建应用。</p>
@@ -3003,11 +3003,11 @@
 </li>
 <li>
 <p>转到 realm 设置页面。选择 <strong>Endpoints</strong>，然后从列表中选择 <strong>OpenID Endpoint Configuration</strong>。</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
 </li>
 <li>
 <p>在浏览器中打开的 JSON 文件中，记录将在稍后使用的 <strong>issuer</strong> 值。</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
 </li>
 <li>
 <p>返回 Keycloak 控制台，在左侧导航栏中选择 <strong>Clients</strong>，然后选择 <strong>Create</strong>。</p>
@@ -3067,7 +3067,7 @@
 <p>在 ADFS 服务器上的 Windows PowerShell 下，运行以下命令以获取 ADFS 的 Issuer（<code>issuer</code>），类似于 <code>https://adfs.example.com/adfs</code>。</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Get-ADFSProperties<span class="w"> </span><span class="p">|</span><span class="w"> </span>Select<span class="w"> </span>IdTokenIssuer
 </span></code></pre></div>
-<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
 </li>
 </ol>
 <p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 ADFS 服务器的以下参数。</p>
