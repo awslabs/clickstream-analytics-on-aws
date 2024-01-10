@@ -122,7 +122,7 @@ export class MetadataEventServ {
 
   public async trigger(req: any, res: any, next: any) {
     try {
-      const { projectId } = req.body;
+      const { projectId, appIds } = req.body;
       const trigger = await clickStreamStore.isManualTrigger(projectId);
       if (trigger) {
         return res.status(429).json(new ApiFail('Do not trigger metadata scans frequently, please try again in 10 minutes.'));
@@ -146,6 +146,7 @@ export class MetadataEventServ {
         JSON.stringify({
           scanStartDate: getLocalDateISOString(new Date(), -7),
           scanEndDate: getLocalDateISOString(new Date()),
+          appIdList: appIds,
         }),
       );
       await clickStreamStore.saveManualTrigger(projectId);

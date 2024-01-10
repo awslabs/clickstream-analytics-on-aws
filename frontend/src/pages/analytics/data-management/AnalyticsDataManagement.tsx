@@ -65,7 +65,8 @@ const AnalyticsDataManagement: React.FC = () => {
   const onClickTriggerScan = async () => {
     try {
       const { success }: ApiResponse<any> = await triggerScan(
-        defaultStr(projectId)
+        defaultStr(projectId),
+        [defaultStr(appId)]
       );
       if (success) {
         alertMsg(t('analytics:metadata.scanTriggeredSuccessfully'), 'success');
