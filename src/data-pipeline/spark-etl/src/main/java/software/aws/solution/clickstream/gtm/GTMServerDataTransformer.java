@@ -266,7 +266,8 @@ public class GTMServerDataTransformer {
                 col(UA),
                 col(GEO_FOR_ENRICH),
                 col(GTM_SESSION_NUM),
-                col(APP_ID)
+                col(APP_ID),
+                col("origin_event_id")
         };
 
         Dataset<Row> eventDataset = dataset2.select(selectCols);
@@ -324,7 +325,7 @@ public class GTMServerDataTransformer {
                 col(UA),
                 col(GEO_FOR_ENRICH),
                 col(GTM_SESSION_NUM),
-                expr("d." + APP_ID)
+                expr("d." + APP_ID),
         };
 
         String maxTimestamp = "max_timestamp";
@@ -360,7 +361,6 @@ public class GTMServerDataTransformer {
             if (debugLocal) {
                 previousMaxNumberSessionDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-previousMaxNumberSessionDataset/");
             }
-
 
             Column joinCond1 = eventDataset.col(APP_ID).equalTo(sessionNumDataset.col(APP_ID))
                     .and(eventDataset.col(USER_PSEUDO_ID).equalTo(sessionNumDataset.col(USER_PSEUDO_ID)))
@@ -401,12 +401,12 @@ public class GTMServerDataTransformer {
                     .filter(expr(String.format("%s >= %s", GTM_SESSION_NUM, MIN_SN)))
                     .withColumn(EVENT_NAME, lit(EVENT_SESSION_START))
                     .select(selectAliasDataCols);
-
         }
         userSessionStartDataset = userSessionStartDataset
                 .groupBy(APP_ID, USER_PSEUDO_ID, GTM_SESSION_NUM)
                 .agg(min_by(struct(expr("*")), col(EVENT_TIMESTAMP)).alias("t"))
                 .select(expr("t.*"))
+                .withColumn("origin_event_id", col(EVENT_ID))
                 .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
                 .select(outputCols);
 
@@ -418,6 +418,7 @@ public class GTMServerDataTransformer {
         Dataset<Row> userSessionEndDataset = eventDataset.alias("d").join(sessionNumDataset.alias("s"), sessionJoinCond, "left")
                 .filter(expr(String.format("%s <= %s", GTM_SESSION_NUM, MAX_SN)))
                 .withColumn(EVENT_NAME, lit(EVENT_SESSION_END))
+                .withColumn("origin_event_id", col(EVENT_ID))
                 .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
                 .select(selectAliasDataCols)
                 .groupBy(APP_ID, USER_PSEUDO_ID, GTM_SESSION_NUM)
@@ -431,12 +432,12 @@ public class GTMServerDataTransformer {
 
         Dataset<Row> userAppStartDataset = userSessionStartDataset
                 .withColumn(EVENT_NAME, lit(EVENT_APP_START))
-                .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
+                .withColumn(EVENT_ID, concat_ws("", col("origin_event_id"), hash(col(EVENT_NAME))))
                 .select(outputCols);
 
         Dataset<Row> userAppEndDataset = userSessionEndDataset
                 .withColumn(EVENT_NAME, lit(EVENT_APP_END))
-                .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
+                .withColumn(EVENT_ID, concat_ws("", col("origin_event_id"), hash(col(EVENT_NAME))))
                 .select(outputCols);
 
         return new SessionDatasetResult(userSessionStartDataset, userSessionEndDataset, userAppStartDataset, userAppEndDataset);
