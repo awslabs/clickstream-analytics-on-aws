@@ -23,7 +23,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock, dictionaryMock } from './ddb-mock';
 import { MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
-import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
+import { analyticsMetadataTable, clickStreamTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -316,90 +316,7 @@ function displayDataMock(m: any) {
     ],
   });
   // BuiltList
-  m.on(GetCommand, {
-    TableName: dictionaryTableName,
-    Key: {
-      name: 'MetadataBuiltInList',
-    },
-  }).resolves({
-    Item: {
-      name: 'MetadataBuiltInList',
-      data: {
-        PresetEvents: [
-          {
-            name: MOCK_EVENT_NAME,
-            displayName: {
-              'en-US': `display name of event ${MOCK_EVENT_NAME}`,
-              'zh-CN': `内置事件${MOCK_EVENT_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock event description in built-in',
-              'zh-CN': '内置事件的描述',
-            },
-          },
-        ],
-        PresetEventParameters: [
-          {
-            name: MOCK_EVENT_PARAMETER_NAME,
-            eventName: MOCK_EVENT_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.EVENT,
-            displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-        ],
-        PublicEventParameters: [
-          {
-            name: MOCK_EVENT_PARAMETER_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.GEO,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-          {
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
-            dataType: MetadataValueType.INTEGER,
-            category: ConditionCategory.DEVICE,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}11显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-        ],
-        PresetUserAttributes: [
-          {
-            name: MOCK_USER_ATTRIBUTE_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.USER_OUTER,
-            displayName: {
-              'en-US': `mock display name of preset user attribute ${MOCK_USER_ATTRIBUTE_NAME}`,
-              'zh-CN': `内置用户属性${MOCK_USER_ATTRIBUTE_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock preset user attribute description in built-in',
-              'zh-CN': '内置用户属性的描述',
-            },
-          },
-        ],
-      },
-    },
-  });
+  dictionaryMock(m, 'MetadataBuiltInList');
 }
 
 function getAllEventParametersInput() {
@@ -2792,7 +2709,7 @@ describe('Metadata User Attribute test V2', () => {
     const res = await request(app)
       .get(`/api/metadata/user_attributes?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
+    expect(res.body).toBe(200);
     expect(res.body.data.totalCount).toEqual(8);
   });
 

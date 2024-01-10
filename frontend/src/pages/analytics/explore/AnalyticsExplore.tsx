@@ -53,7 +53,6 @@ import AnalyticsEvent from '../event/AnalyticsEvent';
 import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
 import AnalyticsPath from '../path/AnalyticsPath';
 import AnalyticsRetention from '../retention/AnalyticsRetention';
-import AnalyticsAttribution from '../attribution/AnalyticsAttribution';
 
 const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();
@@ -448,21 +447,6 @@ const AnalyticsExplore: React.FC = () => {
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}
                     groupParameters={groupParameters}
-                  />
-                )}
-              {pipeline &&
-                !loadingData &&
-                selectedOption?.value === 'Attribution' && (
-                  <AnalyticsAttribution
-                    loadingEvents={loadingMetadataEvent}
-                    loading={false}
-                    pipeline={pipeline}
-                    builtInMetadata={builtInMetadata}
-                    metadataEvents={metadataEvents}
-                    metadataEventParameters={metadataEventParameters}
-                    metadataUserAttributes={metadataUserAttributes}
-                    categoryEvents={categoryEvents}
-                    presetParameters={presetParameters}
                   />
                 )}
             </ContentLayout>

@@ -247,7 +247,9 @@ export class MetadataUserAttributeServ {
       if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
         return res.status(400).json(new ApiFail('The current version does not support.'));
       }
+      console.log('metadataVersion', metadataVersion);
       const attributes = await this.listRawUserAttributes(projectId, appId, metadataVersion);
+      console.log('attributes', attributes);
       const results = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,

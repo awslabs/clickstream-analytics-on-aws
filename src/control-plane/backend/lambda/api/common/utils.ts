@@ -13,6 +13,7 @@
 
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -30,7 +31,7 @@ import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusDetail, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -1158,9 +1159,9 @@ function _getPipelineStatus(pipeline: IPipeline) {
   let lastAction = pipeline.lastAction;
   if (!lastAction || lastAction === '') {
     lastAction = getPipelineLastActionFromStacksStatus(
-      pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
+      pipeline.status?.stackDetails, pipeline.templateVersion);
   }
-  const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
+  const executionDetail = pipeline.status?.executionDetail;
   const stackStatus = _getPipelineStatusFromStacks(pipeline);
   const executionStatus = executionDetail?.status;
   if (executionStatus === ExecutionStatus.FAILED ||
@@ -1201,7 +1202,7 @@ function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
 
 function _getPipelineStatusFromStacks(pipeline: IPipeline) {
   let status = 'COMPLETE';
-  const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
+  const stackDetails = pipeline.status?.stackDetails;
   if (!stackDetails || stackDetails.length === 0) {
     return status;
   }
