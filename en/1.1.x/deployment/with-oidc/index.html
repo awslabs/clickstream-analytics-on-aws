@@ -2968,12 +2968,12 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 </li>
 <li>
 <p>If your hosted UI is set up, you should be able to see something like below.</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
 </li>
 <li>
 <p>Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
-   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
+   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
 </li>
 </ol>
 <p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your Cognito User Pool.</p>
@@ -2991,7 +2991,7 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 <li>Enter the <strong>Application Name</strong>, and <strong>Subdomain</strong>.</li>
 <li>
 <p>Save the <code>App ID</code> (that is, <code>client_id</code>) and <code>Issuer</code> to a text file from Endpoint Information, which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
 </li>
 <li>
 <p>Update the <code>Login Callback URL</code> and <code>Logout Callback URL</code>, note that you need to add <strong><code>/signin</code></strong> to your domain name for <code>Login Callback URL</code> as follow:</p>
@@ -3002,7 +3002,7 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 </li>
 <li>
 <p>Set the Authorization Configuration.</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
 </li>
 </ol>
 <p>You have successfully created an authing self-built application.</p>
@@ -3024,11 +3024,11 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 </li>
 <li>
 <p>Go to the realm setting page. Choose <strong>Endpoints</strong>, and then <strong>OpenID Endpoint Configuration</strong> from the list.</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
 </li>
 <li>
 <p>In the JSON file that opens up in your browser, record the <strong>issuer</strong> value which will be used later.</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
 </li>
 <li>
 <p>Go back to Keycloak console and select <strong>Clients</strong> on the left navigation bar, and choose <strong>Create</strong>.</p>
@@ -3086,7 +3086,7 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 <p>Under Windows PowerShell on ADFS server, run the following command to get the Issuer (<code>issuer</code>) of ADFS, which is similar to <code>https://adfs.example.com/adfs</code>.</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Get-ADFSProperties<span class="w"> </span><span class="p">|</span><span class="w"> </span>Select<span class="w"> </span>IdTokenIssuer
 </span></code></pre></div>
-<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
+<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
 </li>
 </ol>
 <p>In <a href="#step-2-launch-the-stack">Step 2. Launch the stack</a>, enter the parameters below from your ADFS server.</p>
