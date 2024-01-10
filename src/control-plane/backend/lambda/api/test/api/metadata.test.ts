@@ -2868,6 +2868,7 @@ describe('Metadata Scan test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
+        appIds: `${MOCK_APP_ID}1,${MOCK_APP_ID}2`,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -2899,6 +2900,7 @@ describe('Metadata Scan test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
+        appIds: `${MOCK_APP_ID}1,${MOCK_APP_ID}2`,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(429);
