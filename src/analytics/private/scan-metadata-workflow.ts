@@ -172,7 +172,7 @@ export class ScanMetadataWorkflow extends Construct {
 
     const getJobListFromInput = new Pass(this, `${this.node.id} - Get app_id from input`, {
       parameters: {
-        'appIdList.$': `States.StringSplit($.appIdList, ',')`,
+        'appIdList.$': 'States.StringSplit($.appIdList, \',\')',
       },
       resultPath: '$.GetJobList',
     }).next(checkJobExist);
