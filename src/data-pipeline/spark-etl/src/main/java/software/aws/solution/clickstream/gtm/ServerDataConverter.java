@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.gtm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
@@ -51,6 +52,7 @@ import static software.aws.solution.clickstream.DatasetUtil.CORRUPT_RECORD;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.ENGAGEMENT_TIME_MSEC;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
@@ -58,7 +60,10 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PAGE_VIEW;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAMS;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_USER_ENGAGEMENT;
 import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.GA_ENGAGEMENT_TIME_MSEC;
 import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
 import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_BRAND;
@@ -96,7 +101,9 @@ import static software.aws.solution.clickstream.DatasetUtil.PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.PRICE;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_DURATION;
 import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_NUMBER;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.USER;
@@ -210,6 +217,8 @@ public class ServerDataConverter {
                 sessionNum
         );
 
+        result.attrMap.put(SESSION_DURATION, JsonNodeFactory.instance.numberNode(0));
+
         eventId = checkStringValue(eventId, MAX_STRING_VALUE_LEN - 32);
         String gtmId = result.attrMap.get("x-ga-measurement_id").asText();
         String gtmVersion = result.attrMap.get("x-ga-gtm_version").asText();
@@ -230,6 +239,12 @@ public class ServerDataConverter {
         if (result.attrMap.containsKey("x-ga-system_properties.fv")) {
             firstVisit = true;
         }
+
+        boolean seesionStart = false;
+        if (result.attrMap.containsKey("x-ga-system_properties.ss")) {
+            seesionStart = true;
+        }
+
         List<GenericRow> eventParams = new ArrayList<>();
         for (Map.Entry<String, JsonNode> e : result.attrMap.entrySet()) {
             KvConverter.ValueTypeResult valueTypeResult = getValueTypeResult(e.getKey(), e.getValue());
@@ -263,6 +278,18 @@ public class ServerDataConverter {
             );
             eventList.add(firstVisitEvent);
         }
+
+        if (seesionStart) {
+            String eventId3 = String.format("%s-%s", eventId, ++eventIndex);
+            GenericRow sessionStartEvent = createGenericRowFromResult(
+                    new EventParams(EVENT_SESSION_START, gtmId, gtmVersion, eventId3, uc),
+                    result,
+                    eventParams,
+                    new SessionParams(requestStartTimeMs, sessionId, sessionNumber)
+            );
+            eventList.add(sessionStartEvent);
+        }
+
         return eventList;
     }
 
@@ -463,15 +490,18 @@ public class ServerDataConverter {
         Map<String, String> eventNameMap = new HashMap<>();
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
+        eventNameMap.put("user_engagement", EVENT_USER_ENGAGEMENT);
         return eventNameMap;
     }
 
     private static Map<String, String> createPropNameMap() {
         Map<String, String> propsNameMap = new HashMap<>();
         propsNameMap.put(GA_SESSION_ID, SESSION_ID);
+        propsNameMap.put(GA_SESSION_NUMBER, SESSION_NUMBER);
         propsNameMap.put(GTM_PAGE_TITLE, PAGE_TITLE);
         propsNameMap.put(GTM_PAGE_LOCATION, PAGE_URL);
         propsNameMap.put(GTM_PAGE_REFERRER, PROP_PAGE_REFERRER); // _page_referrer
+        propsNameMap.put(GA_ENGAGEMENT_TIME_MSEC, ENGAGEMENT_TIME_MSEC);
         return propsNameMap;
     }
 
