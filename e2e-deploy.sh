@@ -26,6 +26,8 @@ fi
 # AWS CLI command to describe CloudFormation stack parameters
 parameters=$(aws cloudformation describe-stacks --stack-name "$stackName" --query "Stacks[0].Parameters" --output json)
 
+tags=$(aws cloudformation describe-stacks --stack-name "$stackName" --query "Stacks[0].Tags" --output json)
+
 # extract the stack name 'Clickstream-DataModelingRedshift-xxx' from aws ARN like arn:aws:cloudformation:ap-northeast-1:123456789012:stack/Clickstream-DataModelingRedshift-xxx/18df3b90-a943-11ee-86a1-0ef0a7b32a81 or arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/Clickstream-DataModelingRedshift-xxx/18df3b90-a943-11ee-86a1-0ef0a7b32a81
 if [[ $stackName == *"arn:aws:cloudformation"* || $stackName == *"arn:aws-cn:cloudformation"* ]]; then
   stackName=$(echo $stackName | cut -d'/' -f2)
@@ -52,7 +54,24 @@ for param in $(echo "$parameters" | jq -c '.[]'); do
   param_string="${param_string} --parameters ${param_name}=\"${param_value}\""
 done
 
+# Concatenate tags into a string
+tag_string=""
+IFS=$'\n'
+for tag in $(echo "$tags" | jq -c '.[]'); do
+  tag_key=$(echo "$tag" | jq -r '.Key')
+  tag_value=$(echo "$tag" | jq -r '.Value')
+  # continue iter if the $tag_value is empty
+  if [ -z "$tag_value" ]; then
+    continue
+  fi
+  tag_string="${tag_string} --tags ${tag_key}=\"${tag_value}\""
+done
+
 # Print the concatenated parameter string
 echo "Concatenated parameters: $param_string"
 
-bash -c "npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string --require-approval never"
+echo "Concatenated tags: $tag_string"
+
+echo "Final command: npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+
+bash -c "npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
