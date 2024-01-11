@@ -135,7 +135,7 @@ Prerequisite: Please follow the steps outlined in this [documentation](https://d
       region: REGION,
       credentials: fromCognitoIdentityPool({
         clientConfig: { region: REGION },
-        identityPoolId: 'your identityPoolId with S3 bucket access permission'
+        identityPoolId: 'your identityPoolId with S3 PutObject permission'
       })
   });
   
