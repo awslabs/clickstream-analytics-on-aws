@@ -693,7 +693,8 @@ REFRESH MATERIALIZED VIEW {{schema}}.item_m_view;
 
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_parameter_view_v1;
-REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_duration_attr_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_page_attr_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_device_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_daily_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_weekly_view_v1;

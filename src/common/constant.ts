@@ -383,6 +383,9 @@ export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'User_Attr_View';
 
 export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
 export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v1';
+export const CLICKSTREAM_SESSION_VIEW_NAME_V2 = 'clickstream_session_view_v2';
+export const CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME = 'clickstream_session_duration_attr_view_v1';
+export const CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME = 'clickstream_session_page_attr_view_v1';
 export const CLICKSTREAM_USER_DIM_VIEW_NAME = 'clickstream_user_dim_view_v1';
 export const CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME = 'clickstream_user_first_attr_view_v1';
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v1';
