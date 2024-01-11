@@ -186,7 +186,7 @@ public final class DatasetUtil {
     public static final String GA_ENGAGEMENT_TIME_MSEC = "engagement_time_msec";
     public static final String ENGAGEMENT_TIME_MSEC = "_engagement_time_msec";
     public static final String SESSION_DURATION = "_session_duration";
-
+    public static final String SESSION_START_TIMESTAMP = "_session_start_timestamp";
 
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,

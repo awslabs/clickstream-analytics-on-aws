@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.api.java.UDF1;
+import org.apache.spark.sql.api.java.UDF2;
 import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.ArrayType;
@@ -104,6 +104,7 @@ import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.SESSION_DURATION;
 import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID;
 import static software.aws.solution.clickstream.DatasetUtil.SESSION_NUMBER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_START_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.USER;
@@ -119,10 +120,10 @@ public class ServerDataConverter {
     protected static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
     protected static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
 
-    private static UDF1<String, Row[]> convertGTMServerData() {
-        return (String value) -> {
+    private static UDF2<String, Long, Row[]> convertGTMServerData() {
+        return (String value, Long ingestTimestamp) -> {
             try {
-                return getGenericRows(value);
+                return getGenericRows(value, ingestTimestamp);
             } catch (Exception e) {
                 log.error("cannot convert data: " + value + ", error: " + e.getMessage());
                 return getCorruptGenericRows(value, e);
@@ -163,7 +164,7 @@ public class ServerDataConverter {
         };
     }
 
-    private static Row[] getGenericRows(final String jsonString) throws JsonProcessingException {
+    private static Row[] getGenericRows(final String jsonString, final Long ingestTimestamp) throws JsonProcessingException {
         List<Row> rows = new ArrayList<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -171,17 +172,17 @@ public class ServerDataConverter {
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.addAll(getGenericRow(elementsIt.next(), index));
+                rows.addAll(getGenericRow(elementsIt.next(), index, ingestTimestamp));
                 index++;
             }
         } else {
-            rows.addAll(getGenericRow(jsonNode, index));
+            rows.addAll(getGenericRow(jsonNode, index, ingestTimestamp));
         }
         return rows.toArray(new Row[0]);
 
     }
 
-    private static List<GenericRow> getGenericRow(final JsonNode jsonNode, final int index) {
+    private static List<GenericRow> getGenericRow(final JsonNode jsonNode, final int index, final Long ingestTimestamp) {
 
         RowResult result = parseJsonNode(jsonNode);
 
@@ -223,7 +224,7 @@ public class ServerDataConverter {
         String gtmId = result.attrMap.get("x-ga-measurement_id").asText();
         String gtmVersion = result.attrMap.get("x-ga-gtm_version").asText();
 
-        Long requestStartTimeMs = null;
+        Long requestStartTimeMs = ingestTimestamp;
         if (result.attrMap.containsKey("x-sst-system_properties.request_start_time_ms")) {
             requestStartTimeMs = result.attrMap.get("x-sst-system_properties.request_start_time_ms").asLong();
         }
@@ -243,6 +244,7 @@ public class ServerDataConverter {
         boolean seesionStart = false;
         if (result.attrMap.containsKey("x-ga-system_properties.ss")) {
             seesionStart = true;
+            result.attrMap.put(SESSION_START_TIMESTAMP, JsonNodeFactory.instance.numberNode(requestStartTimeMs));
         }
 
         List<GenericRow> eventParams = new ArrayList<>();
@@ -491,6 +493,7 @@ public class ServerDataConverter {
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
         eventNameMap.put("user_engagement", EVENT_USER_ENGAGEMENT);
+        eventNameMap.put("click", "_click");
         return eventNameMap;
     }
 
@@ -733,7 +736,7 @@ public class ServerDataConverter {
         ArrayType dataItemArrayType = DataTypes.createArrayType(dataItemType);
 
         UserDefinedFunction convertStringToKeyValueUdf = udf(convertGTMServerData(), dataItemArrayType);
-        Dataset<Row> convertedKeyValueDataset = dataset.withColumn(DATA_OUT, explode(convertStringToKeyValueUdf.apply(col(DATA))))
+        Dataset<Row> convertedKeyValueDataset = dataset.withColumn(DATA_OUT, explode(convertStringToKeyValueUdf.apply(col(DATA), col("ingest_time"))))
                 .drop(DATA);
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
