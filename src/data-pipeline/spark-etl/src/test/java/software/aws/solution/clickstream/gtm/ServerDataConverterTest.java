@@ -143,4 +143,29 @@ public class ServerDataConverterTest extends BaseSparkTest {
         Assertions.assertEquals(2, fvCount);
     }
 
+    @Test
+    void test_convert_session_start() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_session_start
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "sessionStartAppId");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-session-start.json")).getPath());
+
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(2, outDataset.count());
+
+        Dataset<Row>  dataset1 = outDataset.filter(expr("dataOut.event_name == '_user_engagement'"));
+        Dataset<Row>  dataset2 = outDataset.filter(expr("dataOut.event_name == '_session_start'"));
+
+        String expectedJson1 = resourceFileAsString("/gtm-server/expected/test_convert_session_start1.json");
+        String expectedJson2 = resourceFileAsString("/gtm-server/expected/test_convert_session_start2.json");
+
+        Assertions.assertEquals(expectedJson1, dataset1.first().prettyJson(), "_user_engagement event is not converted correctly");
+        Assertions.assertEquals(expectedJson2, dataset2.first().prettyJson(), "_session_start event is not converted correctly");
+
+    }
+
 }

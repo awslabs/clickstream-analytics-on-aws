@@ -18,7 +18,7 @@
     "_corrupt_record" : null,
     "gtmId" : "G-000000003",
     "gtmVersion" : "45je38n0",
-    "event_id" : "0-1693281535-11",
+    "event_id" : "0-1693281535-0",
     "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
     "event_name" : "_profile_set",
     "ip" : "72.21.198.67",
@@ -74,14 +74,6 @@
         "string_value" : "Retail Demo Store"
       }
     }, {
-      "key" : "engagement_time_msec",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 8129,
-        "string_value" : null
-      }
-    }, {
       "key" : "x-ga-system_properties.ee",
       "value" : {
         "double_value" : null,
@@ -122,6 +114,14 @@
         "string_value" : "false"
       }
     }, {
+      "key" : "_session_duration",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 0,
+        "string_value" : null
+      }
+    }, {
       "key" : "persona",
       "value" : {
         "double_value" : null,
@@ -144,14 +144,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "Server"
-      }
-    }, {
-      "key" : "ga_session_number",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 11,
-        "string_value" : null
       }
     }, {
       "key" : "screen_resolution",
@@ -186,12 +178,28 @@
         "string_value" : "1693281535"
       }
     }, {
+      "key" : "_session_number",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 11,
+        "string_value" : null
+      }
+    }, {
       "key" : "firstName",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
         "string_value" : ""
+      }
+    }, {
+      "key" : "_engagement_time_msec",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 8129,
+        "string_value" : null
       }
     }, {
       "key" : "TestBy",
@@ -371,6 +379,6 @@
     "requestStartTimeMs" : 1693281865635,
     "uc" : "SG",
     "gtmSessionId" : "1693281535",
-    "gtmSessionNum" : 11
+    "gtmSessionNum" : 0
   }
 }

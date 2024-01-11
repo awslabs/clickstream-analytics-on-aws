@@ -1,44 +1,44 @@
 {
-  "appId" : "gtm_server_demo_https",
+  "appId" : "sessionStartAppId",
   "compression" : null,
-  "date" : "2023-11-20T07:04:34+00:00",
+  "date" : "2024-01-10T06:13:50+00:00",
   "fakeIp" : null,
-  "ingest_time" : 1700463874000,
+  "ingest_time" : 1704867230000,
   "ip" : "44.210.248.18",
   "method" : "POST",
   "path" : "/g/collect",
   "platform" : null,
-  "rid" : "7aec82f779dc4d911c272e704aa5e68c",
-  "server_ingest_time" : 1700463874000,
+  "rid" : "55384aaeda62c5b20a462076ec59f3f5",
+  "server_ingest_time" : 1704867230000,
   "source_type" : "http_server",
-  "timestamp" : "2023-11-20T07:04:34.547618258Z",
+  "timestamp" : "2024-01-10T06:13:50.856292352Z",
   "ua" : null,
   "uri" : "/g/collect?appId=gtm_server_demo_https",
   "dataOut" : {
     "_corrupt_record" : null,
-    "gtmId" : "G-7W7D6ZHG1T",
-    "gtmVersion" : "45je3b81v9137860177",
-    "event_id" : "0-1700462767-0",
+    "gtmId" : "G-5HX07RSCP2",
+    "gtmVersion" : "45je4180v9137682176",
+    "event_id" : "0-1704867229-0",
     "user_id" : null,
-    "event_name" : "product_exposure",
-    "ip" : "72.21.198.65",
-    "client_id" : "vmrOyJjCREZ3OgIdYAFuykcrAzX+wv7sakYHamtBPTM=.1690769179",
-    "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "event_name" : "_user_engagement",
+    "ip" : "52.94.133.141",
+    "client_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+    "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
     "language" : "en-us",
-    "screenWidth" : 3008,
-    "screenHeight" : 1692,
-    "pageReferrer" : "https://tagassistant.google.com/",
+    "screenWidth" : 3440,
+    "screenHeight" : 1440,
+    "pageReferrer" : null,
     "isClientMobile" : false,
-    "clientModel" : null,
-    "clientPlatform" : "\"macOS\"",
-    "clientPlatformVersion" : null,
-    "clientBrand" : "Microsoft Edge|Chromium|Not?A_Brand",
+    "clientModel" : "",
+    "clientPlatform" : "macOS",
+    "clientPlatformVersion" : "13.6.3",
+    "clientBrand" : "Not_A Brand|Chromium|Microsoft Edge",
     "eventParams" : [ {
       "key" : "x-ga-tfd",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 188501,
+        "int_value" : 9376618,
         "string_value" : null
       }
     }, {
@@ -50,20 +50,12 @@
         "string_value" : "US"
       }
     }, {
-      "key" : "origin",
+      "key" : "client_hints.platform_version",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "firebase"
-      }
-    }, {
-      "key" : "x-ga-system_properties.fid",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "fEj96vkOHt5jN-csBLEy_A"
+        "string_value" : "13.6.3"
       }
     }, {
       "key" : "_page_title",
@@ -90,20 +82,12 @@
         "string_value" : "11l1l1l1l1"
       }
     }, {
-      "key" : "_page_referrer",
+      "key" : "client_hints.architecture",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://tagassistant.google.com/"
-      }
-    }, {
-      "key" : "x-ga-system_properties.dbg",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "1"
+        "string_value" : "x86"
       }
     }, {
       "key" : "event_location.region",
@@ -119,7 +103,15 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "1700463686496"
+        "string_value" : "1704857853989"
+      }
+    }, {
+      "key" : "_session_start_timestamp",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 1704867230837,
+        "string_value" : null
       }
     }, {
       "key" : "x-sst-system_properties.consent",
@@ -130,28 +122,12 @@
         "string_value" : "{\"consentGrantedState\":{\"ad_storage\":true,\"analytics_storage\":true,\"ad_user_data\":true,\"ad_personalization\":true},\"isUpdate\":false,\"updateType\":\"\"}"
       }
     }, {
-      "key" : "currency",
+      "key" : "x-ga-system_properties.ss",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "USD"
-      }
-    }, {
-      "key" : "x-ga-system_properties.ee",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "true"
-      }
-    }, {
-      "key" : "value",
-      "value" : {
-        "double_value" : 43.99,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : null
+        "string_value" : "1"
       }
     }, {
       "key" : "x-ga-measurement_id",
@@ -159,15 +135,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "G-7W7D6ZHG1T"
-      }
-    }, {
-      "key" : "x-ga-request_count",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 16,
-        "string_value" : null
+        "string_value" : "G-5HX07RSCP2"
       }
     }, {
       "key" : "client_hints.mobile",
@@ -176,6 +144,14 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "false"
+      }
+    }, {
+      "key" : "x-ga-request_count",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 3,
+        "string_value" : null
       }
     }, {
       "key" : "_session_duration",
@@ -194,27 +170,27 @@
         "string_value" : "11l1l1l1l1"
       }
     }, {
+      "key" : "client_hints.full_version_list",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "[{\"brand\":\"Not_A Brand\",\"version\":\"8.0.0.0\"},{\"brand\":\"Chromium\",\"version\":\"120.0.6099.200\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120.0.2210.121\"}]"
+      }
+    }, {
       "key" : "screen_resolution",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "3008x1692"
-      }
-    }, {
-      "key" : "event_category",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "home_featured_rerank"
+        "string_value" : "3440x1440"
       }
     }, {
       "key" : "x-ga-page_id",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 1700463686496,
+        "int_value" : 1704857853989,
         "string_value" : null
       }
     }, {
@@ -223,7 +199,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "[{\"brand\":\"Microsoft Edge\",\"version\":\"119\"},{\"brand\":\"Chromium\",\"version\":\"119\"},{\"brand\":\"Not?A_Brand\",\"version\":\"24\"}]"
+        "string_value" : "[{\"brand\":\"Not_A Brand\",\"version\":\"8\"},{\"brand\":\"Chromium\",\"version\":\"120\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120\"}]"
       }
     }, {
       "key" : "_session_id",
@@ -231,23 +207,23 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "1700462767"
+        "string_value" : "1704867229"
       }
     }, {
       "key" : "_session_number",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 22,
+        "int_value" : 9,
         "string_value" : null
       }
     }, {
-      "key" : "_engagement_time_msec",
+      "key" : "client_hints.wow64",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 14,
-        "string_value" : null
+        "int_value" : null,
+        "string_value" : "false"
       }
     }, {
       "key" : "x-ga-protocol_version",
@@ -263,7 +239,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1700463685039"
+        "string_value" : "https://d3mpqdtjegq8im.cloudfront.net/"
       }
     }, {
       "key" : "x-ga-gtm_version",
@@ -271,14 +247,30 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "45je3b81v9137860177"
+        "string_value" : "45je4180v9137682176"
+      }
+    }, {
+      "key" : "client_hints.bitness",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "64"
+      }
+    }, {
+      "key" : "client_hints.model",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : ""
       }
     }, {
       "key" : "x-sst-system_properties.request_start_time_ms",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 1700463874488,
+        "int_value" : 1704867230837,
         "string_value" : null
       }
     }, {
@@ -287,7 +279,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "1"
+        "string_value" : "0"
       }
     }, {
       "key" : "client_hints.platform",
@@ -295,7 +287,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "\"macOS\""
+        "string_value" : "macOS"
       }
     }, {
       "key" : "x-sst-system_properties.uc",
@@ -305,21 +297,13 @@
         "int_value" : null,
         "string_value" : "US"
       }
-    }, {
-      "key" : "x-sst-system_properties.ngs",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "1"
-      }
     } ],
     "items" : [ ],
     "eventItems" : [ ],
     "user" : null,
-    "requestStartTimeMs" : 1700463874488,
+    "requestStartTimeMs" : 1704867230837,
     "uc" : "US",
-    "gtmSessionId" : "1700462767",
+    "gtmSessionId" : "1704867229",
     "gtmSessionNum" : 0
   }
 }
