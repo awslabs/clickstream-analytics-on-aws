@@ -504,11 +504,16 @@ class ETLRunnerTest extends BaseSparkTest {
         Assertions.assertTrue(itemDataset.count() > 0);
         Assertions.assertTrue(userDataset.count() > 0);
 
+        Dataset<Row> eventDataset1 = eventDataset.filter(col("event_id").equalTo("7da14049fe2aca7ea98c9f4b2b3c6f4a-0-1691480516-0"));
+
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_etl_runner_data_event.json");
-        Assertions.assertEquals(expectedData, eventDataset
-                .filter(col("event_id")
-                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11"))
-                .first().prettyJson());
+        Assertions.assertEquals(expectedData, eventDataset1.first().prettyJson());
+
+        long profileSetCount = eventDataset.filter(col("event_name").equalTo("_profile_set")).count();
+        Assertions.assertTrue(profileSetCount > 0, "profileSetCount=" + profileSetCount);
+
+        Dataset<Row> params = eventParamDataset.filter(expr("event_param_int_value = 0 and event_param_key = '_session_start_timestamp'"));
+        Assertions.assertTrue(params.count() == 0, "should not have _session_start_timestamp = 0");
 
     }
 

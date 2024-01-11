@@ -1,0 +1,12 @@
+{
+  "app_id" : "sessionStartAppId1",
+  "event_date" : "2024-01-10",
+  "event_timestamp" : 1704867230837,
+  "event_id" : "55384aaeda62c5b20a462076ec59f3f5-0-1704867229-0-1",
+  "event_name" : "_session_start",
+  "event_param_key" : "_session_duration",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : 0,
+  "event_param_string_value" : null
+}

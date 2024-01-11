@@ -117,6 +117,7 @@ public final class DatasetUtil {
     public static final String EVENT_APP_START = "_app_start";
     public static final String EVENT_SESSION_END = "_session_end";
     public static final String EVENT_SESSION_START = "_session_start";
+    public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String APP_INFO = "app_info";
     public static final String MOBILE = "mobile";
     public static final String MODEL = "model";
@@ -126,6 +127,7 @@ public final class DatasetUtil {
     public static final String CLIENT_ID = "client_id";
     public static final String GA_SESSION_ID = "ga_session_id";
     public static final String GA_SESSION_NUMBER = "ga_session_number";
+    public static final String SESSION_NUMBER = "_session_number";
     public static final String X_GA_JS_CLIENT_ID = "x-ga-js_client_id";
     public static final String GTM_SCREEN_WIDTH = "screenWidth";
     public static final String GTM_SCREEN_HEIGHT = "screenHeight";
@@ -175,15 +177,16 @@ public final class DatasetUtil {
     public static final String GTM_BRANDS = "brands";
     public static final String GTM_BRAND = "brand";
     public static final String GTM_CLIENT_BRAND = "clientBrand";
-
     public static final String EVENT_BUNDLE_SEQUENCE_ID = "event_bundle_sequence_id";
     public static final String DEVICE = "device";
     public static final String TRAFFIC_SOURCE = "traffic_source";
     public static final String PROJECT_ID = "project_id";
     public static final String GEO = "geo";
     public static final String APP_INF = "app_info";
-
-
+    public static final String GA_ENGAGEMENT_TIME_MSEC = "engagement_time_msec";
+    public static final String ENGAGEMENT_TIME_MSEC = "_engagement_time_msec";
+    public static final String SESSION_DURATION = "_session_duration";
+    public static final String SESSION_START_TIMESTAMP = "_session_start_timestamp";
 
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,
