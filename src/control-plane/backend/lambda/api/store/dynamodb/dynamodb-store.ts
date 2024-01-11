@@ -24,6 +24,7 @@ import {
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
+import { logger } from '../../common/powertools';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
