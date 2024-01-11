@@ -22,7 +22,7 @@ const s3Client = new S3Client({
   region: REGION,
   credentials: fromCognitoIdentityPool({
     clientConfig: { region: REGION },
-    identityPoolId: 'your identityPoolId with s3 bucket access permission'
+    identityPoolId: 'your identityPoolId with S3 PutObject permission'
   })
 });
 
@@ -35,7 +35,7 @@ export default {
         const file = fileInput.files[0];
         console.log(file);
         const command = new PutObjectCommand({
-          Bucket: 'your s3 bucket',
+          Bucket: 'your S3 bucket',
           Key: file.name,
           Body: file
         });
