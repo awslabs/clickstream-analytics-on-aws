@@ -20,12 +20,6 @@ export const ANALYTICS_NAV_STATUS = 'ClickStreamAnalyticsNavigationStatus';
 export const ANALYTICS_NAV_ITEM = 'ClickStreamAnalyticsNavigationItem';
 export const CLICK_STREAM_USER_DATA = 'ClickStreamAnalyticsUserInformation';
 export const CONFIG_URL = '/aws-exports.json';
-export const COMMON_ALERT_TYPE = {
-  Success: 'success',
-  Error: 'error',
-  Warning: 'warning',
-  Info: 'info',
-};
 
 export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
   String.fromCharCode(65 + index)

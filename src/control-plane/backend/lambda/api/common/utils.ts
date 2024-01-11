@@ -574,8 +574,8 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
-function getStackOutputFromPipelineStatus(status: PipelineStatus, stackType: PipelineStackType, key: string): string {
-  if (isEmpty(status)) {
+function getStackOutputFromPipelineStatus(status: PipelineStatus | undefined, stackType: PipelineStackType, key: string): string {
+  if (!status || isEmpty(status)) {
     return '';
   }
   const stackTypes = status.stackDetails.map(s => s.stackType);
@@ -1254,6 +1254,12 @@ function getMetadataVersionType(pipeline: IPipeline) {
   return MetadataVersionType.V2;
 }
 
+function getLocalDateISOString(date: Date, offsetDay?: number) {
+  const timezoneOffset = date.getTimezoneOffset();
+  date = new Date(date.getTime() - (timezoneOffset*60*1000) + (offsetDay ?? 0)*24*60*60*1000);
+  return date.toISOString().split('T')[0];
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1307,4 +1313,5 @@ export {
   rawToEvent,
   rawToParameter,
   rawToAttribute,
+  getLocalDateISOString,
 };

@@ -43,6 +43,7 @@ interface IAttributeTableItem {
 }
 
 interface MetadataUserAttributesTableProps {
+  analysisStudioEnabled: boolean;
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
 }
 
@@ -51,7 +52,7 @@ const MetadataUserAttributesTable: React.FC<
 > = (props: MetadataUserAttributesTableProps) => {
   const { projectId, appId } = useParams();
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
-  const { setShowDetails } = props;
+  const { setShowDetails, analysisStudioEnabled } = props;
 
   const renderEditNameCell = (
     item: IAttributeTableItem,
@@ -250,6 +251,7 @@ const MetadataUserAttributesTable: React.FC<
   return (
     <MetadataTable
       resourceName="UserAttribute"
+      analysisStudioEnabled={analysisStudioEnabled}
       infoType={HelpPanelType.METADATA_USER_PARAM_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}
       tableContentDisplay={CONTENT_DISPLAY}

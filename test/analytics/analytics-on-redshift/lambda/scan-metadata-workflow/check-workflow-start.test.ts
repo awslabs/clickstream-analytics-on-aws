@@ -71,6 +71,7 @@ describe('Lambda - check workflow start', () => {
       scanEndDate: '2023-10-26',
       jobStartTimestamp: 1698330523913,
       scanStartDate: '',
+      eventSource: 'LoadDataFlow',
     });
   });
 

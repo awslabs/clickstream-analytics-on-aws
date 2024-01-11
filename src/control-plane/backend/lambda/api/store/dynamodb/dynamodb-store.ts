@@ -24,6 +24,7 @@ import {
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
+import { logger } from '../../common/powertools';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
@@ -1199,5 +1200,42 @@ export class DynamoDbStore implements ClickStreamStore {
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
+  };
+
+  public async isManualTrigger(projectId: string, appId: string): Promise<boolean> {
+    try {
+      const params: GetCommand = new GetCommand({
+        TableName: clickStreamTableName,
+        Key: {
+          id: `MANUAL_TRIGGER_${projectId}_${appId}`,
+          type: 'MANUAL_TRIGGER',
+        },
+      });
+      const record = await docClient.send(params);
+      if (!record.Item) {
+        return false;
+      }
+      return true;
+    } catch (err) {
+      logger.error('Failed to check manual trigger: ', { err });
+      throw err;
+    }
+  };
+
+  public async saveManualTrigger(projectId: string, appId: string): Promise<void> {
+    try {
+      const params: PutCommand = new PutCommand({
+        TableName: clickStreamTableName,
+        Item: {
+          id: `MANUAL_TRIGGER_${projectId}_${appId}`,
+          type: 'MANUAL_TRIGGER',
+          ttl: Date.now() / 1000 + 600,
+        },
+      });
+      await docClient.send(params);
+    } catch (err) {
+      logger.error('Failed to save manual trigger: ', { err });
+      throw err;
+    }
   };
 }
