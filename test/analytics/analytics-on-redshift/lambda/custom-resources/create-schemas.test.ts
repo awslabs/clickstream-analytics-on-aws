@@ -135,7 +135,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const appSchemaCount = schemaDefs.length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount + 7; // total: 42
+  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 + 1; // total: 42  (1 is for delete old session mv)
 
   const defs: { [key: string]: string } = {};
 

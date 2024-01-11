@@ -48,7 +48,7 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME } from '../../../../src/common/constant';
+import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME_V2 } from '../../../../src/common/constant';
 import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
 import { clickstream_lifecycle_daily_view_columns, clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';
@@ -141,7 +141,7 @@ describe('QuickSight Lambda function', () => {
           tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
           columns: clickstream_session_view_columns,
-          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME_V2} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
           dateTimeDatasetParameter: [
             {
               name: 'startDate',
@@ -222,7 +222,7 @@ describe('QuickSight Lambda function', () => {
         {
           tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME_V2} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
           columns: clickstream_session_view_columns,
           dateTimeDatasetParameter: [
             {

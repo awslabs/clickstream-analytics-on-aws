@@ -44,8 +44,22 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
       Status: 'STARTED',
     });
 
+    process.env.ENABLE_REFRESH = 'true';
     const resp = await handler({}, context);
     expect(resp.execInfo).toHaveLength(3);
+  });
+
+  test('Should disable refresh SQL by app', async () => {
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
+      Id: 'id1',
+    });
+
+    redshiftDataMock.on(DescribeStatementCommand).resolves({
+      Status: 'STARTED',
+    });
+    process.env.ENABLE_REFRESH = 'false';
+    const resp = await handler({}, context);
+    expect(resp.execInfo).toHaveLength(0);
   });
 
 

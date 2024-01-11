@@ -1084,7 +1084,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Session_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_session_view_v1 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'session_id',
