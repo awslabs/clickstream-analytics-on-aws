@@ -18,7 +18,7 @@
     "_corrupt_record" : null,
     "gtmId" : "G-000000001",
     "gtmVersion" : "45je3820",
-    "event_id" : "0-1691480516-2",
+    "event_id" : "0-1691480516-0",
     "user_id" : null,
     "event_name" : "_page_view",
     "ip" : "52.94.133.137",
@@ -34,11 +34,11 @@
     "clientPlatformVersion" : null,
     "clientBrand" : "Not/A)Brand|Microsoft Edge|Chromium",
     "eventParams" : [ {
-      "key" : "ga_session_number",
+      "key" : "_session_duration",
       "value" : {
         "double_value" : null,
         "float_value" : null,
-        "int_value" : 2,
+        "int_value" : 0,
         "string_value" : null
       }
     }, {
@@ -80,6 +80,14 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1691480516"
+      }
+    }, {
+      "key" : "_session_number",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 2,
+        "string_value" : null
       }
     }, {
       "key" : "_page_referrer",
@@ -189,9 +197,9 @@
     "items" : [ ],
     "eventItems" : [ ],
     "user" : null,
-    "requestStartTimeMs" : null,
+    "requestStartTimeMs" : 1691481796000,
     "uc" : "US",
     "gtmSessionId" : "1691480516",
-    "gtmSessionNum" : 2
+    "gtmSessionNum" : 0
   }
 }
