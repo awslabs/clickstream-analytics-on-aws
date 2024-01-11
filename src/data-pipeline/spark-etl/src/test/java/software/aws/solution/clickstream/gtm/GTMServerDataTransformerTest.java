@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
 import static software.aws.solution.clickstream.ContextUtil.*;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_CHECK_PREVIOUS_SESSION;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
@@ -148,9 +149,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_referrer_full_v1"));
         Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_referrer_incremental_v1"));
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_session_full_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_session_incremental_v1"));
-
         Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/user_full_v1"));
         Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/user_incremental_v1"));
 
@@ -177,11 +175,11 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         List<Dataset<Row>> datasetList = transformer.transform(dataset);
 
         String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event1.json");
-        Assertions.assertEquals(expectedData1, datasetList.get(0).first().prettyJson());
+        Assertions.assertEquals(expectedData1, datasetList.get(0).filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-0'")).first().prettyJson());
 
         Dataset<Row> eventDataset = transformer.postTransform(datasetList.get(0));
         String expectedDataPost = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event1_post.json");
-        Assertions.assertEquals(expectedDataPost, eventDataset.first().prettyJson());
+        Assertions.assertEquals(expectedDataPost, eventDataset.filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-0'")).first().prettyJson());
 
     }
 
@@ -200,7 +198,7 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         List<Dataset<Row>> datasetList = transformer.transform(dataset);
 
         String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_brand.json");
-        Assertions.assertEquals(expectedData1, datasetList.get(0).first().prettyJson());
+        Assertions.assertEquals(expectedData1, datasetList.get(0).filter(expr("event_id='43cc3b89d7dfccbc2c906eb125ea25dbbrand-0-1693281535-0'")).first().prettyJson());
     }
 
     @Test
@@ -215,7 +213,7 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
         List<Dataset<Row>> datasetList = transformer.transform(dataset);
-        Dataset<Row> resultDataset =datasetList.get(1);
+        Dataset<Row> resultDataset =datasetList.get(1).filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-0'"));
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event_param.json");
         Assertions.assertEquals(expectedData, resultDataset.first().prettyJson());
@@ -306,92 +304,37 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
     }
 
     @Test
-    void test_transform_should_add_session() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_should_add_session
+    void test_transform_data_with_session_start() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_data_with_session_start
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_should_add_session/");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_with_session_start/");
         System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
-                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session1.json")).getPath());
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session-start.json")).getPath());
 
         List<Dataset<Row>> datasetList = transformer.transform(dataset);
         Dataset<Row> eventDataset =datasetList.get(0);
-        List<Row> eventList = eventDataset.select("event_id", "event_name").orderBy("event_name").takeAsList(10);
-        Assertions.assertEquals(6, eventList.size());
+        Dataset<Row> eventParams =datasetList.get(1);
 
-        List<String> eventNames = new ArrayList<>();
-        List<String> eventIds = new ArrayList<>();
-        eventList.forEach(r -> {
-            eventNames.add(r.getAs("event_name"));
-            eventIds.add(r.getAs("event_id"));
-        });
+        Assertions.assertEquals(2, eventDataset.count());
+        Assertions.assertEquals(66, eventParams.count());
 
-        Assertions.assertTrue(eventNames.contains("_session_start"));
-        Assertions.assertTrue(eventNames.contains("_page_view"));
-        Assertions.assertTrue(eventNames.contains("_app_start"));
-        Assertions.assertTrue(eventNames.contains("_session_end"));
-        Assertions.assertTrue(eventNames.contains("_app_end"));
-        Assertions.assertTrue(eventNames.contains("_first_open"));
+        String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_session_start.json");
+        Assertions.assertEquals(expectedData, eventDataset.filter(expr("event_name = '_session_start'")).first().prettyJson(), "_session_start event is correct");
 
-        Assertions.assertFalse(eventIds.get(0).equalsIgnoreCase(eventIds.get(1)));
-        Assertions.assertFalse(eventIds.get(1).equalsIgnoreCase(eventIds.get(2)));
+        Dataset<Row> params1 =  eventParams.filter(expr("event_name = '_session_start' and event_param_key = '_session_duration'"));
+        String expectedData2 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_session_start_param.json");
+        Assertions.assertEquals(expectedData2, params1.first().prettyJson(), "session duration is correct");
 
-        eventDataset.coalesce(1).write().mode("overwrite").json("/tmp/test_transform_should_add_session/");
+        Dataset<Row> params2 =  eventParams.filter(expr("event_name = '_session_start' and event_param_key = '_session_start_timestamp'"));
+        Assertions.assertTrue(params2.count() > 0, "event _session_start has param _session_start_timestamp");
 
+        Dataset<Row> params3 = eventParams.filter(expr("event_param_int_value = 0 and event_param_key = '_session_start_timestamp'"));
+        Assertions.assertTrue(params3.count() == 0, "should not have _session_start_timestamp = 0");
     }
 
-    @Test
-    void test_transform_should_add_session_check_previous() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_should_add_session_check_previous
-        System.setProperty(APP_IDS_PROP, "testApp");
-        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
-        System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_should_add_session_check_previous/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "true");
-        System.setProperty(GTM_PREVIOUS_SESSION_KEEP_DAYS, "999999");
-
-        Dataset<Row> dataset =
-                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session1.json")).getPath());
-        transformer.transform(dataset);
-
-        Dataset<Row> dataset2 =
-                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session2.json")).getPath());
-        List<Dataset<Row>> result2 = transformer.transform(dataset2);
-        Dataset<Row> eventDataset = result2.get(0);
-        Assertions.assertEquals(3, eventDataset.count());
-        List<String> eventNameList = eventDataset.select("event_name").takeAsList(3).stream().map(r -> r.getString(0)).collect(Collectors.toList());
-        Assertions.assertTrue(eventNameList.contains("_session_end"));
-        Assertions.assertTrue(eventNameList.contains("_app_end"));
-        Assertions.assertTrue(eventNameList.contains("page_view_2"));
-    }
-
-
-    @Test
-    void test_transform_should_add_session_seq() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_should_add_session_seq
-        System.setProperty(APP_IDS_PROP, "testApp");
-        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
-        System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_should_add_session_seq/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
-
-        Dataset<Row> dataset2 =
-                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session3.json")).getPath());
-        List<Dataset<Row>> result2 = transformer.transform(dataset2);
-        Dataset<Row> eventDataset = result2.get(0);
-
-        eventDataset = eventDataset.select("event_name", "event_id", "event_timestamp")
-                .coalesce(1)
-                .orderBy("event_timestamp", "event_name");
-
-        Assertions.assertEquals(19, eventDataset.count());
-        String jsonContent= eventDataset.takeAsList(20).stream().map(Row::json).collect(Collectors.joining("\n"));
-        String expectedData = this.resourceFileContent("/gtm-server/expected/test_transform_should_add_session_seq.json");
-        Assertions.assertEquals(expectedData, jsonContent);
-
-    }
 
 }

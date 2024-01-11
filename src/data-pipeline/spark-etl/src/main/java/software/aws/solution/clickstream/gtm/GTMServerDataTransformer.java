@@ -13,7 +13,6 @@
 
 package software.aws.solution.clickstream.gtm;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
@@ -38,13 +37,7 @@ import static org.apache.spark.sql.functions.coalesce;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.concat_ws;
 import static org.apache.spark.sql.functions.explode;
-import static org.apache.spark.sql.functions.expr;
-import static org.apache.spark.sql.functions.hash;
 import static org.apache.spark.sql.functions.lit;
-import static org.apache.spark.sql.functions.max;
-import static org.apache.spark.sql.functions.max_by;
-import static org.apache.spark.sql.functions.min;
-import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
 import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.timestamp_seconds;
@@ -61,10 +54,7 @@ import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
 import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
@@ -76,8 +66,6 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_INT_VALU
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_KEY;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_END;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
@@ -114,7 +102,6 @@ import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_SESSION;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_VISIT;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE;
@@ -137,7 +124,6 @@ import static software.aws.solution.clickstream.DatasetUtil.getAggItemDataset;
 import static software.aws.solution.clickstream.DatasetUtil.loadFullItemDataset;
 import static software.aws.solution.clickstream.DatasetUtil.loadFullUserDataset;
 import static software.aws.solution.clickstream.DatasetUtil.loadFullUserRefererDataset;
-import static software.aws.solution.clickstream.DatasetUtil.loadPreviousUserSessionDataset;
 import static software.aws.solution.clickstream.DatasetUtil.readDatasetFromPath;
 import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPath;
 import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
@@ -173,7 +159,7 @@ public class GTMServerDataTransformer {
         return loadFullUserRefererDataset(newPageReferrerDataset, pathInfo);
     }
 
-    private static Dataset<Row> extractEvent(final Dataset<Row> dataset1, final Dataset<Row> userFirstVisitDataset) {
+    private static Dataset<Row> extractEvent(final Dataset<Row> dataset1) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
 
         Column dataCol = dataset1.col(DATA_OUT);
@@ -264,194 +250,16 @@ public class GTMServerDataTransformer {
                 col(USER_PSEUDO_ID),
                 col(USER_ID),
                 col(UA),
-                col(GEO_FOR_ENRICH),
-                col(GTM_SESSION_NUM),
-                col(APP_ID),
-                col("origin_event_id")
+                col(GEO_FOR_ENRICH)
         };
-
         Dataset<Row> eventDataset = dataset2.select(selectCols);
-
-        SessionDatasetResult sessionResult = getUserSessionDatasets(eventDataset, selectCols);
-
-        Dataset<Row> firstOpenDataset = getFirstOpenDataset(userFirstVisitDataset, eventDataset)
-                .select(selectCols);
-
         log.info("eventDataset count:" + eventDataset.count());
-        log.info("userSessionStartDataset count:" + sessionResult.userSessionStartDataset.count());
-        log.info("userSessionEndDataset count:" + sessionResult.userSessionEndDataset.count());
-        log.info("firstOpenDataset count:" + firstOpenDataset.count());
-
-        Dataset<Row> eventAllDataset = eventDataset
-                .unionAll(sessionResult.userSessionStartDataset)
-                .unionAll(sessionResult.userAppStartDataset)
-                .unionAll(sessionResult.userSessionEndDataset)
-                .unionAll(sessionResult.userAppEndDataset)
-                .unionAll(firstOpenDataset)
-                .select(selectCols)
-                .drop(
-                        GTM_SESSION_NUM,
-                        APP_ID
-                );
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
-            eventAllDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-eventDataset/");
+            eventDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-eventDataset/");
         }
-        return eventAllDataset;
-    }
-
-    private static SessionDatasetResult getUserSessionDatasets(final Dataset<Row> eventDataset, final Column[] outputCols) {
-        boolean checkPreviousSession = Boolean.parseBoolean(System.getProperty(GTM_CHECK_PREVIOUS_SESSION));
-
-        Column[] selectAliasDataCols = new Column[]{
-                col(EVENT_ID),
-                col(EVENT_DATE),
-                col(EVENT_TIMESTAMP),
-                col(EVENT_PREVIOUS_TIMESTAMP),
-                col(EVENT_NAME),
-                col(EVENT_VALUE_IN_USD),
-                col(EVENT_BUNDLE_SEQUENCE_ID),
-                col(INGEST_TIMESTAMP),
-                col(DEVICE),
-                col(GEO),
-                col(TRAFFIC_SOURCE),
-                col(APP_INFO),
-                col(PLATFORM),
-                col(PROJECT_ID),
-                col(ITEMS),
-                expr("d." + USER_PSEUDO_ID),
-                col(USER_ID),
-                col(UA),
-                col(GEO_FOR_ENRICH),
-                col(GTM_SESSION_NUM),
-                expr("d." + APP_ID),
-        };
-
-        String maxTimestamp = "max_timestamp";
-        Dataset<Row> sessionNumDataset = eventDataset
-                .select(APP_ID, USER_PSEUDO_ID, GTM_SESSION_NUM, EVENT_TIMESTAMP)
-                .groupBy(APP_ID, USER_PSEUDO_ID)
-                .agg(
-                        max(GTM_SESSION_NUM).alias(MAX_SN),
-                        max(EVENT_TIMESTAMP).alias(maxTimestamp),
-                        min(GTM_SESSION_NUM).alias(MIN_SN))
-                .select(APP_ID, USER_PSEUDO_ID, MAX_SN, MIN_SN, maxTimestamp);
-
-
-        boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
-        if (debugLocal) {
-            eventDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-session-eventDataset/");
-            sessionNumDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-sessionNumDataset/");
-        }
-
-        Dataset<Row> userSessionStartDataset = null;
-
-        Column sessionJoinCond = eventDataset.col(APP_ID).equalTo(sessionNumDataset.col(APP_ID))
-                .and(eventDataset.col(USER_PSEUDO_ID).equalTo(sessionNumDataset.col(USER_PSEUDO_ID)));
-
-        if (checkPreviousSession) {
-            Dataset<Row> maxNumberUserSessionDataset = sessionNumDataset
-                    .select(col(APP_ID), col(USER_PSEUDO_ID), col(MAX_SN), col(maxTimestamp).alias(EVENT_TIMESTAMP));
-
-            DatasetUtil.PathInfo pathInfo = addSchemaToMap(maxNumberUserSessionDataset, TABLE_NAME_ETL_GTM_USER_SESSION, TABLE_VERSION_SUFFIX_V1);
-
-            Dataset<Row> previousMaxNumberSessionDataset = loadPreviousUserSessionDataset(maxNumberUserSessionDataset, pathInfo);
-
-            if (debugLocal) {
-                previousMaxNumberSessionDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-previousMaxNumberSessionDataset/");
-            }
-
-            Column joinCond1 = eventDataset.col(APP_ID).equalTo(sessionNumDataset.col(APP_ID))
-                    .and(eventDataset.col(USER_PSEUDO_ID).equalTo(sessionNumDataset.col(USER_PSEUDO_ID)))
-                    .and(eventDataset.col(GTM_SESSION_NUM).equalTo(sessionNumDataset.col(MIN_SN)));
-
-            // handle min session number in current dataset
-            Dataset<Row> minUserSessionDataset = eventDataset.alias("d")
-                    .join(sessionNumDataset.alias("s"), joinCond1, "SEMI")
-                    .select(selectAliasDataCols).distinct();
-
-            // if min session number > previous save max number, then add an event _session_start
-            Column joinCond2 = minUserSessionDataset.col(APP_ID).equalTo(previousMaxNumberSessionDataset.col(APP_ID))
-                    .and(minUserSessionDataset.col(USER_PSEUDO_ID).equalTo(previousMaxNumberSessionDataset.col(USER_PSEUDO_ID)));
-            Dataset<Row> minUserSessionStartDataset = minUserSessionDataset.alias("d").join(previousMaxNumberSessionDataset.alias("s"), joinCond2, "left")
-                    .filter(expr(String.format("%s > %s or %s is null", GTM_SESSION_NUM, MAX_SN, MAX_SN)))
-                    .withColumn(EVENT_NAME, lit(EVENT_SESSION_START))
-                    .select(selectAliasDataCols);
-
-            if (debugLocal) {
-                minUserSessionStartDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-minUserSessionStartDataset/");
-            }
-
-            // handle the session number > min number
-            Dataset<Row> userSessionStartDataset2 = eventDataset.alias("d").join(sessionNumDataset.as("s"), sessionJoinCond, "left")
-                    .filter(expr(String.format("%s > %s", GTM_SESSION_NUM, MIN_SN)))
-                    .withColumn(EVENT_NAME, lit(EVENT_SESSION_START))
-                    .select(selectAliasDataCols);
-
-            if (debugLocal) {
-                userSessionStartDataset2.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-userSessionStartDataset2/");
-            }
-
-            userSessionStartDataset = minUserSessionStartDataset
-                    .unionAll(userSessionStartDataset2);
-
-        } else {
-            userSessionStartDataset = eventDataset.alias("d").join(sessionNumDataset.alias("s"), sessionJoinCond, "left")
-                    .filter(expr(String.format("%s >= %s", GTM_SESSION_NUM, MIN_SN)))
-                    .withColumn(EVENT_NAME, lit(EVENT_SESSION_START))
-                    .select(selectAliasDataCols);
-        }
-        userSessionStartDataset = userSessionStartDataset
-                .groupBy(APP_ID, USER_PSEUDO_ID, GTM_SESSION_NUM)
-                .agg(min_by(struct(expr("*")), col(EVENT_TIMESTAMP)).alias("t"))
-                .select(expr("t.*"))
-                .withColumn("origin_event_id", col(EVENT_ID))
-                .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
-                .select(outputCols);
-
-        if (debugLocal) {
-            userSessionStartDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-userSessionStartDataset/");
-        }
-
-        // handle the session number < max number
-        Dataset<Row> userSessionEndDataset = eventDataset.alias("d").join(sessionNumDataset.alias("s"), sessionJoinCond, "left")
-                .filter(expr(String.format("%s <= %s", GTM_SESSION_NUM, MAX_SN)))
-                .withColumn(EVENT_NAME, lit(EVENT_SESSION_END))
-                .withColumn("origin_event_id", col(EVENT_ID))
-                .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))))
-                .select(selectAliasDataCols)
-                .groupBy(APP_ID, USER_PSEUDO_ID, GTM_SESSION_NUM)
-                .agg(max_by(struct(expr("*")), col(EVENT_TIMESTAMP)).alias("t"))
-                .select(expr("t.*"))
-                .select(outputCols);
-
-        if (debugLocal) {
-            userSessionEndDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-userSessionEndDataset/");
-        }
-
-        Dataset<Row> userAppStartDataset = userSessionStartDataset
-                .withColumn(EVENT_NAME, lit(EVENT_APP_START))
-                .withColumn(EVENT_ID, concat_ws("", col("origin_event_id"), hash(col(EVENT_NAME))))
-                .select(outputCols);
-
-        Dataset<Row> userAppEndDataset = userSessionEndDataset
-                .withColumn(EVENT_NAME, lit(EVENT_APP_END))
-                .withColumn(EVENT_ID, concat_ws("", col("origin_event_id"), hash(col(EVENT_NAME))))
-                .select(outputCols);
-
-        return new SessionDatasetResult(userSessionStartDataset, userSessionEndDataset, userAppStartDataset, userAppEndDataset);
-    }
-
-    private static Dataset<Row> getFirstOpenDataset(final Dataset<Row> userFirstVisitDataset, final Dataset<Row> eventDataset) {
-        Column joinCond = eventDataset.col(APP_ID).equalTo(userFirstVisitDataset.col(APP_ID)).and(
-                eventDataset.col(USER_PSEUDO_ID).equalTo(userFirstVisitDataset.col(USER_PSEUDO_ID))
-        ).and(
-                eventDataset.col(EVENT_TIMESTAMP).equalTo(userFirstVisitDataset.col(EVENT_TIMESTAMP))
-        );
-        return eventDataset.join(userFirstVisitDataset, joinCond, "SEMI")
-                .withColumn(EVENT_NAME, lit(EVENT_FIRST_OPEN))
-                .withColumn(EVENT_ID, concat_ws("", col(EVENT_ID), hash(col(EVENT_NAME))));
+        return eventDataset;
     }
 
     private static void mergeIncrementalTables(final SparkSession sparkSession) {
@@ -519,7 +327,7 @@ public class GTMServerDataTransformer {
 
         Dataset<Row> userFirstVisitDataset = getUserFirstVisitDataset(dataset1);
 
-        Dataset<Row> eventDataset = extractEvent(dataset1, userFirstVisitDataset);
+        Dataset<Row> eventDataset = extractEvent(dataset1);
         log.info(new ETLMetric(eventDataset, "eventDataset").toString());
 
         Dataset<Row> eventParameterDataset = extractEventParameter(dataset1);
@@ -691,13 +499,5 @@ public class GTMServerDataTransformer {
         SparkSession sparkSession = dataset.sparkSession();
         mergeIncrementalTables(sparkSession);
         return dataset.drop("ua", GEO_FOR_ENRICH);
-    }
-
-    @AllArgsConstructor
-    static class SessionDatasetResult {
-       final Dataset<Row> userSessionStartDataset;
-       final Dataset<Row> userSessionEndDataset;
-       final Dataset<Row> userAppStartDataset;
-       final Dataset<Row> userAppEndDataset;
     }
 }
