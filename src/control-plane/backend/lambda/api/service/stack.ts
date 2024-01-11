@@ -12,7 +12,7 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { awsRegion, stackWorkflowS3Bucket } from '../common/constants';
+import { awsRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
 import {
   WorkflowParallelBranch,
@@ -182,7 +182,7 @@ export class StackManager {
     if (workflow === undefined) {
       throw new Error('Pipeline workflow is empty.');
     }
-    const executionArn = await startExecution(awsRegion!, executionName, JSON.stringify(workflow.Workflow));
+    const executionArn = await startExecution(awsRegion!, stackWorkflowStateMachineArn!, executionName, JSON.stringify(workflow.Workflow));
     return executionArn ?? '';
   }
 

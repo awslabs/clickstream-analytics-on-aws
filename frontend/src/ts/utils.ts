@@ -71,7 +71,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
   return [];
 };
 
-export const alertMsg = (alertTxt: string, alertType: AlertType) => {
+export const alertMsg = (alertTxt: string, alertType: AlertType = 'error') => {
   const patchEvent = new CustomEvent('showAlertMsg', {
     detail: {
       alertTxt,
@@ -391,7 +391,7 @@ export const getEventParameters = (
   if (!eventName) {
     return [];
   }
-  if (metadataEventParameters?.[0].eventNames?.length > 0) {
+  if (metadataEventParameters?.[0]?.eventNames?.length > 0) {
     const associatedParameters = metadataEventParameters.filter((p) =>
       p.eventNames.includes(eventName)
     );
@@ -412,12 +412,10 @@ const patchBuiltInMetadata = (
   metadataEventParameters: IMetadataEventParameter[],
   builtInMetadata?: IMetadataBuiltInList
 ) => {
-  console.log(builtInMetadata);
   if (!builtInMetadata) {
     return metadataEventParameters;
   }
   const presetEventParameters = builtInMetadata.PresetEventParameters;
-  console.log(presetEventParameters);
   for (const parameter of metadataEventParameters) {
     const presetParameter = presetEventParameters.find(
       (item) =>
@@ -427,7 +425,6 @@ const patchBuiltInMetadata = (
         item.dataType === parameter.valueType
     );
     if (presetParameter) {
-      console.log(presetParameter);
       const localeLng = getLngFromLocalStorage();
       parameter.displayName = (presetParameter.displayName as any)[localeLng];
       parameter.description = (presetParameter.description as any)[localeLng];

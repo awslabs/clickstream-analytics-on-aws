@@ -103,6 +103,7 @@ export class StackActionStateMachine extends Construct {
             'iam:UpdateRoleDescription',
             'iam:TagRole',
             'iam:UntagRole',
+            'iam:ListRoleTags',
           ],
           resources: [
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
