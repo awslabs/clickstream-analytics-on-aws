@@ -12,7 +12,7 @@
  */
 
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
-import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
+import { CloudWatchEventsClient, PutRuleCommand } from '@aws-sdk/client-cloudwatch-events';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   EC2Client,
@@ -43,7 +43,7 @@ import {
 
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { SNSClient } from '@aws-sdk/client-sns';
+import { CreateTopicCommand, SNSClient } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -87,6 +87,7 @@ import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { getDefaultTags } from '../../common/utils';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -3182,6 +3183,17 @@ describe('Pipeline test', () => {
       },
       success: true,
       message: 'Pipeline upgraded.',
+    });
+    expect(snsMock).toHaveReceivedCommandTimes(CreateTopicCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
+    expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
+      Name: `ClickstreamTopicForCFN-${MOCK_PIPELINE_ID}`,
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
+      Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
+      EventPattern: '{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/Clickstream*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
     });
   });
   it('Upgrade pipeline with error server size', async () => {
