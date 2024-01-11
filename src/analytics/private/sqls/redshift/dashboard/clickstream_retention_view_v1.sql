@@ -21,20 +21,32 @@ SELECT
 ),
 
 retention_counts AS (
-  SELECT
+  select 
     first_date,
     day_diff,
-    COUNT(DISTINCT user_pseudo_id) AS returned_user_count
-  FROM retention_data
-  WHERE day_diff <= 42 -- Calculate retention rate for the last 42 days
+    COUNT(user_pseudo_id) AS returned_user_count
+  from (
+    SELECT
+      first_date,
+      day_diff,
+      user_pseudo_id
+    FROM retention_data
+    WHERE day_diff <= 42 -- Calculate retention rate for the last 42 days
+    GROUP BY first_date, day_diff, user_pseudo_id
+  ) t1
   GROUP BY first_date, day_diff
 ),
 
 total_users AS (
   SELECT
     first_date,
-    COUNT(DISTINCT user_pseudo_id) AS total_users
-  FROM user_first_date
+    COUNT(user_pseudo_id) AS total_users
+  FROM (
+    select 
+      first_date,
+      user_pseudo_id
+    from user_first_date group by 1,2
+  ) t2
   group by 1
 ),
 
