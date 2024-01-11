@@ -122,4 +122,38 @@ Record data sent and received during WebSocket communication:
 
 ```
 
+### Upload files to s3 bucket
+
+Clickstream SDK is mainly used for the collection of business attributes. When you need to associate files, we recommend uploading the file to s3 bucket and then setting the file s3 url into the event attribute to link to the file.
+
+```javascript
+  // Config your s3 client
+  const REGION = 'your bucket region';
+  const s3Client = new S3Client({
+      region: REGION,
+      credentials: fromCognitoIdentityPool({
+        clientConfig: { region: REGION },
+        identityPoolId: 'your identityPoolId with s3 bucket access permission'
+      })
+  });
+  
+  // Create put object command
+  const command = new PutObjectCommand({
+    Bucket: 'your s3 bucket',
+    Key: file.name,
+    Body: file
+  });
+  
+  // Upload file
+  try {
+    const response = await s3Client.send(command);
+    console.log(response);
+    if (response.$metadata.httpStatusCode === 200) {
+      console.log('upload success');
+    }
+  } catch (err) {
+    console.error(err);
+  }
+```
+
 Learn more Clickstream Web SDK usage examples please refer to this [document](https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/web/).
