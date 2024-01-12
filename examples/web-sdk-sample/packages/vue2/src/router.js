@@ -38,5 +38,10 @@ export default new Router({
       name: 'websocket',
       component: () => import('./components/Websocket'),
     },
+    {
+      path: '/upload-file',
+      name: 'upload-file',
+      component: () => import('./components/UploadFile'),
+    },
   ],
 });

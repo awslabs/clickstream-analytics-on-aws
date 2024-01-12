@@ -37,6 +37,14 @@
             >Websocket</router-link
           >
         </span>
+        <span class="nav-item">
+          <router-link
+            to="/upload-file"
+            class="nav-link"
+            :class="{ 'active-link': isActive('/upload-file') }"
+            >UploadFile</router-link
+          >
+        </span>
       </div>
     </nav>
     <div class="container mt-3">
