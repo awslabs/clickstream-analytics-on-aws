@@ -78,8 +78,8 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightPrincipalArn: 'test-principal-arn',
-    quickSightOwnerPrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
     vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
@@ -162,8 +162,8 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightPrincipalArn: 'test-principal-arn',
-    quickSightOwnerPrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
     vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
@@ -255,8 +255,8 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightPrincipalArn: 'test-principal-arn',
-    quickSightOwnerPrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
     vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
@@ -330,7 +330,7 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream-change',
-    quickSightPrincipalArn: 'test-principal-arn-change',
+    quickSightSharePrincipalArn: 'test-principal-arn-change',
     quickSightOwnerPrincipalArn: 'test-principal-arn-change',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
@@ -2019,6 +2019,254 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Create QuickSight dashboard - check permission', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).callsFakeOnce(input => {
+      if ( input.Permissions[0].Principal === 'test-owner-principal-arn'
+        && input.Permissions[1].Principal === 'test-principal-arn'
+        && input.Permissions[0].Actions[9] === 'quicksight:CancelIngestion'
+        && input.Permissions[1].Actions[4] === 'quicksight:ListIngestions'
+      ) {
+        return {
+          Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('data set permission is not the expected one.');
+      }
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
+        && input.GrantPermissions[1].Principal === 'test-principal-arn') {
+        return {
+          DataSourceArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/datasource_1',
+          DataSourceId: 'datasource_1',
+          Status: 200,
+        };
+      } else {
+        throw new Error('data source permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(CreateAnalysisCommand).callsFakeOnce(input => {
+      if ( input.Permissions.length === 1
+        && input.Permissions[0].Principal === 'test-owner-principal-arn'
+        && input.Permissions[0].Actions[3] === 'quicksight:UpdateAnalysis'
+      ) {
+        return {
+          Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('analysis permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(CreateDashboardCommand).callsFakeOnce(input => {
+      if ( input.Permissions.length === 2
+        && input.Permissions[0].Principal === 'test-owner-principal-arn'
+        && input.Permissions[1].Principal === 'test-principal-arn'
+        && input.Permissions[0].Actions[0] === 'quicksight:DescribeDashboard'
+        && input.Permissions[1].Actions[3] === 'quicksight:UpdateDashboard'
+      ) {
+        return {
+          DashboardId: 'dashboard_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('dashboard permission is not the expected one.');
+      }
+    });
+
+    const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSourcePermissionsCommand, 1);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Update QuickSight dashboard - check permission', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
+        && input.GrantPermissions[1].Principal === 'test-principal-arn'
+        && input.GrantPermissions[0].Actions[5] === 'quicksight:UpdateDataSource'
+        && input.GrantPermissions[1].Actions[5] === 'quicksight:UpdateDataSource'
+
+      ) {
+        return {
+          DataSourceArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/datasource_1',
+          DataSourceId: 'datasource_1',
+          Status: 200,
+        };
+      } else {
+        throw new Error('data source permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions.length === 2
+        && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
+        && input.GrantPermissions[1].Principal === 'test-principal-arn'
+        && input.GrantPermissions[0].Actions[9] === 'quicksight:CancelIngestion'
+        && input.GrantPermissions[1].Actions[4] === 'quicksight:ListIngestions'
+      ) {
+        return {};
+      } else {
+        throw new Error('data set permission is not the expected one.');
+      }
+    }).resolvesOnce({});
+
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions.length === 1
+        && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
+        && input.GrantPermissions[0].Actions[6] === 'quicksight:DescribeAnalysisPermissions'
+      ) {
+        return {};
+      } else {
+        throw new Error('analysis permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions.length === 2
+        && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
+        && input.GrantPermissions[1].Principal === 'test-principal-arn'
+        && input.GrantPermissions[0].Actions[0] === 'quicksight:DescribeDashboard'
+        && input.GrantPermissions[1].Actions[3] === 'quicksight:UpdateDashboard') {
+        return {};
+      } else {
+        throw new Error('dashboard permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard_0',
+    });
+
+    const resp = await handler(updateEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
