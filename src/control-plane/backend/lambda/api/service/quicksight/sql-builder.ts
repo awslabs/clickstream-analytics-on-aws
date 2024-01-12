@@ -369,7 +369,7 @@ function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: st
   return `
     ${seqTable}
     ${resultColSql}
-    select day::date, event_name, ${prefix} ${appendGroupingCol ? ',group_col' : ''} from final_table
+    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',group_col' : ''} from final_table
   `;
 }
 
