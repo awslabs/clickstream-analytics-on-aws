@@ -17,7 +17,7 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { amznRequestContextHeader } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -1116,6 +1116,10 @@ function getDefaultTags(projectId: string) {
     {
       Key: BuiltInTagKeys.AWS_SOLUTION,
       Value: SolutionInfo.SOLUTION_SHORT_NAME,
+    },
+    {
+      Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+      Value: FULL_SOLUTION_VERSION,
     },
     {
       Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,

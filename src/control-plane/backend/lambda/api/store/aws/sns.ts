@@ -11,15 +11,16 @@
  *  and limitations under the License.
  */
 
-import { SNSClient, CreateTopicCommand, SubscribeCommand, SetTopicAttributesCommand } from '@aws-sdk/client-sns';
+import { SNSClient, CreateTopicCommand, SubscribeCommand, SetTopicAttributesCommand, TagResourceCommand } from '@aws-sdk/client-sns';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { getDefaultTags } from '../../common/utils';
 
 export const createTopicAndSubscribeSQSQueue = async (region: string, projectId: string, name: string, queueArn: string) => {
   try {
-    const topicArn = await createTopic(region, projectId, name);
+    const topicArn = await createTopic(region, name);
     if (topicArn) {
+      await tagResource(region, topicArn, projectId);
       await setPermissionForEventRule(region, topicArn);
       await subscribeSQSQueue(region, topicArn, queueArn);
     }
@@ -30,7 +31,7 @@ export const createTopicAndSubscribeSQSQueue = async (region: string, projectId:
   }
 };
 
-export const createTopic = async (region: string, projectId: string, name: string) => {
+export const createTopic = async (region: string, name: string) => {
   try {
     const client = new SNSClient({
       ...aws_sdk_client_common_config,
@@ -38,12 +39,28 @@ export const createTopic = async (region: string, projectId: string, name: strin
     });
     const command = new CreateTopicCommand({
       Name: name,
-      Tags: getDefaultTags(projectId),
     });
     const data = await client.send(command);
     return data.TopicArn;
   } catch (error) {
     logger.error('Error in create topic', { error });
+    throw error;
+  }
+};
+
+
+export const tagResource = async (region: string, topicArn: string, projectId: string) => {
+  try {
+    const client = new SNSClient({
+      region,
+    });
+    const command = new TagResourceCommand({
+      ResourceArn: topicArn,
+      Tags: getDefaultTags(projectId),
+    });
+    await client.send(command);
+  } catch (error) {
+    logger.error('Error in tag topic', { error });
     throw error;
   }
 };
@@ -68,7 +85,6 @@ export const subscribeSQSQueue = async (region: string, topicArn: string, queueA
     throw error;
   }
 };
-
 
 export const setPermissionForEventRule = async (region: string, topicArn: string) => {
   try {
