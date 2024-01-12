@@ -1289,7 +1289,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id
     from
@@ -6015,7 +6015,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id
     from
@@ -10035,7 +10035,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id,
       group_col
@@ -10345,7 +10345,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id,
       group_col
@@ -10642,7 +10642,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id,
       group_col
@@ -13395,7 +13395,7 @@ describe('SQL Builder test', () => {
           event_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       event_id,
       group_col
@@ -16704,7 +16704,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id_2
       )
     select
-      day::date,
+      day::date as event_date,
       event_name,
       user_pseudo_id
     from
