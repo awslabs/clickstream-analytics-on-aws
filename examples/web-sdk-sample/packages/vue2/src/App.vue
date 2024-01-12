@@ -42,7 +42,7 @@
             to="/upload-file"
             class="nav-link"
             :class="{ 'active-link': isActive('/upload-file') }"
-          >UploadFile</router-link
+            >UploadFile</router-link
           >
         </span>
       </div>

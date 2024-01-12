@@ -122,28 +122,28 @@ Record data sent and received during WebSocket communication:
 
 ```
 
-### Upload files to S3 bucket
+### Upload files to Amazon S3 bucket
 
-Clickstream SDK is mainly used for the collection of business attributes. When you need to associate files, we recommend uploading the file to S3 bucket and then setting the file S3 url into the event attribute to link to the file.
+Clickstream SDK is mainly used for the collection of business attributes. When you need to associate files, we recommend uploading the file to Amazon S3 bucket and then setting the file S3 url into the event attribute to link to the file.
 
 Prerequisite: Please follow the steps outlined in this [documentation](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-browser-credentials-cognito.html) to create a Cognito identity pool with guest access.
 
 ```javascript
-  // Config your S3 client
-  const REGION = 'your bucket region';
+  // Config your Amazon S3 client
+  const REGION = process.env.VUE_APP_S3_BUCKET_REGION;
   const s3Client = new S3Client({
-      region: REGION,
-      credentials: fromCognitoIdentityPool({
-        clientConfig: { region: REGION },
-        identityPoolId: 'your identityPoolId with S3 PutObject permission'
-      })
+    region: REGION,
+    credentials: fromCognitoIdentityPool({
+      clientConfig: { region: REGION },
+      identityPoolId: process.env.VUE_APP_IDENTITY_POOL_ID,
+    }),
   });
   
   // Create put object command
   const command = new PutObjectCommand({
-    Bucket: 'your S3 bucket',
+    Bucket: process.env.VUE_APP_S3_BUCKET_NAME,
     Key: file.name,
-    Body: file
+    Body: file,
   });
   
   // Upload file
