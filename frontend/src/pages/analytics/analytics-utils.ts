@@ -373,6 +373,16 @@ export const getGoalAndConditions = (
   } as AttributionTouchPoint;
 };
 
+export const getTargetComputeMethod = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  return goalData.calculateMethodOption?.value;
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
