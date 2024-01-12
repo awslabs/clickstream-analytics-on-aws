@@ -11,15 +11,16 @@
  *  and limitations under the License.
  */
 
-import { CloudWatchEventsClient, PutRuleCommand, PutTargetsCommand, Target } from '@aws-sdk/client-cloudwatch-events';
+import { CloudWatchEventsClient, PutRuleCommand, PutTargetsCommand, TagResourceCommand, Target } from '@aws-sdk/client-cloudwatch-events';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { getDefaultTags } from '../../common/utils';
 
 export const createRuleAndAddTargets = async (region: string, projectId: string, name: string, eventPattern: string, targetArn: string) => {
   try {
-    const ruleArn = await putRule(region, projectId, name, eventPattern);
+    const ruleArn = await putRule(region, name, eventPattern);
     if (ruleArn) {
+      await tagResource(region, ruleArn, projectId);
       const targets: Target[] = [{
         Id: 'ClickstreamTarget',
         Arn: targetArn,
@@ -33,7 +34,7 @@ export const createRuleAndAddTargets = async (region: string, projectId: string,
   }
 };
 
-export const putRule = async (region: string, projectId: string, name: string, eventPattern: string) => {
+export const putRule = async (region: string, name: string, eventPattern: string) => {
   try {
     const client = new CloudWatchEventsClient({
       ...aws_sdk_client_common_config,
@@ -42,11 +43,26 @@ export const putRule = async (region: string, projectId: string, name: string, e
     const command = new PutRuleCommand({
       Name: name,
       EventPattern: eventPattern,
-      Tags: getDefaultTags(projectId),
     });
     return (await client.send(command)).RuleArn;
   } catch (error) {
     logger.error('Error in putRule', { error });
+    throw error;
+  }
+};
+
+export const tagResource = async (region: string, ruleArn: string, projectId: string) => {
+  try {
+    const client = new CloudWatchEventsClient({
+      region,
+    });
+    const command = new TagResourceCommand({
+      ResourceARN: ruleArn,
+      Tags: getDefaultTags(projectId),
+    });
+    await client.send(command);
+  } catch (error) {
+    logger.error('Error in tag rule', { error });
     throw error;
   }
 };

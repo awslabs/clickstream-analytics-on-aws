@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand } from '@aws-sdk/client-cloudwatch-events';
+import { DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand, TagResourceCommand as EventTagResourceCommand } from '@aws-sdk/client-cloudwatch-events';
 import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   ConnectivityType,
@@ -30,7 +30,7 @@ import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshi
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand } from '@aws-sdk/client-sns';
+import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand, TagResourceCommand as SNSTagResourceCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -941,6 +941,7 @@ function createEventRuleMock(cloudWatchEventsMock: any): any {
   cloudWatchEventsMock.on(PutRuleCommand).resolves({
     RuleArn: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
   });
+  cloudWatchEventsMock.on(EventTagResourceCommand).resolves({});
   cloudWatchEventsMock.on(PutTargetsCommand).resolves({});
 }
 
@@ -959,6 +960,7 @@ function createSNSTopicMock(snsMock: any): any {
   snsMock.on(CreateTopicCommand).resolves({
     TopicArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
   });
+  snsMock.on(SNSTagResourceCommand).resolves({});
   snsMock.on(SetTopicAttributesCommand).resolves({});
   snsMock.on(SubscribeCommand).resolves({});
 }
