@@ -276,7 +276,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     schema,
   };
 
-  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn);
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
 
   for ( const dataSet of dataSets) {
     const createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
@@ -376,7 +376,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     schema,
   };
 
-  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn);
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
 
   const oldDataSetTableNames: string[] = [];
   const dataSetTableNames: string[] = [];
@@ -1003,7 +1003,8 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
   }
 };
 
-const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: string, awsAccountId: string, ownerPrincipalArn: string) => {
+const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: string, awsAccountId: string,
+  ownerPrincipalArn: string, sharePrincipalArn: string) => {
   const arnSplits = dataSourceArn.split('/');
   const dataSourceId = arnSplits[arnSplits.length - 1];
   await waitForDataSourceChangeCompleted(quickSight, awsAccountId, dataSourceId);
@@ -1013,6 +1014,17 @@ const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: 
     GrantPermissions: [
       {
         Principal: ownerPrincipalArn,
+        Actions: [
+          'quicksight:UpdateDataSourcePermissions',
+          'quicksight:DescribeDataSourcePermissions',
+          'quicksight:PassDataSource',
+          'quicksight:DescribeDataSource',
+          'quicksight:DeleteDataSource',
+          'quicksight:UpdateDataSource',
+        ],
+      },
+      {
+        Principal: sharePrincipalArn,
         Actions: [
           'quicksight:UpdateDataSourcePermissions',
           'quicksight:DescribeDataSourcePermissions',
