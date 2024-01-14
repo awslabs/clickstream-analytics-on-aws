@@ -2858,6 +2858,7 @@ describe('Metadata Scan test', () => {
 
   it('trigger scan metadata', async () => {
     tokenMock(ddbMock, false);
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-02'));
     ddbMock.on(GetCommand).resolves({});
     SFNMock.on(StartExecutionCommand).resolves({
       executionArn: 'arn:aws:states:us-east-1:123456789012:execution:scan-StateMachine:scan-StateMachine:00000000-0000-0000-0000-000000000000',
@@ -2868,7 +2869,7 @@ describe('Metadata Scan test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        appIds: `${MOCK_APP_ID}1,${MOCK_APP_ID}2`,
+        appId: MOCK_APP_ID,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -2880,6 +2881,15 @@ describe('Metadata Scan test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
     expect(SFNMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+    expect(SFNMock).toHaveReceivedCommandWith(StartExecutionCommand, {
+      stateMachineArn: 'arn:aws:states:us-east-1:123456789012:stateMachine:xxxxScanMetadataWorkflow',
+      name: 'manual-trigger-1675296000000',
+      input: JSON.stringify({
+        scanStartDate: '2023-01-26',
+        scanEndDate: '2023-02-02',
+        appIdList: MOCK_APP_ID,
+      }),
+    });
   });
 
   it('trigger scan metadata frequently', async () => {
@@ -2900,7 +2910,7 @@ describe('Metadata Scan test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        appIds: `${MOCK_APP_ID}1,${MOCK_APP_ID}2`,
+        appId: MOCK_APP_ID,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(429);
