@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
@@ -717,10 +717,15 @@ export class ReportingService {
       const sid = visualPropsArray[0].sheetId;
       dashboardDef.Sheets![0].SheetId = sid;
       dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
+      dashboardDef.Options!.WeekStart = DayOfWeek.MONDAY;
     } else {
       const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
       dashboardDef = dashboardDefProps.def;
       dashboardName = dashboardDefProps.name;
+      if (dashboardDef.Options === undefined) {
+        dashboardDef.Options = {};
+      }
+      dashboardDef.Options.WeekStart = DayOfWeek.MONDAY;
     }
 
     const dashboard = applyChangeToDashboard({

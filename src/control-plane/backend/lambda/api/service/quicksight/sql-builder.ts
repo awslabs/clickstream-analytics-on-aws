@@ -228,6 +228,33 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   });
 };
 
+
+function _buildFunnelChartViewNestCaseWhenSql(prefix: string, cnt: number, isNameCol: boolean) : string {
+
+  let sql = '';
+  if (isNameCol) {
+    for (let i = 0; i < cnt; i++) {
+      sql += `when seq = ${i} then '${i+1}_' || event_name_${i} \n`;
+    }
+  } else {
+    for (let i = 0; i < cnt; i++) {
+      sql += `when seq = ${i} then ${prefix}_${i} \n`;
+    }
+  }
+
+  return sql;
+}
+
+function _buildFunnelChartViewGroupingNestCaseWhenSql(cnt: number, groupColNameWithPrefix: string) : string {
+
+  let sql = '';
+  for (let i = 0; i < cnt; i++) {
+    sql += `when seq = ${i} then ${groupColNameWithPrefix}_${i} \n`;
+  }
+
+  return sql;
+}
+
 function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, index: number, isNameCol: boolean) : string {
   let sql = ' when ';
   for (let i = 1; i < eventCount; i++) {
@@ -238,11 +265,12 @@ function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, i
     }
   }
 
-  if (isNameCol) {
-    sql += `then '${index}_' || event_name_${index-1}`;
-  } else {
-    sql += `then ${prefix}_${index-1}`;
-  }
+  sql += `then 
+    case 
+      ${_buildFunnelChartViewNestCaseWhenSql(prefix, index, isNameCol)}
+    else null 
+    end
+  `;
 
   return sql;
 }
@@ -257,7 +285,13 @@ function _buildFunnelChartViewGroupingSql(prefix: string, eventCount: number, in
       sql += `${i === 1 ? ' ': ' and'} ${prefix}_${i} is null `;
     }
   }
-  sql += `then ${groupColNameWithPrefix}_${index-1}`;
+
+  sql += `then 
+    case 
+      ${_buildFunnelChartViewGroupingNestCaseWhenSql(index, groupColNameWithPrefix)}
+    else null 
+    end
+  `;
 
   return sql;
 }
@@ -269,20 +303,18 @@ function _buildFunnelChartViewResultCaseWhenSql(prefix: string, eventCount: numb
   `;
 
   if (isEventName) {
-    for (let i = 1; i < eventCount; i++) {
-      resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, i, true);
+    for (let index = eventCount; index > 0; index--) {
+      resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, index, true);
     }
     resultColSql += `
-        else '${eventCount}_' || event_name_${eventCount-1} 
-      end
+    end as event_name
     `;
   } else {
-    for (let i = 1; i < eventCount; i++) {
-      resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, i, false);
+    for (let index = eventCount; index > 0; index--) {
+      resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, index, false);
     }
     resultColSql += `
-      else ${prefix}_${eventCount-1} 
-      end
+      end as ${prefix}
     `;
   }
 
@@ -296,20 +328,18 @@ function _buildFunnelChartViewResultGroupingSql(prefix: string,
 
   if (applyToFirst) {
     resultColSql = `
-      ${ appendGroupingCol ? `,max(${groupColNameWithPrefix}_0) as group_col` : ''}
+      ${ appendGroupingCol ? `,${groupColNameWithPrefix}_0 as group_col` : ''}
     `;
   } else if (appendGroupingCol) {
     resultColSql = `
-      ,max(
-        case
+      ,case
     `;
-    for (let i = 1; i < eventCount; i++) {
-      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, i, groupColNameWithPrefix);
+    for (let index = eventCount; index > 0; index--) {
+      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, index, groupColNameWithPrefix);
     }
     resultColSql += `
-      else ${groupColNameWithPrefix}_${eventCount-1} 
       end
-    ) as group_col
+    as group_col
     `;
   }
 
@@ -354,22 +384,19 @@ function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: st
     final_table as (
       select
       day ${_buildFunnelChartIdList(count, prefix)},
-      max(
-        ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, false)}
-      ) as ${prefix},
-      max (
-        ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, true)}
-      ) as event_name
+      ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, false)}
+      ,
+      ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, true)}
       ${_buildFunnelChartViewResultGroupingSql(prefix, appendGroupingCol, applyToFirst, groupColNameWithPrefix, count)}
       from join_table join seq_table on 1=1
-      group by day ${_buildFunnelChartIdList(count, prefix)}
     )
   `;
 
   return `
     ${seqTable}
     ${resultColSql}
-    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',group_col' : ''} from final_table
+    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',group_col' : ''} 
+    from final_table where event_name is not null
   `;
 }
 
