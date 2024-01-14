@@ -141,8 +141,8 @@ export class MetadataEventServ {
       }
       await startExecution(
         pipeline.region,
-        `manual-trigger-${new Date().getTime()}`,
         scanMetadataWorkflowArn,
+        `manual-trigger-${new Date().getTime()}`,
         JSON.stringify({
           scanStartDate: getLocalDateISOString(new Date(), -7),
           scanEndDate: getLocalDateISOString(new Date()),
