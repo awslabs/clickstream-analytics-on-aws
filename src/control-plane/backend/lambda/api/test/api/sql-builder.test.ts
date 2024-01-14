@@ -23,7 +23,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -802,7 +802,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -1039,14 +1039,14 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'view_item',
+          eventName: '_first_open',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1066,7 +1066,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'add_to_cart',
+          eventName: '_scroll',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1087,7 +1087,10 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'purchase',
+          eventName: '_user_engagement',
+        },
+        {
+          eventName: '_app_end',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
@@ -1095,6 +1098,7 @@ describe('SQL Builder test', () => {
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
+
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
@@ -1149,7 +1153,12 @@ describe('SQL Builder test', () => {
                 where
                   event.event_date >= date '2023-10-01'
                   and event.event_date <= date '2025-10-10'
-                  and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+                  and event.event_name in (
+                    '_first_open',
+                    '_scroll',
+                    '_user_engagement',
+                    '_app_end'
+                  )
               ) as l
               join (
                 select
@@ -1166,20 +1175,21 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'view_item'
+              event_name = '_first_open'
               and (
                 platform = 'Android'
                 and device_screen_height <> 1400
               )
             )
             or (
-              event_name = 'add_to_cart'
+              event_name = '_scroll'
               and (
                 platform = 'Android'
                 and device_screen_height <> 1400
               )
             )
-            or (event_name = 'purchase')
+            or (event_name = '_user_engagement')
+            or (event_name = '_app_end')
           )
       ),
       table_0 as (
@@ -1197,7 +1207,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'view_item'
+          event_name = '_first_open'
       ),
       table_1 as (
         select
@@ -1210,7 +1220,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_to_cart'
+          event_name = '_scroll'
       ),
       table_2 as (
         select
@@ -1223,7 +1233,20 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'purchase'
+          event_name = '_user_engagement'
+      ),
+      table_3 as (
+        select
+          event_date as event_date_3,
+          event_name as event_name_3,
+          event_timestamp as event_timestamp_3,
+          event_id as event_id_3,
+          user_id as user_id_3,
+          user_pseudo_id as user_pseudo_id_3
+        from
+          base_data base
+        where
+          event_name = '_app_end'
       ),
       join_table as (
         select
@@ -1235,7 +1258,11 @@ describe('SQL Builder test', () => {
           table_2.event_id_2,
           table_2.event_name_2,
           table_2.user_pseudo_id_2,
-          table_2.event_timestamp_2
+          table_2.event_timestamp_2,
+          table_3.event_id_3,
+          table_3.event_name_3,
+          table_3.user_pseudo_id_3,
+          table_3.event_timestamp_3
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
@@ -1244,6 +1271,9 @@ describe('SQL Builder test', () => {
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_3 on table_2.user_pseudo_id_2 = table_3.user_pseudo_id_3
+          and table_3.event_timestamp_3 - table_2.event_timestamp_2 > 0
+          and table_3.event_timestamp_3 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       seq_table as (
         select
@@ -1254,6 +1284,9 @@ describe('SQL Builder test', () => {
         union all
         select
           2 as seq
+        union all
+        select
+          3 as seq
       ),
       final_table as (
         select
@@ -1261,32 +1294,74 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          user_pseudo_id_3,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null
+            and user_pseudo_id_3 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              when seq = 3 then user_pseudo_id_3
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as event_name
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null
+            and user_pseudo_id_3 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              when seq = 3 then '4_' || event_name_3
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null
+            and user_pseudo_id_3 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -1294,6 +1369,8 @@ describe('SQL Builder test', () => {
       user_pseudo_id
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -1303,12 +1380,12 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       eventAndConditions: [
         {
           eventName: 'view_item',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
         {
           eventName: 'add_to_cart',
@@ -1501,7 +1578,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -1798,7 +1875,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2107,7 +2184,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2352,7 +2429,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2620,7 +2697,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2872,7 +2949,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3146,7 +3223,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3441,7 +3518,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3722,7 +3799,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4007,7 +4084,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4295,7 +4372,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4620,7 +4697,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4926,7 +5003,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5260,7 +5337,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5634,7 +5711,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5715,7 +5792,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -5987,32 +6064,49 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
             end
-          ) as event_name
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -6020,6 +6114,8 @@ describe('SQL Builder test', () => {
       user_pseudo_id
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -6029,7 +6125,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6110,7 +6206,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -6396,7 +6492,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6477,7 +6573,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -6776,7 +6872,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6857,7 +6953,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -7191,7 +7287,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -7272,7 +7368,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -7653,7 +7749,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -7790,7 +7886,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -8180,7 +8276,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -8317,7 +8413,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: '_app_end',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
       ],
       pathAnalysis: {
@@ -8708,7 +8804,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -8789,7 +8885,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -9162,7 +9258,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: '_session_id',
@@ -9451,7 +9547,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -9725,7 +9821,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: '_session_id',
@@ -9998,41 +10094,69 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
             end
-          ) as event_name,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then _session_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then _session_id_1
-              else _session_id_2
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
             end
-          ) as group_col
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then _session_id_0
+              when seq = 1 then _session_id_1
+              when seq = 2 then _session_id_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then _session_id_0
+              when seq = 1 then _session_id_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then _session_id_0
+              else null
+            end
+          end as group_col
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -10041,6 +10165,8 @@ describe('SQL Builder test', () => {
       group_col
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -10050,7 +10176,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -10308,41 +10434,69 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
             end
-          ) as event_name,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then geo_country_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then geo_country_1
-              else geo_country_2
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
             end
-          ) as group_col
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              when seq = 2 then geo_country_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then geo_country_0
+              else null
+            end
+          end as group_col
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -10351,6 +10505,8 @@ describe('SQL Builder test', () => {
       group_col
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -10360,7 +10516,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -10613,33 +10769,50 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
             end
-          ) as event_name,
-          max(geo_country_0) as group_col
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          geo_country_0 as group_col
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -10648,6 +10821,8 @@ describe('SQL Builder test', () => {
       group_col
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -10658,7 +10833,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -10761,7 +10936,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -10923,7 +11098,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11090,7 +11265,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11222,7 +11397,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11381,7 +11556,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11559,7 +11734,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11773,7 +11948,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11907,7 +12082,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12053,7 +12228,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12253,7 +12428,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12465,7 +12640,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12723,7 +12898,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13079,7 +13254,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -13358,41 +13533,69 @@ describe('SQL Builder test', () => {
           event_id_0,
           event_id_1,
           event_id_2,
-          max(
-            case
-              when event_id_1 is null
-              and event_id_2 is null then event_id_0
-              when event_id_1 is not null
-              and event_id_2 is null then event_id_1
-              else event_id_2
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              when seq = 2 then event_id_2
+              else null
             end
-          ) as event_id,
-          max(
-            case
-              when event_id_1 is null
-              and event_id_2 is null then '1_' || event_name_0
-              when event_id_1 is not null
-              and event_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              else null
             end
-          ) as event_name,
-          max(
-            case
-              when event_id_1 is null
-              and event_id_2 is null then geo_country_0
-              when event_id_1 is not null
-              and event_id_2 is null then geo_country_1
-              else geo_country_2
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              else null
             end
-          ) as group_col
+          end as event_id,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              when seq = 2 then geo_country_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              else null
+            end
+          end as group_col
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          event_id_0,
-          event_id_1,
-          event_id_2
       )
     select
       day::date as event_date,
@@ -13401,6 +13604,8 @@ describe('SQL Builder test', () => {
       group_col
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -13410,7 +13615,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13484,7 +13689,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -13769,7 +13974,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13843,7 +14048,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14148,7 +14353,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -14222,7 +14427,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14523,7 +14728,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -14609,7 +14814,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14997,7 +15202,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -15324,7 +15529,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
       ],
       pathAnalysis: {
@@ -15533,7 +15738,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -15614,7 +15819,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -15943,7 +16148,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -16431,7 +16636,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shopping',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -16676,32 +16881,49 @@ describe('SQL Builder test', () => {
           user_pseudo_id_0,
           user_pseudo_id_1,
           user_pseudo_id_2,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then user_pseudo_id_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then user_pseudo_id_1
-              else user_pseudo_id_2
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
             end
-          ) as user_pseudo_id,
-          max(
-            case
-              when user_pseudo_id_1 is null
-              and user_pseudo_id_2 is null then '1_' || event_name_0
-              when user_pseudo_id_1 is not null
-              and user_pseudo_id_2 is null then '2_' || event_name_1
-              else '3_' || event_name_2
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
             end
-          ) as event_name
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name
         from
           join_table
           join seq_table on 1 = 1
-        group by
-          day,
-          user_pseudo_id_0,
-          user_pseudo_id_1,
-          user_pseudo_id_2
       )
     select
       day::date as event_date,
@@ -16709,6 +16931,8 @@ describe('SQL Builder test', () => {
       user_pseudo_id
     from
       final_table
+    where
+      event_name is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -16799,7 +17023,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -17154,7 +17378,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       eventAndConditions: [
         {
@@ -17375,4 +17599,984 @@ describe('SQL Builder test', () => {
     );
 
   });
+
+  test('funnel bar chart - sanity check - user count', () => {
+
+    const sql = buildFunnelView({
+      schemaName: 'blog',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: '_first_open',
+        },
+        {
+          eventName: '_scroll',
+        },
+        {
+          eventName: '_user_engagement',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.WEEK,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event_date,
+              event_name,
+              event_id,
+              event_timestamp,
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
+            from
+              (
+                select
+                  event_date,
+                  event_name::varchar as event_name,
+                  event_id::varchar as event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  blog.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('_first_open', '_scroll', '_user_engagement')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  blog.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
+          ) as event_base
+        where
+          1 = 1
+          and (
+            (event_name = '_first_open')
+            or (event_name = '_scroll')
+            or (event_name = '_user_engagement')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = '_first_open'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = '_scroll'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = '_user_engagement'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      user_pseudo_id
+    from
+      final_table
+    where
+      event_name is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('funnel bar chart - sanity check - event count', () => {
+
+    const sql = buildFunnelView({
+      schemaName: 'blog',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: '_first_open',
+        },
+        {
+          eventName: '_scroll',
+        },
+        {
+          eventName: '_user_engagement',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.WEEK,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event_date,
+              event_name,
+              event_id,
+              event_timestamp,
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
+            from
+              (
+                select
+                  event_date,
+                  event_name::varchar as event_name,
+                  event_id::varchar as event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  blog.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('_first_open', '_scroll', '_user_engagement')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  blog.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
+          ) as event_base
+        where
+          1 = 1
+          and (
+            (event_name = '_first_open')
+            or (event_name = '_scroll')
+            or (event_name = '_user_engagement')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = '_first_open'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = '_scroll'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = '_user_engagement'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          event_id_0,
+          event_id_1,
+          event_id_2,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              when seq = 2 then event_id_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              else null
+            end
+          end as event_id,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      event_id
+    from
+      final_table
+    where
+      event_name is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('funnel bar chart - sanity check - group condition - first', () => {
+
+    const sql = buildFunnelView({
+      schemaName: 'blog',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        property: 'country',
+        category: ConditionCategory.GEO,
+        dataType: MetadataValueType.STRING,
+        applyTo: 'FIRST',
+      },
+      eventAndConditions: [
+        {
+          eventName: '_first_open',
+        },
+        {
+          eventName: '_scroll',
+        },
+        {
+          eventName: '_user_engagement',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.WEEK,
+    }, true);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event_date,
+              event_name,
+              event_id,
+              event_timestamp,
+              geo_country,
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
+            from
+              (
+                select
+                  event_date,
+                  event_name::varchar as event_name,
+                  event_id::varchar as event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  geo.country::varchar as geo_country,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  blog.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('_first_open', '_scroll', '_user_engagement')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  blog.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
+          ) as event_base
+        where
+          1 = 1
+          and (
+            (event_name = '_first_open')
+            or (event_name = '_scroll')
+            or (event_name = '_user_engagement')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          COALESCE(geo_country::varchar, 'null') as geo_country_0,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = '_first_open'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = '_scroll'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = '_user_engagement'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          geo_country_0 as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      user_pseudo_id,
+      group_col
+    from
+      final_table
+    where
+      event_name is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('funnel bar chart - sanity check - group condition - not first', () => {
+
+    const sql = buildFunnelView({
+      schemaName: 'blog',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        property: 'country',
+        category: ConditionCategory.GEO,
+        dataType: MetadataValueType.STRING,
+        applyTo: 'ALL',
+      },
+      eventAndConditions: [
+        {
+          eventName: '_first_open',
+        },
+        {
+          eventName: '_scroll',
+        },
+        {
+          eventName: '_user_engagement',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.WEEK,
+    }, true);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event_date,
+              event_name,
+              event_id,
+              event_timestamp,
+              geo_country,
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
+            from
+              (
+                select
+                  event_date,
+                  event_name::varchar as event_name,
+                  event_id::varchar as event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  geo.country::varchar as geo_country,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  blog.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('_first_open', '_scroll', '_user_engagement')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  blog.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
+          ) as event_base
+        where
+          1 = 1
+          and (
+            (event_name = '_first_open')
+            or (event_name = '_scroll')
+            or (event_name = '_user_engagement')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0,
+          COALESCE(geo_country::varchar, 'null') as geo_country_0
+        from
+          base_data base
+        where
+          event_name = '_first_open'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1,
+          COALESCE(geo_country::varchar, 'null') as geo_country_1
+        from
+          base_data base
+        where
+          event_name = '_scroll'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2,
+          COALESCE(geo_country::varchar, 'null') as geo_country_2
+        from
+          base_data base
+        where
+          event_name = '_user_engagement'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_1.geo_country_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2,
+          table_2.geo_country_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0.geo_country_0 = table_1.geo_country_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_1.geo_country_1 = table_2.geo_country_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              when seq = 2 then user_pseudo_id_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              when seq = 1 then user_pseudo_id_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then user_pseudo_id_0
+              else null
+            end
+          end as user_pseudo_id,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              when seq = 2 then '3_' || event_name_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              when seq = 1 then '2_' || event_name_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then '1_' || event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is not null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              when seq = 2 then geo_country_2
+              else null
+            end
+            when user_pseudo_id_1 is not null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              else null
+            end
+            when user_pseudo_id_1 is null
+            and user_pseudo_id_2 is null then case
+              when seq = 0 then geo_country_0
+              else null
+            end
+          end as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      user_pseudo_id,
+      group_col
+    from
+      final_table
+    where
+      event_name is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
 });
