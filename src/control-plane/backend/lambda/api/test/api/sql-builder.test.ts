@@ -18578,5 +18578,5 @@ describe('SQL Builder test', () => {
     );
 
   });
-  
+
 });
