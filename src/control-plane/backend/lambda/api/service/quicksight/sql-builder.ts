@@ -442,7 +442,6 @@ export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: b
   return format(sql, {
     language: 'postgresql',
   });
-  // return sql
 }
 
 export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
