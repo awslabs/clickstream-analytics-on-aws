@@ -219,7 +219,7 @@ export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, acc
 };
 
 export async function waitForTemplateChangeCompleted(quickSight: QuickSight, accountId: string, templateId: string) {
-  for (const _i of Array(60).keys()) {
+  for (const _i of Array(300).keys()) {
     try {
       const analysis = await quickSight.describeTemplateDefinition({
         AwsAccountId: accountId,
