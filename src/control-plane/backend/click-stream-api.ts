@@ -327,6 +327,7 @@ export class ClickStreamApiConstruct extends Construct {
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/*`,
           ],
           actions: [
             'quicksight:UpdateDashboardPermissions',
@@ -342,6 +343,8 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:CreateAnalysis',
             'quicksight:UpdateAnalysis',
             'quicksight:DeleteAnalysis',
+            'quicksight:CreateFolderMembership',
+            'quicksight:ListFolderMembers',
           ],
         }),
         new iam.PolicyStatement({

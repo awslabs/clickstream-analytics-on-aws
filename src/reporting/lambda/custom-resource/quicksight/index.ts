@@ -525,6 +525,42 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   if (dashboardExist) {
     dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
+
+    //create folder membership
+    const folderExist = await existFolder(quickSight, commonParams.awsAccountId, `clickstream_${commonParams.databaseName}_${commonParams.schema}`);
+    if (folderExist) {
+      await quickSight.createFolderMembership({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+        MemberId: dashboard?.DashboardId!,
+        MemberType: MemberType.DASHBOARD,
+      });
+    } else {
+      const folder = await quickSight.createFolder({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+        Name: `${commonParams.databaseName}_${commonParams.schema}`,
+        FolderType: FolderType.SHARED,
+        SharingModel: SharingModel.ACCOUNT,
+        Permissions: [
+          {
+            Principal: commonParams.sharePrincipalArn,
+            Actions: folderContributorPermissionActions,
+          },
+          {
+            Principal: commonParams.ownerPrincipalArn,
+            Actions: folderOwnerPermissionActions,
+          },
+        ],
+      });
+
+      await quickSight.createFolderMembership({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: folder.FolderId!,
+        MemberId: dashboard?.DashboardId!,
+        MemberType: MemberType.DASHBOARD,
+      });
+    }
   } else {
     dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
@@ -545,6 +581,16 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
         Name: `${commonParams.databaseName}_${commonParams.schema}`,
         FolderType: FolderType.SHARED,
         SharingModel: SharingModel.ACCOUNT,
+        Permissions: [
+          {
+            Principal: commonParams.sharePrincipalArn,
+            Actions: folderContributorPermissionActions,
+          },
+          {
+            Principal: commonParams.ownerPrincipalArn,
+            Actions: folderOwnerPermissionActions,
+          },
+        ],
       });
 
       await quickSight.createFolderMembership({

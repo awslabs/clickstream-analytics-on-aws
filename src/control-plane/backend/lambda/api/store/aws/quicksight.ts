@@ -43,9 +43,17 @@ import {
   DeleteUserCommand,
   DeleteUserCommandInput,
   ResourceNotFoundException,
+  CreateFolderMembershipCommand,
+  CreateFolderMembershipCommandInput,
+  CreateFolderMembershipCommandOutput,
+  MemberType,
+  ListFolderMembersCommand,
+  ListFolderMembersCommandInput,
+  ListFolderMembersCommandOutput,
 } from '@aws-sdk/client-quicksight';
+import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
+import { DEFAULT_DASHBOARD_NAME_PREFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
@@ -58,6 +66,7 @@ const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
 const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
 
 const sdkClient: SDKClient = new SDKClient();
+const promisePool = pLimit(3);
 
 export const registerClickstreamUser = async () => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
@@ -439,6 +448,7 @@ export const createPublishDashboard = async (
       DashboardId: dashboard.id,
       Name: dashboard.name,
       Definition: dashboardDefinition,
+      VersionDescription: dashboard.description,
       Permissions: [
         {
           Principal: principals.publishUserArn,
@@ -461,6 +471,12 @@ export const createPublishDashboard = async (
       ],
     };
     await createAnalysis(dashboard.region, analysisInput);
+    await createFolderMembership(dashboard.region, {
+      AwsAccountId: awsAccountId,
+      FolderId: `clickstream_${dashboard.projectId}_${dashboard.appId}`,
+      MemberId: dashboard.id,
+      MemberType: MemberType.DASHBOARD,
+    });
   } catch (err) {
     logger.error('Create Publish Dashboard Error.', { err });
     throw err;
@@ -492,4 +508,155 @@ export const deleteDatasetOfPublishDashboard = async (
     logger.error('Delete dataset of publish dashboard error.', { err });
     throw err;
   }
+};
+
+export const createFolderMembership = async (
+  region: string,
+  input: CreateFolderMembershipCommandInput,
+): Promise<CreateFolderMembershipCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateFolderMembershipCommand = new CreateFolderMembershipCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Folder Membership Error.', { err });
+    throw err;
+  }
+};
+
+export const listFolderMembership = async (
+  region: string,
+  input: ListFolderMembersCommandInput,
+): Promise<ListFolderMembersCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: ListFolderMembersCommand = new ListFolderMembersCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('List Folder Membership Error.', { err });
+    throw err;
+  }
+};
+
+export const describeDashboardByIds = async (
+  region: string,
+  projectId: string,
+  appId: string,
+  dashboardIds: string[],
+): Promise<IDashboard[]> => {
+  const dashboards: IDashboard[] = [];
+  const inputs = [];
+  const quickSightClient = sdkClient.QuickSightClient({
+    region: region,
+  });
+  for (let dashboardId of dashboardIds) {
+    inputs.push(promisePool(() => {
+      return quickSightClient.send(new DescribeDashboardCommand({
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+      })).then(res => {
+        if (res.Dashboard && res.Dashboard.DashboardId) {
+          dashboards.push({
+            id: res.Dashboard.DashboardId,
+            name: res.Dashboard.Name ?? '',
+            description: res.Dashboard.Version?.Description ?? '',
+            projectId: projectId,
+            appId: appId,
+            region: region,
+            sheets: res.Dashboard.Version?.Sheets?.map((sheet) => {
+              return {
+                id: sheet.SheetId ?? '',
+                name: sheet.Name ?? '',
+              };
+            }) ?? [],
+            createAt: res.Dashboard.CreatedTime?.getTime() ?? 0,
+            updateAt: res.Dashboard.LastUpdatedTime?.getTime() ?? 0,
+          });
+        }
+      }).catch(_ => {
+        return;
+      });
+    }));
+  }
+  await Promise.all(inputs);
+  // sort by create timestamp
+  dashboards.sort((a, b) => {
+    return b.createAt - a.createAt;
+  });
+  const presetDashboard = dashboards.find((dashboard) => {
+    return dashboard.name.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX);
+  });
+  if (presetDashboard) {
+    dashboards.splice(dashboards.indexOf(presetDashboard), 1);
+    dashboards.unshift(presetDashboard);
+  }
+  return dashboards;
+};
+
+export const listDashboardIdsInFolder = async (
+  region: string,
+  folderId: string,
+): Promise<string[]> => {
+  const dashboardIds: string[] = [];
+  let nextToken: string | undefined;
+  do {
+    const resp = await listFolderMembership(region, {
+      AwsAccountId: awsAccountId,
+      FolderId: folderId,
+      NextToken: nextToken,
+    });
+    resp.FolderMemberList?.forEach((member) => {
+      if (member.MemberArn?.includes('dashboard') && member.MemberId) {
+        dashboardIds.push(member.MemberId);
+      }
+    });
+    nextToken = resp.NextToken;
+  } while (nextToken);
+  return dashboardIds;
+};
+
+export const listDashboardsByApp = async (
+  region: string,
+  projectId: string,
+  appId: string,
+): Promise<IDashboard[]> => {
+  const folderId = `clickstream_${projectId}_${appId}`;
+  const dashboardIds = await listDashboardIdsInFolder(region, folderId);
+  const dashboards = await describeDashboardByIds(region, projectId, appId, dashboardIds);
+  return dashboards;
+};
+
+export const getDashboardDetail = async (
+  region: string,
+  projectId: string,
+  appId: string,
+  dashboardId: string,
+): Promise<IDashboard | undefined> => {
+  const dashboard = await describeDashboard(region, {
+    AwsAccountId: awsAccountId,
+    DashboardId: dashboardId,
+  });
+  if (dashboard.Dashboard && dashboard.Dashboard.DashboardId) {
+    return {
+      id: dashboard.Dashboard.DashboardId,
+      name: dashboard.Dashboard.Name ?? '',
+      description: dashboard.Dashboard.Version?.Description ?? '',
+      projectId: projectId,
+      appId: appId,
+      region: region,
+      sheets: dashboard.Dashboard.Version?.Sheets?.map((sheet) => {
+        return {
+          id: sheet.SheetId ?? '',
+          name: sheet.Name ?? '',
+        };
+      }) ?? [],
+      createAt: dashboard.Dashboard.CreatedTime?.getTime() ?? 0,
+      updateAt: dashboard.Dashboard.LastUpdatedTime?.getTime() ?? 0,
+    };
+  }
+  return undefined;
 };

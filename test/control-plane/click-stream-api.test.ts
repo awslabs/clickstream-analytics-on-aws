@@ -797,6 +797,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:CreateAnalysis',
               'quicksight:UpdateAnalysis',
               'quicksight:DeleteAnalysis',
+              'quicksight:CreateFolderMembership',
+              'quicksight:ListFolderMembers',
             ],
             Effect: 'Allow',
             Resource: [
@@ -909,6 +911,22 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                       Ref: 'AWS::AccountId',
                     },
                     ':dataset/_tmp_*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':folder/*',
                   ],
                 ],
               },

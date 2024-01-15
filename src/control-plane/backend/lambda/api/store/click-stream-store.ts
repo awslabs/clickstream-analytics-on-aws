@@ -26,11 +26,6 @@ export interface ClickStreamStore {
   deleteProject: (id: string, operator: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
-  createDashboard: (dashboard: IDashboard) => Promise<string>;
-  getDashboard: (dashboardId: string) => Promise<IDashboard | undefined>;
-  listDashboards: (projectId: string, appId: string, order: string) => Promise<IDashboard[]>;
-  deleteDashboard: (dashboardId: string, operator: string) => Promise<void>;
-
   addApplication: (app: IApplication) => Promise<string>;
   getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
   updateApplication: (app: IApplication) => Promise<void>;
