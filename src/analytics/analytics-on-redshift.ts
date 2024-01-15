@@ -37,7 +37,7 @@ import { createCustomResourceAssociateIAMRole } from './private/redshift-associa
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW } from '../common/constant';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
@@ -248,8 +248,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
 
-
-    const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
+    const scanMetadataWorkflow = new ScanMetadataWorkflow(this, SCAN_METADATA_WORKFLOW_PREFIX, {
       appIds: props.appIds,
       projectId: props.projectId,
       networkConfig: {
