@@ -112,6 +112,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         alarms: [
           loadDataWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
+          scanMetadataWorkflowAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
       },
