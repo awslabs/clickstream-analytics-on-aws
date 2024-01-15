@@ -11,6 +11,17 @@
  *  and limitations under the License.
  */
 
-export const KINESIS_MANAGED_KMS_KEY_ID = 'alias/aws/kinesis';
+import { KINESIS_MODE } from '../../common/model';
 
-export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';
+export interface KinesisProperties {
+  readonly streamMode: KINESIS_MODE;
+  readonly dataRetentionHours: number;
+  readonly shardCount: number;
+  readonly encryptionKeyId: string;
+}
+
+export type KinesisCustomResourceProps = KinesisProperties & {
+  readonly projectId: string;
+  readonly appIds: string;
+  readonly identifier: string;
+}

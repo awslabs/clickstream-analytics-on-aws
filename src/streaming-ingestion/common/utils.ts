@@ -11,14 +11,11 @@
  *  and limitations under the License.
  */
 
+import { SINK_STREAM_NAME_PREFIX } from './constant';
 import { sleep } from '../../common/utils';
 
 export function getSinkStreamName(projectId: string, appId: string, suffix: string): string {
-  return `clickstream_${projectId}_${appId}_sink_${suffix}`.toLowerCase();
-}
-
-export function getFlinkApplicationName(projectId: string, appId: string, suffix: string): string {
-  return `clickstream_${projectId}_${appId}_flink_${suffix}`.toLowerCase();
+  return `${SINK_STREAM_NAME_PREFIX}${projectId}_${appId}_${suffix}`.toLowerCase();
 }
 
 export function splitString(str: string): string[] {

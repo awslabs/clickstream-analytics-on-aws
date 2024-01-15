@@ -29,9 +29,11 @@ import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
+import { KINESIS_MANAGED_KMS_KEY_ID } from './streaming-ingestion/common/constant';
 import {
   createStackParameters,
 } from './streaming-ingestion/parameter';
+import { KinesisSink } from './streaming-ingestion/private/kinesis-sink';
 
 export class StreamingIngestionMainStack extends Stack {
 
@@ -54,6 +56,7 @@ export class StreamingIngestionMainStack extends Stack {
     const pipeline = p.params.pipeline;
     const sourceStream = Stream.fromStreamArn(this, 'SourceStream', pipeline.source.kinesisArn!);
     const dataBucket = Bucket.fromBucketArn(this, 'DataBucket', pipeline.dataBucket.arn);
+
 
     const vpc = getExistVpc(this, 'from-vpc-for-streaming-ingestion', {
       vpcId: pipeline.network.vpcId,
@@ -112,6 +115,15 @@ export class StreamingIngestionMainStack extends Stack {
     dataBucket.grantRead(this.flinkApp, applicationJarKey);
     dataBucket.grantRead(this.flinkApp, geoDBKey);
     this.flinkApp.node.addDependency(deployment);
+
+    // create sink Kinesis data streams per application
+    new KinesisSink(this, 'StreamingIngestionSink', {
+      projectId,
+      appIds: p.params.appIds,
+      ...pipeline.buffer.kinesis,
+      streamMode: pipeline.buffer.kinesis.mode,
+      encryptionKeyId: KINESIS_MANAGED_KMS_KEY_ID, // use master key owned by KDS by default
+    });
 
     this.addCfnNag();
 
