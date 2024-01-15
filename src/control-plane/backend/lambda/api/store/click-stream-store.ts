@@ -15,7 +15,7 @@ import { IApplication } from '../model/application';
 import { IDictionary } from '../model/dictionary';
 import { IPipeline } from '../model/pipeline';
 import { IPlugin } from '../model/plugin';
-import { IDashboard, IProject } from '../model/project';
+import { IProject } from '../model/project';
 import { IUser, IUserSettings } from '../model/user';
 
 export interface ClickStreamStore {
