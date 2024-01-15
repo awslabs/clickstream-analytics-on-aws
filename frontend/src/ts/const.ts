@@ -419,3 +419,6 @@ export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';
 
 export const POSITIVE_INTEGER_REGEX = new RegExp(`${'^$|^[1-9]\\d*$'}`);
 export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);
+export const PERCENTAGE_REGEX = new RegExp(
+  `${'^$|^(100|[1-9]?\\d)$|^(100|[1-9]?\\d)\\.\\d{1,2}$'}`
+);
