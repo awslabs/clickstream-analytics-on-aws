@@ -1,25 +1,18 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
-BACKUP NO
-AUTO REFRESH YES
+CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
 AS
-with daily_usage as (
-  select 
-    user_pseudo_id, 
-    DATE_TRUNC('day', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-  from {{schema}}.event
-  where event_name = '_session_start' group by 1,2 order by 1,2),
--- detect if lag and lead exists
 lag_lead as (
   select user_pseudo_id, time_period,
-    lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
-    lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
-  from daily_usage),
+    lag(time_period,1) over (partition by user_pseudo_id order by time_period),
+    lead(time_period,1) over (partition by user_pseudo_id order by time_period)
+  from {{schema}}.clickstream_lifecycle_view_v1
+),
 -- calculate lag and lead size
 lag_lead_with_diffs as (
   select user_pseudo_id, time_period, lag, lead, 
     datediff(day,lag,time_period) lag_size,
     datediff(day,time_period,lead) lead_size
-  from lag_lead),
+  from lag_lead
+),
 -- case to lifecycle stage
 calculated as (
   select 
@@ -43,8 +36,10 @@ calculated as (
   ) t1
   group by 1,2,3
 )
-select time_period, this_day_value, sum(total_users) 
+select time_period as time_period , this_day_value, sum(total_users) as sum
   from calculated group by 1,2
 union
-select time_period+1, '0-CHURN', -1*sum(total_users) 
-  from calculated where next_day_churn is not null group by 1,2;
+select time_period+1 as time_period, '0-CHURN' as this_day_value, -1*sum(total_users) as sum
+  from calculated where next_day_churn is not null 
+  group by 1,2
+;
