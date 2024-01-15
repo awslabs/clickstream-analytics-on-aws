@@ -4369,7 +4369,19 @@ describe('Should set metrics widgets', () => {
         description: {
           markdown: Match.anyValue(),
         },
-        widgets: Match.anyValue(),
+        widgets: Match.arrayWith([
+          Match.objectLike({
+            type: 'alarm',
+            properties: {
+              alarms: Match.arrayWith([
+                Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
+                Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
+                Match.objectLike({ 'Fn::GetAtt': Match.anyValue() }),
+              ]),
+              title: Match.anyValue(),
+            },
+          }),
+        ]),
       },
     });
 
