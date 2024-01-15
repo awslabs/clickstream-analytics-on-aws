@@ -396,3 +396,5 @@ export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
+
+export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';

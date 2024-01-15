@@ -695,6 +695,22 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               {
                 Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
               },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ScanMetadataWorkflow*',
+                  ],
+                ],
+              },
             ],
           },
         ],
