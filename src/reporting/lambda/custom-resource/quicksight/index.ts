@@ -12,6 +12,7 @@
  */
 
 import crypto from 'crypto';
+import { ResourceAlreadyExistsException } from '@aws-sdk/client-cloudwatch-events';
 import {
   QuickSight,
   DashboardSourceEntity,
@@ -525,81 +526,9 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   if (dashboardExist) {
     dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
-
-    //create folder membership
-    const folderExist = await existFolder(quickSight, commonParams.awsAccountId, `clickstream_${commonParams.databaseName}_${commonParams.schema}`);
-    if (folderExist) {
-      await quickSight.createFolderMembership({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
-        MemberId: dashboard?.DashboardId!,
-        MemberType: MemberType.DASHBOARD,
-      });
-    } else {
-      const folder = await quickSight.createFolder({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
-        Name: `${commonParams.databaseName}_${commonParams.schema}`,
-        FolderType: FolderType.SHARED,
-        SharingModel: SharingModel.ACCOUNT,
-        Permissions: [
-          {
-            Principal: commonParams.sharePrincipalArn,
-            Actions: folderContributorPermissionActions,
-          },
-          {
-            Principal: commonParams.ownerPrincipalArn,
-            Actions: folderOwnerPermissionActions,
-          },
-        ],
-      });
-
-      await quickSight.createFolderMembership({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: folder.FolderId!,
-        MemberId: dashboard?.DashboardId!,
-        MemberType: MemberType.DASHBOARD,
-      });
-    }
   } else {
     dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
-
-    //create folder membership
-    const folderExist = await existFolder(quickSight, commonParams.awsAccountId, `clickstream_${commonParams.databaseName}_${commonParams.schema}`);
-    if (folderExist) {
-      await quickSight.createFolderMembership({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
-        MemberId: dashboard?.DashboardId!,
-        MemberType: MemberType.DASHBOARD,
-      });
-    } else {
-      const folder = await quickSight.createFolder({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
-        Name: `${commonParams.databaseName}_${commonParams.schema}`,
-        FolderType: FolderType.SHARED,
-        SharingModel: SharingModel.ACCOUNT,
-        Permissions: [
-          {
-            Principal: commonParams.sharePrincipalArn,
-            Actions: folderContributorPermissionActions,
-          },
-          {
-            Principal: commonParams.ownerPrincipalArn,
-            Actions: folderOwnerPermissionActions,
-          },
-        ],
-      });
-
-      await quickSight.createFolderMembership({
-        AwsAccountId: commonParams.awsAccountId,
-        FolderId: folder.FolderId!,
-        MemberId: dashboard?.DashboardId!,
-        MemberType: MemberType.DASHBOARD,
-      });
-    }
 
     //due to dashboardId changed in version v1.1, need to delete old dashboard
     const foundDashboardId = await findDashboardWithPrefix(quickSight, commonParams.awsAccountId, dashboardId.id.replace(`/${dashboardId.idSuffix}/g`, ''), dashboard?.DashboardId);
@@ -608,10 +537,44 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     }
   }
 
+  const folderId = `clickstream_${commonParams.databaseName}_${commonParams.schema}`;
+  await updateFolderMembership(quickSight, commonParams, folderId, dashboard?.DashboardId!);
+
+  return dashboard;
+};
+
+const updateFolderMembership = async (quickSight: QuickSight, commonParams: ResourceCommonParams, folderId: string, dashboardId: string)
+: Promise<void> => {
+  let folderExist = await existFolder(quickSight, commonParams.awsAccountId, folderId);
+  if (!folderExist) {
+    await quickSight.createFolder({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      Name: `${commonParams.databaseName}_${commonParams.schema}`,
+      FolderType: FolderType.SHARED,
+      SharingModel: SharingModel.ACCOUNT,
+    });
+  }
+
+  try {
+    await quickSight.createFolderMembership({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      MemberId: dashboardId,
+      MemberType: MemberType.DASHBOARD,
+    });
+  } catch (e) {
+    if (e instanceof ResourceAlreadyExistsException) {
+      logger.warn('folder membership already exist. skip create operation.');
+    } else {
+      throw e;
+    }
+  }
+
   //update folder permissions
   await quickSight.updateFolderPermissions({
     AwsAccountId: commonParams.awsAccountId,
-    FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+    FolderId: folderId,
     GrantPermissions: [
       {
         Principal: commonParams.sharePrincipalArn,
@@ -624,7 +587,6 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     ],
   });
 
-  return dashboard;
 };
 
 const buildDataSetParameter = function (dateTimeDatasetParameter: DateTimeParameter[] | undefined): DatasetParameter[] | undefined {
