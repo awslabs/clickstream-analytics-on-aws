@@ -1,4 +1,4 @@
-CREATE VIEW {{schema}}.{{viewName}}
+CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
 AS
 WITH 
 session_part_1 AS (

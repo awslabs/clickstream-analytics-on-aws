@@ -1232,7 +1232,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_event_view_v1 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_event_view_v2 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'event_date',

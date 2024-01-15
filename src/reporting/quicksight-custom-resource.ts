@@ -48,7 +48,7 @@ import {
   CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
-  CLICKSTREAM_SESSION_VIEW_NAME_V2,
+  CLICKSTREAM_SESSION_VIEW_NAME,
 } from '../common/constant';
 
 import { SolutionNodejsFunction } from '../private/function';
@@ -138,7 +138,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME_V2} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_session_view_columns,
         dateTimeDatasetParameter: [
           {

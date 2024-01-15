@@ -691,7 +691,7 @@ ANALYZE {{schema}}.{{table_user}};
 REFRESH MATERIALIZED VIEW {{schema}}.user_m_view;
 REFRESH MATERIALIZED VIEW {{schema}}.item_m_view; 
 
-REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_attr_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_parameter_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_duration_attr_view_v1;
 REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_page_attr_view_v1;
