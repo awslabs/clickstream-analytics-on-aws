@@ -1729,7 +1729,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Daily_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'time_period',
@@ -1763,7 +1763,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Weekly_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1 where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v2 where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'time_period',
