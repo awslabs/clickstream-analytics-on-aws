@@ -73,3 +73,6 @@ Follow the same steps to update display name and description for Event Parameter
 4. Go back to Exploration, and in the filter dropdown, you can see `_entrances` displayed as `Non-First Entry` and `First Entry`.
 
 Follow the same steps to customize data dictionary for User Attributes values.
+
+## Trigger the workflow to scan metadata manually
+You can choose **Scan metadata** at the top right corner of the page to start a workflow to scan the past seven days metadata of the current app.
