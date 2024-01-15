@@ -39,14 +39,10 @@ import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/an
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
 import { StateActionType, HelpPanelType } from 'context/reducer';
-
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  POSITIVE_INTEGER_REGEX,
-  POSITIVE_INTEGER_REGEX_INCLUDE_ZERO,
-} from 'ts/const';
+import { PERCENTAGE_REGEX, POSITIVE_INTEGER_REGEX } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -74,6 +70,7 @@ import {
   getGoalAndConditions,
   getIntervalInSeconds,
   getLngFromLocalStorage,
+  getTargetComputeMethod,
   getTouchPointsAndConditions,
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
@@ -225,6 +222,14 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
 
   const [selectedAttributionModel, setSelectedAttributionModel] =
     useState<SelectProps.Option | null>(firstTouchOption);
+  const [contributionFirstInvalid, setContributionFirstInvalid] =
+    useState<boolean>(false);
+  const [contributionInBetweenInvalid, setContributionInBetweenInvalid] =
+    useState<boolean>(false);
+  const [contributionLastInvalid, setContributionLastInvalid] =
+    useState<boolean>(false);
+  const [contributionInvalid, setContributionInvalid] =
+    useState<boolean>(false);
   const [contributionFirst, setContributionFirst] = useState<string>('100');
   const [contributionInBetween, setContributionInBetween] =
     useState<string>('0');
@@ -345,11 +350,17 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
       specifyJoinColumn: false,
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 60 * 60 * 24,
-      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      computeMethod:
+        getTargetComputeMethod(goalDataState) ?? ExploreComputeMethod.EVENT_CNT,
       eventAndConditions: getTouchPointsAndConditions(eventDataState),
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       targetEventAndCondition: targetEventAndCondition,
       modelType: selectedAttributionModel?.value,
+      modelWeights: [
+        Number(contributionFirst) / 100,
+        Number(contributionInBetween) / 100,
+        Number(contributionLast) / 100,
+      ],
       timeWindowType: selectedWindowType?.value,
       timeWindowInSeconds: getIntervalInSeconds(
         selectedWindowType,
@@ -409,6 +420,14 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     if (
       eventDataState.length === 0 ||
       !validEventAnalyticsItem(eventDataState[0])
+    ) {
+      return;
+    }
+    if (
+      contributionFirstInvalid ||
+      contributionInBetweenInvalid ||
+      contributionLastInvalid ||
+      contributionInvalid
     ) {
       return;
     }
@@ -600,13 +619,23 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               type="number"
                               placeholder="100"
                               value={contributionFirst}
+                              invalid={
+                                contributionInvalid || contributionFirstInvalid
+                              }
                               onChange={(event) => {
+                                setContributionInvalid(false);
+                                setContributionFirstInvalid(false);
                                 if (
-                                  !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
-                                    event.detail.value
-                                  )
+                                  !PERCENTAGE_REGEX.test(event.detail.value)
                                 ) {
-                                  return false;
+                                  setContributionFirstInvalid(true);
+                                } else if (
+                                  Number(event.detail.value) +
+                                    Number(contributionInBetween) +
+                                    Number(contributionLast) !==
+                                  100
+                                ) {
+                                  setContributionInvalid(true);
                                 }
                                 setContributionFirst(event.detail.value);
                               }}
@@ -627,13 +656,24 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               type="number"
                               placeholder="0"
                               value={contributionInBetween}
+                              invalid={
+                                contributionInvalid ||
+                                contributionInBetweenInvalid
+                              }
                               onChange={(event) => {
+                                setContributionInvalid(false);
+                                setContributionInBetweenInvalid(false);
                                 if (
-                                  !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
-                                    event.detail.value
-                                  )
+                                  !PERCENTAGE_REGEX.test(event.detail.value)
                                 ) {
-                                  return false;
+                                  setContributionInBetweenInvalid(true);
+                                } else if (
+                                  Number(event.detail.value) +
+                                    Number(contributionFirst) +
+                                    Number(contributionLast) !==
+                                  100
+                                ) {
+                                  setContributionInvalid(true);
                                 }
                                 setContributionInBetween(event.detail.value);
                               }}
@@ -654,13 +694,23 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               type="number"
                               placeholder="0"
                               value={contributionLast}
+                              invalid={
+                                contributionInvalid || contributionLastInvalid
+                              }
                               onChange={(event) => {
+                                setContributionInvalid(false);
+                                setContributionLastInvalid(false);
                                 if (
-                                  !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
-                                    event.detail.value
-                                  )
+                                  !PERCENTAGE_REGEX.test(event.detail.value)
                                 ) {
-                                  return false;
+                                  setContributionLastInvalid(true);
+                                } else if (
+                                  Number(event.detail.value) +
+                                    Number(contributionInBetween) +
+                                    Number(contributionFirst) !==
+                                  100
+                                ) {
+                                  setContributionInvalid(true);
                                 }
                                 setContributionLast(event.detail.value);
                               }}

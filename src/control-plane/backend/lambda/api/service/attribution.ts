@@ -120,14 +120,20 @@ export class AttributionAnalysisService {
   };
 
   async createLinearModelVisual(sheetId: string, query: any) {
-    const sql = buildSQLForLinearModel(query as AttributionSQLParameters);
+    const sql = buildSQLForLinearModel({
+      ...query,
+      schemaName: query.appId,
+    } as AttributionSQLParameters);
     logger.debug(`sql of linear model: ${sql}`);
 
     return this.createModelVisual(sql, sheetId, query);
   };
 
   async createPositionBasedModelVisual(sheetId: string, query: any) {
-    const sql = buildSQLForPositionModel(query as AttributionSQLParameters);
+    const sql = buildSQLForPositionModel({
+      ...query,
+      schemaName: query.appId,
+    } as AttributionSQLParameters);
     logger.debug(`sql of position based model: ${sql}`);
 
     return this.createModelVisual(sql, sheetId, query);
