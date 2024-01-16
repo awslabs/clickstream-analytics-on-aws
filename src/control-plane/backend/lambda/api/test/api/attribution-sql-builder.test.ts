@@ -1515,7 +1515,7 @@ describe('Attribution SQL Builder test', () => {
             and target_data.rank = touch_point_data_3.group_id
             and target_data.event_timestamp >= touch_point_data_3.event_timestamp
             and (
-              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 600 * 60 * 1000
+              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 600 * cast(1000 as bigint)
             )
           where
             touch_point_data_3.event_name <> 'purchase'
@@ -2812,7 +2812,7 @@ describe('Attribution SQL Builder test', () => {
             and target_data.rank = touch_point_data_3.group_id
             and target_data.event_timestamp >= touch_point_data_3.event_timestamp
             and (
-              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 200 * 60 * 1000
+              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 200 * cast(1000 as bigint)
             )
           where
             touch_point_data_3.event_name <> 'purchase'
@@ -3263,7 +3263,7 @@ describe('Attribution SQL Builder test', () => {
             and target_data.rank = touch_point_data_3.group_id
             and target_data.event_timestamp >= touch_point_data_3.event_timestamp
             and (
-              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 200 * 60 * 1000
+              target_data.event_timestamp - touch_point_data_3.event_timestamp <= 200 * cast(1000 as bigint)
             )
           where
             touch_point_data_3.event_name <> 'purchase'

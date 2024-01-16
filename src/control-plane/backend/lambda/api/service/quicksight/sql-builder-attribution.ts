@@ -558,7 +558,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       break;
     case ExploreAttributionTimeWindowType.CUSTOMIZE:
       timeWindowSql = `
-        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * 60 * 1000 )
+        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * cast(1000 as bigint) )
       `;
       break;
     default:

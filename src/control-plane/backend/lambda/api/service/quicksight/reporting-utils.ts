@@ -1269,6 +1269,13 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
     };
   }
 
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
+    return {
+      success: false,
+      message: 'time window too long for attribution analysis, max is 10 years',
+    };
+  }
+
   if (params.computeMethod !== ExploreComputeMethod.EVENT_CNT && params.computeMethod !== ExploreComputeMethod.SUM_VALUE) {
     return {
       success: false,
@@ -1488,6 +1495,11 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
     return checkResult;
   }
 
+  const timeCheckResult = checkTimeLargeThan10Years(params);
+  if (timeCheckResult !== undefined ) {
+    return timeCheckResult;
+  }
+
 }
 
 function _getRetentionAnalysisConditions(params: any) {
@@ -1537,6 +1549,39 @@ function _checkCondition(params: any): CheckParamsStatus | void {
       return {
         success: false,
         message: 'Incomplete filter conditions.',
+      };
+    }
+  }
+}
+
+function exploreRelativeTimeUnitToSeconds(timeUnit: string) : number {
+  switch (timeUnit) {
+    case ExploreRelativeTimeUnit.DD:
+      return 24 * 60 * 60;
+    case ExploreRelativeTimeUnit.WK:
+      return 7 * 24 * 60 * 60;
+    case ExploreRelativeTimeUnit.MM:
+      return 30 * 24 * 60 * 60;
+    default:
+      return 365 * 24 * 60 * 60;
+  }
+}
+
+function checkTimeLargeThan10Years(params: any): CheckParamsStatus | void {
+  if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
+    const timeStart = new Date(params.timeStart);
+    const timeEnd = new Date(params.timeEnd);
+    if (timeEnd.getTime() - timeStart.getTime() > 10 * 365 * 24 * 60 * 60 * 1000) {
+      return {
+        success: false,
+        message: 'Time interval too long, max is 10 years.',
+      };
+    }
+  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
+    if (params.lastN !== undefined && params.timeUnit !== undefined && params.lastN * exploreRelativeTimeUnitToSeconds(params.timeUnit) > 10 * 365 * 24 * 60 * 60) {
+      return {
+        success: false,
+        message: 'Time interval too long, max is 10 years.',
       };
     }
   }
