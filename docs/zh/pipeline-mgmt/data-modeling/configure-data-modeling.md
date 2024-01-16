@@ -4,17 +4,18 @@
 
 ## 预设数据视图
 
-| 数据模型名称                 | Redshift | Athena | 描述                                                                  |
-|-----------------------------|-----------|--------|----------------------------------------------------------------------|
-| clickstream_ods_event_rt_view    | 物化视图    | 视图 | 包含所有事件维度的视图。      |
-| clickstream_ods_event_parameter_rt_view    | 物化视图    | 视图 | 包含所有事件参数的视图。        |
-| clickstream_user_dim_view    | 物化视图    | 视图 | 包含所有用户维度的视图。                     |
-| clickstream_user_attr_view    | 物化视图    | 视图 | 包含所有用户自定义属性的视图。        |
-| clickstream_session_view    | 物化视图    | 视图 | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
-| clickstream_retention_view    | 物化视图    | 视图 | 包含按日期和返回日度量的保留指标的视图。        |
-| clickstream_lifecycle_daily_view    | 物化视图    | 视图 | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_lifecycle_weekly_view    | 物化视图    | 视图 | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_path_view    | 物化视图    | 视图 | 包含关于每个会话中用户旅程的信息的视图。        |
+| 数据模型名称                 | Redshift | 描述                                                                  |
+|-----------------------------|-----------|----------------------------------------------------------------------|
+| clickstream_device_view_v1    | 物化视图    | 包含所有设备相关信息的视图                     |
+| clickstream_event_view_v2    | 视图    | 包含所有事件维度的视图。      |
+| clickstream_event_parameter_view_v1    | 物化视图      | 包含所有事件参数的视图。        |
+| clickstream_user_dim_view_v1    | 物化视图     | 包含所有用户维度的视图。                     |
+| clickstream_user_attr_view_v1    | 物化视图      | 包含所有用户自定义属性的视图。        |
+| clickstream_session_view_v2    | 视图     | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
+| clickstream_retention_view_v1    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
+| clickstream_lifecycle_daily_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
+| clickstream_lifecycle_weekly_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
+
 
 您可以选择使用Redshift或Athena，或两者都用。
 

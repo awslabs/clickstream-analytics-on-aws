@@ -19,10 +19,10 @@
 ??? 示例 "SQL 命令"
     === "Redshift"
         ```sql title="clickstream_lifecycle_weekly_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:6"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:2"
         ```
         ```sql title="clickstream_lifecycle_daily_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:6"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:2"
         ```
         ```sql title="clickstream_retention_view_v1.sql"
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v1.sql:6"

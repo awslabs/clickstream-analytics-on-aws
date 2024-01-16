@@ -15,8 +15,8 @@ User report are created based on the QuickSight dataset of:
 - `User_Attr_View-<app>-<project>` which connects to `clickstream_user_attr_view_v1`. Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_user_dim_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:6"
+        ```sql title="clickstream_user_dim_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:2"
         ```
     === "Athena"
         ```sql title="clickstream-user-dim-query.sql"

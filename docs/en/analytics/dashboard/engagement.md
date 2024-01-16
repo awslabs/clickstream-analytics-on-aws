@@ -13,7 +13,7 @@ Engagement report are created based on the QuickSight dataset of `Session_View-<
 ??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v1.sql:7"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:7"
         ```
     === "Athena"
         ```sql title="clickstream-session-query.sql"

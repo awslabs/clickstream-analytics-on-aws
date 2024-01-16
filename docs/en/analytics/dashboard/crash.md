@@ -15,8 +15,8 @@ Crash report are created based on the following QuickSight datasets:
 - `Events_Parameter_View-<app id>-<project id>` that connects to the `clickstream_events_parameter_view_v1` view in analytics engines  
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_event_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v1.sql:3"
+        ```sql title="clickstream_event_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v2.sql:2"
         ```
     === "Athena"
         ```sql title="clickstream-event-query.sql"

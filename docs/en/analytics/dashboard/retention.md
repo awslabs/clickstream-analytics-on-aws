@@ -18,11 +18,11 @@ Retention report are created based on the following QuickSight dataset:
 Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_lifecycle_weekly_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_weekly_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v2.sql:2"
         ```
-        ```sql title="clickstream_lifecycle_daily_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_daily_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v2.sql:2"
         ```
         ```sql title="clickstream_retention_view_v1.sql"
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v1.sql:6"

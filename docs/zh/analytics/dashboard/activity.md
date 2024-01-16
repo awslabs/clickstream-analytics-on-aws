@@ -18,8 +18,8 @@
 
 ??? 示例 "SQL 命令"
     === "Redshift"
-        ```sql title="clickstream_event_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v1.sql:6"
+        ```sql title="clickstream_event_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v2.sql:2"
         ```
     === "Athena"
         ```sql title="clickstream-ods-events-query.sql"
