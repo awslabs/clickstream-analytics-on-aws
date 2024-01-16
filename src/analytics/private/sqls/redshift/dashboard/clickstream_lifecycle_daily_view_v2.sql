@@ -1,6 +1,6 @@
 CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
 AS
-lag_lead as (
+with lag_lead as (
   select user_pseudo_id, time_period,
     lag(time_period,1) over (partition by user_pseudo_id order by time_period),
     lead(time_period,1) over (partition by user_pseudo_id order by time_period)

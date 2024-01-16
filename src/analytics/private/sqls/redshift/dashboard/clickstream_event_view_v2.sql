@@ -48,5 +48,5 @@ event_date
 , event.user_id
 , event.user_pseudo_id
 , u.user_first_touch_timestamp
-from shop.tttttt as event
+from {{schema}}.clickstream_event_attr_view_v1 as event
 left join shop.user_m_view as u on event.user_pseudo_id = u.user_pseudo_id
