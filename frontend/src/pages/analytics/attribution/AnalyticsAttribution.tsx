@@ -585,144 +585,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   ) : null}
                 </div>
               </SpaceBetween>
-              <div className="cs-analytics-config">
-                <SpaceBetween direction="vertical" size="xs">
-                  <InfoTitle
-                    title={t('analytics:labels.attributionModel')}
-                    popoverDescription={t(
-                      'analytics:information.attributionModelInfo'
-                    )}
-                  />
-                  <div className="cs-analytics-attribution-model">
-                    <Select
-                      selectedOption={selectedAttributionModel}
-                      options={attributionModelOptions}
-                      onChange={(event) => {
-                        setSelectedAttributionModel(
-                          event.detail.selectedOption
-                        );
-                      }}
-                    />
-                  </div>
-                </SpaceBetween>
-                {selectedAttributionModel?.value ===
-                  AttributionModelType.POSITION && (
-                  <>
-                    <SpaceBetween direction="vertical" size="xs">
-                      <InfoTitle
-                        title={t('analytics:labels.attributionFirst')}
-                      />
-                      <div className="cs-analytics-dropdown">
-                        <div className="cs-analytics-parameter">
-                          <div className="flex-1">
-                            <Input
-                              type="number"
-                              placeholder="100"
-                              value={contributionFirst}
-                              invalid={
-                                contributionInvalid || contributionFirstInvalid
-                              }
-                              onChange={(event) => {
-                                setContributionInvalid(false);
-                                setContributionFirstInvalid(false);
-                                if (
-                                  !PERCENTAGE_REGEX.test(event.detail.value)
-                                ) {
-                                  setContributionFirstInvalid(true);
-                                } else if (
-                                  Number(event.detail.value) +
-                                    Number(contributionInBetween) +
-                                    Number(contributionLast) !==
-                                  100
-                                ) {
-                                  setContributionInvalid(true);
-                                }
-                                setContributionFirst(event.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="cs-suffix-name">%</div>
-                        </div>
-                      </div>
-                    </SpaceBetween>
-                    <SpaceBetween direction="vertical" size="xs">
-                      <InfoTitle
-                        title={t('analytics:labels.attributionInBetween')}
-                      />
-                      <div className="cs-analytics-dropdown">
-                        <div className="cs-analytics-parameter">
-                          <div className="flex-1">
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={contributionInBetween}
-                              invalid={
-                                contributionInvalid ||
-                                contributionInBetweenInvalid
-                              }
-                              onChange={(event) => {
-                                setContributionInvalid(false);
-                                setContributionInBetweenInvalid(false);
-                                if (
-                                  !PERCENTAGE_REGEX.test(event.detail.value)
-                                ) {
-                                  setContributionInBetweenInvalid(true);
-                                } else if (
-                                  Number(event.detail.value) +
-                                    Number(contributionFirst) +
-                                    Number(contributionLast) !==
-                                  100
-                                ) {
-                                  setContributionInvalid(true);
-                                }
-                                setContributionInBetween(event.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="cs-suffix-name">%</div>
-                        </div>
-                      </div>
-                    </SpaceBetween>
-                    <SpaceBetween direction="vertical" size="xs">
-                      <InfoTitle
-                        title={t('analytics:labels.attributionLast')}
-                      />
-                      <div className="cs-analytics-dropdown">
-                        <div className="cs-analytics-parameter">
-                          <div className="flex-1">
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={contributionLast}
-                              invalid={
-                                contributionInvalid || contributionLastInvalid
-                              }
-                              onChange={(event) => {
-                                setContributionInvalid(false);
-                                setContributionLastInvalid(false);
-                                if (
-                                  !PERCENTAGE_REGEX.test(event.detail.value)
-                                ) {
-                                  setContributionLastInvalid(true);
-                                } else if (
-                                  Number(event.detail.value) +
-                                    Number(contributionInBetween) +
-                                    Number(contributionFirst) !==
-                                  100
-                                ) {
-                                  setContributionInvalid(true);
-                                }
-                                setContributionLast(event.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="cs-suffix-name">%</div>
-                        </div>
-                      </div>
-                    </SpaceBetween>
-                  </>
-                )}
-              </div>
               <SpaceBetween direction="vertical" size="xs">
                 <InfoTitle
                   title={t('analytics:labels.selectTouchpointEvent')}
@@ -775,16 +637,146 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
           </Button>
         </Container>
         <Container>
-          <div className="cs-analytics-data-range">
-            <ExploreDateRangePicker
-              disableSelect={loadingChart}
-              dateRangeValue={dateRangeValue}
-              setDateRangeValue={setDateRangeValue}
-              timeGranularity={timeGranularity}
-              timeGranularityVisible={false}
-              setTimeGranularity={setTimeGranularity}
-            />
-          </div>
+          <SpaceBetween direction="horizontal" size="xs">
+            <SpaceBetween direction="vertical" size="xs">
+              <InfoTitle title="Date Range" />
+              <ExploreDateRangePicker
+                disableSelect={loadingChart}
+                dateRangeValue={dateRangeValue}
+                setDateRangeValue={setDateRangeValue}
+                timeGranularity={timeGranularity}
+                timeGranularityVisible={false}
+                setTimeGranularity={setTimeGranularity}
+              />
+            </SpaceBetween>
+            <div className="cs-analytics-data-range"></div>
+            <div className="cs-analytics-config">
+              <SpaceBetween direction="vertical" size="xs">
+                <InfoTitle
+                  title={t('analytics:labels.attributionModel')}
+                  popoverDescription={t(
+                    'analytics:information.attributionModelInfo'
+                  )}
+                />
+                <div className="cs-analytics-attribution-model">
+                  <Select
+                    selectedOption={selectedAttributionModel}
+                    options={attributionModelOptions}
+                    onChange={(event) => {
+                      setSelectedAttributionModel(event.detail.selectedOption);
+                    }}
+                  />
+                </div>
+              </SpaceBetween>
+              {selectedAttributionModel?.value ===
+                AttributionModelType.POSITION && (
+                <>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <InfoTitle title={t('analytics:labels.attributionFirst')} />
+                    <div className="cs-analytics-dropdown">
+                      <div className="cs-analytics-parameter">
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="100"
+                            value={contributionFirst}
+                            invalid={
+                              contributionInvalid || contributionFirstInvalid
+                            }
+                            onChange={(event) => {
+                              setContributionInvalid(false);
+                              setContributionFirstInvalid(false);
+                              if (!PERCENTAGE_REGEX.test(event.detail.value)) {
+                                setContributionFirstInvalid(true);
+                              } else if (
+                                Number(event.detail.value) +
+                                  Number(contributionInBetween) +
+                                  Number(contributionLast) !==
+                                100
+                              ) {
+                                setContributionInvalid(true);
+                              }
+                              setContributionFirst(event.detail.value);
+                            }}
+                          />
+                        </div>
+                        <div className="cs-suffix-name">%</div>
+                      </div>
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <InfoTitle
+                      title={t('analytics:labels.attributionInBetween')}
+                    />
+                    <div className="cs-analytics-dropdown">
+                      <div className="cs-analytics-parameter">
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={contributionInBetween}
+                            invalid={
+                              contributionInvalid ||
+                              contributionInBetweenInvalid
+                            }
+                            onChange={(event) => {
+                              setContributionInvalid(false);
+                              setContributionInBetweenInvalid(false);
+                              if (!PERCENTAGE_REGEX.test(event.detail.value)) {
+                                setContributionInBetweenInvalid(true);
+                              } else if (
+                                Number(event.detail.value) +
+                                  Number(contributionFirst) +
+                                  Number(contributionLast) !==
+                                100
+                              ) {
+                                setContributionInvalid(true);
+                              }
+                              setContributionInBetween(event.detail.value);
+                            }}
+                          />
+                        </div>
+                        <div className="cs-suffix-name">%</div>
+                      </div>
+                    </div>
+                  </SpaceBetween>
+                  <SpaceBetween direction="vertical" size="xs">
+                    <InfoTitle title={t('analytics:labels.attributionLast')} />
+                    <div className="cs-analytics-dropdown">
+                      <div className="cs-analytics-parameter">
+                        <div className="flex-1">
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            value={contributionLast}
+                            invalid={
+                              contributionInvalid || contributionLastInvalid
+                            }
+                            onChange={(event) => {
+                              setContributionInvalid(false);
+                              setContributionLastInvalid(false);
+                              if (!PERCENTAGE_REGEX.test(event.detail.value)) {
+                                setContributionLastInvalid(true);
+                              } else if (
+                                Number(event.detail.value) +
+                                  Number(contributionInBetween) +
+                                  Number(contributionFirst) !==
+                                100
+                              ) {
+                                setContributionInvalid(true);
+                              }
+                              setContributionLast(event.detail.value);
+                            }}
+                          />
+                        </div>
+                        <div className="cs-suffix-name">%</div>
+                      </div>
+                    </div>
+                  </SpaceBetween>
+                </>
+              )}
+            </div>
+          </SpaceBetween>
           <br />
           {loadingChart ? (
             <Loading isPage />
