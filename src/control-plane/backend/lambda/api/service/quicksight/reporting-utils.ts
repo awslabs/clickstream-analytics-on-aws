@@ -162,12 +162,11 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
 }
 
 export type MustacheAttributionAnalysisType = MustacheBaseType & {
-  eventNameFieldId: string;
+  touchPointNameFieldId: string;
+  totalTriggerCountFieldId: string;
+  triggerCountFieldId: string;
   contributionFieldId: string;
-  countFieldId: string;
-  countFieldName: string;
-  totalCountFieldId: string;
-  totalCountFieldName: string;
+  contributionRateFieldId: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -279,40 +278,25 @@ export const attributionVisualColumnsEvent: InputColumn[] = [
   },
 ];
 
-export const attributionVisualColumnsUser: InputColumn[] = [
+export const attributionVisualColumns: InputColumn[] = [
   {
-    Name: 'total_user_count',
+    Name: 'Trigger Count',
     Type: 'DECIMAL',
   },
   {
-    Name: 'event_name',
+    Name: 'TouchPoint Name',
     Type: 'STRING',
   },
   {
-    Name: 'user_count',
+    Name: 'Number of Attributed Triggers',
     Type: 'DECIMAL',
   },
   {
-    Name: 'contribution',
-    Type: 'DECIMAL',
-  },
-];
-
-export const attributionVisualColumnsSumValue: InputColumn[] = [
-  {
-    Name: 'total_event_count',
+    Name: 'Contribution',
     Type: 'DECIMAL',
   },
   {
-    Name: 'event_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'contribution_amount',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'contribution',
+    Name: 'Contribution Rate',
     Type: 'DECIMAL',
   },
 ];
@@ -901,31 +885,20 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 }
 
 export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, method: ExploreComputeMethod) : Visual {
-
-  let countFieldName = 'event_count';
-  let totalCountFieldName = 'total_event_count';
-
-  if (method === ExploreComputeMethod.USER_ID_CNT) {
-    countFieldName = 'user_count';
-    totalCountFieldName = 'total_user_count';
-  } else if (method === ExploreComputeMethod.SUM_VALUE) {
-    countFieldName = 'contribution_amount';
-  }
+  quickSightChartType: QuickSightChartType) : Visual {
 
   const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
-    eventNameFieldId: uuidv4(),
+    touchPointNameFieldId: uuidv4(),
+    totalTriggerCountFieldId: uuidv4(),
+    triggerCountFieldId: uuidv4(),
     contributionFieldId: uuidv4(),
+    contributionRateFieldId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
-    countFieldId: uuidv4(),
-    countFieldName,
-    totalCountFieldId: uuidv4(),
-    totalCountFieldName,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheAttributionAnalysisType)) as Visual;
