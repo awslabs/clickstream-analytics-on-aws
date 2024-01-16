@@ -14,14 +14,16 @@
 import { Box, Popover } from '@cloudscape-design/components';
 import React from 'react';
 import ExtendIcon from '../ExtendIcon';
+import InfoLink from '../InfoLink';
 
 interface InfoTitleProps {
   title: string | null;
   popoverDescription?: string | null;
+  infoLinkDispatch?: () => void;
 }
 
 const InfoTitle: React.FC<InfoTitleProps> = (props: InfoTitleProps) => {
-  const { title, popoverDescription } = props;
+  const { title, popoverDescription, infoLinkDispatch } = props;
   return (
     <div className="flex align-center gap-3">
       <Box variant="awsui-key-label">{title}</Box>
@@ -32,6 +34,7 @@ const InfoTitle: React.FC<InfoTitleProps> = (props: InfoTitleProps) => {
           </div>
         </Popover>
       )}
+      {infoLinkDispatch && <InfoLink onFollow={infoLinkDispatch} />}
     </div>
   );
 };

@@ -18,38 +18,47 @@
               "TableAggregatedFieldWells": {
                   "GroupBy": [
                       {
-                          "NumericalDimensionField": {
-                            "FieldId": "{{totalCountFieldId}}",
+                        "CategoricalDimensionField": {
+                            "FieldId": "{{touchPointNameFieldId}}",
                             "Column": {
                                 "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                "ColumnName": "{{totalCountFieldName}}"
+                                "ColumnName": "Touch Point Name"
+                            }
+                        }
+                      },
+                      {
+                          "NumericalDimensionField": {
+                            "FieldId": "{{totalTriggerCountFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "Trigger Count"
                             }
                           }
                       },
                       {
-                          "CategoricalDimensionField": {
-                              "FieldId": "{{eventNameFieldId}}",
+                          "NumericalDimensionField": {
+                              "FieldId": "{{triggerCountFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "event_name"
+                                  "ColumnName": "Number of Attributed Triggers"
                               }
                           }
                       },
                       {
-                          "NumericalDimensionField": {
-                              "FieldId": "{{countFieldId}}",
-                              "Column": {
-                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "{{countFieldName}}"
-                              }
-                          }
-                      },
+                        "NumericalDimensionField": {
+                            "FieldId": "{{contributionFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "Contribution"
+                            }
+                        }
+                    },
                       {
                           "NumericalDimensionField": {
-                              "FieldId": "{{contributionFieldId}}",
+                              "FieldId": "{{contributionRateFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "contribution"
+                                  "ColumnName": "Contribution Rate"
                               },
                               "FormatConfiguration": {
                                 "FormatConfiguration": {
@@ -81,7 +90,7 @@
             "RowSort": [
               {
                   "FieldSort": {
-                      "FieldId": "{{eventNameFieldId}}",
+                      "FieldId": "{{touchPointNameFieldId}}",
                       "Direction": "ASC"
                   }
               }

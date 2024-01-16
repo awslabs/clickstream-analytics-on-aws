@@ -276,6 +276,7 @@
     "setConversionGoal": "Set conversion goal",
     "setConversionWindow": "Set conversion window",
     "selectTouchpointEvent": "Select touchpoint event",
+    "attributionDateRange": "Date range",
     "attributionModel": "Attribution model",
     "attributionFirst": "First",
     "attributionInBetween": "In-between",
@@ -306,9 +307,8 @@
     "introducingAnalyticsHeader": "Introducing analytics",
     "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards.",
     "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps.",
-    "attributionSetConversionGoalInfo": "attributionSetConversionGoalInfo",
-    "attributionSetConversionWindowInfo": "attributionSetConversionWindowInfo",
-    "attributionSelectTouchpointEventInfo": "attributionSelectTouchpointEventInfo",
-    "attributionModelInfo": "attributionModelInfo"
+    "attributionSetConversionGoalInfo": "Conversion goal typically represent events that can embody a specific business objective. Common events include purchases, successful payments, registrations, and so on.",
+    "attributionSetConversionWindowInfo": "Only events that occur within the conversion window, close to the time of the target conversion events, will be included in the analysis.",
+    "attributionSelectTouchpointEventInfo": "Events to be included in the attribution analysis, e.g., click events for promotion spot, landing page visits."
   }
 }

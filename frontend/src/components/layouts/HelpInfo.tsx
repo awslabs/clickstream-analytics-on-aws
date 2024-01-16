@@ -43,11 +43,43 @@ const HelpInfo: React.FC = () => {
     [HelpPanelType.EXPLORE_FUNNEL_INFO]: 'funnelInfo',
     [HelpPanelType.EXPLORE_PATH_INFO]: 'pathInfo',
     [HelpPanelType.EXPLORE_RETENTION_INFO]: 'retentionInfo',
+    [HelpPanelType.EXPLORE_ATTRIBUTION_INFO]: 'attributionInfo',
+    [HelpPanelType.EXPLORE_ATTRIBUTION_MODEL_INFO]: 'attributionModelInfo',
     [HelpPanelType.ANALYTICS_ANALYZES]: 'analyzesInfo',
     [HelpPanelType.ANALYTICS_METADATA]: 'metadataInfo',
     [HelpPanelType.METADATA_EVENT_INFO]: 'metadataEventInfo',
     [HelpPanelType.METADATA_EVENT_PARAM_INFO]: 'metadataEventParamInfo',
     [HelpPanelType.METADATA_USER_PARAM_INFO]: 'metadataUserParamInfo',
+  };
+
+  const getDescription = (currentHelpPanelKey: string) => {
+    if (currentHelpPanelKey === 'attributionModelInfo') {
+      return (
+        <p>
+          {t('help:attributionModelInfo.description')}
+          <br />
+          <ul>
+            <li>
+              <b>{t('help:attributionModelInfo.firstTouch.title')}</b>
+              {t('help:attributionModelInfo.firstTouch.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.lastTouch.title')}</b>
+              {t('help:attributionModelInfo.lastTouch.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.linearTouch.title')}</b>
+              {t('help:attributionModelInfo.linearTouch.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.positionBasedTouch.title')}</b>
+              {t('help:attributionModelInfo.positionBasedTouch.description')}
+            </li>
+          </ul>
+        </p>
+      );
+    }
+    return <p>{t(`help:${currentHelpPanelKey}.description`)}</p>;
   };
 
   const dataItem: HelpInfoProps = {
@@ -60,9 +92,7 @@ const HelpInfo: React.FC = () => {
 
   if (currentHelpPanelKey) {
     dataItem.title = t(`help:${currentHelpPanelKey}.title`);
-    dataItem.description = (
-      <p>{t(`help:${currentHelpPanelKey}.description`)}</p>
-    );
+    dataItem.description = getDescription(currentHelpPanelKey);
     dataItem.linkItems = [
       {
         text: t(`help:${currentHelpPanelKey}.links.docLinkName`),
