@@ -197,7 +197,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Ref: 'AWS::AccountId',
           },
           LOG_LEVEL: 'WARN',
-          QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
           WITH_VALIDATE_ROLE: 'true',
         },
       },
@@ -799,6 +798,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:DeleteAnalysis',
               'quicksight:CreateFolderMembership',
               'quicksight:ListFolderMembers',
+              'quicksight:DescribeFolder',
+              'quicksight:CreateFolder',
             ],
             Effect: 'Allow',
             Resource: [
@@ -1778,7 +1779,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       ],
       Environment: {
         Variables: {
-          QUICKSIGHT_CONTROL_PLANE_REGION: 'cn-north-1',
+          QUICKSIGHT_EMBED_ROLE_ARN: '',
         },
       },
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',

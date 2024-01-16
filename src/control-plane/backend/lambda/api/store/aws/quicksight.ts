@@ -550,6 +550,7 @@ export const checkFolder = async (
     });
     const folderId = getQuickSightFolderId(projectId, appId);
     const exist = await existFolder(region, folderId);
+    console.log('exist', exist);
     if (!exist) {
       const principals = await getClickstreamUserArn();
       const folderRes = await quickSight.createFolder({
