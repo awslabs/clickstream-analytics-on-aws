@@ -1269,7 +1269,8 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
     };
   }
 
-  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined
+    && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
     return {
       success: false,
       message: 'time window too long for attribution analysis, max is 10 years',
@@ -1578,7 +1579,8 @@ function checkTimeLargeThan10Years(params: any): CheckParamsStatus | void {
       };
     }
   } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
-    if (params.lastN !== undefined && params.timeUnit !== undefined && params.lastN * exploreRelativeTimeUnitToSeconds(params.timeUnit) > 10 * 365 * 24 * 60 * 60) {
+    if (params.lastN !== undefined && params.timeUnit !== undefined
+      && params.lastN * exploreRelativeTimeUnitToSeconds(params.timeUnit) > 10 * 365 * 24 * 60 * 60) {
       return {
         success: false,
         message: 'Time interval too long, max is 10 years.',

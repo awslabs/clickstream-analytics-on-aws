@@ -1567,9 +1567,9 @@ describe('Attribution SQL Builder test', () => {
         ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
         join (
           select
-            count(t_event_id) as total_contribution
+          sum(contribution) as total_contribution
           from
-            joined_base_data
+          attribution_data
         ) as t on 1 = 1
     `.trim().replace(/ /g, ''));
 

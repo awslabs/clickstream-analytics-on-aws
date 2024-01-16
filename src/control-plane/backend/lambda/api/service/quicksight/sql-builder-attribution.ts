@@ -219,9 +219,11 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
         from touch_point_data_3 group by event_name
       ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
       join (
-        select count(t_event_id) as total_contribution from joined_base_data
-      ) as t
-      on 1=1
+        select
+        sum(contribution) as total_contribution
+        from
+        attribution_data
+      ) as t on 1 = 1
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     modelDataSql = `
