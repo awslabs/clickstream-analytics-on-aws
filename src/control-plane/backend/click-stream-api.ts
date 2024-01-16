@@ -345,6 +345,8 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:DeleteAnalysis',
             'quicksight:CreateFolderMembership',
             'quicksight:ListFolderMembers',
+            'quicksight:DescribeFolder',
+            'quicksight:CreateFolder',
           ],
         }),
         new iam.PolicyStatement({

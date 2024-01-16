@@ -50,6 +50,12 @@ import {
   ListFolderMembersCommand,
   ListFolderMembersCommandInput,
   ListFolderMembersCommandOutput,
+  DescribeFolderCommand,
+  CreateFolderCommand,
+  CreateFolderCommandInput,
+  CreateFolderCommandOutput,
+  FolderType,
+  SharingModel,
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
@@ -59,7 +65,7 @@ import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
-import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions } from '../../service/quicksight/dashboard-ln';
+import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions, folderContributorPermissionActions, folderOwnerPermissionActions } from '../../service/quicksight/dashboard-ln';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
@@ -526,6 +532,22 @@ export const createFolderMembership = async (
   }
 };
 
+export const createFolder = async (
+  region: string,
+  input: CreateFolderCommandInput,
+): Promise<CreateFolderCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateFolderCommand = new CreateFolderCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Folder Error.', { err });
+    throw err;
+  }
+};
+
 export const listFolderMembership = async (
   region: string,
   input: ListFolderMembersCommandInput,
@@ -660,3 +682,70 @@ export const getDashboardDetail = async (
   }
   return undefined;
 };
+
+export const checkFolder = async (
+  region: string,
+  projectId: string,
+  appId: string,
+  dashboardId?: string,
+): Promise<void> => {
+  try {
+    const folderId = `clickstream_${projectId}_${appId}`;
+    const exist = await existFolder(region, folderId);
+    if (!exist) {
+      const principals = await getClickstreamUserArn();
+      const folderRes = await createFolder(region, {
+        AwsAccountId: awsAccountId,
+        FolderId: folderId,
+        Name: `${projectId}_${appId}`,
+        FolderType: FolderType.SHARED,
+        SharingModel: SharingModel.ACCOUNT,
+        Permissions: [
+          {
+            Principal: principals.publishUserArn,
+            Actions: folderContributorPermissionActions,
+          },
+          {
+            Principal: principals.exploreUserArn,
+            Actions: folderOwnerPermissionActions,
+          },
+        ],
+      });
+      if (dashboardId) {
+        await createFolderMembership(region, {
+          AwsAccountId: awsAccountId,
+          FolderId: folderRes.FolderId,
+          MemberId: dashboardId,
+          MemberType: MemberType.DASHBOARD,
+        });
+      }
+    }
+  } catch (err) {
+    logger.error('Check Folder Error.', { err });
+    throw err;
+  }
+};
+
+export const existFolder = async (
+  region: string,
+  folderId: string,
+): Promise<boolean> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DescribeFolderCommand = new DescribeFolderCommand({
+      AwsAccountId: awsAccountId,
+      FolderId: folderId,
+    });
+    await quickSightClient.send(command);
+    return true;
+  } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return false;
+    }
+    logger.error('Describe Folder Error.', { err });
+    throw err;
+  }
+};
+

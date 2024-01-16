@@ -22,7 +22,7 @@ import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPip
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
+import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -37,7 +37,7 @@ export class ProjectServ {
     return pipelines[0];
   }
 
-  private async getPresetAppDashboard(pipeline: IPipeline, appId: string) {
+  private getPresetAppDashboard(pipeline: IPipeline, appId: string) {
     const stackDashboards = getReportingDashboardsUrl(
       pipeline.stackDetails ?? pipeline.status?.stackDetails, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
     if (stackDashboards.length === 0) {
@@ -69,6 +69,9 @@ export class ProjectServ {
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
+      // check folder and move preset dashboard to folder
+      const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
+      await checkFolder(pipeline.region, projectId, appId, presetAppDashboard?.id);
       const result = await listDashboardsByApp(pipeline.region, projectId, appId);
       const items = paginateData(result, true, pageSize, pageNumber);
       return res.json(new ApiSuccess({
@@ -145,7 +148,7 @@ export class ProjectServ {
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const presetAppDashboard = await this.getPresetAppDashboard(pipeline, appId);
+      const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
       if (presetAppDashboard?.id === dashboardId) {
         return res.status(400).json(new ApiFail('Preset Dashboard not allowed to delete.'));
       }
