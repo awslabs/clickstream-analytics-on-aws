@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-01-16
+
+### Updated
+
+* improve the performance of querying metadata
+* improve the performance of exploration queries
+
+### Fixed
+
+* mitigate the intermittent failure of creating QuickSight stack
+* mitigate the potential timeout when upgrading data modeling in Redshift
+* few dashboard rendering issues
+* the metadata scanning failure with long non-ascii data
+* coordinate the alarm period of scanning metadata workflow
+* manually trigger metadata scanning
+* choose S3 bucket in other regions
+* transform session data in GTM transformer
+
 ## [1.1.1] - 2023-12-22
 
 ### Fixed
