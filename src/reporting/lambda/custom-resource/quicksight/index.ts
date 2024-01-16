@@ -12,7 +12,6 @@
  */
 
 import crypto from 'crypto';
-import { ResourceAlreadyExistsException } from '@aws-sdk/client-cloudwatch-events';
 import {
   QuickSight,
   DashboardSourceEntity,
@@ -39,13 +38,16 @@ import {
   MemberType,
   FolderType,
   SharingModel,
+  ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
+import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions, dataSetReaderPermissionActions, folderContributorPermissionActions, folderOwnerPermissionActions } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
+import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
   waitForAnalysisChangeCompleted,
@@ -57,10 +59,6 @@ import {
   QuickSightDashboardDefProps,
   DataSetProps,
   truncateString,
-  dashboardAdminPermissionActions,
-  dataSetAdminPermissionActions,
-  analysisAdminPermissionActions,
-  dataSetReaderPermissionActions,
   waitForTemplateChangeCompleted,
   existDashboard,
   existAnalysis,
@@ -68,8 +66,6 @@ import {
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
   DateTimeParameter,
-  folderContributorPermissionActions,
-  folderOwnerPermissionActions,
   existFolder,
 } from '../../../private/dashboard';
 
@@ -304,8 +300,8 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   const folder = await quickSight.createFolder({
     AwsAccountId: commonParams.awsAccountId,
-    FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
-    Name: `${commonParams.databaseName}_${commonParams.schema}`,
+    FolderId: getQuickSightFolderId(commonParams.databaseName, commonParams.schema),
+    Name: getQuickSightFolderName(commonParams.databaseName, commonParams.schema),
     FolderType: FolderType.SHARED,
     SharingModel: SharingModel.ACCOUNT,
     Permissions: [
@@ -360,14 +356,14 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 
   await quickSight.listFolderMembers({
     AwsAccountId: accountId,
-    FolderId: `clickstream_${databaseName}_${schema}`,
+    FolderId: getQuickSightFolderId(databaseName, schema),
   }).then(async (data) => {
     if (data !== undefined && data.FolderMemberList !== undefined) {
       for (const member of data.FolderMemberList) {
         const memberType = getMemberType(member.MemberArn!, member.MemberId!);
         await quickSight.deleteFolderMembership({
           AwsAccountId: accountId,
-          FolderId: `clickstream_${databaseName}_${schema}`,
+          FolderId: getQuickSightFolderId(databaseName, schema),
           MemberId: member.MemberId!,
           MemberType: memberType,
         });
@@ -378,7 +374,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   //delete folder
   await quickSight.deleteFolder({
     AwsAccountId: accountId,
-    FolderId: `clickstream_${databaseName}_${schema}`,
+    FolderId: getQuickSightFolderId(databaseName, schema),
   });
 
   return result;
@@ -564,7 +560,7 @@ const updateFolderMembership = async (quickSight: QuickSight, commonParams: Reso
       MemberType: MemberType.DASHBOARD,
     });
   } catch (e) {
-    if (e instanceof ResourceAlreadyExistsException) {
+    if (e instanceof ResourceExistsException) {
       logger.warn('folder membership already exist. skip create operation.');
     } else {
       throw e;

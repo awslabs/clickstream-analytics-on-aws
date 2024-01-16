@@ -327,7 +327,7 @@ export class ClickStreamApiConstruct extends Construct {
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
           ],
           actions: [
             'quicksight:UpdateDashboardPermissions',
@@ -434,7 +434,6 @@ export class ClickStreamApiConstruct extends Construct {
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
         HEALTH_CHECK_PATH: props.healthCheckPath,
-        QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         WITH_VALIDATE_ROLE: 'true',
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         LISTEN_STACK_QUEUE_ARN: backendEventBus.listenStackQueue.queueArn,

@@ -14,6 +14,7 @@
 import { Arn, ArnFormat, Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export function createRoleForQuicksightCustomResourceLambda(
@@ -108,7 +109,7 @@ export function createRoleForQuicksightCustomResourceLambda(
     new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
-        `${arnPrefix}:folder/clickstream_*`,
+        `${arnPrefix}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
       ],
       actions: [
         'quicksight:CreateFolderMembership',

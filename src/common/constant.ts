@@ -399,3 +399,60 @@ export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
+
+export const dataSetReaderPermissionActions = [
+  'quicksight:DescribeDataSet',
+  'quicksight:DescribeDataSetPermissions',
+  'quicksight:PassDataSet',
+  'quicksight:DescribeIngestion',
+  'quicksight:ListIngestions',
+];
+
+export const dataSetAdminPermissionActions = [
+  ...dataSetReaderPermissionActions,
+  'quicksight:UpdateDataSetPermissions',
+  'quicksight:UpdateDataSet',
+  'quicksight:DeleteDataSet',
+  'quicksight:CreateIngestion',
+  'quicksight:CancelIngestion',
+];
+
+export const analysisAdminPermissionActions = [
+  'quicksight:DescribeAnalysis',
+  'quicksight:UpdateAnalysisPermissions',
+  'quicksight:QueryAnalysis',
+  'quicksight:UpdateAnalysis',
+  'quicksight:RestoreAnalysis',
+  'quicksight:DeleteAnalysis',
+  'quicksight:DescribeAnalysisPermissions',
+];
+
+export const dashboardReaderPermissionActions = [
+  'quicksight:DescribeDashboard',
+  'quicksight:ListDashboardVersions',
+  'quicksight:QueryDashboard',
+];
+
+export const dashboardAdminPermissionActions = [
+  ...dashboardReaderPermissionActions,
+  'quicksight:UpdateDashboard',
+  'quicksight:DeleteDashboard',
+  'quicksight:UpdateDashboardPermissions',
+  'quicksight:DescribeDashboardPermissions',
+  'quicksight:UpdateDashboardPublishedVersion',
+];
+
+export const folderContributorPermissionActions = [
+  'quicksight:CreateFolder',
+  'quicksight:DescribeFolder',
+  'quicksight:CreateFolderMembership',
+  'quicksight:DeleteFolderMembership',
+  'quicksight:DescribeFolderPermissions',
+];
+
+export const folderOwnerPermissionActions = [
+  ...folderContributorPermissionActions,
+  'quicksight:UpdateFolder',
+  'quicksight:DeleteFolder',
+  'quicksight:UpdateFolderPermissions',
+];

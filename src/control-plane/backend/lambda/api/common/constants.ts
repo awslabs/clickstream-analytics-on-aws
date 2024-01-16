@@ -21,7 +21,7 @@ const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
 const prefixMonthGSIName = process.env.PREFIX_MONTH_GSI_NAME;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
-const awsRegion = process.env.AWS_REGION;
+const awsRegion = process.env.AWS_REGION ?? 'us-east-1';
 const awsPartition = process.env.AWS_PARTITION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
@@ -30,7 +30,6 @@ const QuickSightEmbedRoleArn = process.env.QUICKSIGHT_EMBED_ROLE_ARN;
 const amznRequestContextHeader = 'x-amzn-request-context';
 const amznLambdaContextHeader = 'x-amzn-lambda-context';
 const ALLOW_UPLOADED_FILE_TYPES = process.env.ALLOW_UPLOADED_FILE_TYPES ?? 'jar,mmdb';
-const QUICKSIGHT_CONTROL_PLANE_REGION = process.env.QUICKSIGHT_CONTROL_PLANE_REGION ?? 'us-east-1';
 const FULL_SOLUTION_VERSION = process.env.FULL_SOLUTION_VERSION ?? 'v1.0.0';
 const SDK_MAVEN_VERSION_API_LINK =
   'https://search.maven.org/solrsearch/select?q=g:%22software.aws.solution%22+AND+a:%22clickstream%22&wt=json';
@@ -103,7 +102,6 @@ export {
   QuickSightEmbedRoleArn,
   amznRequestContextHeader,
   amznLambdaContextHeader,
-  QUICKSIGHT_CONTROL_PLANE_REGION,
   SDK_MAVEN_VERSION_API_LINK,
   PIPELINE_SUPPORTED_REGIONS,
   ALLOW_UPLOADED_FILE_TYPES,

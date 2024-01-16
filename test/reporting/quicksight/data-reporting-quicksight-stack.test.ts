@@ -539,7 +539,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':folder/clickstream_*',
+                  ':folder/clickstream*',
                 ],
               ],
             },

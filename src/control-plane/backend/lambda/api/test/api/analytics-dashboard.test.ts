@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, CreateFolderMembershipCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardCommand, DescribeDashboardDefinitionCommand, ListFolderMembersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, CreateFolderCommand, CreateFolderMembershipCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardCommand, DescribeDashboardDefinitionCommand, DescribeFolderCommand, ListFolderMembersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -152,6 +152,16 @@ describe('Analytics dashboard test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
+    quickSightMock.on(DescribeFolderCommand).resolves({
+      Folder: {
+        Arn: 'arn:aws:quicksight:us-west-2:5555555555555:folder/folder1',
+        FolderId: 'folder1',
+        Name: 'folder1',
+        FolderType: 'SHARED',
+        CreatedTime: new Date('2023-08-01T08:00:00.000Z'),
+        LastUpdatedTime: new Date('2023-08-01T08:00:00.000Z'),
+      },
+    });
     quickSightMock.on(ListFolderMembersCommand).resolves({
       FolderMemberList: [
         {
@@ -237,6 +247,108 @@ describe('Analytics dashboard test', () => {
       },
     );
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(ListFolderMembersCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+  });
+
+  it('List dashboards of project when folder is non-existent', async () => {
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    quickSightMock.on(DescribeFolderCommand).resolves({
+      Folder: {},
+    });
+    quickSightMock.on(CreateFolderCommand).resolves({});
+    quickSightMock.on(CreateFolderMembershipCommand).resolves({});
+    quickSightMock.on(ListFolderMembersCommand).resolves({
+      FolderMemberList: [
+        {
+          MemberId: 'dashboard1',
+          MemberArn: 'arn:aws:quicksight:us-west-2:5555555555555:dashboard/dashboard1',
+        },
+        {
+          MemberId: 'dashboard2',
+          MemberArn: 'arn:aws:quicksight:us-west-2:5555555555555:dashboard/dashboard2',
+        },
+      ],
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        DashboardId: 'preset_dashboard',
+        Name: `${DEFAULT_DASHBOARD_NAME_PREFIX}preset dashboard`,
+        Arn: 'arn:aws:quicksight:us-west-2:5555555555555:dashboard/preset_dashboard',
+        Version: {
+          Description: 'Description of preset dashboard',
+          Sheets: [
+            { SheetId: 'sheet1', Name: 'sheet1' },
+            { SheetId: 'sheet2', Name: 'sheet2' },
+          ],
+        },
+        CreatedTime: new Date('2023-08-01T08:00:00.000Z'),
+        LastUpdatedTime: new Date('2023-08-01T08:00:00.000Z'),
+      },
+    }).resolves({
+      Dashboard: {
+        DashboardId: 'dashboard1',
+        Name: 'dashboard1',
+        Arn: 'arn:aws:quicksight:us-west-2:5555555555555:dashboard/dashboard1',
+        Version: {
+          Description: 'Description of dashboard1',
+          Sheets: [
+            { SheetId: 'sheet1', Name: 'sheet1' },
+            { SheetId: 'sheet2', Name: 'sheet2' },
+          ],
+        },
+        CreatedTime: new Date('2023-08-10T08:00:00.000Z'),
+        LastUpdatedTime: new Date('2023-08-10T08:00:00.000Z'),
+      },
+    });
+    const res = await request(app)
+      .get(`/api/project/${MOCK_PROJECT_ID}/app1/dashboard`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(
+      {
+        data: {
+          items: [{
+            id: 'preset_dashboard',
+            description: 'Description of preset dashboard',
+            name: 'Clickstream Dashboard preset dashboard',
+            projectId: MOCK_PROJECT_ID,
+            appId: 'app1',
+            region: 'ap-southeast-1',
+            sheets: [
+              { id: 'sheet1', name: 'sheet1' },
+              { id: 'sheet2', name: 'sheet2' },
+            ],
+            createAt: 1690876800000,
+            updateAt: 1690876800000,
+          },
+          {
+            id: 'dashboard1',
+            description: 'Description of dashboard1',
+            name: 'dashboard1',
+            projectId: MOCK_PROJECT_ID,
+            appId: 'app1',
+            region: 'ap-southeast-1',
+            sheets: [
+              { id: 'sheet1', name: 'sheet1' },
+              { id: 'sheet2', name: 'sheet2' },
+            ],
+            createAt: 1691654400000,
+            updateAt: 1691654400000,
+          }],
+          totalCount: 2,
+        },
+        message: '',
+        success: true,
+      },
+    );
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(ListFolderMembersCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });

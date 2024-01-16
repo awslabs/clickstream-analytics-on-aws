@@ -31,6 +31,8 @@ import { ClientBroker, KafkaClient, ListClustersV2Command } from '@aws-sdk/clien
 import {
   QuickSightClient,
   DescribeAccountSubscriptionCommand,
+  ListUsersCommand,
+  ResourceNotFoundException,
 } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
@@ -67,6 +69,7 @@ describe('Account Env test', () => {
     s3Client.reset();
     kafkaClient.reset();
     redshiftClient.reset();
+    redshiftServerlessClient.reset();
     quickSightClient.reset();
     route53Client.reset();
     iamClient.reset();
@@ -1128,8 +1131,17 @@ describe('Account Env test', () => {
     });
   });
   it('Ping QuickSight', async () => {
+    quickSightClient.on(ListUsersCommand).resolves({
+      UserList: [
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/xxxx',
+          UserName: 'xxxx',
+          Email: 'fake@example.com',
+        },
+      ],
+    });
     quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({});
-    let res = await request(app).get('/api/env/quicksight/ping');
+    const res = await request(app).get('/api/env/quicksight/ping');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1137,10 +1149,30 @@ describe('Account Env test', () => {
       message: '',
       data: true,
     });
-    const mockError = new Error('Mock DynamoDB error');
-    mockError.name = 'ResourceNotFoundException';
+  });
+  it('Ping QuickSight with ResourceNotFoundException', async () => {
+    quickSightClient.on(ListUsersCommand).resolves({
+      UserList: [
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/xxxx',
+          UserName: 'xxxx',
+          Email: 'fake@example.com',
+        },
+      ],
+    });
+    const mockError = new ResourceNotFoundException({
+      $metadata: {
+        requestId: 'xxxx',
+        extendedRequestId: undefined,
+        cfId: undefined,
+        attempts: 1,
+        totalRetryDelay: 0,
+      },
+      message: 'ResourceNotFoundException',
+    });
     quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
-    res = await request(app).get('/api/env/quicksight/ping');
+    const res = await request(app).get('/api/env/quicksight/ping');
+    expect(quickSightClient).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
