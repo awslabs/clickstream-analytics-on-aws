@@ -284,7 +284,7 @@ export const attributionVisualColumns: InputColumn[] = [
     Type: 'DECIMAL',
   },
   {
-    Name: 'TouchPoint Name',
+    Name: 'Touch Point Name',
     Type: 'STRING',
   },
   {

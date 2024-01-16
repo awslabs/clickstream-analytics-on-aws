@@ -90,7 +90,7 @@
             "RowSort": [
               {
                   "FieldSort": {
-                      "FieldId": "{{eventNameFieldId}}",
+                      "FieldId": "{{touchPointNameFieldId}}",
                       "Direction": "ASC"
                   }
               }

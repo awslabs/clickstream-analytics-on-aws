@@ -109,7 +109,7 @@ export class AttributionAnalysisService {
       customSql: visualSql,
       projectedColumns: [
         'Trigger Count',
-        'TouchPoint Name',
+        'Touch Point Name',
         'Number of Attributed Triggers',
         'Contribution',
         'Contribution Rate',
