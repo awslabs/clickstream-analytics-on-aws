@@ -69,10 +69,11 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         group by t_event_name
       )
       select 
-         total_count_data.total_event_count
-        ,attribution_data.t_event_name as event_name
-        ,attribution_data.contribution as event_count
-        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+        total_count_data.total_event_count as "Trigger Count"
+        ,attribution_data.t_event_name as "Touch Point Name"
+        ,attribution_count as "Number of Attributed Triggers"
+        ,attribution_data.contribution as Contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
         select 
@@ -84,44 +85,10 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select count(t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
-    `;
-  } else if (params.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-    attributionDataSql = `
-      total_count_data as (
-        select 
-           event_name
-          ,count(distinct COALESCE(u.user_id, u.user_pseudo_id)) as total_user_count
-        from touch_point_data_3
-        join ${params.schemaName}.${USER_TABLE} as u
-        on touch_point_data_3.user_pseudo_id = u.user_pseudo_id
-        group by event_name
-      ),
-      model_data_with_user as (
-        select 
-          model_data.*
-          ,COALESCE(u.user_id, u.user_pseudo_id) as u_user_pseudo_id
-        from model_data
-        join ${params.schemaName}.${USER_TABLE} as u
-        on model_data.user_pseudo_id = u.user_pseudo_id
-      ),
-      attribution_data as (
-        select 
-          t_event_name
-          ,count(distinct u_user_pseudo_id) as contribution
-        from model_data_with_user
-        group by t_event_name
-      )
-      select 
-         total_count_data.total_user_count
-        ,t1.t_event_name as event_name
-        ,t1.contribution as user_count
-        ,cast(t1.contribution as float)/t2.total_contribution as contribution
-      from attribution_data as t1
-      join total_count_data on t1.t_event_name = total_count_data.event_name
       join (
-        select sum(contribution) as total_contribution from attribution_data
-      ) as t2
-      on 1=1
+        select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
+      ) as s
+      on attribution_data.t_event_name = s.t_event_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     attributionDataSql = `
@@ -134,10 +101,11 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         group by t_event_name
       )
       select 
-         total_count_data.total_event_count
-        ,attribution_data.t_event_name as event_name
-        ,attribution_data.contribution as contribution_amount
-        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+         total_count_data.total_event_count as "Trigger Count"
+        ,attribution_data.t_event_name as "Touch Point Name"
+        ,attribution_count as "Number of Attributed Triggers"
+        ,attribution_data.contribution as Contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
         select 
@@ -149,6 +117,10 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select sum(contribution) as total_contribution from attribution_data
       ) as t
       on 1=1
+      join (
+        select t_event_name,count(1) as attribution_count from joined_base_data group by t_event_name
+      ) as s
+      on attribution_data.t_event_name = s.t_event_name
     `;
   }
 
@@ -207,10 +179,11 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
           t_event_name
       ) 
       select 
-        total_count_data.total_event_count
-        ,attribution_data.t_event_name as event_name
-        ,attribution_data.contribution as event_count
-        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+        total_count_data.total_event_count as "Trigger Count"
+        ,attribution_data.t_event_name as "Touch Point Name"
+        ,attribution_count as "Number of Attributed Triggers"
+        ,attribution_data.contribution as Contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
         select 
@@ -219,9 +192,15 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
         from touch_point_data_3 group by event_name
       ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
       join (
-        select count(t_event_id) as total_contribution from joined_base_data
-      ) as t
-      on 1=1
+        select
+        sum(contribution) as total_contribution
+        from
+        attribution_data
+      ) as t on 1 = 1
+      join (
+        select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
+      ) as s
+      on attribution_data.t_event_name = s.t_event_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     modelDataSql = `
@@ -259,10 +238,11 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
           t_event_name
       )
       select
-        total_count_data.total_event_count,
-        attribution_data.t_event_name as event_name,
-        attribution_data.contribution as contribution_amount,
-        cast(attribution_data.contribution as float) / t.total_contribution as contribution
+        total_count_data.total_event_count as "Trigger Count"
+        ,attribution_data.t_event_name as "Touch Point Name"
+        ,attribution_count as "Number of Attributed Triggers"
+        ,attribution_data.contribution as Contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from
         attribution_data
       join (
@@ -280,6 +260,10 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
         from
         attribution_data
       ) as t on 1 = 1
+      join (
+        select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
+      ) as s
+      on attribution_data.t_event_name = s.t_event_name
     `;
   }
 
@@ -347,10 +331,11 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
         t_event_name
     )
     select 
-      total_count_data.total_event_count
-      ,attribution_data.t_event_name as event_name
-      ,attribution_data.contribution as event_count
-      ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+      total_count_data.total_event_count as "Trigger Count"
+      ,attribution_data.t_event_name as "Touch Point Name"
+      ,attribution_count as "Number of Attributed Triggers"
+      ,attribution_data.contribution as Contribution
+      ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
     from attribution_data
     join (
       select 
@@ -362,6 +347,10 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
       select sum(contribution) as total_contribution from model_data
     ) as t
     on 1=1
+    join (
+      select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
+    ) as s
+    on attribution_data.t_event_name = s.t_event_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     modelDataSql = `
@@ -396,10 +385,11 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
           t_event_name
       )
       select
-        total_count_data.total_event_count,
-        attribution_data.t_event_name as event_name,
-        attribution_data.contribution as contribution_amount,
-        cast(attribution_data.contribution as float) / t.total_contribution as contribution
+        total_count_data.total_event_count as "Trigger Count"
+        ,attribution_data.t_event_name as "Touch Point Name"
+        ,attribution_count as "Number of Attributed Triggers"
+        ,attribution_data.contribution as Contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from
         attribution_data
       join (
@@ -417,6 +407,10 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
         from
         attribution_data
       ) as t on 1 = 1
+      join (
+        select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
+      ) as s
+      on attribution_data.t_event_name = s.t_event_name
     `;
   }
 
@@ -558,7 +552,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       break;
     case ExploreAttributionTimeWindowType.CUSTOMIZE:
       timeWindowSql = `
-        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * 60 * 1000 )
+        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * cast(1000 as bigint) )
       `;
       break;
     default:
