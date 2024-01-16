@@ -2197,22 +2197,23 @@ function buildSqlForEventCondition(condition: Condition, tablePrefix: string = '
 function buildSqlForNestAttributeStringCondition(condition: Condition, propertyKey: string, propertyValue: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} ${condition.operator} '${condition.value[0]}')`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} ${condition.operator} '${condition.value[0]}')))`;
     case ExploreAnalyticsOperators.IN:
       const values = '\'' + condition.value.join('\',\'') + '\'';
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} in (${values}))`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not in (${notValues}))`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not in (${notValues}))))`;
     case ExploreAnalyticsOperators.CONTAINS:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} like '%${condition.value[0]}%')`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not like '%${condition.value[0]}%')`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not like '%${condition.value[0]}%')))`;
     case ExploreAnalyticsOperators.NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is null)`;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2227,18 +2228,19 @@ function buildSqlForNestAttributeStringCondition(condition: Condition, propertyK
 function buildSqlForNestAttributeNumberCondition(condition: Condition, propertyKey: string, propertyValue: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} ${condition.operator} '${condition.value[0]}')`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} ${condition.operator} '${condition.value[0]}')))`;
     case ExploreAnalyticsOperators.IN:
       const values = condition.value.join(',');
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} in (${values}))`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = condition.value.join(',');
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not in (${notValues}))`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} not in (${notValues}) or ${propertyValue} is null)))`;
     case ExploreAnalyticsOperators.NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is null)`;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2253,22 +2255,23 @@ function buildSqlForNestAttributeNumberCondition(condition: Condition, propertyK
 function _buildSqlFromStringCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `${prefix}${condition.property} ${condition.operator} '${condition.value[0]}'`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} ${condition.operator} '${condition.value[0]}')`;
     case ExploreAnalyticsOperators.IN:
       const values = '\'' + condition.value.join('\',\'') + '\'';
       return `${prefix}${condition.property} in (${values})`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
-      return `${prefix}${condition.property} not in (${notValues})`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not in (${notValues}))`;
     case ExploreAnalyticsOperators.CONTAINS:
       return `${prefix}${condition.property} like '%${condition.value[0]}%'`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `${prefix}${condition.property} not like '%${condition.value[0]}%'`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not like '%${condition.value[0]}%')`;
     case ExploreAnalyticsOperators.NULL:
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2283,18 +2286,19 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
 function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `${prefix}${condition.property} ${condition.operator} ${condition.value[0]}`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} ${condition.operator} ${condition.value[0]})`;
     case ExploreAnalyticsOperators.IN:
       const values = condition.value.join(',');
       return `${prefix}${condition.property} in (${values})`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = condition.value.join(',');
-      return `${prefix}${condition.property} not in (${notValues})`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not in (${notValues}))`;
     case ExploreAnalyticsOperators.NULL:
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:

@@ -18579,4 +18579,52 @@ describe('SQL Builder test', () => {
 
   });
 
+  test('event path analysis view - not in filter', () => {
+
+    const sql = buildEventPathAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [{
+          category: ConditionCategory.DEVICE,
+          property: 'mobile_brand_name',
+          operator: 'not_in',
+          value: ['xxx'],
+          dataType: MetadataValueType.STRING,
+        }]
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+        },
+        {
+          eventName: 'add_to_cart',
+        },
+        {
+          eventName: 'purchase',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.PAGE_TITLE,
+        includingOtherEvents: false,
+        mergeConsecutiveEvents: false
+      },
+    });
+console.log(sql);
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
 });
