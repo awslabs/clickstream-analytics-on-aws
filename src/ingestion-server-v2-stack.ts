@@ -22,46 +22,40 @@ import {
   ICfnConditionExpression,
 } from 'aws-cdk-lib';
 import {
-  InstanceType,
-  SecurityGroup,
   SubnetType,
+  SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
-import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
-import {
-  createCommonConditions,
-  createKinesisConditions,
-  createMskConditions,
-  getServerPropsByCondition,
-  mergeConditionsAndServerPropsConfig,
-} from './ingestion-server/server/condition';
-import {
-  FleetProps,
-  IngestionServer,
-  IngestionServerProps,
-  KafkaSinkConfig,
-  KinesisSinkConfig,
-  S3SinkConfig,
-} from './ingestion-server/server/ingestion-server';
 import { createStackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
+import {
+  createKinesisConditionsV2,
+  createAlwaysTrueConditionsV2,
+  createMskConditionsV2,
+} from './ingestion-server/server-v2/condition-v2';
+import {
+  FleetV2Props,
+  IngestionServerV2,
+  IngestionServerV2Props,
+  S3SinkConfig,
+  KinesisSinkConfig,
+  KafkaSinkConfig,
+} from './ingestion-server/server-v2/ingestion-server-v2';
 
-interface IngestionServerNestStackProps extends StackProps {
+interface IngestionServerV2NestStackProps extends StackProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string;
   readonly privateSubnetIds: string;
 
   readonly serverMin: number;
   readonly serverMax: number;
-  readonly warmPoolSize: number;
   readonly scaleOnCpuUtilizationPercent: number;
   readonly workerStopTimeout: number;
 
@@ -70,10 +64,10 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly protocol: string;
   readonly domainName: string;
   readonly certificateArn: string;
-  readonly notificationsTopicArn?: string;
-  readonly enableApplicationLoadBalancerAccessLog?: string;
-  readonly logBucketName?: string;
-  readonly logPrefix?: string;
+  readonly notificationsTopicArn: string;
+  readonly enableApplicationLoadBalancerAccessLog: string;
+  readonly logBucketName: string;
+  readonly logPrefix: string;
   readonly enableGlobalAccelerator: string;
   readonly devMode: string;
   readonly projectId: string;
@@ -81,8 +75,8 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly clickStreamSDK: string;
 
   // authentication parameters
-  readonly enableAuthentication?: string;
-  readonly authenticationSecretArn?: string;
+  readonly enableAuthentication: string;
+  readonly authenticationSecretArn: string;
 
   // Kafka parameters
   readonly kafkaBrokers?: string;
@@ -98,14 +92,13 @@ interface IngestionServerNestStackProps extends StackProps {
   readonly s3Prefix?: string;
   readonly batchTimeout?: number;
   readonly batchMaxBytes?: number;
-
 }
 
-export class IngestionServerNestedStack extends NestedStack {
+export class IngestionServerV2NestedStack extends NestedStack {
   constructor(
     scope: Construct,
     id: string,
-    props: IngestionServerNestStackProps,
+    props: IngestionServerV2NestStackProps,
   ) {
     super(scope, id, props);
     const featureName = 'IngestionServer ' + id;
@@ -119,25 +112,6 @@ export class IngestionServerNestedStack extends NestedStack {
       publicSubnetIds: Fn.split(',', props.publicSubnetIds),
       privateSubnetIds: Fn.split(',', props.privateSubnetIds),
     });
-
-    let notificationsTopic;
-
-    if (props.notificationsTopicArn) {
-      notificationsTopic = Topic.fromTopicArn(
-        this,
-        'from-notificationsTopic',
-        props.notificationsTopicArn,
-      );
-    }
-    let logBucket;
-    if (props.logBucketName) {
-      logBucket = Bucket.fromBucketName(
-        this,
-        'from-logS3Bucket',
-        props.logBucketName,
-      );
-    }
-
 
     let kafkaSinkConfig: KafkaSinkConfig | undefined;
     if (props.kafkaBrokers && props.kafkaTopic) {
@@ -169,25 +143,6 @@ export class IngestionServerNestedStack extends NestedStack {
       };
     }
 
-    let protocol = ApplicationProtocol.HTTP;
-    if (props.protocol == 'HTTPS') {
-      protocol = ApplicationProtocol.HTTPS;
-    }
-
-    let loadBalancerLogProps;
-    if (props.enableApplicationLoadBalancerAccessLog == 'Yes') {
-      loadBalancerLogProps = {
-        enableAccessLog: true,
-        bucket: logBucket,
-        prefix: props.logPrefix,
-      };
-    }
-
-    let authenticationSecretArn;
-    if (props.enableAuthentication == 'Yes') {
-      authenticationSecretArn = props.authenticationSecretArn;
-    }
-
     let s3SinkConfig: S3SinkConfig | undefined = undefined;
     if (props.s3BucketName && props.s3Prefix && props.batchMaxBytes && props.batchTimeout) {
       const s3Bucket = Bucket.fromBucketName(
@@ -203,30 +158,23 @@ export class IngestionServerNestedStack extends NestedStack {
       };
     }
 
-    const fleetCommonProps = {
-      workerCpu: 1792,
-      proxyCpu: 256,
-      instanceType: new InstanceType('c6i.large'),
+    const fleetProps: FleetV2Props = {
+      taskCpu: 256,
+      taskMemory: 512,
+      workerCpu: 128,
+      workerMemory: 256,
+      proxyCpu: 128,
+      proxyMemory: 256,
       isArm: false,
-      warmPoolSize: 0,
-      proxyReservedMemory: 900,
-      workerReservedMemory: 900,
       proxyMaxConnections: 1024,
       workerThreads: 6,
       workerStreamAckEnable: true,
-    };
-
-    const fleetProps: FleetProps = {
-      ...fleetCommonProps,
-      serverMin: props.serverMin,
-      serverMax: props.serverMax,
-      warmPoolSize: props.warmPoolSize,
       taskMin: props.serverMin,
       taskMax: props.serverMax,
       scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent,
     };
 
-    const serverProps: IngestionServerProps = {
+    const serverProps: IngestionServerV2Props = {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -234,24 +182,29 @@ export class IngestionServerNestedStack extends NestedStack {
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
-      loadBalancerLogProps,
-      protocol,
       domainName: props.domainName,
       certificateArn: props.certificateArn,
-      notificationsTopic,
-      kafkaSinkConfig,
       s3SinkConfig,
       kinesisSinkConfig,
+      kafkaSinkConfig,
       enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
-      authenticationSecretArn,
       projectId: props.projectId,
       appIds: props.appIds,
       clickStreamSDK: props.clickStreamSDK,
       workerStopTimeout: props.workerStopTimeout,
+      protocol: props.protocol,
+      enableApplicationLoadBalancerAccessLog: props.enableApplicationLoadBalancerAccessLog,
+      logBucketName: props.logBucketName,
+      logPrefix: props.logPrefix,
+
+      notificationsTopicArn: props.notificationsTopicArn,
+
+      enableAuthentication: props.enableAuthentication,
+      authenticationSecretArn: props.authenticationSecretArn,
     };
 
-    const ingestionServer = new IngestionServer(
+    const ingestionServer = new IngestionServerV2(
       this,
       'IngestionServer',
       serverProps,
@@ -267,27 +220,24 @@ export class IngestionServerNestedStack extends NestedStack {
       description: 'Server DNS',
     });
 
-    let ingestionServerUrl;
-    if (props.protocol === ApplicationProtocol.HTTPS) {
-      ingestionServerUrl = `https://${props.domainName}${props.serverEndpointPath}`;
-    } else {
-      ingestionServerUrl = `http://${ingestionServerDNS}${props.serverEndpointPath}`;
-    }
+    const isHttps = ingestionServer.isHttps;
 
     new CfnOutput(this, 'ingestionServerUrl', {
-      value: ingestionServerUrl,
+      value: Fn.conditionIf(isHttps.logicalId,
+        `https://${props.domainName}${props.serverEndpointPath}`,
+        `http://${ingestionServerDNS}${props.serverEndpointPath}`).toString(),
       description: 'Server Url',
     });
   }
 }
 
-export interface IngestionServerStackProps extends StackProps {
+export interface IngestionServerV2StackProps extends StackProps {
   deliverToS3: boolean;
   deliverToKinesis: boolean;
   deliverToKafka: boolean;
 }
 
-export class IngestionServerStack extends Stack {
+export class IngestionServerStackV2 extends Stack {
   public kinesisNestedStacks:{
     provisionedStack: NestedStack;
     onDemandStack: NestedStack;
@@ -299,7 +249,7 @@ export class IngestionServerStack extends Stack {
 
   public nestedStacks: NestedStack[] = [];
 
-  constructor(scope: Construct, id: string, props: IngestionServerStackProps) {
+  constructor(scope: Construct, id: string, props: IngestionServerV2StackProps) {
     super(scope, id, props);
 
     const featureName = 'IngestionServer';
@@ -323,7 +273,6 @@ export class IngestionServerStack extends Stack {
         notificationsTopicArnParam,
         serverMinParam,
         serverMaxParam,
-        warmPoolSizeParam,
         scaleOnCpuUtilizationPercentParam,
         kafkaParams,
         s3Params,
@@ -333,7 +282,7 @@ export class IngestionServerStack extends Stack {
         projectIdParam,
         appIdsParam,
         clickStreamSDKParam,
-        workerStopTimeoutParam,
+        fargateWorkerStopTimeoutParam,
         enableAuthenticationParam,
         authenticationSecretArnParam,
       },
@@ -350,13 +299,12 @@ export class IngestionServerStack extends Stack {
       });
     }
 
-    const nestStackCommonProps: IngestionServerNestStackProps = {
+    const nestStackCommonProps: IngestionServerV2NestStackProps = {
       vpcId: vpcIdParam.valueAsString,
       privateSubnetIds: privateSubnetIdsParam.valueAsString,
       publicSubnetIds: publicSubnetIdsParam!.valueAsString,
       serverMin: serverMinParam.valueAsNumber,
       serverMax: serverMaxParam.valueAsNumber,
-      warmPoolSize: warmPoolSizeParam.valueAsNumber,
       scaleOnCpuUtilizationPercent:
       scaleOnCpuUtilizationPercentParam.valueAsNumber,
       serverEndpointPath: serverEndpointPathParam.valueAsString,
@@ -366,15 +314,24 @@ export class IngestionServerStack extends Stack {
       protocol: protocolParam.valueAsString,
       enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
       devMode: devModeParam.valueAsString,
+      notificationsTopicArn: notificationsTopicArnParam.valueAsString,
+      enableApplicationLoadBalancerAccessLog: enableApplicationLoadBalancerAccessLogParam.valueAsString,
       projectId: projectIdParam.valueAsString,
       clickStreamSDK: clickStreamSDKParam.valueAsString,
       appIds: appIdsParam.valueAsString,
-      workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
+      workerStopTimeout: fargateWorkerStopTimeoutParam.valueAsNumber,
+      logBucketName: logS3BucketParam.valueAsString,
+      logPrefix: logS3PrefixParam.valueAsString,
+      enableAuthentication: enableAuthenticationParam.valueAsString,
+      authenticationSecretArn: authenticationSecretArnParam.valueAsString,
     };
+
+    const dataBufferPropsAndConditions: any[] = [];
 
     let nestStackProps = { ... nestStackCommonProps };
 
     if (props.deliverToS3 && s3Params) {
+      const s3Condition = createAlwaysTrueConditionsV2(this);
       nestStackProps = {
         ...nestStackProps,
         s3BucketName: s3Params.s3DataBucketParam.valueAsString,
@@ -382,24 +339,27 @@ export class IngestionServerStack extends Stack {
         batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,
         batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
       };
+
+      dataBufferPropsAndConditions.push({
+        nestStackProps,
+        conditions: [s3Condition],
+        conditionName: 'C',
+      });
     }
 
-    const commonConditionsAndProps = createCommonConditions(this, {
-      enableApplicationLoadBalancerAccessLogParam,
-      logS3BucketParam,
-      logS3PrefixParam,
-      notificationsTopicArnParam,
-      protocolParam,
-      domainNameParam,
-      certificateArnParam,
-      enableAuthenticationParam,
-      authenticationSecretArnParam,
-    });
-    let stackConditionsAndProps = commonConditionsAndProps;
-
     if (props.deliverToKinesis && this.kinesisNestedStacks) {
-      const kinesisConditionsAndProps = createKinesisConditions(this.kinesisNestedStacks);
-      stackConditionsAndProps = mergeConditionsAndServerPropsConfig(kinesisConditionsAndProps, commonConditionsAndProps);
+      const kinesisConditionsAndProps = createKinesisConditionsV2(this.kinesisNestedStacks);
+      kinesisConditionsAndProps.forEach((kinesisConditionAndProps) => {
+        nestStackProps = {
+          ...nestStackProps,
+          kinesisDataStreamArn: kinesisConditionAndProps.serverProps.kinesisDataStreamArn,
+        };
+        dataBufferPropsAndConditions.push({
+          nestStackProps,
+          conditions: [kinesisConditionAndProps.condition],
+          conditionName: kinesisConditionAndProps.name,
+        });
+      });
     }
 
     if (props.deliverToKafka && kafkaParams) {
@@ -407,34 +367,31 @@ export class IngestionServerStack extends Stack {
         ...nestStackProps,
         kafkaBrokers: kafkaParams.kafkaBrokersParam.valueAsString,
         kafkaTopic: kafkaParams.kafkaTopicParam.valueAsString,
-
       };
 
-      const mskConditionsAndProps = createMskConditions(this, kafkaParams);
-      stackConditionsAndProps = mergeConditionsAndServerPropsConfig(mskConditionsAndProps, commonConditionsAndProps);
+      const mskConditionsAndProps = createMskConditionsV2(this, kafkaParams);
+      mskConditionsAndProps.forEach((mskConditionAndProps) => {
+        nestStackProps = {
+          ...nestStackProps,
+          mskClusterName: mskConditionAndProps.serverProps.mskClusterName,
+          mskSecurityGroupId: mskConditionAndProps.serverProps.mskSecurityGroupId,
+        };
+        dataBufferPropsAndConditions.push({
+          nestStackProps,
+          conditions: mskConditionAndProps.conditions,
+          conditionName: mskConditionAndProps.name,
+        });
+      });
     }
 
-    const allConditions = stackConditionsAndProps.conditions;
-    const conditionServerPopsConfig = stackConditionsAndProps.serverPropsConfig;
-
-    for (let c of allConditions) {
-      const serverPropsCondition = getServerPropsByCondition(
-        c.conditions,
-        conditionServerPopsConfig,
-      );
-
-      const conditionExpression = Fn.conditionAnd(...c.conditions);
-      const serverNestStackProps = {
-        ...nestStackProps,
-        ...serverPropsCondition,
-      };
-
-      const nestedId = `IngestionServer${c.name}`;
+    for (const conditionsAndProps of dataBufferPropsAndConditions) {
+      const nestedId = `IngestionServer${conditionsAndProps.conditionName}`;
+      const conditionExpression = Fn.conditionAnd(...conditionsAndProps.conditions);
       const nestedStack = createNestedStackWithCondition(
         this,
         nestedId,
-        c.scName,
-        serverNestStackProps,
+        conditionsAndProps.conditionName,
+        conditionsAndProps.nestStackProps,
         conditionExpression,
       );
       this.nestedStacks.push(nestedStack);
@@ -448,17 +405,18 @@ export class IngestionServerStack extends Stack {
 function createNestedStackWithCondition(
   scope: Construct,
   id: string,
-  scName: string,
-  props: IngestionServerNestStackProps,
+  conditionName: string,
+  props: IngestionServerV2NestStackProps,
   conditionExpression: ICfnConditionExpression,
 ) {
+
   const condition = new CfnCondition(scope, id + 'Condition', {
     expression: conditionExpression,
   });
 
-  const ingestionServer = new IngestionServerNestedStack(scope, id, props);
+  const ingestionServer = new IngestionServerV2NestedStack(scope, id, props);
   (ingestionServer.nestedStackResource as CfnStack).cfnOptions.condition =
-    condition;
+  condition;
 
   addCfnNagToIngestionServer(ingestionServer);
 
@@ -477,12 +435,13 @@ function createNestedStackWithCondition(
   });
   serverURLOutput.condition = condition;
 
-  if (scName == 'K1' || scName == 'K2') {
+  if (conditionName == 'K1' || conditionName == 'K2') {
     const kdsOutput = new CfnOutput(scope, id + 'KinesisArn', {
       value: props.kinesisDataStreamArn || '',
       description: 'Kinesis Arn',
     });
     kdsOutput.condition = condition;
   }
+
   return ingestionServer;
 }

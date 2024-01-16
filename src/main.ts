@@ -26,6 +26,7 @@ import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
 import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
+import { IngestionServerStackV2 } from './ingestion-server-v2-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
@@ -144,6 +145,26 @@ stackSuppressions([
     deliverToS3: false,
   }),
   new IngestionServerStack(app, app.node.tryGetContext('ingestToS3StackName') ?? 'ingestion-server-s3-stack', { //To S3
+    synthesizer: synthesizer(),
+    deliverToKafka: false,
+    deliverToKinesis: false,
+    deliverToS3: true,
+  }),
+
+  // for Ingestion V2
+  new IngestionServerStackV2(app, 'ingestion-server-v2-kafka-stack', { //To Kafka
+    synthesizer: synthesizer(),
+    deliverToKafka: true,
+    deliverToKinesis: false,
+    deliverToS3: false,
+  }),
+  new IngestionServerStackV2(app, 'ingestion-server-v2-kinesis-stack', { //To Kinesis
+    synthesizer: synthesizer(),
+    deliverToKafka: false,
+    deliverToKinesis: true,
+    deliverToS3: false,
+  }),
+  new IngestionServerStackV2(app, 'ingestion-server-v2-s3-stack', { //To S3
     synthesizer: synthesizer(),
     deliverToKafka: false,
     deliverToKinesis: false,

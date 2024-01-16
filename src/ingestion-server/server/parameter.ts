@@ -141,14 +141,14 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
   );
 
   const serverMinParam = new CfnParameter(scope, 'ServerMin', {
-    description: 'Server size min number',
+    description: 'Server and task size min number',
     type: 'Number',
     default: '2',
     minValue: 0,
   });
 
   const serverMaxParam = new CfnParameter(scope, 'ServerMax', {
-    description: 'Server size max number',
+    description: 'Server and task size max number',
     type: 'Number',
     default: '2',
     minValue: 0,
@@ -213,6 +213,14 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     type: 'Number',
     default: '330',
     minValue: 60,
+  });
+
+  const fargateWorkerStopTimeoutParam = new CfnParameter(scope, 'FargateWorkerStopTimeout', {
+    description: 'Worker container stop timeout seconds for fargate task',
+    type: 'Number',
+    default: '60',
+    minValue: 60,
+    maxValue: 120,
   });
 
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
@@ -714,6 +722,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       appIdsParam,
       clickStreamSDKParam,
       workerStopTimeoutParam,
+      fargateWorkerStopTimeoutParam,
       enableAuthenticationParam,
       authenticationSecretArnParam,
     },
