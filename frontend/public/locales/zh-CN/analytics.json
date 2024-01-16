@@ -67,7 +67,7 @@
     "inputVisualDescriptionPlaceholder": "请输入图表描述"
   },
   "options": {
-    "eventNumber": "事件数",
+    "eventNumber": "总次数",
     "userNumber": "用户数",
     "customWindow": "自定义",
     "theDayWindow": "当天",
@@ -93,10 +93,10 @@
     "platformWechatMinPro": "微信小程序",
     "directlyFollowed": "直接跟随",
     "indirectlyFollowed": "非直接跟随",
-    "firstTouchAttributionModel": "首次触达",
-    "lastTouchAttributionModel": "末次触达",
-    "linearAttributionModel": "平均分担",
-    "positionBasedAttributionModel": "基于位置分担",
+    "firstTouchAttributionModel": "首次归因",
+    "lastTouchAttributionModel": "末次归因",
+    "linearAttributionModel": "线性归因",
+    "positionBasedAttributionModel": "位置归因",
     "timeDecayAttributionModel": "时间衰减"
   },
   "metadata": {
@@ -275,10 +275,11 @@
     "setConversionGoal": "设置转换目标",
     "setConversionWindow": "转换窗口期",
     "selectTouchpointEvent": "选择触点事件",
+    "attributionDateRange": "日期范围",
     "attributionModel": "归因模型",
-    "attributionFirst": "最初的",
-    "attributionInBetween": "中间的",
-    "attributionLast": "最后的"
+    "attributionFirst": "第一个归因位",
+    "attributionInBetween": "其余位置",
+    "attributionLast": "最后一个归因位"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置指标进行查询",
@@ -305,9 +306,8 @@
     "introducingAnalyticsHeader": "介绍分析工作坊",
     "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和仪表板的访问。",
     "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。",
-    "attributionSetConversionGoalInfo": "attributionSetConversionGoalInfo",
-    "attributionSetConversionWindowInfo": "attributionSetConversionWindowInfo",
-    "attributionSelectTouchpointEventInfo": "attributionSelectTouchpointEventInfo",
-    "attributionModelInfo": "attributionModelInfo"
+    "attributionSetConversionGoalInfo": "转化目标通常是能够代表某一业务目标的事件，常见的事件有购买、支付成功、注册等。",
+    "attributionSetConversionWindowInfo": "只有距目标转化时间在转化窗口发生的事件才会被纳入分析。",
+    "attributionSelectTouchpointEventInfo": "参与归因分析的事件，通常为推广运营为的点击事件、落地页的进入。"
   }
 }

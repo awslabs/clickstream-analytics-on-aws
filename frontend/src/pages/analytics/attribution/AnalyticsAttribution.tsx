@@ -474,7 +474,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   onFollow={() => {
                     dispatch?.({
                       type: StateActionType.SHOW_HELP_PANEL,
-                      payload: HelpPanelType.EXPLORE_EVENT_INFO,
+                      payload: HelpPanelType.EXPLORE_ATTRIBUTION_INFO,
                     });
                   }}
                 />
@@ -639,7 +639,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
         <Container>
           <SpaceBetween direction="horizontal" size="xs">
             <SpaceBetween direction="vertical" size="xs">
-              <InfoTitle title="Date Range" />
+              <InfoTitle title={t('analytics:labels.attributionDateRange')} />
               <ExploreDateRangePicker
                 disableSelect={loadingChart}
                 dateRangeValue={dateRangeValue}
@@ -654,9 +654,12 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
               <SpaceBetween direction="vertical" size="xs">
                 <InfoTitle
                   title={t('analytics:labels.attributionModel')}
-                  popoverDescription={t(
-                    'analytics:information.attributionModelInfo'
-                  )}
+                  infoLinkDispatch={() => {
+                    dispatch?.({
+                      type: StateActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_ATTRIBUTION_MODEL_INFO,
+                    });
+                  }}
                 />
                 <div className="cs-analytics-attribution-model">
                   <Select
