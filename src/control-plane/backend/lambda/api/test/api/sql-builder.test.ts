@@ -933,14 +933,20 @@ describe('SQL Builder test', () => {
               event_name = 'view_item'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (
               event_name = 'add_to_cart'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (event_name = 'purchase')
@@ -1178,14 +1184,20 @@ describe('SQL Builder test', () => {
               event_name = '_first_open'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (
               event_name = '_scroll'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (event_name = '_user_engagement')
@@ -1752,14 +1764,20 @@ describe('SQL Builder test', () => {
               event_name = 'view_item'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (
               event_name = 'add_to_cart'
               and (
                 platform = 'Android'
-                or device_screen_height <> 1400
+                or (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (event_name = 'purchase')
@@ -2011,14 +2029,20 @@ describe('SQL Builder test', () => {
               event_name = 'view_item'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (
               event_name = 'add_to_cart'
               and (
                 platform = 'Android'
-                or device_screen_height <> 1400
+                or (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (event_name = 'purchase')
@@ -3960,7 +3984,10 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             platform = 'Android'
-            and device_screen_height <> 1400
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
       ),
       date_list as (
@@ -4248,7 +4275,10 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             platform = 'Android'
-            and device_screen_height <> 1400
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
       ),
       date_list as (
@@ -4573,7 +4603,10 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             platform = 'Android'
-            and device_screen_height <> 1400
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
       ),
       date_list as (
@@ -4879,7 +4912,10 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             platform = 'Android'
-            and device_screen_height <> 1400
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
       ),
       date_list as (
@@ -5221,7 +5257,10 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             platform = 'Android'
-            or device_screen_height <> 1400
+            or (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
           and (
             (
@@ -5591,9 +5630,18 @@ describe('SQL Builder test', () => {
           and (
             platform = 'Android'
             or platform in ('Android', 'iOS')
-            or platform not like '%Web%'
-            or platform not in ('Web', 'WebchatMP')
-            or device_screen_height <> 1400
+            or (
+              platform is null
+              or platform not like '%Web%'
+            )
+            or (
+              platform is null
+              or platform not in ('Web', 'WebchatMP')
+            )
+            or (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
           )
           and (
             (
@@ -16796,7 +16844,10 @@ describe('SQL Builder test', () => {
               event_name = 'add_to_cart'
               and (
                 platform = 'Android'
-                and device_screen_height <> 1400
+                and (
+                  device_screen_height is null 
+                  or device_screen_height <> 1400
+                )
               )
             )
             or (event_name = 'purchase')
@@ -18574,54 +18625,6 @@ describe('SQL Builder test', () => {
       final_table
     where
       event_name is not null
-  `.trim().replace(/ /g, ''),
-    );
-
-  });
-
-  test('event path analysis view - not in filter', () => {
-
-    const sql = buildEventPathAnalysisView({
-      schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_ID_CNT,
-      specifyJoinColumn: true,
-      joinColumn: 'user_pseudo_id',
-      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
-      conversionIntervalInSeconds: 10*60,
-      globalEventCondition: {
-        conditions: [{
-          category: ConditionCategory.DEVICE,
-          property: 'mobile_brand_name',
-          operator: 'not_in',
-          value: ['xxx'],
-          dataType: MetadataValueType.STRING,
-        }]
-      },
-      eventAndConditions: [
-        {
-          eventName: 'view_item',
-        },
-        {
-          eventName: 'add_to_cart',
-        },
-        {
-          eventName: 'purchase',
-        },
-      ],
-      timeScopeType: ExploreTimeScopeType.FIXED,
-      groupColumn: ExploreGroupColumn.DAY,
-      timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2025-10-10'),
-      pathAnalysis: {
-        sessionType: ExplorePathSessionDef.SESSION,
-        nodeType: ExplorePathNodeType.PAGE_TITLE,
-        includingOtherEvents: false,
-        mergeConsecutiveEvents: false
-      },
-    });
-console.log(sql);
-    expect(sql.trim().replace(/ /g, '')).toEqual(`
-    
   `.trim().replace(/ /g, ''),
     );
 

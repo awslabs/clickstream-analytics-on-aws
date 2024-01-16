@@ -1651,7 +1651,7 @@ function _checkNodesLimit(params: any): CheckParamsStatus | void {
 
 function _mergeFilterConditionsForRetention(params: any): Condition[] {
   const allConditions: Condition[] = [];
-  if(params.pairEventAndConditions !== undefined) {
+  if (params.pairEventAndConditions !== undefined) {
     for (const pairCondition of params.pairEventAndConditions) {
       if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
         allConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
@@ -1666,32 +1666,32 @@ function _mergeFilterConditionsForRetention(params: any): Condition[] {
 }
 
 function _mergeFilterConditions(params: any): Condition[] {
-    const allConditions: Condition[] = [];
-    const eventAndConditions = params.eventAndConditions as EventAndCondition[];
-    const globalEventCondition = params.globalEventCondition as SQLCondition;
-  
-    if (eventAndConditions !== undefined) {
-      for (const condition of eventAndConditions) {
-        if (condition.sqlCondition?.conditions !== undefined) {
-          allConditions.push(...condition.sqlCondition.conditions);
-        }
+  const allConditions: Condition[] = [];
+  const eventAndConditions = params.eventAndConditions as EventAndCondition[];
+  const globalEventCondition = params.globalEventCondition as SQLCondition;
+
+  if (eventAndConditions !== undefined) {
+    for (const condition of eventAndConditions) {
+      if (condition.sqlCondition?.conditions !== undefined) {
+        allConditions.push(...condition.sqlCondition.conditions);
       }
     }
-  
-    if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
-      allConditions.push(...globalEventCondition.conditions);
-    }
-
-    allConditions.push(..._mergeFilterConditionsForRetention(params));
-  
-    return allConditions;
   }
+
+  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
+    allConditions.push(...globalEventCondition.conditions);
+  }
+
+  allConditions.push(..._mergeFilterConditionsForRetention(params));
+
+  return allConditions;
+}
 
 function _checkFilterTypeAndValue(params: any): CheckParamsStatus | void {
   const allConditions: Condition[] = _mergeFilterConditions(params);
   for (const filter of allConditions) {
     if (filter.dataType !== MetadataValueType.STRING) {
-      for( const value of filter.value) {
+      for ( const value of filter.value) {
         if (isNaN(value)) {
           return {
             success: false,

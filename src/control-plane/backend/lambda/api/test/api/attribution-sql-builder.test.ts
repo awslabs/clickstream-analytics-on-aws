@@ -282,7 +282,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -306,7 +309,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -332,7 +338,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -349,7 +358,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -751,7 +763,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -777,7 +792,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -807,7 +825,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -826,7 +847,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
