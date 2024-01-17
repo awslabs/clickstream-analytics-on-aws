@@ -43,7 +43,7 @@ import {
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions, dataSetReaderPermissionActions, folderContributorPermissionActions, folderOwnerPermissionActions } from '../../../../common/constant';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
@@ -307,11 +307,11 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     Permissions: [
       {
         Principal: commonParams.sharePrincipalArn,
-        Actions: folderContributorPermissionActions,
+        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
       },
       {
         Principal: commonParams.ownerPrincipalArn,
-        Actions: folderOwnerPermissionActions,
+        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
       },
     ],
   });
@@ -574,11 +574,11 @@ const updateFolderMembership = async (quickSight: QuickSight, commonParams: Reso
     GrantPermissions: [
       {
         Principal: commonParams.sharePrincipalArn,
-        Actions: folderContributorPermissionActions,
+        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
       },
       {
         Principal: commonParams.ownerPrincipalArn,
-        Actions: folderOwnerPermissionActions,
+        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
       },
     ],
   });
@@ -687,11 +687,11 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       Permissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dataSetAdminPermissionActions,
+          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dataSetReaderPermissionActions,
+          Actions: DATASET_READER_PERMISSION_ACTIONS,
         },
       ],
       DatasetParameters: datasetParameters,
@@ -744,7 +744,7 @@ const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       Permissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: analysisAdminPermissionActions,
+          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
         },
       ],
 
@@ -775,11 +775,11 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
         Principal: commonParams.ownerPrincipalArn,
-        Actions: dashboardAdminPermissionActions,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
       },
       {
         Principal: commonParams.sharePrincipalArn,
-        Actions: dashboardAdminPermissionActions,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
       }],
 
       SourceEntity: sourceEntity,
@@ -985,11 +985,11 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dataSetAdminPermissionActions,
+          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dataSetReaderPermissionActions,
+          Actions: DATASET_READER_PERMISSION_ACTIONS,
         },
       ],
     });
@@ -1028,7 +1028,7 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: analysisAdminPermissionActions,
+          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     });
@@ -1103,11 +1103,11 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dashboardAdminPermissionActions,
+          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dashboardAdminPermissionActions,
+          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     });

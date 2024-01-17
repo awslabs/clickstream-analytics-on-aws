@@ -400,7 +400,7 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
 
-export const dataSetReaderPermissionActions = [
+export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',
   'quicksight:PassDataSet',
@@ -408,8 +408,8 @@ export const dataSetReaderPermissionActions = [
   'quicksight:ListIngestions',
 ];
 
-export const dataSetAdminPermissionActions = [
-  ...dataSetReaderPermissionActions,
+export const DATASET_ADMIN_PERMISSION_ACTIONS = [
+  ...DATASET_READER_PERMISSION_ACTIONS,
   'quicksight:UpdateDataSetPermissions',
   'quicksight:UpdateDataSet',
   'quicksight:DeleteDataSet',
@@ -417,7 +417,7 @@ export const dataSetAdminPermissionActions = [
   'quicksight:CancelIngestion',
 ];
 
-export const analysisAdminPermissionActions = [
+export const ANALYSIS_ADMIN_PERMISSION_ACTIONS = [
   'quicksight:DescribeAnalysis',
   'quicksight:UpdateAnalysisPermissions',
   'quicksight:QueryAnalysis',
@@ -427,14 +427,14 @@ export const analysisAdminPermissionActions = [
   'quicksight:DescribeAnalysisPermissions',
 ];
 
-export const dashboardReaderPermissionActions = [
+export const DASHBOARD_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDashboard',
   'quicksight:ListDashboardVersions',
   'quicksight:QueryDashboard',
 ];
 
-export const dashboardAdminPermissionActions = [
-  ...dashboardReaderPermissionActions,
+export const DASHBOARD_ADMIN_PERMISSION_ACTIONS = [
+  ...DASHBOARD_READER_PERMISSION_ACTIONS,
   'quicksight:UpdateDashboard',
   'quicksight:DeleteDashboard',
   'quicksight:UpdateDashboardPermissions',
@@ -442,7 +442,7 @@ export const dashboardAdminPermissionActions = [
   'quicksight:UpdateDashboardPublishedVersion',
 ];
 
-export const folderContributorPermissionActions = [
+export const FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS = [
   'quicksight:CreateFolder',
   'quicksight:DescribeFolder',
   'quicksight:CreateFolderMembership',
@@ -450,8 +450,8 @@ export const folderContributorPermissionActions = [
   'quicksight:DescribeFolderPermissions',
 ];
 
-export const folderOwnerPermissionActions = [
-  ...folderContributorPermissionActions,
+export const FOLDER_OWNER_PERMISSION_ACTIONS = [
+  ...FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
   'quicksight:UpdateFolder',
   'quicksight:DeleteFolder',
   'quicksight:UpdateFolderPermissions',

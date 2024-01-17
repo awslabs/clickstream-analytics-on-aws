@@ -28,7 +28,7 @@ import {
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { DEFAULT_DASHBOARD_NAME_PREFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions, folderContributorPermissionActions, folderOwnerPermissionActions } from '../../common/constants-ln';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
@@ -284,7 +284,7 @@ export const createPublishDashboard = async (
       Name: `dataset-${dashboard.name}-default`,
       Permissions: [{
         Principal: principals.publishUserArn,
-        Actions: dataSetAdminPermissionActions,
+        Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
       }],
       ImportMode: DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
@@ -342,7 +342,7 @@ export const createPublishDashboard = async (
       Permissions: [
         {
           Principal: principals.publishUserArn,
-          Actions: dashboardAdminPermissionActions,
+          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     };
@@ -356,7 +356,7 @@ export const createPublishDashboard = async (
       Permissions: [
         {
           Principal: principals.publishUserArn,
-          Actions: analysisAdminPermissionActions,
+          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     };
@@ -562,11 +562,11 @@ export const checkFolder = async (
         Permissions: [
           {
             Principal: principals.publishUserArn,
-            Actions: folderContributorPermissionActions,
+            Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
           },
           {
             Principal: principals.exploreUserArn,
-            Actions: folderOwnerPermissionActions,
+            Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
           },
         ],
       });
