@@ -35,13 +35,19 @@ import {
   TemplateVersionSummary,
   ParameterValueType,
   DatasetParameter,
+  MemberType,
+  FolderType,
+  SharingModel,
+  ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
+import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
   waitForAnalysisChangeCompleted,
@@ -53,10 +59,6 @@ import {
   QuickSightDashboardDefProps,
   DataSetProps,
   truncateString,
-  dashboardAdminPermissionActions,
-  dataSetAdminPermissionActions,
-  analysisAdminPermissionActions,
-  dataSetReaderPermissionActions,
   waitForTemplateChangeCompleted,
   existDashboard,
   existAnalysis,
@@ -64,6 +66,7 @@ import {
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
   DateTimeParameter,
+  existFolder,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -182,7 +185,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   logger.info('Filtering params:', {
     propsSchemas: props.schemas,
     oldPropsSchemas: oldProps.schemas,
-    databaseSchemanameArray: databaseSchemaNameArray,
+    databaseSchemaNameArray: databaseSchemaNameArray,
     oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
   });
 
@@ -295,11 +298,37 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
+  const folder = await quickSight.createFolder({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: getQuickSightFolderId(commonParams.databaseName, commonParams.schema),
+    Name: getQuickSightFolderName(commonParams.databaseName, commonParams.schema),
+    FolderType: FolderType.SHARED,
+    SharingModel: SharingModel.ACCOUNT,
+    Permissions: [
+      {
+        Principal: commonParams.sharePrincipalArn,
+        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+      },
+      {
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+      },
+    ],
+  });
+
   const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
 
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
+
+  await quickSight.createFolderMembership({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: folder.FolderId!,
+    MemberId: dashboard?.DashboardId!,
+    MemberType: MemberType.DASHBOARD,
+  });
+
   return dashboard;
 
 };
@@ -325,8 +354,48 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
 
+  await quickSight.listFolderMembers({
+    AwsAccountId: accountId,
+    FolderId: getQuickSightFolderId(databaseName, schema),
+  }).then(async (data) => {
+    if (data !== undefined && data.FolderMemberList !== undefined) {
+      for (const member of data.FolderMemberList) {
+        const memberType = getMemberType(member.MemberArn!, member.MemberId!);
+        await quickSight.deleteFolderMembership({
+          AwsAccountId: accountId,
+          FolderId: getQuickSightFolderId(databaseName, schema),
+          MemberId: member.MemberId!,
+          MemberType: memberType,
+        });
+      }
+    }
+  });
+
+  //delete folder
+  await quickSight.deleteFolder({
+    AwsAccountId: accountId,
+    FolderId: getQuickSightFolderId(databaseName, schema),
+  });
+
   return result;
 
+};
+
+const getMemberType = function(memberArn: string, memberId: string): MemberType | undefined {
+  let memberType = undefined;
+
+  if (memberArn.includes(`:dashboard/${memberId}`)) {
+    memberType = MemberType.DASHBOARD;
+  } else if (memberArn.includes(`:analysis/${memberId}`)) {
+    memberType = MemberType.ANALYSIS;
+  } else if (memberArn.includes(`:dataset/${memberId}`)) {
+    memberType = MemberType.DATASET;
+  } else if (memberArn.includes(`:datasource/${memberId}`)) {
+    memberType = MemberType.DATASOURCE;
+  } else if (memberArn.includes(`:topic/${memberId}`)) {
+    memberType = MemberType.TOPIC;
+  }
+  return memberType;
 };
 
 const getLatestTemplateVersion = async (quickSight: QuickSight,
@@ -457,13 +526,63 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
 
+    //due to dashboardId changed in version v1.1, need to delete old dashboard
     const foundDashboardId = await findDashboardWithPrefix(quickSight, commonParams.awsAccountId, dashboardId.id.replace(`/${dashboardId.idSuffix}/g`, ''), dashboard?.DashboardId);
     if (foundDashboardId !== undefined) {
       await deleteDashboardById(quickSight, commonParams.awsAccountId, foundDashboardId);
     }
   }
 
+  const folderId = `clickstream_${commonParams.databaseName}_${commonParams.schema}`;
+  await updateFolderMembership(quickSight, commonParams, folderId, dashboard?.DashboardId!);
+
   return dashboard;
+};
+
+const updateFolderMembership = async (quickSight: QuickSight, commonParams: ResourceCommonParams, folderId: string, dashboardId: string)
+: Promise<void> => {
+  let folderExist = await existFolder(quickSight, commonParams.awsAccountId, folderId);
+  if (!folderExist) {
+    await quickSight.createFolder({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      Name: `${commonParams.databaseName}_${commonParams.schema}`,
+      FolderType: FolderType.SHARED,
+      SharingModel: SharingModel.ACCOUNT,
+    });
+  }
+
+  try {
+    await quickSight.createFolderMembership({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      MemberId: dashboardId,
+      MemberType: MemberType.DASHBOARD,
+    });
+  } catch (e) {
+    if (e instanceof ResourceExistsException) {
+      logger.warn('folder membership already exist. skip create operation.');
+    } else {
+      throw e;
+    }
+  }
+
+  //update folder permissions
+  await quickSight.updateFolderPermissions({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: folderId,
+    GrantPermissions: [
+      {
+        Principal: commonParams.sharePrincipalArn,
+        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+      },
+      {
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+      },
+    ],
+  });
+
 };
 
 const buildDataSetParameter = function (dateTimeDatasetParameter: DateTimeParameter[] | undefined): DatasetParameter[] | undefined {
@@ -568,11 +687,11 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       Permissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dataSetAdminPermissionActions,
+          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dataSetReaderPermissionActions,
+          Actions: DATASET_READER_PERMISSION_ACTIONS,
         },
       ],
       DatasetParameters: datasetParameters,
@@ -625,7 +744,7 @@ const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       Permissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: analysisAdminPermissionActions,
+          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
         },
       ],
 
@@ -656,11 +775,11 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
         Principal: commonParams.ownerPrincipalArn,
-        Actions: dashboardAdminPermissionActions,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
       },
       {
         Principal: commonParams.sharePrincipalArn,
-        Actions: dashboardAdminPermissionActions,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
       }],
 
       SourceEntity: sourceEntity,
@@ -866,11 +985,11 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dataSetAdminPermissionActions,
+          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dataSetReaderPermissionActions,
+          Actions: DATASET_READER_PERMISSION_ACTIONS,
         },
       ],
     });
@@ -909,7 +1028,7 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: analysisAdminPermissionActions,
+          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     });
@@ -984,11 +1103,11 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       GrantPermissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
-          Actions: dashboardAdminPermissionActions,
+          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dashboardAdminPermissionActions,
+          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
         },
       ],
     });

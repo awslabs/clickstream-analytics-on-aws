@@ -192,23 +192,15 @@ declare global {
 
   interface IAnalyticsDashboard {
     readonly id: string;
-    readonly type: string;
-    readonly prefix: string;
-
-    readonly projectId: string;
-    readonly appId: string;
-    readonly dashboardId: string;
-
     readonly name: string;
     readonly description: string;
+    readonly projectId: string;
+    readonly appId: string;
     readonly region: string;
-    readonly sheets: IAnalyticsDashboardSheet[];
-    readonly embedUrl?: string;
-
+    readonly sheets: IDashboardSheet[];
+    embedUrl?: string;
     readonly createAt: number;
     readonly updateAt: number;
-    readonly operator: string;
-    readonly deleted: boolean;
   }
 
   interface IAnalyticsDashboardSheet {

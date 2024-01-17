@@ -15,7 +15,7 @@ import { IApplication } from '../model/application';
 import { IDictionary } from '../model/dictionary';
 import { IPipeline } from '../model/pipeline';
 import { IPlugin } from '../model/plugin';
-import { IDashboard, IProject } from '../model/project';
+import { IProject } from '../model/project';
 import { IUser, IUserSettings } from '../model/user';
 
 export interface ClickStreamStore {
@@ -25,11 +25,6 @@ export interface ClickStreamStore {
   listProjects: (order: string) => Promise<IProject[]>;
   deleteProject: (id: string, operator: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
-
-  createDashboard: (dashboard: IDashboard) => Promise<string>;
-  getDashboard: (dashboardId: string) => Promise<IDashboard | undefined>;
-  listDashboards: (projectId: string, appId: string, order: string) => Promise<IDashboard[]>;
-  deleteDashboard: (dashboardId: string, operator: string) => Promise<void>;
 
   addApplication: (app: IApplication) => Promise<string>;
   getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;

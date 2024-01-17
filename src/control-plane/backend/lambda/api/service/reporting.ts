@@ -16,7 +16,7 @@ import { join } from 'path';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
+import { DataSetProps } from './quicksight/dashboard-ln';
 import {
   createDataSet,
   funnelVisualColumns,
@@ -47,7 +47,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -819,7 +819,7 @@ export class ReportingService {
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: analysisAdminPermissionActions,
+        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
       }],
       Definition: dashboard as AnalysisDefinition,
     });
@@ -832,7 +832,7 @@ export class ReportingService {
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: dashboardAdminPermissionActions,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
       }],
       Definition: dashboard,
     });

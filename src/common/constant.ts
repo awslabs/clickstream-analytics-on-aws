@@ -363,6 +363,7 @@ export const ALARM_NAME_PREFIX = 'Clickstream';
 
 export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';
 export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
+export const DEFAULT_DASHBOARD_NAME_PREFIX = 'Clickstream Dashboard ';
 
 export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
 
@@ -398,3 +399,60 @@ export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
+
+export const DATASET_READER_PERMISSION_ACTIONS = [
+  'quicksight:DescribeDataSet',
+  'quicksight:DescribeDataSetPermissions',
+  'quicksight:PassDataSet',
+  'quicksight:DescribeIngestion',
+  'quicksight:ListIngestions',
+];
+
+export const DATASET_ADMIN_PERMISSION_ACTIONS = [
+  ...DATASET_READER_PERMISSION_ACTIONS,
+  'quicksight:UpdateDataSetPermissions',
+  'quicksight:UpdateDataSet',
+  'quicksight:DeleteDataSet',
+  'quicksight:CreateIngestion',
+  'quicksight:CancelIngestion',
+];
+
+export const ANALYSIS_ADMIN_PERMISSION_ACTIONS = [
+  'quicksight:DescribeAnalysis',
+  'quicksight:UpdateAnalysisPermissions',
+  'quicksight:QueryAnalysis',
+  'quicksight:UpdateAnalysis',
+  'quicksight:RestoreAnalysis',
+  'quicksight:DeleteAnalysis',
+  'quicksight:DescribeAnalysisPermissions',
+];
+
+export const DASHBOARD_READER_PERMISSION_ACTIONS = [
+  'quicksight:DescribeDashboard',
+  'quicksight:ListDashboardVersions',
+  'quicksight:QueryDashboard',
+];
+
+export const DASHBOARD_ADMIN_PERMISSION_ACTIONS = [
+  ...DASHBOARD_READER_PERMISSION_ACTIONS,
+  'quicksight:UpdateDashboard',
+  'quicksight:DeleteDashboard',
+  'quicksight:UpdateDashboardPermissions',
+  'quicksight:DescribeDashboardPermissions',
+  'quicksight:UpdateDashboardPublishedVersion',
+];
+
+export const FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS = [
+  'quicksight:CreateFolder',
+  'quicksight:DescribeFolder',
+  'quicksight:CreateFolderMembership',
+  'quicksight:DeleteFolderMembership',
+  'quicksight:DescribeFolderPermissions',
+];
+
+export const FOLDER_OWNER_PERMISSION_ACTIONS = [
+  ...FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+  'quicksight:UpdateFolder',
+  'quicksight:DeleteFolder',
+  'quicksight:UpdateFolderPermissions',
+];

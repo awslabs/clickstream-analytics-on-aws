@@ -14,6 +14,7 @@
 import { Arn, ArnFormat, Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export function createRoleForQuicksightCustomResourceLambda(
@@ -102,6 +103,23 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:UpdateDashboard',
         'quicksight:UpdateDashboardPermissions',
         'quicksight:UpdateDashboardPublishedVersion',
+      ],
+    }),
+
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        `${arnPrefix}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
+      ],
+      actions: [
+        'quicksight:CreateFolderMembership',
+        'quicksight:DeleteFolderMembership',
+        'quicksight:DescribeFolder',
+        'quicksight:CreateFolder',
+        'quicksight:DeleteFolder',
+        'quicksight:UpdateFolder',
+        'quicksight:UpdateFolderPermissions',
+        'quicksight:ListFolderMembers',
       ],
     }),
 

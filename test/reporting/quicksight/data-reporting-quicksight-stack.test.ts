@@ -511,6 +511,39 @@ describe('DataReportingQuickSightStack resource test', () => {
               ],
             },
           },
+          {
+            Action: [
+              'quicksight:CreateFolderMembership',
+              'quicksight:DeleteFolderMembership',
+              'quicksight:DescribeFolder',
+              'quicksight:CreateFolder',
+              'quicksight:DeleteFolder',
+              'quicksight:UpdateFolder',
+              'quicksight:UpdateFolderPermissions',
+              'quicksight:ListFolderMembers',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':folder/clickstream*',
+                ],
+              ],
+            },
+          },
         ],
         Version: '2012-10-17',
       },
