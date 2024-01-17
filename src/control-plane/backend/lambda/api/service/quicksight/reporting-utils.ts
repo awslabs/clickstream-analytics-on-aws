@@ -32,9 +32,9 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
+import { DataSetProps } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -318,13 +318,13 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     const datasetPermissionActions = [
       {
         Principal: exploreUserArn,
-        Actions: dataSetAdminPermissionActions,
+        Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
       },
     ];
     if (requestAction === ExploreRequestAction.PUBLISH) {
       datasetPermissionActions.push({
         Principal: publishUserArn,
-        Actions: dataSetReaderPermissionActions,
+        Actions: DATASET_READER_PERMISSION_ACTIONS,
       });
     }
     const dataset = await quickSight.createDataSet({

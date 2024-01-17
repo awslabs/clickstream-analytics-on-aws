@@ -95,48 +95,6 @@ export interface QuickSightDashboardDefProps {
   dataSets: DataSetProps[];
 };
 
-export const dataSetReaderPermissionActions = [
-  'quicksight:DescribeDataSet',
-  'quicksight:DescribeDataSetPermissions',
-  'quicksight:PassDataSet',
-  'quicksight:DescribeIngestion',
-  'quicksight:ListIngestions',
-];
-
-export const dataSetAdminPermissionActions = [
-  ...dataSetReaderPermissionActions,
-  'quicksight:UpdateDataSetPermissions',
-  'quicksight:UpdateDataSet',
-  'quicksight:DeleteDataSet',
-  'quicksight:CreateIngestion',
-  'quicksight:CancelIngestion',
-];
-
-export const analysisAdminPermissionActions = [
-  'quicksight:DescribeAnalysis',
-  'quicksight:UpdateAnalysisPermissions',
-  'quicksight:QueryAnalysis',
-  'quicksight:UpdateAnalysis',
-  'quicksight:RestoreAnalysis',
-  'quicksight:DeleteAnalysis',
-  'quicksight:DescribeAnalysisPermissions',
-];
-
-export const dashboardReaderPermissionActions = [
-  'quicksight:DescribeDashboard',
-  'quicksight:ListDashboardVersions',
-  'quicksight:QueryDashboard',
-];
-
-export const dashboardAdminPermissionActions = [
-  ...dashboardReaderPermissionActions,
-  'quicksight:UpdateDashboard',
-  'quicksight:DeleteDashboard',
-  'quicksight:UpdateDashboardPermissions',
-  'quicksight:DescribeDashboardPermissions',
-  'quicksight:UpdateDashboardPublishedVersion',
-];
-
 export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 };
@@ -374,6 +332,23 @@ export const existDashboard = async (quickSight: QuickSight, accountId: string, 
     await quickSight.describeDashboard({
       AwsAccountId: accountId,
       DashboardId: dashboardId,
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
+export const existFolder = async (quickSight: QuickSight, accountId: string, folderId: string) => {
+
+  try {
+    await quickSight.describeFolder({
+      AwsAccountId: accountId,
+      FolderId: folderId,
     });
     return true;
   } catch (err: any) {

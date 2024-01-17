@@ -31,7 +31,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
-import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
@@ -53,7 +53,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     return (
       <div className="clickstream-link-style">
         <Link to={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}>
-          {item.name === DEFAULT_DASHBOARD_NAME ? (
+          {item.name.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX) ? (
             <>
               {t('analytics:dashboard.defaultUserLifecycle')} -
               {
@@ -72,7 +72,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   const buildCardDescription = (item: IAnalyticsDashboard) => {
     return (
       <>
-        {item.name === DEFAULT_DASHBOARD_NAME ? (
+        {item.name.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX) ? (
           <>{t('analytics:dashboard.defaultUserLifecycleDescription')}</>
         ) : (
           item.description || '-'
@@ -96,9 +96,10 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
           item?.createAt ? moment(item?.createAt).format(TIME_FORMAT) : '-',
       },
       {
-        id: 'operator',
-        header: t('analytics:list.createdBy'),
-        content: (item: IAnalyticsDashboard) => item.operator || '-',
+        id: 'updateAt',
+        header: t('analytics:list.updateAt'),
+        content: (item: IAnalyticsDashboard) =>
+          item?.updateAt ? moment(item?.updateAt).format(TIME_FORMAT) : '-',
       },
     ],
   };

@@ -15,7 +15,7 @@ import { AccessDeniedException, ListUsersCommand, QuickSight, QuickSightClient, 
 import { RedshiftDataClient, RedshiftDataClientConfig } from '@aws-sdk/client-redshift-data';
 import { STSClient, STSClientConfig } from '@aws-sdk/client-sts';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { QUICKSIGHT_CONTROL_PLANE_REGION, awsAccountId } from './constants';
+import { awsAccountId, awsRegion } from './constants';
 import { REGION_PATTERN } from './constants-ln';
 import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
@@ -115,7 +115,7 @@ export class SDKClient {
     const matchValues = [...message.matchAll(regexp)];
     let identityRegion = '';
     for (let v of matchValues) {
-      if (v[0] !== QUICKSIGHT_CONTROL_PLANE_REGION) {
+      if (v[0] !== awsRegion) {
         identityRegion = v[0];
         break;
       }
@@ -127,7 +127,7 @@ export class SDKClient {
     try {
       const defaultQuickSightClient = new QuickSightClient({
         ...aws_sdk_client_common_config,
-        region: QUICKSIGHT_CONTROL_PLANE_REGION,
+        region: awsRegion,
       });
       const params: ListUsersCommand = new ListUsersCommand({
         AwsAccountId: awsAccountId,
@@ -139,6 +139,6 @@ export class SDKClient {
         return this.getIdentityRegionFromMessage(err.message);
       }
     }
-    return QUICKSIGHT_CONTROL_PLANE_REGION;
+    return awsRegion;
   };
 }
