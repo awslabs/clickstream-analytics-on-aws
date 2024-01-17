@@ -11,27 +11,39 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.flink;
 
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
+import software.aws.solution.clickstream.flink.mock.MockKinesisSink;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 import static org.mockito.Mockito.mock;
 
 public class BaseFlinkTest {
+    public static final String TMP_GEO_LITE_2_CITY_MMDB = "/tmp/GeoLite2-City.mmdb";
     @ClassRule
     public static MiniClusterWithClientResource flinkCluster = new MiniClusterWithClientResource(
             new MiniClusterResourceConfiguration.Builder()
@@ -40,22 +52,23 @@ public class BaseFlinkTest {
                     .build());
 
     protected StreamExecutionEnvironment env;
-    protected StreamingJob streamingJob;
+
     @BeforeAll
-    public static void downloadResources() {
+    public static void setUPAll() {
         System.out.println("BeforeAll downloadResources");
         if (!needDownloadFile()) {
             return;
         }
         System.out.println("download GeoLite2-City.mmdb.gz...");
-//        String dbFile = downloadFile("https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz");
-//        System.out.println("download completed, " + dbFile);
+        String dbFile = downloadFile("https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz");
+        System.out.println("download completed, " + dbFile);
     }
 
     public static String downloadFile(String urlStr) {
-        String dbFile = new File(BaseFlinkTest.class.getResource("/original_data.json").getPath())
-                .getParent() + "/GeoLite2-City.mmdb";
-        System.out.println(dbFile);
+        File dbFile = new File(TMP_GEO_LITE_2_CITY_MMDB);
+        if (dbFile.isFile()) {
+            return dbFile.getAbsolutePath();
+        }
         try (
                 FileOutputStream fs = new FileOutputStream(dbFile)
         ) {
@@ -71,31 +84,34 @@ public class BaseFlinkTest {
                 fs.write(buffer, 0, byteRead);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return dbFile;
+        return dbFile.getAbsolutePath();
+    }
+
+    public static boolean needDownloadFile() {
+        String dfile = System.getenv("DOWNLOAD_FILE");
+        return !"false".equals(dfile) && !"0".equals(dfile);
     }
 
     @BeforeEach
     public void init() {
+        Configurator.setRootLevel(Level.WARN);
+        Configurator.setLevel("software.aws.solution.clickstream", Level.DEBUG);
         System.out.println("BeforeEach init");
-//        env = mock(LocalStreamEnvironment.class);
         env = StreamExecutionEnvironment.getExecutionEnvironment();
-        streamingJob = mock(StreamingJob.class);
     }
 
     @AfterEach
     public void clear() {
-        MockKinesisSink.values.clear();
+        MockKinesisSink.appValues.clear();
         System.out.println("AfterEach clear");
     }
 
-    public static boolean needDownloadFile(){
-        String dfile = System.getenv("DOWNLOAD_FILE");
-        if ("false".equals(dfile) || "0".equals(dfile)) {
-            return false;
-        }
-        return true;
+    public String resourceFileAsString(final String fileName) throws IOException {
+        ObjectMapper om = new ObjectMapper();
+        String jsonStr = IOUtils.resourceToString(fileName, StandardCharsets.UTF_8).trim();
+        JsonNode jsonNode = om.readTree(jsonStr);
+        return om.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
     }
 }

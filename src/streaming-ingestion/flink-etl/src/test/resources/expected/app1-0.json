@@ -1,0 +1,149 @@
+{
+  "project_id" : "project1",
+  "event_name" : "_app_start",
+  "event_id" : "1917e95b-6d75-4609-a2a0-18b45fb183c2",
+  "app_id" : "app1",
+  "user_pseudo_id" : "636aa295-c083-4bf0-bc16-4c5e9c0e2ac6",
+  "event_timestamp" : 1684962462712,
+  "device" : {
+    "vendor_id" : "e4ffd32989074992",
+    "mobile_brand_name" : "Realme",
+    "mobile_model_name" : "Realme 10T 5G",
+    "manufacturer" : "Realme",
+    "screen_width" : 1080,
+    "screen_height" : 2316,
+    "carrier" : "China Mobile",
+    "network_type" : "WIFI",
+    "operating_system" : "Android",
+    "operating_system_version" : "12",
+    "ua_browser" : "Python Requests",
+    "ua_browser_version" : null,
+    "ua_os" : "Other",
+    "ua_os_version" : null,
+    "ua_device" : "Other",
+    "ua_device_category" : null,
+    "system_language" : "pt",
+    "time_zone_offset_seconds" : 7200000,
+    "advertising_id" : null,
+    "host_name" : null
+  },
+  "app_info" : {
+    "app_id" : "app1",
+    "id" : "com.example.notepad",
+    "install_source" : "QQ Store",
+    "version" : "2.9.0",
+    "app_package_name" : "com.example.notepad"
+  },
+  "ecommerce" : null,
+  "event_bundle_sequence_id" : 657998,
+  "event_date" : "2023-05-24",
+  "event_dimensions" : null,
+  "event_params" : [ {
+    "key" : "_session_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "9c0e2ac6-20230524-210742709"
+    }
+  }, {
+    "key" : "_session_start_timestamp",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 1684962462709,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_session_duration",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 3,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_session_number",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 9,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_channel",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "QQ Store"
+    }
+  }, {
+    "key" : "_screen_name",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : ""
+    }
+  }, {
+    "key" : "_screen_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : ""
+    }
+  } ],
+  "event_previous_timestamp" : 0,
+  "event_server_timestamp_offset" : 19364121524,
+  "event_value_in_usd" : 0,
+  "geo" : {
+    "city" : "Columbus",
+    "continent" : "North America",
+    "country" : "United States",
+    "metro" : null,
+    "region" : null,
+    "sub_continent" : null,
+    "locale" : "pt_BR"
+  },
+  "ingest_timestamp" : 1704326584236,
+  "items" : null,
+  "platform" : "Android",
+  "privacy_info" : { },
+  "traffic_source" : {
+    "_traffic_source_source" : "bytedance",
+    "_traffic_source_medium" : "Search"
+  },
+  "user_first_touch_timestamp" : 1681218459820,
+  "user_id" : "81c94dc5-01d7-48d7-a351-4ac730e3deec",
+  "user_ltv" : { },
+  "user_properties" : [ {
+    "key" : "_user_first_touch_timestamp",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 1681218459820,
+      "string_value" : null
+    },
+    "set_timestamp" : 1681218459820
+  }, {
+    "key" : "_user_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "81c94dc5-01d7-48d7-a351-4ac730e3deec"
+    },
+    "set_timestamp" : 1684929006763
+  }, {
+    "key" : "_user_name",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Isabella King"
+    },
+    "set_timestamp" : 1684929006763
+  } ]
+}

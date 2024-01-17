@@ -11,22 +11,20 @@
  *  and limitations under the License.
  */
 
+package software.aws.solution.clickstream.flink;
 
-package software.aws.solution.clickstream.plugin.transformer;
 
-import lombok.Getter;
-public class KvObjectNode {
-    @Getter
-    private final String key;
+import org.junit.jupiter.api.Test;
 
-    @Getter
-    private final String value;
+public class ClickstreamExceptionTest {
 
-    @Getter
-    private final String valueFormat;
-    public KvObjectNode(final String key, final String value, final String valueFormat) {
-        this.key = key;
-        this.value = value;
-        this.valueFormat = valueFormat;
+    @Test
+    void testClickstreamException(){
+        try {
+            new ClickstreamException("test");
+            new ClickstreamException(new Exception("test"));
+        }catch (Exception e){
+            assert false;
+        }
     }
 }

@@ -11,22 +11,24 @@
  *  and limitations under the License.
  */
 
-
 package software.aws.solution.clickstream.plugin.transformer;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
+public class UserKvObjectNode {
+    @Getter
+    private final String key;
+    @Getter
+    private final String value;
+    @Getter
+    private final String valueFormat;
+    @Getter
+    private final Long setTimestamp;
 
-public interface Transformer extends Serializable {
-    ObjectNode transform(Map<String, String> paramMap);
-
-    ArrayNode transformArrayNode(List<KvObjectNode> paramList);
-
-    ObjectNode transformObjectNode(List<JsonObjectNode> paramList);
-
-    ArrayNode transformUserArrayNode(List<UserKvObjectNode> paramList);
+    public UserKvObjectNode(final String key, final String value, final Long setTimestamp, final String valueFormat) {
+        this.key = key;
+        this.value = value;
+        this.setTimestamp = setTimestamp;
+        this.valueFormat = valueFormat;
+    }
 }

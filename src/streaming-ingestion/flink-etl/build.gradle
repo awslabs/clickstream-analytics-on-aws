@@ -64,14 +64,12 @@ shadowJar {
     }
 }
 
+applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.xml"]
 
 dependencies {
     api "com.amazonaws:aws-kinesisanalytics-runtime:$kdaRuntimeVersion"
     api "org.apache.flink:flink-connector-kinesis:$flinkVersion"
     api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkVersion"
-    api "org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion"
-    api "org.apache.logging.log4j:log4j-api:$log4jVersion"
-    api "org.apache.logging.log4j:log4j-core:$log4jVersion"
     api "org.apache.flink:flink-streaming-java:$flinkVersion"
     api "org.apache.flink:flink-clients:$flinkVersion"
     api "software.amazon.awssdk:bom:2.21.2"
@@ -81,6 +79,10 @@ dependencies {
     testImplementation "org.apache.flink:flink-runtime:$flinkVersion"
     testImplementation "org.apache.flink:flink-test-utils:$flinkVersion"
     testImplementation "org.apache.flink:flink-test-utils-junit:$flinkVersion"
+
+    runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
     // Use JUnit Jupiter for testing.
     testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
@@ -105,13 +107,16 @@ dependencies {
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
 }
 
-tasks.named('test') {
+test {
     useJUnitPlatform()
     testLogging {
         showStandardStreams = true
         exceptionFormat = 'full'
-        events "passed", "skipped", "failed", "standardOut", "standardError"
+        events = ['passed', 'skipped', 'failed', 'standardOut', 'standardError']
     }
+    minHeapSize = "128m" // initial heap size
+    maxHeapSize = "1024m" // maximum heap size
+    jvmArgs '-XX:MaxPermSize=1024m' // mem argument for the test JVM
 }
 
 application {

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.plugin.transformer;
 
 import lombok.Getter;
@@ -27,7 +28,7 @@ public class JsonObjectNode {
     @Setter
     @Getter
     private String valueFormat;
-    public JsonObjectNode(String key, JsonNode value, String valueFormat) {
+    public JsonObjectNode(final String key, final JsonNode value, final String valueFormat) {
         this.key = key;
         this.value = value;
         this.valueFormat = valueFormat;

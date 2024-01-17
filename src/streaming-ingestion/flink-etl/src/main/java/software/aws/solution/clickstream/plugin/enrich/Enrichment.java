@@ -11,12 +11,14 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.plugin.enrich;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface Enrichment {
-    public ObjectNode enrich(ObjectNode node, Map<String,String> paramMap);
+public interface Enrichment extends Serializable {
+    ObjectNode enrich(ObjectNode node, Map<String, String> paramMap);
 }

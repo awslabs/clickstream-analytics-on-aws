@@ -11,22 +11,12 @@
  *  and limitations under the License.
  */
 
+package software.aws.solution.clickstream.flink;
 
-package software.aws.solution.clickstream.plugin.transformer;
+import org.apache.flink.api.connector.sink2.Sink;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
-import lombok.Getter;
-public class KvObjectNode {
-    @Getter
-    private final String key;
-
-    @Getter
-    private final String value;
-
-    @Getter
-    private final String valueFormat;
-    public KvObjectNode(final String key, final String value, final String valueFormat) {
-        this.key = key;
-        this.value = value;
-        this.valueFormat = valueFormat;
-    }
+public interface StreamSourceAndSinkProvider {
+    SourceFunction<String> createSource();
+    Sink<String> createSink(String appId);
 }
