@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.plugin.enrich;
 
 import com.maxmind.db.CHMCache;
@@ -18,64 +19,67 @@ import com.maxmind.db.MaxMindDbConstructor;
 import com.maxmind.db.MaxMindDbParameter;
 import com.maxmind.db.Reader;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.ResponseBytes;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.aws.solution.clickstream.flink.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 public class IPEnrichment implements Enrichment {
     public static final String PARAM_KEY_IP = "ip";
     public static final String PARAM_KEY_LOCALE = "locale";
-    public static final String PARAM_KEY_REGION = "region";
-    public static final String PARAM_KEY_BUCKET = "geoBucketName";
-    public static final String PARAM_KEY_FILE_NAME = "geoFileKey";
-    private static final Logger LOG = LoggerFactory.getLogger(IPEnrichment.class);
-    public ObjectNode enrich(ObjectNode geoNode, Map<String,String> paramMap) {
+    private static final long serialVersionUID = 17054589439690001L;
+    private final String bucket;
+    private final String fileName;
+    private final String region;
+    private byte[] geoFileBytes;
+
+    public IPEnrichment(final String bucket, final String fileName, final String region) {
+        this.bucket = bucket;
+        this.fileName = fileName;
+        this.region = region;
+    }
+
+    public ObjectNode enrich(final ObjectNode geoNode, final Map<String, String> paramMap) {
         String ip = paramMap.get(PARAM_KEY_IP);
         String locale = paramMap.get(PARAM_KEY_LOCALE);
-        String bucket = paramMap.get(PARAM_KEY_BUCKET);
-        String fileName = paramMap.get(PARAM_KEY_FILE_NAME);
-        LOG.info("IPEnrichment transform begin enrich. ip={}, locale={}, bucket={}, fileName={}, region={}",
-                ip, locale, bucket, fileName, paramMap.get(PARAM_KEY_REGION));
-        Region region = Region.of(paramMap.get(PARAM_KEY_REGION));
-        S3Client s3 = S3Client.builder().region(region).build();
         try {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(fileName)
-                    .build();
-            ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(getObjectRequest);
+
+            if (this.geoFileBytes == null) {
+                this.geoFileBytes = Utils.getInstance().readS3BinaryFile(this.bucket, this.fileName, this.region);
+            }
+
             try (Reader reader = new Reader(
-                    new ByteArrayInputStream(objectBytes.asByteArray()),
+                    new ByteArrayInputStream(this.geoFileBytes),
                     new CHMCache(1024 * 128))) {
                 final InetAddress ipAddress = InetAddress.getByName(ip);
                 LookupResult result = reader.get(ipAddress, LookupResult.class);
-                geoNode.put("city", Optional.ofNullable(result.getCity()).map(LookupResult.City::getName).orElse(null));
-                geoNode.put("continent", Optional.ofNullable(result.getContinent()).map(LookupResult.Continent::getName).orElse(null));
-                geoNode.put("country", Optional.ofNullable(result.getCountry()).map(LookupResult.Country::getName).orElse(null));
+
+                String city = Optional.ofNullable(result.getCity()).map(LookupResult.City::getName).orElse(null);
+                String continent = Optional.ofNullable(result.getContinent()).map(LookupResult.Continent::getName).orElse(null);
+                String country = Optional.ofNullable(result.getCountry()).map(LookupResult.Country::getName).orElse(null);
+
+                geoNode.put("city", city);
+                geoNode.put("continent", continent);
+                geoNode.put("country", country);
                 geoNode.set("metro", null);
                 geoNode.set("region", null);
                 geoNode.set("sub_continent", null);
-                geoNode.put("locale", locale);
+                geoNode.put(PARAM_KEY_LOCALE, locale);
             }
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
             geoNode.set("city", null);
             geoNode.set("continent", null);
             geoNode.set("country", null);
             geoNode.set("metro", null);
             geoNode.set("region", null);
             geoNode.set("sub_continent", null);
-            geoNode.put("locale", locale);
+            geoNode.put(PARAM_KEY_LOCALE, locale);
         }
         return geoNode;
     }

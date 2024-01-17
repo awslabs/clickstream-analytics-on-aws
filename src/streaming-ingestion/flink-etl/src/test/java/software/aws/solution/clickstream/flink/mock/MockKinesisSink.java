@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.flink;
+
+package software.aws.solution.clickstream.flink.mock;
 
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.api.connector.sink2.SinkWriter;
@@ -19,17 +20,28 @@ import org.apache.flink.api.connector.sink2.SinkWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MockKinesisSink implements Sink<String> {
-    public static List<String> values = Collections.synchronizedList(new ArrayList<String>());
+    public static Map<String, List<String>> appValues =new HashMap<>();
+    private String appId;
+    public MockKinesisSink(String appId) {
+        this.appId = appId;
+    }
 
     @Override
     public SinkWriter<String> createWriter(InitContext context) throws IOException {
         return new SinkWriter<String>() {
             @Override
             public void write(String element, Context context) throws IOException, InterruptedException {
-                MockKinesisSink.values.add(element);
+                synchronized (MockKinesisSink.class) {
+                    if (!appValues.containsKey(appId)) {
+                        appValues.put(appId, new ArrayList<>());
+                    }
+                    appValues.get(appId).add(element);
+                }
             }
 
             @Override

@@ -11,22 +11,26 @@
  *  and limitations under the License.
  */
 
+package software.aws.solution.clickstream.flink;
 
-package software.aws.solution.clickstream.plugin.transformer;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
-
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
-public interface Transformer extends Serializable {
-    ObjectNode transform(Map<String, String> paramMap);
+@Getter
+@Setter
+@ToString
+public class AppIdSteamConfig {
+    @Getter
+    @Setter
+    static class AppIdSteamMap {
+        private String appId;
+        private String streamArn;
+        private boolean enabled;
+    }
+    private List<AppIdSteamMap> appIdStreamMap;
 
-    ArrayNode transformArrayNode(List<KvObjectNode> paramList);
-
-    ObjectNode transformObjectNode(List<JsonObjectNode> paramList);
-
-    ArrayNode transformUserArrayNode(List<UserKvObjectNode> paramList);
 }
+

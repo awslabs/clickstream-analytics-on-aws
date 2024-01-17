@@ -11,22 +11,14 @@
  *  and limitations under the License.
  */
 
+package software.aws.solution.clickstream.flink;
 
-package software.aws.solution.clickstream.plugin.transformer;
+public class ClickstreamException extends RuntimeException{
+    public ClickstreamException(final Exception e) {
+        super(e);
+    }
 
-import lombok.Getter;
-public class KvObjectNode {
-    @Getter
-    private final String key;
-
-    @Getter
-    private final String value;
-
-    @Getter
-    private final String valueFormat;
-    public KvObjectNode(final String key, final String value, final String valueFormat) {
-        this.key = key;
-        this.value = value;
-        this.valueFormat = valueFormat;
+    public ClickstreamException(final String error) {
+        super(error);
     }
 }

@@ -11,35 +11,37 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.plugin.transformer;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ObjectNodeTransformer implements Transformer{
+public class ObjectNodeTransformer implements Transformer {
     public static final String PARAM_KEY_DOUBLE_VALUE = "double_value";
     public static final String PARAM_KEY_FLOAT_VALUE = "float_value";
     public static final String PARAM_KEY_INT_VALUE = "int_value";
     public static final String PARAM_KEY_STRING_VALUE = "string_value";
     public static final String PARAM_KEY_JSON_VALUE = "json_value";
     public static final String PARAM_KEY_NULL_VALUE = "null_value";
+    private static final long serialVersionUID = 17054589439690001L;
+
     @Override
-    public ObjectNode transform(Map<String, String> paramMap) {
+    public ObjectNode transform(final Map<String, String> paramMap) {
         return null;
     }
 
     @Override
-    public ArrayNode transformArrayNode(List<KvObjectNode> paramList) {
+    public ArrayNode transformArrayNode(final List<KvObjectNode> paramList) {
         return null;
     }
 
     @Override
-    public ObjectNode transformObjectNode(List<JsonObjectNode> paramList) {
+    public ObjectNode transformObjectNode(final List<JsonObjectNode> paramList) {
         ObjectMapper jsonParser = new ObjectMapper();
         ObjectNode node = jsonParser.createObjectNode();
         for (JsonObjectNode jsonObj : paramList) {
@@ -51,14 +53,19 @@ public class ObjectNodeTransformer implements Transformer{
                 node.put(jsonObj.getKey(), jsonObj.getValue().asDouble());
             } else if (PARAM_KEY_INT_VALUE.equals(jsonObj.getValueFormat())) {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asLong());
-            } else if (PARAM_KEY_STRING_VALUE.equals(jsonObj.getValueFormat())){
+            } else if (PARAM_KEY_STRING_VALUE.equals(jsonObj.getValueFormat())) {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asText());
-            } else if (PARAM_KEY_NULL_VALUE.equals(jsonObj.getValueFormat())){
+            } else if (PARAM_KEY_NULL_VALUE.equals(jsonObj.getValueFormat())) {
                 node.set(jsonObj.getKey(), null);
             } else {
                 node.set(jsonObj.getKey(), null);
             }
         }
         return node;
+    }
+
+    @Override
+    public ArrayNode transformUserArrayNode(final List<UserKvObjectNode> paramList) {
+        return null;
     }
 }

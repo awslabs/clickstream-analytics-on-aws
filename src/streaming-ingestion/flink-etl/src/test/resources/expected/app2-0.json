@@ -1,0 +1,215 @@
+{
+  "project_id" : "project1",
+  "event_name" : "PageView3",
+  "event_id" : "event_id-e1705563189478-8969",
+  "app_id" : "app2",
+  "user_pseudo_id" : "USER-U1660168",
+  "event_timestamp" : 1705563189478,
+  "device" : {
+    "vendor_id" : "device_id5",
+    "mobile_brand_name" : "Brand HUAWEI",
+    "mobile_model_name" : "HUAWEI-P10",
+    "manufacturer" : "Make HUAWEI",
+    "screen_width" : 1080,
+    "screen_height" : 2259,
+    "carrier" : "CDMA",
+    "network_type" : "Mobile",
+    "operating_system" : "ANDROID",
+    "operating_system_version" : "v1.0.1-v1.0.x-202308230820-95b4cde",
+    "ua_browser" : "Other",
+    "ua_browser_version" : null,
+    "ua_os" : "Other",
+    "ua_os_version" : null,
+    "ua_device" : "Other",
+    "ua_device_category" : null,
+    "system_language" : "zh",
+    "time_zone_offset_seconds" : 28800000,
+    "advertising_id" : null,
+    "host_name" : null
+  },
+  "app_info" : {
+    "app_id" : "app2",
+    "id" : "com.example.demoapplication",
+    "install_source" : "C0011705542178771",
+    "version" : "1.0",
+    "app_package_name" : "com.example.demoapplication"
+  },
+  "ecommerce" : null,
+  "event_bundle_sequence_id" : 470690,
+  "event_date" : "2024-01-18",
+  "event_dimensions" : null,
+  "event_params" : [ {
+    "key" : "_channel",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "C0011705542178771"
+    }
+  }, {
+    "key" : "_device_vendor_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "V0011705542178771"
+    }
+  }, {
+    "key" : "_device_advertising_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "DAID0011705542178771"
+    }
+  }, {
+    "key" : "_error_name_invalid",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : ""
+    }
+  }, {
+    "key" : "_error_name_length_exceed",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : ""
+    }
+  }, {
+    "key" : "_error_value_length_exceed",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : ""
+    }
+  }, {
+    "key" : "_page_referrer",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "http://test.com/test1-1705542178771"
+    }
+  }, {
+    "key" : "_is_first_time",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "true"
+    }
+  }, {
+    "key" : "_is_first_day",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "true"
+    }
+  }, {
+    "key" : "_session_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "see000201912dk-23u92-1df0020"
+    }
+  }, {
+    "key" : "_session_start_timestamp",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 1667963966697,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_session_duration",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 690000,
+      "string_value" : null
+    }
+  } ],
+  "event_previous_timestamp" : 0,
+  "event_server_timestamp_offset" : -478,
+  "event_value_in_usd" : 0,
+  "geo" : {
+    "city" : "Ashburn",
+    "continent" : "North America",
+    "country" : "United States",
+    "metro" : null,
+    "region" : null,
+    "sub_continent" : null,
+    "locale" : "zh_CN_#Hans"
+  },
+  "ingest_timestamp" : 1705563189000,
+  "items" : null,
+  "platform" : "Android",
+  "privacy_info" : {
+    "_privacy_info_ads_storage" : "PIAS1705542178771",
+    "_privacy_info_analytics_storage" : "PIAAS1705542178771",
+    "_privacy_info_uses_transient_token" : "PIUTT1705542178771"
+  },
+  "traffic_source" : {
+    "_traffic_source_medium" : "TSM-1-1705542178771",
+    "_traffic_source_name" : "TSN-1-1705542178771",
+    "_traffic_source_source" : "TSS-1-"
+  },
+  "user_first_touch_timestamp" : 1705563189445,
+  "user_id" : "U1660134",
+  "user_ltv" : {
+    "_user_ltv_revenue" : 1094.44,
+    "_user_ltv_currency" : "USD"
+  },
+  "user_properties" : [ {
+    "key" : "_user_id",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "U1660134"
+    },
+    "set_timestamp" : 1705563189445
+  }, {
+    "key" : "_user_name",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "Yon.L-1705563189445-470689"
+    },
+    "set_timestamp" : 1705563189445
+  }, {
+    "key" : "_user_action",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : null,
+      "string_value" : "_profile_set"
+    },
+    "set_timestamp" : 1705563189445
+  }, {
+    "key" : "_user_age",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 29,
+      "string_value" : null
+    },
+    "set_timestamp" : 1705563189445
+  }, {
+    "key" : "_user_first_touch_timestamp",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 1705563189445,
+      "string_value" : null
+    },
+    "set_timestamp" : 1705563189445
+  } ]
+}
