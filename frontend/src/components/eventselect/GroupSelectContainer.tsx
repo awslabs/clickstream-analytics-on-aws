@@ -44,8 +44,7 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
 
   const itemSelectClass = (item: IAnalyticsItem) => {
     return (
-      (item.value === selectedItem?.value &&
-        item.label === selectedItem?.label) ||
+      item.value === selectedItem?.value ||
       item.value === selectedItem?.groupName
     );
   };

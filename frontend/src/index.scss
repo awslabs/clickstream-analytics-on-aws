@@ -2,9 +2,8 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: 44px;
@@ -14,8 +13,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 [data-amplify-authenticator] [data-amplify-container] {
@@ -69,9 +67,8 @@ code {
 }
 
 .custom-description {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #8d99a8;
   font-size: 14px;
@@ -230,7 +227,7 @@ code {
   bottom: 20px;
   .unspecified {
     background-color: #d1d5db;
-    font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
+    font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
     font-size: 12px;
     letter-spacing: 0.005em;
     line-height: 22px;
@@ -278,15 +275,8 @@ code {
   z-index: 1000;
   margin: 0;
   background-color: #0f1b2a;
-  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
-  font-family: var(
-    --font-family-base-qnistn,
-    'Open Sans',
-    'Helvetica Neue',
-    Roboto,
-    Arial,
-    sans-serif
-  );
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
 }
 #b {
   padding-top: 56px;
@@ -379,15 +369,8 @@ ul.menu-list li.checkbox-item {
   background-color: #0f1b2a;
   bottom: 0;
   display: flex;
-  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
-  font-family: var(
-    --font-family-base-qnistn,
-    'Open Sans',
-    'Helvetica Neue',
-    Roboto,
-    Arial,
-    sans-serif
-  );
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
   font-size: 14px;
   gap: 10px;
   justify-content: space-between;
@@ -545,13 +528,13 @@ ul.menu-list li.checkbox-item {
   width: 100%;
   height: 100%;
   border: 0px;
-  overflow: 'hidden';
+  overflow: "hidden";
 }
 
 .iframe-explore {
   width: 100%;
   border: 0px;
-  overflow: 'hidden';
+  overflow: "hidden";
   min-height: 150px;
 }
 
@@ -671,10 +654,10 @@ ul.menu-list li.checkbox-item {
   }
   .cs-dropdown-input {
     .cs-dropdown-event-input {
-      [class^='awsui_dropdown-'] {
+      [class^="awsui_dropdown-"] {
         opacity: 0 !important;
       }
-      [class^='awsui_dropdown-content-wrapper'] {
+      [class^="awsui_dropdown-content-wrapper"] {
         opacity: 0 !important;
       }
       .custom-popover {
@@ -700,10 +683,10 @@ ul.menu-list li.checkbox-item {
       .second-select-option {
         width: 200px;
         flex-shrink: 0;
-        [class^='awsui_dropdown-'] {
+        [class^="awsui_dropdown-"] {
           opacity: 0 !important;
         }
-        [class^='awsui_dropdown-content-wrapper'] {
+        [class^="awsui_dropdown-content-wrapper"] {
           opacity: 0 !important;
         }
       }
@@ -1010,10 +993,12 @@ ul.menu-list li.checkbox-item {
           justify-content: space-between;
           align-items: center;
           padding: 6px 15px;
-          &:hover,
+          &:hover {
+            background-color: #efefef;
+          }
           &.item-selected {
             background-color: #e8f4ff;
-            color: #000;
+            color: #0972d3;
             font-weight: 400;
           }
         }
@@ -1027,16 +1012,16 @@ ul.menu-list li.checkbox-item {
   header {
     background-color: #015292 !important;
   }
-  [class^='awsui_scrolling-background'] {
+  [class^="awsui_scrolling-background"] {
     background-color: #014a87 !important;
   }
-  [class^='awsui_dark-header'] {
+  [class^="awsui_dark-header"] {
     background-color: #014a87 !important;
   }
-  [class^='awsui_background_'] {
+  [class^="awsui_background_"] {
     background-color: #014a87 !important;
   }
-  [class^='awsui_breadcrumb'] {
+  [class^="awsui_breadcrumb"] {
     background-color: #014a87 !important;
   }
 
@@ -1057,9 +1042,8 @@ ul.menu-list li.checkbox-item {
       color: #fff;
     }
     .analytics-custom-description {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-        'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
-        'Helvetica Neue', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+        "Droid Sans", "Helvetica Neue", sans-serif;
       -webkit-font-smoothing: antialiased;
       margin-top: 10px;
       color: #8d99a8;
@@ -1178,7 +1162,7 @@ ul.menu-list li.checkbox-item {
 }
 
 .click-stream-custom-tag {
-  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
+  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
   line-height: 20px;
   padding: 0 8px;
   border-radius: 4px;
