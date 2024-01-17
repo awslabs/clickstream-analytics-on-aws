@@ -13,7 +13,7 @@
 
 - `lifecycle_weekly_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_weekly_view_v1` 视图。
 - `lifecycle_daily_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_daily_view_v1` 视图。
-- 连接到分析引擎中的“clickstream_retention_view_v1”视图的“retention_view-<app id>-<project id>”
+- 连接到分析引擎中的 `clickstream_retention_view_v1` 视图。
 
 下面是生成视图的 SQL 命令。
 ??? 示例 "SQL 命令"
