@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
   CfnOutput,
@@ -24,7 +24,7 @@ import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { addCfnNagForCfnResource, addCfnNagToSecurityGroup, addCfnNagToStack, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
+import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
@@ -134,6 +134,8 @@ export class StreamingIngestionMainStack extends Stack {
   }
 
   private addCfnNag() {
+    const stack = Stack.of(this);
+    // suppress Flink application
     const cfnNagListForFlinkConstruct = [
       ruleRolePolicyWithWildcardResourcesAndHighSPCM('ClickstreamStreamingIngestion/Role/DefaultPolicy/Resource', 'Flink policy', 'eni'),
       {
@@ -143,11 +145,19 @@ export class StreamingIngestionMainStack extends Stack {
         ],
       },
     ];
-    addCfnNagToStack(Stack.of(this), cfnNagListForFlinkConstruct);
+    addCfnNagToStack(stack, cfnNagListForFlinkConstruct);
     this.flinkApp.connections.securityGroups.forEach(sg => {
       addCfnNagToSecurityGroup(sg);
     });
-    addCfnNagForCfnResource(Stack.of(this), 'CDK built-in BucketDeployment', 'Custom::CDKBucketDeployment.*', 'streaming-ingestion', []);
+    addCfnNagForCfnResource(stack, 'CDK built-in BucketDeployment', 'Custom::CDKBucketDeployment.*', 'streaming-ingestion', []);
+
+    // suppress Kinesis sink
+    addCfnNagForLogRetention(stack);
+    addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for KinesisSinkCustomResource', 'StreamingIngestionSink/KinesisSinkCustomResourceProvider');
+    addCfnNagToStack(stack, [
+      ruleForLambdaVPCAndReservedConcurrentExecutions(
+        'StreamingIngestionSink/KinesisManagementFn/Resource', 'KinesisManagementFn'),
+    ]);
   }
 }
 
