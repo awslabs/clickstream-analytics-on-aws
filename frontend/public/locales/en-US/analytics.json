@@ -1,5 +1,7 @@
 {
   "analytics": "Analytics",
+  "sumGroup": "SUM by ...",
+  "sumGroupLabel": "SUM by {{label}}",
   "dashboard": {
     "title": "Dashboards",
     "description": "You can view the out-of-the-box user life cycle dashboards here, and create a custom dashboard with exploration analysis.",

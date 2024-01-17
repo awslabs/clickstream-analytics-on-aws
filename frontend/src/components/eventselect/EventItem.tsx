@@ -21,6 +21,7 @@ import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
+import GroupSelectContainer from './GroupSelectContainer';
 
 interface EventItemProps {
   type: 'event' | 'attribute';
@@ -31,7 +32,7 @@ interface EventItemProps {
   categoryOption: IAnalyticsItem | null;
   calcMethodOption?: SelectProps.Option | null;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
-  changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
+  changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;
   disabled?: boolean;
@@ -57,18 +58,55 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const { t } = useTranslation();
   const state = useContext(StateContext);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
     label: t('analytics:options.userNumber') ?? 'User number',
   };
 
-  const computeMethodOptions: SelectProps.Options = [
+  const computeMethodOptions: IAnalyticsItem[] = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? 'Event number',
     },
+    {
+      label: defaultStr(t('analytics:sumGroup')),
+      value: 'SUM',
+      subList: [
+        {
+          label: '应用ID',
+          value: 'SUM_WITH_APPID',
+          groupName: 'SUM',
+          itemType: 'children',
+        },
+        {
+          label: 'Login',
+          value: 'SUM_WITH_LOGIN',
+          groupName: 'SUM',
+          itemType: 'children',
+        },
+      ],
+    },
+    // {
+    //   label: '按...求平均值 (AVG) ',
+    //   value: 'AVG',
+    //   subList: [
+    //     {
+    //       label: '访问',
+    //       value: 'AVG_WITH_VISIT',
+    //       groupName: 'AVG',
+    //       itemType: 'children',
+    //     },
+    //     {
+    //       label: '设备',
+    //       value: 'AVG_WITH_DEVICE',
+    //       groupName: 'AVG',
+    //       itemType: 'children',
+    //     },
+    //   ],
+    // },
   ];
 
   function useOutsideAlerter(ref: any) {
@@ -79,6 +117,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       function handleClickOutside(event: any) {
         if (ref.current && !ref.current.contains(event.target)) {
           setShowDropdown(false);
+          setShowGroupSelectDropdown(false);
           setClickedOutside(true);
         } else {
           setClickedOutside(false);
@@ -104,10 +143,14 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       >
         <div
           className="flex-1 cs-dropdown-event-input"
-          onClick={() => setShowDropdown((prev) => !prev)}
+          onClick={() => {
+            setShowDropdown((prev) => !prev);
+            setShowGroupSelectDropdown(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               setShowDropdown((prev) => !prev);
+              setShowGroupSelectDropdown(false);
             }
           }}
         >
@@ -136,15 +179,43 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             )}
         </div>
         {isMultiSelect && (
-          <div className="second-select-option" title={calcMethodOption?.label}>
-            <Select
-              selectedOption={calcMethodOption ?? null}
-              onChange={(e) => {
-                changeCurCalcMethodOption?.(e.detail.selectedOption);
+          <>
+            <div
+              className="second-select-option"
+              title={calcMethodOption?.label}
+              onClick={() => {
+                setShowGroupSelectDropdown((prev) => !prev);
+                setShowDropdown(false);
               }}
-              options={computeMethodOptions}
-            />
-          </div>
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setShowGroupSelectDropdown((prev) => !prev);
+                  setShowDropdown(false);
+                }
+              }}
+            >
+              <Select selectedOption={calcMethodOption ?? null} />
+              {showGroupSelectDropdown && (
+                <GroupSelectContainer
+                  categories={computeMethodOptions}
+                  selectedItem={calcMethodOption ?? null}
+                  changeSelectItem={(item) => {
+                    if (item) {
+                      const newItem: any = { ...item };
+                      if (item.itemType === 'children') {
+                        newItem.label = t('analytics:sumGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      changeCurCalcMethodOption?.(newItem);
+                    } else {
+                      changeCurCalcMethodOption?.(null);
+                    }
+                  }}
+                />
+              )}
+            </div>
+          </>
         )}
       </div>
       {showDropdown && (

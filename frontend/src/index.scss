@@ -700,6 +700,12 @@ ul.menu-list li.checkbox-item {
       .second-select-option {
         width: 200px;
         flex-shrink: 0;
+        [class^='awsui_dropdown-'] {
+          opacity: 0 !important;
+        }
+        [class^='awsui_dropdown-content-wrapper'] {
+          opacity: 0 !important;
+        }
       }
     }
   }
@@ -986,6 +992,29 @@ ul.menu-list li.checkbox-item {
                 }
               }
             }
+          }
+        }
+      }
+      &.group-select {
+        min-width: 240px;
+        .item-container {
+          width: 240px !important;
+        }
+        .group-select-sub-list {
+          width: 200px;
+          border-left: 1px solid #ccc;
+        }
+        .group-select-item {
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 6px 15px;
+          &:hover,
+          &.item-selected {
+            background-color: #e8f4ff;
+            color: #000;
+            font-weight: 400;
           }
         }
       }

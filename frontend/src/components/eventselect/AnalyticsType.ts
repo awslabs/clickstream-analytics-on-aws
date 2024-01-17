@@ -41,6 +41,9 @@ export interface IAnalyticsItem extends SelectProps.Option {
   valueType?: MetadataValueType;
   platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
+  groupName?: string;
+  itemType?: string;
+  subList?: IAnalyticsItem[];
 }
 
 export interface IProjectSelectItem extends SelectProps.Option {
