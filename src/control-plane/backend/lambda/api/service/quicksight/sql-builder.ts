@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { formatDateToYYYYMMDD } from './reporting-utils';
+import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
@@ -1829,8 +1829,15 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
   } else {
-    const nDayNumber = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
-    eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= DATEADD(day, -${nDayNumber}, CURRENT_DATE) and ${prefix}event_date <= CURRENT_DATE`);
+    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_date <= CURRENT_DATE`);
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and ${prefix}event_date <= CURRENT_DATE`);
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and ${prefix}event_date <= CURRENT_DATE`);
+    } else {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and ${prefix}event_date <= CURRENT_DATE`);
+    }
   }
 
   return eventDateSQL;
@@ -2011,8 +2018,8 @@ function _buildDateListSQL(sqlParameters: SQLParameters) {
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     dateList.push(...generateDateList(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
-    const lastN = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
-    for (let n = 1; n <= lastN; n++) {
+    const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit!);
+    for (let n = 1; n <= daysCount; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
       `);
@@ -2137,16 +2144,23 @@ function _buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
   return sql;
 }
 
-function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
-  let lastNDayNumber = lastN;
+export function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
+  const currentDate = new Date();
+  let targetDate: Date = new Date();
   if (timeUnit === ExploreRelativeTimeUnit.WK) {
-    lastNDayNumber = lastN * 7;
+    targetDate = getMondayOfLastNWeeks(currentDate, lastN);
   } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
-    lastNDayNumber = lastN * 31;
-  } else if (timeUnit === ExploreRelativeTimeUnit.Q) {
-    lastNDayNumber = lastN * 31 * 3;
+    targetDate = getFirstDayOfLastNMonths(currentDate, lastN);
+  } else if (timeUnit === ExploreRelativeTimeUnit.YY) {
+    targetDate = getFirstDayOfLastNYears(currentDate, lastN);
   }
-  return lastNDayNumber;
+  return daysBetweenDates(currentDate, targetDate);
+}
+
+export function daysBetweenDates(date1: Date, date2: Date): number {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const diffDays = Math.round(Math.abs((date1.getTime() - date2.getTime()) / oneDay));
+  return diffDays;
 }
 
 function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : string {

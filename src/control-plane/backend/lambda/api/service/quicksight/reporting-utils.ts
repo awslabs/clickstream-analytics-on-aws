@@ -1082,6 +1082,8 @@ export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
     unit = 'WEEK';
   } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
+  } else if (timeUnit == ExploreRelativeTimeUnit.YY) {
+    unit = 'YEAR';
   }
   return unit;
 }
@@ -1092,6 +1094,26 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
   }
 
   return resourceName;
+}
+
+export function getMondayOfLastNWeeks(currentDate: Date, cnt: number): Date {
+  const dayOfWeek = currentDate.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  const daysSinceLastMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Calculate days since last Monday
+  const startDateOfLastNWeeks = new Date(currentDate);
+  startDateOfLastNWeeks.setDate(currentDate.getDate() - (cnt*7) - daysSinceLastMonday);
+  return startDateOfLastNWeeks;
+}
+
+export function getFirstDayOfLastNMonths(currentDate: Date, n: number): Date {
+  const lastNMonths = new Date(currentDate);
+  lastNMonths.setMonth(currentDate.getMonth() - n); // Subtract n months and add 1 to get the first day of the month
+  lastNMonths.setDate(1); // Set the day to the first day of the month
+  return lastNMonths;
+}
+
+export function getFirstDayOfLastNYears(currentDate: Date, cnt: number): Date {
+  const currentYear = currentDate.getFullYear();
+  return new Date(currentYear - cnt, 0, 1);
 }
 
 export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {

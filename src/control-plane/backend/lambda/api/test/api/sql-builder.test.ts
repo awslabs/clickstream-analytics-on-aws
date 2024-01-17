@@ -12,7 +12,8 @@
  */
 
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
-import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql } from '../../service/quicksight/sql-builder';
+import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
+import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -18629,5 +18630,31 @@ describe('SQL Builder test', () => {
     );
 
   });
+
+  test('test date coumpute funtions', () => {
+    expect(getMondayOfLastNWeeks(new Date('2024-01-17'), 0).toDateString()).toEqual('Mon Jan 15 2024');
+    expect(getMondayOfLastNWeeks(new Date('2024-01-17'), 1).toDateString()).toEqual('Mon Jan 08 2024');
+    expect(getMondayOfLastNWeeks(new Date('2024-01-15'), 0).toDateString()).toEqual('Mon Jan 15 2024');
+    expect(getMondayOfLastNWeeks(new Date('2024-01-15'), 1).toDateString()).toEqual('Mon Jan 08 2024');
+    expect(getMondayOfLastNWeeks(new Date('2024-01-21'), 0).toDateString()).toEqual('Mon Jan 15 2024');
+    expect(getMondayOfLastNWeeks(new Date('2024-01-21'), 1).toDateString()).toEqual('Mon Jan 08 2024');
+
+    expect(getFirstDayOfLastNYears(new Date('2024-01-17'), 0).toDateString()).toContain('Mon Jan 01 2024');
+    expect(getFirstDayOfLastNYears(new Date('2024-12-31'), 0).toDateString()).toContain('Mon Jan 01 2024');
+    expect(getFirstDayOfLastNYears(new Date('2024-01-01'), 0).toDateString()).toContain('Mon Jan 01 2024');
+    expect(getFirstDayOfLastNYears(new Date('2024-01-17'), 3).toDateString()).toContain('Fri Jan 01 2021');
+
+    expect(getFirstDayOfLastNMonths(new Date('2024-01-17'), 0).toDateString()).toContain('Mon Jan 01 2024');
+    expect(getFirstDayOfLastNMonths(new Date('2024-01-17'), 1).toDateString()).toContain('Fri Dec 01 2023');
+    expect(getFirstDayOfLastNMonths(new Date('2000-03-01'), 0).toDateString()).toContain('Wed Mar 01 2000');
+    expect(getFirstDayOfLastNMonths(new Date('2023-03-01'), 0).toDateString()).toContain('Wed Mar 01 2023');
+    expect(getFirstDayOfLastNMonths(new Date('2023-03-01'), 1).toDateString()).toContain('Wed Feb 01 2023');
+
+    expect(daysBetweenDates(new Date(), new Date())).toEqual(0);
+    expect(daysBetweenDates(new Date('2024-01-17'), new Date('2024-01-16'))).toEqual(1);
+    expect(daysBetweenDates(new Date('2024-03-01'), new Date('2024-02-01'))).toEqual(29);
+
+  });
+
 
 });
