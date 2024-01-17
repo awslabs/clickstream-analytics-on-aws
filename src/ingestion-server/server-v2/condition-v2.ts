@@ -15,15 +15,15 @@ import { CfnCondition, CfnParameter, Fn } from 'aws-cdk-lib';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
 
-export function createAlwaysTrueConditionsV2(scope: Construct) {
-
-  const alwaysTrueCondition = new CfnCondition(scope, 'alwaysTrueCondition',
-    {
-      expression: Fn.conditionEquals('', ''),
-    },
-  );
-  return alwaysTrueCondition;
+export function createS3ConditionsV2(scope: Construct, props: {
+  deliverToS3: boolean;
+}) {
+  const s3Condition = new CfnCondition(scope, 's3Condition', {
+    expression: Fn.conditionEquals(props.deliverToS3, true),
+  });
+  return s3Condition;
 }
+
 
 export function createKinesisConditionsV2(props: {
   provisionedStackStream: Stream;

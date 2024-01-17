@@ -37,7 +37,7 @@ import { createStackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
 import {
   createKinesisConditionsV2,
-  createAlwaysTrueConditionsV2,
+  createS3ConditionsV2,
   createMskConditionsV2,
 } from './ingestion-server/server-v2/condition-v2';
 import {
@@ -331,7 +331,9 @@ export class IngestionServerStackV2 extends Stack {
     let nestStackProps = { ... nestStackCommonProps };
 
     if (props.deliverToS3 && s3Params) {
-      const s3Condition = createAlwaysTrueConditionsV2(this);
+      const s3Condition = createS3ConditionsV2(this, {
+        deliverToS3: props.deliverToS3,
+      });
       nestStackProps = {
         ...nestStackProps,
         s3BucketName: s3Params.s3DataBucketParam.valueAsString,
