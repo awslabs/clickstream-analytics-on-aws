@@ -67,6 +67,8 @@
     "inputVisualDescriptionPlaceholder": "Input visualization description"
   },
   "options": {
+    "generalGroup": "General",
+    "sumGroup": "Summation",
     "eventNumber": "Event number",
     "userNumber": "User number",
     "customWindow": "Custom",

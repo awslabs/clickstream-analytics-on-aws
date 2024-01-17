@@ -67,6 +67,8 @@
     "inputVisualDescriptionPlaceholder": "请输入图表描述"
   },
   "options": {
+    "generalGroup": "常规",
+    "sumGroup": "按...求和",
     "eventNumber": "总次数",
     "userNumber": "用户数",
     "customWindow": "自定义",

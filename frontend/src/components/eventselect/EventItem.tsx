@@ -19,7 +19,11 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
-import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
+import {
+  CategoryItemType,
+  IAnalyticsItem,
+  ICalculateMethodSelectItem,
+} from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
@@ -29,7 +33,8 @@ interface EventItemProps {
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
-  calcMethodOption?: SelectProps.Option | null;
+  calcMethodOption?: ICalculateMethodSelectItem | null;
+  calcMethodOptions?: ICalculateMethodSelectItem[];
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
   categories: CategoryItemType[];
@@ -47,6 +52,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     isMultiSelect,
     categoryOption,
     calcMethodOption,
+    calcMethodOptions,
     changeCurCategoryOption,
     changeCurCalcMethodOption,
     categories,
@@ -63,7 +69,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     label: t('analytics:options.userNumber') ?? 'User number',
   };
 
-  const computeMethodOptions: SelectProps.Options = [
+  const defaultComputeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.EVENT_CNT,
@@ -142,7 +148,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
               onChange={(e) => {
                 changeCurCalcMethodOption?.(e.detail.selectedOption);
               }}
-              options={computeMethodOptions}
+              options={calcMethodOptions ?? defaultComputeMethodOptions}
             />
           </div>
         )}

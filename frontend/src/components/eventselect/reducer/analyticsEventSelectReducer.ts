@@ -13,7 +13,10 @@
 
 import { SelectProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
-import { parametersConvertToCategoryItemType } from 'pages/analytics/analytics-utils';
+import {
+  getAttributionMethodOptions,
+  parametersConvertToCategoryItemType,
+} from 'pages/analytics/analytics-utils';
 import { IMetadataBuiltInList } from 'ts/explore-types';
 import { getEventParameters } from 'ts/utils';
 import {
@@ -90,6 +93,7 @@ export type ChangeCurCalcMethodOption = {
 
 export type ChangeCurCategoryOption = {
   type: 'changeCurCategoryOption';
+  enableChangeMultiSelect?: boolean;
   eventIndex: number;
   categoryOption: IAnalyticsItem | null;
   builtInMetadata?: IMetadataBuiltInList;
@@ -205,6 +209,14 @@ export const analyticsEventSelectReducer = (
       );
       newState[action.eventIndex].selectedEventOption = action.categoryOption;
       newState[action.eventIndex].conditionOptions = parameterOption;
+      if (action.enableChangeMultiSelect) {
+        const calculateMethodOptions = getAttributionMethodOptions(
+          action.metadataUserAttributes,
+          eventParameters
+        );
+        newState[action.eventIndex].calculateMethodOptions =
+          calculateMethodOptions;
+      }
       return newState;
     }
     case 'changeCurRelationShip': {
