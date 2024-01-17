@@ -19,7 +19,11 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
-import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
+import {
+  CategoryItemType,
+  IAnalyticsItem,
+  ICalculateMethodSelectItem,
+} from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 import GroupSelectContainer from './GroupSelectContainer';
 
@@ -30,7 +34,8 @@ interface EventItemProps {
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
-  calcMethodOption?: SelectProps.Option | null;
+  calcMethodOption?: ICalculateMethodSelectItem | null;
+  calcMethodOptions?: ICalculateMethodSelectItem[];
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
@@ -48,6 +53,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     isMultiSelect,
     categoryOption,
     calcMethodOption,
+    calcMethodOptions,
     changeCurCategoryOption,
     changeCurCalcMethodOption,
     categories,

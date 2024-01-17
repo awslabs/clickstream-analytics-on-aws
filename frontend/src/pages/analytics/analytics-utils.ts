@@ -18,6 +18,7 @@ import {
 import {
   CategoryItemType,
   IAnalyticsItem,
+  ICalculateMethodSelectItem,
   IConditionItemType,
   IEventAnalyticsItem,
   IRetentionAnalyticsItem,
@@ -168,6 +169,50 @@ export const parametersConvertToCategoryItemType = (
   }
   categoryItems.push(categoryUserItems);
   return categoryItems;
+};
+
+export const getAttributionMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: SelectProps.OptionGroup[] = [
+    {
+      label: i18n.t('analytics:options.generalGroup') ?? 'General',
+      options: [
+        {
+          value: ExploreComputeMethod.EVENT_CNT,
+          label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
+        },
+      ],
+    },
+    {
+      label: i18n.t('analytics:options.sumGroup') ?? 'Summation',
+      options: [],
+    },
+  ];
+  const numberParameters = parameterItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberAttributes = userAttributeItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberParametersAndAttributes = [
+    ...numberParameters,
+    ...numberAttributes,
+  ];
+  for (const parameter of numberParametersAndAttributes) {
+    computeMethodOptions[1].options = [
+      ...computeMethodOptions[1].options,
+      {
+        value: parameter.name,
+        label: parameter.displayName,
+        name: parameter.name,
+        valueType: parameter.valueType,
+        category: parameter.category,
+      } as ICalculateMethodSelectItem,
+    ];
+  }
+  return computeMethodOptions;
 };
 
 function patchSameName(
@@ -322,9 +367,7 @@ export const getTouchPointsAndConditions = (
       });
 
       const touchPoint: AttributionTouchPoint = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
@@ -362,14 +405,27 @@ export const getGoalAndConditions = (
       conditions.push(conditionObj);
     }
   });
+  let groupColumn: IColumnAttribute | undefined;
+  if (goalData.calculateMethodOption?.name) {
+    groupColumn = {
+      category: defaultStr(
+        goalData.calculateMethodOption?.category,
+        ConditionCategory.OTHER
+      ),
+      property: defaultStr(goalData.calculateMethodOption?.name),
+      dataType: defaultStr(
+        goalData.calculateMethodOption?.valueType,
+        MetadataValueType.STRING
+      ),
+    };
+  }
   return {
-    eventName: defaultStr(
-      goalData.selectedEventOption?.value?.split('#').pop()
-    ),
+    eventName: defaultStr(goalData.selectedEventOption?.name),
     sqlCondition: {
       conditions: conditions,
       conditionOperator: goalData.conditionRelationShip,
     },
+    groupColumn,
   } as AttributionTouchPoint;
 };
 
@@ -380,7 +436,12 @@ export const getTargetComputeMethod = (
     return;
   }
   const goalData = eventOptionData[0];
-  return goalData.calculateMethodOption?.value;
+  if (
+    goalData.calculateMethodOption?.value === ExploreComputeMethod.EVENT_CNT
+  ) {
+    return ExploreComputeMethod.EVENT_CNT;
+  }
+  return ExploreComputeMethod.SUM_VALUE;
 };
 
 export const getEventAndConditions = (
@@ -410,9 +471,7 @@ export const getEventAndConditions = (
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
