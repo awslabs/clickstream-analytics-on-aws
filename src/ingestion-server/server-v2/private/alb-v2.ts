@@ -28,8 +28,8 @@ import {
   ListenerAction,
   CfnLoadBalancer,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
@@ -173,7 +173,7 @@ export function createApplicationLoadBalancerV2(
           'Using HTTP listener is by design',
       },
     ],
-  );    
+  );
 
   const httpRedirectListener = new ApplicationListener(scope, 'HttpRedirectListener', {
     protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
@@ -195,6 +195,6 @@ export function createApplicationLoadBalancerV2(
           'Using HTTP listener is by design',
       },
     ],
-  );  
+  );
   return { alb, targetGroup, listener: httpListener };
 }
