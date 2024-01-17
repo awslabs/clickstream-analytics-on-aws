@@ -704,7 +704,7 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= DATEADD (day, -744, CURRENT_DATE)
+          event.event_date >= date_trunc('month', current_date - interval '23 months')
           and event.event_date <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
