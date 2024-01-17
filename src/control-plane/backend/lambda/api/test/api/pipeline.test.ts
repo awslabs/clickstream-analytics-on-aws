@@ -1870,7 +1870,7 @@ describe('Pipeline test', () => {
             { ...BASE_STATUS.stackDetails[0] },
             { ...BASE_STATUS.stackDetails[1] },
             { ...BASE_STATUS.stackDetails[2] },
-            { ...BASE_STATUS.stackDetails[4] },
+            { ...BASE_STATUS.stackDetails[4], outputs: [] },
             { ...BASE_STATUS.stackDetails[3] },
             { ...BASE_STATUS.stackDetails[5] },
           ],

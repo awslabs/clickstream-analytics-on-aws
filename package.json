@@ -25,6 +25,7 @@
     "projen": "npx projen"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.110",
     "@types/jest": "^29.5.10",
     "@types/jsonpath-plus": "^5.0.2",
     "@types/mock-fs": "^4.13.1",
@@ -85,7 +86,6 @@
     "@aws-sdk/util-dynamodb": "^3.398.0",
     "@smithy/node-http-handler": "^2.0.7",
     "@smithy/util-stream-node": "^2.0.7",
-    "@types/aws-lambda": "^8.10.110",
     "aws-cdk-lib": "^2.81.0",
     "cdk-bootstrapless-synthesizer": "^2.2.11",
     "cdk-nag": "^2.20.6",

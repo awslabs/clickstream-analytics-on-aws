@@ -967,7 +967,16 @@ export const BASE_STATUS = {
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
       stackTemplateVersion: MOCK_SOLUTION_VERSION,
-      outputs: [],
+      outputs: [
+        {
+          OutputKey: 'DataSourceArn',
+          OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
+        },
+        {
+          OutputKey: 'Dashboards',
+          OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+        },
+      ],
     },
     {
       stackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
