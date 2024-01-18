@@ -64,6 +64,7 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
                       {categories.map((category, index) => {
                         return (
                           <div
+                            title={category.label}
                             key={identity(index)}
                             className={classNames({
                               'group-select-item': true,
@@ -114,6 +115,7 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
                         ?.subList?.map((item, index) => {
                           return (
                             <div
+                              title={item.label}
                               key={identity(index)}
                               className={classNames({
                                 'group-select-item': true,
