@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ProtocalType, ResourceCreateMethod, SinkType } from './const';
+import { EIngestionType, ProtocalType, ResourceCreateMethod, SinkType } from './const';
 
 export const INIT_PROJECT_DATA = {
   id: 'my_project_id',
@@ -43,6 +43,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     prefix: '',
   },
   ingestionServer: {
+    ingestionType: EIngestionType.EC2,
     size: {
       serverMin: 2,
       serverMax: 4,

@@ -83,6 +83,7 @@ import {
   INGESTION_KINESIS_PROVISIONED_PARAMETERS,
   INGESTION_MSK_PARAMETERS,
   INGESTION_MSK_WITHOUT_APP_PARAMETERS,
+  INGESTION_S3_FARGATE_PARAMETERS,
   INGESTION_S3_PARAMETERS,
   INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
   INGESTION_THIRDPARTY_SDK_KINESIS_ON_DEMAND_PARAMETERS,
@@ -95,7 +96,7 @@ import {
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
-import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
+import { IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
@@ -205,6 +206,117 @@ describe('Workflow test', () => {
                             StackName: 'Clickstream-Ingestion-s3-6666-6666',
                             Tags: Tags,
                             TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
+                  },
+                },
+                Next: 'PipelineStacks',
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-s3-fargate', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      noVpcEndpoint: true,
+    });
+    const pipeline: CPipeline = new CPipeline({
+      ...S3_INGESTION_PIPELINE,
+      ingestionServer: {
+        ...S3_INGESTION_PIPELINE.ingestionServer,
+        ingestionType: IngestionType.Fargate,
+      },
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_S3_FARGATE_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-s3-stack.template.json',
                           },
                         },
                         End: true,

@@ -57,6 +57,7 @@ import {
   ClickStreamBadRequestError,
   IngestionServerSinkBatchProps,
   IngestionServerSizeProps,
+  IngestionType,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
@@ -135,6 +136,7 @@ interface RedshiftNetworkProps {
 }
 
 interface IngestionServer {
+  readonly ingestionType?: IngestionType;
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
@@ -981,7 +983,11 @@ export class CPipeline {
   }
 
   private async _getIngestionWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
-    const ingestionTemplateURL = await this.getTemplateUrl(`${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`);
+    let ingestionTemplateKey = `${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`;
+    if (this.pipeline.ingestionServer.ingestionType === IngestionType.Fargate) {
+      ingestionTemplateKey = `${ingestionTemplateKey}_${IngestionType.Fargate}`;
+    }
+    const ingestionTemplateURL = await this.getTemplateUrl(ingestionTemplateKey);
     if (!ingestionTemplateURL) {
       throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
     }
