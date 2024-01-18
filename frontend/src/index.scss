@@ -986,6 +986,7 @@ ul.menu-list li.checkbox-item {
         .group-select-sub-list {
           width: 200px;
           border-left: 1px solid #ccc;
+          overflow: auto;
         }
         .group-select-item {
           cursor: pointer;
