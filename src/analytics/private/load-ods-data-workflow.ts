@@ -640,13 +640,18 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
         REDSHIFT_DATABASE: props.databaseName,
         REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
-        ENABLE_REFRESH: 'false',
+        ENABLE_REFRESH: 'true',
+        REFRESH_INTERVAL_MINUTES: '120',
+        PIPELINE_S3_BUCKET_NAME: props.workflowBucketInfo.s3Bucket.bucketName,
+        PIPELINE_S3_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
       applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
+    props.workflowBucketInfo.s3Bucket.grantPut(fn, `${props.workflowBucketInfo.prefix}*`);
+    props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.workflowBucketInfo.prefix}*`);
     return fn;
   }
 }

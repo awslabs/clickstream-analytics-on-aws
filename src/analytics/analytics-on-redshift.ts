@@ -314,7 +314,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     const loadRedshiftTablesWorkflow = new LoadOdsDataToRedshiftWorkflow(this, 'LoadData', loadDataProps);
     (loadRedshiftTablesWorkflow.loadDataWorkflow.node.defaultChild as CfnResource).overrideLogicalId('ClickstreamLoadDataWorkflow');
 
-
     if (this.redshiftServerlessWorkgroup) {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
