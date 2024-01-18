@@ -18,7 +18,6 @@ import {
 import {
   CategoryItemType,
   IAnalyticsItem,
-  ICalculateMethodSelectItem,
   IConditionItemType,
   IEventAnalyticsItem,
   IRetentionAnalyticsItem,
@@ -175,19 +174,15 @@ export const getAttributionMethodOptions = (
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems: IMetadataEventParameter[]
 ) => {
-  const computeMethodOptions: SelectProps.OptionGroup[] = [
+  const computeMethodOptions: IAnalyticsItem[] = [
     {
-      label: i18n.t('analytics:options.generalGroup') ?? 'General',
-      options: [
-        {
-          value: ExploreComputeMethod.EVENT_CNT,
-          label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
-        },
-      ],
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
     },
     {
-      label: i18n.t('analytics:options.sumGroup') ?? 'Summation',
-      options: [],
+      label: defaultStr(i18n.t('analytics:sumGroup')),
+      value: 'SUM',
+      subList: [],
     },
   ];
   const numberParameters = parameterItems.filter(
@@ -201,16 +196,15 @@ export const getAttributionMethodOptions = (
     ...numberAttributes,
   ];
   for (const parameter of numberParametersAndAttributes) {
-    computeMethodOptions[1].options = [
-      ...computeMethodOptions[1].options,
-      {
-        value: parameter.name,
-        label: parameter.displayName,
-        name: parameter.name,
-        valueType: parameter.valueType,
-        category: parameter.category,
-      } as ICalculateMethodSelectItem,
-    ];
+    computeMethodOptions[1].subList?.push({
+      value: parameter.name,
+      label: parameter.displayName,
+      name: parameter.name,
+      valueType: parameter.valueType,
+      category: parameter.category,
+      groupName: 'SUM',
+      itemType: 'children',
+    } as IAnalyticsItem);
   }
   return computeMethodOptions;
 };

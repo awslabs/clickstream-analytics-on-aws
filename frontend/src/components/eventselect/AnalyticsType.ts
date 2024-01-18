@@ -52,13 +52,6 @@ export interface IProjectSelectItem extends SelectProps.Option {
   appId?: string;
   appName?: string;
 }
-
-export interface ICalculateMethodSelectItem extends SelectProps.Option {
-  name?: string;
-  category?: ConditionCategory;
-  valueType?: MetadataValueType;
-}
-
 export interface CategoryItemType {
   categoryName: string;
   categoryType: string;
@@ -80,8 +73,8 @@ export interface IEventAnalyticsItem {
   customOrderName?: string;
   selectedEventOption: IAnalyticsItem | null;
   selectedEventAttributeOption: CategoryItemType[];
-  calculateMethodOptions?: ICalculateMethodSelectItem[];
-  calculateMethodOption?: ICalculateMethodSelectItem | null;
+  calculateMethodOptions?: IAnalyticsItem[];
+  calculateMethodOption?: IAnalyticsItem | null;
   conditionOptions: CategoryItemType[];
   conditionList: IConditionItemType[];
   conditionRelationShip: ERelationShip;

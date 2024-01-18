@@ -19,11 +19,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
-import {
-  CategoryItemType,
-  IAnalyticsItem,
-  ICalculateMethodSelectItem,
-} from './AnalyticsType';
+import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 import GroupSelectContainer from './GroupSelectContainer';
 
@@ -34,8 +30,8 @@ interface EventItemProps {
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
-  calcMethodOption?: ICalculateMethodSelectItem | null;
-  calcMethodOptions?: ICalculateMethodSelectItem[];
+  calcMethodOption?: IAnalyticsItem | null;
+  calcMethodOptions?: IAnalyticsItem[];
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
@@ -66,52 +62,14 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
-  const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
-  };
-
-  const computeMethodOptions: IAnalyticsItem[] = [
-    defaultComputeMethodOption,
+  const defaultComputeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? 'User number',
+    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? 'Event number',
-    },
-    {
-      label: defaultStr(t('analytics:sumGroup')),
-      value: 'SUM',
-      subList: [
-        {
-          label: '应用ID',
-          value: 'SUM_WITH_APPID',
-          groupName: 'SUM',
-          itemType: 'children',
-        },
-        {
-          label: 'Login',
-          value: 'SUM_WITH_LOGIN',
-          groupName: 'SUM',
-          itemType: 'children',
-        },
-      ],
-    },
-    {
-      label: '按...求平均值 (AVG) ',
-      value: 'AVG',
-      subList: [
-        {
-          label: '访问',
-          value: 'AVG_WITH_VISIT',
-          groupName: 'AVG',
-          itemType: 'children',
-        },
-        {
-          label: '设备',
-          value: 'AVG_WITH_DEVICE',
-          groupName: 'AVG',
-          itemType: 'children',
-        },
-      ],
     },
   ];
 
@@ -203,7 +161,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
               <Select selectedOption={calcMethodOption ?? null} />
               {showGroupSelectDropdown && (
                 <GroupSelectContainer
-                  categories={computeMethodOptions}
+                  categories={calcMethodOptions ?? defaultComputeMethodOptions}
                   selectedItem={calcMethodOption ?? null}
                   changeSelectItem={(item) => {
                     if (item) {
