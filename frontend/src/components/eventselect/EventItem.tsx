@@ -89,24 +89,24 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         },
       ],
     },
-    // {
-    //   label: '按...求平均值 (AVG) ',
-    //   value: 'AVG',
-    //   subList: [
-    //     {
-    //       label: '访问',
-    //       value: 'AVG_WITH_VISIT',
-    //       groupName: 'AVG',
-    //       itemType: 'children',
-    //     },
-    //     {
-    //       label: '设备',
-    //       value: 'AVG_WITH_DEVICE',
-    //       groupName: 'AVG',
-    //       itemType: 'children',
-    //     },
-    //   ],
-    // },
+    {
+      label: '按...求平均值 (AVG) ',
+      value: 'AVG',
+      subList: [
+        {
+          label: '访问',
+          value: 'AVG_WITH_VISIT',
+          groupName: 'AVG',
+          itemType: 'children',
+        },
+        {
+          label: '设备',
+          value: 'AVG_WITH_DEVICE',
+          groupName: 'AVG',
+          itemType: 'children',
+        },
+      ],
+    },
   ];
 
   function useOutsideAlerter(ref: any) {
@@ -202,8 +202,19 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                   changeSelectItem={(item) => {
                     if (item) {
                       const newItem: any = { ...item };
-                      if (item.itemType === 'children') {
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === 'SUM'
+                      ) {
                         newItem.label = t('analytics:sumGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === 'AVG'
+                      ) {
+                        newItem.label = t('analytics:avgGroupLabel', {
                           label: item.label,
                         });
                       }
