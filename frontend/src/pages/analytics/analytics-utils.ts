@@ -657,6 +657,8 @@ export const getIntervalInSeconds = (
         return Number(windowValue) * 60 * 60;
       case 'day':
         return Number(windowValue) * 60 * 60 * 24;
+      case 'month':
+        return Number(windowValue) * 60 * 60 * 24 * 30;
       default:
         return Number(windowValue) * 60;
     }

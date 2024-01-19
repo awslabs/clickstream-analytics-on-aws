@@ -76,6 +76,30 @@ const HelpInfo: React.FC = () => {
               {t('help:attributionModelInfo.positionBasedTouch.description')}
             </li>
           </ul>
+          {t('help:attributionModelInfo.columnTitlesDescription')}
+          <br />
+          <ul>
+            <li>
+              <b>{t('help:attributionModelInfo.touchpointName.title')}</b>
+              {t('help:attributionModelInfo.touchpointName.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.totalTriggerCount.title')}</b>
+              {t('help:attributionModelInfo.totalTriggerCount.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.numberTriggersConversion.title')}</b>
+              {t('help:attributionModelInfo.numberTriggersConversion.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.contribution.title')}</b>
+              {t('help:attributionModelInfo.contribution.description')}
+            </li>
+            <li>
+              <b>{t('help:attributionModelInfo.contributionRate.title')}</b>
+              {t('help:attributionModelInfo.contributionRate.description')}
+            </li>
+          </ul>
         </p>
       );
     }

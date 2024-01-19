@@ -80,6 +80,7 @@
     "minuteWindowUnit": "Minute(s)",
     "hourWindowUnit": "Hour(s)",
     "dayWindowUnit": "Day(s)",
+    "monthWindowUnit": "Month(s)",
     "hourTimeGranularity": "Hourly",
     "dayTimeGranularity": "Daily",
     "weekTimeGranularity": "Weekly",

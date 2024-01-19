@@ -80,6 +80,7 @@
     "minuteWindowUnit": "分钟",
     "hourWindowUnit": "小时",
     "dayWindowUnit": "天",
+    "monthWindowUnit": "月",
     "hourTimeGranularity": "小时级",
     "dayTimeGranularity": "天级",
     "weekTimeGranularity": "周级",
