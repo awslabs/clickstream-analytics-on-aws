@@ -12,7 +12,7 @@
  */
 
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand } from '@aws-sdk/client-cloudwatch-events';
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, UnsubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
@@ -54,6 +54,7 @@ describe('Listen SFN Status Lambda Function', () => {
     id: MOCK_PIPELINE_ID,
     projectId: MOCK_PROJECT_ID,
     region: 'ap-southeast-1',
+    updateAt: new Date('2022-01-01').getTime(),
   };
 
   beforeEach(() => {
@@ -67,6 +68,9 @@ describe('Listen SFN Status Lambda Function', () => {
       Items: [{ ...mockPipeline, lastAction: 'Create' }],
     });
     docMock.on(UpdateCommand).resolves({});
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-01'));
     await handler(baseEvent);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(docMock).toHaveReceivedNthSpecificCommandWith(1, UpdateCommand, {
@@ -75,12 +79,57 @@ describe('Listen SFN Status Lambda Function', () => {
         id: MOCK_PROJECT_ID,
         type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
       },
-      UpdateExpression: 'SET #executionDetail = :executionDetail',
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #executionDetail = :executionDetail, #ConditionVersion = :updateAt',
       ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
         '#executionDetail': 'executionDetail',
       },
       ExpressionAttributeValues: {
         ':executionDetail': mockExecutionDetail,
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
+      },
+    });
+    expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 0);
+    expect(docMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 0);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(ListTargetsByRuleCommand, 0);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 0);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 0);
+  });
+
+  test('Save state status to DDB with Conditional Check Failed', async () => {
+    docMock.on(QueryCommand).resolves({
+      Items: [{ ...mockPipeline, lastAction: 'Create' }],
+    });
+    const mockConditionalCheckFailed = new ConditionalCheckFailedException(
+      {
+        message: 'ConditionalCheckFailedException',
+        $metadata: {},
+      },
+    );
+    docMock.on(UpdateCommand).rejectsOnce(mockConditionalCheckFailed).resolves({});
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-01'));
+    await handler(baseEvent);
+    expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    expect(docMock).toHaveReceivedNthSpecificCommandWith(2, UpdateCommand, {
+      TableName: process.env.CLICKSTREAM_TABLE_NAME ?? '',
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+      },
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #executionDetail = :executionDetail, #ConditionVersion = :updateAt',
+      ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
+        '#executionDetail': 'executionDetail',
+      },
+      ExpressionAttributeValues: {
+        ':executionDetail': mockExecutionDetail,
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
       },
     });
     expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 0);
@@ -127,6 +176,9 @@ describe('Listen SFN Status Lambda Function', () => {
     });
     snsMock.on(UnsubscribeCommand).resolves({});
     snsMock.on(DeleteTopicCommand).resolves({});
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-01'));
     await handler(baseEvent);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(docMock).toHaveReceivedNthSpecificCommandWith(1, UpdateCommand, {
@@ -135,12 +187,16 @@ describe('Listen SFN Status Lambda Function', () => {
         id: MOCK_PROJECT_ID,
         type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
       },
-      UpdateExpression: 'SET #executionDetail = :executionDetail',
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #executionDetail = :executionDetail, #ConditionVersion = :updateAt',
       ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
         '#executionDetail': 'executionDetail',
       },
       ExpressionAttributeValues: {
         ':executionDetail': mockExecutionDetail,
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
       },
     });
     expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 1);

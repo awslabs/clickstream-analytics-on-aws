@@ -36,7 +36,7 @@ export const handler = async (
 
   const projectId = pipeline.projectId;
 
-  await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
+  await updatePipelineStateStatus(projectId, pipelineId, eventDetail, pipeline.updateAt);
 
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
     const ruleName = `${CFN_RULE_PREFIX}-${projectId}`;
