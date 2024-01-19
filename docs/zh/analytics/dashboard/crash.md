@@ -13,7 +13,7 @@
 
 崩溃报告是基于以下QuickSight数据集创建的：
 
-- `clickstream_user_dim_view_v1` - 连接到分析引擎中的`clickstream_event_view_v1`视图（例如，Redshift）。
+- `clickstream_user_dim_view_v1` - 连接到分析引擎中的`clickstream_event_view_v2`视图（例如，Redshift）。
 - `Events_Parameter_View-<app id>-<project id>` - 连接到分析引擎中的`clickstream_events_parameter_view_v1`视图。
 
 ??? example "SQL Commands"

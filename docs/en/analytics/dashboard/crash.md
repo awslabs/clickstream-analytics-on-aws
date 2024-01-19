@@ -11,7 +11,7 @@ Note: This article describes the default report. You can customize the report by
 ## Where the data comes from
 Crash report are created based on the following QuickSight datasets:
 
-- `clickstream_user_dim_view_v1` - `Events_View-<app id>-<project id>` that connects to the `clickstream_event_view_v1` view in analytics engines (i.e., Redshift)
+- `clickstream_user_dim_view_v1` - `Events_View-<app id>-<project id>` that connects to the `clickstream_event_view_v2` view in analytics engines (i.e., Redshift)
 - `Events_Parameter_View-<app id>-<project id>` that connects to the `clickstream_events_parameter_view_v1` view in analytics engines  
 ??? example "SQL Commands"
     === "Redshift"
