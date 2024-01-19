@@ -26,8 +26,6 @@ public class ObjectNodeTransformer implements Transformer {
     public static final String PARAM_KEY_FLOAT_VALUE = "float_value";
     public static final String PARAM_KEY_INT_VALUE = "int_value";
     public static final String PARAM_KEY_STRING_VALUE = "string_value";
-    public static final String PARAM_KEY_JSON_VALUE = "json_value";
-    public static final String PARAM_KEY_NULL_VALUE = "null_value";
     private static final long serialVersionUID = 17054589439690001L;
 
     @Override
@@ -45,9 +43,7 @@ public class ObjectNodeTransformer implements Transformer {
         ObjectMapper jsonParser = new ObjectMapper();
         ObjectNode node = jsonParser.createObjectNode();
         for (JsonObjectNode jsonObj : paramList) {
-            if (PARAM_KEY_JSON_VALUE.equals(jsonObj.getValueFormat())) {
-                node.set(jsonObj.getKey(), jsonObj.getValue());
-            } else if (PARAM_KEY_DOUBLE_VALUE.equals(jsonObj.getValueFormat())) {
+           if (PARAM_KEY_DOUBLE_VALUE.equals(jsonObj.getValueFormat())) {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asDouble());
             } else if (PARAM_KEY_FLOAT_VALUE.equals(jsonObj.getValueFormat())) {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asDouble());
@@ -55,10 +51,8 @@ public class ObjectNodeTransformer implements Transformer {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asLong());
             } else if (PARAM_KEY_STRING_VALUE.equals(jsonObj.getValueFormat())) {
                 node.put(jsonObj.getKey(), jsonObj.getValue().asText());
-            } else if (PARAM_KEY_NULL_VALUE.equals(jsonObj.getValueFormat())) {
-                node.set(jsonObj.getKey(), null);
             } else {
-                node.set(jsonObj.getKey(), null);
+                node.put(jsonObj.getKey(), jsonObj.getValue().asText());
             }
         }
         return node;
