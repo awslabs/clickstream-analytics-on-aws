@@ -1,7 +1,7 @@
 CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(event_date)
-AUTO REFRESH YES
+AUTO REFRESH NO
 AS
 select 
 event_date

@@ -1,6 +1,6 @@
 CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
-AUTO REFRESH YES
+AUTO REFRESH NO
 AS
 select 
   user_pseudo_id, 

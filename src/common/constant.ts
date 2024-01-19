@@ -381,7 +381,7 @@ export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'Lifecycle_Daily_Vie
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
 export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'User_Attr_View';
 
-export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
+export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v2';
 export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v2';
 export const CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME = 'clickstream_session_duration_attr_view_v1';
 export const CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME = 'clickstream_session_page_attr_view_v1';

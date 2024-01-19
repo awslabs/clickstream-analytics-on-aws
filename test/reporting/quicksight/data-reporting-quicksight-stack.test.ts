@@ -1055,7 +1055,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Retention_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v2',
             columns: [
               {
                 Name: 'first_date',

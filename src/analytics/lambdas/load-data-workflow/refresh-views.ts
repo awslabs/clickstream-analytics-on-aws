@@ -14,7 +14,7 @@
 import { Context } from 'aws-lambda';
 
 import { checkLoadStatus } from './check-load-status';
-import { CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME } from '../../../common/constant';
+import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
@@ -54,13 +54,11 @@ export const handler = async (_e: any, _c: Context) => {
 
       if (refreshInfo === undefined || Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000) {
         const sqlStatementForApp = `
-          REFRESH MATERIALIZED VIEW ${schema}.user_m_view;
-          REFRESH MATERIALIZED VIEW ${schema}.item_m_view;
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_VIEW_NAME};
+          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_VIEW_NAME};
         `;
 
         const sqlStatements = sqlStatementForApp.split(';').map(s => s.trim()).filter(s => s.length > 0);
@@ -71,11 +69,11 @@ export const handler = async (_e: any, _c: Context) => {
           queryIds.push(queryId);
         }
 
-        logger.info(`Refresh mv for app: ${schema} finished`);
+        logger.warn(`Refresh mv for app: ${schema} finished`);
 
         await updateMVRefreshInfoToS3(Date.now(), pipelineS3BucketPrefix, REDSHIFT_DATABASE, schema);
       } else {
-        logger.info(`Skip mv refresh for app: ${schema}`);
+        logger.warn(`Skip mv refresh for app: ${schema}`);
       }
     }
   }
