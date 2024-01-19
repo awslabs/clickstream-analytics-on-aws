@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
     
     
       
@@ -2775,292 +2775,294 @@
 <ul>
 <li><code>lifecycle_weekly_view-&lt;app id&gt;-&lt;project id&gt;</code>，连接到分析引擎（即 Redshift 或 Athena）中的 <code>clickstream_lifecycle_weekly_view_v1</code> 视图。</li>
 <li><code>lifecycle_daily_view-&lt;app id&gt;-&lt;project id&gt;</code>，连接到分析引擎（即 Redshift 或 Athena）中的 <code>clickstream_lifecycle_daily_view_v1</code> 视图。</li>
-<li>连接到分析引擎中的“clickstream_retention_view_v1”视图的“retention_view-<app id>-<project id>”</li>
+<li>连接到分析引擎中的 <code>clickstream_retention_view_v1</code> 视图。</li>
 </ul>
-<p>下面是生成视图的 SQL 命令。
-??? 示例“SQL 命令”
-     ===“红移”
-         ```sql title="clickstream_lifecycle_weekly_view_v1.sql"
-           select 
-             user_pseudo_id, 
-             DATE_TRUNC('week', dateadd(ms,event_timestamp, '1970-01-01')) as time_period
-           from {{schema}}.event
-           where event_name = '_session_start' group by 1,2 order by 1,2),
-         -- detect if lag and lead exists
-         lag_lead as (
-           select user_pseudo_id, time_period,
-             lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
-             lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
-           from weekly_usage),
-         -- calculate lag and lead size
-         lag_lead_with_diffs as (
-           select user_pseudo_id, time_period, lag, lead, 
-             datediff(week,lag,time_period) lag_size,
-             datediff(week,time_period,lead) lead_size
-           from lag_lead),
-         -- case to lifecycle stage
-         calculated as (select time_period,
-           case when lag is null then '1-NEW'
-              when lag_size = 1 then '2-ACTIVE'
-              when lag_size &gt; 1 then '3-RETURN'
-           end as this_week_value,</p>
-<div class="language-text highlight"><pre><span></span><code>       case when (lead_size &gt; 1 OR lead_size IS NULL) then &#39;0-CHURN&#39;
-          else NULL
-       end as next_week_churn,
-       count(distinct user_pseudo_id)
-        from lag_lead_with_diffs
-       group by 1,2,3)
-     select time_period, this_week_value, sum(count) 
-       from calculated group by 1,2
-     union
-     select time_period+7, &#39;0-CHURN&#39;, -1*sum(count) 
-       from calculated where next_week_churn is not null group by 1,2;
-     ````
-     ```sql title=&quot;clickstream_lifecycle_daily_view_v1.sql&quot;
-       select 
-         user_pseudo_id, 
-         DATE_TRUNC(&#39;day&#39;, dateadd(ms,event_timestamp, &#39;1970-01-01&#39;)) as time_period
-       from {{schema}}.event
-       where event_name = &#39;_session_start&#39; group by 1,2 order by 1,2),
-     -- detect if lag and lead exists
-     lag_lead as (
-       select user_pseudo_id, time_period,
-         lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
-         lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
-       from daily_usage),
-     -- calculate lag and lead size
-     lag_lead_with_diffs as (
-       select user_pseudo_id, time_period, lag, lead, 
-         datediff(day,lag,time_period) lag_size,
-         datediff(day,time_period,lead) lead_size
-       from lag_lead),
-     -- case to lifecycle stage
-     calculated as (select time_period,
-       case when lag is null then &#39;1-NEW&#39;
-          when lag_size = 1 then &#39;2-ACTIVE&#39;
-          when lag_size &gt; 1 then &#39;3-RETURN&#39;
-       end as this_day_value,
-
-       case when (lead_size &gt; 1 OR lead_size IS NULL) then &#39;0-CHURN&#39;
-          else NULL
-       end as next_day_churn,
-       count(distinct user_pseudo_id)
-        from lag_lead_with_diffs
-       group by 1,2,3)
-     select time_period, this_day_value, sum(count) 
-       from calculated group by 1,2
-     union
-     select time_period+1, &#39;0-CHURN&#39;, -1*sum(count) 
-       from calculated where next_day_churn is not null group by 1,2;
-     ````
-     ```sql title=&quot;clickstream_retention_view_v1.sql&quot;
-     WITH user_first_date AS (
-       SELECT
-         user_pseudo_id,
-         min(event_date) as first_date
-       FROM {{schema}}.event
-       GROUP BY user_pseudo_id
-     ),
-
-     retention_data AS (
-     SELECT
-         user_pseudo_id,
-         first_date,
-         DATE_DIFF(&#39;day&#39;, first_date, event_date) AS day_diff
-       FROM {{schema}}.event
-       JOIN user_first_date USING (user_pseudo_id)
-     ),
-
-     retention_counts AS (
-       SELECT
-         first_date,
-         day_diff,
-         COUNT(DISTINCT user_pseudo_id) AS returned_user_count
-       FROM retention_data
-       WHERE day_diff &lt;= 42 -- Calculate retention rate for the last 42 days
-       GROUP BY first_date, day_diff
-     ),
-
-     total_users AS (
-       SELECT
-         first_date,
-         COUNT(DISTINCT user_pseudo_id) AS total_users
-       FROM user_first_date
-       group by 1
-     ),
-
-     retention_rate AS (
-       SELECT
-         first_date,
-         day_diff,
-         returned_user_count,
-         total_users
-       FROM retention_counts join total_users using(first_date)
-     )
-
-     SELECT
-     *
-     FROM retention_rate;
-     ````
- ===“雅典娜”
-     ```sql title=&quot;clickstream-lifecycle-weekly-query.sql&quot;
-     -- run following command to load latest partition
-     -- msck repair table {{database}}.{{eventTable}};
-
-     with weekly_usage as (
-       select 
-         user_pseudo_id, 
-         DATE_TRUNC(&#39;week&#39;, event_date) as time_period
-       from {{database}}.{{eventTable}}
-       where partition_app = ? 
-         and partition_year &gt;= ?
-         and partition_month &gt;= ?
-         and partition_day &gt;= ?
-         and event_name = &#39;_session_start&#39; group by 1,2 order by 1,2
-     ),
-     lag_lead as (
-       select user_pseudo_id, time_period,
-         lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lag,
-         lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lead
-       from weekly_usage
-     ),
-     lag_lead_with_diffs as (
-       select user_pseudo_id, time_period, lag, lead, 
-         date_diff(&#39;week&#39;,lag,time_period) lag_size,
-         date_diff(&#39;week&#39;,time_period,lead) lead_size
-       from lag_lead
-     ),
-     calculated as (
-       select time_period,
-         case when lag is null then &#39;1-NEW&#39;
-           when lag_size = 1 then &#39;2-ACTIVE&#39;
-           when lag_size &gt; 1 then &#39;3-RETURN&#39;
-         end as this_week_value,
-         case when (lead_size &gt; 1 OR lead_size IS NULL) then &#39;0-CHURN&#39;
-           else NULL
-         end as next_week_churn,
-         count(distinct user_pseudo_id) as cnt
-       from lag_lead_with_diffs
-       group by 1,2,3
-     )
-     select time_period, this_week_value, sum(cnt) as cnt from calculated group by 1,2
-     union
-     select date_add(&#39;day&#39;, 7, time_period), &#39;0-CHURN&#39;, -1*sum(cnt) as cnt
-       from calculated 
-     where next_week_churn is not null 
-     group by 1,2
-     ````
-     ```sql title=&quot;clickstream-lifecycle-daily-query.sql&quot;
-     -- run following command to load latest partition
-     -- msck repair table {{database}}.{{eventTable}};
-
-     with daily_usage as (
-       select 
-         user_pseudo_id, 
-         DATE_TRUNC(&#39;day&#39;, event_date) as time_period
-       from {{database}}.{{eventTable}} 
-       where partition_app = ? 
-         and partition_year &gt;= ?
-         and partition_month &gt;= ?
-         and partition_day &gt;= ?
-         and event_name = &#39;_session_start&#39; group by 1,2 order by 1,2
-     ),
-     lag_lead as (
-       select user_pseudo_id, time_period,
-         lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lag,
-         lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period) as lead
-       from daily_usage
-     ),
-     lag_lead_with_diffs as (
-       select user_pseudo_id, time_period, lag, lead, 
-         date_diff(&#39;day&#39;,lag,time_period) lag_size,
-         date_diff(&#39;day&#39;,time_period,lead) lead_size
-       from lag_lead
-     ),
-     calculated as (
-       select time_period,
-         case when lag is null then &#39;1-NEW&#39;
-           when lag_size = 1 then &#39;2-ACTIVE&#39;
-           when lag_size &gt; 1 then &#39;3-RETURN&#39;
-         end as this_day_value,
-
-         case when (lead_size &gt; 1 OR lead_size IS NULL) then &#39;0-CHURN&#39;
-           else NULL
-         end as next_day_churn,
-         count(distinct user_pseudo_id) as cnt
-       from lag_lead_with_diffs
-       group by 1,2,3
-     )
-     select time_period, this_day_value, sum(cnt) as cnt
-       from calculated group by 1,2
-     union
-     select date_add(&#39;day&#39;, 1, time_period) as time_period, &#39;0-CHURN&#39;, -1*sum(cnt) as cnt 
-       from calculated 
-       where next_day_churn is not null 
-       group by 1,2;
-     ````
-     ```sql title=&quot;clickstream-lifecycle-daily-query.sql&quot;
-     -- run following command to load latest partition
-     -- msck repair table {{database}}.{{eventTable}};
-
-     with base as (
-       select 
-         *
-       from {{database}}.{{eventTable}}
-       where partition_app = ? 
-         and partition_year &gt;= ?
-         and partition_month &gt;= ?
-         and partition_day &gt;= ?
-     ),
-     user_first_date AS (
-       SELECT
-         user_pseudo_id,
-         min(event_date) as first_date
-       FROM base
-       GROUP BY user_pseudo_id
-     ),
-
-     retention_data AS (
-     SELECT
-         user_pseudo_id,
-         first_date,
-         DATE_DIFF(&#39;day&#39;, first_date, event_date) AS day_diff
-       FROM base
-       JOIN user_first_date USING (user_pseudo_id)
-     ),
-
-     retention_counts AS (
-       SELECT
-         first_date,
-         day_diff,
-         COUNT(DISTINCT user_pseudo_id) AS returned_user_count
-       FROM retention_data
-       WHERE day_diff &lt;= 42 -- Calculate retention rate for the last 42 days
-       GROUP BY first_date, day_diff
-     ),
-
-     total_users AS (
-       SELECT
-         first_date,
-         COUNT(DISTINCT user_pseudo_id) AS total_users
-       FROM user_first_date
-       group by 1
-     ),
-
-     retention_rate AS (
-       SELECT
-         first_date,
-         day_diff,
-         returned_user_count,
-         total_users
-       FROM retention_counts join total_users using(first_date)
-     )
-
-     SELECT
-     *
-     FROM retention_rate
-     ````
-</code></pre></div>
+<p>下面是生成视图的 SQL 命令。</p>
+<details class="示例">
+<summary>SQL 命令</summary>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><div class="language-sql highlight"><span class="filename">clickstream_lifecycle_weekly_view_v1.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;week&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">dateadd</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span><span class="n">event_timestamp</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_period</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">event</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_session_start&#39;</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1">-- detect if lag and lead exists</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">lag_lead</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">lag</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">),</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">lead</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">weekly_usage</span><span class="p">),</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1">-- calculate lag and lead size</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">lag_lead_with_diffs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span><span class="w"> </span><span class="n">lead</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="n">datediff</span><span class="p">(</span><span class="n">week</span><span class="p">,</span><span class="n">lag</span><span class="p">,</span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="n">lag_size</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="n">datediff</span><span class="p">(</span><span class="n">week</span><span class="p">,</span><span class="n">time_period</span><span class="p">,</span><span class="n">lead</span><span class="p">)</span><span class="w"> </span><span class="n">lead_size</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead</span><span class="p">),</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1">-- case to lifecycle stage</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="n">calculated</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">lag</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;1-NEW&#39;</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">     </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;2-ACTIVE&#39;</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">     </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;3-RETURN&#39;</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">this_week_value</span><span class="p">,</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="p">(</span><span class="n">lead_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">lead_size</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">NULL</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">next_week_churn</span><span class="p">,</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">   </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead_with_diffs</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">this_week_value</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="p">(</span><span class="k">count</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">union</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="o">+</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="k">sum</span><span class="p">(</span><span class="k">count</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">next_week_churn</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><span class="filename">clickstream_lifecycle_daily_view_v1.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">dateadd</span><span class="p">(</span><span class="n">ms</span><span class="p">,</span><span class="n">event_timestamp</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;1970-01-01&#39;</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_period</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">event</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_session_start&#39;</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">-- detect if lag and lead exists</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">lag_lead</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="n">lag</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">),</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="n">lead</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">daily_usage</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1">-- calculate lag and lead size</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">lag_lead_with_diffs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span><span class="w"> </span><span class="n">lead</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="n">datediff</span><span class="p">(</span><span class="k">day</span><span class="p">,</span><span class="n">lag</span><span class="p">,</span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="n">lag_size</span><span class="p">,</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="n">datediff</span><span class="p">(</span><span class="k">day</span><span class="p">,</span><span class="n">time_period</span><span class="p">,</span><span class="n">lead</span><span class="p">)</span><span class="w"> </span><span class="n">lead_size</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead</span><span class="p">),</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="c1">-- case to lifecycle stage</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="n">calculated</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">lag</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;1-NEW&#39;</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">     </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;2-ACTIVE&#39;</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">     </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;3-RETURN&#39;</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">  </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">this_day_value</span><span class="p">,</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="p">(</span><span class="n">lead_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">lead_size</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">NULL</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">next_day_churn</span><span class="p">,</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">   </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead_with_diffs</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">this_day_value</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="p">(</span><span class="k">count</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="k">union</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="k">sum</span><span class="p">(</span><span class="k">count</span><span class="p">)</span><span class="w"> </span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">next_day_churn</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><span class="filename">clickstream_retention_view_v1.sql</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">user_first_date</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="k">min</span><span class="p">(</span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_date</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">event</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">user_pseudo_id</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">),</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">retention_data</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">SELECT</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="n">DATE_DIFF</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">first_date</span><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">day_diff</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">event</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span><span class="k">JOIN</span><span class="w"> </span><span class="n">user_first_date</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span><span class="n">user_pseudo_id</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">),</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="n">retention_counts</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="n">day_diff</span><span class="p">,</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">returned_user_count</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">retention_data</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">day_diff</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="c1">-- Calculate retention rate for the last 42 days</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">first_date</span><span class="p">,</span><span class="w"> </span><span class="n">day_diff</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="p">),</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="n">total_users</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total_users</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">user_first_date</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="p">),</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="n">retention_rate</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="w">    </span><span class="n">day_diff</span><span class="p">,</span>
+</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">    </span><span class="n">returned_user_count</span><span class="p">,</span>
+</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">    </span><span class="n">total_users</span>
+</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">retention_counts</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="n">total_users</span><span class="w"> </span><span class="k">using</span><span class="p">(</span><span class="n">first_date</span><span class="p">)</span>
+</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="p">)</span>
+</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>
+</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="k">SELECT</span>
+</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="o">*</span>
+</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a><span class="k">FROM</span><span class="w"> </span><span class="n">retention_rate</span><span class="p">;</span>
+</span></code></pre></div></p>
+</div>
+<div class="tabbed-block">
+<p><div class="language-sql highlight"><span class="filename">clickstream-lifecycle-weekly-query.sql</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">-- run following command to load latest partition</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1">-- msck repair table {{database}}.{{eventTable}};</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">with</span><span class="w"> </span><span class="n">weekly_usage</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;week&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_period</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">eventTable</span><span class="err">}}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_session_start&#39;</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">),</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="n">lag_lead</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="n">lag</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="n">lead</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lead</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">weekly_usage</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="p">),</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="n">lag_lead_with_diffs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span><span class="w"> </span><span class="n">lead</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="n">date_diff</span><span class="p">(</span><span class="s1">&#39;week&#39;</span><span class="p">,</span><span class="n">lag</span><span class="p">,</span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="n">lag_size</span><span class="p">,</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">    </span><span class="n">date_diff</span><span class="p">(</span><span class="s1">&#39;week&#39;</span><span class="p">,</span><span class="n">time_period</span><span class="p">,</span><span class="n">lead</span><span class="p">)</span><span class="w"> </span><span class="n">lead_size</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="p">),</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="n">calculated</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">lag</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;1-NEW&#39;</span>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">      </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;2-ACTIVE&#39;</span>
+</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">      </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;3-RETURN&#39;</span>
+</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">this_week_value</span><span class="p">,</span>
+</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="p">(</span><span class="n">lead_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">lead_size</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span>
+</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">NULL</span>
+</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">next_week_churn</span><span class="p">,</span>
+</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="w">    </span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span>
+</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead_with_diffs</span>
+</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span>
+</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a><span class="p">)</span>
+</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">this_week_value</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a><span class="k">union</span>
+</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a><span class="k">select</span><span class="w"> </span><span class="n">date_add</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">),</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="k">sum</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span>
+</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span>
+</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a><span class="k">where</span><span class="w"> </span><span class="n">next_week_churn</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span>
+</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><span class="filename">clickstream-lifecycle-daily-query.sql</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">-- run following command to load latest partition</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1">-- msck repair table {{database}}.{{eventTable}};</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">with</span><span class="w"> </span><span class="n">daily_usage</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_period</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">eventTable</span><span class="err">}}</span><span class="w"> </span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;_session_start&#39;</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="p">),</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="n">lag_lead</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="n">lag</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="n">lead</span><span class="p">(</span><span class="n">time_period</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">lead</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">daily_usage</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="p">),</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="n">lag_lead_with_diffs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">lag</span><span class="p">,</span><span class="w"> </span><span class="n">lead</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="n">date_diff</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="n">lag</span><span class="p">,</span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="n">lag_size</span><span class="p">,</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">    </span><span class="n">date_diff</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="n">time_period</span><span class="p">,</span><span class="n">lead</span><span class="p">)</span><span class="w"> </span><span class="n">lead_size</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="p">),</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="n">calculated</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">lag</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;1-NEW&#39;</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">      </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;2-ACTIVE&#39;</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">      </span><span class="k">when</span><span class="w"> </span><span class="n">lag_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;3-RETURN&#39;</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">this_day_value</span><span class="p">,</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="p">(</span><span class="n">lead_size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">lead_size</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="p">)</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">      </span><span class="k">else</span><span class="w"> </span><span class="k">NULL</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">    </span><span class="k">end</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">next_day_churn</span><span class="p">,</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">    </span><span class="k">count</span><span class="p">(</span><span class="k">distinct</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">lag_lead_with_diffs</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="p">)</span>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="k">select</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="n">this_day_value</span><span class="p">,</span><span class="w"> </span><span class="k">sum</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="k">union</span>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="k">select</span><span class="w"> </span><span class="n">date_add</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">time_period</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">time_period</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;0-CHURN&#39;</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="k">sum</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cnt</span><span class="w"> </span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">calculated</span><span class="w"> </span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">next_day_churn</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">;</span>
+</span></code></pre></div>
+<div class="language-sql highlight"><span class="filename">clickstream-lifecycle-daily-query.sql</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">-- run following command to load latest partition</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1">-- msck repair table {{database}}.{{eventTable}};</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">with</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="o">*</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">eventTable</span><span class="err">}}</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">),</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="n">user_first_date</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">    </span><span class="k">min</span><span class="p">(</span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_date</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">base</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">user_pseudo_id</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="p">),</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="n">retention_data</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="k">SELECT</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="w">    </span><span class="n">DATE_DIFF</span><span class="p">(</span><span class="s1">&#39;day&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">first_date</span><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">day_diff</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">base</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a><span class="w">  </span><span class="k">JOIN</span><span class="w"> </span><span class="n">user_first_date</span><span class="w"> </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span><span class="n">user_pseudo_id</span><span class="p">)</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a><span class="p">),</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a><span class="n">retention_counts</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a><span class="w">    </span><span class="n">day_diff</span><span class="p">,</span>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">returned_user_count</span>
+</span><span id="__span-5-35"><a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">retention_data</span>
+</span><span id="__span-5-36"><a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">day_diff</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="c1">-- Calculate retention rate for the last 42 days</span>
+</span><span id="__span-5-37"><a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">first_date</span><span class="p">,</span><span class="w"> </span><span class="n">day_diff</span>
+</span><span id="__span-5-38"><a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a><span class="p">),</span>
+</span><span id="__span-5-39"><a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>
+</span><span id="__span-5-40"><a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a><span class="n">total_users</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-41"><a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-5-42"><a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-5-43"><a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total_users</span>
+</span><span id="__span-5-44"><a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">user_first_date</span>
+</span><span id="__span-5-45"><a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a><span class="w">  </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span>
+</span><span id="__span-5-46"><a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a><span class="p">),</span>
+</span><span id="__span-5-47"><a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a>
+</span><span id="__span-5-48"><a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a><span class="n">retention_rate</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-49"><a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a><span class="w">  </span><span class="k">SELECT</span>
+</span><span id="__span-5-50"><a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a><span class="w">    </span><span class="n">first_date</span><span class="p">,</span>
+</span><span id="__span-5-51"><a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a><span class="w">    </span><span class="n">day_diff</span><span class="p">,</span>
+</span><span id="__span-5-52"><a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a><span class="w">    </span><span class="n">returned_user_count</span><span class="p">,</span>
+</span><span id="__span-5-53"><a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a><span class="w">    </span><span class="n">total_users</span>
+</span><span id="__span-5-54"><a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">retention_counts</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="n">total_users</span><span class="w"> </span><span class="k">using</span><span class="p">(</span><span class="n">first_date</span><span class="p">)</span>
+</span><span id="__span-5-55"><a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a><span class="p">)</span>
+</span><span id="__span-5-56"><a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a>
+</span><span id="__span-5-57"><a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a><span class="k">SELECT</span>
+</span><span id="__span-5-58"><a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a><span class="o">*</span>
+</span><span id="__span-5-59"><a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a><span class="k">FROM</span><span class="w"> </span><span class="n">retention_rate</span>
+</span></code></pre></div></p>
+</div>
+</div>
+</div>
+</details>
 <h2 id="_4">维度和指标</h2>
 <p>该报告包括以下维度和指标。 您可以通过在 QuickSight 数据集中创建“计算字段”来添加更多维度或指标。 <a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">了解更多</a>。</p>
 <table>
@@ -3215,10 +3217,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.d7c377c4.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.7389ff0e.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
