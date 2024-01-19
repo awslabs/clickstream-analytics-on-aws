@@ -20,12 +20,13 @@ import {
   StartStreamEncryptionCommand,
   EncryptionType,
 } from '@aws-sdk/client-kinesis';
-import { CdkCustomResourceHandler, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, Context } from 'aws-lambda';
+import { CdkCustomResourceHandler, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { planAppChanges } from '../../../common/custom-resources';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { getSinkStreamName } from '../../common/utils';
 import { KinesisCustomResourceProps, KinesisProperties } from '../../private/model';
+import { getSinkStreamName } from '../../private/utils';
 
 export type ResourcePropertiesType = KinesisCustomResourceProps & {
   readonly ServiceToken: string;
@@ -47,9 +48,8 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
 
   try {
     const props = event.ResourceProperties as ResourcePropertiesType;
-    const requestType = event.RequestType;
 
-    const { toBeAdded, toBeUpdated, toBeDeleted } = planAppChanges(requestType, props, event);
+    const { toBeAdded, toBeUpdated, toBeDeleted } = planAppChanges(event);
 
     logger.info('App changing info: ', {
       toBeAdded,
@@ -78,37 +78,6 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
   }
   return response;
 };
-
-function toAppIdArray(appIds?: string) {
-  return (appIds === '' || !appIds) ? [] : appIds.split(',');
-}
-
-function planAppChanges(requestType: string, props: ResourcePropertiesType, event: CloudFormationCustomResourceEvent) {
-  const toBeAdded: string[] = [], toBeUpdated: string[] = [], toBeDeleted: string[] = [];
-
-  if (requestType == 'Create') {
-    toAppIdArray(props.appIds).forEach(appId => { toBeAdded.push(appId); });
-  }
-
-  if (requestType == 'Update') {
-    const oldProps = (event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType;
-    const oldAppIds = toAppIdArray(oldProps.appIds);
-    const newAppIds = toAppIdArray(props.appIds);
-
-    newAppIds.forEach(appId => {
-      if (!oldAppIds.includes(appId)) { toBeAdded.push(appId); } else { toBeUpdated.push(appId); }
-    });
-
-    oldAppIds.forEach(appId => {
-      if (!newAppIds.includes(appId)) { toBeDeleted.push(appId); }
-    });
-  }
-
-  if (requestType == 'Delete') {
-    toAppIdArray(props.appIds).forEach(appId => { toBeDeleted.push(appId); });
-  }
-  return { toBeAdded, toBeUpdated, toBeDeleted };
-}
 
 async function createKinesisStreams(projectId: string, appIds: string[], identifier: string,
   kinesisProps: KinesisProperties, tags: Tag[]) {
@@ -145,8 +114,8 @@ async function createKinesisStreams(projectId: string, appIds: string[], identif
 
     await setStreamDataRetentionPeriod(streamName, 24, Number(kinesisProps.dataRetentionHours));
 
-    if (kinesisProps.encryptionKeyId) {
-      await setEncryptionKey(streamName, kinesisProps.encryptionKeyId);
+    if (kinesisProps.encryptionKeyArn) {
+      await setEncryptionKey(streamName, kinesisProps.encryptionKeyArn);
     }
 
     await tagStream(streamName, tags);
@@ -155,12 +124,12 @@ async function createKinesisStreams(projectId: string, appIds: string[], identif
   return appStreamMapping;
 }
 
-async function setEncryptionKey(streamName: string, kmsKeyId: string) {
-  logger.info(`Setting stream ${streamName} encryption key to ${kmsKeyId}`);
+async function setEncryptionKey(streamName: string, kmsKeyArn: string) {
+  logger.info(`Setting stream ${streamName} encryption key to ${kmsKeyArn}`);
   await kinesisClient.send(new StartStreamEncryptionCommand({
     StreamName: streamName,
     EncryptionType: EncryptionType.KMS,
-    KeyId: kmsKeyId,
+    KeyId: kmsKeyArn,
   }));
   await waitUntilStreamExists({
     client: kinesisClient,
@@ -301,8 +270,8 @@ async function updateKinesisStreams(projectId: string, appIds: string[], identif
       await setStreamDataRetentionPeriod(streamName, stream.StreamDescriptionSummary?.RetentionPeriodHours ?? 24,
         Number(kinesisProps.dataRetentionHours));
 
-      if (stream.StreamDescriptionSummary?.KeyId != kinesisProps.encryptionKeyId) {
-        await setEncryptionKey(streamName, kinesisProps.encryptionKeyId);
+      if (stream.StreamDescriptionSummary?.KeyId != kinesisProps.encryptionKeyArn) {
+        await setEncryptionKey(streamName, kinesisProps.encryptionKeyArn);
       }
 
       await tagStream(streamName, tags, await getTags(stream.StreamDescriptionSummary!.StreamARN!));

@@ -15,27 +15,31 @@ import path from 'path';
 import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
+  CfnCondition,
   CfnOutput,
+  CfnStack,
   Fn,
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
+import { Role } from 'aws-cdk-lib/aws-iam';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
+import { REDSHIFT_MODE } from './common/model';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
-import { KINESIS_MANAGED_KMS_KEY_ID } from './streaming-ingestion/common/constant';
 import {
   createStackParameters,
 } from './streaming-ingestion/parameter';
 import { KinesisSink } from './streaming-ingestion/private/kinesis-sink';
+import { StreamingIngestionRedshiftStack } from './streaming-ingestion/private/redshift-stack';
 
-export class StreamingIngestionMainStack extends Stack {
+export class StreamingIngestionStack extends Stack {
 
   readonly flinkApp: Application;
 
@@ -46,13 +50,14 @@ export class StreamingIngestionMainStack extends Stack {
   ) {
     super(scope, id, props);
 
-    const featureName = 'StreamingIngestion';
+    const featureName = 'Streaming Ingestion';
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-si) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const p = createStackParameters(this);
     this.templateOptions.metadata = p.metadata;
 
     const projectId = p.params.projectId;
+    const appIds = p.params.appIds;
     const pipeline = p.params.pipeline;
     const sourceStream = Stream.fromStreamArn(this, 'SourceStream', pipeline.source.kinesisArn!);
     const dataBucket = Bucket.fromBucketArn(this, 'DataBucket', pipeline.dataBucket.arn);
@@ -62,6 +67,15 @@ export class StreamingIngestionMainStack extends Stack {
       vpcId: pipeline.network.vpcId,
       availabilityZones: Fn.getAzs(),
       privateSubnetIds: Fn.split(',', pipeline.network.subnetIds),
+    });
+
+    // create sink Kinesis data streams per application
+    const sinkStream = new KinesisSink(this, 'StreamingIngestionSink', {
+      projectId,
+      appIds,
+      ...pipeline.buffer.kinesis,
+      streamMode: pipeline.buffer.kinesis.mode,
+      encryptionKeyArn: pipeline.buffer.kinesis.encryptionKeyArn,
     });
 
     // copy the application jar and files to streaming ingestion data bucket for creating flink application
@@ -116,14 +130,56 @@ export class StreamingIngestionMainStack extends Stack {
     dataBucket.grantRead(this.flinkApp, geoDBKey);
     this.flinkApp.node.addDependency(deployment);
 
-    // create sink Kinesis data streams per application
-    new KinesisSink(this, 'StreamingIngestionSink', {
+    // update Redshift IAM role association and schema and table per application
+    const isExistingRedshiftServerless = new CfnCondition(
+      this,
+      'existingRedshiftServerless',
+      {
+        expression:
+          Fn.conditionEquals(pipeline.destination.redshift.mode, REDSHIFT_MODE.SERVERLESS),
+      },
+    );
+    const isRedshiftProvisioned = new CfnCondition(
+      this,
+      'redshiftProvisioned',
+      {
+        expression:
+          Fn.conditionEquals(pipeline.destination.redshift.mode, REDSHIFT_MODE.PROVISIONED),
+      },
+    );
+    const ingestionParams = {
       projectId,
-      appIds: p.params.appIds,
-      ...pipeline.buffer.kinesis,
-      streamMode: pipeline.buffer.kinesis.mode,
-      encryptionKeyId: KINESIS_MANAGED_KMS_KEY_ID, // use master key owned by KDS by default
+      appIds,
+      dataAPIRole: Role.fromRoleArn(this, 'RedshiftDataAPIRole', pipeline.destination.redshift.dataAPIRoleArn),
+      workflowBucketInfo: {
+        s3Bucket: dataBucket,
+        prefix: `clickstream/${projectId}/tmp/`,
+      },
+      streamArnPattern: sinkStream.streamArnPattern,
+      streamEncryptionKeyArn: pipeline.buffer.kinesis.encryptionKeyArn,
+      biUser: pipeline.destination.redshift.userName,
+      identifier: getShortIdOfStack(Stack.of(this)),
+    };
+    const toRedshiftServerlessStack = new StreamingIngestionRedshiftStack(this, 'StreamingToServerlessRedshift', {
+      ...ingestionParams,
+      existingRedshiftServerlessProps: {
+        createdInStack: false,
+        workgroupId: pipeline.destination.redshift.existingServerless!.workgroupId,
+        namespaceId: pipeline.destination.redshift.existingServerless!.namespaceId,
+        workgroupName: pipeline.destination.redshift.existingServerless!.workgroupName,
+        databaseName: pipeline.destination.redshift.defaultDatabaseName,
+      },
     });
+    (toRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
+    const toProvisionedRedshiftStack = new StreamingIngestionRedshiftStack(this, 'StreamingToProvisionedRedshift', {
+      ...ingestionParams,
+      existingProvisionedRedshiftProps: {
+        clusterIdentifier: pipeline.destination.redshift.provisioned!.clusterIdentifier,
+        dbUser: pipeline.destination.redshift.provisioned!.dbUser,
+        databaseName: pipeline.destination.redshift.defaultDatabaseName,
+      },
+    });
+    (toProvisionedRedshiftStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
 
     this.addCfnNag();
 

@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
-export const KINESIS_MANAGED_KMS_KEY_ID = 'alias/aws/kinesis';
+import { SINK_STREAM_NAME_PREFIX } from './constant';
 
-export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';
+export function getSinkStreamName(projectId: string, appId: string, suffix: string): string {
+  return `${SINK_STREAM_NAME_PREFIX}${projectId}_${appId}_${suffix}`.toLowerCase();
+}

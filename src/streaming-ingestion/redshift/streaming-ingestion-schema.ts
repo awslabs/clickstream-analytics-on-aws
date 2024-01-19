@@ -13,6 +13,7 @@
 
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { schemaDefs } from './sql-def';
 import { RedshiftSQLExecution, RedshiftSQLExecutionProps } from '../../analytics/private/app-schema';
 
 export interface StreamingIngestionSchemasProps extends RedshiftSQLExecutionProps {
@@ -20,6 +21,8 @@ export interface StreamingIngestionSchemasProps extends RedshiftSQLExecutionProp
   readonly appIds: string;
   readonly databaseName: string;
   readonly streamingIngestionRole: IRole;
+  readonly biUsername: string;
+  readonly identifier: string;
 }
 
 export class StreamingIngestionSchemas extends RedshiftSQLExecution {
@@ -32,14 +35,17 @@ export class StreamingIngestionSchemas extends RedshiftSQLExecution {
     return [];
   }
 
+
   protected getCustomResourceProperties(props: RedshiftSQLExecutionProps) {
     const properties = props as StreamingIngestionSchemasProps;
-    // get schemaDefs files last modify timestamp
     return {
       projectId: properties.projectId,
       appIds: properties.appIds,
       databaseName: properties.databaseName,
       streamingRoleArn: properties.streamingIngestionRole.roleArn,
+      identifier: properties.identifier,
+      schemaDefs: schemaDefs,
+      biUsername: properties.biUsername,
     };
   }
 }

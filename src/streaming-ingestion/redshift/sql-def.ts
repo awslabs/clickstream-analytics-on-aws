@@ -24,5 +24,8 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'ods-events-streaming-view.sql',
   },
-
+  {
+    sqlFile: 'grant-permissions-to-bi-user.sql',
+    multipleLine: 'true',
+  },
 ];

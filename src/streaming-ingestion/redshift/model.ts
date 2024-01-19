@@ -11,24 +11,20 @@
  *  and limitations under the License.
  */
 
-import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, SQLDef } from '../../analytics/private/model';
+import { SQLDef } from '../../analytics/private/model';
 
-interface CustomProperties {
-  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps;
-  readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
-}
-
-export type CreateStreamingIngestionSchemas = CustomProperties & {
+export type StreamingIngestionSchemas = {
   readonly projectId: string;
   readonly appIds: string;
-  readonly stackShortId: string;
-  readonly databaseName: string;
-  readonly dataAPIRole: string;
-  readonly reportingViewsDef: SQLDef[];
+  readonly streamingRoleArn: string;
   readonly schemaDefs: SQLDef[];
+  readonly biUsername: string;
+  readonly identifier: string;
 }
 
 export type MustacheParamType = {
-  schema: string;
+  app_schema: string;
+  stream_schema: string;
   kinesis_data_stream_name: string;
+  user_bi: string;
 }

@@ -18,12 +18,12 @@ import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
+import { SINK_STREAM_NAME_PREFIX } from './constant';
 import { KinesisProperties } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
-import { SINK_STREAM_NAME_PREFIX } from '../common/constant';
 
 export type KinesisSinkProps = Omit<KinesisProperties, 'streamMode'> & {
   readonly projectId: string;
@@ -34,11 +34,17 @@ export type KinesisSinkProps = Omit<KinesisProperties, 'streamMode'> & {
 export class KinesisSink extends Construct {
 
   public readonly cr: CustomResource;
+  public readonly streamArnPattern: string;
 
   constructor(scope: Construct, id: string, props: KinesisSinkProps) {
     super(scope, id);
 
-    const fn = this.createKinesisManagementFunction(props.projectId);
+    this.streamArnPattern = Arn.format({
+      service: 'kinesis',
+      resource: 'stream',
+      resourceName: `${SINK_STREAM_NAME_PREFIX}${props.projectId}_*`,
+    }, Stack.of(this));
+    const fn = this.createKinesisManagementFunction(this.streamArnPattern, props.encryptionKeyArn);
     const policy = attachListTagsPolicyForFunction(this, 'KinesisManagementFn', fn);
 
     const provider = new Provider(
@@ -60,13 +66,8 @@ export class KinesisSink extends Construct {
     this.cr.node.addDependency(policy);
   }
 
-  private createKinesisManagementFunction(projectId: string): IFunction {
+  private createKinesisManagementFunction(streamArnPattern: string, keyArn: string): IFunction {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
-    const streamArnPattern = Arn.format({
-      service: 'kinesis',
-      resource: 'stream',
-      resourceName: `${SINK_STREAM_NAME_PREFIX}${projectId}_*`,
-    }, Stack.of(this));
     const fn = new SolutionNodejsFunction(this, 'KinesisManagementFn', {
       entry: join(
         lambdaRootPath,
@@ -97,11 +98,7 @@ export class KinesisSink extends Construct {
           actions: ['kinesis:StartStreamEncryption'],
           resources: [
             streamArnPattern,
-            Arn.format({
-              service: 'kms',
-              resource: 'key',
-              resourceName: '*',
-            }, Stack.of(this)),
+            keyArn,
           ],
         }),
       ]),

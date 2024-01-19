@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{schema}}.clickstream_ods_events_streaming_view as
+CREATE OR REPLACE VIEW {{app_schema}}.ods_events_streaming_view as
 select approximate_arrival_timestamp
 , event_data.project_id::VARCHAR as project_id
 , event_data.event_name::VARCHAR as event_name
@@ -26,4 +26,4 @@ select approximate_arrival_timestamp
 , event_data.user_id::VARCHAR as user_id
 , event_data.user_ltv::SUPER as user_ltv
 , event_data.user_properties::SUPER as user_properties
-from {{schema}}.clickstream_ods_events_streaming_mv;
+from {{app_schema}}.ods_events_streaming_mv;

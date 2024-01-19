@@ -12,6 +12,8 @@
  */
 
 import {
+  KINESIS_DATA_STREAM_ARN_PATTERN,
+  KMS_KEY_ARN_PATTERN,
   S3_BUCKET_ARN_PATTERN,
   SUBNETS_PATTERN,
 } from '@aws/clickstream-base-lib';
@@ -32,6 +34,7 @@ export interface StreamingIngestionStackProps {
         mode: string;
         shardCount: number;
         dataRetentionHours: number;
+        encryptionKeyArn: string;
       };
     };
     destination: {
@@ -49,6 +52,7 @@ export interface StreamingIngestionStackProps {
           dbUser: string;
         };
         associateRoleTimeout: number;
+        userName: string;
       };
     };
     worker: {
@@ -76,6 +80,11 @@ export function createStackParameters(scope: Construct): {
 } {
 
   const { kinesisStreamModeParam, kinesisShardCountParam, kinesisDataRetentionHoursParam } = Parameters.createKinesisParameters(scope);
+  const kinesisEncryptionKMSKeyARNParam = new CfnParameter(scope, 'KinesisEncryptionKMSKeyArn', {
+    description: 'The ARN of KMS key for encrypting the Kinesis data stream',
+    type: 'String',
+    allowedPattern: KMS_KEY_ARN_PATTERN,
+  });
 
   const kinesisParamsGroup = [];
   kinesisParamsGroup.push({
@@ -84,6 +93,7 @@ export function createStackParameters(scope: Construct): {
       kinesisStreamModeParam.logicalId,
       kinesisShardCountParam.logicalId,
       kinesisDataRetentionHoursParam.logicalId,
+      kinesisEncryptionKMSKeyARNParam.logicalId,
     ],
   });
 
@@ -99,11 +109,15 @@ export function createStackParameters(scope: Construct): {
     [ kinesisDataRetentionHoursParam.logicalId]: {
       default: 'Data retention hours',
     },
+    [kinesisEncryptionKMSKeyARNParam.logicalId]: {
+      default: 'KMS key(ARN) for encrypting KDS',
+    },
   };
 
   const kinesisSourceStreamARNParam = new CfnParameter(scope, 'KinesisSourceStreamArn', {
     description: 'The ARN of Kinesis Data Stream used as streaming ingestion source.',
     type: 'String',
+    allowedPattern: KINESIS_DATA_STREAM_ARN_PATTERN,
   });
 
   const streamingIngestionConfigurationParamsGroup = [];
@@ -204,12 +218,19 @@ export function createStackParameters(scope: Construct): {
     minValue: 50,
   });
 
+  const redshiftUserParam = new CfnParameter(scope, 'RedshiftUserParam', {
+    description: 'User name is for reporting module to access the Redshift.',
+    type: 'String',
+    allowedPattern: '\\w+',
+  });
+
   const redshiftCommonParamsGroup = [];
   redshiftCommonParamsGroup.push({
-    Label: { default: 'Redshift Database' },
+    Label: { default: 'Redshift Configuration' },
     Parameters: [
       redshiftDefaultDatabaseParam.logicalId,
       associateRoleTimeoutParam.logicalId,
+      redshiftUserParam.logicalId,
     ],
   });
 
@@ -332,6 +353,7 @@ export function createStackParameters(scope: Construct): {
             mode: kinesisStreamModeParam.valueAsString,
             shardCount: kinesisShardCountParam.valueAsNumber,
             dataRetentionHours: kinesisDataRetentionHoursParam.valueAsNumber,
+            encryptionKeyArn: kinesisEncryptionKMSKeyARNParam.valueAsString,
           },
         },
         destination: {
@@ -349,6 +371,7 @@ export function createStackParameters(scope: Construct): {
               clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
             },
             associateRoleTimeout: associateRoleTimeoutParam.valueAsNumber,
+            userName: redshiftUserParam.valueAsString,
           },
         },
         worker: {

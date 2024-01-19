@@ -12,7 +12,7 @@
  */
 
 import { readdirSync, statSync } from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '@aws/clickstream-base-lib';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
@@ -104,6 +104,7 @@ export abstract class RedshiftSQLExecution extends Construct {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
+      lastModifiedTime: this.getLatestTimestampForDirectory(props.codePath),
       ...crProps,
     };
 
@@ -130,7 +131,6 @@ export abstract class RedshiftSQLExecution extends Construct {
       entry: props.functionEntry,
       handler: 'handler',
       memorySize: 256,
-      reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(15),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
@@ -151,6 +151,21 @@ export abstract class RedshiftSQLExecution extends Construct {
     props.workflowBucketInfo?.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
+  }
+
+  private getLatestTimestampForDirectory(directory: string): number {
+    let latestTimestamp = 0;
+
+    const files = readdirSync(directory);
+    files.forEach(file => {
+      const filePath = join(directory, file);
+      const stats = statSync(filePath);
+      if (stats.isFile()) {
+        latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
+      } else {latestTimestamp = Math.max(this.getLatestTimestampForDirectory(filePath), latestTimestamp);}
+    });
+
+    return latestTimestamp;
   }
 }
 
@@ -213,36 +228,6 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
-      lastModifiedTime: this.getLatestModifyTimestamp(),
     };
-  }
-
-  private getLatestModifyTimestamp(): number {
-    const schemaPath = resolve(__dirname, 'sqls/redshift');
-    const reportingViewsPath = resolve(__dirname, 'sqls/redshift/dashboard');
-
-    // Get latest timestamp from both directories
-    const latestSchemaTimestamp = this.getLatestTimestampForDirectory(schemaPath);
-    const latestReportingViewTimestamp = this.getLatestTimestampForDirectory(reportingViewsPath);
-
-    // Return the max of both timestamps
-    const latestTimestamp = Math.max(latestSchemaTimestamp, latestReportingViewTimestamp);
-
-    return latestTimestamp;
-  }
-
-  private getLatestTimestampForDirectory(directory: string): number {
-    let latestTimestamp = 0;
-
-    const files = readdirSync(directory);
-    files.forEach(file => {
-      const filePath = join(directory, file);
-      const stats = statSync(filePath);
-      if (stats.isFile()) {
-        latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
-      }
-    });
-
-    return latestTimestamp;
   }
 }

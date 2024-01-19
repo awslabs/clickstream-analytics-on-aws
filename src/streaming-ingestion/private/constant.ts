@@ -11,17 +11,7 @@
  *  and limitations under the License.
  */
 
-import { KINESIS_MODE } from '../../common/model';
 
-export interface KinesisProperties {
-  readonly streamMode: KINESIS_MODE;
-  readonly dataRetentionHours: number;
-  readonly shardCount: number;
-  readonly encryptionKeyArn: string;
-}
+export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';
 
-export type KinesisCustomResourceProps = KinesisProperties & {
-  readonly projectId: string;
-  readonly appIds: string;
-  readonly identifier: string;
-}
+export const STREAMING_SCHEMA_SUFFIX = '_streaming';

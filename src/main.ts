@@ -32,7 +32,7 @@ import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
 import { ServiceCatalogAppregistryStack } from './service-catalog-appregistry-stack';
-import { StreamingIngestionMainStack } from './streaming-ingestion-stack';
+import { StreamingIngestionStack } from './streaming-ingestion-stack';
 
 const app = new App();
 
@@ -208,7 +208,7 @@ new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') 
 });
 
 stackSuppressions([
-  new StreamingIngestionMainStack(app, app.node.tryGetContext('streamingIngestionStackName') ?? 'streaming-ingestion-stack', {
+  new StreamingIngestionStack(app, app.node.tryGetContext('streamingIngestionStackName') ?? 'streaming-ingestion-stack', {
     synthesizer: synthesizer(),
   }),
 ], commonCdkNagRules);
