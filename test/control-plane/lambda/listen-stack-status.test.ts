@@ -14,6 +14,7 @@
 import {
   CloudFormationClient, DescribeStacksCommand, Stack, StackStatus,
 } from '@aws-sdk/client-cloudformation';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -284,6 +285,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
         ],
       },
     },
+    updateAt: new Date('2022-01-01').getTime(),
   };
 
   beforeEach(() => {
@@ -299,9 +301,13 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       Items: [{ ...mockPipeline }],
     });
     docMock.on(UpdateCommand).resolves({});
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-01'));
     await handler(sqsEvent);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(docMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(mockStackDetails).toContainEqual({
       stackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
       outputs: [],
@@ -317,12 +323,66 @@ describe('Listen CFN Stack Status Lambda Function', () => {
         id: MOCK_PROJECT_ID,
         type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
       },
-      UpdateExpression: 'SET #stackDetails = :stackDetails',
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #stackDetails = :stackDetails, #ConditionVersion = :updateAt',
       ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
         '#stackDetails': 'stackDetails',
       },
       ExpressionAttributeValues: {
         ':stackDetails': [...mockStackDetails],
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
+      },
+    });
+  });
+
+  test('Save stack status to DDB with Conditional Check Failed', async () => {
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [{ ...mockIngestionKafkaStack }],
+    });
+    docMock.on(QueryCommand).resolves({
+      Items: [{ ...mockPipeline }],
+    });
+    const mockConditionalCheckFailed = new ConditionalCheckFailedException(
+      {
+        message: 'ConditionalCheckFailedException',
+        $metadata: {},
+      },
+    );
+    docMock.on(UpdateCommand).rejectsOnce(mockConditionalCheckFailed).resolves({});
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-01-01'));
+    await handler(sqsEvent);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 1);
+    expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    expect(docMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
+    expect(mockStackDetails).toContainEqual({
+      stackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+      outputs: [],
+      stackName: mockIngestionKafkaStack.StackName,
+      stackStatus: mockIngestionKafkaStack.StackStatus,
+      stackStatusReason: mockIngestionKafkaStack.StackStatusReason,
+      stackTemplateVersion: 'v1.0.0',
+      stackType: PipelineStackType.INGESTION,
+    });
+    expect(docMock).toHaveReceivedNthSpecificCommandWith(1, UpdateCommand, {
+      TableName: process.env.CLICKSTREAM_TABLE_NAME ?? '',
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+      },
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #stackDetails = :stackDetails, #ConditionVersion = :updateAt',
+      ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
+        '#stackDetails': 'stackDetails',
+      },
+      ExpressionAttributeValues: {
+        ':stackDetails': [...mockStackDetails],
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
       },
     });
   });
