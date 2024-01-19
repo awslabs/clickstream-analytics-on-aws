@@ -395,7 +395,13 @@ export const CLICKSTREAM_LIFECYCLE_VIEW_NAME = 'clickstream_lifecycle_view_v1';
 export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME = 'clickstream_lifecycle_daily_view_v2';
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v2';
 export const CLICKSTREAM_USER_ATTR_VIEW_NAME = 'clickstream_user_attr_view_v1';
-export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = ['clickstream_session_view_v1', 'clickstream_event_view_v1', 'clickstream_lifecycle_daily_view_v1', 'clickstream_lifecycle_weekly_view_v1'];
+export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
+  'clickstream_session_view_v1',
+  'clickstream_event_view_v1',
+  'clickstream_lifecycle_daily_view_v1',
+  'clickstream_lifecycle_weekly_view_v1',
+  'clickstream_retention_view_v1',
+];
 
 export const QUICKSIGHT_RESOURCE_NAME_PREFIX = 'clickstream';
 export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
