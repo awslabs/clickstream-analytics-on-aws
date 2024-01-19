@@ -182,7 +182,7 @@ export class StackManager {
     if (workflow === undefined) {
       throw new Error('Pipeline workflow is empty.');
     }
-    const executionArn = await startExecution(awsRegion!, stackWorkflowStateMachineArn!, executionName, JSON.stringify(workflow.Workflow));
+    const executionArn = await startExecution(awsRegion, stackWorkflowStateMachineArn!, executionName, JSON.stringify(workflow.Workflow));
     return executionArn ?? '';
   }
 

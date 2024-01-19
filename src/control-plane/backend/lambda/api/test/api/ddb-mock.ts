@@ -24,7 +24,7 @@ import {
 } from '@aws-sdk/client-ec2';
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
-import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
+import { DescribeAccountSubscriptionCommand, Edition, RegisterUserCommand, ResourceExistsException } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
@@ -367,6 +367,7 @@ function createPipelineMock(
     vpcEndpointSubnetErr?: boolean;
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
+    quickSightUserExisted?: boolean;
     albPolicyDisable?: boolean;
     bucket?: {
       notExist?: boolean;
@@ -910,12 +911,6 @@ function createPipelineMock(
     SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
   });
   mockClients.sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-  mockClients.quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
-    AccountInfo: {
-      AccountName: 'ck',
-      Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
-    },
-  });
   mockClients.s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
@@ -931,6 +926,28 @@ function createPipelineMock(
   }
   createEventRuleMock(mockClients.cloudWatchEventsMock);
   createSNSTopicMock(mockClients.snsMock);
+  mockQuickSight(mockClients.quickSightMock, props?.quickSightStandard, props?.quickSightUserExisted);
+}
+
+function mockQuickSight(quickSightMock: any, standard?: boolean, userExisted?: boolean): any {
+  quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
+    AccountInfo: {
+      AccountName: 'ck',
+      Edition: standard ? Edition.STANDARD : Edition.ENTERPRISE,
+    },
+  });
+  if (userExisted) {
+    quickSightMock.on(RegisterUserCommand).rejects(
+      new ResourceExistsException(
+        {
+          message: 'ResourceExistsException',
+          $metadata: {},
+        },
+      ),
+    );
+  } else {
+    quickSightMock.on(RegisterUserCommand).resolves({});
+  }
 }
 
 function createPipelineMockForBJSRegion(s3Mock: any) {

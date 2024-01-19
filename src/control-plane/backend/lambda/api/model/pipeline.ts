@@ -359,7 +359,6 @@ export class CPipeline {
       status: ExecutionStatus.RUNNING,
     };
     this.pipeline.statusType = PipelineStatusType.UPDATING;
-    this.pipeline.tags = oldPipeline.tags;
     this.pipeline.workflow = this.stackManager.getWorkflow();
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
@@ -469,7 +468,7 @@ export class CPipeline {
   private async _forceRefreshStatus(): Promise<void> {
     let executionDetail;
     if (this.pipeline.executionDetail?.executionArn) {
-      executionDetail = await getExecutionDetail(awsRegion!, this.pipeline.executionDetail?.executionArn);
+      executionDetail = await getExecutionDetail(awsRegion, this.pipeline.executionDetail?.executionArn);
       if (executionDetail) {
         this.pipeline.executionDetail = {
           executionArn: executionDetail.executionArn ?? '',
