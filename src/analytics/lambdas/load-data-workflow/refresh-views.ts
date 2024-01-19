@@ -103,9 +103,7 @@ async function getMVRefreshInfoFromS3(pipelineS3Prefix: string, projectId: strin
       s3Key,
     );
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error('Error when get mv refresh info data from s3:', error);
-    }
+    logger.error('Error when get mv refresh info data from s3:', error);
     throw error;
   }
 }
@@ -118,9 +116,7 @@ async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix
     const s3Key = getMVRefreshInfoKey(pipelineS3Prefix, projectId, appId);
     await putStringToS3(JSON.stringify(info), pipelineS3BucketName, s3Key);
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error('Error when write mv refresh info data to s3:', error);
-    }
+    logger.error('Error when write mv refresh info data to s3:', error);
     throw error;
   }
 }
