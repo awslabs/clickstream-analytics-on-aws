@@ -42,7 +42,7 @@ public final class Utils {
     private AmazonS3 s3Client;
 
     public static synchronized Utils getInstance() {
-        if (instance != null) {
+        if (instance == null) {
             instance = new Utils();
         }
         return instance;
