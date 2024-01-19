@@ -18,7 +18,6 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import software.aws.solution.clickstream.flink.Utils;
 import software.aws.solution.clickstream.plugin.enrich.Enrichment;
@@ -87,7 +86,7 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<String, Stri
             data.set("event_id", dataNode.get("event_id"));
             data.set(APP_ID, dataNode.get(APP_ID));
             data.set("user_pseudo_id", dataNode.get("unique_id"));
-            data.set("event_timestamp",dataNode.get(TIMESTAMP));
+            data.set("event_timestamp", dataNode.get(TIMESTAMP));
 
             transformDevice(dataNode, ingestNode, data);
             transformAppInfo(dataNode, attributesNode, data);
