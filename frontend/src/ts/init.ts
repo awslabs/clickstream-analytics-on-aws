@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { EIngestionType, ProtocalType, ResourceCreateMethod, SinkType } from './const';
+import {
+  EIngestionType,
+  ProtocalType,
+  ResourceCreateMethod,
+  SinkType,
+} from './const';
 
 export const INIT_PROJECT_DATA = {
   id: 'my_project_id',
