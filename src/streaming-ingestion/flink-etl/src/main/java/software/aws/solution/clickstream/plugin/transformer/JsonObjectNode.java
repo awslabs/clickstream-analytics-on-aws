@@ -11,26 +11,16 @@
  *  and limitations under the License.
  */
 
-
 package software.aws.solution.clickstream.plugin.transformer;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 
+@Getter
+@AllArgsConstructor
 public class JsonObjectNode {
-    @Setter
-    @Getter
     private String key;
-    @Setter
-    @Getter
     private JsonNode value;
-    @Setter
-    @Getter
     private String valueFormat;
-    public JsonObjectNode(final String key, final JsonNode value, final String valueFormat) {
-        this.key = key;
-        this.value = value;
-        this.valueFormat = valueFormat;
-    }
 }
