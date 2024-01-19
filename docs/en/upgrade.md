@@ -2,8 +2,8 @@
 
 ## Planning and Preparation
 
-1. **Data Processing interval**: The pipeline upgrade will take about 20 minutes; ensure no data processing job is running while upgrading the existing pipeline. You can update the existing pipeline to increase the interval and view whether there are running jobs of the EMR Serverless application in the console.
-2. **Backup modified QuickSight Analysis and Dashboard**: The solution upgrade might update the out-of-box analysis and dashboard. If you changed it, please follow [this documentation][quicksight-assets-export] to back them up.
+1. **Backup of Modified QuickSight Analysis and Dashboard**: The solution upgrade may involve modifying the out-of-the-box analysis and dashboard. In this case, you can back them up following [this documentation][quicksight-assets-export].
+2. **Data Processing Interval** (only applied to upgrade from v1.0.x): The pipeline upgrade will take about 20 minutes. Make sure no data processing job is running while upgrading the existing pipeline. You can update the existing pipeline to increase the interval and view whether there are running jobs of the EMR Serverless application in the console.
 
 ## Upgrade Process
 
