@@ -40,6 +40,7 @@ export enum ExploreComputeMethod {
   USER_ID_CNT = 'USER_ID_CNT', // user_id
   EVENT_CNT = 'EVENT_CNT',
   SUM_VALUE = 'SUM_VALUE',
+  AVG_VALUE = 'AVG_VALUE',
 }
 
 export enum ExplorePathSessionDef {

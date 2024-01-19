@@ -168,7 +168,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                       const newItem: any = { ...item };
                       if (
                         item.itemType === 'children' &&
-                        item.groupName === 'SUM'
+                        item.groupName === ExploreComputeMethod.SUM_VALUE
                       ) {
                         newItem.label = t('analytics:sumGroupLabel', {
                           label: item.label,
@@ -176,7 +176,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                       }
                       if (
                         item.itemType === 'children' &&
-                        item.groupName === 'AVG'
+                        item.groupName === ExploreComputeMethod.AVG_VALUE
                       ) {
                         newItem.label = t('analytics:avgGroupLabel', {
                           label: item.label,

@@ -181,7 +181,7 @@ export const getAttributionMethodOptions = (
     },
     {
       label: defaultStr(i18n.t('analytics:sumGroup')),
-      value: 'SUM',
+      value: ExploreComputeMethod.SUM_VALUE,
       subList: [],
     },
   ];
@@ -202,7 +202,7 @@ export const getAttributionMethodOptions = (
       name: parameter.name,
       valueType: parameter.valueType,
       category: parameter.category,
-      groupName: 'SUM',
+      groupName: ExploreComputeMethod.SUM_VALUE,
       itemType: 'children',
     } as IAnalyticsItem);
   }
