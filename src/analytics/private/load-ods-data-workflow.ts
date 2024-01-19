@@ -50,6 +50,7 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly emrServerlessApplicationId: string;
   readonly redshiftRoleForCopyFromS3: IRole;
   readonly ddbStatusTable: ITable;
+  readonly mvRefreshInterval: number;
 
   readonly tablesOdsSource: TablesODSSource; // data S3 bucket
   readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
@@ -641,7 +642,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         REDSHIFT_DATABASE: props.databaseName,
         REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
         ENABLE_REFRESH: 'true',
-        REFRESH_INTERVAL_MINUTES: '120',
+        REFRESH_INTERVAL_MINUTES: props.mvRefreshInterval.toString(),
         PIPELINE_S3_BUCKET_NAME: props.workflowBucketInfo.s3Bucket.bucketName,
         PIPELINE_S3_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
         REDSHIFT_ROLE: copyRole.roleArn,

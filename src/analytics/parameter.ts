@@ -73,6 +73,7 @@ export interface RedshiftAnalyticsStackProps {
   redshift: {
     mode: string;
     defaultDatabaseName: string;
+    mvRefreshInterval: number;
     newServerless?: {
       vpcId: string;
       subnetIds: string;
@@ -304,13 +305,32 @@ export function createStackParameters(scope: Construct): {
     default: 'dev',
     allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
   });
+
+  const mvRefreshIntervalParam = new CfnParameter(scope, 'MVRefreshInterval', {
+    description: 'The interval of refresh redshift materialized views in minutes',
+    type: 'Number',
+    default: 120,
+    minValue: 6,
+    maxValue: 1440,
+  });
+
   const redshiftCommonParamsGroup = [];
   redshiftCommonParamsGroup.push({
     Label: { default: 'Redshift Database' },
     Parameters: [
       redshiftDefaultDatabaseParam.logicalId,
+      mvRefreshIntervalParam.logicalId,
     ],
   });
+
+  const redshiftCommonParamsLabels = {
+    [redshiftDefaultDatabaseParam.logicalId]: {
+      default: 'Redshift Default Database',
+    },
+    [mvRefreshIntervalParam.logicalId]: {
+      default: 'Materialized View Refresh Interval',
+    },
+  };
 
   // Set new Redshift serverless parameters
   const redshiftServerlessWorkgroupName = createWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
@@ -759,6 +779,7 @@ export function createStackParameters(scope: Construct): {
         [loadWorkflowBucketPrefixParam.logicalId]: {
           default: 'S3 prefix for load workflow data',
         },
+        ...redshiftCommonParamsLabels,
         ...redshiftServerlessParamsLabels,
         ...existingRedshiftServerlessParamsLabels,
         ...redshiftClusterParamsLabels,
@@ -828,6 +849,7 @@ export function createStackParameters(scope: Construct): {
       redshift: {
         mode: redshiftModeParam.valueAsString,
         defaultDatabaseName: redshiftDefaultDatabaseParam.valueAsString,
+        mvRefreshInterval: mvRefreshIntervalParam.valueAsNumber,
         newServerless: {
           vpcId: redshiftServerlessVPCId.valueAsString,
           subnetIds: redshiftServerlessSubnets.valueAsString,
