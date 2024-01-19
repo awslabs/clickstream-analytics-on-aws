@@ -13,7 +13,7 @@
 
 import { CloudFormationClient, DescribeStacksCommand, Stack, StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand, ResourceNotFoundException } from '@aws-sdk/client-cloudwatch-events';
-import { DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
+import { ConditionalCheckFailedException, DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
 import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, UnsubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, UpdateCommand, UpdateCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
@@ -22,6 +22,8 @@ import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { CFN_TOPIC_PREFIX } from '../api/common/constants';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
+
+const MAX_RETRY_COUNT = 3;
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
@@ -103,7 +105,8 @@ export async function getPipeline(pipelineId: string): Promise<any> {
   }
 }
 
-export async function updatePipelineStackStatus(projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[]): Promise<void> {
+async function updateStackStatusWithOptimisticLocking(
+  projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<boolean> {
   try {
     const input: UpdateCommandInput = {
       TableName: clickStreamTableName,
@@ -111,15 +114,44 @@ export async function updatePipelineStackStatus(projectId: string, pipelineId:st
         id: projectId,
         type: `PIPELINE#${pipelineId}#latest`,
       },
-      UpdateExpression: 'SET #stackDetails = :stackDetails',
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #stackDetails = :stackDetails, #ConditionVersion = :updateAt',
       ExpressionAttributeNames: {
         '#stackDetails': 'stackDetails',
+        '#ConditionVersion': 'updateAt',
       },
       ExpressionAttributeValues: {
         ':stackDetails': stackDetails,
+        ':ConditionVersionValue': updateAt,
+        ':updateAt': Date.now(),
       },
     };
     await docClient.send(new UpdateCommand(input));
+    return true;
+  } catch (err) {
+    if (err instanceof ConditionalCheckFailedException) {
+      return false;
+    }
+    logger.error('Failed to update pipeline stack status: ', { projectId, pipelineId, err });
+    throw err;
+  }
+}
+
+export async function updatePipelineStackStatus(
+  projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<void> {
+  try {
+    let retryCount = 0;
+    let success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, updateAt);
+    while (!success && retryCount < MAX_RETRY_COUNT) {
+      logger.warn('Failed to update pipeline stack status with optimistic locking: ', { projectId, pipelineId, retryCount });
+      const pipeline = await getPipeline(pipelineId);
+      if (!pipeline) {
+        logger.error('Failed to get pipeline: ', { projectId, pipelineId });
+        throw new Error('Failed to get pipeline');
+      }
+      success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, pipeline.updateAt);
+      retryCount += 1;
+    }
   } catch (err) {
     logger.error('Failed to update pipeline stack status: ', { projectId, pipelineId, err });
     throw err;
@@ -192,9 +224,10 @@ export const getTopicArn = (region: string, pipelineId: string) => {
   return `arn:${partition}:sns:${region}:${process.env.AWS_ACCOUNT_ID}:${topicName}`;
 };
 
-export const updatePipelineStateStatus = async (
+async function updateStateStatusWithOptimisticLocking(
   projectId: string, pipelineId:string,
-  eventDetail: StepFunctionsExecutionStatusChangeNotificationEventDetail) => {
+  eventDetail: StepFunctionsExecutionStatusChangeNotificationEventDetail,
+  updateAt: number): Promise<boolean> {
   try {
     const executionDetail: ExecutionDetail = {
       executionArn: eventDetail.executionArn,
@@ -207,15 +240,46 @@ export const updatePipelineStateStatus = async (
         id: projectId,
         type: `PIPELINE#${pipelineId}#latest`,
       },
-      UpdateExpression: 'SET #executionDetail = :executionDetail',
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #executionDetail = :executionDetail, #ConditionVersion = :updateAt',
       ExpressionAttributeNames: {
         '#executionDetail': 'executionDetail',
+        '#ConditionVersion': 'updateAt',
       },
       ExpressionAttributeValues: {
         ':executionDetail': executionDetail,
+        ':ConditionVersionValue': updateAt,
+        ':updateAt': Date.now(),
       },
     };
     await docClient.send(new UpdateCommand(input));
+    return true;
+  } catch (err) {
+    if (err instanceof ConditionalCheckFailedException) {
+      return false;
+    }
+    logger.error('Failed to update pipeline state status: ', { projectId, pipelineId, err });
+    throw err;
+  }
+};
+
+export const updatePipelineStateStatus = async (
+  projectId: string, pipelineId:string,
+  eventDetail: StepFunctionsExecutionStatusChangeNotificationEventDetail,
+  updateAt: number) => {
+  try {
+    let retryCount = 0;
+    let success = await updateStateStatusWithOptimisticLocking(projectId, pipelineId, eventDetail, updateAt);
+    while (!success && retryCount < MAX_RETRY_COUNT) {
+      logger.warn('Failed to update pipeline state status with optimistic locking: ', { projectId, pipelineId, retryCount });
+      const pipeline = await getPipeline(pipelineId);
+      if (!pipeline) {
+        logger.error('Failed to get pipeline: ', { projectId, pipelineId });
+        throw new Error('Failed to get pipeline');
+      }
+      success = await updateStateStatusWithOptimisticLocking(projectId, pipelineId, eventDetail, pipeline.updateAt);
+      retryCount += 1;
+    }
   } catch (err) {
     logger.error('Failed to update pipeline state status: ', { projectId, pipelineId, err });
     throw err;
