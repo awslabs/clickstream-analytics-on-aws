@@ -88,8 +88,12 @@ const HelpInfo: React.FC = () => {
               {t('help:attributionModelInfo.totalTriggerCount.description')}
             </li>
             <li>
-              <b>{t('help:attributionModelInfo.numberTriggersConversion.title')}</b>
-              {t('help:attributionModelInfo.numberTriggersConversion.description')}
+              <b>
+                {t('help:attributionModelInfo.numberTriggersConversion.title')}
+              </b>
+              {t(
+                'help:attributionModelInfo.numberTriggersConversion.description'
+              )}
             </li>
             <li>
               <b>{t('help:attributionModelInfo.contribution.title')}</b>
