@@ -25,6 +25,8 @@ import {
   MemberType,
   FolderType,
   SharingModel,
+  RegisterUserCommandInput,
+  ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
@@ -45,7 +47,7 @@ const promisePool = pLimit(3);
 export const registerClickstreamUser = async () => {
   try {
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
-    await sdkClient.QuickSight({ region: identityRegion }).registerUser({
+    await registerUser(identityRegion, {
       IdentityType: IdentityType.IAM,
       AwsAccountId: awsAccountId,
       Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
@@ -54,7 +56,7 @@ export const registerClickstreamUser = async () => {
       UserRole: UserRole.ADMIN,
       SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
     });
-    await sdkClient.QuickSight({ region: identityRegion }).registerUser({
+    await registerUser(identityRegion, {
       IdentityType: IdentityType.IAM,
       AwsAccountId: awsAccountId,
       Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
@@ -67,6 +69,24 @@ export const registerClickstreamUser = async () => {
     return clickstreamUserArn;
   } catch (err) {
     logger.error('Register Clickstream User Error.', { err });
+    throw err;
+  }
+};
+
+const registerUser = async (
+  region: string,
+  input: RegisterUserCommandInput,
+) => {
+  try {
+    const quickSight = sdkClient.QuickSight({
+      region: region,
+    });
+    await quickSight.registerUser(input);
+  } catch (err) {
+    if (err instanceof ResourceExistsException) {
+      return;
+    }
+    logger.error('Register User Error.', { err });
     throw err;
   }
 };
