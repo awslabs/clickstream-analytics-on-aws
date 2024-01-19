@@ -13,30 +13,30 @@
 
 - `lifecycle_weekly_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_weekly_view_v1` 视图。
 - `lifecycle_daily_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_daily_view_v1` 视图。
-- 连接到分析引擎中的 `clickstream_retention_view_v1` 视图。
+- 连接到分析引擎中的“clickstream_retention_view_v2”视图的“retention_view-<app id>-<project id>”
 
 下面是生成视图的 SQL 命令。
-??? 示例 "SQL 命令"
-    === "Redshift"
-        ```sql title="clickstream_lifecycle_weekly_view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:2"
-        ```
-        ```sql title="clickstream_lifecycle_daily_view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:2"
-        ```
-        ```sql title="clickstream_retention_view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v1.sql:6"
-        ```
-    === "Athena"
-        ```sql title="clickstream-lifecycle-weekly-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-weekly-query.sql"
-        ```
-        ```sql title="clickstream-lifecycle-daily-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-daily-query.sql"
-        ```
-        ```sql title="clickstream-lifecycle-daily-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-retention-query.sql"
-        ```
+??? 示例"SQL 命令"
+     ==="Redshift"
+         ```sql title="clickstream_lifecycle_weekly_view.sql"
+         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v2.sql:2"
+         ````
+         ```sql title="clickstream_lifecycle_daily_view.sql"
+         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v2.sql:2"
+         ````
+         ```sql title="clickstream_retention_view.sql"
+         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v2.sql:6"
+         ````
+     ==="Athena"
+         ```sql title="clickstream-lifecycle-weekly-query.sql"
+         --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-weekly-query.sql"
+         ````
+         ```sql title="clickstream-lifecycle-daily-query.sql"
+         --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-daily-query.sql"
+         ````
+         ```sql title="clickstream-lifecycle-daily-query.sql"
+         --8<-- "src/analytics/private/sqls/athena/clickstream-retention-query.sql"
+         ````
 
 ## 维度和指标
 该报告包括以下维度和指标。 您可以通过在 QuickSight 数据集中创建“计算字段”来添加更多维度或指标。 [了解更多](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html)。

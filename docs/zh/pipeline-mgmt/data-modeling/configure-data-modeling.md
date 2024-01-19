@@ -12,7 +12,7 @@
 | clickstream_user_dim_view_v1    | 物化视图     | 包含所有用户维度的视图。                     |
 | clickstream_user_attr_view_v1    | 物化视图      | 包含所有用户自定义属性的视图。        |
 | clickstream_session_view_v2    | 视图     | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
-| clickstream_retention_view_v1    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
+| clickstream_retention_view_v2    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
 | clickstream_lifecycle_daily_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
 | clickstream_lifecycle_weekly_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
 
