@@ -16,7 +16,7 @@
 ??? 示例 "SQL 命令"
     === "Redshift"
         ```sql title="clickstream_user_dim_view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:2"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-user-dim-query.sql"

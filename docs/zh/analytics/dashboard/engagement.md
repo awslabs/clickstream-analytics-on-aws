@@ -12,7 +12,7 @@
 ??? 示例 "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:7"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-session-query.sql"
