@@ -2792,7 +2792,7 @@
 <h2 id="where-the-data-comes-from">Where the data comes from</h2>
 <p>Device report are created based on the following QuickSight dataset:</p>
 <ul>
-<li><code>Device_View-&lt;app id&gt;-&lt;project id&gt;</code>, which connects to the <code>clickstream_device_view_v1</code> view in analytics engines (i.e., Redshift or Athena). </li>
+<li><code>Device_View-&lt;app id&gt;-&lt;project id&gt;</code>, which connects to the <code>clickstream_device_view</code> view in analytics engines (i.e., Redshift or Athena). </li>
 </ul>
 <p>Below is the SQL command that generates the view.</p>
 <details class="example">
@@ -2800,7 +2800,7 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream_device_view_v1.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">select</span>
+<div class="language-sql highlight"><span class="filename">clickstream_device_view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">select</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">device</span><span class="p">.</span><span class="n">vendor_id</span><span class="p">::</span><span class="nb">varchar</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_id</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="w"> </span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">mobile_brand_name</span><span class="p">::</span><span class="nb">varchar</span>
