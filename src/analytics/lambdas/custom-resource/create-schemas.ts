@@ -28,6 +28,7 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../common/constant';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -330,6 +331,12 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
+
+    //drop old views
+    for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
+      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
+    }
+
     sqlStatementsByApp.set(app, sqlStatements);
   };
   return sqlStatementsByApp;

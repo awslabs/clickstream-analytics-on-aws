@@ -11,21 +11,21 @@ Note: This article describes the default report. You can customize the report by
 ## Where the data comes from
 Retention report are created based on the following QuickSight dataset:
 
-- `lifecycle_weekly_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_weekly_view_v1` view in analytics engines (i.e., Redshift or Athena). 
-- `lifecycle_daily_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_daily_view_v1` view in analytics engines (i.e., Redshift or Athena). 
-- `retention_view-<app id>-<project id>` that connects to the `clickstream_retention_view_v1` view in analytics engines
+- `lifecycle_weekly_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_weekly_view` view in analytics engines (i.e., Redshift or Athena). 
+- `lifecycle_daily_view-<app id>-<project id>`, which connects to the `clickstream_lifecycle_daily_view` view in analytics engines (i.e., Redshift or Athena). 
+- `retention_view-<app id>-<project id>` that connects to the `clickstream_retention_view` view in analytics engines
 
 Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_lifecycle_weekly_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_weekly_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v2.sql:3"
         ```
-        ```sql title="clickstream_lifecycle_daily_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_daily_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v2.sql:3"
         ```
-        ```sql title="clickstream_retention_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v1.sql:6"
+        ```sql title="clickstream_retention_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v2.sql:6"
         ```
     === "Athena"
         ```sql title="clickstream-lifecycle-weekly-query.sql"

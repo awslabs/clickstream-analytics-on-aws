@@ -31,6 +31,7 @@ import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../.
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -135,7 +136,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const appSchemaCount = schemaDefs.length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount + 7; // total: 42
+  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length; // total: 42
 
   const defs: { [key: string]: string } = {};
 
