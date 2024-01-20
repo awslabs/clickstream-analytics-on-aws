@@ -32,6 +32,8 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [WeChat Mini Program][wechat-sdk]
 - [HTTP API][http-api]
 
+See [this repo][sdk-samples] for different kinds of SDK samples.
+
 ## Deployment
 
 ### Using AWS CloudFormation template
@@ -182,3 +184,4 @@ Upon successfully cloning the repository into your local development environment
 [aws-cdk]: https://aws.amazon.com/cdk/
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
 [doc-deployment]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/deployment.html
+[sdk-samples]: https://github.com/aws-samples/clickstream-sdk-samples
