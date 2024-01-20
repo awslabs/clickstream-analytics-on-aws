@@ -222,11 +222,6 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-kinesis-analytics-v2",
-      "version": "^3.462.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-kinesis",
       "version": "^3.462.0",
       "type": "runtime"

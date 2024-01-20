@@ -81,8 +81,6 @@ const awsSDKServicesDeps = [
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sfn',
   '@aws-sdk/client-kinesis',
-  '@aws-sdk/client-kinesis-analytics-v2',
-  '@aws-sdk/client-iam',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const awsSDKPackagesDepsForApiProject = [
