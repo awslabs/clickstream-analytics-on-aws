@@ -42,6 +42,8 @@ import { StreamingIngestionRedshiftStack } from './streaming-ingestion/private/r
 export class StreamingIngestionStack extends Stack {
 
   readonly flinkApp: Application;
+  readonly toRedshiftServerlessStack: StreamingIngestionRedshiftStack;
+  readonly toProvisionedRedshiftStack: StreamingIngestionRedshiftStack;
 
   constructor(
     scope: Construct,
@@ -160,7 +162,7 @@ export class StreamingIngestionStack extends Stack {
       biUser: pipeline.destination.redshift.userName,
       identifier: getShortIdOfStack(Stack.of(this)),
     };
-    const toRedshiftServerlessStack = new StreamingIngestionRedshiftStack(this, 'StreamingToServerlessRedshift', {
+    this.toRedshiftServerlessStack = new StreamingIngestionRedshiftStack(this, 'StreamingToServerlessRedshift', {
       ...ingestionParams,
       existingRedshiftServerlessProps: {
         createdInStack: false,
@@ -170,8 +172,8 @@ export class StreamingIngestionStack extends Stack {
         databaseName: pipeline.destination.redshift.defaultDatabaseName,
       },
     });
-    (toRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
-    const toProvisionedRedshiftStack = new StreamingIngestionRedshiftStack(this, 'StreamingToProvisionedRedshift', {
+    (this.toRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
+    this.toProvisionedRedshiftStack = new StreamingIngestionRedshiftStack(this, 'StreamingToProvisionedRedshift', {
       ...ingestionParams,
       existingProvisionedRedshiftProps: {
         clusterIdentifier: pipeline.destination.redshift.provisioned!.clusterIdentifier,
@@ -179,7 +181,7 @@ export class StreamingIngestionStack extends Stack {
         databaseName: pipeline.destination.redshift.defaultDatabaseName,
       },
     });
-    (toProvisionedRedshiftStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
+    (this.toProvisionedRedshiftStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
 
     this.addCfnNag();
 
