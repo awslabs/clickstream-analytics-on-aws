@@ -9,11 +9,11 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of `Engagement`.
 
 ## Where the data comes from
-Engagement report are created based on the QuickSight dataset of `Session_View-<app id>-<project id>`, which connects to the `clickstream_session_view_v2` view in analytics engines (i.e., Redshift or Athena). Below is the SQL command that generates the view.
+Engagement report are created based on the QuickSight dataset of `Session_View-<app id>-<project id>`, which connects to the `clickstream_session_view` view in analytics engines (i.e., Redshift or Athena). Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:7"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-session-query.sql"

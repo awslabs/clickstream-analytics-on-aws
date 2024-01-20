@@ -9,11 +9,11 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Acquisition`**.
 
 ## Where the data comes from
-Acquisition report are created based on the QuickSight dataset of `User_Dim_View-<app>-<project>`, which connects to the `clickstream_user_dim_view_v1` view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.
+Acquisition report are created based on the QuickSight dataset of `User_Dim_View-<app>-<project>`, which connects to the `clickstream_user_dim_view` view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-user-dim-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:2"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-user-dim-query.sql"
