@@ -21,6 +21,7 @@ import { Role, IRole, ServicePrincipal, PolicyDocument, PolicyStatement } from '
 import { Construct } from 'constructs';
 import { BasicRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from '../../analytics/private/model';
 import { RedshiftAssociateIAMRole } from '../../analytics/private/redshift-associate-iam-role';
+import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { SolutionInfo } from '../../common/solution-info';
 import { StreamingIngestionSchemas } from '../redshift/streaming-ingestion-schema';
 
@@ -133,5 +134,36 @@ export class StreamingIngestionRedshiftStack extends NestedStack {
 }
 
 function addCfnNag(stack: Stack) {
-  console.log(stack.account);
+  addCfnNagToStack(stack, [
+    {
+      paths_endswith: [
+        'StreamingIngestionFromKDS/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'W11',
+          reason: 'Kinesis\'s listStreams and listShards actions do not support resources.',
+        },
+      ],
+    },
+    {
+      paths_endswith: [
+        'AssociateIAMRoleFnRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        {
+          id: 'F39',
+          reason: 'Updating IAM roles of existing Redshift required pass existing roles, which requires undetermined role names.',
+        },
+        ruleToSuppressRolePolicyWithWildcardResources('logs', 'logs'),
+      ],
+    },
+    ruleRolePolicyWithWildcardResources('RedshiftSQLExecutionCustomResource/Default', 'xray', 'xray'),
+    ruleRolePolicyWithWildcardResources('SQLExecutionStateMachine/Role/DefaultPolicy/Resource', 'xray and logs', 'xray/logs'),
+    ruleForLambdaVPCAndReservedConcurrentExecutions('AssociateIAMRoleToRedshiftFn/Resource', 'AssociateIAMRoleToRedshiftFn'),
+    ruleForLambdaVPCAndReservedConcurrentExecutions('StreamingIngestionSchemas/RedshiftSQLExecutionFn/Resource', 'RedshiftSQLExecutionFn'),
+  ]);
+
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftAssociateIAMRoleCustomResourceProvider', 'RedshiftAssociateIAMRoleCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftSQLExecutionCustomResourceProvider', 'RedshiftSQLExecutionCustomResourceProvider');
 }
