@@ -13,13 +13,13 @@
 
 崩溃报告是基于以下QuickSight数据集创建的：
 
-- `clickstream_user_dim_view_v1` - 连接到分析引擎中的`clickstream_event_view_v1`视图（例如，Redshift）。
-- `Events_Parameter_View-<app id>-<project id>` - 连接到分析引擎中的`clickstream_events_parameter_view_v1`视图。
+- `clickstream_user_dim_view` - 连接到分析引擎中的`clickstream_event_view`视图（例如，Redshift）。
+- `Events_Parameter_View-<app id>-<project id>` - 连接到分析引擎中的`clickstream_events_parameter_view`视图。
 
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_event_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v1.sql:3"
+        ```sql title="clickstream_event_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v2.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-ods-events-query.sql"

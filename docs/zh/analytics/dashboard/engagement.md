@@ -8,11 +8,11 @@
 2. 在仪表板中，单击名称为 `Engagement` 的表。
 
 ## 数据来源
-参与度报告是基于 `Session_View-<app id>-<project id>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_session_view_v1` 视图。以下是生成视图的 SQL 命令。
+参与度报告是基于 `Session_View-<app id>-<project id>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_session_view` 视图。以下是生成视图的 SQL 命令。
 ??? 示例 "SQL 命令"
     === "Redshift"
         ```sql title="clickstream-session-view.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v1.sql:7"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_session_view_v2.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-session-query.sql"

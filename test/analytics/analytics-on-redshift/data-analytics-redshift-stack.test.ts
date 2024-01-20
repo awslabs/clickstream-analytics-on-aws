@@ -278,6 +278,14 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     });
   });
 
+  test('Should has Parameter MVRefreshInterval', () => {
+    template.hasParameter('MVRefreshInterval', {
+      Type: 'Number',
+      MinValue: 6,
+      MaxValue: 1440,
+    });
+  });
+
   test('RedshiftMode allowedValues', () => {
     const param = template.toJSON().Parameters.RedshiftMode;
     const allowedValues = param.AllowedValues;
@@ -338,7 +346,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(33);
+    expect(paramCount).toEqual(35);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -467,6 +475,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'ClearExpiredEventsRetentionRangeDays',
       'EMRServerlessApplicationId',
       'DataProcessingCronOrRateExpression',
+      'MVRefreshInterval',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -615,6 +624,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       projectId: 'project1',
       appIds: 'app1',
       ...nestStackCommonTablesProps,
+      mvRefreshInterval: 120,
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
@@ -661,6 +671,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       projectId: 'project1',
       appIds: 'app1',
       ...nestStackCommonTablesProps,
+      mvRefreshInterval: 120,
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
         subnetIds: 'subnet-1,subnet-2',
@@ -710,6 +721,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       projectId: 'project1',
       appIds: 'app1',
       ...nestStackCommonTablesProps,
+      mvRefreshInterval: 120,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       scanMetadataWorkflowData: {
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
