@@ -69,11 +69,11 @@ export const handler = async (_e: any, _c: Context) => {
           queryIds.push(queryId);
         }
 
-        logger.warn(`Refresh mv for app: ${schema} finished`);
+        logger.info(`Refresh mv for app: ${schema} finished`);
 
         await updateMVRefreshInfoToS3(Date.now(), pipelineS3BucketPrefix, REDSHIFT_DATABASE, schema);
       } else {
-        logger.warn(`Skip mv refresh for app: ${schema}`);
+        logger.info(`Skip mv refresh for app: ${schema}`);
       }
     }
   }
