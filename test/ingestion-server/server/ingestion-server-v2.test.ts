@@ -295,7 +295,7 @@ test('Construct has property server dns - https', () => {
     {},
   );
   expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
-    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] });
+    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] });
 });
 
 test('Construct has property server url - https', () => {
@@ -328,7 +328,7 @@ test('Construct has property server url - http', () => {
     {},
   );
   expect(ingestionServerUrlOutput.ingestionServerUrl.Value)
-    .toEqual({ 'Fn::Join': ['', ['http://', { 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] }, '/test_me']] });
+    .toEqual({ 'Fn::Join': ['', ['http://', { 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] }, '/test_me']] });
 });
 
 test('Construct has property server dns - http', () => {
@@ -343,7 +343,7 @@ test('Construct has property server dns - http', () => {
     {},
   );
   expect(ingestionServerDnsOutput.ingestionServerDNS.Value)
-    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerAccelerator7EDCB081', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerclickstreamingestionservicealb4FB9B3DD', 'DNSName'] }] });
+    .toEqual({ 'Fn::If': ['acceleratorEnableCondition', { 'Fn::GetAtt': ['IngestionServerGlobalAccelerator22B37939', 'DnsName'] }, { 'Fn::GetAtt': ['IngestionServerALBclickstreamingestionservicealbC894A3C2', 'DNSName'] }] });
 });
 
 test('Server endpoint path can be configured in nginx task', () => {

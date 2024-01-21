@@ -81,7 +81,21 @@ export interface ApplicationLoadBalancerProps {
   isHttps: CfnCondition;
 }
 
-export function createApplicationLoadBalancerV2(
+export class ApplicationLoadBalancerV2 extends Construct {
+  public readonly alb: ApplicationLoadBalancer;
+  public readonly targetGroup: ApplicationTargetGroup;
+  public readonly listener: ApplicationListener;
+
+  constructor(scope: Construct, id: string, props: ApplicationLoadBalancerProps) {
+    super(scope, id);
+    const { alb, targetGroup, listener } = createApplicationLoadBalancer(this, props);
+    this.alb = alb;
+    this.targetGroup = targetGroup;
+    this.listener = listener;
+  }
+}
+
+function createApplicationLoadBalancer(
   scope: Construct,
   props: ApplicationLoadBalancerProps,
 ) {

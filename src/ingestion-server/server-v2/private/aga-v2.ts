@@ -15,7 +15,7 @@ import { Stack, CfnCondition, Fn } from 'aws-cdk-lib';
 import {
   ApplicationLoadBalancer,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Accelerator, PortRange, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
+import { Accelerator, PortRange, CfnListener, Listener, EndpointGroup } from 'aws-cdk-lib/aws-globalaccelerator';
 import { ApplicationLoadBalancerEndpoint } from 'aws-cdk-lib/aws-globalaccelerator-endpoints';
 import { Construct } from 'constructs';
 import { getShortIdOfStack } from '../../../common/stack';
@@ -32,12 +32,18 @@ export interface GlobalAcceleratorProps {
   isHttps: CfnCondition;
 }
 
-export function createGlobalAcceleratorV2(
-  scope: Construct,
-  props: GlobalAcceleratorProps,
-) {
-  const { accelerator, agListener, endpointGroup } = createAccelerator(scope, props);
-  return { accelerator, agListener, endpointGroup };
+export class GlobalAcceleratorV2 extends Construct {
+  public readonly accelerator: Accelerator;
+  public readonly agListener: Listener;
+  public readonly endpointGroup: EndpointGroup;
+
+  constructor(scope: Construct, id: string, props: GlobalAcceleratorProps) {
+    super(scope, id);
+    const { accelerator, agListener, endpointGroup } = createAccelerator(this, props);
+    this.accelerator = accelerator;
+    this.agListener = agListener;
+    this.endpointGroup = endpointGroup;
+  }
 }
 
 function createAccelerator(

@@ -19,7 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-ecs';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { createECSFargateService } from './ecs-fargate-service';
+import { ECSFargateService } from './ecs-fargate-service';
 import { createProxyAndWorkerECRImages } from '../../server/private/ecr';
 import { IngestionServerV2Props, RESOURCE_ID_PREFIX } from '../ingestion-server-v2';
 
@@ -37,7 +37,27 @@ export interface ECSFargateClusterResult extends ECSFargateServiceResult {
   ecsCluster: Cluster;
 }
 
-export function createECSFargateClusterAndService(
+export class ECSFargateCluster extends Construct {
+  public readonly ecsCluster: Cluster;
+  public readonly ecsService: FargateService;
+  public readonly taskDefinition: TaskDefinition;
+  public readonly httpContainerName: string;
+  public readonly ecsInfraRole: IRole;
+
+  constructor(scope: Construct, id: string, props: ECSFargateClusterProps) {
+    super(scope, id);
+
+    const ecsFargateClusterInfo = createECSFargateClusterAndService(this, props);
+
+    this.ecsCluster = ecsFargateClusterInfo.ecsCluster;
+    this.ecsService = ecsFargateClusterInfo.ecsService;
+    this.taskDefinition = ecsFargateClusterInfo.taskDefinition;
+    this.httpContainerName = ecsFargateClusterInfo.httpContainerName;
+    this.ecsInfraRole = ecsFargateClusterInfo.ecsInfraRole;
+  }
+}
+
+function createECSFargateClusterAndService(
   scope: Construct,
   props: ECSFargateClusterProps,
 ): ECSFargateClusterResult {
@@ -57,13 +77,18 @@ export function createECSFargateClusterAndService(
     platform,
   );
 
-  const ecsServiceInfo = createECSFargateService(scope, {
+  const ecsFargateService = new ECSFargateService(scope, 'ecs-fargate-service', {
     ...props,
     ecsCluster,
     proxyImage,
     workerImage,
   });
 
-  return { ...ecsServiceInfo, ecsInfraRole: ecsServiceInfo.taskDefinition.taskRole, ecsCluster };
-
+  return {
+    ecsService: ecsFargateService.ecsService,
+    taskDefinition: ecsFargateService.taskDefinition,
+    ecsInfraRole: ecsFargateService.taskDefinition.taskRole,
+    httpContainerName: ecsFargateService.httpContainerName,
+    ecsCluster,
+  };
 }

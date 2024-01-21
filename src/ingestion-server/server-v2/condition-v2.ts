@@ -14,12 +14,13 @@
 import { CfnCondition, CfnParameter, Fn } from 'aws-cdk-lib';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
+import { SINK_TYPE_S3 } from '../../common/constant';
 
 export function createS3ConditionsV2(scope: Construct, props: {
-  deliverToS3: boolean;
+  sinkType: string;
 }) {
   const s3Condition = new CfnCondition(scope, 's3Condition', {
-    expression: Fn.conditionEquals(props.deliverToS3, true),
+    expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_S3),
   });
   return s3Condition;
 }
@@ -31,7 +32,6 @@ export function createKinesisConditionsV2(props: {
   provisionedStackCondition: CfnCondition;
   onDemandStackCondition: CfnCondition;
 }) {
-
   const kinesisConditionsAndProps = [
     {
       condition: props.onDemandStackCondition,
@@ -60,6 +60,7 @@ export function createMskConditionsV2(
     mskSecurityGroupIdParam: CfnParameter;
     kafkaBrokersParam: CfnParameter;
     kafkaTopicParam: CfnParameter;
+    sinkType: string;
   },
 ) {
   const mskClusterNameCondition = new CfnCondition(
@@ -93,11 +94,16 @@ export function createMskConditionsV2(
     mskSecurityGroupIdCondition,
   );
 
+  const mskCondition = new CfnCondition(scope, 'mskCondition', {
+    expression: Fn.conditionEquals(props.sinkType, 'MSK'),
+  });
+
   const mskConditionServerPopsConfig = [
     {
       conditions: [
         mskSecurityGroupIdCondition,
         mskClusterNameCondition,
+        mskCondition,
       ],
       name: 'M11',
       serverProps: {
@@ -110,6 +116,7 @@ export function createMskConditionsV2(
       conditions: [
         mskSecurityGroupIdCondition,
         mskClusterNameConditionNeg,
+        mskCondition,
       ],
       name: 'M10',
       serverProps: {
@@ -122,6 +129,7 @@ export function createMskConditionsV2(
       conditions: [
         mskSecurityGroupIdConditionNeg,
         mskClusterNameCondition,
+        mskCondition,
       ],
       name: 'M01',
       serverProps: {
@@ -134,6 +142,7 @@ export function createMskConditionsV2(
       conditions: [
         mskSecurityGroupIdConditionNeg,
         mskClusterNameConditionNeg,
+        mskCondition,
       ],
       name: 'M00',
       serverProps: {

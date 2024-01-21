@@ -36,12 +36,10 @@ import {
   BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../../../src/ingestion-server/server/ingestion-server';
 import {
   IngestionServerV2,
   IngestionServerV2Props,
-  S3SinkConfig,
-  KinesisSinkConfig,
-  KafkaSinkConfig,
   FleetV2Props,
 } from '../../../src/ingestion-server/server-v2/ingestion-server-v2';
 

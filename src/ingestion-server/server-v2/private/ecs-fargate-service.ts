@@ -31,7 +31,23 @@ export interface FargateServiceProps extends ECSFargateClusterProps {
   workerImage: ContainerImage;
 }
 
-export function createECSFargateService(
+export class ECSFargateService extends Construct {
+  public readonly ecsService: FargateService;
+  public readonly taskDefinition: FargateTaskDefinition;
+  public readonly httpContainerName: string;
+
+  constructor(scope: Construct, id: string, props: FargateServiceProps) {
+    super(scope, id);
+
+    const ecsFargateServiceInfo = createECSFargateService(this, props);
+
+    this.ecsService = ecsFargateServiceInfo.ecsService;
+    this.taskDefinition = ecsFargateServiceInfo.taskDefinition;
+    this.httpContainerName = ecsFargateServiceInfo.httpContainerName;
+  }
+}
+
+function createECSFargateService(
   scope: Construct,
   props: FargateServiceProps,
 ): ECSFargateServiceResult {

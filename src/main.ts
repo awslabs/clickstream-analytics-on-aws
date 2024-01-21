@@ -152,22 +152,10 @@ stackSuppressions([
   }),
 
   // for Ingestion V2
-  new IngestionServerStackV2(app, 'ingestion-server-v2-kafka-stack', { //To Kafka
+  new IngestionServerStackV2(app, 'ingestion-server-v2', { //To Kafka
     synthesizer: synthesizer(),
     deliverToKafka: true,
-    deliverToKinesis: false,
-    deliverToS3: false,
-  }),
-  new IngestionServerStackV2(app, 'ingestion-server-v2-kinesis-stack', { //To Kinesis
-    synthesizer: synthesizer(),
-    deliverToKafka: false,
     deliverToKinesis: true,
-    deliverToS3: false,
-  }),
-  new IngestionServerStackV2(app, 'ingestion-server-v2-s3-stack', { //To S3
-    synthesizer: synthesizer(),
-    deliverToKafka: false,
-    deliverToKinesis: false,
     deliverToS3: true,
   }),
 ], [

@@ -13,21 +13,19 @@
 
 import { CfnCondition, Fn } from 'aws-cdk-lib';
 import {
-  ISecurityGroup,
   IVpc,
   SubnetSelection,
   Port,
 } from 'aws-cdk-lib/aws-ec2';
 import { IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { CfnAccelerator, CfnEndpointGroup, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
-import { IStream } from 'aws-cdk-lib/aws-kinesis';
-import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { createGlobalAcceleratorV2 } from './private/aga-v2';
-import { createApplicationLoadBalancerV2, PROXY_PORT } from './private/alb-v2';
-import { createECSFargateClusterAndService } from './private/ecs-fargate-cluster';
+import { GlobalAcceleratorV2 } from './private/aga-v2';
+import { ApplicationLoadBalancerV2, PROXY_PORT } from './private/alb-v2';
+import { ECSFargateCluster } from './private/ecs-fargate-cluster';
 import { deleteECSClusterCustomResource } from '../custom-resource/delete-ecs-cluster';
-import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules-v2';
+import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
+import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../server/ingestion-server';
 import { grantMskReadWrite } from '../server/private/iam';
 import { createMetricsWidgetForKafka } from '../server/private/metircs-kafka';
 import { createMetricsWidgetForServerV2 } from '../server/private/metircs-server';
@@ -47,25 +45,6 @@ export const DefaultFleetProps = {
   workerThreads: 6,
   workerStreamAckEnable: true,
 };
-
-export interface KafkaSinkConfig {
-  readonly kafkaBrokers: string;
-  readonly kafkaTopic: string;
-  readonly mskSecurityGroup?: ISecurityGroup;
-  readonly mskClusterName?: string;
-}
-
-export interface S3SinkConfig {
-  readonly s3Bucket: IBucket;
-  readonly s3Prefix: string;
-  readonly batchMaxBytes: number;
-  readonly batchTimeoutSecs: number;
-}
-
-
-export interface KinesisSinkConfig {
-  readonly kinesisDataStream: IStream;
-}
 
 export interface FleetV2Props {
   readonly workerCpu: number;
@@ -102,7 +81,7 @@ export interface IngestionServerV2Props {
   readonly domainName: string;
   readonly certificateArn: string;
   readonly notificationsTopicArn: string;
-  readonly enableApplicationLoadBalancerAccessLog?: string;
+  readonly enableApplicationLoadBalancerAccessLog: string;
   readonly logBucketName: string;
   readonly logPrefix: string;
   readonly loadBalancerIpAddressType?: IpAddressType;
@@ -162,14 +141,14 @@ export class IngestionServerV2 extends Construct {
     );
     this.acceleratorEnableCondition = acceleratorEnableCondition;
 
-    const ecsResults = createECSFargateClusterAndService(this, {
+    const ecsFargateCluster = new ECSFargateCluster(this, 'ECSFargateCluster', {
       ...props,
       ecsSecurityGroup,
     });
 
     const mskClusterName = props.kafkaSinkConfig?.mskClusterName;
     if (mskClusterName) {
-      const autoScalingGroupRole = ecsResults.ecsInfraRole;
+      const autoScalingGroupRole = ecsFargateCluster.ecsInfraRole;
       grantMskReadWrite(
         this,
         autoScalingGroupRole,
@@ -195,14 +174,14 @@ export class IngestionServerV2 extends Construct {
 
     ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
 
-    const { alb, targetGroup, listener }= createApplicationLoadBalancerV2(this, {
+    const albConstructor = new ApplicationLoadBalancerV2(this, 'ALB', {
       vpc: props.vpc,
-      service: ecsResults.ecsService,
+      service: ecsFargateCluster.ecsService,
       sg: albSg,
       ports,
       endpointPath,
       protocol: props.protocol,
-      httpContainerName: ecsResults.httpContainerName,
+      httpContainerName: ecsFargateCluster.httpContainerName,
       certificateArn: props.certificateArn || '',
       domainName: props.domainName || '',
       enableAccessLog: props.enableApplicationLoadBalancerAccessLog || '',
@@ -212,21 +191,26 @@ export class IngestionServerV2 extends Construct {
       ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
       isHttps,
     });
-    this.albDNS = alb.loadBalancerDnsName;
 
-    const { accelerator, agListener, endpointGroup } = createGlobalAcceleratorV2(this, {
-      ports,
-      protocol: props.protocol,
-      alb,
-      endpointPath,
-      isHttps,
-    });
+    this.albDNS = albConstructor.alb.loadBalancerDnsName;
+
+    const aga = new GlobalAcceleratorV2(
+      this,
+      'GlobalAccelerator',
+      {
+        ports,
+        protocol: props.protocol,
+        alb: albConstructor.alb,
+        endpointPath,
+        isHttps,
+      },
+    );
 
     createMetricsWidgetForServerV2(this, {
       projectId: props.projectId,
-      albFullName: alb.loadBalancerFullName,
-      ecsServiceName: ecsResults.ecsService.serviceName,
-      ecsClusterName: ecsResults.ecsService.cluster.clusterName,
+      albFullName: albConstructor.alb.loadBalancerFullName,
+      ecsServiceName: ecsFargateCluster.ecsService.serviceName,
+      ecsClusterName: ecsFargateCluster.ecsService.cluster.clusterName,
     });
 
     if (props.kafkaSinkConfig && mskClusterName) {
@@ -240,8 +224,8 @@ export class IngestionServerV2 extends Construct {
 
     const appIds = props.appIds;
     const clickStreamSDK = props.clickStreamSDK;
-    const targetGroupArn = targetGroup.targetGroupArn;
-    const listenerArn = listener.listenerArn;
+    const targetGroupArn = albConstructor.targetGroup.targetGroupArn;
+    const listenerArn = albConstructor.listener.listenerArn;
     const serverEndpointPath = props.serverEndpointPath;
     const protocol = props.protocol;
     const domainName = props.domainName;
@@ -260,13 +244,18 @@ export class IngestionServerV2 extends Construct {
       domainName,
     });
 
-    deleteECSCluster(this, ecsResults.ecsCluster.clusterArn, ecsResults.ecsCluster.clusterName, ecsResults.ecsService.serviceName);
+    deleteECSCluster(
+      this,
+      ecsFargateCluster.ecsCluster.clusterArn,
+      ecsFargateCluster.ecsCluster.clusterName,
+      ecsFargateCluster.ecsService.serviceName,
+    );
 
-    (accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
-    (agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
-    (endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
+    (aga.accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
+    (aga.agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
+    (aga.endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
 
-    this.acceleratorDNS = accelerator.dnsName;
+    this.acceleratorDNS = aga.accelerator.dnsName;
     this.acceleratorEnableCondition = acceleratorEnableCondition;
   }
 }
@@ -283,14 +272,12 @@ function updateAlbRules(
   const endpointPath = updateAlbRulesInput.serverEndpointPath;
   const domainName = updateAlbRulesInput.domainName;
   const protocol = updateAlbRulesInput.protocol;
-  const enableAuthentication = updateAlbRulesInput.enableAuthentication;
 
   updateAlbRulesCustomResource(scope, {
     appIds,
     clickStreamSDK,
     targetGroupArn,
     listenerArn,
-    enableAuthentication,
     authenticationSecretArn,
     endpointPath,
     domainName,
