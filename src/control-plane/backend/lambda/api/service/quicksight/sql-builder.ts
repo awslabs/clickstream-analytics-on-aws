@@ -2019,7 +2019,7 @@ function _buildDateListSQL(sqlParameters: SQLParameters) {
     dateList.push(...generateDateList(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
     const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit!);
-    for (let n = 1; n <= daysCount; n++) {
+    for (let n = 0; n < daysCount; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
       `);
