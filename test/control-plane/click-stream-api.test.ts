@@ -815,7 +815,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':analysis/clickstream*',
+                    ':analysis/*',
                   ],
                 ],
               },
@@ -831,7 +831,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':dashboard/clickstream*',
+                    ':dashboard/*',
                   ],
                 ],
               },
@@ -847,7 +847,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':dataset/clickstream*',
+                    ':dataset/*',
                   ],
                 ],
               },
@@ -863,55 +863,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':datasource/clickstream*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':analysis/_tmp_*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dashboard/_tmp_*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dataset/_tmp_*',
+                    ':datasource/*',
                   ],
                 ],
               },

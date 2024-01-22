@@ -320,13 +320,10 @@ export class ClickStreamApiConstruct extends Construct {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           resources: [
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:datasource/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/*`,
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:datasource/*`,
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
           ],
           actions: [
