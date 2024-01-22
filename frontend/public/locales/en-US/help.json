@@ -85,6 +85,27 @@
     "positionBasedTouch": {
       "title": "Position-Based Attribution: ",
       "description": "Among all attribution positions contributing to a specific target event, users can customize the contribution distribution for each position. For example, the first and last attribution positions receive 40% contribution each, while the remaining positions evenly split the remaining 20% contribution."
+    },
+    "columnTitlesDescription": "The title of each column in the attribution result table is as follows.",
+    "touchpointName": {
+      "title": "Touchpoint Name: ",
+      "description": "The touchpoint event name for attribution."
+    },
+    "totalTriggerCount": {
+      "title": "Total Trigger Count: ",
+      "description": "Number of times the touchpoint has been triggered within the calculation period."
+    },
+    "numberTriggersConversion": {
+      "title": "Number of Triggers with Conversion: ",
+      "description": "Within the conversion window, number of time the touchpoint  occurred simultaneously with the conversion goal."
+    },
+    "contribution": {
+      "title": "Contribution(number/sum...value): ",
+      "description": "The contribution of this touchpoint can be attributed to the conversion goal based on the select."
+    },
+    "contributionRate": {
+      "title": "Contribution Rate: ",
+      "description": "After calculation through the attribution model, the contribution of this touchpoint is expressed as a percentage of the overall total, with the calculation logic being the conversion goal metrics under the current attributed event divided by the sum of all conversion goals."
     }
   },
   "analyzesInfo": {

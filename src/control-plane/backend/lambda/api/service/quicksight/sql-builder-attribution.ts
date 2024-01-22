@@ -71,8 +71,8 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       select 
         total_count_data.total_event_count as "Trigger Count"
         ,attribution_data.t_event_name as "Touch Point Name"
-        ,attribution_count as "Number of Attributed Triggers"
-        ,attribution_data.contribution as Contribution
+        ,attribution_count as "Number of Triggers with Conversion"
+        ,attribution_data.contribution as "Contribution(number/sum...value)"
         ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
@@ -103,8 +103,8 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       select 
          total_count_data.total_event_count as "Trigger Count"
         ,attribution_data.t_event_name as "Touch Point Name"
-        ,attribution_count as "Number of Attributed Triggers"
-        ,attribution_data.contribution as Contribution
+        ,attribution_count as "Number of Triggers with Conversion"
+        ,attribution_data.contribution as "Contribution(number/sum...value)"
         ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
@@ -181,8 +181,8 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
       select 
         total_count_data.total_event_count as "Trigger Count"
         ,attribution_data.t_event_name as "Touch Point Name"
-        ,attribution_count as "Number of Attributed Triggers"
-        ,attribution_data.contribution as Contribution
+        ,attribution_count as "Number of Triggers with Conversion"
+        ,attribution_data.contribution as "Contribution(number/sum...value)"
         ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from attribution_data
       join (
@@ -240,8 +240,8 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
       select
         total_count_data.total_event_count as "Trigger Count"
         ,attribution_data.t_event_name as "Touch Point Name"
-        ,attribution_count as "Number of Attributed Triggers"
-        ,attribution_data.contribution as Contribution
+        ,attribution_count as "Number of Triggers with Conversion"
+        ,attribution_data.contribution as "Contribution(number/sum...value)"
         ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from
         attribution_data
@@ -333,8 +333,8 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
     select 
       total_count_data.total_event_count as "Trigger Count"
       ,attribution_data.t_event_name as "Touch Point Name"
-      ,attribution_count as "Number of Attributed Triggers"
-      ,attribution_data.contribution as Contribution
+      ,attribution_count as "Number of Triggers with Conversion"
+      ,attribution_data.contribution as "Contribution(number/sum...value)"
       ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
     from attribution_data
     join (
@@ -387,8 +387,8 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
       select
         total_count_data.total_event_count as "Trigger Count"
         ,attribution_data.t_event_name as "Touch Point Name"
-        ,attribution_count as "Number of Attributed Triggers"
-        ,attribution_data.contribution as Contribution
+        ,attribution_count as "Number of Triggers with Conversion"
+        ,attribution_data.contribution as "Contribution(number/sum...value)"
         ,cast(attribution_data.contribution as float)/t.total_contribution as "Contribution Rate"
       from
         attribution_data

@@ -110,8 +110,8 @@ export class AttributionAnalysisService {
       projectedColumns: [
         'Trigger Count',
         'Touch Point Name',
-        'Number of Attributed Triggers',
-        'Contribution',
+        'Number of Triggers with Conversion',
+        'Contribution(number/sum...value)',
         'Contribution Rate',
       ],
     });

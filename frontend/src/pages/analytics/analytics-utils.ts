@@ -170,6 +170,45 @@ export const parametersConvertToCategoryItemType = (
   return categoryItems;
 };
 
+export const getAttributionMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
+    },
+    {
+      label: defaultStr(i18n.t('analytics:sumGroup')),
+      value: ExploreComputeMethod.SUM_VALUE,
+      subList: [],
+    },
+  ];
+  const numberParameters = parameterItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberAttributes = userAttributeItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberParametersAndAttributes = [
+    ...numberParameters,
+    ...numberAttributes,
+  ];
+  for (const parameter of numberParametersAndAttributes) {
+    computeMethodOptions[1].subList?.push({
+      value: parameter.name,
+      label: parameter.displayName,
+      name: parameter.name,
+      valueType: parameter.valueType,
+      category: parameter.category,
+      groupName: ExploreComputeMethod.SUM_VALUE,
+      itemType: 'children',
+    } as IAnalyticsItem);
+  }
+  return computeMethodOptions;
+};
+
 function patchSameName(
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems: IMetadataEventParameter[]
@@ -322,9 +361,7 @@ export const getTouchPointsAndConditions = (
       });
 
       const touchPoint: AttributionTouchPoint = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
@@ -362,14 +399,27 @@ export const getGoalAndConditions = (
       conditions.push(conditionObj);
     }
   });
+  let groupColumn: IColumnAttribute | undefined;
+  if (goalData.calculateMethodOption?.name) {
+    groupColumn = {
+      category: defaultStr(
+        goalData.calculateMethodOption?.category,
+        ConditionCategory.OTHER
+      ),
+      property: defaultStr(goalData.calculateMethodOption?.name),
+      dataType: defaultStr(
+        goalData.calculateMethodOption?.valueType,
+        MetadataValueType.STRING
+      ),
+    };
+  }
   return {
-    eventName: defaultStr(
-      goalData.selectedEventOption?.value?.split('#').pop()
-    ),
+    eventName: defaultStr(goalData.selectedEventOption?.name),
     sqlCondition: {
       conditions: conditions,
       conditionOperator: goalData.conditionRelationShip,
     },
+    groupColumn,
   } as AttributionTouchPoint;
 };
 
@@ -380,7 +430,12 @@ export const getTargetComputeMethod = (
     return;
   }
   const goalData = eventOptionData[0];
-  return goalData.calculateMethodOption?.value;
+  if (
+    goalData.calculateMethodOption?.value === ExploreComputeMethod.EVENT_CNT
+  ) {
+    return ExploreComputeMethod.EVENT_CNT;
+  }
+  return ExploreComputeMethod.SUM_VALUE;
 };
 
 export const getEventAndConditions = (
@@ -410,9 +465,7 @@ export const getEventAndConditions = (
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
@@ -604,6 +657,8 @@ export const getIntervalInSeconds = (
         return Number(windowValue) * 60 * 60;
       case 'day':
         return Number(windowValue) * 60 * 60 * 24;
+      case 'month':
+        return Number(windowValue) * 60 * 60 * 24 * 30;
       default:
         return Number(windowValue) * 60;
     }

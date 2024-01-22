@@ -85,6 +85,27 @@
     "positionBasedTouch": {
       "title": "位置归因：",
       "description": "完成某个目标事件的所有归因位中，用户可自定义每个位置的贡献分配比例，比如首末归因位获得40%贡献，其余位置平分剩余20%的贡献。"
+    },
+    "columnTitlesDescription": "归因结果表中每列的标题如下。",
+    "touchpointName": {
+      "title": "Touchpoint Name: ",
+      "description": "归因触点事件名称。"
+    },
+    "totalTriggerCount": {
+      "title": "Total Trigger Count: ",
+      "description": "表示在计算周期内，归因触点事件一共触发了多少次。"
+    },
+    "numberTriggersConversion": {
+      "title": "Number of Triggers with Conversion: ",
+      "description": "在转化窗口内，有多少个触点事件与转化目标同时发生。"
+    },
+    "contribution": {
+      "title": "Contribution(number/sum...value): ",
+      "description": "按照所选模型，该触点可以归因到转化目标的贡献度。"
+    },
+    "contributionRate": {
+      "title": "Contribution Rate: ",
+      "description": "通过归因模型计算后，归属于该触点事件的贡献占整体的占比，计算逻辑为：当前触点事件下的转化目标指标 / 整体转化目标之和。"
     }
   },
   "analyzesInfo": {

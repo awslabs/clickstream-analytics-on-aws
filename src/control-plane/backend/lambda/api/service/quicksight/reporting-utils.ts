@@ -288,11 +288,11 @@ export const attributionVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'Number of Attributed Triggers',
+    Name: 'Number of Triggers with Conversion',
     Type: 'DECIMAL',
   },
   {
-    Name: 'Contribution',
+    Name: 'Contribution(number/sum...value)',
     Type: 'DECIMAL',
   },
   {

@@ -737,7 +737,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
-                enableChangeRelation={false}
+                enableChangeRelation={true}
+                enableChangeMultiSelect={false}
               />
 
               <div className="cs-analytics-config">
