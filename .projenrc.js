@@ -23,6 +23,7 @@ const cdkAlphaModules = [
 
 const commonDeps = [
   'uuid@^9.0.0',
+  '@types/aws-lambda@^8.10.110',
   '@aws-lambda-powertools/logger@^1.17.0',
   '@aws-lambda-powertools/metrics@^1.17.0',
   'jsonwebtoken@^9.0.0',
@@ -35,7 +36,6 @@ const commonDeps = [
 ];
 
 const commonDevDeps = [
-  '@types/aws-lambda@^8.10.110',
   '@types/uuid@^9.0.0',
   'aws-sdk-client-mock@^2.1.1',
   'aws-sdk-client-mock-jest@^2.1.1',

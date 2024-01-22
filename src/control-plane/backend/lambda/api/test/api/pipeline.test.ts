@@ -3538,16 +3538,17 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    createPipelineMock(mockClients, {
-      publicAZContainPrivateAZ: true,
-      subnetsCross3AZ: true,
-      subnetsIsolated: true,
-      update: true,
-      quickSightUserExisted: true,
-      updatePipeline: {
-        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
-      },
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        quickSightUserExisted: true,
+        updatePipeline: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        },
+      });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
