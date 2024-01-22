@@ -429,6 +429,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 metadataUserAttributes={metadataUserAttributes}
                 enableChangeRelation={true}
                 isMultiSelect={true}
+                enableChangeMultiSelect={false}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">

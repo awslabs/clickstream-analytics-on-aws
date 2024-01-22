@@ -1,5 +1,8 @@
 {
   "analytics": "Analytics",
+  "sumGroup": "SUM by ...",
+  "sumGroupLabel": "SUM by {{label}}",
+  "avgGroupLabel": "AVG by {{label}}",
   "dashboard": {
     "title": "Dashboards",
     "description": "You can view the out-of-the-box user life cycle dashboards here, and create a custom dashboard with exploration analysis.",
@@ -77,6 +80,7 @@
     "minuteWindowUnit": "Minute(s)",
     "hourWindowUnit": "Hour(s)",
     "dayWindowUnit": "Day(s)",
+    "monthWindowUnit": "Month(s)",
     "hourTimeGranularity": "Hourly",
     "dayTimeGranularity": "Daily",
     "weekTimeGranularity": "Weekly",

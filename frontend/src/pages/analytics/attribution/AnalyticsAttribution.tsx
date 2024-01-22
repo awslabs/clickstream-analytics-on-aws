@@ -77,7 +77,7 @@ import {
   validateFilterConditions,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
-  DEFAULT_WEEK_RANGE,
+  DEFAULT_MONTH_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -117,7 +117,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const [windowValue, setWindowValue] = useState<string>('10');
+  const [windowValue, setWindowValue] = useState<string>('1');
 
   const customWindowType = {
     value: ExploreConversionIntervalType.CUSTOMIZE,
@@ -132,23 +132,23 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     },
   ];
 
-  const minuteWindowUnitOption = {
-    value: 'minute',
-    label: t('analytics:options.minuteWindowUnit'),
+  const monthWindowUnitOption = {
+    value: 'month',
+    label: t('analytics:options.monthWindowUnit'),
   };
 
   const windowUnitOptions = [
-    { value: 'second', label: t('analytics:options.secondWindowUnit') },
-    minuteWindowUnitOption,
+    { value: 'minute', label: t('analytics:options.minuteWindowUnit') },
     { value: 'hour', label: t('analytics:options.hourWindowUnit') },
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
+    monthWindowUnitOption,
   ];
 
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
 
   const [selectedWindowUnit, setSelectedWindowUnit] =
-    useState<SelectProps.Option | null>(minuteWindowUnitOption);
+    useState<SelectProps.Option | null>(monthWindowUnitOption);
 
   const dispatch = useContext(DispatchContext);
 
@@ -188,7 +188,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
   );
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    useState<DateRangePickerProps.Value>(DEFAULT_MONTH_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -214,10 +214,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
       value: AttributionModelType.POSITION,
       label: t('analytics:options.positionBasedAttributionModel'),
     },
-    {
-      value: AttributionModelType.TIME_DECAY,
-      label: t('analytics:options.timeDecayAttributionModel'),
-    },
   ];
 
   const [selectedAttributionModel, setSelectedAttributionModel] =
@@ -230,10 +226,10 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     useState<boolean>(false);
   const [contributionInvalid, setContributionInvalid] =
     useState<boolean>(false);
-  const [contributionFirst, setContributionFirst] = useState<string>('100');
+  const [contributionFirst, setContributionFirst] = useState<string>('40');
   const [contributionInBetween, setContributionInBetween] =
-    useState<string>('0');
-  const [contributionLast, setContributionLast] = useState<string>('0');
+    useState<string>('20');
+  const [contributionLast, setContributionLast] = useState<string>('40');
 
   const resetConfig = async () => {
     goalDataDispatch({
@@ -252,7 +248,14 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(DEFAULT_WEEK_RANGE);
+    setSelectedAttributionModel(firstTouchOption);
+    setSelectedWindowType(customWindowType);
+    setSelectedWindowUnit(monthWindowUnitOption);
+    setWindowValue('1');
+    setContributionFirst('40');
+    setContributionInBetween('20');
+    setContributionLast('40');
+    setDateRangeValue(DEFAULT_MONTH_RANGE);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -462,6 +465,24 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     });
   }, [presetParameters]);
 
+  useEffect(() => {
+    if (
+      selectedAttributionModel?.value === AttributionModelType.POSITION &&
+      !contributionFirstInvalid &&
+      !contributionInBetweenInvalid &&
+      !contributionLastInvalid &&
+      !contributionInvalid
+    ) {
+      clickPreview();
+    }
+  }, [
+    selectedAttributionModel,
+    contributionFirstInvalid,
+    contributionInBetweenInvalid,
+    contributionLastInvalid,
+    contributionInvalid,
+  ]);
+
   return (
     <>
       <SpaceBetween direction="vertical" size="l">
@@ -534,6 +555,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
+                  enableChangeMultiSelect={true}
                   isMultiSelect={true}
                   disableAddEvent={true}
                 />
@@ -608,6 +630,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={false}
+                  enableChangeMultiSelect={false}
                 />
               </SpaceBetween>
             </SpaceBetween>
@@ -663,10 +686,17 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                 />
                 <div className="cs-analytics-attribution-model">
                   <Select
+                    disabled={loadingChart}
                     selectedOption={selectedAttributionModel}
                     options={attributionModelOptions}
                     onChange={(event) => {
                       setSelectedAttributionModel(event.detail.selectedOption);
+                      if (
+                        event.detail.selectedOption?.value !==
+                        AttributionModelType.POSITION
+                      ) {
+                        clickPreview();
+                      }
                     }}
                   />
                 </div>
@@ -681,7 +711,8 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                         <div className="flex-1">
                           <Input
                             type="number"
-                            placeholder="100"
+                            placeholder="40"
+                            disabled={loadingChart}
                             value={contributionFirst}
                             invalid={
                               contributionInvalid || contributionFirstInvalid
@@ -689,6 +720,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                             onChange={(event) => {
                               setContributionInvalid(false);
                               setContributionFirstInvalid(false);
+                              setContributionFirst(event.detail.value);
                               if (!PERCENTAGE_REGEX.test(event.detail.value)) {
                                 setContributionFirstInvalid(true);
                               } else if (
@@ -699,7 +731,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               ) {
                                 setContributionInvalid(true);
                               }
-                              setContributionFirst(event.detail.value);
                             }}
                           />
                         </div>
@@ -716,7 +747,8 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                         <div className="flex-1">
                           <Input
                             type="number"
-                            placeholder="0"
+                            placeholder="20"
+                            disabled={loadingChart}
                             value={contributionInBetween}
                             invalid={
                               contributionInvalid ||
@@ -725,6 +757,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                             onChange={(event) => {
                               setContributionInvalid(false);
                               setContributionInBetweenInvalid(false);
+                              setContributionInBetween(event.detail.value);
                               if (!PERCENTAGE_REGEX.test(event.detail.value)) {
                                 setContributionInBetweenInvalid(true);
                               } else if (
@@ -735,7 +768,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               ) {
                                 setContributionInvalid(true);
                               }
-                              setContributionInBetween(event.detail.value);
                             }}
                           />
                         </div>
@@ -750,7 +782,8 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                         <div className="flex-1">
                           <Input
                             type="number"
-                            placeholder="0"
+                            placeholder="40"
+                            disabled={loadingChart}
                             value={contributionLast}
                             invalid={
                               contributionInvalid || contributionLastInvalid
@@ -758,6 +791,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                             onChange={(event) => {
                               setContributionInvalid(false);
                               setContributionLastInvalid(false);
+                              setContributionLast(event.detail.value);
                               if (!PERCENTAGE_REGEX.test(event.detail.value)) {
                                 setContributionLastInvalid(true);
                               } else if (
@@ -768,7 +802,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                               ) {
                                 setContributionInvalid(true);
                               }
-                              setContributionLast(event.detail.value);
                             }}
                           />
                         </div>

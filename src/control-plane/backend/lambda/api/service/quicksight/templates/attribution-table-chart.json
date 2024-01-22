@@ -40,7 +40,7 @@
                               "FieldId": "{{triggerCountFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "Number of Attributed Triggers"
+                                  "ColumnName": "Number of Triggers with Conversion"
                               }
                           }
                       },
@@ -49,7 +49,7 @@
                             "FieldId": "{{contributionFieldId}}",
                             "Column": {
                                 "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                "ColumnName": "Contribution"
+                                "ColumnName": "Contribution(number/sum...value)"
                             }
                         }
                     },

@@ -39,6 +39,7 @@ interface EventsSelectProps {
   eventOptionList: CategoryItemType[];
   defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
+  enableChangeMultiSelect: boolean;
   enableChangeRelation: boolean;
   builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
@@ -59,6 +60,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     eventOptionList,
     defaultComputeMethodOption,
     isMultiSelect,
+    enableChangeMultiSelect,
     enableChangeRelation,
     builtInMetadata,
     metadataEvents,
@@ -86,10 +88,12 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
                   type="event"
                   placeholder={eventPlaceholder}
                   calcMethodOption={element.calculateMethodOption}
+                  calcMethodOptions={element.calculateMethodOptions}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {
                     eventDataDispatch({
                       type: 'changeCurCategoryOption',
+                      enableChangeMultiSelect,
                       eventIndex: index,
                       categoryOption: item,
                       builtInMetadata,
