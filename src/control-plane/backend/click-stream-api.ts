@@ -52,7 +52,7 @@ import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
