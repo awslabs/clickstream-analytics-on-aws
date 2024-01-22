@@ -148,7 +148,7 @@ export class IngestionServerStackV2 extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
-    const featureName = 'IngestionServer';
+    const featureName = 'IngestionServerV2';
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
@@ -180,7 +180,7 @@ export class IngestionServerStackV2 extends Stack {
         projectIdParam,
         appIdsParam,
         clickStreamSDKParam,
-        fargateWorkerStopTimeoutParam,
+        workerStopTimeoutParam,
         enableAuthenticationParam,
         authenticationSecretArnParam,
       },
@@ -221,7 +221,7 @@ export class IngestionServerStackV2 extends Stack {
       projectId: projectIdParam.valueAsString,
       clickStreamSDK: clickStreamSDKParam.valueAsString,
       appIds: appIdsParam.valueAsString,
-      workerStopTimeout: fargateWorkerStopTimeoutParam.valueAsNumber,
+      workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
       logBucketName: logS3BucketParam.valueAsString,
       logPrefix: logS3PrefixParam.valueAsString,
       enableAuthentication: enableAuthenticationParam.valueAsString,

@@ -509,7 +509,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'MskSecurityGroupId',
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'FargateWorkerStopTimeout',
+    'WorkerStopTimeout',
     'KafkaBrokers',
     'KafkaTopic',
     'DevMode',
@@ -558,7 +558,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
   const exceptedParams = [
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'FargateWorkerStopTimeout',
+    'WorkerStopTimeout',
     'KafkaBrokers',
     'KafkaTopic',
     'DevMode',
@@ -606,7 +606,7 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
   const exceptedParams = [
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'FargateWorkerStopTimeout',
+    'WorkerStopTimeout',
     'DevMode',
     'ServerMin',
     'PrivateSubnetIds',
@@ -652,7 +652,7 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
   const exceptedParams = [
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'FargateWorkerStopTimeout',
+    'WorkerStopTimeout',
     'DevMode',
     'ServerMin',
     'PrivateSubnetIds',
@@ -697,7 +697,7 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
   const exceptedParams = [
     'ServerEndpointPath',
     'ServerCorsOrigin',
-    'FargateWorkerStopTimeout',
+    'WorkerStopTimeout',
     'DevMode',
     'ServerMin',
     'PrivateSubnetIds',

@@ -210,13 +210,14 @@ export function createV2StackParameters(scope: Construct) {
     default: SINK_TYPE_S3,
   });
 
-  const fargateWorkerStopTimeoutParam = new CfnParameter(scope, 'FargateWorkerStopTimeout', {
-    description: 'Worker container stop timeout seconds for fargate task',
+  const workerStopTimeoutParam = new CfnParameter(scope, 'WorkerStopTimeout', {
+    description: 'Worker container stop timeout seconds',
     type: 'Number',
-    default: '60',
+    default: '120',
     minValue: 60,
     maxValue: 120,
   });
+
   const commonParameters = createCommonParameters(scope);
 
   let kafkaKinesisS3ParamsGroup: any[] = [];
@@ -372,7 +373,7 @@ export function createV2StackParameters(scope: Construct) {
       projectIdParam: commonParameters.projectIdParam,
       appIdsParam: commonParameters.appIdsParam,
       clickStreamSDKParam: commonParameters.clickStreamSDKParam,
-      fargateWorkerStopTimeoutParam,
+      workerStopTimeoutParam,
       sinkTypeParam,
       enableAuthenticationParam: commonParameters.enableAuthenticationParam,
       authenticationSecretArnParam: commonParameters.authenticationSecretArnParam,
