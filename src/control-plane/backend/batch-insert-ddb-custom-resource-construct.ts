@@ -39,7 +39,6 @@ export class BatchInsertDDBCustomResource extends Construct {
       handler: 'handler',
       timeout: Duration.seconds(30),
       memorySize: 256,
-      reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'DicInitCustomResourceRole', false, []),
     });
 
@@ -68,6 +67,7 @@ export class BatchInsertDDBCustomResource extends Construct {
         serviceToken: customResourceProvider.serviceToken,
         properties: {
           tableName: props.table.tableName,
+          lastModifiedTime: new Date().toISOString(),
         },
       },
     );

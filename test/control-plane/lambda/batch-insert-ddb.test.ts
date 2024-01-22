@@ -37,6 +37,7 @@ describe('Dictionary Data', () => {
     ResourceProperties: {
       ...basicCloudFormationEvent.ResourceProperties,
       tableName: 'Dictionary',
+      lastModifiedTime: '2021-01-01T00:00:00.000Z',
     },
   };
 
@@ -52,6 +53,7 @@ describe('Dictionary Data', () => {
     OldResourceProperties: createDictionaryEvent.ResourceProperties,
     ResourceProperties: {
       ...createDictionaryEvent.ResourceProperties,
+      lastModifiedTime: '2021-01-02T00:00:00.000Z',
     },
     PhysicalResourceId: 'physical-resource-id',
     RequestType: 'Update',

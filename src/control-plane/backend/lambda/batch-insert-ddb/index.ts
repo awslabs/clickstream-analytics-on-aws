@@ -26,6 +26,7 @@ import { NativeAttributeValue, marshall } from '@aws-sdk/util-dynamodb';
 import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
+  CloudFormationCustomResourceUpdateEvent,
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
@@ -51,6 +52,7 @@ export const handler = async (
   context: Context,
 ): Promise<CdkCustomResourceResponse> => {
   logger.debug('dictionary:', { dictionary });
+
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,
     RequestId: event.RequestId,
@@ -63,6 +65,12 @@ export const handler = async (
   };
 
   try {
+    const lastModifiedTime = event.ResourceProperties.lastModifiedTime;
+    const oldLastModifiedTime = (event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties.lastModifiedTime;
+    if (lastModifiedTime === oldLastModifiedTime) {
+      logger.info('No change in dictionary. Skip batch insert.');
+      return response;
+    }
     await _handler(event);
   } catch (e) {
     if (e instanceof Error) {
