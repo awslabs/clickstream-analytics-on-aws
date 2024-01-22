@@ -100,8 +100,7 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
     scope,
     'authEnableCondition',
     {
-      expression:
-      Fn.conditionEquals(authenticationSecretArn, 'Yes'),
+      expression: Fn.conditionNot(Fn.conditionEquals(authenticationSecretArn, '')),
     },
   );
   (authPolicy.node.defaultChild as CfnPolicy).cfnOptions.condition = authEnableCondition;

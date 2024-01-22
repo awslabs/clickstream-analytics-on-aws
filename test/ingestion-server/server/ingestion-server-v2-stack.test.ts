@@ -507,10 +507,6 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
 
   const exceptedParams = [
     'MskSecurityGroupId',
-    'S3DataBucket',
-    'S3DataPrefix',
-    'S3BatchTimeout',
-    'S3BatchMaxBytes',
     'ServerEndpointPath',
     'ServerCorsOrigin',
     'FargateWorkerStopTimeout',
@@ -549,7 +545,7 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
 
-  expect(templateParams.length).toEqual(exceptedParams.length + 1);
+  expect(templateParams.length).toEqual(exceptedParams.length);
 });
 
 test('Check parameters for Kafka nested stack - has minimum parameters', () => {
@@ -561,10 +557,6 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
 
   const exceptedParams = [
     'ServerEndpointPath',
-    'S3DataBucket',
-    'S3DataPrefix',
-    'S3BatchTimeout',
-    'S3BatchMaxBytes',
     'ServerCorsOrigin',
     'FargateWorkerStopTimeout',
     'KafkaBrokers',
@@ -601,7 +593,7 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
   for (const ep of exceptedParams) {
     expect(templateParams.includes(ep)).toBeTruthy();
   }
-  expect(templateParams.length).toEqual(exceptedParams.length + 1);
+  expect(templateParams.length).toEqual(exceptedParams.length);
 });
 
 test('Check parameters for Kinesis nested stack - has all parameters', () => {
@@ -613,10 +605,6 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
 
   const exceptedParams = [
     'ServerEndpointPath',
-    'S3DataBucket',
-    'S3DataPrefix',
-    'S3BatchTimeout',
-    'S3BatchMaxBytes',
     'ServerCorsOrigin',
     'FargateWorkerStopTimeout',
     'DevMode',
@@ -663,10 +651,6 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
 
   const exceptedParams = [
     'ServerEndpointPath',
-    'S3DataBucket',
-    'S3DataPrefix',
-    'S3BatchTimeout',
-    'S3BatchMaxBytes',
     'ServerCorsOrigin',
     'FargateWorkerStopTimeout',
     'DevMode',

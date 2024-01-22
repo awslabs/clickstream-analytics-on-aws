@@ -230,60 +230,59 @@ export class IngestionServerStackV2 extends Stack {
 
     const dataBufferPropsAndConditions: any[] = [];
 
-    let nestStackProps = { ... nestStackCommonProps };
+    // S3
+    const s3Condition = createS3ConditionsV2(this, {
+      sinkType,
+    });
+    const s3NestStackProps = {
+      ...nestStackCommonProps,
+      s3BucketName: s3Params.s3DataBucketParam.valueAsString,
+      s3Prefix: s3Params.s3DataPrefixParam.valueAsString,
+      batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,
+      batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
+    };
 
-    if (s3Params) {
-      const s3Condition = createS3ConditionsV2(this, {
-        sinkType,
-      });
-      nestStackProps = {
-        ...nestStackProps,
-        s3BucketName: s3Params.s3DataBucketParam.valueAsString,
-        s3Prefix: s3Params.s3DataPrefixParam.valueAsString,
-        batchMaxBytes: s3Params.s3BatchMaxBytesParam.valueAsNumber,
-        batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
+    dataBufferPropsAndConditions.push({
+      nestStackProps: s3NestStackProps,
+      conditions: [s3Condition],
+      conditionName: 'C',
+    });
+
+    // Kafka
+    let mskNestStackProps = {
+      ...nestStackCommonProps,
+      kafkaBrokers: kafkaParams.kafkaBrokersParam.valueAsString,
+      kafkaTopic: kafkaParams.kafkaTopicParam.valueAsString,
+    };
+    const mskConditionsAndProps = createMskConditionsV2(this, { ...kafkaParams, sinkType });
+    mskConditionsAndProps.forEach((mskConditionAndProps) => {
+      mskNestStackProps = {
+        ...mskNestStackProps,
+        mskClusterName: mskConditionAndProps.serverProps.mskClusterName,
+        mskSecurityGroupId: mskConditionAndProps.serverProps.mskSecurityGroupId,
       };
-
       dataBufferPropsAndConditions.push({
-        nestStackProps,
-        conditions: [s3Condition],
-        conditionName: 'C',
+        nestStackProps: mskNestStackProps,
+        conditions: mskConditionAndProps.conditions,
+        conditionName: mskConditionAndProps.name,
       });
-    }
+    });
 
+    // Kinesis
     if (this.kinesisNestedStacks) {
+      let kinesisNestStackProps = {
+        ...nestStackCommonProps,
+      };
       const kinesisConditionsAndProps = createKinesisConditionsV2(this.kinesisNestedStacks);
       kinesisConditionsAndProps.forEach((kinesisConditionAndProps) => {
-        nestStackProps = {
-          ...nestStackProps,
+        kinesisNestStackProps = {
+          ...kinesisNestStackProps,
           kinesisDataStreamArn: kinesisConditionAndProps.serverProps.kinesisDataStreamArn,
         };
         dataBufferPropsAndConditions.push({
-          nestStackProps,
+          nestStackProps: kinesisNestStackProps,
           conditions: [kinesisConditionAndProps.condition],
           conditionName: kinesisConditionAndProps.name,
-        });
-      });
-    }
-
-    if (kafkaParams) {
-      nestStackProps = {
-        ...nestStackProps,
-        kafkaBrokers: kafkaParams.kafkaBrokersParam.valueAsString,
-        kafkaTopic: kafkaParams.kafkaTopicParam.valueAsString,
-      };
-
-      const mskConditionsAndProps = createMskConditionsV2(this, { ...kafkaParams, sinkType });
-      mskConditionsAndProps.forEach((mskConditionAndProps) => {
-        nestStackProps = {
-          ...nestStackProps,
-          mskClusterName: mskConditionAndProps.serverProps.mskClusterName,
-          mskSecurityGroupId: mskConditionAndProps.serverProps.mskSecurityGroupId,
-        };
-        dataBufferPropsAndConditions.push({
-          nestStackProps,
-          conditions: mskConditionAndProps.conditions,
-          conditionName: mskConditionAndProps.name,
         });
       });
     }

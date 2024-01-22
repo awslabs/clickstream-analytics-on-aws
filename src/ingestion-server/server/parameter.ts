@@ -827,6 +827,7 @@ function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], 
     default: '300',
     minValue: 30,
   });
+
   const s3Params = {
     s3DataBucketParam,
     s3DataPrefixParam,
