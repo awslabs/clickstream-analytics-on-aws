@@ -21,7 +21,7 @@ import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRe
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeNatGateways, describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { simulateCustomPolicy } from '../store/aws/iam';
-import { describeAccountSubscription } from '../store/aws/quicksight';
+import { quickSightIsEnterprise } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
 
@@ -340,8 +340,8 @@ async function _checkForReporting(pipeline: IPipeline, quickSightSubnets: ClickS
   portOfRedshift: number, redshiftSecurityGroups: string[], redshiftSecurityGroupsRules: SecurityGroupRule[],
   redshiftType: string) {
   if (pipeline.reporting?.quickSight) {
-    const accountInfo = await describeAccountSubscription();
-    if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
+    const isEnterprise = await quickSightIsEnterprise();
+    if (!isEnterprise) {
       throw new ClickStreamBadRequestError(
         'Validation error: QuickSight edition is not enterprise in your account.',
       );

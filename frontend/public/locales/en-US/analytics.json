@@ -49,6 +49,7 @@
     "id": "ID",
     "description": "Descriptions",
     "createAt": "Creation time",
+    "updateAt": "Update time",
     "createdBy": "Created by"
   },
   "header": {

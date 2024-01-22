@@ -1870,7 +1870,7 @@ describe('Pipeline test', () => {
             { ...BASE_STATUS.stackDetails[0] },
             { ...BASE_STATUS.stackDetails[1] },
             { ...BASE_STATUS.stackDetails[2] },
-            { ...BASE_STATUS.stackDetails[4] },
+            { ...BASE_STATUS.stackDetails[4], outputs: [] },
             { ...BASE_STATUS.stackDetails[3] },
             { ...BASE_STATUS.stackDetails[5] },
           ],
@@ -3475,6 +3475,92 @@ describe('Pipeline test', () => {
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
               OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    let res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        ingestionServer: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.ingestionServer,
+          loadBalancer: {
+            ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.ingestionServer.loadBalancer,
+            protocol: PipelineServerProtocol.HTTP,
+            enableApplicationLoadBalancerAccessLog: false,
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test-modify',
+            enableGlobalAccelerator: false,
+            serverCorsOrigin: '*',
+            serverEndpointPath: '/collect-modify',
+          },
+        },
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(TransactWriteItemsCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Update pipeline when QuickSight user already existed', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        quickSightUserExisted: true,
+        updatePipeline: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        },
+      });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',

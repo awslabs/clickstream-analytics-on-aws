@@ -361,6 +361,7 @@ function createPipelineMock(
     vpcEndpointSubnetErr?: boolean;
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
+    quickSightUserExisted?: boolean;
     albPolicyDisable?: boolean;
     bucket?: {
       notExist?: boolean;

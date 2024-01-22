@@ -31,7 +31,7 @@ import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
@@ -39,7 +39,11 @@ const AnalyticsDashboardDetail: React.FC = () => {
   const { dashboardId, projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
-  const [dashboard, setDashboard] = useState({} as IAnalyticsDashboard);
+  const [dashboard, setDashboard] = useState({
+    name: '',
+    description: '',
+    embedUrl: '',
+  } as IAnalyticsDashboard);
   const dispatch = useContext(DispatchContext);
   const state = useContext(StateContext);
   const getAnalyticsDashboardDetails = async () => {
@@ -69,7 +73,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
   }, [dashboardId]);
 
   const getDashboardName = () => {
-    return dashboard.name === DEFAULT_DASHBOARD_NAME
+    return dashboard?.name?.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX)
       ? `${t('analytics:dashboard.defaultUserLifecycle')} - ${t(
           'analytics:dashboard.defaultTag'
         )}`
@@ -77,7 +81,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
   };
 
   const getDashboardDescription = () => {
-    return dashboard.name === DEFAULT_DASHBOARD_NAME
+    return dashboard?.name?.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX)
       ? `${t('analytics:dashboard.defaultUserLifecycleDescription')}`
       : dashboard.description;
   };
@@ -129,7 +133,9 @@ const AnalyticsDashboardDetail: React.FC = () => {
                     description={getDashboardDescription()}
                     info={
                       <>
-                        {dashboard.name === DEFAULT_DASHBOARD_NAME ? (
+                        {dashboard.name.startsWith(
+                          DEFAULT_DASHBOARD_NAME_PREFIX
+                        ) ? (
                           <InfoLink
                             onFollow={() => {
                               dispatch?.({

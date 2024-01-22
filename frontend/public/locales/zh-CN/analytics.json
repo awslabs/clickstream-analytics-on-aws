@@ -49,6 +49,7 @@
     "id": "ID",
     "description": "描述",
     "createAt": "创建时间",
+    "updateAt": "更新时间",
     "createdBy": "创建者"
   },
   "header": {
