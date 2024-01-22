@@ -24,6 +24,7 @@ import {
 import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
+import GroupSelectContainer from './GroupSelectContainer';
 
 interface EventItemProps {
   type: 'event' | 'attribute';
@@ -32,9 +33,10 @@ interface EventItemProps {
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
-  calcMethodOption?: SelectProps.Option | null;
+  calcMethodOption?: IAnalyticsItem | null;
+  calcMethodOptions?: IAnalyticsItem[];
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
-  changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
+  changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;
   disabled?: boolean;
@@ -50,6 +52,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     isMultiSelect,
     categoryOption,
     calcMethodOption,
+    calcMethodOptions,
     changeCurCategoryOption,
     changeCurCalcMethodOption,
     categories,
@@ -60,14 +63,13 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const { t } = useTranslation();
   const state = useContext(StateContext);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
-  const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
-  };
-
-  const computeMethodOptions: SelectProps.Options = [
-    defaultComputeMethodOption,
+  const defaultComputeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? 'User number',
+    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? 'Event number',
@@ -82,6 +84,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       function handleClickOutside(event: any) {
         if (ref.current && !ref.current.contains(event.target)) {
           setShowDropdown(false);
+          setShowGroupSelectDropdown(false);
           setClickedOutside(true);
         } else {
           setClickedOutside(false);
@@ -107,10 +110,14 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       >
         <div
           className="flex-1 cs-dropdown-event-input"
-          onClick={() => setShowDropdown((prev) => !prev)}
+          onClick={() => {
+            setShowDropdown((prev) => !prev);
+            setShowGroupSelectDropdown(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               setShowDropdown((prev) => !prev);
+              setShowGroupSelectDropdown(false);
             }
           }}
         >
@@ -140,21 +147,21 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         </div>
         {isMultiSelect && (
           <>
-          <div className="second-select-option" title={calcMethodOption?.label}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              setShowGroupSelectDropdown((prev) => !prev);
-              setShowDropdown(false);
-            }
-          }}
-          >
-            <Select
-              selectedOption={calcMethodOption ?? null}
-              onChange={(e) => {
-                changeCurCalcMethodOption?.(e.detail.selectedOption);
+            <div
+              className="second-select-option"
+              title={calcMethodOption?.label}
+              onClick={() => {
+                setShowGroupSelectDropdown((prev) => !prev);
+                setShowDropdown(false);
               }}
-              options={computeMethodOptions}
-            />
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setShowGroupSelectDropdown((prev) => !prev);
+                  setShowDropdown(false);
+                }
+              }}
+            >
+              <Select selectedOption={calcMethodOption ?? null} />
               {showGroupSelectDropdown && (
                 <GroupSelectContainer
                   categories={calcMethodOptions ?? defaultComputeMethodOptions}

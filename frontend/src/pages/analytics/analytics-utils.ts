@@ -470,95 +470,6 @@ export const validConditionItemType = (condition: IConditionItemType) => {
   );
 };
 
-export const getTouchPointsAndConditions = (
-  eventOptionData: IEventAnalyticsItem[]
-) => {
-  const touchPoints: AttributionTouchPoint[] = [];
-  eventOptionData.forEach((item) => {
-    if (validEventAnalyticsItem(item)) {
-      const conditions: ICondition[] = [];
-      item.conditionList.forEach((condition) => {
-        if (validConditionItemType(condition)) {
-          const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.OTHER
-            ),
-            property: defaultStr(condition.conditionOption?.name),
-            operator: defaultStr(condition.conditionOperator?.value),
-            value: condition.conditionValue,
-            dataType: defaultStr(
-              condition.conditionOption?.valueType,
-              MetadataValueType.STRING
-            ),
-          };
-          conditions.push(conditionObj);
-        }
-      });
-
-      const touchPoint: AttributionTouchPoint = {
-        eventName: defaultStr(item.selectedEventOption?.name),
-        sqlCondition: {
-          conditions: conditions,
-          conditionOperator: item.conditionRelationShip,
-        },
-      };
-      touchPoints.push(touchPoint);
-    }
-  });
-  return touchPoints;
-};
-
-export const getGoalAndConditions = (
-  eventOptionData: IEventAnalyticsItem[]
-) => {
-  if (eventOptionData.length === 0) {
-    return;
-  }
-  const goalData = eventOptionData[0];
-  const conditions: ICondition[] = [];
-  goalData.conditionList.forEach((condition) => {
-    if (validConditionItemType(condition)) {
-      const conditionObj: ICondition = {
-        category: defaultStr(
-          condition.conditionOption?.category,
-          ConditionCategory.OTHER
-        ),
-        property: defaultStr(condition.conditionOption?.name),
-        operator: defaultStr(condition.conditionOperator?.value),
-        value: condition.conditionValue,
-        dataType: defaultStr(
-          condition.conditionOption?.valueType,
-          MetadataValueType.STRING
-        ),
-      };
-      conditions.push(conditionObj);
-    }
-  });
-  let groupColumn: IColumnAttribute | undefined;
-  if (goalData.calculateMethodOption?.name) {
-    groupColumn = {
-      category: defaultStr(
-        goalData.calculateMethodOption?.category,
-        ConditionCategory.OTHER
-      ),
-      property: defaultStr(goalData.calculateMethodOption?.name),
-      dataType: defaultStr(
-        goalData.calculateMethodOption?.valueType,
-        MetadataValueType.STRING
-      ),
-    };
-  }
-  return {
-    eventName: defaultStr(goalData.selectedEventOption?.name),
-    sqlCondition: {
-      conditions: conditions,
-      conditionOperator: goalData.conditionRelationShip,
-    },
-    groupColumn,
-  } as AttributionTouchPoint;
-};
-
 export const getTargetComputeMethod = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
@@ -650,9 +561,7 @@ export const getEventAndConditions = (
         item.calculateMethodOption
       );
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
@@ -842,6 +751,8 @@ export const getIntervalInSeconds = (
         return Number(windowValue) * 60 * 60;
       case 'day':
         return Number(windowValue) * 60 * 60 * 24;
+      case 'month':
+        return Number(windowValue) * 60 * 60 * 24 * 30;
       default:
         return Number(windowValue) * 60;
     }
