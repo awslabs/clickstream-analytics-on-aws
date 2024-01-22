@@ -11,15 +11,15 @@
 ## 数据从哪里来
 活动报告是基于以下 QuickSight 数据集创建的：
 
-- `Events_View-<app id>-<project id>` 连接到分析引擎（即 Redshift）中的 `clickstream_event_view_v1` 视图
-- `Events_Parameter_View-<app id>-<project id>` 连接到分析引擎中的 `clickstream_events_parameter_view_v1` 视图
+- `Events_View-<app id>-<project id>` 连接到分析引擎（即 Redshift）中的 `clickstream_event_view` 视图
+- `Events_Parameter_View-<app id>-<project id>` 连接到分析引擎中的 `clickstream_events_parameter_view` 视图
 
 下面是生成相关视图的 SQL 命令。
 
 ??? 示例 "SQL 命令"
     === "Redshift"
-        ```sql title="clickstream_event_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v1.sql:6"
+        ```sql title="clickstream_event_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v2.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-ods-events-query.sql"

@@ -5,14 +5,14 @@ Once the data pipeline processes the event data, you can load the data into an a
 | Data model name                 | Redshift | Description                                                                  |
 |-----------------------------|-----------|----------------------------------------------------------------------|
 | clickstream_device_view_v1    | Materialized view    | A view contains all device dimensions.                     |
-| clickstream_event_view_v1    | Materialized view    | A view contains all event dimensions      |
+| clickstream_event_view_v2    | view    | A view contains all event dimensions      |
 | clickstream_event_parameter_view_v1    | Materialized view      | A view contains all event parameters.        |
 | clickstream_user_dim_view_v1    | Materialized view     | A view contains all user dimensions.                     |
 | clickstream_user_attr_view_v1    | Materialized view      | A view contains all user custom attributes.        |
-| clickstream_session_view_v1    | Materialized view     | A view contains all session dimension and relevant metrics, e.g.,session duration, session views.        |
-| clickstream_retention_view_v1    | Materialized view      | A view contains metrics of retentions by dates and return days.        |
-| clickstream_lifecycle_daily_view_v1    | Materialized view    | A view contains metrics of user number by lifecycle stages by day, i.e., New, Active, Return, Churn.        |
-| clickstream_lifecycle_weekly_view_v1    | Materialized view    | A view contains metrics of user number by lifecycle stages by week, i.e., New, Active, Return, Churn.        |
+| clickstream_session_view_v2    | view     | A view contains all session dimension and relevant metrics, e.g.,session duration, session views.        |
+| clickstream_retention_view_v2    | Materialized view      | A view contains metrics of retentions by dates and return days.        |
+| clickstream_lifecycle_daily_view_v2    | view    | A view contains metrics of user number by lifecycle stages by day, i.e., New, Active, Return, Churn.        |
+| clickstream_lifecycle_weekly_view_v2    | view    | A view contains metrics of user number by lifecycle stages by week, i.e., New, Active, Return, Churn.        |
 
 You can choose to use Redshift or Athena, or both. 
 

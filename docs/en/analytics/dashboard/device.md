@@ -14,12 +14,12 @@ Note: This article describes the default report. You can customize the report by
 
 Device report are created based on the following QuickSight dataset:
 
-- `Device_View-<app id>-<project id>`, which connects to the `clickstream_device_view_v1` view in analytics engines (i.e., Redshift or Athena). 
+- `Device_View-<app id>-<project id>`, which connects to the `clickstream_device_view` view in analytics engines (i.e., Redshift or Athena). 
 
 Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
-        ```sql title="clickstream_device_view_v1.sql"
+        ```sql title="clickstream_device_view.sql"
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_device_view_v1.sql:6"
         ```
     === "Athena"

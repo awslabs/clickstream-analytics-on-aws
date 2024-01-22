@@ -8,11 +8,11 @@
 2. 在仪表板中，单击名称为 **`Acquisition`** 的表。
 
 ## 数据来源
-获取报告是基于 `User_Dim_View-<app>-<project>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift）中的 `clickstream_user_dim_view_v1` 视图。以下是生成视图的 SQL 命令。
+获取报告是基于 `User_Dim_View-<app>-<project>` 的 QuickSight 数据集创建的，该数据集连接到分析引擎（即 Redshift）中的 `clickstream_user_dim_view` 视图。以下是生成视图的 SQL 命令。
 ??? 示例 "SQL 命令"
     === "Redshift"
-        ```sql title="clickstream-user-dim-view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:6"
+        ```sql title="clickstream-user-dim-view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
         ```
     === "Athena"
         ```sql title="clickstream-user-dim-query.sql"

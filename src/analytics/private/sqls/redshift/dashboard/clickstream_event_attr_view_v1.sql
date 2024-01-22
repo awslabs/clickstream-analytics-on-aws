@@ -1,7 +1,7 @@
 CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(event_date)
-AUTO REFRESH YES
+AUTO REFRESH NO
 AS
 select 
 event_date
@@ -50,18 +50,5 @@ event_date
 , traffic_source.source::varchar as traffic_source_source
 , event.user_id
 , event.user_pseudo_id
-, u.user_first_touch_timestamp
 from {{schema}}.event
-left join (
-	select
-	  *
-	from (
-    select  
-      user_pseudo_id,
-		  user_first_touch_timestamp
-	    ,ROW_NUMBER() over (partition by user_pseudo_id ORDER BY event_timestamp desc) AS et_rank
-	  from {{schema}}.user
-  )
-	where et_rank = 1
-) as u on event.user_pseudo_id = u.user_pseudo_id
 ;

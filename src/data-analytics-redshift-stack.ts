@@ -127,6 +127,7 @@ export function createRedshiftAnalyticsStack(
     tablesOdsSource,
     loadDataConfig,
     workflowBucketInfo,
+    mvRefreshInterval: props.redshift.mvRefreshInterval,
 
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,

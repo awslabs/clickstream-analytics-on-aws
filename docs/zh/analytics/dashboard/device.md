@@ -13,12 +13,12 @@
 
 设备报告是基于以下 QuickSight 数据集创建的：
 
-- `Device_View-<app id>-<project id>`，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_device_view_v1` 视图。
+- `Device_View-<app id>-<project id>`，该数据集连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_device_view` 视图。
 
 以下是生成视图的 SQL 命令。
 ??? 示例 "SQL 命令"
     === "Redshift"
-        ```sql title="clickstream_device_view_v1.sql"
+        ```sql title="clickstream_device_view.sql"
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_device_view_v1.sql:6"
         ```
     === "Athena"

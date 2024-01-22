@@ -11,21 +11,21 @@
 ## 数据从哪里来
 留存报告是基于以下 QuickSight 数据集创建的：
 
-- `lifecycle_weekly_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_weekly_view_v1` 视图。
-- `lifecycle_daily_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_daily_view_v1` 视图。
-- 连接到分析引擎中的 `clickstream_retention_view_v1` 视图。
+- `lifecycle_weekly_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_weekly_view` 视图。
+- `lifecycle_daily_view-<app id>-<project id>`，连接到分析引擎（即 Redshift 或 Athena）中的 `clickstream_lifecycle_daily_view` 视图。
+- 连接到分析引擎中的 `clickstream_retention_view` 视图。
 
 下面是生成视图的 SQL 命令。
 ??? 示例 "SQL 命令"
     === "Redshift"
-        ```sql title="clickstream_lifecycle_weekly_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_weekly_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_weekly_view_v2.sql:3"
         ```
-        ```sql title="clickstream_lifecycle_daily_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v1.sql:6"
+        ```sql title="clickstream_lifecycle_daily_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_lifecycle_daily_view_v2.sql:3"
         ```
-        ```sql title="clickstream_retention_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v1.sql:6"
+        ```sql title="clickstream_retention_view.sql"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v2.sql:6"
         ```
     === "Athena"
         ```sql title="clickstream-lifecycle-weekly-query.sql"

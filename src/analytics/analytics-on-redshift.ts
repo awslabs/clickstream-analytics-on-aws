@@ -54,6 +54,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly projectId: string;
   readonly appIds: string;
   readonly tablesOdsSource: TablesODSSource;
+  readonly mvRefreshInterval: number;
   readonly loadDataConfig: LoadDataConfig;
   readonly newRedshiftServerlessProps?: NewRedshiftServerlessProps;
   readonly existingRedshiftServerlessProps?: ExistingRedshiftServerlessProps;
@@ -289,6 +290,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       },
       securityGroupForLambda,
       databaseName: projectDatabaseName,
+      mvRefreshInterval: props.mvRefreshInterval,
       dataAPIRole: this.redshiftDataAPIExecRole,
       emrServerlessApplicationId: props.emrServerlessApplicationId,
       serverlessRedshift: existingRedshiftServerlessProps,
@@ -309,7 +311,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const loadRedshiftTablesWorkflow = new LoadOdsDataToRedshiftWorkflow(this, 'LoadData', loadDataProps);
     (loadRedshiftTablesWorkflow.loadDataWorkflow.node.defaultChild as CfnResource).overrideLogicalId('ClickstreamLoadDataWorkflow');
-
 
     if (this.redshiftServerlessWorkgroup) {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
