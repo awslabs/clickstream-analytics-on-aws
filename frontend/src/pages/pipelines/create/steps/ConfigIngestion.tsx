@@ -38,6 +38,7 @@ import {
   DEFAULT_KDS_SINK_INTERVAL,
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
+  EIngestionType,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -70,6 +71,7 @@ interface ConfigIngestionProps {
   pipelineInfo: IExtPipeline;
   changePublicSubnets: (subnets: SelectProps.Option[]) => void;
   changePrivateSubnets: (subnets: SelectProps.Option[]) => void;
+  changeIngestionType: (type: string) => void;
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;
@@ -138,6 +140,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     pipelineInfo,
     changePublicSubnets,
     changePrivateSubnets,
+    changeIngestionType,
     changeServerMin,
     changeServerMax,
     changeWarmSize,
@@ -362,11 +365,34 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             />
           </FormField>
 
-          <FormField
-            label={t('pipeline:create.ingestionCapacity')}
-            description={t('pipeline:create.ingestionCapacityDesc')}
-            stretch
-          >
+          <FormField label={t('pipeline:create.ingestionCapacity')} stretch>
+            <Tiles
+              onChange={({ detail }) => changeIngestionType(detail.value)}
+              value={pipelineInfo.ingestionServer.ingestionType}
+              columns={2}
+              items={[
+                {
+                  label: 'ECS on Fargate',
+                  description: t('pipeline:create.ingestionTypeFargateDesc'),
+                  value: EIngestionType.Fargate,
+                },
+                {
+                  label: 'ECS on EC2',
+                  description: t('pipeline:create.ingestionTypeEC2Desc'),
+                  value: EIngestionType.EC2,
+                },
+              ]}
+            />
+
+            <FormField
+              description={
+                pipelineInfo.ingestionServer.ingestionType ===
+                EIngestionType.EC2
+                  ? t('pipeline:create.ingestionCapacityDesc')
+                  : t('pipeline:create.ingestionCapacityFargateDesc')
+              }
+              stretch
+            />
             <ColumnLayout columns={3}>
               <FormField
                 stretch
@@ -412,28 +438,35 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }}
                 />
               </FormField>
-              <FormField
-                stretch
-                errorText={ternary(
-                  warmPoolError,
-                  t('pipeline:valid.warmPoolError'),
-                  undefined
-                )}
-              >
-                <div>{t('pipeline:create.warmPool')}</div>
-                <Input
-                  type="number"
-                  value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
-                  onChange={(e) => {
-                    if (
-                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
-                    ) {
-                      return false;
-                    }
-                    changeWarmSize(e.detail.value);
-                  }}
-                />
-              </FormField>
+              {pipelineInfo.ingestionServer.ingestionType ===
+                EIngestionType.EC2 && (
+                <>
+                  <FormField
+                    stretch
+                    errorText={ternary(
+                      warmPoolError,
+                      t('pipeline:valid.warmPoolError'),
+                      undefined
+                    )}
+                  >
+                    <div>{t('pipeline:create.warmPool')}</div>
+                    <Input
+                      type="number"
+                      value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
+                      onChange={(e) => {
+                        if (
+                          !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
+                            e.detail.value
+                          )
+                        ) {
+                          return false;
+                        }
+                        changeWarmSize(e.detail.value);
+                      }}
+                    />
+                  </FormField>
+                </>
+              )}
             </ColumnLayout>
           </FormField>
 

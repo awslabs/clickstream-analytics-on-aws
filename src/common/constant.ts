@@ -301,6 +301,9 @@ export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
   'OpenID Connector Jwks Uri Suffix';
 
+export const KDS_ON_DEMAND_MODE = 'ON_DEMAND';
+export const KDS_PROVISIONED_MODE = 'PROVISIONED';
+
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_INGESTION = 'ingestion_events';

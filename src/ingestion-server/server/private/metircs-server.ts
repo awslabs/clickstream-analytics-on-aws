@@ -27,6 +27,89 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
   ecsClusterName: string;
 }) {
 
+  const widgets = commonMetricWidget(scope, props);
+
+  const asgNamespace = 'AWS/EC2';
+  const asgDimension = [
+    'AutoScalingGroupName',
+    props.autoScalingGroupName,
+  ];
+
+  widgets.push(
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Average',
+        title: 'Server(Autoscaling group) CPU Utilization',
+        metrics: [
+          [
+            asgNamespace,
+            'CPUUtilization',
+            ...asgDimension,
+            {
+              stat: 'Average',
+              label: 'CPUUtilization Average',
+            },
+          ],
+
+          [
+            '.', '.', '.', '.',
+            {
+              stat: 'Maximum',
+              label: 'CPUUtilization Maximum',
+            },
+          ],
+
+          [
+            '.', '.', '.', '.',
+            {
+              stat: 'Minimum',
+              label: 'CPUUtilization Minimum',
+            },
+          ],
+        ],
+      },
+    },
+  );
+
+  return new MetricsWidgets(scope, 'ingestionServer', {
+    order: WIDGETS_ORDER.ingestionServer,
+    projectId: props.projectId,
+    name: 'ingestionServer',
+    description: {
+      markdown: '## Data Ingestion - Server',
+    },
+    widgets,
+  });
+}
+
+export function createMetricsWidgetForServerV2(scope: Construct, props: {
+  projectId: string;
+  albFullName: string;
+  ecsServiceName: string;
+  ecsClusterName: string;
+}) {
+  const widgets = commonMetricWidget(scope, props);
+
+  return new MetricsWidgets(scope, 'ingestionServer', {
+    order: WIDGETS_ORDER.ingestionServer,
+    projectId: props.projectId,
+    name: 'ingestionServer',
+    description: {
+      markdown: '## Data Ingestion - Server',
+    },
+    widgets,
+  });
+
+}
+
+function commonMetricWidget(scope: Construct, props: {
+  projectId: string;
+  albFullName: string;
+  ecsServiceName: string;
+  ecsClusterName: string;
+}) {
+
 
   const albNamespace = 'AWS/ApplicationELB';
   const albDimension = [
@@ -47,13 +130,6 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     'ServiceName',
     props.ecsServiceName,
   ];
-
-  const asgNamespace = 'AWS/EC2';
-  const asgDimension = [
-    'AutoScalingGroupName',
-    props.autoScalingGroupName,
-  ];
-
 
   const ecsPendingTaskCountAlarm = new Alarm(scope, 'ecsPendingTaskCountAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -224,41 +300,6 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
       type: 'metric',
       properties: {
         stat: 'Average',
-        title: 'Server(Autoscaling group) CPU Utilization',
-        metrics: [
-          [
-            asgNamespace,
-            'CPUUtilization',
-            ...asgDimension,
-            {
-              stat: 'Average',
-              label: 'CPUUtilization Average',
-            },
-          ],
-
-          [
-            '.', '.', '.', '.',
-            {
-              stat: 'Maximum',
-              label: 'CPUUtilization Maximum',
-            },
-          ],
-
-          [
-            '.', '.', '.', '.',
-            {
-              stat: 'Minimum',
-              label: 'CPUUtilization Minimum',
-            },
-          ],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Average',
         title: 'Server(ECS) Container CpuUtilized',
         metrics: [
           [
@@ -297,13 +338,5 @@ export function createMetricsWidgetForServer(scope: Construct, props: {
     },
   ];
 
-  return new MetricsWidgets(scope, 'ingestionServer', {
-    order: WIDGETS_ORDER.ingestionServer,
-    projectId: props.projectId,
-    name: 'ingestionServer',
-    description: {
-      markdown: '## Data Ingestion - Server',
-    },
-    widgets,
-  });
+  return widgets;
 }
