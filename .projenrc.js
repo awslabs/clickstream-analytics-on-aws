@@ -37,8 +37,8 @@ const commonDeps = [
 const commonDevDeps = [
   '@types/aws-lambda@^8.10.110',
   '@types/uuid@^9.0.0',
-  'aws-sdk-client-mock@^2.1.1',
-  'aws-sdk-client-mock-jest@^2.1.1',
+  'aws-sdk-client-mock@^3.0.1',
+  'aws-sdk-client-mock-jest@^3.0.1',
   '@types/mustache@^4.2.2',
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
