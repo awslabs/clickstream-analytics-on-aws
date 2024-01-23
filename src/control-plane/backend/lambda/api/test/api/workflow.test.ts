@@ -94,6 +94,7 @@ import {
   mergeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
+import { SINK_TYPE_S3 } from '../../common/constants-ln';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';
@@ -101,7 +102,6 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
-import { SINK_TYPE_S3 } from '../../common/constants-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
