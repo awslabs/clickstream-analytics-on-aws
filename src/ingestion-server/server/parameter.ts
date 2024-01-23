@@ -24,9 +24,9 @@ import {
   PARAMETER_LABEL_DOMAIN_NAME,
 } from '../../common/constant';
 
+import { SINK_TYPE_MODE } from '../../common/model';
 import { Parameters, SubnetParameterType } from '../../common/parameters';
 import { STACK_CORS_PATTERN } from '../../control-plane/backend/lambda/api/common/constants-ln';
-import { SINK_TYPE_MODE } from '../../common/model';
 
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
 
