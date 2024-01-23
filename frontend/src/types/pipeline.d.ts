@@ -57,6 +57,7 @@ declare global {
       prefix: string;
     };
     ingestionServer: {
+      ingestionType: EIngestionType;
       size: {
         serverMin: number;
         serverMax: number;

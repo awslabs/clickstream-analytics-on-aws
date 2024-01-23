@@ -1294,6 +1294,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
+              changeIngestionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      ingestionType: type,
+                    },
+                  };
+                });
+              }}
               changeServerMin={(min) => {
                 setMinCapacityError(false);
                 setPipelineInfo((prev) => {
@@ -2582,6 +2593,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
+        ingestionType: defaultStr(data.ingestionServer.ingestionType),
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,

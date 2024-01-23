@@ -28,10 +28,10 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, MetadataVersionType } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusDetail, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, PipelineStackType, PipelineStatus, PipelineStatusDetail, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -246,6 +246,22 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
   names.set(PipelineStackType.APP_REGISTRY, `Clickstream-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
+}
+
+function getSinkType(pipeline: IPipeline): string | undefined {
+  if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
+    switch (pipeline?.ingestionServer.sinkType) {
+      case PipelineSinkType.S3:
+        return SINK_TYPE_MODE.SINK_TYPE_S3;
+      case PipelineSinkType.KAFKA:
+        return SINK_TYPE_MODE.SINK_TYPE_MSK;
+      case PipelineSinkType.KINESIS:
+        return SINK_TYPE_MODE.SINK_TYPE_KDS;
+      default:
+        return undefined;
+    }
+  }
+  return undefined;
 }
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {
@@ -1314,4 +1330,5 @@ export {
   rawToParameter,
   rawToAttribute,
   getLocalDateISOString,
+  getSinkType,
 };

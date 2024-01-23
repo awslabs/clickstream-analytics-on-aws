@@ -21,6 +21,7 @@ const cfnNagList = [
       'IngestionServer/clickstream-ingestion-service-ecs-asg/InstanceRole/DefaultPolicy/Resource',
       'IngestionServer/clickstream-ingestion-service-ecs-asg/DrainECSHook/Function/ServiceRole/DefaultPolicy/Resource',
       'IngestionServer/clickstream-ingestion-service-ecs-task-def/ExecutionRole/DefaultPolicy/Resource',
+      'IngestionServer/ECSFargateCluster/ecs-fargate-service/clickstream-ingestion-service-ecs-fargate-task-def/ExecutionRole/DefaultPolicy/Resource',
     ],
     rules_to_suppress: [
       {

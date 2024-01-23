@@ -31,6 +31,12 @@ export enum BuiltInTagKeys {
   CLICKSTREAM_PROJECT = 'aws-solution/clickstream/project',
 }
 
+export enum SINK_TYPE_MODE {
+  SINK_TYPE_KDS='KDS',
+  SINK_TYPE_S3='S3',
+  SINK_TYPE_MSK='MSK',
+}
+
 export enum REDSHIFT_MODE {
   PROVISIONED='Provisioned',
   SERVERLESS='Serverless',

@@ -321,6 +321,11 @@ export enum PipelineSinkType {
   KINESIS = 'kinesis',
 }
 
+export enum IngestionType {
+  Fargate = 'Fargate',
+  EC2 = 'EC2',
+}
+
 export enum PipelineServerProtocol {
   HTTP = 'HTTP',
   HTTPS = 'HTTPS',

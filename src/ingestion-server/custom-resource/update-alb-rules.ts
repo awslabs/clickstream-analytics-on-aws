@@ -12,8 +12,8 @@
  */
 
 import { join } from 'path';
-import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CustomResource, Duration, CfnResource, CfnCondition, Fn } from 'aws-cdk-lib';
+import { PolicyStatement, Policy, CfnPolicy } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -63,7 +63,7 @@ export function updateAlbRulesCustomResource(
   return { customResource: cr, fn };
 }
 
-function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authenticationSecretArn?: string): SolutionNodejsFunction {
+function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, inputAuthenticationSecretArn?: string): SolutionNodejsFunction {
   const policyStatements = [
     new PolicyStatement({
       actions: [
@@ -82,17 +82,30 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
       resources: ['*'],
     }),
   ];
-  if (authenticationSecretArn) {
-    policyStatements.push(
+
+  const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
+  const authenticationSecretArn = inputAuthenticationSecretArn || '';
+
+  const authPolicy = new Policy(scope, 'updateAlbRulesLambdaAuthPolicy', {
+    statements: [
       new PolicyStatement({
         actions: [
           'secretsmanager:GetSecretValue',
         ],
         resources: [authenticationSecretArn],
       }),
-    );
-  }
-  const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
+    ],
+  });
+  authPolicy.attachToRole(role);
+
+  const authEnableCondition = new CfnCondition(
+    scope,
+    'authEnableCondition',
+    {
+      expression: Fn.conditionNot(Fn.conditionEquals(authenticationSecretArn, '')),
+    },
+  );
+  (authPolicy.node.defaultChild as CfnPolicy).cfnOptions.condition = authEnableCondition;
 
   const fn = new SolutionNodejsFunction(scope, 'updateAlbRulesLambda', {
     runtime: Runtime.NODEJS_18_X,
