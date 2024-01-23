@@ -26,12 +26,15 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
+  SINK_TYPE_KDS,
+  SINK_TYPE_MSK,
+  SINK_TYPE_S3,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -246,6 +249,22 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
   names.set(PipelineStackType.APP_REGISTRY, `Clickstream-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
+}
+
+function getSinkType(pipeline: IPipeline): string | undefined {
+  if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
+    switch (pipeline?.ingestionServer.sinkType) {
+      case PipelineSinkType.S3:
+        return SINK_TYPE_S3;
+      case PipelineSinkType.KAFKA:
+        return SINK_TYPE_MSK;
+      case PipelineSinkType.KINESIS:
+        return SINK_TYPE_KDS;
+      default:
+        return undefined;
+    }
+  }
+  return undefined;
 }
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {
@@ -1324,4 +1343,5 @@ export {
   rawToParameter,
   rawToAttribute,
   getLocalDateISOString,
+  getSinkType,
 };

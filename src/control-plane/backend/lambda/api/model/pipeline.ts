@@ -985,11 +985,11 @@ export class CPipeline {
   private async _getIngestionWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
     let ingestionTemplateKey = `${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`;
     if (this.pipeline.ingestionServer.ingestionType === IngestionType.Fargate) {
-      ingestionTemplateKey = `${ingestionTemplateKey}_${IngestionType.Fargate}`;
+      ingestionTemplateKey = `${PipelineStackType.INGESTION}_v2`;
     }
     const ingestionTemplateURL = await this.getTemplateUrl(ingestionTemplateKey);
     if (!ingestionTemplateURL) {
-      throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+      throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
     }
     const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
     const ingestionStackParameters = getStackParameters(ingestionStack);

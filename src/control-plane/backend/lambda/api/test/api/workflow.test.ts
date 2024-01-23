@@ -101,6 +101,7 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
+import { SINK_TYPE_S3 } from '../../common/constants-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -313,10 +314,14 @@ describe('Workflow test', () => {
                             Parameters: [
                               ...INGESTION_S3_FARGATE_PARAMETERS,
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              {
+                                ParameterKey: 'SinkType',
+                                ParameterValue: SINK_TYPE_S3,
+                              },
                             ],
                             StackName: 'Clickstream-Ingestion-s3-6666-6666',
                             Tags: Tags,
-                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-s3-stack.template.json',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-v2-stack.template.json',
                           },
                         },
                         End: true,

@@ -152,7 +152,7 @@ stackSuppressions([
   }),
 
   // for Ingestion V2
-  new IngestionServerStackV2(app, 'ingestion-server-v2', { //To Ingestion V2
+  new IngestionServerStackV2(app, 'ingestion-server-v2-stack', { //To Ingestion V2
     synthesizer: synthesizer(),
   }),
 ], [

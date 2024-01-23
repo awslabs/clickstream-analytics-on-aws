@@ -64,6 +64,7 @@ import {
   isEmail,
   corsStackInput,
   getAppRegistryApplicationArn,
+  getSinkType,
 } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
@@ -121,6 +122,7 @@ export class CIngestionServerStack extends JSONObject {
       'AuthenticationSecretArn',
       'EnableApplicationLoadBalancerAccessLog',
       'Protocol',
+      'SinkType',
     ];
     return allowedList;
   }
@@ -286,24 +288,13 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.lte(1830)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
-      return undefined;
+      return 120;
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
       return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 330;
     }
     return undefined;
   })
     WorkerStopTimeout?: number;
-
-  @JSONObject.optional(60)
-  @JSONObject.gte(60)
-  @JSONObject.lte(120)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
-      return value;
-    }
-    return undefined;
-  })
-    FargateWorkerStopTimeout?: number;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
@@ -397,6 +388,8 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    SinkType?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
@@ -439,6 +432,8 @@ export class CIngestionServerStack extends JSONObject {
       // Log
       LogS3Bucket: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? pipeline.bucket.name,
       LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_ALB, pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
+
+      SinkType: getSinkType(pipeline),
       // S3 sink
       S3DataBucket: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
       S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),

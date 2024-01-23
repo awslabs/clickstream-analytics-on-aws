@@ -189,8 +189,8 @@ export const INGESTION_S3_FARGATE_PARAMETERS = replaceParameters(
     ParameterValue: '90',
   },
   {
-    ParameterKey: 'FargateWorkerStopTimeout',
-    ParameterValue: '60',
+    ParameterKey: 'WorkerStopTimeout',
+    ParameterValue: '120',
   },
 );
 
