@@ -92,6 +92,28 @@ describe('Dictionary Data', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(BatchWriteItemCommand, 1);
   });
 
+  test('Update Dictionary without lastModifiedTime field', async () => {
+    docMock.on(ScanCommand).resolvesOnce({ Items: [{ name: 'D1', data: {} }] });
+    docMock.on(DeleteCommand).resolves({});
+    ddbMock.on(BatchWriteItemCommand).resolvesOnce({});
+    const event = {
+      ...updateDictionaryEvent,
+      OldResourceProperties: {
+        ...createDictionaryEvent.ResourceProperties,
+        lastModifiedTime: undefined,
+      },
+      ResourceProperties: {
+        ...createDictionaryEvent.ResourceProperties,
+        lastModifiedTime: '2021-01-02T00:00:00.000Z',
+      },
+    };
+    const resp = await handler(event, context) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(docMock).toHaveReceivedCommandTimes(DeleteCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(BatchWriteItemCommand, 1);
+  });
+
   test('Delete Dictionary', async () => {
     const event = deleteDictionaryEvent;
     docMock.on(ScanCommand).resolvesOnce({
