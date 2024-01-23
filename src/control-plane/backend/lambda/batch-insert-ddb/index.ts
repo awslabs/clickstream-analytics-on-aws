@@ -65,12 +65,6 @@ export const handler = async (
   };
 
   try {
-    const lastModifiedTime = event.ResourceProperties.lastModifiedTime;
-    const oldLastModifiedTime = (event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties.lastModifiedTime;
-    if (lastModifiedTime === oldLastModifiedTime) {
-      logger.info('No change in dictionary. Skip batch insert.');
-      return response;
-    }
     await _handler(event);
   } catch (e) {
     if (e instanceof Error) {
@@ -84,7 +78,16 @@ export const handler = async (
 async function _handler(event: CdkCustomResourceEvent) {
   const requestType = event.RequestType;
 
-  if (requestType == 'Create' || requestType == 'Update') {
+  if (requestType == 'Create') {
+    await cleanData(event);
+    await batchInsert(event);
+  } else if (requestType == 'Update') {
+    const lastModifiedTime = event.ResourceProperties.lastModifiedTime;
+    const oldLastModifiedTime = (event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties.lastModifiedTime;
+    if (lastModifiedTime === oldLastModifiedTime) {
+      logger.info('No change in dictionary. Skip batch insert.');
+      return;
+    }
     await cleanData(event);
     await batchInsert(event);
   }
