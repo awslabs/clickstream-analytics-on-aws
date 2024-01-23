@@ -94,8 +94,7 @@ import {
   mergeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
-import { SINK_TYPE_S3 } from '../../common/constants-ln';
-import { BuiltInTagKeys } from '../../common/model-ln';
+import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
@@ -316,7 +315,7 @@ describe('Workflow test', () => {
                               APPREGISTRY_APPLICATION_ARN_PARAMETER,
                               {
                                 ParameterKey: 'SinkType',
-                                ParameterValue: SINK_TYPE_S3,
+                                ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
                               },
                             ],
                             StackName: 'Clickstream-Ingestion-s3-6666-6666',

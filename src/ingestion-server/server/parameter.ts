@@ -22,13 +22,11 @@ import {
   PARAMETER_LABEL_VPCID,
   PARAMETER_LABEL_CERTIFICATE_ARN,
   PARAMETER_LABEL_DOMAIN_NAME,
-  SINK_TYPE_S3,
-  SINK_TYPE_KDS,
-  SINK_TYPE_MSK,
 } from '../../common/constant';
 
 import { Parameters, SubnetParameterType } from '../../common/parameters';
 import { STACK_CORS_PATTERN } from '../../control-plane/backend/lambda/api/common/constants-ln';
+import { SINK_TYPE_MODE } from '../../common/model';
 
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
 
@@ -206,8 +204,8 @@ export function createV2StackParameters(scope: Construct) {
   const sinkTypeParam = new CfnParameter(scope, 'SinkType', {
     description: 'sink type for data buffer',
     type: 'String',
-    allowedValues: [SINK_TYPE_S3, SINK_TYPE_KDS, SINK_TYPE_MSK],
-    default: SINK_TYPE_S3,
+    allowedValues: [SINK_TYPE_MODE.SINK_TYPE_S3, SINK_TYPE_MODE.SINK_TYPE_KDS, SINK_TYPE_MODE.SINK_TYPE_MSK],
+    default: SINK_TYPE_MODE.SINK_TYPE_S3,
   });
 
   const workerStopTimeoutParam = new CfnParameter(scope, 'WorkerStopTimeout', {
@@ -231,7 +229,7 @@ export function createV2StackParameters(scope: Construct) {
       {
         assert: Fn.conditionOr(
           Fn.conditionAnd(
-            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MSK),
+            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_MSK),
             Fn.conditionNot(
               Fn.conditionEquals(kafkaParams.kafkaTopicParam.valueAsString, ''),
             ),
@@ -239,7 +237,7 @@ export function createV2StackParameters(scope: Construct) {
               Fn.conditionEquals(kafkaParams.kafkaBrokersParam.valueAsString, ''),
             ),
           ),
-          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MSK)),
+          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_MSK)),
         ),
         assertDescription:
         'kafkaTopic and kafkaBrokers cannot be empty',
@@ -254,7 +252,7 @@ export function createV2StackParameters(scope: Construct) {
       {
         assert: Fn.conditionOr(
           Fn.conditionAnd(
-            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_S3),
+            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_S3),
             Fn.conditionNot(
               Fn.conditionEquals(s3Params.s3DataBucketParam.valueAsString, ''),
             ),
@@ -262,7 +260,7 @@ export function createV2StackParameters(scope: Construct) {
               Fn.conditionEquals(s3Params.s3DataPrefixParam.valueAsString, ''),
             ),
           ),
-          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_S3)),
+          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_S3)),
         ),
         assertDescription:
           's3DataBucket and s3DataPrefix cannot be empty when sinkToS3Param=Yes',
@@ -278,7 +276,7 @@ export function createV2StackParameters(scope: Construct) {
       {
         assert: Fn.conditionOr(
           Fn.conditionAnd(
-            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_KDS),
+            Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_KDS),
             Fn.conditionNot(
               Fn.conditionEquals(kinesisParams.kinesisDataS3BucketParam.valueAsString, ''),
             ),
@@ -286,7 +284,7 @@ export function createV2StackParameters(scope: Construct) {
               Fn.conditionEquals(kinesisParams.kinesisDataS3PrefixParam.valueAsString, ''),
             ),
           ),
-          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_KDS)),
+          Fn.conditionNot(Fn.conditionEquals(sinkTypeParam.valueAsString, SINK_TYPE_MODE.SINK_TYPE_KDS)),
         ),
         assertDescription:
         'kinesisDataS3Bucket and kinesisDataS3Prefix cannot be empty when sinkToKinesis=Yes',

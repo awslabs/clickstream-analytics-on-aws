@@ -34,10 +34,10 @@ import {
   ruleRolePolicyWithWildcardResources,
 } from '../../common/cfn-nag';
 import {
-  SINK_TYPE_KDS,
   KDS_ON_DEMAND_MODE,
   KDS_PROVISIONED_MODE,
 } from '../../common/constant';
+import { SINK_TYPE_MODE } from '../../common/model';
 
 import { SolutionInfo } from '../../common/solution-info';
 import { getExistVpc } from '../../common/vpc-utils';
@@ -82,7 +82,7 @@ export function createKinesisNestStack(
     'onDemandStackCondition',
     {
       expression: Fn.conditionAnd(
-        Fn.conditionEquals(props.sinkType, SINK_TYPE_KDS),
+        Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_KDS),
         Fn.conditionEquals(streamModeStr, KDS_ON_DEMAND_MODE),
       ),
     },
@@ -93,7 +93,7 @@ export function createKinesisNestStack(
     'provisionedStackCondition',
     {
       expression: Fn.conditionAnd(
-        Fn.conditionEquals(props.sinkType, SINK_TYPE_KDS),
+        Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_KDS),
         Fn.conditionEquals(streamModeStr, KDS_PROVISIONED_MODE),
       ),
     },

@@ -26,12 +26,9 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
-  SINK_TYPE_KDS,
-  SINK_TYPE_MSK,
-  SINK_TYPE_S3,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
@@ -255,11 +252,11 @@ function getSinkType(pipeline: IPipeline): string | undefined {
   if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
     switch (pipeline?.ingestionServer.sinkType) {
       case PipelineSinkType.S3:
-        return SINK_TYPE_S3;
+        return SINK_TYPE_MODE.SINK_TYPE_S3;
       case PipelineSinkType.KAFKA:
-        return SINK_TYPE_MSK;
+        return SINK_TYPE_MODE.SINK_TYPE_MSK;
       case PipelineSinkType.KINESIS:
-        return SINK_TYPE_KDS;
+        return SINK_TYPE_MODE.SINK_TYPE_KDS;
       default:
         return undefined;
     }

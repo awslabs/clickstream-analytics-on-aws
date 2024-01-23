@@ -31,7 +31,8 @@ import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, SINK_TYPE_KDS } from './common/constant';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
+import { SINK_TYPE_MODE } from './common/model';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
@@ -365,7 +366,7 @@ export class IngestionServerStack extends Stack {
         vpcIdParam,
         privateSubnetIdsParam,
         kinesisParams,
-        sinkType: SINK_TYPE_KDS,
+        sinkType: SINK_TYPE_MODE.SINK_TYPE_KDS,
       });
     }
 

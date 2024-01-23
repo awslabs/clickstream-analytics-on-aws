@@ -14,13 +14,13 @@
 import { CfnCondition, CfnParameter, Fn } from 'aws-cdk-lib';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
-import { SINK_TYPE_S3 } from '../../common/constant';
+import { SINK_TYPE_MODE } from '../../common/model';
 
 export function createS3ConditionsV2(scope: Construct, props: {
   sinkType: string;
 }) {
   const s3Condition = new CfnCondition(scope, 's3Condition', {
-    expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_S3),
+    expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_S3),
   });
   return s3Condition;
 }
@@ -95,7 +95,7 @@ export function createMskConditionsV2(
   );
 
   const mskCondition = new CfnCondition(scope, 'mskCondition', {
-    expression: Fn.conditionEquals(props.sinkType, 'MSK'),
+    expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_MSK),
   });
 
   const mskConditionServerPopsConfig = [
