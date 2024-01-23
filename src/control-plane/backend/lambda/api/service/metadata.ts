@@ -132,7 +132,7 @@ export class MetadataEventServ {
         return res.status(404).json(new ApiFail('Pipeline not found'));
       }
       const scanMetadataWorkflowArn = getStackOutputFromPipelineStatus(
-        pipeline.status?.stackDetails,
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
       );

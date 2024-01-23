@@ -361,26 +361,48 @@ function mockPipeline(version?: string) {
     BASE_STATUS.stackDetails[4],
     BASE_STATUS.stackDetails[5],
   ];
-  ddbMock.on(QueryCommand, {
-    TableName: clickStreamTableName,
-    IndexName: prefixTimeGSIName,
-    KeyConditionExpression: '#prefix= :prefix',
-    ExpressionAttributeNames: {
-      '#prefix': 'prefix',
-    },
-    ExpressionAttributeValues: {
-      ':prefix': 'PIPELINE',
-    },
-  }).resolves({
-    Items: [{
-      ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
-      templateVersion: version ?? 'v1.1.0',
-      status: {
-        ...BASE_STATUS,
-        stackDetails: stackDetailsWithScanArnOutputs,
+  if (version === 'v1.2.0') {
+    ddbMock.on(QueryCommand, {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
       },
-    }],
-  });
+      ExpressionAttributeValues: {
+        ':prefix': 'PIPELINE',
+      },
+    }).resolves({
+      Items: [{
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.2.0',
+        status: undefined,
+        stackDetails: stackDetailsWithScanArnOutputs,
+      }],
+    });
+  } else {
+    ddbMock.on(QueryCommand, {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': 'PIPELINE',
+      },
+    }).resolves({
+      Items: [{
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.1.0',
+        status: {
+          ...BASE_STATUS,
+          stackDetails: stackDetailsWithScanArnOutputs,
+        },
+        stackDetails: undefined,
+      }],
+    });
+  }
   ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
     Items: [
       MOCK_EVENT_PARAMETER,
@@ -2853,10 +2875,47 @@ describe('Metadata Scan test', () => {
   beforeEach(() => {
     ddbMock.reset();
     SFNMock.reset();
-    mockPipeline('v1.2.0');
   });
 
   it('trigger scan metadata', async () => {
+    mockPipeline('v1.2.0');
+    tokenMock(ddbMock, false);
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(GetCommand).resolves({});
+    SFNMock.on(StartExecutionCommand).resolves({
+      executionArn: 'arn:aws:states:us-east-1:123456789012:execution:scan-StateMachine:scan-StateMachine:00000000-0000-0000-0000-000000000000',
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/metadata/trigger')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Trigger success',
+    });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(SFNMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+    expect(SFNMock).toHaveReceivedCommandWith(StartExecutionCommand, {
+      stateMachineArn: 'arn:aws:states:us-east-1:123456789012:stateMachine:xxxxScanMetadataWorkflow',
+      name: 'manual-trigger-1675296000000',
+      input: JSON.stringify({
+        scanStartDate: '2023-01-26',
+        scanEndDate: '2023-02-02',
+        appIdList: MOCK_APP_ID,
+      }),
+    });
+  });
+
+  it('trigger scan metadata when old version', async () => {
+    mockPipeline();
     tokenMock(ddbMock, false);
     jest.useFakeTimers().setSystemTime(new Date('2023-02-02'));
     ddbMock.on(GetCommand).resolves({});
@@ -2893,6 +2952,7 @@ describe('Metadata Scan test', () => {
   });
 
   it('trigger scan metadata frequently', async () => {
+    mockPipeline('v1.2.0');
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand).resolves({
       Item: {
