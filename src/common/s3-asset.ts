@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AssetHashType, BundlingOptions, DockerImage } from 'aws-cdk-lib';
+import { AssetHashType, BundlingOptions, DockerImage, Size } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
@@ -60,6 +60,8 @@ export function uploadBuiltInJarsAndRemoteFiles(
     ],
     destinationBucket,
     destinationKeyPrefix,
+    memoryLimit: 1024, // Increase the memory limit to 1 gibibytes
+    ephemeralStorageSize: Size.gibibytes(1), // Increase the ephemeral storage size to 1 gibibytes
   });
 
   const entryPointJar = `s3://${destinationBucket.bucketName}/${destinationKeyPrefix}/${jarFile}`;
