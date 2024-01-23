@@ -29,6 +29,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
 import { REDSHIFT_MODE } from './common/model';
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH } from './common/constant';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
@@ -94,6 +95,7 @@ export class StreamingIngestionStack extends Stack {
       this,
       path.resolve(__dirname, 'streaming-ingestion', 'flink-etl'),
       'flink-etl',
+      true,
       dataBucket,
       appPrefix,
       '-x checkstyleMain',
@@ -102,18 +104,18 @@ export class StreamingIngestionStack extends Stack {
     // create managed flink application
     const applicationJarKey = applicationJar.substring(`s3://${dataBucket.bucketName}/`.length);
     const geoDBKey = builtInFiles[0].substring(`s3://${dataBucket.bucketName}/`.length);
+    const mappingConfgKey = `${pipeline.dataBucket.prefix}${projectId}/flink-config/app-id-stream-config.json`;
+    const appIdStreamConfigS3Path = `s3://${dataBucket.bucketName}/${mappingConfgKey}`;
     this.flinkApp = new Application(this, 'ClickstreamStreamingIngestion', {
       code: ApplicationCode.fromBucket(dataBucket, applicationJarKey),
       propertyGroups: {
-        FlinkApplicationProperties: {
-          inputStreamArn: sourceStream.streamArn,
-        },
         EnvironmentProperties: {
           'projectId': projectId,
           'stackShortId': getShortIdOfStack(Stack.of(this)),
-          'kinesis.source.stream': sourceStream.streamName,
+          'inputStreamArn': sourceStream.streamArn,
           'dataBucketName': dataBucket.bucketName,
           'geoFileKey': geoDBKey,
+          'appIdStreamConfig': appIdStreamConfigS3Path,
         },
       },
       runtime: Runtime.FLINK_1_15,
@@ -130,6 +132,7 @@ export class StreamingIngestionStack extends Stack {
     sourceStream.grantRead(this.flinkApp);
     dataBucket.grantRead(this.flinkApp, applicationJarKey);
     dataBucket.grantRead(this.flinkApp, geoDBKey);
+    dataBucket.grantRead(this.flinkApp, mappingConfgKey);
     this.flinkApp.node.addDependency(deployment);
 
     // update Redshift IAM role association and schema and table per application
@@ -184,6 +187,11 @@ export class StreamingIngestionStack extends Stack {
     (this.toProvisionedRedshiftStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;
 
     this.addCfnNag();
+
+    new CfnOutput(this, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, {
+      description: 'S3 path of app IDs and kineisis data stream sinks config mapping',
+      value: appIdStreamConfigS3Path,
+    });
 
     new CfnOutput(this, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, {
       description: 'Flink application ARN',

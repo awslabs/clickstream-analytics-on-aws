@@ -113,6 +113,7 @@ export class DataPipelineConstruct extends Construct {
       scope,
       path.resolve(__dirname, 'spark-etl'),
       'spark-etl',
+      false,
       this.props.pipelineS3Bucket,
       pluginPrefix,
     );

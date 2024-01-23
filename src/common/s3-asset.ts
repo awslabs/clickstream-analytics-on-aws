@@ -21,13 +21,17 @@ export function uploadBuiltInJarsAndRemoteFiles(
   scope: Construct,
   sourcePath: string,
   jarName: string,
+  shadowJar: boolean,
   destinationBucket: IBucket,
   destinationKeyPrefix: string,
   additionalBuildArgument: string = '',
   remoteFiles: string[] = ['https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz'],
 ) {
   const version = SolutionInfo.SOLUTION_VERSION_SHORT;
-  const jarFile = `${jarName}-${version}.jar`;
+  let jarFile = `${jarName}-${version}.jar`;
+  if (shadowJar) {
+    jarFile = `${jarName}-${version}-all.jar`;
+  }
   const shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
