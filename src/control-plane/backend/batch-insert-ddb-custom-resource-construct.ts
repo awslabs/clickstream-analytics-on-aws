@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 
-import path from 'path';
+
+import { statSync } from 'fs';
+import { join, resolve } from 'path';
 import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -35,11 +37,10 @@ export class BatchInsertDDBCustomResource extends Construct {
 
     const customResourceLambda = new SolutionNodejsFunction(this, 'DicInitCustomResourceFunction', {
       description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
-      entry: path.join(__dirname, './lambda/batch-insert-ddb/index.ts'),
+      entry: join(__dirname, './lambda/batch-insert-ddb/index.ts'),
       handler: 'handler',
       timeout: Duration.seconds(30),
       memorySize: 256,
-      reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'DicInitCustomResourceRole', false, []),
     });
 
@@ -68,9 +69,20 @@ export class BatchInsertDDBCustomResource extends Construct {
         serviceToken: customResourceProvider.serviceToken,
         properties: {
           tableName: props.table.tableName,
+          lastModifiedTime: this.getLatestTimestampFromDictionary(),
         },
       },
     );
+  }
+
+  private getLatestTimestampFromDictionary(): number {
+    let latestTimestamp = 0;
+    const filePath = resolve(__dirname, 'lambda/api/config/dictionary.json');
+    const stats = statSync(filePath);
+    if (stats.isFile()) {
+      latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
+    }
+    return latestTimestamp;
   }
 
 }
