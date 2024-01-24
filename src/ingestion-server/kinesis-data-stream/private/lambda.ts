@@ -43,7 +43,9 @@ export function createKinesisToS3Lambda(
     handler: 'handler',
     memorySize: 2048,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
     vpc,
     vpcSubnets: props.subnetSelection,

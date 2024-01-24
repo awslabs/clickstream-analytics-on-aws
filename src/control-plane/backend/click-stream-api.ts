@@ -51,7 +51,7 @@ import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
-import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
@@ -386,16 +386,8 @@ export class ClickStreamApiConstruct extends Construct {
     });
     awsSdkPolicy.attachToRole(clickStreamApiFunctionRole);
     addCfnNagSuppressRules(awsSdkPolicy.node.defaultChild as iam.CfnPolicy, [
-      {
-        id: 'W12',
-        reason:
-          'The lambda need to be queried all resources under the current account by design',
-      },
-      {
-        id: 'W76',
-        reason:
-          'This policy needs to be able to call other AWS service by design',
-      },
+      ruleToSuppressRolePolicyWithWildcardResources('AWS SDK Policy', 'The lambda need to be queried all resources under the current account by design'),
+      ruleToSuppressRolePolicyWithHighSPCM('AWS SDK Policy'),
     ]);
 
     // Create a role for upload object to S3
@@ -499,16 +491,7 @@ export class ClickStreamApiConstruct extends Construct {
 
       addCfnNagSuppressRules(
         this.clickStreamApiFunction.node.defaultChild as CfnResource,
-        [
-          {
-            id: 'W89', //Lambda functions should be deployed inside a VPC
-            reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
-          },
-          {
-            id: 'W92',
-            reason: 'Lambda function is only used by ClickStreamApiFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-          },
-        ],
+        rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ApiFunction'),
       );
       addCfnNagSuppressRules(
         stackActionStateMachine.actionFunction.node.defaultChild as CfnResource,

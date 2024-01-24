@@ -22,8 +22,6 @@ import { GetResourcePrefixPropertiesType } from './lambdas/custom-resource/get-s
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
   DDB_TABLE_ARN_PATTERN,
   TABLE_NAME_EVENT,
@@ -215,12 +213,7 @@ export function createStackParameters(scope: Construct): {
   };
   params: RedshiftAnalyticsStackProps;
 } {
-  const redshiftModeParam = new CfnParameter(scope, 'RedshiftMode', {
-    description: 'Select Redshift cluster mode',
-    type: 'String',
-    default: REDSHIFT_MODE.NEW_SERVERLESS,
-    allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
-  });
+  const redshiftModeParam = Parameters.createRedshiftModeParameter(scope, 'RedshiftMode');
 
   const networkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
 
@@ -299,12 +292,7 @@ export function createStackParameters(scope: Construct): {
   }).overrideLogicalId('S3BucketReadinessRule');
 
   // Set Redshift common parameters
-  const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
-    description: 'The name of the default database in Redshift',
-    type: 'String',
-    default: 'dev',
-    allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
-  });
+  const { redshiftDefaultDatabaseParam } = Parameters.createRedshiftCommonParameters(scope);
 
   const mvRefreshIntervalParam = new CfnParameter(scope, 'MVRefreshInterval', {
     description: 'The interval of refresh redshift materialized views in minutes',
@@ -316,7 +304,7 @@ export function createStackParameters(scope: Construct): {
 
   const redshiftCommonParamsGroup = [];
   redshiftCommonParamsGroup.push({
-    Label: { default: 'Redshift Database' },
+    Label: { default: 'Redshift Default Database Name' },
     Parameters: [
       redshiftDefaultDatabaseParam.logicalId,
       mvRefreshIntervalParam.logicalId,
@@ -333,7 +321,7 @@ export function createStackParameters(scope: Construct): {
   };
 
   // Set new Redshift serverless parameters
-  const redshiftServerlessWorkgroupName = createWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
+  const redshiftServerlessWorkgroupName = Parameters.createRedshiftWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
   const redshiftServerlessRPU = new CfnParameter(scope, 'RedshiftServerlessRPU', {
     description: 'Redshift processing units (RPUs) used to process your workload.',
     constraintDescription: 'Range must be 8-512 in increments of 8.',
@@ -419,28 +407,12 @@ export function createStackParameters(scope: Construct): {
   // Set existing Redshift serverless parameters
   const existingRedshiftServerlessParamsGroup = [];
 
-  const redshiftServerlessWorkgroupNameParam = createWorkgroupParameter(scope, 'RedshiftServerlessWorkgroupName');
+  const redshiftServerlessWorkgroupNameParam = Parameters.createRedshiftWorkgroupParameter(scope, 'RedshiftServerlessWorkgroupName');
 
-  const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
-    description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^([a-z0-9-]{24,})?$',
-  });
+  const { redshiftServerlessWorkgroupIdParam, redshiftServerlessNamespaceIdParam } =
+    Parameters.createRedshiftServerlessWorkgroupAndNamespaceParameters(scope);
 
-  const redshiftServerlessNamespaceIdParam = new CfnParameter(scope, 'RedshiftServerlessNamespaceId', {
-    description: 'The id of the namespace in Redshift serverless.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^([a-z0-9-]{24,})?$',
-  });
-
-  const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftServerlessIAMRole', {
-    description: 'The ARN of IAM role of Redshift serverless user with superuser privilege.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^(arn:(aws|aws-cn):iam::[0-9]{12}:role/.*)?$',
-  });
+  const redshiftServerlessIAMRoleParam = Parameters.createRedshiftServerlessDataRoleParameter(scope);
 
   existingRedshiftServerlessParamsGroup.push({
     Label: { default: 'Specify existing Redshift Serverless' },
@@ -467,40 +439,16 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
-    assertions: [
-      {
-        assert: Fn.conditionAnd(
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftServerlessWorkgroupNameParam.valueAsString, ''),
-          ),
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftServerlessIAMRoleParam.valueAsString, ''),
-          ),
-        ),
-        assertDescription:
-            'Namespace, Workgroup and Role Arn are required for using existing Redshift Serverless.',
-      },
-    ],
-  }).overrideLogicalId('ExistingRedshiftServerlessParameters');
+  Parameters.createRedshiftServerlessParametersRule(scope, {
+    redshiftModeParam,
+    redshiftServerlessWorkgroupNameParam,
+    redshiftServerlessIAMRoleParam,
+  });
 
   // Set Redshift cluster parameters
   const redshiftClusterParamsGroup = [];
 
-  const redshiftClusterIdentifierParam = new CfnParameter(scope, 'RedshiftClusterIdentifier', {
-    description: 'The cluster identifier of Redshift.',
-    type: 'String',
-    allowedPattern: REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
-    default: '',
-  });
-
-  const redshiftDbUserParam = new CfnParameter(scope, 'RedshiftDbUser', {
-    description: 'The name of Redshift database user.',
-    type: 'String',
-    allowedPattern: REDSHIFT_DB_USER_NAME_PATTERN,
-    default: '',
-  });
+  const { redshiftClusterIdentifierParam, redshiftDbUserParam } = Parameters.createProvisionedRedshiftParameters(scope);
 
   redshiftClusterParamsGroup.push({
     Label: { default: 'Provisioned Redshift Cluster' },
@@ -518,24 +466,6 @@ export function createStackParameters(scope: Construct): {
       default: 'DB user',
     },
   };
-
-  new CfnRule(scope, 'RedshiftProvisionedParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
-    assertions: [
-      {
-        assert: Fn.conditionAnd(
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftClusterIdentifierParam.valueAsString, ''),
-          ),
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftDbUserParam.valueAsString, ''),
-          ),
-        ),
-        assertDescription:
-            'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
-      },
-    ],
-  }).overrideLogicalId('RedshiftProvisionedParameters');
 
   // Set load job parameters
   const loadJobParamsGroup = [];
@@ -872,15 +802,6 @@ export function createStackParameters(scope: Construct): {
   };
 }
 
-function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
-  return new CfnParameter(scope, id, {
-    description: 'The name of the Redshift serverless workgroup.',
-    type: 'String',
-    default: 'default',
-    allowedPattern: '^([a-z0-9-]{3,64})?$',
-  });
-}
-
 function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: string): string {
 
   const role = createLambdaRole(scope, 'GetSourcePrefixCustomerResourceFnRole', false, []);
@@ -894,7 +815,9 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: st
     handler: 'handler',
     memorySize: 128,
     timeout: Duration.minutes(1),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
   });
   const provider = new Provider(

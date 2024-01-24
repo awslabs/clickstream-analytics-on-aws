@@ -44,7 +44,10 @@ import {
   EMAIL_PATTERN,
   S3_PREFIX_PATTERN,
   SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
+  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
 } from './constant';
+import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
 export enum SubnetParameterType {
   'List',
@@ -58,6 +61,7 @@ interface ParameterProps {
   default?: string;
   allowedPattern?: string;
   constraintDescription?: string;
+  allowedValues?: string[];
 }
 
 export interface NetworkParameters {
@@ -463,6 +467,178 @@ export class Parameters {
       default: '',
       allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
       constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
+    });
+  }
+
+  public static createRedshiftModeParameter(scope: Construct, id?: string, props: ParameterProps ={}) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'RedshiftMode', {
+      description: 'Select Redshift cluster mode',
+      type: 'String',
+      default: REDSHIFT_MODE.NEW_SERVERLESS,
+      allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
+      ...props,
+    });
+  }
+
+  public static createRedshiftCommonParameters(scope: Construct) {
+    // Set Redshift common parameters
+    const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
+      description: 'The name of the default database in Redshift',
+      type: 'String',
+      default: 'dev',
+      allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
+    });
+
+    return {
+      redshiftDefaultDatabaseParam,
+    };
+  }
+
+  public static createRedshiftWorkgroupParameter(scope: Construct, id: string): CfnParameter {
+    return new CfnParameter(scope, id, {
+      description: 'The name of the Redshift serverless workgroup.',
+      type: 'String',
+      default: 'default',
+      allowedPattern: '^([a-z0-9-]{3,64})?$',
+    });
+  }
+
+  public static createRedshiftServerlessDataRoleParameter(scope: Construct) {
+    const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftServerlessIAMRole', {
+      description: 'The ARN of IAM role of Redshift serverless user with superuser privilege.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^(arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/.*)?$',
+    });
+
+    return redshiftServerlessIAMRoleParam;
+  }
+
+  public static createRedshiftServerlessWorkgroupAndNamespaceParameters(scope: Construct) {
+    const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
+      description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^([a-z0-9-]{24,})?$',
+    });
+
+    const redshiftServerlessNamespaceIdParam = new CfnParameter(scope, 'RedshiftServerlessNamespaceId', {
+      description: 'The id of the namespace in Redshift serverless.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^([a-z0-9-]{24,})?$',
+    });
+
+    return {
+      redshiftServerlessWorkgroupIdParam,
+      redshiftServerlessNamespaceIdParam,
+    };
+  }
+
+  public static createRedshiftServerlessParametersRule(scope: Construct, parameters: {
+    redshiftModeParam: CfnParameter;
+    redshiftServerlessWorkgroupNameParam: CfnParameter;
+    redshiftServerlessIAMRoleParam: CfnParameter;
+  }) {
+    new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
+      ruleCondition: Fn.conditionEquals(parameters.redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
+      assertions: [
+        {
+          assert: Fn.conditionAnd(
+            Fn.conditionNot(
+              Fn.conditionEquals(parameters.redshiftServerlessWorkgroupNameParam.valueAsString, ''),
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(parameters.redshiftServerlessIAMRoleParam.valueAsString, ''),
+            ),
+          ),
+          assertDescription:
+              'Workgroup and Data API Role Arn are required for using existing Redshift Serverless.',
+        },
+      ],
+    }).overrideLogicalId('ExistingRedshiftServerlessParameters');
+  }
+
+  public static createProvisionedRedshiftParameters(scope: Construct, redshiftModeParam?: CfnParameter) {
+    const redshiftClusterIdentifierParam = new CfnParameter(scope, 'RedshiftClusterIdentifier', {
+      description: 'The cluster identifier of Redshift.',
+      type: 'String',
+      allowedPattern: REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+      default: '',
+    });
+
+    const redshiftDbUserParam = new CfnParameter(scope, 'RedshiftDbUser', {
+      description: 'The name of Redshift database user.',
+      type: 'String',
+      allowedPattern: REDSHIFT_DB_USER_NAME_PATTERN,
+      default: '',
+    });
+
+    if (redshiftModeParam) {
+      new CfnRule(scope, 'RedshiftProvisionedParameters', {
+        ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
+        assertions: [
+          {
+            assert: Fn.conditionAnd(
+              Fn.conditionNot(
+                Fn.conditionEquals(redshiftClusterIdentifierParam.valueAsString, ''),
+              ),
+              Fn.conditionNot(
+                Fn.conditionEquals(redshiftDbUserParam.valueAsString, ''),
+              ),
+            ),
+            assertDescription:
+                'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
+          },
+        ],
+      }).overrideLogicalId('RedshiftProvisionedParameters');
+    }
+
+    return {
+      redshiftClusterIdentifierParam,
+      redshiftDbUserParam,
+    };
+  }
+
+  public static createKinesisParameters(scope: Construct) {
+    const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {
+      description: 'Kinesis Data Stream mode',
+      type: 'String',
+      allowedValues: [KINESIS_MODE.ON_DEMAND, KINESIS_MODE.PROVISIONED],
+      default: KINESIS_MODE.ON_DEMAND,
+    });
+
+    const kinesisShardCountParam = new CfnParameter(scope, 'KinesisShardCount', {
+      description:
+      'Number of Kinesis Data Stream shards, only apply for Provisioned mode',
+      type: 'Number',
+      default: '3',
+      minValue: 1,
+    });
+
+    const kinesisDataRetentionHoursParam = new CfnParameter(
+      scope,
+      'KinesisDataRetentionHours',
+      {
+        description: 'Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)',
+        type: 'Number',
+        default: '24',
+        minValue: 24,
+        maxValue: 8760,
+      },
+    );
+
+    return {
+      kinesisStreamModeParam,
+      kinesisShardCountParam,
+      kinesisDataRetentionHoursParam,
+    };
+  }
+
+  public static createRedshiftUserKeyParameter(scope: Construct) {
+    return new CfnParameter(scope, 'RedshiftParameterKeyParam', {
+      description: 'Parameter key name which stores redshift user and password.',
+      type: 'String',
     });
   }
 }

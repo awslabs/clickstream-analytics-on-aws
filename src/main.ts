@@ -20,13 +20,13 @@ import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag
 import { IConstruct } from 'constructs';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
+import { commonCdkNagRules } from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
 import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
-import { IngestionServerStackV2 } from './ingestion-server-v2-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
@@ -150,22 +150,8 @@ stackSuppressions([
     deliverToKinesis: false,
     deliverToS3: true,
   }),
-
-  // for Ingestion V2
-  new IngestionServerStackV2(app, 'ingestion-server-v2-stack', { //To Ingestion V2
-    synthesizer: synthesizer(),
-  }),
 ], [
-  {
-    id: 'AwsSolutions-IAM4',
-    reason:
-        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
-  },
-  {
-    id: 'AwsSolutions-IAM5',
-    reason:
-        'LogRetention lambda policy which are created by CDK contains wildcard permissions',
-  },
+  ...commonCdkNagRules,
   {
     id: 'AwsSolutions-AS3',
     reason: 'notifications configuration for autoscaling group is optional',
@@ -194,12 +180,6 @@ stackSuppressions([
     id: 'AwsSolutions-SNS3',
     reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
   },
-  {
-    id: 'AwsSolutions-L1',
-    // The non-container Lambda function is not configured to use the latest runtime version
-    reason:
-        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
-  },
 ]);
 
 new KafkaS3SinkConnectorStack(app, app.node.tryGetContext('kafkaS3SinkStackName') ?? 'kafka-s3-sink-stack', { // Kafka S3 sink connector
@@ -214,11 +194,7 @@ stackSuppressions([
   new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('modelRedshiftStackName') ?? 'data-analytics-redshift-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
-  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
-]);
+], commonCdkNagRules);
 
 new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') ?? 'data-modeling-athena-stack', {
   synthesizer: synthesizer(),
@@ -228,33 +204,13 @@ stackSuppressions([
   new DataReportingQuickSightStack(app, app.node.tryGetContext('reportingStackName') ?? 'data-reporting-quicksight-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  {
-    id: 'AwsSolutions-IAM4',
-    reason:
-      'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
-  },
-  {
-    id: 'AwsSolutions-IAM5',
-    reason:
-      'LogRetention lambda policy which are created by CDK contains wildcard permissions',
-  },
-  {
-    id: 'AwsSolutions-L1',
-    reason:
-      'Caused by CDK built-in custom resource provider not using latest Nodejs runtime',
-  },
-]);
+], commonCdkNagRules);
 
 stackSuppressions([
   new MetricsStack(app, app.node.tryGetContext('metricsStackName') ?? 'metrics-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
-  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler with wildcard policy' },
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
-]);
+], commonCdkNagRules);
 
 new ServiceCatalogAppregistryStack(app, app.node.tryGetContext('appRegistryStackName') ?? 'service-catalog-appregistry-stack', {
   synthesizer: synthesizer(),

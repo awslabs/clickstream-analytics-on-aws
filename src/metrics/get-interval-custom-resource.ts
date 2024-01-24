@@ -82,7 +82,9 @@ function createGetIntervalResourceLambda(scope: Construct, id: string): Solution
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.seconds(10),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
   });
 

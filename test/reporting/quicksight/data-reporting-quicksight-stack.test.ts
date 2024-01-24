@@ -572,6 +572,13 @@ describe('DataReportingQuickSightStack resource test', () => {
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       },
     },
+    LoggingConfig: {
+      LogFormat: 'JSON',
+      ApplicationLogLevel: 'INFO',
+      LogGroup: {
+        Ref: 'QuicksightCustomResourceLambdalog376BFB51',
+      },
+    },
     Handler: 'index.handler',
     MemorySize: 256,
     Timeout: 900,
@@ -638,26 +645,9 @@ describe('DataReportingQuickSightStack resource test', () => {
     Timeout: 900,
   }, 1);
 
-  template.resourcePropertiesCountIs('Custom::LogRetention', {
-    ServiceToken: {
-      'Fn::GetAtt': [
-        Match.stringLikeRegexp('LogRetention[a-zA-Z0-9]+'),
-        'Arn',
-      ],
-    },
-    LogGroupName: {
-      'Fn::Join': [
-        '',
-        [
-          '/aws/lambda/',
-          {
-            Ref: Match.stringLikeRegexp('QuicksightCustomResourceLambda[a-zA-Z0-9]+'),
-          },
-        ],
-      ],
-    },
+  template.resourcePropertiesCountIs('AWS::Logs::LogGroup', {
     RetentionInDays: 7,
-  }, 1);
+  }, 2);
 
   template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
     AwsAccountId: {

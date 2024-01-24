@@ -14,7 +14,7 @@
 import { CfnResource, Stack } from 'aws-cdk-lib';
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from './cfn-nag';
+import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from './cfn-nag';
 import { getShortIdOfStack } from './stack';
 
 export function createLogGroup(
@@ -32,11 +32,7 @@ export function createLogGroup(
     retention: props.retention ?? RetentionDays.SIX_MONTHS,
   });
   addCfnNagSuppressRules(logGroup.node.defaultChild as CfnResource, [
-    {
-      id: 'W84',
-      reason:
-        'Log group data is always encrypted in CloudWatch Logs. By default, CloudWatch Logs uses server-side encryption for the log data at rest.',
-    },
+    ruleToSuppressCloudWatchLogEncryption(),
   ]);
   return logGroup;
 }

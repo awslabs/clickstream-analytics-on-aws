@@ -36,7 +36,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressCloudWatchLogEncryption, ruleToSuppressRolePolicyWithHighSPCM, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
@@ -363,7 +363,9 @@ export class CloudFrontControlPlaneStack extends Stack {
       },
       timeout: Duration.seconds(15),
       memorySize: 512,
-      logRetention: RetentionDays.TEN_YEARS,
+      logConf: {
+        retention: RetentionDays.TEN_YEARS,
+      },
       applicationLogLevel: 'WARN',
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
@@ -431,11 +433,7 @@ function addCfnNag(stack: Stack) {
         'ClickStreamApi/ApiGatewayAccessLogs/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W84',
-          reason:
-            'By default CloudWatchLogs LogGroups data is encrypted using the CloudWatch server-side encryption keys (AWS Managed Keys)',
-        },
+        ruleToSuppressCloudWatchLogEncryption(),
       ],
     },
     {
@@ -443,30 +441,10 @@ function addCfnNag(stack: Stack) {
         'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason:
-          'This policy needs to be able to call other AWS service by design',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunction'),
       ],
     },
-    {
-      paths_endswith: [
-        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
-      ],
-      rules_to_suppress: [
-        {
-          id: 'W89',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
-        },
-        {
-          id: 'W92',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-        },
-      ],
-    },
+    ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'AddAdminUserFunction'),
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);

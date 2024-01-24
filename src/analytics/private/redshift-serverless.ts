@@ -20,7 +20,7 @@ import { CfnWorkgroup } from 'aws-cdk-lib/aws-redshiftserverless';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { CreateMappingRoleUser, NewNamespaceCustomProperties, RedshiftServerlessWorkgroupProps } from './model';
-import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { BuiltInTagKeys } from '../../common/model';
@@ -170,10 +170,7 @@ export class RedshiftServerless extends Construct {
           'ClickstreamWorkgroupAdminRole/DefaultPolicy/Resource',
         ],
         rules_to_suppress: [
-          {
-            id: 'W12',
-            reason: 'Have to using wildcard resources for creating undetermined Redshift Serverless workgroup / data api to get query result',
-          },
+          ruleToSuppressRolePolicyWithWildcardResources('Create workgroup Lambda', 'redshift-serverless workgroup'),
         ],
       },
       {
@@ -231,7 +228,9 @@ export class RedshiftServerless extends Construct {
       memorySize: 128,
       reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       role: createLambdaRole(this, 'CreateRedshiftUserRole', false, []),
     });
     return fn;
@@ -277,7 +276,9 @@ export class RedshiftServerless extends Construct {
       memorySize: 128,
       reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       role: createLambdaRole(this, 'CreateRedshiftNamespaceRole', false, []),
     });
     return fn;

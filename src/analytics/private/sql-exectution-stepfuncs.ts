@@ -122,7 +122,9 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     environment: {
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       REDSHIFT_DATABASE: props.databaseName,

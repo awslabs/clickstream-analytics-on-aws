@@ -169,7 +169,9 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(1),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
     environment: {
       DASHBOARD_NAME: props.dashboard.dashboardName,

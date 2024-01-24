@@ -83,6 +83,11 @@ export enum REDSHIFT_MODE {
   NEW_SERVERLESS='New_Serverless',
 }
 
+export enum KINESIS_MODE {
+  ON_DEMAND = 'ON_DEMAND',
+  PROVISIONED = 'PROVISIONED',
+}
+
 export enum MetricsNamespace {
   DATAPIPELINE = 'Clickstream/DataPipeline',
   REDSHIFT_ANALYTICS ='Clickstream/DataModeling/Redshift',

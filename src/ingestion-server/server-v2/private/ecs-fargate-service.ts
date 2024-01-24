@@ -22,7 +22,7 @@ import {
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { ECSFargateClusterProps, ECSFargateServiceResult } from './ecs-fargate-cluster';
-import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
+import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX, DefaultFleetProps } from '../../server/ingestion-server';
 
 export interface FargateServiceProps extends ECSFargateClusterProps {
@@ -73,15 +73,9 @@ function createECSFargateService(
     retention: RetentionDays.ONE_MONTH,
   });
 
-  addCfnNagSuppressRules(proxyLogGroup.node.defaultChild as CfnResource, [{
-    id: 'W84',
-    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
-  }]);
+  addCfnNagSuppressRules(proxyLogGroup.node.defaultChild as CfnResource, [ruleToSuppressCloudWatchLogEncryption()]);
 
-  addCfnNagSuppressRules(workerLogGroup.node.defaultChild as CfnResource, [{
-    id: 'W84',
-    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
-  }]);
+  addCfnNagSuppressRules(workerLogGroup.node.defaultChild as CfnResource, [ruleToSuppressCloudWatchLogEncryption()]);
 
   const proxyContainer = taskDefinition.addContainer('proxy', {
     image: props.proxyImage,
