@@ -256,10 +256,11 @@ describe('Workflow test', () => {
   });
   it('Generate Workflow ingestion-server-s3-fargate', async () => {
     dictionaryMock(ddbMock);
-    createPipelineMock(mockClients, {
-      publicAZContainPrivateAZ: true,
-      noVpcEndpoint: true,
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
+      });
     const pipeline: CPipeline = new CPipeline({
       ...S3_INGESTION_PIPELINE,
       ingestionServer: {
