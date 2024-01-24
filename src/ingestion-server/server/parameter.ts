@@ -144,7 +144,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
       projectIdParam: commonParameters.projectIdParam,
       publicSubnets: commonParameters.netWorkProps.publicSubnets,
-    }
+    },
   );
 
   commonParameterGroups.push(... kafkaKinesisS3ParamsGroup);
@@ -235,7 +235,7 @@ export function createV2StackParameters(scope: Construct) {
   let kafkaKinesisS3ParamsLabels = {};
 
   // Kafka
-  const {kafkaParams, kafkaParamsLabels} = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup);
+  const { kafkaParams, kafkaParamsLabels } = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup);
   kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kafkaParamsLabels };
 
   new CfnRule(scope, 'sinkToKafkaAndKafkaBrokersAndKafkaTopic', {
@@ -260,7 +260,7 @@ export function createV2StackParameters(scope: Construct) {
   });
 
   // S3
-  const {s3Params, s3ParamsLabels} = createS3Parameters(scope, kafkaKinesisS3ParamsGroup);
+  const { s3Params, s3ParamsLabels } = createS3Parameters(scope, kafkaKinesisS3ParamsGroup);
   kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...s3ParamsLabels };
   new CfnRule(scope, 'sinkToS3Rule', {
     assertions: [
@@ -284,7 +284,7 @@ export function createV2StackParameters(scope: Construct) {
   });
 
   // Kinesis
-  const {kinesisParams, kinesisParamsLabels} = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup);
+  const { kinesisParams, kinesisParamsLabels } = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup);
   kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kinesisParamsLabels };
 
   new CfnRule(scope, 'sinkToKinesisRule', {
@@ -327,7 +327,7 @@ export function createV2StackParameters(scope: Construct) {
       scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
       projectIdParam: commonParameters.projectIdParam,
       publicSubnets: commonParameters.netWorkProps.publicSubnets,
-    }
+    },
   );
 
   commonParameterGroups.push(... kafkaKinesisS3ParamsGroup);
@@ -659,26 +659,26 @@ function createCommonParameters(scope: Construct) {
   };
 }
 
-function createCommonParameterGroups(props: 
-  {
-    vpcId: CfnParameter,
-    privateSubnets: CfnParameter,
-    domainNameParam: CfnParameter,
-    certificateArnParam: CfnParameter,
-    serverEndpointPathParam: CfnParameter,
-    serverCorsOriginParam: CfnParameter,
-    protocolParam: CfnParameter,
-    enableApplicationLoadBalancerAccessLogParam: CfnParameter,
-    logS3BucketParam: CfnParameter,
-    logS3PrefixParam: CfnParameter,
-    notificationsTopicArnParam: CfnParameter,
-    serverMinParam: CfnParameter,
-    serverMaxParam: CfnParameter,
-    warmPoolSizeParam: CfnParameter,
-    scaleOnCpuUtilizationPercentParam: CfnParameter,
-    projectIdParam: CfnParameter,
-    publicSubnets?: CfnParameter,
-  }
+function createCommonParameterGroups(props:
+{
+  vpcId: CfnParameter;
+  privateSubnets: CfnParameter;
+  domainNameParam: CfnParameter;
+  certificateArnParam: CfnParameter;
+  serverEndpointPathParam: CfnParameter;
+  serverCorsOriginParam: CfnParameter;
+  protocolParam: CfnParameter;
+  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+  logS3BucketParam: CfnParameter;
+  logS3PrefixParam: CfnParameter;
+  notificationsTopicArnParam: CfnParameter;
+  serverMinParam: CfnParameter;
+  serverMaxParam: CfnParameter;
+  warmPoolSizeParam: CfnParameter;
+  scaleOnCpuUtilizationPercentParam: CfnParameter;
+  projectIdParam: CfnParameter;
+  publicSubnets?: CfnParameter;
+},
 ) {
   return [
     {
@@ -731,25 +731,25 @@ function createCommonParameterGroups(props:
 }
 
 function createCommonParameterLabels(props:
-  {
-    vpcId: CfnParameter,
-    privateSubnets: CfnParameter,
-    domainNameParam: CfnParameter,
-    certificateArnParam: CfnParameter,
-    serverEndpointPathParam: CfnParameter,
-    serverCorsOriginParam: CfnParameter,
-    protocolParam: CfnParameter,
-    enableApplicationLoadBalancerAccessLogParam: CfnParameter,
-    logS3BucketParam: CfnParameter,
-    logS3PrefixParam: CfnParameter,
-    notificationsTopicArnParam: CfnParameter,
-    serverMinParam: CfnParameter,
-    serverMaxParam: CfnParameter,
-    warmPoolSizeParam: CfnParameter,
-    scaleOnCpuUtilizationPercentParam: CfnParameter,
-    projectIdParam: CfnParameter,
-    publicSubnets?: CfnParameter,
-  }
+{
+  vpcId: CfnParameter;
+  privateSubnets: CfnParameter;
+  domainNameParam: CfnParameter;
+  certificateArnParam: CfnParameter;
+  serverEndpointPathParam: CfnParameter;
+  serverCorsOriginParam: CfnParameter;
+  protocolParam: CfnParameter;
+  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+  logS3BucketParam: CfnParameter;
+  logS3PrefixParam: CfnParameter;
+  notificationsTopicArnParam: CfnParameter;
+  serverMinParam: CfnParameter;
+  serverMaxParam: CfnParameter;
+  warmPoolSizeParam: CfnParameter;
+  scaleOnCpuUtilizationPercentParam: CfnParameter;
+  projectIdParam: CfnParameter;
+  publicSubnets?: CfnParameter;
+},
 
 ) {
   return {
@@ -885,7 +885,7 @@ function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) 
     },
   };
 
-  return {s3Params, s3ParamsLabels};
+  return { s3Params, s3ParamsLabels };
 }
 
 function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) {
@@ -1001,7 +1001,7 @@ function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: an
       default: 'Max batching window for Lambda function',
     },
   };
-  return {kinesisParams, kinesisParamsLabels};
+  return { kinesisParams, kinesisParamsLabels };
 }
 
 function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) {
@@ -1044,5 +1044,5 @@ function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[
       default: 'Amazon managed streaming for apache kafka (Amazon MSK) cluster name',
     },
   };
-  return {kafkaParams, kafkaParamsLabels};
+  return { kafkaParams, kafkaParamsLabels };
 }
