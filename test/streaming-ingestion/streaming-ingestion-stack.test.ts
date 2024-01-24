@@ -451,7 +451,7 @@ describe('managed Flink application for real-time data processing', () => {
                         ],
                       ],
                     },
-                    '/flink-etl-v1.2.0.jar',
+                    `/flink-etl-${SolutionInfo.SOLUTION_VERSION_SHORT}-all.jar`,
                   ],
                 ],
               },
@@ -590,7 +590,7 @@ describe('managed Flink application for real-time data processing', () => {
                         ],
                       ],
                     },
-                    `/flink-etl-${SolutionInfo.SOLUTION_VERSION_SHORT}.jar`,
+                    `/flink-etl-${SolutionInfo.SOLUTION_VERSION_SHORT}-all.jar`,
                   ],
                 ],
               },
@@ -604,20 +604,12 @@ describe('managed Flink application for real-time data processing', () => {
         EnvironmentProperties: {
           PropertyGroups: [
             {
-              PropertyGroupId: 'FlinkApplicationProperties',
-              PropertyMap: {
-                inputStreamArn: {
-                  Ref: 'KinesisSourceStreamArn',
-                },
-              },
-            },
-            {
               PropertyGroupId: 'EnvironmentProperties',
               PropertyMap: {
-                'projectId': {
+                projectId: {
                   Ref: 'ProjectId',
                 },
-                'stackShortId': {
+                stackShortId: {
                   'Fn::Select': [
                     0,
                     {
@@ -640,30 +632,10 @@ describe('managed Flink application for real-time data processing', () => {
                     },
                   ],
                 },
-                'kinesis.source.stream': {
-                  'Fn::Select': [
-                    1,
-                    {
-                      'Fn::Split': [
-                        '/',
-                        {
-                          'Fn::Select': [
-                            5,
-                            {
-                              'Fn::Split': [
-                                ':',
-                                {
-                                  Ref: 'KinesisSourceStreamArn',
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
+                inputStreamArn: {
+                  Ref: 'KinesisSourceStreamArn',
                 },
-                'dataBucketName': {
+                dataBucketName: {
                   'Fn::Select': [
                     0,
                     {
@@ -686,7 +658,7 @@ describe('managed Flink application for real-time data processing', () => {
                     },
                   ],
                 },
-                'geoFileKey': {
+                geoFileKey: {
                   'Fn::Join': [
                     '',
                     [

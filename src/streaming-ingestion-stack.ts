@@ -28,8 +28,8 @@ import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
-import { REDSHIFT_MODE } from './common/model';
 import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH } from './common/constant';
+import { REDSHIFT_MODE } from './common/model';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
@@ -110,12 +110,12 @@ export class StreamingIngestionStack extends Stack {
       code: ApplicationCode.fromBucket(dataBucket, applicationJarKey),
       propertyGroups: {
         EnvironmentProperties: {
-          'projectId': projectId,
-          'stackShortId': getShortIdOfStack(Stack.of(this)),
-          'inputStreamArn': sourceStream.streamArn,
-          'dataBucketName': dataBucket.bucketName,
-          'geoFileKey': geoDBKey,
-          'appIdStreamConfig': appIdStreamConfigS3Path,
+          projectId: projectId,
+          stackShortId: getShortIdOfStack(Stack.of(this)),
+          inputStreamArn: sourceStream.streamArn,
+          dataBucketName: dataBucket.bucketName,
+          geoFileKey: geoDBKey,
+          appIdStreamConfig: appIdStreamConfigS3Path,
         },
       },
       runtime: Runtime.FLINK_1_15,
