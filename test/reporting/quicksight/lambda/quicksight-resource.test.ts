@@ -2474,7 +2474,7 @@ describe('QuickSight Lambda function', () => {
   });
 
 
-  test('Delete QuickSight dashboard - folder', async () => {
+  test('Delete QuickSight dashboard - folder contains custom resources', async () => {
 
     quickSightClientMock.on(DescribeDataSetCommand).rejects(notExistError);
     quickSightClientMock.on(DeleteDataSetCommand).resolves({});
