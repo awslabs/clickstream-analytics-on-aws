@@ -92,6 +92,7 @@ export interface IngestionServerV2Props {
   readonly appIds: string;
   readonly clickStreamSDK: string;
   readonly workerStopTimeout: number;
+  readonly debugViewS3SinkConfig: S3SinkConfig;
 
   readonly enableAuthentication: string;
 }

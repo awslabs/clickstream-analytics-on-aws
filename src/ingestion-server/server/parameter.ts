@@ -148,7 +148,6 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
   );
 
   commonParameterGroups.push(... kafkaKinesisS3ParamsGroup);
-
   let commonParameterLabels = createCommonParameterLabels({
     vpcId: commonParameters.netWorkProps.vpcId,
     privateSubnets: commonParameters.netWorkProps.privateSubnets,
@@ -166,6 +165,10 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
     warmPoolSizeParam: commonParameters.warmPoolSizeParam,
     scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
     projectIdParam: commonParameters.projectIdParam,
+    debugViewS3BatchMaxBytesParam: commonParameters.debugViewS3Params.debugViewS3BatchMaxBytesParam,
+    debugViewS3BatchTimeoutParam: commonParameters.debugViewS3Params.debugViewS3BatchTimeoutParam,
+    debugViewS3BucketParam: commonParameters.debugViewS3Params.debugViewS3BucketParam,
+    debugViewS3PrefixParam: commonParameters.debugViewS3Params.debugViewS3PrefixParam,
     publicSubnets: commonParameters.netWorkProps.publicSubnets,
   });
 
@@ -201,6 +204,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       kafkaParams,
       s3Params,
       kinesisParams,
+      debugViewS3Params: commonParameters.debugViewS3Params,
       enableGlobalAcceleratorParam: commonParameters.enableGlobalAcceleratorParam,
       devModeParam: commonParameters.devModeParam,
       projectIdParam: commonParameters.projectIdParam,
@@ -349,11 +353,14 @@ export function createV2StackParameters(scope: Construct) {
     warmPoolSizeParam: commonParameters.warmPoolSizeParam,
     scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
     projectIdParam: commonParameters.projectIdParam,
+    debugViewS3BatchMaxBytesParam: commonParameters.debugViewS3Params.debugViewS3BatchMaxBytesParam,
+    debugViewS3BatchTimeoutParam: commonParameters.debugViewS3Params.debugViewS3BatchTimeoutParam,
+    debugViewS3BucketParam: commonParameters.debugViewS3Params.debugViewS3BucketParam,
+    debugViewS3PrefixParam: commonParameters.debugViewS3Params.debugViewS3PrefixParam,
     publicSubnets: commonParameters.netWorkProps.publicSubnets,
   });
 
   commonParameterLabels = { ...commonParameterLabels, ... kafkaKinesisS3ParamsLabels };
-
 
   const metadata = {
     'AWS::CloudFormation::Interface': {
@@ -384,6 +391,7 @@ export function createV2StackParameters(scope: Construct) {
       kafkaParams,
       s3Params,
       kinesisParams,
+      debugViewS3Params: commonParameters.debugViewS3Params,
       enableGlobalAcceleratorParam: commonParameters.enableGlobalAcceleratorParam,
       devModeParam: commonParameters.devModeParam,
       projectIdParam: commonParameters.projectIdParam,
@@ -579,6 +587,37 @@ function createCommonParameters(scope: Construct) {
     },
   );
 
+  const debugViewS3BucketParam = Parameters.createS3BucketParameter(scope, 'DebugViewS3Bucket', {
+    description: 'Debug view S3 data bucket name',
+    default: '',
+  });
+
+  const debugViewS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'DebugViewS3Prefix', {
+    description: 'Debug view S3 data object prefix',
+    default: 'debug-view-s3-data/',
+  }); 
+
+  const debugViewS3BatchMaxBytesParam = new CfnParameter(scope, 'DebugViewS3BatchMaxBytes', {
+    description: 'Debug View Batch max bytes',
+    type: 'Number',
+    default: '30000000',
+    maxValue: 50000000,
+    minValue: 1000000,
+  });
+
+  const debugViewS3BatchTimeoutParam = new CfnParameter(scope, 'DebugViewS3BatchTimeout', {
+    description: 'Debug View Batch timeout seconds',
+    type: 'Number',
+    default: '300',
+    minValue: 30,
+  });
+  const debugViewS3Params = {
+    debugViewS3BucketParam,
+    debugViewS3PrefixParam,
+    debugViewS3BatchMaxBytesParam,
+    debugViewS3BatchTimeoutParam,
+  };  
+
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
       {
@@ -647,6 +686,7 @@ function createCommonParameters(scope: Construct) {
     appIdsParam,
     warmPoolSizeParam,
     clickStreamSDKParam,
+    debugViewS3Params,
     notificationsTopicArnParam,
     serverMinParam,
     serverMaxParam,
@@ -731,26 +771,29 @@ function createCommonParameterGroups(props:
 }
 
 function createCommonParameterLabels(props:
-{
-  vpcId: CfnParameter;
-  privateSubnets: CfnParameter;
-  domainNameParam: CfnParameter;
-  certificateArnParam: CfnParameter;
-  serverEndpointPathParam: CfnParameter;
-  serverCorsOriginParam: CfnParameter;
-  protocolParam: CfnParameter;
-  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
-  logS3BucketParam: CfnParameter;
-  logS3PrefixParam: CfnParameter;
-  notificationsTopicArnParam: CfnParameter;
-  serverMinParam: CfnParameter;
-  serverMaxParam: CfnParameter;
-  warmPoolSizeParam: CfnParameter;
-  scaleOnCpuUtilizationPercentParam: CfnParameter;
-  projectIdParam: CfnParameter;
-  publicSubnets?: CfnParameter;
-},
-
+  {
+    vpcId: CfnParameter;
+    privateSubnets: CfnParameter;
+    domainNameParam: CfnParameter;
+    certificateArnParam: CfnParameter;
+    serverEndpointPathParam: CfnParameter;
+    serverCorsOriginParam: CfnParameter;
+    protocolParam: CfnParameter;
+    enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+    logS3BucketParam: CfnParameter;
+    logS3PrefixParam: CfnParameter;
+    notificationsTopicArnParam: CfnParameter;
+    serverMinParam: CfnParameter;
+    serverMaxParam: CfnParameter;
+    warmPoolSizeParam: CfnParameter;
+    scaleOnCpuUtilizationPercentParam: CfnParameter;
+    projectIdParam: CfnParameter;
+    debugViewS3BucketParam: CfnParameter;
+    debugViewS3PrefixParam: CfnParameter;
+    debugViewS3BatchMaxBytesParam: CfnParameter;
+    debugViewS3BatchTimeoutParam: CfnParameter;
+    publicSubnets?: CfnParameter;
+  }
 ) {
   return {
     [props.projectIdParam.logicalId]: {
@@ -815,6 +858,22 @@ function createCommonParameterLabels(props:
 
     [props.warmPoolSizeParam.logicalId]: {
       default: 'Server autoscaling warm pool min size',
+    },
+
+    [props.debugViewS3BatchMaxBytesParam.logicalId]: {
+      default: 'Debug View Batch max bytes',
+    },
+
+    [props.debugViewS3BatchTimeoutParam.logicalId]: {
+      default: 'Debug View Batch timeout seconds',
+    },
+
+    [props.debugViewS3BucketParam.logicalId]: {
+      default: 'Debug View S3 bucket name',
+    },
+
+    [props.debugViewS3PrefixParam.logicalId]: {
+      default: 'Debug View S3 object prefix',
     },
 
     [props.scaleOnCpuUtilizationPercentParam.logicalId]: {

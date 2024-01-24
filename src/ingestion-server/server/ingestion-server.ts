@@ -124,6 +124,7 @@ export interface IngestionServerProps {
   readonly appIds: string;
   readonly clickStreamSDK: string;
   readonly workerStopTimeout: number;
+  readonly debugViewS3SinkConfig: S3SinkConfig;
 }
 
 interface UpdateAlbRulesInput {

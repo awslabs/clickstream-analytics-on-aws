@@ -5,9 +5,13 @@ set -e
 
 export RUST_BACKTRACE=full
 
-toml_files="/etc/vector/vector-global.toml /etc/vector/vector.toml"
+toml_files="/etc/vector/vector-global.toml"
 
 echo "AWS_REGION: $AWS_REGION"
+echo "AWS_DEBUG_VIEW_S3_BUCKET": $AWS_DEBUG_VIEW_S3_BUCKET
+echo "AWS_DEBUG_VIEW_S3_PREFIX": $AWS_DEBUG_VIEW_S3_PREFIX
+echo "DEBUG_VIEW_S3_BATCH_MAX_BYTES": $DEBUG_VIEW_S3_BATCH_MAX_BYTES
+echo "DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS": $DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS
 echo "AWS_S3_BUCKET: $AWS_S3_BUCKET"
 echo "AWS_S3_PREFIX: $AWS_S3_PREFIX"
 echo "S3_BATCH_MAX_BYTES: $S3_BATCH_MAX_BYTES"
@@ -32,9 +36,17 @@ then
   VECTOR_THREADS_OPT=''
 fi 
 
+vector_config_file=/etc/vector/vector.toml
 msk_config_file=/etc/vector/vector-msk-${batch_or_ack}.toml
 s3_config_file=/etc/vector/vector-s3.toml
 kinesis_config_file=/etc/vector/vector-kinesis-${batch_or_ack}.toml
+
+sed -i "s#%%AWS_REGION%%#$AWS_REGION#g; \
+s#%%AWS_DEBUG_VIEW_S3_BUCKET%%#$AWS_DEBUG_VIEW_S3_BUCKET#g; \
+s#%%AWS_DEBUG_VIEW_S3_PREFIX%%#$AWS_DEBUG_VIEW_S3_PREFIX#g; \
+s#%%DEBUG_VIEW_S3_BATCH_MAX_BYTES%%#$DEBUG_VIEW_S3_BATCH_MAX_BYTES#g; \
+s#%%DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS%%#$DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS#g;" ${vector_config_file}
+toml_files="${toml_files} ${vector_config_file}"
 
 if [ $AWS_MSK_BROKERS != '__NOT_SET__' ] && [ -f ${msk_config_file} ];
 then

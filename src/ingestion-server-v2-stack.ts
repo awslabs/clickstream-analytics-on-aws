@@ -58,7 +58,7 @@ export class IngestionServerV2NestedStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig } = createCommonResources(this, props);
+    const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig, debugViewS3SinkConfig } = createCommonResources(this, props);
 
     const fleetProps: FleetV2Props = {
       taskCpu: 256,
@@ -95,6 +95,7 @@ export class IngestionServerV2NestedStack extends NestedStack {
       appIds: props.appIds,
       clickStreamSDK: props.clickStreamSDK,
       workerStopTimeout: props.workerStopTimeout,
+      debugViewS3SinkConfig,
       protocol: props.protocol,
       enableApplicationLoadBalancerAccessLog: props.enableApplicationLoadBalancerAccessLog || 'No',
       logBucketName: props.logBucketName || '',
@@ -174,6 +175,7 @@ export class IngestionServerStackV2 extends Stack {
         kafkaParams,
         s3Params,
         kinesisParams,
+        debugViewS3Params,
         sinkTypeParam,
         enableGlobalAcceleratorParam,
         devModeParam,
@@ -222,6 +224,10 @@ export class IngestionServerStackV2 extends Stack {
       clickStreamSDK: clickStreamSDKParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
+      debugViewS3BucketName: debugViewS3Params.debugViewS3BucketParam.valueAsString,
+      debugViewS3Prefix: debugViewS3Params.debugViewS3PrefixParam.valueAsString,
+      debugViewS3BatchTimeout: debugViewS3Params.debugViewS3BatchTimeoutParam.valueAsNumber,
+      debugViewS3BatchMaxBytes: debugViewS3Params.debugViewS3BatchMaxBytesParam.valueAsNumber,
       logBucketName: logS3BucketParam.valueAsString,
       logPrefix: logS3PrefixParam.valueAsString,
       enableAuthentication: enableAuthenticationParam.valueAsString,
