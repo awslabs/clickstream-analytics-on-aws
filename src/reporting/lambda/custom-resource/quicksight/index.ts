@@ -43,7 +43,7 @@ import {
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS } from '../../../../common/constant';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
@@ -298,23 +298,27 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
-  const folder = await quickSight.createFolder({
-    AwsAccountId: commonParams.awsAccountId,
-    FolderId: getQuickSightFolderId(commonParams.databaseName, commonParams.schema),
-    Name: getQuickSightFolderName(commonParams.databaseName, commonParams.schema),
-    FolderType: FolderType.SHARED,
-    SharingModel: SharingModel.ACCOUNT,
-    Permissions: [
-      {
-        Principal: commonParams.sharePrincipalArn,
-        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
-      },
-      {
-        Principal: commonParams.ownerPrincipalArn,
-        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
-      },
-    ],
-  });
+  const folderId = getQuickSightFolderId(commonParams.databaseName, commonParams.schema);
+  const folderExist = await existFolder(quickSight, commonParams.awsAccountId, folderId);
+  if (!folderExist) {
+    await quickSight.createFolder({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      Name: getQuickSightFolderName(commonParams.databaseName, commonParams.schema),
+      FolderType: FolderType.SHARED,
+      SharingModel: SharingModel.ACCOUNT,
+      Permissions: [
+        {
+          Principal: commonParams.sharePrincipalArn,
+          Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+        },
+        {
+          Principal: commonParams.ownerPrincipalArn,
+          Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+        },
+      ],
+    });
+  }
 
   const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
@@ -322,12 +326,20 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
-  await quickSight.createFolderMembership({
-    AwsAccountId: commonParams.awsAccountId,
-    FolderId: folder.FolderId!,
-    MemberId: dashboard?.DashboardId!,
-    MemberType: MemberType.DASHBOARD,
-  });
+  try {
+    await quickSight.createFolderMembership({
+      AwsAccountId: commonParams.awsAccountId,
+      FolderId: folderId,
+      MemberId: dashboard?.DashboardId!,
+      MemberType: MemberType.DASHBOARD,
+    });
+  } catch (e) {
+    if (e instanceof ResourceExistsException) {
+      logger.warn('folder membership already exist. skip create operation.');
+    } else {
+      throw e;
+    }
+  }
 
   return dashboard;
 
@@ -354,17 +366,22 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
 
+  let deleteFolder: boolean = true;
   await quickSight.listFolderMembers({
     AwsAccountId: accountId,
     FolderId: getQuickSightFolderId(databaseName, schema),
   }).then(async (data) => {
     if (data !== undefined && data.FolderMemberList !== undefined) {
       for (const member of data.FolderMemberList) {
-        const memberType = getMemberType(member.MemberArn!, member.MemberId!);
+        if (!member.MemberId?.startsWith(QUICKSIGHT_RESOURCE_NAME_PREFIX)) {
+          deleteFolder = false;
+          continue;
+        }
+        const memberType = getMemberType(member.MemberArn!, member.MemberId);
         await quickSight.deleteFolderMembership({
           AwsAccountId: accountId,
           FolderId: getQuickSightFolderId(databaseName, schema),
-          MemberId: member.MemberId!,
+          MemberId: member.MemberId,
           MemberType: memberType,
         });
       }
@@ -372,10 +389,12 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   });
 
   //delete folder
-  await quickSight.deleteFolder({
-    AwsAccountId: accountId,
-    FolderId: getQuickSightFolderId(databaseName, schema),
-  });
+  if (deleteFolder) {
+    await quickSight.deleteFolder({
+      AwsAccountId: accountId,
+      FolderId: getQuickSightFolderId(databaseName, schema),
+    });
+  }
 
   return result;
 
