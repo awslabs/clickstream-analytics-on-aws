@@ -134,7 +134,9 @@ export abstract class RedshiftSQLExecution extends Construct {
       memorySize: 256,
       reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(15),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       environment: {
         SUPPRESS_ALL_ERROR: 'false',
         APPLY_ALL_APP_SQL: 'false',

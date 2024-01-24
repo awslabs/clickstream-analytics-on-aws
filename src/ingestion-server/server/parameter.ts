@@ -899,32 +899,7 @@ function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: an
     default: 'kinesis-data/',
   });
 
-  const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {
-    description: 'Kinesis Data Stream mode',
-    type: 'String',
-    allowedValues: ['ON_DEMAND', 'PROVISIONED'],
-    default: 'ON_DEMAND',
-  });
-
-  const kinesisShardCountParam = new CfnParameter(scope, 'KinesisShardCount', {
-    description:
-    'Number of Kinesis Data Stream shards, only apply for Provisioned mode',
-    type: 'Number',
-    default: '3',
-    minValue: 1,
-  });
-
-  const kinesisDataRetentionHoursParam = new CfnParameter(
-    scope,
-    'KinesisDataRetentionHours',
-    {
-      description: 'Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)',
-      type: 'Number',
-      default: '24',
-      minValue: 24,
-      maxValue: 8760,
-    },
-  );
+  const { kinesisStreamModeParam, kinesisShardCountParam, kinesisDataRetentionHoursParam } = Parameters.createKinesisParameters(scope);
 
   const kinesisBatchSizeParam = new CfnParameter(
     scope,

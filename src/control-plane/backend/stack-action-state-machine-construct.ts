@@ -25,6 +25,8 @@ import {
   addCfnNagToStack,
   ruleForLambdaVPCAndReservedConcurrentExecutions,
   ruleRolePolicyWithWildcardResources,
+  ruleToSuppressRolePolicyWithHighSPCM,
+  ruleToSuppressRolePolicyWithWildcardResources,
 } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
@@ -176,23 +178,15 @@ export class StackActionStateMachine extends Construct {
         {
           id: 'F4',
           reason:
-            'This policy requires releted actions in order to start/delete/update cloudformation stacks with many other services',
+            'This policy requires related actions in order to start/delete/update cloudformation stacks with many other services',
         },
         {
           id: 'F39',
           reason:
             'When start/delete/update cloudformation stacks, we have to PassRole to existing undeterministical roles.',
         },
-        {
-          id: 'W76',
-          reason:
-            'This policy needs to be able to execute stacks, and call other AWS service',
-        },
-        {
-          id: 'W12',
-          reason:
-            'This policy needs to be able to start/delete other cloudformation stacks of the plugin with unknown resources names',
-        },
+        ruleToSuppressRolePolicyWithWildcardResources('Action Lambda', 'This policy needs to be able to start/delete other cloudformation stacks of the plugin with unknown resources names'),
+        ruleToSuppressRolePolicyWithHighSPCM('Action Lambda'),
       ],
     );
 

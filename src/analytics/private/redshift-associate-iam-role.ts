@@ -54,7 +54,9 @@ export class RedshiftAssociateIAMRole extends Construct {
       memorySize: 256,
       reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(5),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       role: createLambdaRole(scope, 'AssociateIAMRoleFnRole', false, [
         new PolicyStatement({
           actions: [

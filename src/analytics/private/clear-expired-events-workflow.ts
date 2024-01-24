@@ -164,7 +164,9 @@ export class ClearExpiredEventsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'ClearExpiredEventsRole', true, []),
       ...props.networkConfig,
@@ -202,7 +204,9 @@ export class ClearExpiredEventsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(2),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckClearJobStatusRole', true, []),
       ...props.networkConfig,

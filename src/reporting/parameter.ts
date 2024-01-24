@@ -23,6 +23,7 @@ import {
   SUBNETS_PATTERN,
   QUICKSIGHT_USER_ARN_PATTERN,
 } from '../common/constant';
+import { Parameters } from '../common/parameters';
 
 export function createStackParametersQuickSight(scope: Construct, paramGroups?: any[], paramLabels?: any) {
 
@@ -136,10 +137,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Redshift Endpoint Port',
   };
 
-  const redshiftParameterKeyParam = new CfnParameter(scope, 'RedshiftParameterKeyParam', {
-    description: 'Parameter key name which stores redshift user and password.',
-    type: 'String',
-  });
+  const redshiftParameterKeyParam = Parameters.createRedshiftUserKeyParameter(scope);
   labels[redshiftParameterKeyParam.logicalId] = {
     default: 'Parameter Key Name',
   };

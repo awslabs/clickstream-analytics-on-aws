@@ -31,7 +31,7 @@ import {
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
-import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
+import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithHighSPCM } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { getShortIdOfStack } from '../../common/stack';
@@ -177,10 +177,7 @@ export class StackWorkflowStateMachine extends Construct {
         paths_endswith: wildcardResources.paths_endswith,
         rules_to_suppress: [
           ...wildcardResources.rules_to_suppress,
-          {
-            id: 'W76',
-            reason: 'The state machine default policy document create by many CallAwsService.',
-          },
+          ruleToSuppressRolePolicyWithHighSPCM('State Machine'),
         ],
       },
     ]);

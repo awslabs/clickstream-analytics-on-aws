@@ -17,6 +17,7 @@ import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
 import { TestApp, removeFolder } from '../common/jest';
 import { CFN_FN } from '../constants';
+import { findFirstResourceByKeyPrefix } from '../utils';
 
 describe('CloudFrontS3PortalStack - Default stack props for common features', () => {
 
@@ -575,32 +576,8 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
   });
 
   test('Authorizer function should keep logs for at least 10 years', () => {
-
-    const capture = new Capture();
-    commonTemplate.hasResourceProperties('Custom::LogRetention', {
-      ServiceToken: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('LogRetention[a-fA-F0-9]+'),
-          'Arn',
-        ],
-      },
-      LogGroupName: {
-        'Fn::Join': [
-          '',
-          [
-            '/aws/lambda/',
-            {
-              Ref: Match.stringLikeRegexp('AuthorizerFunction[A-F0-9]+'),
-            },
-          ],
-        ],
-      },
-      RetentionInDays: capture,
-    },
-    );
-
-    expect(capture.asNumber()).toBeGreaterThanOrEqual(3653);
-
+    const logGroup = findFirstResourceByKeyPrefix(commonTemplate, 'AWS::Logs::LogGroup', 'AuthorizerFunctionlog');
+    expect(logGroup.resource.Properties.RetentionInDays).toBeGreaterThanOrEqual(3653);
   });
 
   test('Test security response headers ', () => {

@@ -63,7 +63,9 @@ function createNetworkInterfaceCheckLambda(
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
   });
 

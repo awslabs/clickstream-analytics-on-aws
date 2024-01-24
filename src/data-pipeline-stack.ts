@@ -20,7 +20,11 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
 import {
   addCfnNagForBucketDeployment,
-  addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention, addCfnNagToStack,
+  commonCdkNagRules,
+  ruleRolePolicyWithWildcardResources,
+  ruleRolePolicyWithWildcardResourcesAndHighSPCM,
 } from './common/cfn-nag';
 import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
@@ -280,26 +284,13 @@ function addCfnNag(stack: Stack) {
     'partitionSyncerLambdaRole/DefaultPolicy/Resource',
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
-    'EmrJobStateListenerLambdaRole/DefaultPolicy/Resource',
     'CreateEMRServelsssApplicationLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
   );
 
   addCfnNagToStack(stack, [
-    {
-      paths_endswith: ['EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource'],
-      rules_to_suppress: [
-        {
-          id: 'W12',
-          reason: 'Some permissions are not resource based, need set * in resource',
-        },
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
-      ],
-    },
+    ruleRolePolicyWithWildcardResourcesAndHighSPCM('EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource', 'EmrSparkJobSubmitterLambda', 'eni'),
   ]);
 
   NagSuppressions.addStackSuppressions(stack, [... commonCdkNagRules,

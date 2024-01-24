@@ -467,8 +467,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
         'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
         'customresourcefunclogs9B71FED3',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
         'actionfunclogs394D90DA',
         'actionfunceniA16F9174',
         'workflowfunclogs7A318BBF',
@@ -1278,8 +1278,13 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   test('LogGroup', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::Logs::LogGroup'))
       .toEqual([
+        'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionlog17E9C861',
+        'testClickStreamALBApiStackActionStateMachineActionFunctionlog17DC1D55',
         'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
+        'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionlog8C09C32C',
         'testClickStreamALBApiStackWorkflowStateMachineLogGroupD7FD1922',
+        'testClickStreamALBApiBackendEventBusListenStateFunctionlog97BF5A13',
+        'testClickStreamALBApiBackendEventBusListenStackFunctionlog7B8AAC43',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Logs::LogGroup', {

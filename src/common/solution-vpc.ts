@@ -23,7 +23,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { LogGroup, RetentionDays, CfnLogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from './cfn-nag';
+import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from './cfn-nag';
 
 export interface VpcProps {
   /**
@@ -62,10 +62,7 @@ export class SolutionVpc extends Construct {
 
       const cfnVpcLG = vpcLogGroup.node.defaultChild as CfnLogGroup;
       addCfnNagSuppressRules(cfnVpcLG, [
-        {
-          id: 'W84',
-          reason: 'log group is encrypted with the default master key',
-        },
+        ruleToSuppressCloudWatchLogEncryption(),
       ]);
 
       // Create a new VPC

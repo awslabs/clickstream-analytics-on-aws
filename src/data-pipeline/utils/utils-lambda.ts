@@ -17,7 +17,6 @@ import { Duration, Stack } from 'aws-cdk-lib';
 
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Tracing, Function } from 'aws-cdk-lib/aws-lambda';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -55,7 +54,6 @@ interface Props {
 const functionSettings = {
   handler: 'handler',
   timeout: Duration.minutes(15),
-  logRetention: RetentionDays.ONE_WEEK,
   tracing: Tracing.ACTIVE,
 };
 

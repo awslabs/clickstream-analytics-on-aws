@@ -17,7 +17,7 @@ import { PolicyStatement, Policy, CfnPolicy } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -114,23 +114,15 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(5),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
   });
   fn.node.addDependency(role);
-  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
-    {
-      id: 'W89',
-      reason:
-        'Lambda is used as custom resource, ignore VPC settings',
-    },
-
-    {
-      id: 'W92',
-      reason:
-        'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
-    },
-  ]);
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('UpdateALBRule'),
+  );
 
   return fn;
 }

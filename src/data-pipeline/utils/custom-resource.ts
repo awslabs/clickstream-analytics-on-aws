@@ -112,7 +112,9 @@ function createCopyAssetsLambda(
     memorySize: 256,
     role,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     environment: {
       STACK_ID: getShortIdOfStack(Stack.of(scope)),
       PROJECT_ID: props.projectId,
@@ -230,7 +232,9 @@ function createEMRServerlessApplicationLambda(
     memorySize: 256,
     role,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     environment: {
       STACK_ID: getShortIdOfStack(Stack.of(scope)),
       PROJECT_ID: props.projectId,

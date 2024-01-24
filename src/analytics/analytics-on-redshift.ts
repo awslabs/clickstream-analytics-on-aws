@@ -36,7 +36,7 @@ import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftS
 import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources } from '../common/cfn-nag';
 import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
@@ -418,10 +418,7 @@ function addCfnNag(stack: Stack) {
           reason:
             'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
         },
-        {
-          id: 'W12',
-          reason: 'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
-        },
+        ruleToSuppressRolePolicyWithWildcardResources('Associate Role to Redshift', 'passRole'),
       ],
     },
 
@@ -431,10 +428,7 @@ function addCfnNag(stack: Stack) {
         ...ruleRolePolicyWithWildcardResources(
           'LoadDataStateMachine/Role/DefaultPolicy/Resource',
           'loadDataFlow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('LoadData'),
       ],
     },
 
@@ -444,20 +438,14 @@ function addCfnNag(stack: Stack) {
         ...ruleRolePolicyWithWildcardResources(
           'ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
           'ScanMetadataWorkflow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('ScanMetadata'),
       ],
     },
 
     {
       paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
       ],
     },
 

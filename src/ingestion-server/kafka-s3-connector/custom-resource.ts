@@ -20,7 +20,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
-import { addCfnNagSuppressRules } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -119,23 +119,15 @@ function createS3SinkConnectorLambda(
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
   });
   fn.node.addDependency(role);
-  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
-    {
-      id: 'W89',
-      reason:
-        'Lambda is used as custom resource, ignore VPC settings',
-    },
-
-    {
-      id: 'W92',
-      reason:
-        'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
-    },
-  ]);
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('KafkaS3ConnectorCR'),
+  );
 
   return fn;
 }

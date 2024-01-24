@@ -31,6 +31,8 @@ import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
   addCfnNagToStack,
+  ruleToSuppressRolePolicyWithHighSPCM,
+  ruleForLambdaVPCAndReservedConcurrentExecutions,
 } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
@@ -285,30 +287,10 @@ function addCfnNag(stack: Stack) {
         'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason:
-          'This policy needs to be able to call other AWS service by design',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunction'),
       ],
     },
-    {
-      paths_endswith: [
-        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
-      ],
-      rules_to_suppress: [
-        {
-          id: 'W89',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
-        },
-        {
-          id: 'W92',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-        },
-      ],
-    },
+    ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'ApiFunction'),
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
