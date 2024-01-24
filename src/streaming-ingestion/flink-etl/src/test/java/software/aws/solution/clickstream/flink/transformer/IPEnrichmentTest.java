@@ -18,6 +18,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.Obje
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.plugin.enrich.IPEnrichment;
+import software.aws.solution.clickstream.plugin.enrich.IPEnrichmentJson;
 
 class IPEnrichmentTest {
     @Test
@@ -55,6 +56,24 @@ class IPEnrichmentTest {
 
         Assertions.assertEquals("{\"city\":null,\"continent\":null,\"country\":null," +
                 "\"metro\":null,\"region\":null,\"sub_continent\":null,\"locale\":\"US\"}", geoNode.toString());
+
+    }
+
+
+    @Test
+    void testEnrichIP_json() {
+        // ./gradlew clean test --tests software.aws.solution.clickstream.flink.transformer.IPEnrichmentTest.testEnrichIP_json
+
+        IPEnrichmentJson ipEnrichment = new IPEnrichmentJson("_", "/tmp/GeoLite2-City.mmdb", "us-east-1");
+
+        ObjectNode geoNode = new ObjectMapper().createObjectNode();
+
+        var paramMap = new java.util.HashMap<String, String>();
+        paramMap.put(IPEnrichment.PARAM_KEY_IP, "18.233.165.3");
+        paramMap.put(IPEnrichment.PARAM_KEY_LOCALE, "US");
+
+        ipEnrichment.enrich(geoNode, paramMap);
+
 
     }
 }

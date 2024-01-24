@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class RouteProcessFunction extends ProcessFunction<String, String> {
+public class RouteProcessFunction extends ProcessFunction<String, JsonNode> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final List<String> appIds;
     @Getter
-    private final Map<String, OutputTag<String>> sideAppOutputTagMap;
+    private final Map<String, OutputTag<JsonNode>> sideAppOutputTagMap;
 
     public RouteProcessFunction(final List<String> appIds) {
         this.appIds = appIds;
@@ -39,7 +39,7 @@ public class RouteProcessFunction extends ProcessFunction<String, String> {
         if (appIds.size() > 1) {
             for (int i = 1; i < appIds.size(); i++) {
                 String appId = appIds.get(i);
-                OutputTag<String> outputTag = new OutputTag<>("side-output-" + appId) {
+                OutputTag<JsonNode> outputTag = new OutputTag<>("side-output-" + appId) {
                 };
                 sideAppOutputTagMap.put(appId, outputTag);
             }
@@ -47,7 +47,7 @@ public class RouteProcessFunction extends ProcessFunction<String, String> {
     }
 
     @Override
-    public void processElement(final String value, final ProcessFunction<String, String>.Context ctx, final Collector<String> out) throws Exception {
+    public void processElement(final String value, final ProcessFunction<String, JsonNode>.Context ctx, final Collector<JsonNode> out) throws Exception {
         JsonNode jsonNode = null;
         try {
             jsonNode = OBJECT_MAPPER.readValue(value, JsonNode.class);
@@ -78,9 +78,9 @@ public class RouteProcessFunction extends ProcessFunction<String, String> {
         }
 
         if (appIds.get(0).equals(appId)) {
-            out.collect(value);
+            out.collect(jsonNode);
         } else {
-            ctx.output(sideAppOutputTagMap.get(appId), value);
+            ctx.output(sideAppOutputTagMap.get(appId), jsonNode);
         }
 
     }

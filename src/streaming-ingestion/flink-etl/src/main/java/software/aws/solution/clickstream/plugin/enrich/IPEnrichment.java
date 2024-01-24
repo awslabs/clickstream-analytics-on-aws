@@ -36,7 +36,7 @@ public class IPEnrichment implements Enrichment {
     private final String bucket;
     private final String fileName;
     private final String region;
-    private byte[] geoFileBytes;
+    private transient byte[] geoFileBytes;
 
     public IPEnrichment(final String bucket, final String fileName, final String region) {
         this.bucket = bucket;

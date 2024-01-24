@@ -15,19 +15,15 @@ package software.aws.solution.clickstream.flink;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonAlias;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
 
 @Getter
 @Setter
-@ToString
-public class AppIdSteamConfig {
+public class AppIdStreamMap {
     @JsonProperty(required = true)
-    @JsonAlias("appIdStreamMap")
-    private List<AppIdStreamMap> appIdStreamMapList;
-
+    private String appId;
+    @JsonProperty(required = true)
+    private String streamArn;
+    @JsonProperty(required = false)
+    private boolean enabled = true;
 }
-

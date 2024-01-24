@@ -48,9 +48,24 @@ class ApplicationParametersTest {
         return props;
     }
 
+    private static Properties getPropertiesV2() {
+        String configText = "{\"appIdStreamMapList\":[" +
+                "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
+                ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
+                "]}";
+        Properties props = new Properties();
+        props.setProperty("inputStreamArn", "arn:aws:kinesis:us-east-1:123456789012:stream/testStream");
+        props.setProperty("dataBucketName", "testBucket");
+        props.setProperty("projectId", "project1");
+        props.setProperty("geoFileKey", "testKey/t.txt");
+        props.setProperty("appIdStreamConfig", configText);
+        return props;
+    }
+
     @Test
     void testCreateApplicationParametersFromProps() throws IOException {
-
+        // ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromProps
         Properties props = getProperties();
         ApplicationParameters params = ApplicationParameters.fromProperties(props);
 
@@ -64,6 +79,44 @@ class ApplicationParametersTest {
         Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
         Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
         Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+
+        params.getAppIdStreamMapList().forEach(appIdStreamMap -> {
+
+            if (appIdStreamMap.getAppId().equals("app1")) {
+                Assertions.assertTrue(appIdStreamMap.isEnabled());
+            }
+
+            if (appIdStreamMap.getAppId().equals("app2")) {
+                Assertions.assertTrue(appIdStreamMap.isEnabled());
+            }
+
+            if (appIdStreamMap.getAppId().equals("app3")) {
+                Assertions.assertFalse(appIdStreamMap.isEnabled());
+            }
+        });
+    }
+
+
+    @Test
+    void testCreateApplicationParametersFromPropsV2() throws IOException {
+        //  ./gradlew  test --tests  software.aws.solution.clickstream.flink.ApplicationParametersTest.testCreateApplicationParametersFromPropsV2
+        Properties propsV2 = getPropertiesV2();
+        ApplicationParameters params = ApplicationParameters.fromProperties(propsV2);
+
+        Assertions.assertEquals("us-east-1", params.getRegion());
+        Assertions.assertEquals("testBucket", params.getDataBucketName());
+        Assertions.assertEquals("testKey/t.txt", params.getGeoFileKey());
+        Assertions.assertEquals("arn:aws:kinesis:us-east-1:123456789012:stream/testStream", params.getInputStreamArn());
+        Assertions.assertEquals("testStream", params.getInputStreamName());
+        Assertions.assertEquals("project1", params.getProjectId());
+
+        Assertions.assertEquals("app1Sink", params.getSinkStreamNameByAppId("app1"));
+        Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
+        Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
+
+        params.getAppIdStreamMapList().forEach(appIdStreamMap -> {
+            Assertions.assertTrue(appIdStreamMap.isEnabled());
+        });
     }
 
     @Test

@@ -14,9 +14,9 @@
 package software.aws.solution.clickstream.flink;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
@@ -47,7 +47,7 @@ public class StreamingJob {
 
         log.info("Application properties: {}", this.props);
 
-        for (AppIdSteamConfig.AppIdSteamMap appIdStreamMap : this.props.getAppIdStreamMaps()) {
+        for (AppIdStreamMap appIdStreamMap : this.props.getAppIdStreamMapList()) {
             if (appIdStreamMap.isEnabled()) {
                 String appId = appIdStreamMap.getAppId();
                 Sink<String> sink = this.streamProvider.createSink(appId);
@@ -84,22 +84,22 @@ public class StreamingJob {
     private void runWithFlink(final DataStream<String> inputStream) {
 
         RouteProcessFunction processFunction = new RouteProcessFunction(appIds);
-        Map<String, OutputTag<String>> sideAppOutputTagMap = processFunction.getSideAppOutputTagMap();
-        SingleOutputStreamOperator<String> mainSteam = inputStream.process(processFunction);
+        Map<String, OutputTag<JsonNode>> sideAppOutputTagMap = processFunction.getSideAppOutputTagMap();
+        SingleOutputStreamOperator<JsonNode> mainStream = inputStream.process(processFunction);
 
         String defaultAppId = appIds.get(0);
-        transformAndSink(defaultAppId, mainSteam, appSinkMap.get(defaultAppId));
+        transformAndSink(defaultAppId, mainStream, appSinkMap.get(defaultAppId));
 
-        for (Map.Entry<String, OutputTag<String>> entry : sideAppOutputTagMap.entrySet()) {
+        for (Map.Entry<String, OutputTag<JsonNode>> entry : sideAppOutputTagMap.entrySet()) {
             String appId = entry.getKey();
-            DataStream<String> sideAppStream = mainSteam.getSideOutput(entry.getValue());
+            DataStream<JsonNode> sideAppStream = mainStream.getSideOutput(entry.getValue());
             Sink<String> outKinesisSink = appSinkMap.get(appId);
             transformAndSink(appId, sideAppStream, outKinesisSink);
         }
 
     }
 
-    private void transformAndSink(final String appId, final DataStream<String> inputStream,
+    private void transformAndSink(final String appId, final DataStream<JsonNode> inputStream,
                                   final Sink<String> outKinesisSink) {
         String projectId = props.getProjectId();
         String bucketName = props.getDataBucketName();
@@ -107,10 +107,9 @@ public class StreamingJob {
         String region = props.getRegion();
 
         log.info("transformAndSink appId: {}", appId);
-        DataStream<Tuple2<String, String>> explodedData = inputStream.flatMap(new ExplodeDataFlatMapFunction(appId)).name("ExplodeDataFlatMapFunction" + appId)
-                .returns(Types.TUPLE(Types.STRING, Types.STRING));
+        DataStream<Tuple2<JsonNode, JsonNode>> explodedData = inputStream.flatMap(new ExplodeDataFlatMapFunction(appId)).name("ExplodeDataFlatMapFunction" + appId);
         DataStream<String> transformedData = explodedData.map(new TransformDataMapFunction(appId, projectId, bucketName, geoFileKey, region))
-                .name("TransformDataMapFunction" + appId).returns(Types.STRING);
+                .name("TransformDataMapFunction" + appId);
         transformedData.sinkTo(outKinesisSink);
     }
 

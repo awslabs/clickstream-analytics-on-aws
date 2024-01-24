@@ -44,7 +44,7 @@ import java.util.Map;
 import static software.aws.solution.clickstream.flink.Utils.getValueType;
 
 @Slf4j
-public class TransformDataMapFunction implements MapFunction<Tuple2<String, String>, String> {
+public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, JsonNode>, String> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String APP_ID = "app_id";
     public static final String TIMESTAMP = "timestamp";
@@ -73,11 +73,11 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<String, Stri
     }
 
     @Override
-    public String map(final Tuple2<String, String> value) throws Exception {
+    public String map(final Tuple2<JsonNode, JsonNode> value) throws Exception {
         try {
             ObjectNode data = OBJECT_MAPPER.createObjectNode();
-            JsonNode ingestNode = OBJECT_MAPPER.readValue(value.f0, JsonNode.class);
-            JsonNode dataNode = OBJECT_MAPPER.readValue(value.f1, JsonNode.class);
+            JsonNode ingestNode = value.f0;
+            JsonNode dataNode = value.f1;
             JsonNode attributesNode = dataNode.get("attributes");
             JsonNode userNode = dataNode.get("user");
 

@@ -21,14 +21,14 @@ import java.util.ArrayList;
 public class AppIdSteamConfigTest {
     @Test
     void testNewAppIdSteamConfig() {
-        AppIdSteamConfig.AppIdSteamMap app1Stream = new AppIdSteamConfig.AppIdSteamMap();
+        AppIdStreamMap app1Stream = new AppIdStreamMap();
         app1Stream.setAppId("app1");
         app1Stream.setStreamArn("arn:aws:kinesis:us-east-1:123456789012:stream/app1");
         app1Stream.setEnabled(true);
         var config = new AppIdSteamConfig();
-        var list = new ArrayList< AppIdSteamConfig.AppIdSteamMap>();
-        config.setAppIdStreamMap(list);
-        config.getAppIdStreamMap().add(app1Stream);
+        var list = new ArrayList<AppIdStreamMap>();
+        config.setAppIdStreamMapList(list);
+        config.getAppIdStreamMapList().add(app1Stream);
         Assertions.assertEquals(1, list.size());
     }
 }

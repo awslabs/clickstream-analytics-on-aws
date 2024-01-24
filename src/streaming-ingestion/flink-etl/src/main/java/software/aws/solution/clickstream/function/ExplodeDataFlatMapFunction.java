@@ -29,14 +29,13 @@ import java.util.Iterator;
 import static software.aws.solution.clickstream.flink.Utils.gzipBytesToString;
 
 @Slf4j
-public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple2<String, String>> {
+public class ExplodeDataFlatMapFunction implements FlatMapFunction<JsonNode, Tuple2<JsonNode, JsonNode>> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final String appId;
 
     public ExplodeDataFlatMapFunction(final String appId) {
         this.appId = appId;
     }
-
     private static JsonNode decodeData(final String dataText) {
         JsonNode dataNode;
         if (dataText.startsWith("[") || dataText.startsWith("{")) {
@@ -60,9 +59,9 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple
     }
 
     @Override
-    public void flatMap(final String value, final Collector<Tuple2<String, String>> out) {
+    public void flatMap(final JsonNode value, final Collector<Tuple2<JsonNode, JsonNode>> out) {
         try {
-            JsonNode jsonNode = OBJECT_MAPPER.readValue(value, JsonNode.class);
+            JsonNode jsonNode = value;
             String dataText = jsonNode.get("data").asText();
             JsonNode dataNode = decodeData(dataText);
 
@@ -88,10 +87,10 @@ public class ExplodeDataFlatMapFunction implements FlatMapFunction<String, Tuple
             if (dataNode.isArray()) {
                 Iterator<JsonNode> iterator = dataNode.elements();
                 while (iterator.hasNext()) {
-                    out.collect(new Tuple2<>(ingestNode.toString(), iterator.next().toString()));
+                    out.collect(new Tuple2<>(ingestNode, iterator.next()));
                 }
             } else {
-                out.collect(new Tuple2<>(ingestNode.toString(), dataNode.toString()));
+                out.collect(new Tuple2<>(ingestNode, dataNode));
             }
         } catch (Exception e) {
             throw new ClickstreamException(e);
