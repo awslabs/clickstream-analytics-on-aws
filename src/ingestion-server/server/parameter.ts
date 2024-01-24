@@ -44,8 +44,12 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
   // Kafka
   let kafkaParams;
+  let kafkaParamsLabels;
   if (props.deliverToKafka) {
-    kafkaParams = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+    const kafkaParameters = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup);
+    kafkaParams = kafkaParameters.kafkaParams;
+    kafkaParamsLabels = kafkaParameters.kafkaParamsLabels;
+    kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kafkaParamsLabels };
 
     new CfnRule(scope, 'sinkToKafkaAndKafkaBrokersAndKafkaTopic', {
       assertions: [
@@ -68,9 +72,12 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
   // S3
   let s3Params;
+  let s3ParamsLabels;
   if (props.deliverToS3) {
-
-    s3Params = createS3Parameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+    const s3Parameters = createS3Parameters(scope, kafkaKinesisS3ParamsGroup);
+    s3Params = s3Parameters.s3Params;
+    s3ParamsLabels = s3Parameters.s3ParamsLabels;
+    kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...s3ParamsLabels };
 
     new CfnRule(scope, 'sinkToS3Rule', {
       assertions: [
@@ -92,8 +99,12 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
 
   // Kinesis
   let kinesisParams;
+  let kinesisParamsLabels;
   if (props.deliverToKinesis) {
-    kinesisParams = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+    const kinesisParameters = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup);
+    kinesisParams = kinesisParameters.kinesisParams;
+    kinesisParamsLabels = kinesisParameters.kinesisParamsLabels;
+    kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kinesisParamsLabels };
 
     new CfnRule(scope, 'sinkToKinesisRule', {
       assertions: [
@@ -115,46 +126,48 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
   }
 
   const commonParameterGroups = createCommonParameterGroups(
-    commonParameters.netWorkProps.vpcId,
-    commonParameters.netWorkProps.privateSubnets,
-    commonParameters.domainNameParam,
-    commonParameters.certificateArnParam,
-    commonParameters.serverEndpointPathParam,
-    commonParameters.serverCorsOriginParam,
-    commonParameters.protocolParam,
-    commonParameters.enableApplicationLoadBalancerAccessLogParam,
-    commonParameters.logS3BucketParam,
-    commonParameters.logS3PrefixParam,
-    commonParameters.notificationsTopicArnParam,
-    commonParameters.serverMinParam,
-    commonParameters.serverMaxParam,
-    commonParameters.warmPoolSizeParam,
-    commonParameters.scaleOnCpuUtilizationPercentParam,
-    commonParameters.projectIdParam,
-    commonParameters.netWorkProps.publicSubnets,
+    {
+      vpcId: commonParameters.netWorkProps.vpcId,
+      privateSubnets: commonParameters.netWorkProps.privateSubnets,
+      domainNameParam: commonParameters.domainNameParam,
+      certificateArnParam: commonParameters.certificateArnParam,
+      serverEndpointPathParam: commonParameters.serverEndpointPathParam,
+      serverCorsOriginParam: commonParameters.serverCorsOriginParam,
+      protocolParam: commonParameters.protocolParam,
+      enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
+      logS3BucketParam: commonParameters.logS3BucketParam,
+      logS3PrefixParam: commonParameters.logS3PrefixParam,
+      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
+      serverMinParam: commonParameters.serverMinParam,
+      serverMaxParam: commonParameters.serverMaxParam,
+      warmPoolSizeParam: commonParameters.warmPoolSizeParam,
+      scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
+      projectIdParam: commonParameters.projectIdParam,
+      publicSubnets: commonParameters.netWorkProps.publicSubnets,
+    },
   );
 
   commonParameterGroups.push(... kafkaKinesisS3ParamsGroup);
 
-  let commonParameterLabels = createCommonParameterLabels(
-    commonParameters.netWorkProps.vpcId,
-    commonParameters.netWorkProps.privateSubnets,
-    commonParameters.domainNameParam,
-    commonParameters.certificateArnParam,
-    commonParameters.serverEndpointPathParam,
-    commonParameters.serverCorsOriginParam,
-    commonParameters.protocolParam,
-    commonParameters.enableApplicationLoadBalancerAccessLogParam,
-    commonParameters.logS3BucketParam,
-    commonParameters.logS3PrefixParam,
-    commonParameters.notificationsTopicArnParam,
-    commonParameters.serverMinParam,
-    commonParameters.serverMaxParam,
-    commonParameters.warmPoolSizeParam,
-    commonParameters.scaleOnCpuUtilizationPercentParam,
-    commonParameters.projectIdParam,
-    commonParameters.netWorkProps.publicSubnets,
-  );
+  let commonParameterLabels = createCommonParameterLabels({
+    vpcId: commonParameters.netWorkProps.vpcId,
+    privateSubnets: commonParameters.netWorkProps.privateSubnets,
+    domainNameParam: commonParameters.domainNameParam,
+    certificateArnParam: commonParameters.certificateArnParam,
+    serverEndpointPathParam: commonParameters.serverEndpointPathParam,
+    serverCorsOriginParam: commonParameters.serverCorsOriginParam,
+    protocolParam: commonParameters.protocolParam,
+    enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
+    logS3BucketParam: commonParameters.logS3BucketParam,
+    logS3PrefixParam: commonParameters.logS3PrefixParam,
+    notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
+    serverMinParam: commonParameters.serverMinParam,
+    serverMaxParam: commonParameters.serverMaxParam,
+    warmPoolSizeParam: commonParameters.warmPoolSizeParam,
+    scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
+    projectIdParam: commonParameters.projectIdParam,
+    publicSubnets: commonParameters.netWorkProps.publicSubnets,
+  });
 
   commonParameterLabels = { ...commonParameterLabels, ... kafkaKinesisS3ParamsLabels };
 
@@ -222,7 +235,8 @@ export function createV2StackParameters(scope: Construct) {
   let kafkaKinesisS3ParamsLabels = {};
 
   // Kafka
-  const kafkaParams = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+  const { kafkaParams, kafkaParamsLabels } = createKafkaParameters(scope, kafkaKinesisS3ParamsGroup);
+  kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kafkaParamsLabels };
 
   new CfnRule(scope, 'sinkToKafkaAndKafkaBrokersAndKafkaTopic', {
     assertions: [
@@ -246,7 +260,8 @@ export function createV2StackParameters(scope: Construct) {
   });
 
   // S3
-  const s3Params = createS3Parameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+  const { s3Params, s3ParamsLabels } = createS3Parameters(scope, kafkaKinesisS3ParamsGroup);
+  kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...s3ParamsLabels };
   new CfnRule(scope, 'sinkToS3Rule', {
     assertions: [
       {
@@ -269,7 +284,8 @@ export function createV2StackParameters(scope: Construct) {
   });
 
   // Kinesis
-  const kinesisParams = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup, kafkaKinesisS3ParamsLabels);
+  const { kinesisParams, kinesisParamsLabels } = createKinesisParameters(scope, kafkaKinesisS3ParamsGroup);
+  kafkaKinesisS3ParamsLabels = { ...kafkaKinesisS3ParamsLabels, ...kinesisParamsLabels };
 
   new CfnRule(scope, 'sinkToKinesisRule', {
     assertions: [
@@ -293,46 +309,48 @@ export function createV2StackParameters(scope: Construct) {
   });
 
   const commonParameterGroups = createCommonParameterGroups(
-    commonParameters.netWorkProps.vpcId,
-    commonParameters.netWorkProps.privateSubnets,
-    commonParameters.domainNameParam,
-    commonParameters.certificateArnParam,
-    commonParameters.serverEndpointPathParam,
-    commonParameters.serverCorsOriginParam,
-    commonParameters.protocolParam,
-    commonParameters.enableApplicationLoadBalancerAccessLogParam,
-    commonParameters.logS3BucketParam,
-    commonParameters.logS3PrefixParam,
-    commonParameters.notificationsTopicArnParam,
-    commonParameters.serverMinParam,
-    commonParameters.serverMaxParam,
-    commonParameters.warmPoolSizeParam,
-    commonParameters.scaleOnCpuUtilizationPercentParam,
-    commonParameters.projectIdParam,
-    commonParameters.netWorkProps.publicSubnets,
+    {
+      vpcId: commonParameters.netWorkProps.vpcId,
+      privateSubnets: commonParameters.netWorkProps.privateSubnets,
+      domainNameParam: commonParameters.domainNameParam,
+      certificateArnParam: commonParameters.certificateArnParam,
+      serverEndpointPathParam: commonParameters.serverEndpointPathParam,
+      serverCorsOriginParam: commonParameters.serverCorsOriginParam,
+      protocolParam: commonParameters.protocolParam,
+      enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
+      logS3BucketParam: commonParameters.logS3BucketParam,
+      logS3PrefixParam: commonParameters.logS3PrefixParam,
+      notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
+      serverMinParam: commonParameters.serverMinParam,
+      serverMaxParam: commonParameters.serverMaxParam,
+      warmPoolSizeParam: commonParameters.warmPoolSizeParam,
+      scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
+      projectIdParam: commonParameters.projectIdParam,
+      publicSubnets: commonParameters.netWorkProps.publicSubnets,
+    },
   );
 
   commonParameterGroups.push(... kafkaKinesisS3ParamsGroup);
 
-  let commonParameterLabels = createCommonParameterLabels(
-    commonParameters.netWorkProps.vpcId,
-    commonParameters.netWorkProps.privateSubnets,
-    commonParameters.domainNameParam,
-    commonParameters.certificateArnParam,
-    commonParameters.serverEndpointPathParam,
-    commonParameters.serverCorsOriginParam,
-    commonParameters.protocolParam,
-    commonParameters.enableApplicationLoadBalancerAccessLogParam,
-    commonParameters.logS3BucketParam,
-    commonParameters.logS3PrefixParam,
-    commonParameters.notificationsTopicArnParam,
-    commonParameters.serverMinParam,
-    commonParameters.serverMaxParam,
-    commonParameters.warmPoolSizeParam,
-    commonParameters.scaleOnCpuUtilizationPercentParam,
-    commonParameters.projectIdParam,
-    commonParameters.netWorkProps.publicSubnets,
-  );
+  let commonParameterLabels = createCommonParameterLabels({
+    vpcId: commonParameters.netWorkProps.vpcId,
+    privateSubnets: commonParameters.netWorkProps.privateSubnets,
+    domainNameParam: commonParameters.domainNameParam,
+    certificateArnParam: commonParameters.certificateArnParam,
+    serverEndpointPathParam: commonParameters.serverEndpointPathParam,
+    serverCorsOriginParam: commonParameters.serverCorsOriginParam,
+    protocolParam: commonParameters.protocolParam,
+    enableApplicationLoadBalancerAccessLogParam: commonParameters.enableApplicationLoadBalancerAccessLogParam,
+    logS3BucketParam: commonParameters.logS3BucketParam,
+    logS3PrefixParam: commonParameters.logS3PrefixParam,
+    notificationsTopicArnParam: commonParameters.notificationsTopicArnParam,
+    serverMinParam: commonParameters.serverMinParam,
+    serverMaxParam: commonParameters.serverMaxParam,
+    warmPoolSizeParam: commonParameters.warmPoolSizeParam,
+    scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
+    projectIdParam: commonParameters.projectIdParam,
+    publicSubnets: commonParameters.netWorkProps.publicSubnets,
+  });
 
   commonParameterLabels = { ...commonParameterLabels, ... kafkaKinesisS3ParamsLabels };
 
@@ -641,166 +659,171 @@ function createCommonParameters(scope: Construct) {
   };
 }
 
-function createCommonParameterGroups(
-  vpcId: CfnParameter,
-  privateSubnets: CfnParameter,
-  domainNameParam: CfnParameter,
-  certificateArnParam: CfnParameter,
-  serverEndpointPathParam: CfnParameter,
-  serverCorsOriginParam: CfnParameter,
-  protocolParam: CfnParameter,
-  enableApplicationLoadBalancerAccessLogParam: CfnParameter,
-  logS3BucketParam: CfnParameter,
-  logS3PrefixParam: CfnParameter,
-  notificationsTopicArnParam: CfnParameter,
-  serverMinParam: CfnParameter,
-  serverMaxParam: CfnParameter,
-  warmPoolSizeParam: CfnParameter,
-  scaleOnCpuUtilizationPercentParam: CfnParameter,
-  projectIdParam: CfnParameter,
-  publicSubnets?: CfnParameter,
+function createCommonParameterGroups(props:
+{
+  vpcId: CfnParameter;
+  privateSubnets: CfnParameter;
+  domainNameParam: CfnParameter;
+  certificateArnParam: CfnParameter;
+  serverEndpointPathParam: CfnParameter;
+  serverCorsOriginParam: CfnParameter;
+  protocolParam: CfnParameter;
+  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+  logS3BucketParam: CfnParameter;
+  logS3PrefixParam: CfnParameter;
+  notificationsTopicArnParam: CfnParameter;
+  serverMinParam: CfnParameter;
+  serverMaxParam: CfnParameter;
+  warmPoolSizeParam: CfnParameter;
+  scaleOnCpuUtilizationPercentParam: CfnParameter;
+  projectIdParam: CfnParameter;
+  publicSubnets?: CfnParameter;
+},
 ) {
   return [
     {
       Label: { default: 'Project' },
       Parameters: [
-        projectIdParam.logicalId,
+        props.projectIdParam.logicalId,
       ],
     },
 
     {
       Label: { default: PARAMETER_GROUP_LABEL_VPC },
       Parameters: [
-        vpcId.logicalId,
-        publicSubnets!.logicalId,
-        privateSubnets.logicalId,
+        props.vpcId.logicalId,
+        props.publicSubnets!.logicalId,
+        props.privateSubnets.logicalId,
       ],
     },
 
     {
       Label: { default: PARAMETER_GROUP_LABEL_DOMAIN },
       Parameters: [
-        domainNameParam.logicalId,
-        certificateArnParam.logicalId,
+        props.domainNameParam.logicalId,
+        props.certificateArnParam.logicalId,
       ],
     },
 
     {
       Label: { default: 'Server' },
       Parameters: [
-        protocolParam.logicalId,
-        serverEndpointPathParam.logicalId,
-        serverCorsOriginParam.logicalId,
-        serverMaxParam.logicalId,
-        serverMinParam.logicalId,
-        scaleOnCpuUtilizationPercentParam.logicalId,
-        warmPoolSizeParam.logicalId,
-        notificationsTopicArnParam.logicalId,
+        props.protocolParam.logicalId,
+        props.serverEndpointPathParam.logicalId,
+        props.serverCorsOriginParam.logicalId,
+        props.serverMaxParam.logicalId,
+        props.serverMinParam.logicalId,
+        props.scaleOnCpuUtilizationPercentParam.logicalId,
+        props.warmPoolSizeParam.logicalId,
+        props.notificationsTopicArnParam.logicalId,
       ],
     },
     {
       Label: { default: 'Logs' },
       Parameters: [
-        enableApplicationLoadBalancerAccessLogParam.logicalId,
-        logS3BucketParam.logicalId,
-        logS3PrefixParam.logicalId,
+        props.enableApplicationLoadBalancerAccessLogParam.logicalId,
+        props.logS3BucketParam.logicalId,
+        props.logS3PrefixParam.logicalId,
 
       ],
     },
   ];
 }
 
-function createCommonParameterLabels(
-  vpcId: CfnParameter,
-  privateSubnets: CfnParameter,
-  domainNameParam: CfnParameter,
-  certificateArnParam: CfnParameter,
-  serverEndpointPathParam: CfnParameter,
-  serverCorsOriginParam: CfnParameter,
-  protocolParam: CfnParameter,
-  enableApplicationLoadBalancerAccessLogParam: CfnParameter,
-  logS3BucketParam: CfnParameter,
-  logS3PrefixParam: CfnParameter,
-  notificationsTopicArnParam: CfnParameter,
-  serverMinParam: CfnParameter,
-  serverMaxParam: CfnParameter,
-  warmPoolSizeParam: CfnParameter,
-  scaleOnCpuUtilizationPercentParam: CfnParameter,
-  projectIdParam: CfnParameter,
-  publicSubnets?: CfnParameter,
+function createCommonParameterLabels(props:
+{
+  vpcId: CfnParameter;
+  privateSubnets: CfnParameter;
+  domainNameParam: CfnParameter;
+  certificateArnParam: CfnParameter;
+  serverEndpointPathParam: CfnParameter;
+  serverCorsOriginParam: CfnParameter;
+  protocolParam: CfnParameter;
+  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+  logS3BucketParam: CfnParameter;
+  logS3PrefixParam: CfnParameter;
+  notificationsTopicArnParam: CfnParameter;
+  serverMinParam: CfnParameter;
+  serverMaxParam: CfnParameter;
+  warmPoolSizeParam: CfnParameter;
+  scaleOnCpuUtilizationPercentParam: CfnParameter;
+  projectIdParam: CfnParameter;
+  publicSubnets?: CfnParameter;
+},
+
 ) {
   return {
-    [projectIdParam.logicalId]: {
+    [props.projectIdParam.logicalId]: {
       default: 'Project Id',
     },
 
-    [vpcId.logicalId]: {
+    [props.vpcId.logicalId]: {
       default: PARAMETER_LABEL_VPCID,
     },
 
-    [publicSubnets!.logicalId]: {
+    [props.publicSubnets!.logicalId]: {
       default: PARAMETER_LABEL_PUBLIC_SUBNETS,
     },
 
-    [privateSubnets.logicalId]: {
+    [props.privateSubnets.logicalId]: {
       default: PARAMETER_LABEL_PRIVATE_SUBNETS,
     },
 
-    [domainNameParam.logicalId]: {
+    [props.domainNameParam.logicalId]: {
       default: PARAMETER_LABEL_DOMAIN_NAME,
     },
 
-    [certificateArnParam.logicalId]: {
+    [props.certificateArnParam.logicalId]: {
       default: PARAMETER_LABEL_CERTIFICATE_ARN,
     },
 
-    [serverEndpointPathParam.logicalId]: {
+    [props.serverEndpointPathParam.logicalId]: {
       default: 'Server endpoint path',
     },
 
-    [serverCorsOriginParam.logicalId]: {
+    [props.serverCorsOriginParam.logicalId]: {
       default: 'Server CORS origin',
     },
 
-    [protocolParam.logicalId]: {
+    [props.protocolParam.logicalId]: {
       default: 'Protocol',
     },
 
-    [enableApplicationLoadBalancerAccessLogParam.logicalId]: {
+    [props.enableApplicationLoadBalancerAccessLogParam.logicalId]: {
       default: 'Enable application load balancer access log',
     },
 
-    [logS3BucketParam.logicalId]: {
+    [props.logS3BucketParam.logicalId]: {
       default: 'S3 bucket name to save log',
     },
 
-    [logS3PrefixParam.logicalId]: {
+    [props.logS3PrefixParam.logicalId]: {
       default: 'S3 object prefix to save log',
     },
 
-    [notificationsTopicArnParam.logicalId]: {
+    [props.notificationsTopicArnParam.logicalId]: {
       default: 'AutoScaling group notifications SNS topic arn',
     },
 
-    [serverMinParam.logicalId]: {
+    [props.serverMinParam.logicalId]: {
       default: 'Server size min number',
     },
 
-    [serverMaxParam.logicalId]: {
+    [props.serverMaxParam.logicalId]: {
       default: 'Server size max number',
     },
 
-    [warmPoolSizeParam.logicalId]: {
+    [props.warmPoolSizeParam.logicalId]: {
       default: 'Server autoscaling warm pool min size',
     },
 
-    [scaleOnCpuUtilizationPercentParam.logicalId]: {
+    [props.scaleOnCpuUtilizationPercentParam.logicalId]: {
       default: 'Autoscaling on CPU utilization percent',
     },
   };
 }
 
-function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], kafkaKinesisS3ParamsLabels: {}) {
+function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) {
   const s3DataBucketParam = Parameters.createS3BucketParameter(scope, 'S3DataBucket', {
     description: 'S3 data bucket name',
     default: '',
@@ -844,8 +867,7 @@ function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], 
     ],
   });
 
-  kafkaKinesisS3ParamsLabels = {
-    ... kafkaKinesisS3ParamsLabels,
+  const s3ParamsLabels = {
     [s3DataBucketParam.logicalId]: {
       default: 'S3 bucket name',
     },
@@ -863,10 +885,10 @@ function createS3Parameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], 
     },
   };
 
-  return s3Params;
+  return { s3Params, s3ParamsLabels };
 }
 
-function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], kafkaKinesisS3ParamsLabels: {}) {
+function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) {
   const kinesisDataS3BucketParam = Parameters.createS3BucketParameter(scope, 'KinesisDataS3Bucket', {
     description: 'S3 bucket name to save data from Kinesis Data Stream',
     default: '',
@@ -950,8 +972,7 @@ function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: an
     ],
   });
 
-  kafkaKinesisS3ParamsLabels = {
-    ... kafkaKinesisS3ParamsLabels,
+  const kinesisParamsLabels = {
     [ kinesisDataS3BucketParam.logicalId]: {
       default: 'Data S3 bucket',
     },
@@ -980,10 +1001,10 @@ function createKinesisParameters(scope: Construct, kafkaKinesisS3ParamsGroup: an
       default: 'Max batching window for Lambda function',
     },
   };
-  return kinesisParams;
+  return { kinesisParams, kinesisParamsLabels };
 }
 
-function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[], kafkaKinesisS3ParamsLabels: {}) {
+function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[]) {
   const kafkaBrokersParam = Parameters.createKafkaBrokersParameter(scope, 'KafkaBrokers', true, { default: '' });
   const kafkaTopicParam = Parameters.createKafkaTopicParameter(scope, 'KafkaTopic', true, { default: '' });
   const mskClusterNameParam = Parameters.createMskClusterNameParameter(scope, 'MskClusterName', { default: '' });
@@ -1006,8 +1027,7 @@ function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[
     ],
   });
 
-  kafkaKinesisS3ParamsLabels = {
-    ... kafkaKinesisS3ParamsLabels,
+  const kafkaParamsLabels = {
     [kafkaBrokersParam.logicalId]: {
       default: 'Kafka brokers string',
     },
@@ -1024,5 +1044,5 @@ function createKafkaParameters(scope: Construct, kafkaKinesisS3ParamsGroup: any[
       default: 'Amazon managed streaming for apache kafka (Amazon MSK) cluster name',
     },
   };
-  return kafkaParams;
+  return { kafkaParams, kafkaParamsLabels };
 }
