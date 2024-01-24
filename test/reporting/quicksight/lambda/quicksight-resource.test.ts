@@ -20,15 +20,18 @@ import {
   DeleteAnalysisCommand,
   DeleteDashboardCommand,
   DeleteDataSetCommand,
+  DeleteFolderCommand,
   DescribeAnalysisCommand,
   DescribeAnalysisDefinitionCommand,
   DescribeDashboardCommand,
   DescribeDashboardDefinitionCommand,
   DescribeDataSetCommand,
   DescribeDataSourceCommand,
+  DescribeFolderCommand,
   DescribeTemplateDefinitionCommand,
   ListAnalysesCommand,
   ListDashboardsCommand,
+  ListFolderMembersCommand,
   ListTemplateVersionsCommand,
   QuickSightClient,
   ResourceExistsException,
@@ -602,6 +605,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeFolderCommand).rejectsOnce(notExistError);
+
     quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
       FolderId: 'folder_0',
       Status: 200,
@@ -619,7 +624,86 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Create QuickSight dashboard - folder exists', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+    quickSightClientMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeFolderCommand).resolvesOnce({
+      Folder: {
+        Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:folder/folder_0',
+      },
+    });
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
 
     expect(resp.Data?.dashboards).toBeDefined();
@@ -703,6 +787,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeFolderCommand).rejects(notExistError);
+
     const resp = await handler(multiAppIdEvent, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
@@ -715,6 +801,7 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 2);
 
@@ -1371,6 +1458,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeFolderCommand).rejects(notExistError);
+
     const resp = await handler(updateFromEmptyEvent, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
@@ -1387,6 +1476,7 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
 
@@ -2054,6 +2144,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeFolderCommand).rejects(notExistError);
+
     quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
       FolderId: 'folder_0',
       Status: 200,
@@ -2072,6 +2164,7 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
 
@@ -2333,6 +2426,97 @@ describe('QuickSight Lambda function', () => {
     logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
+  });
+
+  test('Delete QuickSight dashboard - folder', async () => {
+
+    quickSightClientMock.on(DescribeDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteDataSetCommand).resolves({});
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+    quickSightClientMock.on(DeleteDashboardCommand).resolves({});
+
+    quickSightClientMock.on(ListFolderMembersCommand).resolvesOnce({
+      FolderMemberList: [
+        {
+          MemberId: 'clickstream_dashboard_0',
+          MemberArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_0',
+        },
+        {
+          MemberId: 'clickstream_dashboard_1',
+          MemberArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_1',
+        },
+      ],
+    });
+
+    const resp = await handler(deleteEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 1);
+
+    expect(resp).toBeUndefined();
+  });
+
+
+  test('Delete QuickSight dashboard - folder', async () => {
+
+    quickSightClientMock.on(DescribeDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteDataSetCommand).resolves({});
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+    quickSightClientMock.on(DeleteDashboardCommand).resolves({});
+
+    quickSightClientMock.on(ListFolderMembersCommand).resolvesOnce({
+      FolderMemberList: [
+        {
+          MemberId: 'member_0',
+          MemberArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/dashboard_0',
+        },
+        {
+          MemberId: 'member_0',
+          MemberArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dashboard/clickstream_dashboard_0',
+        },
+      ],
+    });
+
+    const resp = await handler(deleteEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 0);
+
+    expect(resp).toBeUndefined();
   });
 
 });
