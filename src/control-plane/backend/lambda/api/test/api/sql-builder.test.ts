@@ -19043,9 +19043,6 @@ describe('SQL Builder test', () => {
           union all
           select
             (CURRENT_DATE - INTERVAL '3 day')::date as event_date
-          union all
-          select
-            (CURRENT_DATE - INTERVAL '4 day')::date as event_date
         ),
         first_date as (
           select

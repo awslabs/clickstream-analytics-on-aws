@@ -1824,19 +1824,48 @@ export function buildCommonConditionSql(sqlParameters: BaseSQLParameters, prefix
   };
 }
 
-export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: string = '') {
-  let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-    eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+function _getStartDateForFixDateRange(date: Date, timeWindowInSeconds: number) {
+  const dayCount = Math.ceil(timeWindowInSeconds / 86400);
+  date.setDate(date.getDate() - dayCount);
+  return formatDateToYYYYMMDD(date);
+}
+
+function _getStartDateForRelativeDateRange(lastN: number, timeUnit: ExploreRelativeTimeUnit, timeWindowInSeconds: number) {
+
+  const dayCount = Math.ceil(timeWindowInSeconds / 86400);
+
+  if (timeUnit === ExploreRelativeTimeUnit.WK) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('week', current_date - interval '${lastN - 1} weeks'))` ;
+  } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('month', current_date - interval '${lastN - 1} months'))`;
+  } else if (timeUnit === ExploreRelativeTimeUnit.YY) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('year', current_date - interval '${lastN - 1} years'))`;
   } else {
-    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_date <= CURRENT_DATE`);
-    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and ${prefix}event_date <= CURRENT_DATE`);
-    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and ${prefix}event_date <= CURRENT_DATE`);
+    return `DATEADD(DAY, -${dayCount}, date_trunc('day', current_date - interval '${lastN - 1} days'))`;
+  }
+}
+
+export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: string = '', timeWindowInSeconds?: number) {
+  let eventDateSQL = '';
+  if (timeWindowInSeconds) {
+    if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart!, timeWindowInSeconds)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
     } else {
-      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and ${prefix}event_date <= CURRENT_DATE`);
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN!, sqlParameters.timeUnit!, timeWindowInSeconds)} and ${prefix}event_date <= CURRENT_DATE`);
+    }
+  } else {
+    if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+    } else {
+      if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_date <= CURRENT_DATE`);
+      } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and ${prefix}event_date <= CURRENT_DATE`);
+      } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and ${prefix}event_date <= CURRENT_DATE`);
+      } else {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and ${prefix}event_date <= CURRENT_DATE`);
+      }
     }
   }
 
