@@ -99,5 +99,7 @@ Creating a custom report mainly consists of two parts, the first part is to prep
 
 
 ### Part 3 - Add the custom dashboard to Analytic Studio
-To enable your custom analysis to appear in the Dashboards module of the Clickstream Analytics Studio, you need to add the dashboard into the Shared folder with name of the <project-id>_<app_id>, which was pre-created by the solution.
+
+To enable your custom analysis to appear in the Dashboards module of the Clickstream Analytics Studio, you need to add the dashboard into the Shared folder with name of the `<project-id>_<app_id>`, which was pre-created by the solution.
+
 After you added the custom dashboard into the Shared folder, it will automatically display in the Clickstream Analytics Studio.
