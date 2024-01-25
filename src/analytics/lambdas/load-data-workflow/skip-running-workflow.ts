@@ -16,10 +16,10 @@ import { SFNClient, ListExecutionsCommand, ListExecutionsCommandOutput } from '@
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
+import { REDSHIFT_TABLE_NAMES } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
-import { REDSHIFT_TABLE_NAMES } from '../../../common/constant';
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
