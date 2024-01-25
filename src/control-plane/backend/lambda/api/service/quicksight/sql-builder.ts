@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { formatDateToYYYYMMDD } from './reporting-utils';
+import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
@@ -1656,7 +1656,7 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
 
 function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters, eventNonNestColProps: EventNonNestColProps,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
-  const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
+  const eventDateSQL = buildEventDateSql(sqlParameters, 'event.');
   const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
 
   return `
@@ -1805,7 +1805,7 @@ function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
 
 function _getCommonConditionSql(sqlParameters: SQLParameters, prefix?: string) {
 
-  const eventDateSQL = _getEventDateSql(sqlParameters, prefix);
+  const eventDateSQL = buildEventDateSql(sqlParameters, prefix);
   let globalConditionSql = _buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
@@ -1815,13 +1815,49 @@ function _getCommonConditionSql(sqlParameters: SQLParameters, prefix?: string) {
   };
 }
 
-function _getEventDateSql(sqlParameters: SQLParameters, prefix: string = '') {
-  let eventDateSQL = '';
-  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-    eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+function _getStartDateForFixDateRange(date: Date, timeWindowInSeconds: number) {
+  const dayCount = Math.ceil(timeWindowInSeconds / 86400);
+  date.setDate(date.getDate() - dayCount);
+  return formatDateToYYYYMMDD(date);
+}
+
+function _getStartDateForRelativeDateRange(lastN: number, timeUnit: ExploreRelativeTimeUnit, timeWindowInSeconds: number) {
+
+  const dayCount = Math.ceil(timeWindowInSeconds / 86400);
+
+  if (timeUnit === ExploreRelativeTimeUnit.WK) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('week', current_date - interval '${lastN - 1} weeks'))` ;
+  } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('month', current_date - interval '${lastN - 1} months'))`;
+  } else if (timeUnit === ExploreRelativeTimeUnit.YY) {
+    return `DATEADD(DAY, -${dayCount}, date_trunc('year', current_date - interval '${lastN - 1} years'))`;
   } else {
-    const nDayNumber = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
-    eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= DATEADD(day, -${nDayNumber}, CURRENT_DATE) and ${prefix}event_date <= CURRENT_DATE`);
+    return `DATEADD(DAY, -${dayCount}, date_trunc('day', current_date - interval '${lastN - 1} days'))`;
+  }
+}
+
+export function buildEventDateSql(sqlParameters: SQLParameters, prefix: string = '', timeWindowInSeconds?: number) {
+  let eventDateSQL = '';
+  if (timeWindowInSeconds) {
+    if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart!, timeWindowInSeconds)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+    } else {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN!, sqlParameters.timeUnit!, timeWindowInSeconds)} and ${prefix}event_date <= CURRENT_DATE`);
+    }
+  } else {
+    if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+      eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and ${prefix}event_date <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+    } else {
+      if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and ${prefix}event_date <= CURRENT_DATE`);
+      } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and ${prefix}event_date <= CURRENT_DATE`);
+      } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and ${prefix}event_date <= CURRENT_DATE`);
+      } else {
+        eventDateSQL = eventDateSQL.concat(`${prefix}event_date >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and ${prefix}event_date <= CURRENT_DATE`);
+      }
+    }
   }
 
   return eventDateSQL;
@@ -2002,8 +2038,8 @@ function _buildDateListSQL(sqlParameters: SQLParameters) {
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     dateList.push(...generateDateList(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
-    const lastN = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
-    for (let n = 1; n <= lastN; n++) {
+    const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit!);
+    for (let n = 0; n < daysCount; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
       `);
@@ -2128,16 +2164,23 @@ function _buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
   return sql;
 }
 
-function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
-  let lastNDayNumber = lastN;
+export function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
+  const currentDate = new Date();
+  let targetDate: Date = new Date();
   if (timeUnit === ExploreRelativeTimeUnit.WK) {
-    lastNDayNumber = lastN * 7;
+    targetDate = getMondayOfLastNWeeks(currentDate, lastN);
   } else if (timeUnit === ExploreRelativeTimeUnit.MM) {
-    lastNDayNumber = lastN * 31;
-  } else if (timeUnit === ExploreRelativeTimeUnit.Q) {
-    lastNDayNumber = lastN * 31 * 3;
+    targetDate = getFirstDayOfLastNMonths(currentDate, lastN);
+  } else if (timeUnit === ExploreRelativeTimeUnit.YY) {
+    targetDate = getFirstDayOfLastNYears(currentDate, lastN);
   }
-  return lastNDayNumber;
+  return daysBetweenDates(currentDate, targetDate);
+}
+
+export function daysBetweenDates(date1: Date, date2: Date): number {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const diffDays = Math.round(Math.abs((date1.getTime() - date2.getTime()) / oneDay));
+  return diffDays;
 }
 
 function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : string {
@@ -2188,22 +2231,23 @@ function buildSqlForEventCondition(condition: Condition, tablePrefix: string = '
 function buildSqlForNestAttributeStringCondition(condition: Condition, propertyKey: string, propertyValue: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} ${condition.operator} '${condition.value[0]}')`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} ${condition.operator} '${condition.value[0]}')))`;
     case ExploreAnalyticsOperators.IN:
       const values = '\'' + condition.value.join('\',\'') + '\'';
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} in (${values}))`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not in (${notValues}))`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not in (${notValues}))))`;
     case ExploreAnalyticsOperators.CONTAINS:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} like '%${condition.value[0]}%')`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not like '%${condition.value[0]}%')`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not like '%${condition.value[0]}%')))`;
     case ExploreAnalyticsOperators.NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is null)`;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2218,18 +2262,19 @@ function buildSqlForNestAttributeStringCondition(condition: Condition, propertyK
 function buildSqlForNestAttributeNumberCondition(condition: Condition, propertyKey: string, propertyValue: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} ${condition.operator} '${condition.value[0]}')`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} ${condition.operator} '${condition.value[0]}')))`;
     case ExploreAnalyticsOperators.IN:
       const values = condition.value.join(',');
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} in (${values}))`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = condition.value.join(',');
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} not in (${notValues}))`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} not in (${notValues}) or ${propertyValue} is null)))`;
     case ExploreAnalyticsOperators.NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is null)`;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2244,22 +2289,23 @@ function buildSqlForNestAttributeNumberCondition(condition: Condition, propertyK
 function _buildSqlFromStringCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `${prefix}${condition.property} ${condition.operator} '${condition.value[0]}'`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} ${condition.operator} '${condition.value[0]}')`;
     case ExploreAnalyticsOperators.IN:
       const values = '\'' + condition.value.join('\',\'') + '\'';
       return `${prefix}${condition.property} in (${values})`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
-      return `${prefix}${condition.property} not in (${notValues})`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not in (${notValues}))`;
     case ExploreAnalyticsOperators.CONTAINS:
       return `${prefix}${condition.property} like '%${condition.value[0]}%'`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `${prefix}${condition.property} not like '%${condition.value[0]}%'`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not like '%${condition.value[0]}%')`;
     case ExploreAnalyticsOperators.NULL:
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2274,18 +2320,19 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
 function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.EQUAL:
-    case ExploreAnalyticsOperators.NOT_EQUAL:
     case ExploreAnalyticsOperators.GREATER_THAN:
     case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
     case ExploreAnalyticsOperators.LESS_THAN:
     case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
       return `${prefix}${condition.property} ${condition.operator} ${condition.value[0]}`;
+    case ExploreAnalyticsOperators.NOT_EQUAL:
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} ${condition.operator} ${condition.value[0]})`;
     case ExploreAnalyticsOperators.IN:
       const values = condition.value.join(',');
       return `${prefix}${condition.property} in (${values})`;
     case ExploreAnalyticsOperators.NOT_IN:
       const notValues = condition.value.join(',');
-      return `${prefix}${condition.property} not in (${notValues})`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not in (${notValues}))`;
     case ExploreAnalyticsOperators.NULL:
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:
