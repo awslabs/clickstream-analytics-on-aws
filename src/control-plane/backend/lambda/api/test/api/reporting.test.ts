@@ -42,6 +42,7 @@ import request from 'supertest';
 import { MOCK_TOKEN, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
+import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -1034,6 +1035,11 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
+    expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      Sqls: expect.arrayContaining([
+        `select * from app1.${REDSHIFT_EVENT_TABLE_NAME} limit 1`,
+      ]),
+    });
 
   });
 

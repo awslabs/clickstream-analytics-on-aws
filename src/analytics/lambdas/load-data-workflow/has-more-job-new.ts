@@ -15,8 +15,9 @@
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
+import { REDSHIFT_TABLE_NAMES } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
+import { JobStatus } from '../../private/constant';
 
 const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
 const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;

@@ -17,8 +17,8 @@ import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/skip-running-workflow';
-import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../../../../src/analytics/private/constant';
-import { PARTITION_APP } from '../../../../../src/common/constant';
+import { JobStatus } from '../../../../../src/analytics/private/constant';
+import { PARTITION_APP, REDSHIFT_TABLE_NAMES } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 
 

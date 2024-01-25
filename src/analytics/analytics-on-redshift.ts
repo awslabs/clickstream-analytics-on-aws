@@ -28,7 +28,7 @@ import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
+import { DYNAMODB_TABLE_INDEX_NAME } from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
@@ -37,7 +37,7 @@ import { createCustomResourceAssociateIAMRole } from './private/redshift-associa
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
