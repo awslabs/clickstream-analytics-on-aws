@@ -96,3 +96,9 @@
 3. 在屏幕左下角选择一个视觉类型，在这个例子中选择**垂直条形图**。
 4. 在字段井中，选择`platform`作为X轴，`login_user`，`add_button_click_users`和`note_create_users`作为值。
 5. 现在您可以将此分析发布为仪表板，或继续格式化它。在这个[链接](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html){:target="_blank"}中了解有关QuickSight可视化的更多信息。
+
+### 第三部分 - 将自定义仪表板添加到 Clickstream Analytic Studio
+
+要使您的自定义分析显示在Clickstream Analytics Studio的仪表板模块中，您需要将仪表板添加到该解决方案预先创建的名为`<project_id>_<app_id>`的共享文件夹中。
+
+将自定义仪表板添加到共享文件夹后，它将自动显示在点击流分析工作室中的仪表板中。
