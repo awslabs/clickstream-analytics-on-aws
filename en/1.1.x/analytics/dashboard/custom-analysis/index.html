@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.4">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
     
     
       
@@ -75,17 +75,15 @@
     
     
    <link href="../../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
-        html.glightbox-open { overflow: initial; height: 100%; }
-        .gslide-title { margin-top: 0px; user-select: text; }
-        .gslide-desc { color: #666; user-select: text; }
-        .gslide-image img { background: white; }
-        
-            .gscrollbar-fixer { padding-right: 15px; }
-            .gdesc-inner { font-size: 0.75rem; }
-            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
-            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
-            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../../../assets/javascripts/glightbox.min.js"></script></head>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -2080,6 +2078,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#part-3-add-the-custom-dashboard-to-analytic-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Part 3 - Add the custom dashboard to Analytic Studio
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2752,6 +2759,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#part-3-add-the-custom-dashboard-to-analytic-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Part 3 - Add the custom dashboard to Analytic Studio
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2885,6 +2901,9 @@ This article illustrates the steps of creating a custom report with an example o
 <li>In the Field wells, select <code>platform</code> as X axis, <code>login_user</code>, <code>add_button_click_users</code>, and <code>note_create_users</code> as Value.</li>
 <li>You now can publish this analysis as dashboard or continue to format it. Learn more about QuickSight visualization in this <a href="https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html" target="_blank">link</a></li>
 </ol>
+<h3 id="part-3-add-the-custom-dashboard-to-analytic-studio">Part 3 - Add the custom dashboard to Analytic Studio</h3>
+<p>To enable your custom analysis to appear in the Dashboards module of the Clickstream Analytics Studio, you need to add the dashboard into the Shared folder with name of the <code>&lt;project-id&gt;_&lt;app_id&gt;</code>, which was pre-created by the solution.</p>
+<p>After you added the custom dashboard into the Shared folder, it will automatically display in the Clickstream Analytics Studio.</p>
 
 
 
@@ -2938,10 +2957,10 @@ This article illustrates the steps of creating a custom report with an example o
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.c011b7c0.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.7389ff0e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
