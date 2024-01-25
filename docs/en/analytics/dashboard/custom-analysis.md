@@ -96,3 +96,9 @@ Creating a custom report mainly consists of two parts, the first part is to prep
 3. Select a Visual type at the bottom-left of the screen, in this example, select **Vertical bar chart**
 4. In the Field wells, select `platform` as X axis, `login_user`, `add_button_click_users`, and `note_create_users` as Value.
 5. You now can publish this analysis as dashboard or continue to format it. Learn more about QuickSight visualization in this [link](https://docs.aws.amazon.com/quicksight/latest/user/working-with-visuals.html){:target="_blank"}
+
+
+### Part 3 - Add the custom dashboard to Analytic Studio
+To enable your custom analysis to appear in the Dashboards module of the Clickstream Analytics Studio, you need to add the dashboard into a Shared folder, called, which was pre-created by the solution.
+
+After you added the custom dashboard into the Shared folder, it will automatically display in the Clickstream Analytics Studio.
