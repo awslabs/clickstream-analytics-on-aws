@@ -170,7 +170,7 @@ function getVectorEnvs(scope: Construct, props: ECSFargateClusterProps) {
     AWS_DEBUG_VIEW_S3_BUCKET: props.debugViewS3SinkConfig.s3Bucket.bucketName || '__NOT_SET__',
     AWS_DEBUG_VIEW_S3_PREFIX: props.debugViewS3SinkConfig.s3Prefix || '__NOT_SET__',
     DEBUG_VIEW_S3_BATCH_MAX_BYTES: props.debugViewS3SinkConfig.batchMaxBytes? props.debugViewS3SinkConfig.batchMaxBytes + '' : '__NOT_SET__',
-    DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS: props.debugViewS3SinkConfig.batchTimeoutSecs? props.debugViewS3SinkConfig.batchTimeoutSecs + '' : '__NOT_SET__',    
+    DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS: props.debugViewS3SinkConfig.batchTimeoutSecs? props.debugViewS3SinkConfig.batchTimeoutSecs + '' : '__NOT_SET__',
     AWS_S3_BUCKET: props.s3SinkConfig?.s3Bucket.bucketName || '__NOT_SET__',
     AWS_S3_PREFIX: props.s3SinkConfig?.s3Prefix || '__NOT_SET__',
     DEV_MODE: props.devMode || '__NOT_SET__',

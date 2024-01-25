@@ -320,7 +320,7 @@ export function createCommonResources(scope : Construct, props: {
     s3Prefix: props.debugViewS3Prefix,
     batchMaxBytes: props.debugViewS3BatchMaxBytes,
     batchTimeoutSecs: props.debugViewS3BatchTimeout,
-  };  
+  };
 
   return { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig, debugViewS3SinkConfig };
 }

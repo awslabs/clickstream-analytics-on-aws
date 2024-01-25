@@ -549,6 +549,10 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -590,6 +594,10 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   console.log('');
@@ -635,6 +643,10 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -674,6 +686,10 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -721,6 +737,10 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -763,6 +783,10 @@ test('Check parameters for S3 nested stack - has minimum parameters', () => {
     'AppIds',
     'ClickStreamSDK',
     'WorkerStopTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(

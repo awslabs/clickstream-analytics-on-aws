@@ -595,7 +595,7 @@ function createCommonParameters(scope: Construct) {
   const debugViewS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'DebugViewS3Prefix', {
     description: 'Debug view S3 data object prefix',
     default: 'debug-view-s3-data/',
-  }); 
+  });
 
   const debugViewS3BatchMaxBytesParam = new CfnParameter(scope, 'DebugViewS3BatchMaxBytes', {
     description: 'Debug View Batch max bytes',
@@ -616,7 +616,7 @@ function createCommonParameters(scope: Construct) {
     debugViewS3PrefixParam,
     debugViewS3BatchMaxBytesParam,
     debugViewS3BatchTimeoutParam,
-  };  
+  };
 
   new CfnRule(scope, 'logS3BucketAndEnableLogRule', {
     assertions: [
@@ -771,29 +771,29 @@ function createCommonParameterGroups(props:
 }
 
 function createCommonParameterLabels(props:
-  {
-    vpcId: CfnParameter;
-    privateSubnets: CfnParameter;
-    domainNameParam: CfnParameter;
-    certificateArnParam: CfnParameter;
-    serverEndpointPathParam: CfnParameter;
-    serverCorsOriginParam: CfnParameter;
-    protocolParam: CfnParameter;
-    enableApplicationLoadBalancerAccessLogParam: CfnParameter;
-    logS3BucketParam: CfnParameter;
-    logS3PrefixParam: CfnParameter;
-    notificationsTopicArnParam: CfnParameter;
-    serverMinParam: CfnParameter;
-    serverMaxParam: CfnParameter;
-    warmPoolSizeParam: CfnParameter;
-    scaleOnCpuUtilizationPercentParam: CfnParameter;
-    projectIdParam: CfnParameter;
-    debugViewS3BucketParam: CfnParameter;
-    debugViewS3PrefixParam: CfnParameter;
-    debugViewS3BatchMaxBytesParam: CfnParameter;
-    debugViewS3BatchTimeoutParam: CfnParameter;
-    publicSubnets?: CfnParameter;
-  }
+{
+  vpcId: CfnParameter;
+  privateSubnets: CfnParameter;
+  domainNameParam: CfnParameter;
+  certificateArnParam: CfnParameter;
+  serverEndpointPathParam: CfnParameter;
+  serverCorsOriginParam: CfnParameter;
+  protocolParam: CfnParameter;
+  enableApplicationLoadBalancerAccessLogParam: CfnParameter;
+  logS3BucketParam: CfnParameter;
+  logS3PrefixParam: CfnParameter;
+  notificationsTopicArnParam: CfnParameter;
+  serverMinParam: CfnParameter;
+  serverMaxParam: CfnParameter;
+  warmPoolSizeParam: CfnParameter;
+  scaleOnCpuUtilizationPercentParam: CfnParameter;
+  projectIdParam: CfnParameter;
+  debugViewS3BucketParam: CfnParameter;
+  debugViewS3PrefixParam: CfnParameter;
+  debugViewS3BatchMaxBytesParam: CfnParameter;
+  debugViewS3BatchTimeoutParam: CfnParameter;
+  publicSubnets?: CfnParameter;
+},
 ) {
   return {
     [props.projectIdParam.logicalId]: {

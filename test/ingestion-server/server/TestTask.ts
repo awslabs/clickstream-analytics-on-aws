@@ -238,14 +238,16 @@ export class TestStack extends Stack {
       };
     }
 
+    const debugViewS3SinkConfig: S3SinkConfig = {
+      s3Bucket: logS3Bucket,
+      s3Prefix: 'test-s3-data',
+      batchMaxBytes: 200000,
+      batchTimeoutSecs: 1,
+    };
+
     let s3SinkConfig: S3SinkConfig | undefined = undefined;
     if (props.withS3SinkConfig) {
-      s3SinkConfig = {
-        s3Bucket: logS3Bucket,
-        s3Prefix: 'test-s3-data',
-        batchMaxBytes: 200000,
-        batchTimeoutSecs: 1,
-      };
+      s3SinkConfig = debugViewS3SinkConfig;
     }
 
     let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
@@ -297,6 +299,7 @@ export class TestStack extends Stack {
       appIds: 'appId',
       clickStreamSDK: 'Yes',
       workerStopTimeout: 330,
+      debugViewS3SinkConfig,
     };
 
     const ingestionServer = new IngestionServer(
