@@ -44,7 +44,6 @@ import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './p
 import { clickStreamTableName } from '../../common/constants';
 import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
-import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
