@@ -85,6 +85,7 @@ interface AnalyticsAttributionProps {
   loading: boolean;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -99,6 +100,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     loading,
     pipeline,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -530,6 +532,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={true}
@@ -601,6 +604,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={false}
