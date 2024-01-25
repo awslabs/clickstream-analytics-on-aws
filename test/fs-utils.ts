@@ -11,20 +11,17 @@
  *  and limitations under the License.
  */
 
-import { SQLDef } from '../../analytics/private/model';
+import { readFileSync } from 'fs';
+import { SQLDef } from '../src/analytics/private/model';
 
-export const reportingViewsDef: SQLDef[] = [];
+export function loadSQLFromFS(defs: SQLDef[], rootPath: string, prefix: string = '') {
+  return defs.reduce((acc: { [key: string]: string }, item, _index) => {
+    acc[`/opt/${prefix}${item.sqlFile}`] = testSqlContent(rootPath + prefix + item.sqlFile);
+    return acc;
+  }, {} as { [key: string]: string });
+}
 
-
-// keep order
-export const schemaDefs: SQLDef[] = [
-  {
-    sqlFile: 'ods-events-streaming-mv.sql',
-  },
-  {
-    sqlFile: 'ods-events-streaming-view.sql',
-  },
-  {
-    sqlFile: 'grant-permissions-to-bi-user.sql',
-  },
-];
+const testSqlContent = (filePath: string) => {
+  const sqlTemplate = readFileSync(filePath, 'utf8');
+  return sqlTemplate;
+};

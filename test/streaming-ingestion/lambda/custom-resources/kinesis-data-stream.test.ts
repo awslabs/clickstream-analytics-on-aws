@@ -41,7 +41,7 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
       identifier: 'identifier1',
       dataRetentionHours: 24,
       streamMode: KINESIS_MODE.ON_DEMAND,
-      encryptionKeyArn: 'arn:aws:kms:us-west-2:012345678912:key/0001-0002-0003',
+      encryptionKeyArn: 'arn:aws:kms:us-west-2:555555555555:key/0001-0002-0003',
     },
   };
 
@@ -166,7 +166,7 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
     });
 
     const streamName = getSinkStreamName('project1', 'app1', 'identifier1');
-    const streamArn = `arn:aws:kinesis:us-west-2:012345678910:stream/${streamName}`;
+    const streamArn = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamName}`;
 
     const basicStreamDetails = {
       StreamName: streamName,
@@ -283,7 +283,7 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
     };
     kinesisMock.on(DescribeStreamCommand).callsFake(input => {
       const streamName = input.StreamName!;
-      const streamArn = `arn:aws:kinesis:us-west-2:012345678910:stream/${streamName}`;
+      const streamArn = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamName}`;
       return {
         StreamDescription: {
           ...basicStreamDetails,
@@ -298,7 +298,7 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
           StreamDescriptionSummary: {
             ...basicStreamDetails,
             StreamName: input.StreamName,
-            StreamARN: `arn:aws:kinesis:us-west-2:012345678910:stream/${input.StreamName}`,
+            StreamARN: `arn:aws:kinesis:us-west-2:555555555555:stream/${input.StreamName}`,
           },
         };
       };
