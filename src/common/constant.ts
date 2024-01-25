@@ -467,3 +467,14 @@ export const FOLDER_OWNER_PERMISSION_ACTIONS = [
   'quicksight:DeleteFolder',
   'quicksight:UpdateFolderPermissions',
 ];
+
+// redshift table names
+export const REDSHIFT_EVENT_TABLE_NAME = 'event';
+export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';
+export const REDSHIFT_USER_TABLE_NAME = 'user';
+export const REDSHIFT_ITEM_TABLE_NAME = 'item';
+
+export const REDSHIFT_TABLE_NAMES = [
+  REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
+  REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
+];
