@@ -282,7 +282,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -306,7 +309,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -332,7 +338,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -349,7 +358,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -411,6 +423,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date '2023-10-01'
       ),
       model_base_data as (
         select
@@ -692,7 +705,7 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= DATEADD (day, -744, CURRENT_DATE)
+          event.event_date >= date_trunc('month', current_date - interval '23 months')
           and event.event_date <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
@@ -751,7 +764,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -777,7 +793,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -807,7 +826,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -826,7 +848,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'apple'
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -879,6 +904,7 @@ describe('Attribution SQL Builder test', () => {
           and target_data._session_id = touch_point_data_3._session_id
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date_trunc('month', current_date - interval '23 months')
       ),
       model_base_data as (
         select
@@ -1098,6 +1124,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date '2023-10-01'
       ),
       model_base_data as (
         select
@@ -1375,7 +1402,7 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= date '2023-10-01'
+          event.event_date >= date '2023-09-30'
           and event.event_date <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
@@ -1427,7 +1454,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -1451,7 +1481,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -1477,7 +1510,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -1494,7 +1530,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -1549,6 +1588,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date '2023-09-30'
       ),
       model_base_data as (
         select
@@ -1889,7 +1929,10 @@ describe('Attribution SQL Builder test', () => {
             platform = 'Android'
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       target_data as (
@@ -1915,7 +1958,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -1945,7 +1991,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -1964,7 +2013,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -2017,6 +2069,7 @@ describe('Attribution SQL Builder test', () => {
           and target_data._session_id = touch_point_data_3._session_id
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date '2023-10-01'
       ),
       model_base_data as (
         select
@@ -2268,7 +2321,7 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= DATEADD (day, -620, CURRENT_DATE)
+          event.event_date >= date_trunc('month', current_date - interval '19 months')
           and event.event_date <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
@@ -2339,7 +2392,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -2367,7 +2423,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -2385,7 +2444,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -2447,6 +2509,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date_trunc('month', current_date - interval '19 months')
       ),
       model_base_data as (
         select
@@ -2708,7 +2771,11 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= DATEADD (day, -620, CURRENT_DATE)
+          event.event_date >= DATEADD(
+            DAY,
+            -1,
+            date_trunc('month', current_date - interval '19 months')
+          )
           and event.event_date <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
@@ -2778,7 +2845,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -2804,7 +2874,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -2821,7 +2894,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
       ),
       touch_point_data_2 as (
@@ -2876,6 +2952,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date_trunc('month', current_date - interval '19 months')
       ),
       model_base_data as (
         select
@@ -3143,7 +3220,11 @@ describe('Attribution SQL Builder test', () => {
         from
           shop.event as event
         where
-          event.event_date >= DATEADD (day, -620, CURRENT_DATE)
+          event.event_date >= DATEADD(
+            DAY,
+            -1,
+            date_trunc('month', current_date - interval '19 months')
+          )
           and event.event_date <= CURRENT_DATE
           and event.event_name in (
             'view_item',
@@ -3219,7 +3300,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 200
-            and _channel <> 'google'
+            and (
+              _channel is null 
+              or _channel <> 'google'
+            )
           )
       ),
       touch_point_data_1 as (
@@ -3245,7 +3329,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -3262,7 +3349,10 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and _user_first_touch_timestamp > 1686532526770
             and _session_duration > 10
-            and _channel <> 'apple'
+            and (
+              _channel is null 
+              or _channel <> 'apple'
+            )
           )
         union all
         select
@@ -3337,6 +3427,7 @@ describe('Attribution SQL Builder test', () => {
           )
         where
           touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date_trunc('month', current_date - interval '19 months')
       ),
       model_base_data as (
         select
@@ -3397,6 +3488,474 @@ describe('Attribution SQL Builder test', () => {
       join (
         select
           sum(contribution) as total_contribution
+        from
+          model_data
+      ) as t on 1 = 1
+      join (
+        select
+          t_event_name,
+          count(1) as attribution_count
+        from
+          joined_base_data
+        group by
+          t_event_name
+      ) as s on attribution_data.t_event_name = s.t_event_name
+    `.trim().replace(/ /g, ''));
+
+  });
+
+  test('last touch model - event count', () => {
+    const sql = buildSQLForSinglePointModel({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
+      timeWindowInSeconds: 7 * 24 * 60 * 60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.OTHER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.GEO,
+            property: 'country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: '_channel',
+            operator: '<>',
+            value: ['google'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+      },
+      targetEventAndCondition:
+        {
+          eventName: 'purchase',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '<>',
+                value: ['google'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: 'user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [10],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '<>',
+                value: ['apple'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [10],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '<>',
+                value: ['apple'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+      ],
+      modelType: AttributionModelType.LAST_TOUCH,
+      timeScopeType: ExploreTimeScopeType.RELATIVE,
+      lastN: 4,
+      timeUnit: ExploreRelativeTimeUnit.WK,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      user_base as (
+        select
+          user_pseudo_id,
+          user_id as user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          shop.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event_date,
+          event_name::varchar as event_name,
+          event_id::varchar as event_id,
+          event_timestamp::bigint as event_timestamp,
+          platform::varchar as platform,
+          geo.country::varchar as geo_country,
+          user_pseudo_id,
+          user_id
+        from
+          shop.event as event
+        where
+          event.event_date >= DATEADD (
+            DAY,
+            -7,
+            date_trunc('week', current_date - interval '3 weeks')
+          )
+          and event.event_date <= CURRENT_DATE
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+      ),
+      base_data as (
+        select
+          _user_first_touch_timestamp,
+          user_first_touch_timestamp,
+          _channel,
+          _session_duration,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration
+            from
+              event_base
+              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                  else null
+                end
+              ) as _user_first_touch_timestamp,
+              max(user_first_touch_timestamp) as user_first_touch_timestamp,
+              max(_channel) as _channel
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and (
+              _channel is null
+              or _channel <> 'google'
+            )
+          )
+      ),
+      target_data as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_name,
+          event_timestamp,
+          row_number() over (
+            PARTITION by
+              user_pseudo_id
+            ORDER by
+              event_timestamp asc
+          ) as rank
+        from
+          base_data
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+            and (
+              _channel is null
+              or _channel <> 'google'
+            )
+          )
+      ),
+      touch_point_data_1 as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_name,
+          event_timestamp
+        from
+          target_data
+        union all
+        select
+          user_pseudo_id,
+          event_id,
+          '1_' || event_name as event_name,
+          event_timestamp
+        from
+          base_data
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and user_first_touch_timestamp > 1686532526770
+            and _session_duration > 10
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
+          )
+        union all
+        select
+          user_pseudo_id,
+          event_id,
+          '2_' || event_name as event_name,
+          event_timestamp
+        from
+          base_data
+        where
+          event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 10
+            and (
+              _channel is null
+              or _channel <> 'apple'
+            )
+          )
+      ),
+      touch_point_data_2 as (
+        select
+          *,
+          case
+            when event_name = 'purchase' then 1
+            else 0
+          end as conversation_flag
+        from
+          touch_point_data_1
+        order by
+          event_timestamp
+      ),
+      touch_point_data_3 as (
+        select
+          *,
+          SUM(conversation_flag) over (
+            PARTITION by
+              user_pseudo_id
+            order by
+              user_pseudo_id,
+              event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING
+              AND CURRENT ROW
+          ) + 1 AS group_id
+        from
+          touch_point_data_2
+      ),
+      joined_base_data as (
+        select
+          target_data.*,
+          touch_point_data_3.user_pseudo_id as t_user_pseudo_id,
+          touch_point_data_3.event_id as t_event_id,
+          touch_point_data_3.event_name as t_event_name,
+          touch_point_data_3.event_timestamp as t_event_timestamp,
+          touch_point_data_3.conversation_flag,
+          touch_point_data_3.group_id,
+          row_number() over (
+            PARTITION by
+              t_user_pseudo_id,
+              rank
+            order by
+              t_event_timestamp asc
+          ) as row_seq
+        from
+          target_data
+          join touch_point_data_3 on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id
+          and target_data.rank = touch_point_data_3.group_id
+          and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+          and (
+            target_data.event_timestamp - touch_point_data_3.event_timestamp <= 604800 * cast(1000 as bigint)
+          )
+        where
+          touch_point_data_3.event_name <> 'purchase'
+          and TIMESTAMP 'epoch' + target_data.event_timestamp / 1000 * INTERVAL '1 second' >= date_trunc('week', current_date - interval '3 weeks')
+      ),
+      model_base_data as (
+        select
+          user_pseudo_id,
+          group_id,
+          max(row_seq) as row_seq
+        from
+          joined_base_data
+        group by
+          user_pseudo_id,
+          group_id
+      ),
+      model_data as (
+        select
+          joined_base_data.*
+        from
+          joined_base_data
+          join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id
+          and joined_base_data.row_seq = model_base_data.row_seq
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+      attribution_data as (
+        select
+          t_event_name,
+          count(t_event_id) as contribution
+        from
+          model_data
+        group by
+          t_event_name
+      )
+    select
+      total_count_data.total_event_count as "Trigger Count",
+      attribution_data.t_event_name as "Touch Point Name",
+      attribution_count as "Number of Triggers with Conversion",
+      attribution_data.contribution as "Contribution(number/sum...value)",
+      cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
+    from
+      attribution_data
+      join (
+        select
+          event_name,
+          count(event_id) as total_event_count
+        from
+          touch_point_data_3
+        group by
+          event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select
+          count(t_event_id) as total_contribution
         from
           model_data
       ) as t on 1 = 1

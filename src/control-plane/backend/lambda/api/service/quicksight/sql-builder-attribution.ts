@@ -12,8 +12,9 @@
  */
 
 import { format } from 'sql-formatter';
+import { formatDateToYYYYMMDD } from './reporting-utils';
 import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, MetadataValueType } from '../../common/explore-types';
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
   targetEventAndCondition: AttributionTouchPoint;
@@ -655,6 +656,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         ${timeWindowSql}
         where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
+        and TIMESTAMP 'epoch' + target_data.event_timestamp/1000 * INTERVAL '1 second' >= ${_buildConversionStartDateSql(params)}
     ),
   `;
 
@@ -666,6 +668,24 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
   `;
 
   return format(sql, { language: 'postgresql' });
+}
+
+function _buildConversionStartDateSql(sqlParameters: AttributionSQLParameters) {
+  let eventDateSQL = '';
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+    eventDateSQL = eventDateSQL.concat(`date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)}`);
+  } else {
+    if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
+      eventDateSQL = eventDateSQL.concat(`date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks')`);
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
+      eventDateSQL = eventDateSQL.concat(`date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months')`);
+    } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
+      eventDateSQL = eventDateSQL.concat(`date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years')`);
+    } else {
+      eventDateSQL = eventDateSQL.concat(`date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days')`);
+    }
+  }
+  return eventDateSQL;
 }
 
 function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParameters) {
@@ -740,7 +760,7 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: Attribution
 }
 
 function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: AttributionSQLParameters, eventNonNestColProps: EventNonNestColProps) {
-  const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.');
+  const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.', sqlParameters.timeWindowInSeconds);
   const eventNameClause = _buildEventNameClause(eventNames);
 
   return `
