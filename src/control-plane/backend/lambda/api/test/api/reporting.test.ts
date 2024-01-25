@@ -2040,7 +2040,9 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
-
+    expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
+      Sqls: expect.arrayContaining(['select * from app1.event limit 1']),
+    });
   });
 
   it('warmup with error id', async () => {

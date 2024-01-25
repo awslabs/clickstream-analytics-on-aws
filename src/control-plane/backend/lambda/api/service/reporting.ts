@@ -900,7 +900,7 @@ export class ReportingService {
           PipelineStackType.DATA_MODELING_REDSHIFT,
           OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
-          Sqls: [`select * from ${appId}.ods_events limit 1`],
+          Sqls: [`select * from ${appId}.event limit 1`],
           WorkgroupName: workgroupName,
           Database: projectId,
           WithEvent: false,
