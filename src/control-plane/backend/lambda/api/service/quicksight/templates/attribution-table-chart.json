@@ -110,32 +110,34 @@
                   "Height": 25
               }
           },
-          "FieldOptions": [
-            {
-              "FieldId": "{{touchPointNameFieldId}}",
-              "Width": "300px"
-            },
-            {
-                "FieldId": "{{totalTriggerCountFieldId}}",
-                "Width": "150px"
-            },
-            {
-                "FieldId": "{{triggerCountFieldId}}",
-                "Width": "150px"
-            },
-            {
-                "FieldId": "{{totalConversionCountFieldId}}",
-                "Width": "150px"
-            },
-            {
-                "FieldId": "{{contributionFieldId}}",
-                "Width": "150px"
-            },
-            {
-                "FieldId": "{{contributionRateFieldId}}",
-                "Width": "150px"
-            }
-          ]
+          "FieldOptions":{
+            "SelectedFieldOptions": [
+                {
+                    "FieldId": "{{touchPointNameFieldId}}",
+                    "Width": "300px"
+                },
+                {
+                    "FieldId": "{{totalTriggerCountFieldId}}",
+                    "Width": "150px"
+                },
+                {
+                    "FieldId": "{{triggerCountFieldId}}",
+                    "Width": "150px"
+                },
+                {
+                    "FieldId": "{{totalConversionCountFieldId}}",
+                    "Width": "150px"
+                },
+                {
+                    "FieldId": "{{contributionFieldId}}",
+                    "Width": "150px"
+                },
+                {
+                    "FieldId": "{{contributionRateFieldId}}",
+                    "Width": "150px"
+                }
+            ]
+          }
       },
       "Actions": []
   }
