@@ -43,7 +43,7 @@ public class ApplicationParameters {
     private String inputStreamName;
     private String projectId;
     private String appIdStreamConfig;
-    private List<AppIdStreamMap> appIdStreamMapList;
+    private List<AppIdStream> appIdStreamList;
     private int parallelism = 0;
 
      static ApplicationParameters fromProperties(final Properties props) {
@@ -64,13 +64,13 @@ public class ApplicationParameters {
         parameters.setAppIdStreamConfig(appIdStreamConfig);
 
         parameters.setRegion(region);
-        parameters.setAppIdStreamMapList(getConfig(parameters.getAppIdStreamConfig(), region));
+        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), region));
         parameters.setInputStreamName(inputStreamArn.split("/")[1]);
         return parameters;
     }
 
 
-    public static List<AppIdStreamMap> getConfig(final String s3PathOrStringContent, final String region) {
+    public static List<AppIdStream> getConfig(final String s3PathOrStringContent, final String region) {
         if (s3PathOrStringContent == null || s3PathOrStringContent.isEmpty()) {
             log.warn("return empty config");
             return new ArrayList<>();
@@ -83,7 +83,7 @@ public class ApplicationParameters {
             }
             log.info("Config content: {}", contentStr);
             AppIdSteamConfig appIdSteamConfigs = Utils.fromJson(contentStr, AppIdSteamConfig.class);
-            return appIdSteamConfigs.getAppIdStreamMapList();
+            return appIdSteamConfigs.getAppIdStreamList();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             log.warn("return empty config");
@@ -100,7 +100,7 @@ public class ApplicationParameters {
         parameters.setAppIdStreamConfig(args[4]);
 
         parameters.setRegion(args[2].split(":")[3]);
-        parameters.setAppIdStreamMapList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
+        parameters.setAppIdStreamList(getConfig(parameters.getAppIdStreamConfig(), parameters.getRegion()));
         return parameters;
     }
 
@@ -117,7 +117,7 @@ public class ApplicationParameters {
     }
 
     public String getSinkStreamNameByAppId(final String appId) {
-        for (AppIdStreamMap appIdSteamMap :appIdStreamMapList) {
+        for (AppIdStream appIdSteamMap : appIdStreamList) {
             if (appIdSteamMap.getAppId().equals(appId)) {
                 return appIdSteamMap.getStreamArn().split("/")[1];
             }

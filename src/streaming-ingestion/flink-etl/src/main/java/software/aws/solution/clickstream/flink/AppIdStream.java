@@ -19,7 +19,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonPro
 
 @Getter
 @Setter
-public class AppIdStreamMap {
+public class AppIdStream {
     @JsonProperty(required = true)
     private String appId;
     @JsonProperty(required = true)

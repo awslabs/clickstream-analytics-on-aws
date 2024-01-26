@@ -50,10 +50,10 @@ public class UtilsTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamMapList().size(), 5);
-        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamMapList().get(0).getAppId(), "app1");
-        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamMapList().get(0).getStreamArn(), "arn:aws:kinesis:us-east-1:123456789012:stream/Clickstream_project1_4a4326c0");
-        Assertions.assertTrue(appIdSteamConfig.getAppIdStreamMapList().get(0).isEnabled());
+        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamList().size(), 5);
+        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamList().get(0).getAppId(), "app1");
+        Assertions.assertEquals(appIdSteamConfig.getAppIdStreamList().get(0).getStreamArn(), "arn:aws:kinesis:us-east-1:123456789012:stream/Clickstream_project1_4a4326c0");
+        Assertions.assertTrue(appIdSteamConfig.getAppIdStreamList().get(0).isEnabled());
     }
 
     @Test

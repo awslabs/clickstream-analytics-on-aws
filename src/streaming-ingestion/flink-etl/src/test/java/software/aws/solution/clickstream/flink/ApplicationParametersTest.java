@@ -34,7 +34,7 @@ class ApplicationParametersTest {
         Configurator.setLevel("software.aws.solution.clickstream", Level.DEBUG);
     }
     private static Properties getProperties() {
-        String configText = "{\"appIdStreamMap\":[" +
+        String configText = "{\"appIdStreamMapList\":[" +
                 "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\",\"enabled\":true}" +
                 ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\",\"enabled\":true}" +
                 ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\",\"enabled\":false}" +
@@ -49,7 +49,7 @@ class ApplicationParametersTest {
     }
 
     private static Properties getPropertiesV2() {
-        String configText = "{\"appIdStreamMapList\":[" +
+        String configText = "{\"appIdStreamList\":[" +
                 "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\"}" +
                 ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
                 ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\"}" +
@@ -80,7 +80,7 @@ class ApplicationParametersTest {
         Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
         Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
 
-        params.getAppIdStreamMapList().forEach(appIdStreamMap -> {
+        params.getAppIdStreamList().forEach(appIdStreamMap -> {
 
             if (appIdStreamMap.getAppId().equals("app1")) {
                 Assertions.assertTrue(appIdStreamMap.isEnabled());
@@ -114,7 +114,7 @@ class ApplicationParametersTest {
         Assertions.assertEquals("app2Sink", params.getSinkStreamNameByAppId("app2"));
         Assertions.assertNull(params.getSinkStreamNameByAppId("app5"));
 
-        params.getAppIdStreamMapList().forEach(appIdStreamMap -> {
+        params.getAppIdStreamList().forEach(appIdStreamMap -> {
             Assertions.assertTrue(appIdStreamMap.isEnabled());
         });
     }

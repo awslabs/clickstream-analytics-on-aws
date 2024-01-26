@@ -47,7 +47,7 @@ public class StreamingJob {
 
         log.info("Application properties: {}", this.props);
 
-        for (AppIdStreamMap appIdStreamMap : this.props.getAppIdStreamMapList()) {
+        for (AppIdStream appIdStreamMap : this.props.getAppIdStreamList()) {
             if (appIdStreamMap.isEnabled()) {
                 String appId = appIdStreamMap.getAppId();
                 Sink<String> sink = this.streamProvider.createSink(appId);
@@ -110,7 +110,7 @@ public class StreamingJob {
         DataStream<Tuple2<JsonNode, JsonNode>> explodedData = inputStream.flatMap(new ExplodeDataFlatMapFunction(appId)).name("ExplodeDataFlatMapFunction" + appId);
         DataStream<String> transformedData = explodedData.map(new TransformDataMapFunction(appId, projectId, bucketName, geoFileKey, region))
                 .name("TransformDataMapFunction" + appId);
-        transformedData.sinkTo(outKinesisSink);
+        transformedData.sinkTo(outKinesisSink).name(appId);
     }
 
 }
