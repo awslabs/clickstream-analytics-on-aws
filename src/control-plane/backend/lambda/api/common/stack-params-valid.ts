@@ -86,7 +86,6 @@ export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CP
 
   await _checkForDataModelingAndReporting(pipeline, allSubnets, resources);
 
-  console.log(pipeline.ingestionServer.loadBalancer);
   if (pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog) {
     const enableAccessLogs = await validateEnableAccessLogsForALB(pipeline.region, pipeline.bucket.name);
     if (!enableAccessLogs) {
