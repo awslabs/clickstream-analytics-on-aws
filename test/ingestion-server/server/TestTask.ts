@@ -275,8 +275,8 @@ export class TestStack extends Stack {
     }
 
     let albInternetFacing = true;
-    if (props.albPublic) {
-      albInternetFacing = props.albPublic;
+    if (props.albPublic === false) {
+      albInternetFacing = false;
     }
     const serverProps: IngestionServerProps = {
       vpc,
