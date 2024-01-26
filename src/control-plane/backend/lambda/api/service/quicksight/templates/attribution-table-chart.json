@@ -114,7 +114,7 @@
             "SelectedFieldOptions": [
                 {
                     "FieldId": "{{touchPointNameFieldId}}",
-                    "Width": "300px"
+                    "Width": "250px"
                 },
                 {
                     "FieldId": "{{totalTriggerCountFieldId}}",
@@ -130,7 +130,7 @@
                 },
                 {
                     "FieldId": "{{contributionFieldId}}",
-                    "Width": "150px"
+                    "Width": "250px"
                 },
                 {
                     "FieldId": "{{contributionRateFieldId}}",
