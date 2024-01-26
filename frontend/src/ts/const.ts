@@ -428,3 +428,8 @@ export enum EIngestionType {
   Fargate = 'Fargate',
   EC2 = 'EC2',
 }
+
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
+}

@@ -39,6 +39,7 @@ import {
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
   EIngestionType,
+  ENetworkType,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -69,6 +70,7 @@ import BufferS3 from './buffer/BufferS3';
 interface ConfigIngestionProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
+  changeNetworkType: (type: ENetworkType) => void;
   changePublicSubnets: (subnets: SelectProps.Option[]) => void;
   changePrivateSubnets: (subnets: SelectProps.Option[]) => void;
   changeIngestionType: (type: string) => void;
@@ -138,6 +140,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const {
     update,
     pipelineInfo,
+    changeNetworkType,
     changePublicSubnets,
     changePrivateSubnets,
     changeIngestionType,
@@ -306,31 +309,54 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
         }
       >
         <SpaceBetween direction="vertical" size="l">
-          <FormField
-            label={t('pipeline:create.publicSubnet')}
-            description={t('pipeline:create.publicSubnetDesc')}
-            stretch
-            errorText={ternary(
-              publicSubnetError,
-              t('pipeline:valid.publicSubnetEmpty'),
-              undefined
-            )}
-          >
-            <Multiselect
-              filteringType="auto"
-              disabled={isDisabled(update, pipelineInfo)}
-              selectedOptions={pipelineInfo.selectedPublicSubnet}
-              tokenLimit={3}
-              deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
-              options={publicSubnetOptionList}
-              placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
-              selectedAriaLabel="Selected"
-              statusType={ternary(loadingSubnet, 'loading', 'finished')}
-              onChange={(e) => {
-                changePublicSubnets(e.detail.selectedOptions as any);
-              }}
+          <FormField label={t('pipeline:create.networkType')} stretch>
+            <Tiles
+              onChange={({ detail }) =>
+                changeNetworkType(detail.value as ENetworkType)
+              }
+              value={pipelineInfo.network.type ?? ENetworkType.General}
+              columns={2}
+              items={[
+                {
+                  label: t('pipeline:create.networkTypeGeneral'),
+                  description: t('pipeline:create.networkTypeGeneralDesc'),
+                  value: ENetworkType.General,
+                },
+                {
+                  label: t('pipeline:create.networkTypePrivate'),
+                  description: t('pipeline:create.networkTypePrivateDesc'),
+                  value: ENetworkType.Private,
+                },
+              ]}
             />
           </FormField>
+          {pipelineInfo.network.type !== ENetworkType.Private && (
+            <FormField
+              label={t('pipeline:create.publicSubnet')}
+              description={t('pipeline:create.publicSubnetDesc')}
+              stretch
+              errorText={ternary(
+                publicSubnetError,
+                t('pipeline:valid.publicSubnetEmpty'),
+                undefined
+              )}
+            >
+              <Multiselect
+                filteringType="auto"
+                disabled={isDisabled(update, pipelineInfo)}
+                selectedOptions={pipelineInfo.selectedPublicSubnet}
+                tokenLimit={3}
+                deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
+                options={publicSubnetOptionList}
+                placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
+                selectedAriaLabel="Selected"
+                statusType={ternary(loadingSubnet, 'loading', 'finished')}
+                onChange={(e) => {
+                  changePublicSubnets(e.detail.selectedOptions as any);
+                }}
+              />
+            </FormField>
+          )}
 
           <FormField
             label={t('pipeline:create.privateSubnet')}

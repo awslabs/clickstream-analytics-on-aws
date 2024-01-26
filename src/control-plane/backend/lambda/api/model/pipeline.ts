@@ -55,6 +55,7 @@ import {
 } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
+  ENetworkType,
   IngestionServerSinkBatchProps,
   IngestionServerSizeProps,
   IngestionType,
@@ -127,6 +128,7 @@ interface NetworkProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string[];
   privateSubnetIds: string[];
+  readonly type?: ENetworkType;
 }
 
 interface RedshiftNetworkProps {
