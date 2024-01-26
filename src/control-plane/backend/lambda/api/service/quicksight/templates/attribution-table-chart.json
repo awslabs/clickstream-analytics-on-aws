@@ -118,7 +118,7 @@
                 },
                 {
                     "FieldId": "{{totalTriggerCountFieldId}}",
-                    "Width": "150px"
+                    "Width": "120px"
                 },
                 {
                     "FieldId": "{{triggerCountFieldId}}",
@@ -126,11 +126,11 @@
                 },
                 {
                     "FieldId": "{{totalConversionCountFieldId}}",
-                    "Width": "150px"
+                    "Width": "200px"
                 },
                 {
                     "FieldId": "{{contributionFieldId}}",
-                    "Width": "250px"
+                    "Width": "200px"
                 },
                 {
                     "FieldId": "{{contributionRateFieldId}}",
