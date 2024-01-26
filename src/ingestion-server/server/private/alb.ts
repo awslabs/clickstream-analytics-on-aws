@@ -90,12 +90,12 @@ export function createApplicationLoadBalancer(
 
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
-    internetFacing: true,
+    internetFacing: false,
     ipAddressType: props.ipAddressType,
     securityGroup: props.sg,
     idleTimeout: Duration.minutes(3),
     vpcSubnets: {
-      subnetType: SubnetType.PUBLIC,
+      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
     },
     dropInvalidHeaderFields: true,
   });
