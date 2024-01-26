@@ -950,7 +950,6 @@ describe('resources in nested redshift stacks', () => {
           },
           {
             sqlFile: 'grant-permissions-to-bi-user.sql',
-            multipleLine: 'true',
           },
         ],
         biUsername: RefAnyValue,
