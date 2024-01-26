@@ -29,6 +29,7 @@ import { Construct } from 'constructs';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
+import { getALBSubnets } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import { createV2StackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
@@ -60,6 +61,8 @@ export class IngestionServerV2NestedStack extends NestedStack {
 
     const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig } = createCommonResources(this, props);
 
+    const albSubnets = getALBSubnets(Fn.split(',', props.publicSubnetIds), Fn.split(',', props.privateSubnetIds));
+
     const fleetProps: FleetV2Props = {
       taskCpu: 256,
       taskMemory: 512,
@@ -81,6 +84,8 @@ export class IngestionServerV2NestedStack extends NestedStack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      albInternetFacing: albSubnets.internetFacing,
+      albSubnets: albSubnets.subnets,
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,

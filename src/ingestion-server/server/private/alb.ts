@@ -12,7 +12,7 @@
  */
 
 import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
-import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Ec2Service } from 'aws-cdk-lib/aws-ecs';
 import {
   ApplicationListener,
@@ -64,6 +64,8 @@ function addECSTargetsToListener(
 
 export interface ApplicationLoadBalancerProps {
   vpc: IVpc;
+  subnetSelection: SubnetSelection;
+  internetFacing: boolean;
   certificateArn: string;
   domainName: string;
   protocol: ApplicationProtocol;
@@ -90,13 +92,11 @@ export function createApplicationLoadBalancer(
 
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
-    internetFacing: false,
+    internetFacing: props.internetFacing,
     ipAddressType: props.ipAddressType,
     securityGroup: props.sg,
     idleTimeout: Duration.minutes(3),
-    vpcSubnets: {
-      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-    },
+    vpcSubnets: props.subnetSelection,
     dropInvalidHeaderFields: true,
   });
 

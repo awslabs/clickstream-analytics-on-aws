@@ -155,6 +155,7 @@ export interface TestStackProps extends StackProps {
   certificateArn?: string;
   authenticationSecretArn?: string;
   protocol?: ApplicationProtocol;
+  albPublic?: boolean;
 }
 
 export class TestStack extends Stack {
@@ -175,6 +176,7 @@ export class TestStack extends Stack {
       warmPoolSize: 0,
       withWarmPoolSizeParameter: false,
       withAuthentication: false,
+      albPublic: true,
     },
   ) {
     super(scope, id, props);
@@ -272,10 +274,18 @@ export class TestStack extends Stack {
       };
     }
 
+    let albInternetFacing = true;
+    if (props.albPublic) {
+      albInternetFacing = props.albPublic;
+    }
     const serverProps: IngestionServerProps = {
       vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      albInternetFacing: albInternetFacing,
+      albSubnets: {
+        subnetType: albInternetFacing ? SubnetType.PUBLIC : SubnetType.PRIVATE_WITH_EGRESS,
       },
       fleetProps,
       serverEndpointPath: props.serverEndpointPath

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { IVpc, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 export interface VpcProps {
@@ -39,4 +39,21 @@ export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc
   );
 
   return vpc;
+}
+
+export function getALBSubnets(publicSubnetIds: string[], privateSubnetIds: string[]) {
+  let internetFacing = true;
+  let subnets = {
+    subnetType: SubnetType.PUBLIC,
+  };
+  publicSubnetIds.sort((a, b) => a.localeCompare(b));
+  privateSubnetIds.sort((a, b) => a.localeCompare(b));
+  if (publicSubnetIds.length === 0 || publicSubnetIds.join(',') === privateSubnetIds.join(',')) {
+    internetFacing = false;
+    subnets = {
+      subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+    };
+  }
+
+  return { internetFacing, subnets };
 }

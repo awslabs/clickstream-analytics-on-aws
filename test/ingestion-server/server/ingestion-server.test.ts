@@ -835,3 +835,91 @@ test('Check security group count', () => {
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
 });
+
+test('Check LoadBalancer deploy in public subnets', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    albPublic: true,
+  });
+
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+    IpAddressType: 'ipv4',
+    LoadBalancerAttributes: [
+      {
+        Key: 'deletion_protection.enabled',
+        Value: 'false',
+      },
+      {
+        Key: 'idle_timeout.timeout_seconds',
+        Value: '180',
+      },
+      {
+        Key: 'routing.http.drop_invalid_header_fields.enabled',
+        Value: 'true',
+      },
+    ],
+    Scheme: 'internet-facing',
+    SecurityGroups: [
+      {
+        'Fn::GetAtt': [
+          'IngestionServerclickstreamingestionservicealbsg86F699BB',
+          'GroupId',
+        ],
+      },
+    ],
+    Subnets: [
+      {
+        Ref: 'vpcsubnetpublicSubnet1SubnetF125D982',
+      },
+      {
+        Ref: 'vpcsubnetpublicSubnet2Subnet2731CC5E',
+      },
+    ],
+    Type: 'application',
+  });
+});
+
+test('Check LoadBalancer deploy in private subnets', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    albPublic: false,
+  });
+
+  const template = Template.fromStack(stack);
+  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+    IpAddressType: 'ipv4',
+    LoadBalancerAttributes: [
+      {
+        Key: 'deletion_protection.enabled',
+        Value: 'false',
+      },
+      {
+        Key: 'idle_timeout.timeout_seconds',
+        Value: '180',
+      },
+      {
+        Key: 'routing.http.drop_invalid_header_fields.enabled',
+        Value: 'true',
+      },
+    ],
+    Scheme: 'internal',
+    SecurityGroups: [
+      {
+        'Fn::GetAtt': [
+          'IngestionServerclickstreamingestionservicealbsg86F699BB',
+          'GroupId',
+        ],
+      },
+    ],
+    Subnets: [
+      {
+        Ref: 'vpcsubnetprivatewithegressSubnet1SubnetF2F863D2',
+      },
+      {
+        Ref: 'vpcsubnetprivatewithegressSubnet2SubnetA9A55023',
+      },
+    ],
+    Type: 'application',
+  });
+});

@@ -240,6 +240,10 @@ export class TestStack extends Stack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      albInternetFacing: true,
+      albSubnets: {
+        subnetType: SubnetType.PUBLIC,
+      },
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
