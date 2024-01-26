@@ -27,6 +27,7 @@ import { KafkaClient } from '@aws-sdk/client-kafka';
 import {
   DescribeAccountSubscriptionCommand,
   QuickSightClient,
+  RegisterUserCommand,
 } from '@aws-sdk/client-quicksight';
 import {
   RedshiftClient,
@@ -4161,6 +4162,76 @@ describe('Pipeline test', () => {
       success: true,
       message: 'Pipeline upgraded.',
     });
+  });
+  it('Upgrade pipeline in China region', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+          ingestionServer: {
+            ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.ingestionServer,
+            loadBalancer: {
+              ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.ingestionServer.loadBalancer,
+              enableApplicationLoadBalancerAccessLog: false,
+            },
+          },
+          region: 'cn-north-1',
+          status: {
+            ...BASE_STATUS,
+          },
+          templateVersion: 'v2.0.0',
+          reporting: {},
+        },
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
+      });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(RegisterUserCommand, 0);
   });
   it('Upgrade pipeline with error server size', async () => {
     tokenMock(ddbMock, false);
