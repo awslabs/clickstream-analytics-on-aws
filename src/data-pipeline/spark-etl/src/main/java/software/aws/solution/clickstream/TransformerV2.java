@@ -355,13 +355,15 @@ public final class TransformerV2 {
         Column dataCol = col("data");
 
         Dataset<Row> dataset0 = cleanedDataset.withColumn(APP_ID, dataCol.getField(APP_ID))
-                .withColumn(USER_PSEUDO_ID, dataCol.getField("unique_id").cast(DataTypes.StringType))
-                .withColumn(EVENT_NAME, dataCol.getField("event_type"))
+                .withColumn(EVENT_ID, substring(dataCol.getItem(EVENT_ID), 0, MAX_STRING_VALUE_LEN))
+                .withColumn(USER_PSEUDO_ID, substring(dataCol.getField("unique_id").cast(DataTypes.StringType), 0, MAX_STRING_VALUE_LEN))
+                .withColumn(EVENT_NAME, substring(dataCol.getField("event_type"), 0, MAX_STRING_VALUE_LEN))
                 .withColumn(EVENT_DATE, to_date(timestamp_seconds(dataCol.getItem(TIMESTAMP).$div(1000))))
                 .withColumn(EVENT_TIMESTAMP, dataCol.getItem(TIMESTAMP))
                 .withColumn(USER_FIRST_TOUCH_TIMESTAMP, get_json_object(dataCol.getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType))
-                .withColumn(USER_ID, get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType));
+                .withColumn(USER_ID, substring(get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType), 0, MAX_STRING_VALUE_LEN));
         Dataset<Row> dataset1 = convertAppInfo(dataset0);
+
         Dataset<Row> eventDataset = extractEvent(dataset1);
         log.info(new ETLMetric(eventDataset, "eventDataset").toString());
 
@@ -383,10 +385,10 @@ public final class TransformerV2 {
     private Dataset<Row> extractEvent(final Dataset<Row> dataset) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
         Column dataCol = col("data");
-        Dataset<Row> dataset1 = dataset.withColumn(EVENT_ID, dataCol.getItem(EVENT_ID))
-                .withColumn(EVENT_PREVIOUS_TIMESTAMP, dataCol.getField(EVENT_PREVIOUS_TIMESTAMP).cast(DataTypes.LongType))
+        Dataset<Row> dataset1 = dataset.withColumn(EVENT_PREVIOUS_TIMESTAMP, dataCol.getField(EVENT_PREVIOUS_TIMESTAMP).cast(DataTypes.LongType))
                 .withColumn(EVENT_VALUE_IN_USD, dataCol.getItem(EVENT_VALUE_IN_USD).cast(DataTypes.FloatType))
-                .withColumn(PLATFORM, dataCol.getItem(PLATFORM)).withColumn("project_id", lit(projectId))
+                .withColumn(PLATFORM, substring(dataCol.getItem(PLATFORM), 0, MAX_STRING_VALUE_LEN))
+                .withColumn("project_id", substring(lit(projectId), 0, MAX_STRING_VALUE_LEN))
                 .withColumn("ingest_timestamp", col("ingest_time"));
 
         Dataset<Row> dataset2 = convertUri(dataset1, "event_bundle_sequence_id", DataTypes.LongType);
@@ -417,13 +419,12 @@ public final class TransformerV2 {
     }
 
     private Dataset<Row> extractEventParameter(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
         Dataset<Row> dataset1 = eventParamsConverter.transform(dataset);
         Dataset<Row> dataset2 = dataset1.select(
                 col(APP_ID),
                 col(EVENT_DATE),
                 col(EVENT_TIMESTAMP),
-                dataCol.getItem(EVENT_ID).cast(DataTypes.StringType).alias(EVENT_ID),
+                col(EVENT_ID),
                 col(EVENT_NAME),
                 col("event_params"));
 
@@ -434,7 +435,7 @@ public final class TransformerV2 {
                         col(EVENT_TIMESTAMP),
                         col(EVENT_ID),
                         col(EVENT_NAME),
-                        col(EVENT_PARAM_KEY),
+                        substring(col(EVENT_PARAM_KEY), 0, MAX_STRING_VALUE_LEN).alias(EVENT_PARAM_KEY),
                         col(EVENT_PARAM_DOUBLE_VALUE),
                         col(EVENT_PARAM_FLOAT_VALUE),
                         col(EVENT_PARAM_INT_VALUE),
@@ -458,6 +459,7 @@ public final class TransformerV2 {
         Dataset<Row> newItemsDataset = dataset1
                 .withColumn(ID, get_json_object(col(itemJson), "$." + ID).cast(DataTypes.StringType))
                 .filter(col(ID).isNotNull())
+                .withColumn(ID, substring(col(ID), 0, MAX_STRING_VALUE_LEN))
                 .select(
                         APP_ID,
                         EVENT_DATE,
@@ -592,21 +594,22 @@ public final class TransformerV2 {
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
         Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset
                 .select(
-                appIdCol,
-                newUniqueUserDataset.col(EVENT_DATE),
-                newUniqueUserDataset.col(EVENT_TIMESTAMP),
-                col(USER_ID),
-                userPseudoIdCol,
+                        appIdCol,
+                        newUniqueUserDataset.col(EVENT_DATE),
+                        newUniqueUserDataset.col(EVENT_TIMESTAMP),
+                        substring(col(USER_ID), 0, MAX_STRING_VALUE_LEN).alias(USER_ID),
+                        userPseudoIdCol,
                         newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP),
-                col(USER_PROPERTIES),
-                col(USER_LTV),
-                timestamp_seconds(newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)).cast(DataTypes.DateType).alias(FIRST_VISIT_DATE),
-                substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
-                col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
-                col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
-                col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),
-                col(DEVICE_ID_LIST),
-                col(CHANNEL));
+                        col(USER_PROPERTIES),
+                        col(USER_LTV),
+                        timestamp_seconds(newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)).cast(DataTypes.DateType).alias(FIRST_VISIT_DATE),
+                        substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
+                        substring(col(TRAFFIC_SOURCE_NAME), 0, MAX_STRING_VALUE_LEN).alias("_first_traffic_source_type"),
+                        substring(col(TRAFFIC_SOURCE_MEDIUM), 0 , MAX_STRING_VALUE_LEN).alias("_first_traffic_medium"),
+                        substring(col(TRAFFIC_SOURCE_SOURCE), 0, MAX_STRING_VALUE_LEN).alias("_first_traffic_source"),
+                        col(DEVICE_ID_LIST),
+                        substring(col(CHANNEL), 0, MAX_STRING_VALUE_LEN).alias(CHANNEL)
+                        );
 
         return Optional.of(joinedPossibleUpdateUserDatasetRt);
     }

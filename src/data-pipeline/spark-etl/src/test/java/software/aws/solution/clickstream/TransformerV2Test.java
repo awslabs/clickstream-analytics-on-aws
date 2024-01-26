@@ -358,4 +358,51 @@ class TransformerV2Test extends BaseSparkTest {
 
     }
 
+    @Test
+    public void should_transform_event_with_field_len_gt_255() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_event_with_field_len_gt_255
+        System.setProperty(APP_IDS_PROP, "appLenMax");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_event_with_field_len_gt_255/");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_nozip_max_len.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(0);
+        Dataset<Row> datasetEventParams = transformedDatasets.get(1).filter(expr("event_param_key='_session_id'"));
+
+        String expectedJson1 = this.resourceFileAsString("/expected/transform_v2_event_max_len.json");
+        Assertions.assertEquals(expectedJson1, datasetEvent.first().prettyJson());
+
+        String expectedJson2 = this.resourceFileAsString("/expected/transform_v2_event_params_max_len.json");
+        Assertions.assertEquals(expectedJson2, datasetEventParams.first().prettyJson());
+
+    }
+
+    @Test
+    public void should_transform_user_item_with_field_len_gt_255() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_item_with_field_len_gt_255
+        System.setProperty(APP_IDS_PROP, "maxLenTestItemUser");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_event_with_field_len_gt_255/");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_nozip_item_max_len.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+
+        Dataset<Row> datasetEvent = transformedDatasets.get(0);
+        Dataset<Row> datasetItem = transformedDatasets.get(2);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String expectedJson0 = this.resourceFileAsString("/expected/transform_v2_event_max_len2.json");
+        Assertions.assertEquals(expectedJson0, datasetEvent.first().prettyJson());
+
+        String expectedJson1 = this.resourceFileAsString("/expected/transform_v2_item_max_len.json");
+        Assertions.assertEquals(expectedJson1, datasetItem.first().prettyJson());
+
+        String expectedJson2 = this.resourceFileAsString("/expected/transform_v2_user_max_len.json");
+        Assertions.assertEquals(expectedJson2, datasetUser.first().prettyJson());
+
+    }
+
 }
