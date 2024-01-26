@@ -16,7 +16,6 @@ package software.aws.solution.clickstream.gtm;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseSparkTest;
@@ -166,6 +165,18 @@ public class ServerDataConverterTest extends BaseSparkTest {
         Assertions.assertEquals(expectedJson1, dataset1.first().prettyJson(), "_user_engagement event is not converted correctly");
         Assertions.assertEquals(expectedJson2, dataset2.first().prettyJson(), "_session_start event is not converted correctly");
 
+    }
+
+    @Test
+    void test_decode_uri() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_decode_uri
+        String uri = "https://www.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&qs=n&form=QBRE&=%25eManage%20Your%20Search%20History%25E&sp=-1&lq=0&pq=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=";
+        String decodeUri = ServerDataConverter.deCodeUri(uri);
+        System.out.println(decodeUri);
+        Assertions.assertEquals(
+                "https://www.bing.com/search?q=中国你好&qs=n&form=QBRE&=%eManage Your Search History%E&sp=-1&lq=0&pq=中国你好&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=",
+                decodeUri
+        );
     }
 
 }

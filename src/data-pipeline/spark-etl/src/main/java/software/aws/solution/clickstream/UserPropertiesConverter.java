@@ -32,11 +32,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.udf;
 import static org.apache.spark.sql.functions.get_json_object;
 
-import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 
@@ -196,7 +194,7 @@ public class UserPropertiesConverter {
                 userLtvUdf.apply(dataset.col("data").getField("user")));
 
         Dataset<Row> userDataset3 = userDataset2
-                .withColumn("user_id", substring(get_json_object(col("data").getField("user"), "$._user_id.value"), 0, MAX_STRING_VALUE_LEN))
+                .withColumn("user_id", get_json_object(col("data").getField("user"), "$._user_id.value"))
                 .withColumn("user_first_touch_timestamp",
                         get_json_object(col("data").getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType));
 
