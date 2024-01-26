@@ -487,7 +487,7 @@ export class CPipeline {
         this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn, SECRETS_MANAGER_ARN_PATTERN);
     }
 
-    if (this.pipeline.reporting) {
+    if (this.pipeline.reporting?.quickSight?.accountName && !this.pipeline.region.startsWith('cn')) {
       const quickSightUser = await registerClickstreamUser();
       this.resources = {
         ...this.resources,
