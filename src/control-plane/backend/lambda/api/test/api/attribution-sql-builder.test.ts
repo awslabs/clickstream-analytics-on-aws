@@ -4599,6 +4599,12 @@ describe('Attribution SQL Builder test', () => {
         where
           event_name = 'purchase'
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -4721,6 +4727,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -4741,6 +4748,12 @@ describe('Attribution SQL Builder test', () => {
         from
           model_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -5050,6 +5063,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -5185,6 +5204,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -5205,6 +5225,12 @@ describe('Attribution SQL Builder test', () => {
         from
           attribution_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -5527,6 +5553,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -5667,6 +5699,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -5687,6 +5720,12 @@ describe('Attribution SQL Builder test', () => {
         from
           attribution_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -5961,6 +6000,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -6116,6 +6161,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -6136,6 +6182,12 @@ describe('Attribution SQL Builder test', () => {
         from
           attribution_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -6414,6 +6466,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -6559,6 +6617,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -6579,6 +6638,12 @@ describe('Attribution SQL Builder test', () => {
         from
           model_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -6869,6 +6934,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -7034,6 +7105,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -7054,6 +7126,12 @@ describe('Attribution SQL Builder test', () => {
         from
           model_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,
@@ -7367,6 +7445,12 @@ describe('Attribution SQL Builder test', () => {
             )
           )
       ),
+      total_conversion_data as (
+        select
+          count(1) as total_conversion
+        from
+        target_data
+      ),
       touch_point_data_1 as (
         select
           user_pseudo_id,
@@ -7502,6 +7586,7 @@ describe('Attribution SQL Builder test', () => {
     select
       total_count_data.total_event_count as "Trigger Count",
       attribution_data.t_event_name as "Touch Point Name",
+      total_conversion as "Number of Total Conversion",
       attribution_count as "Number of Triggers with Conversion",
       attribution_data.contribution as "Contribution(number/sum...value)",
       cast(attribution_data.contribution as float) / t.total_contribution as "Contribution Rate"
@@ -7522,6 +7607,12 @@ describe('Attribution SQL Builder test', () => {
         from
           model_data
       ) as t on 1 = 1
+      join (
+        select 
+          total_conversion 
+        from 
+        total_conversion_data
+      ) as c on 1=1
       join (
         select
           t_event_name,

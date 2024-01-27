@@ -167,6 +167,7 @@ export type MustacheAttributionAnalysisType = MustacheBaseType & {
   triggerCountFieldId: string;
   contributionFieldId: string;
   contributionRateFieldId: string;
+  totalConversionCountFieldId: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -259,25 +260,6 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
 ];
 
-export const attributionVisualColumnsEvent: InputColumn[] = [
-  {
-    Name: 'total_event_count',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'event_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_count',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'contribution',
-    Type: 'DECIMAL',
-  },
-];
-
 export const attributionVisualColumns: InputColumn[] = [
   {
     Name: 'Trigger Count',
@@ -286,6 +268,10 @@ export const attributionVisualColumns: InputColumn[] = [
   {
     Name: 'Touch Point Name',
     Type: 'STRING',
+  },
+  {
+    Name: 'Number of Total Conversion',
+    Type: 'DECIMAL',
   },
   {
     Name: 'Number of Triggers with Conversion',
@@ -897,6 +883,7 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
     triggerCountFieldId: uuidv4(),
     contributionFieldId: uuidv4(),
     contributionRateFieldId: uuidv4(),
+    totalConversionCountFieldId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
   };
