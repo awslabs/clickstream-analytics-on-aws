@@ -46,13 +46,22 @@
                       },
                       {
                         "NumericalDimensionField": {
+                            "FieldId": "{{totalConversionCountFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "Number of Total Conversion"
+                            }
+                        }
+                      },
+                      {
+                        "NumericalDimensionField": {
                             "FieldId": "{{contributionFieldId}}",
                             "Column": {
                                 "DataSetIdentifier": "{{dataSetIdentifier}}",
                                 "ColumnName": "Contribution(number/sum...value)"
                             }
                         }
-                    },
+                      },
                       {
                           "NumericalDimensionField": {
                               "FieldId": "{{contributionRateFieldId}}",
@@ -100,6 +109,34 @@
               "CellStyle": {
                   "Height": 25
               }
+          },
+          "FieldOptions":{
+            "SelectedFieldOptions": [
+                {
+                    "FieldId": "{{touchPointNameFieldId}}",
+                    "Width": "250px"
+                },
+                {
+                    "FieldId": "{{totalTriggerCountFieldId}}",
+                    "Width": "120px"
+                },
+                {
+                    "FieldId": "{{triggerCountFieldId}}",
+                    "Width": "150px"
+                },
+                {
+                    "FieldId": "{{totalConversionCountFieldId}}",
+                    "Width": "200px"
+                },
+                {
+                    "FieldId": "{{contributionFieldId}}",
+                    "Width": "200px"
+                },
+                {
+                    "FieldId": "{{contributionRateFieldId}}",
+                    "Width": "150px"
+                }
+            ]
           }
       },
       "Actions": []
