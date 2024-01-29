@@ -481,12 +481,35 @@ test('Alb is internet-facing and ipv4 by default', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
+    privateSubnets: 'privateSubnet1,privateSubnet2',
+    publicSubnets: 'publicSubnet1,publicSubnet2',
   });
   const template = Template.fromStack(stack);
+  template.hasCondition('IsPrivateSubnets', {
+    'Fn::Equals': [
+      'publicSubnet1,publicSubnet2',
+      'privateSubnet1,privateSubnet2',
+    ],
+  });
   template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
     //IpAddressType: 'dualstack',
     IpAddressType: 'ipv4',
-    Scheme: 'internet-facing',
+    Scheme: {
+      'Fn::If': ['IsPrivateSubnets', 'internal', 'internet-facing'],
+    },
+    Subnets: {
+      'Fn::If': [
+        'IsPrivateSubnets',
+        [
+          'privateSubnet1',
+          'privateSubnet2',
+        ],
+        [
+          'publicSubnet1',
+          'publicSubnet2',
+        ],
+      ],
+    },
   });
 });
 
@@ -834,44 +857,4 @@ test('Check security group count', () => {
 
   const template = Template.fromStack(stack);
   template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
-});
-
-test('Check LoadBalancer deploy in public subnets', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    albPublic: true,
-  });
-
-  const template = Template.fromStack(stack);
-  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
-    Scheme: 'internet-facing',
-    Subnets: [
-      {
-        Ref: 'vpcsubnetpublicSubnet1SubnetF125D982',
-      },
-      {
-        Ref: 'vpcsubnetpublicSubnet2Subnet2731CC5E',
-      },
-    ],
-  });
-});
-
-test('Check LoadBalancer deploy in private subnets', () => {
-  const app = new App();
-  const stack = new TestStack(app, 'test', {
-    albPublic: false,
-  });
-
-  const template = Template.fromStack(stack);
-  template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
-    Scheme: 'internal',
-    Subnets: [
-      {
-        Ref: 'vpcsubnetprivatewithegressSubnet1SubnetF2F863D2',
-      },
-      {
-        Ref: 'vpcsubnetprivatewithegressSubnet2SubnetA9A55023',
-      },
-    ],
-  });
 });

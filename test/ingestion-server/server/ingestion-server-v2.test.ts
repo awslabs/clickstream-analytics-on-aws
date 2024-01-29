@@ -436,10 +436,32 @@ test('Alb is internet-facing and ipv4 by default', () => {
   commonTestStackProps.withMskConfig = true;
   const stack = new TestStack(app, 'test', commonTestStackProps);
   const template = Template.fromStack(stack);
+
+  template.hasCondition('IsPrivateSubnets', {
+    'Fn::Equals': [
+      'publicSubnet1,publicSubnet2',
+      'privateSubnet1,privateSubnet2',
+    ],
+  });
   template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
     //IpAddressType: 'dualstack',
     IpAddressType: 'ipv4',
-    Scheme: 'internet-facing',
+    Scheme: {
+      'Fn::If': ['IsPrivateSubnets', 'internal', 'internet-facing'],
+    },
+    Subnets: {
+      'Fn::If': [
+        'IsPrivateSubnets',
+        [
+          'privateSubnet1',
+          'privateSubnet2',
+        ],
+        [
+          'publicSubnet1',
+          'publicSubnet2',
+        ],
+      ],
+    },
   });
 });
 

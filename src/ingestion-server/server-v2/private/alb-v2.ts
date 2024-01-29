@@ -12,7 +12,7 @@
  */
 
 import { Duration, CfnCondition, Fn } from 'aws-cdk-lib';
-import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { BaseService } from 'aws-cdk-lib/aws-ecs';
 import {
   ApplicationListener,
@@ -61,8 +61,9 @@ function createECSTargets(scope : Construct, service: BaseService, proxyContaine
 
 export interface ApplicationLoadBalancerProps {
   vpc: IVpc;
-  subnetSelection: SubnetSelection;
-  internetFacing: boolean;
+  publicSubnets: string;
+  privateSubnets: string;
+  isPrivateSubnetsCondition: CfnCondition;
   certificateArn: string;
   domainName: string;
   sg: SecurityGroup;
@@ -107,11 +108,13 @@ function createApplicationLoadBalancer(
 
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
-    internetFacing: props.internetFacing,
+    internetFacing: true,
     ipAddressType: props.ipAddressType,
     securityGroup: props.sg,
     idleTimeout: Duration.minutes(3),
-    vpcSubnets: props.subnetSelection,
+    vpcSubnets: {
+      subnetType: SubnetType.PUBLIC,
+    },
     dropInvalidHeaderFields: true,
   });
 
@@ -153,6 +156,12 @@ function createApplicationLoadBalancer(
   const cfnAlb = alb.node.defaultChild as CfnLoadBalancer;
   cfnAlb.addPropertyOverride('LoadBalancerAttributes',
     Fn.conditionIf(enableAlbAccessLogCondition.logicalId, enableAccessLogAlbAttributes, baseAlbAttributes));
+
+  cfnAlb.addPropertyOverride('Scheme',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, 'internal', 'internet-facing').toString());
+
+  cfnAlb.addPropertyOverride('Subnets',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
 
   const targetGroup = createECSTargets(scope, props.service, httpContainerName);
 
@@ -210,5 +219,6 @@ function createApplicationLoadBalancer(
       },
     ],
   );
+
   return { alb, targetGroup, listener: httpListener };
 }
