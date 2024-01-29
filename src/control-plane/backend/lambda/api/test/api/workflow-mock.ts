@@ -182,6 +182,18 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
   ],
 );
 
+export const INGESTION_S3_PRIVATE_PARAMETERS = replaceParameters(
+  INGESTION_S3_PARAMETERS,
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+  },
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+  },
+);
+
 export const INGESTION_S3_FARGATE_PARAMETERS = replaceParameters(
   INGESTION_S3_PARAMETERS,
   {

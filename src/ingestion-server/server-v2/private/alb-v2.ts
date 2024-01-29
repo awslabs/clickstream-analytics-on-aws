@@ -61,6 +61,9 @@ function createECSTargets(scope : Construct, service: BaseService, proxyContaine
 
 export interface ApplicationLoadBalancerProps {
   vpc: IVpc;
+  publicSubnets: string;
+  privateSubnets: string;
+  isPrivateSubnetsCondition: CfnCondition;
   certificateArn: string;
   domainName: string;
   sg: SecurityGroup;
@@ -154,6 +157,12 @@ function createApplicationLoadBalancer(
   cfnAlb.addPropertyOverride('LoadBalancerAttributes',
     Fn.conditionIf(enableAlbAccessLogCondition.logicalId, enableAccessLogAlbAttributes, baseAlbAttributes));
 
+  cfnAlb.addPropertyOverride('Scheme',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, 'internal', 'internet-facing').toString());
+
+  cfnAlb.addPropertyOverride('Subnets',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
+
   const targetGroup = createECSTargets(scope, props.service, httpContainerName);
 
   const httpListener = new ApplicationListener(scope, 'HttpListener', {
@@ -210,5 +219,6 @@ function createApplicationLoadBalancer(
       },
     ],
   );
+
   return { alb, targetGroup, listener: httpListener };
 }

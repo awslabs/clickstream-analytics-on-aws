@@ -13,6 +13,7 @@
 
 import {
   EIngestionType,
+  ENetworkType,
   ProtocalType,
   ResourceCreateMethod,
   SinkType,
@@ -42,6 +43,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     vpcId: '',
     publicSubnetIds: [],
     privateSubnetIds: [],
+    type: ENetworkType.General,
   },
   bucket: {
     name: '',
