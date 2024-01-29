@@ -33,6 +33,8 @@ import software.aws.solution.clickstream.ETLMetric;
 import software.aws.solution.clickstream.KvConverter;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -114,6 +116,7 @@ import static software.aws.solution.clickstream.DatasetUtil.VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.X_GA_JS_CLIENT_ID;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
+import static software.aws.solution.clickstream.MaxLengthTransformer.checkStringValueLength;
 
 @Slf4j
 public class ServerDataConverter {
@@ -245,6 +248,11 @@ public class ServerDataConverter {
         if (result.attrMap.containsKey("x-ga-system_properties.ss")) {
             seesionStart = true;
             result.attrMap.put(SESSION_START_TIMESTAMP, JsonNodeFactory.instance.numberNode(requestStartTimeMs));
+        }
+
+        if (result.attrMap.containsKey(PAGE_URL)) {
+            String url = deCodeUri(result.attrMap.get(PAGE_URL).asText());
+            result.attrMap.put(PAGE_URL, JsonNodeFactory.instance.textNode(url));
         }
 
         List<GenericRow> eventParams = new ArrayList<>();
@@ -387,10 +395,12 @@ public class ServerDataConverter {
                 }
 
                 case GTM_PAGE_REFERRER: {
-                    pageReferrer = checkStringValue(attrValue.asText());
+                    pageReferrer = attrValue.asText();
+                    pageReferrer = checkStringValue(deCodeUri(pageReferrer));
                     addValueToParamsMap(attrMap, attrName, attrValue);
                     break;
                 }
+
                 case "client_hints": {
                     clientHint = getClientHint(attrValue);
                     addValueToParamsMap(attrMap, attrName, attrValue);
@@ -608,15 +618,11 @@ public class ServerDataConverter {
     }
 
     private static String checkStringValue(final String sValue) {
-        return checkStringValue(sValue, MAX_STRING_VALUE_LEN);
+        return  checkStringValueLength(sValue, MAX_STRING_VALUE_LEN);
     }
 
     private static String checkStringValue(final String sValue, final int len) {
-        String reString = sValue;
-        if (reString != null && reString.length() > len) {
-            reString = reString.substring(0, len);
-        }
-        return reString;
+        return  checkStringValueLength(sValue, len);
     }
 
     public static void addValueToParamsMap(final Map<String, JsonNode> attrMap, final String attrName, final JsonNode attrValue) {
@@ -750,6 +756,16 @@ public class ServerDataConverter {
             saveCorruptDataset(corruptDataset, corruptDatasetCount);
         }
         return okDataset;
+    }
+
+    public static String deCodeUri(final String uri) {
+        String result = "";
+        try {
+            result = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.warn(e.getMessage() + ", uri:" + uri);
+        }
+        return result;
     }
 
     @AllArgsConstructor

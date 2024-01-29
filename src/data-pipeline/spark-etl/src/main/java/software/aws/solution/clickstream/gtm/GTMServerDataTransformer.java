@@ -39,7 +39,6 @@ import static org.apache.spark.sql.functions.concat_ws;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.struct;
-import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
@@ -94,8 +93,6 @@ import static software.aws.solution.clickstream.DatasetUtil.ITEM;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
-import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
-import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
@@ -129,6 +126,10 @@ import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPat
 import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.ETLRunner.EVENT_DATE;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEvent;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEventParameter;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForItem;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForUser;
 
 @Slf4j
 public class GTMServerDataTransformer {
@@ -259,7 +260,9 @@ public class GTMServerDataTransformer {
         if (debugLocal) {
             eventDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-eventDataset/");
         }
-        return eventDataset;
+        Dataset<Row> datasetFinal = runMaxLengthTransformerForEvent(eventDataset);
+
+        return datasetFinal.select(selectCols);
     }
 
     private static void mergeIncrementalTables(final SparkSession sparkSession) {
@@ -409,7 +412,7 @@ public class GTMServerDataTransformer {
                 fullAggUserDataset.col(USER_PROPERTIES).alias(USER_PROPERTIES),
                 lit(null).cast(userLtvType).alias(USER_LTV),
                 userFirstVisitDataset.col(FIRST_VISIT_DATE).alias(FIRST_VISIT_DATE),
-                substring(userReferrerDataset.col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
+                userReferrerDataset.col(COL_PAGE_REFERER).alias(FIRST_REFERER),
                 lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_SOURCE_TYPE),
                 lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_MEDIUM),
                 lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_SOURCE),
@@ -421,11 +424,46 @@ public class GTMServerDataTransformer {
         if (debugLocal) {
             finalUserDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-userDataset/");
         }
-        return Optional.of(finalUserDataset);
+
+        Dataset<Row> finalUserDataset2 = runMaxLengthTransformerForUser(finalUserDataset);
+
+        Dataset<Row> finalUserDatasetRt = finalUserDataset2.select(
+                col(APP_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(USER_ID),
+                col(USER_PSEUDO_ID),
+                col(USER_FIRST_TOUCH_TIMESTAMP),
+                col(USER_PROPERTIES),
+                col(USER_LTV),
+                col(FIRST_VISIT_DATE),
+                col(FIRST_REFERER),
+                col(FIRST_TRAFFIC_SOURCE_TYPE),
+                col(FIRST_TRAFFIC_MEDIUM),
+                col(FIRST_TRAFFIC_SOURCE),
+                col(DEVICE_ID_LIST),
+                col(CHANNEL)
+        );
+
+        return Optional.of(finalUserDatasetRt);
     }
 
     private Dataset<Row> extractEventParameter(final Dataset<Row> dataset2) {
         Column dataCol = dataset2.col(DATA_OUT);
+
+        Column[] selectColumns = new Column[] {
+                col(APP_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(EVENT_ID),
+                col(EVENT_NAME),
+                col(EVENT_PARAM_KEY),
+                col(EVENT_PARAM_DOUBLE_VALUE),
+                col(EVENT_PARAM_FLOAT_VALUE),
+                col(EVENT_PARAM_INT_VALUE),
+                col(EVENT_PARAM_STRING_VALUE)
+        };
+
         Dataset<Row> eventParamsDataset = dataset2
                 .withColumn(EVENT_NAME, dataCol.getField(EVENT_NAME))
                 .withColumn(EVENT_PARAM, explode(dataCol.getField(EVENT_PARAMS)))
@@ -434,29 +472,27 @@ public class GTMServerDataTransformer {
                 .withColumn(EVENT_PARAM_FLOAT_VALUE, col(EVENT_PARAM).getField(VALUE).getField(FLOAT_VALUE))
                 .withColumn(EVENT_PARAM_INT_VALUE, col(EVENT_PARAM).getField(VALUE).getField(INT_VALUE))
                 .withColumn(EVENT_PARAM_STRING_VALUE, col(EVENT_PARAM).getField(VALUE).getField(STRING_VALUE))
-                .select(
-                        col(APP_ID),
-                        col(EVENT_DATE),
-                        col(EVENT_TIMESTAMP),
-                        col(EVENT_ID),
-                        col(EVENT_NAME),
-                        col(EVENT_PARAM_KEY),
-                        col(EVENT_PARAM_DOUBLE_VALUE),
-                        col(EVENT_PARAM_FLOAT_VALUE),
-                        col(EVENT_PARAM_INT_VALUE),
-                        substring(col(EVENT_PARAM_STRING_VALUE), 0, MAX_PARAM_STRING_VALUE_LEN).alias(EVENT_PARAM_STRING_VALUE)
-                );
+                .select(selectColumns);
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
             eventParamsDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-eventParameters/");
         }
-        return eventParamsDataset;
 
+        Dataset<Row> datasetOut = runMaxLengthTransformerForEventParameter(eventParamsDataset);
+        return datasetOut.select(selectColumns);
     }
 
     private Optional<Dataset<Row>> extractItem(final Dataset<Row> dataset1) {
         Column dataCol = dataset1.col(DATA_OUT);
+        Column[] selectedColumns = new Column[] {
+                col(APP_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(ID),
+                col(PROPERTIES)
+        };
+
         Dataset<Row> newItemDataset = dataset1
                 .withColumn(ITEMS, dataCol.getField(ITEMS))
                 .select(APP_ID,
@@ -468,11 +504,7 @@ public class GTMServerDataTransformer {
                 .withColumn(ID, col(ITEM).getField(ID))
                 .withColumn(PROPERTIES, col(ITEM).getField(PROPERTIES))
                 .select(
-                        APP_ID,
-                        EVENT_DATE,
-                        EVENT_TIMESTAMP,
-                        ID,
-                        PROPERTIES
+                        selectedColumns
                 )
                 .filter(col(ID).isNotNull())
                 .distinct();
@@ -487,7 +519,10 @@ public class GTMServerDataTransformer {
 
         loadFullItemDataset(newItemDataset, pathInfo);
 
-        Dataset<Row> newAggeItemsDataset = getAggItemDataset(newItemDataset);
+        Dataset<Row> newItemsDatasetOut = runMaxLengthTransformerForItem(newItemDataset);
+
+        Dataset<Row> newAggeItemsDataset = getAggItemDataset(newItemsDatasetOut.select(selectedColumns));
+
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
             newAggeItemsDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/GTMSever-newAggeItemsDataset/");
