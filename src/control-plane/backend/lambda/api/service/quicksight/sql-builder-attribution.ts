@@ -23,6 +23,7 @@ export interface AttributionSQLParameters extends BaseSQLParameters {
   modelWeights?: number[];
   timeWindowType: ExploreAttributionTimeWindowType;
   timeWindowInSeconds?: number;
+  touchPointNames?: string[];
 }
 
 export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
@@ -71,7 +72,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       )
       select 
         total_count_data.total_event_count as "Trigger Count"
-        ,attribution_data.t_event_name as "Touch Point Name"
+        ,p.custom_touch_point_name as "Touch Point Name"
         ,total_conversion as "Number of Total Conversion"
         ,attribution_count as "Number of Triggers with Conversion"
         ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -94,6 +95,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
       ) as s
       on attribution_data.t_event_name = s.t_event_name
+      join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     attributionDataSql = `
@@ -107,7 +109,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       )
       select 
          total_count_data.total_event_count as "Trigger Count"
-        ,attribution_data.t_event_name as "Touch Point Name"
+        ,p.custom_touch_point_name as "Touch Point Name"
         ,total_conversion as "Number of Total Conversion"
         ,attribution_count as "Number of Triggers with Conversion"
         ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -130,6 +132,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select t_event_name,count(1) as attribution_count from joined_base_data group by t_event_name
       ) as s
       on attribution_data.t_event_name = s.t_event_name
+      join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   }
 
@@ -189,7 +192,7 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
       ) 
       select 
         total_count_data.total_event_count as "Trigger Count"
-        ,attribution_data.t_event_name as "Touch Point Name"
+        ,p.custom_touch_point_name as "Touch Point Name"
         ,total_conversion as "Number of Total Conversion"
         ,attribution_count as "Number of Triggers with Conversion"
         ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -214,6 +217,7 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
         select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
       ) as s
       on attribution_data.t_event_name = s.t_event_name
+      join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     modelDataSql = `
@@ -252,7 +256,7 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
       )
       select
         total_count_data.total_event_count as "Trigger Count"
-        ,attribution_data.t_event_name as "Touch Point Name"
+        ,p.custom_touch_point_name as "Touch Point Name"
         ,total_conversion as "Number of Total Conversion"
         ,attribution_count as "Number of Triggers with Conversion"
         ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -281,6 +285,7 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
         select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
       ) as s
       on attribution_data.t_event_name = s.t_event_name
+      join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   }
 
@@ -349,7 +354,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
     )
     select 
       total_count_data.total_event_count as "Trigger Count"
-      ,attribution_data.t_event_name as "Touch Point Name"
+      ,p.custom_touch_point_name as "Touch Point Name"
       ,total_conversion as "Number of Total Conversion"
       ,attribution_count as "Number of Triggers with Conversion"
       ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -372,6 +377,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
       select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
     ) as s
     on attribution_data.t_event_name = s.t_event_name
+    join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     modelDataSql = `
@@ -407,7 +413,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
       )
       select
         total_count_data.total_event_count as "Trigger Count"
-        ,attribution_data.t_event_name as "Touch Point Name"
+        ,p.custom_touch_point_name as "Touch Point Name"
         ,total_conversion as "Number of Total Conversion"
         ,attribution_count as "Number of Triggers with Conversion"
         ,attribution_data.contribution as "Contribution(number/sum...value)"
@@ -436,6 +442,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
         select t_event_name, count(1) as attribution_count from joined_base_data group by t_event_name
       ) as s
       on attribution_data.t_event_name = s.t_event_name
+      join touch_point_names p on attribution_data.t_event_name = p.origin_name
     `;
   }
 
@@ -545,6 +552,31 @@ export function buildBaseDataForAttribution(eventNames: string[], params: Attrib
   }
 
   return format(resultSql, { language: 'postgresql' });
+}
+
+
+function getCustomTouchPointNamesSql(params: AttributionSQLParameters) {
+  let touchPointNamesSql = `touch_point_names as (
+  `;
+  const touchPointNames = params.touchPointNames;
+  for (const [index, eventAndCondition] of params.eventAndConditions.entries()) {
+    let name = '';
+    if (touchPointNames !== undefined && touchPointNames.length > index && touchPointNames[index] !== '') {
+      name = touchPointNames[index];
+    } else {
+      name = `${index+1}_${eventAndCondition.eventName}`;
+    }
+    touchPointNamesSql = touchPointNamesSql.concat(`
+      ${index !== 0 ? 'union all' : ''} 
+      select 
+        '${index+1}_${eventAndCondition.eventName}' as origin_name
+        ,'${name}' as custom_touch_point_name
+    `);
+  }
+
+  touchPointNamesSql += '),';
+
+  return touchPointNamesSql;
 }
 
 export function buildCommonSqlForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
@@ -694,6 +726,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
     ${targetSql}
     ${touchPointSql}
     ${joinSql}
+    ${getCustomTouchPointNamesSql(params)}
   `;
 
   return format(sql, { language: 'postgresql' });
