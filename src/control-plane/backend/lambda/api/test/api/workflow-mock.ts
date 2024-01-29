@@ -29,6 +29,18 @@ export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   return parameters;
 }
 
+export function replaceParameters(base: Parameter[], search: Parameter, replace: Parameter) {
+  // Deep Copy
+  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const indexOfObject = parameters.findIndex((object) => {
+    return object.ParameterKey === search.ParameterKey;
+  });
+  if (indexOfObject > -1) {
+    parameters[indexOfObject] = replace;
+  }
+  return parameters;
+}
+
 const BASE_INGESTION_PARAMETERS: Parameter[] = [
   {
     ParameterKey: 'DevMode',
@@ -168,6 +180,18 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
       ParameterValue: '90',
     },
   ],
+);
+
+export const INGESTION_S3_PRIVATE_PARAMETERS = replaceParameters(
+  INGESTION_S3_PARAMETERS,
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+  },
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+  },
 );
 
 export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(

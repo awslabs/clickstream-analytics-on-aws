@@ -44,6 +44,7 @@ import {
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
   DEFAULT_TRANSFORM_SDK_IDS,
+  ENetworkType,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -253,8 +254,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const validateIngestionSubnets = () => {
     // Validate public subnets
     if (
-      pipelineInfo.selectedPublicSubnet.length < 2 ||
-      !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2)
+      pipelineInfo.network.type !== ENetworkType.Private &&
+      (pipelineInfo.selectedPublicSubnet.length < 2 ||
+        !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2))
     ) {
       setPublicSubnetError(true);
       return false;
@@ -271,6 +273,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
     // Validate private subnet in the same AZ with public subnets
     if (
+      pipelineInfo.network.type !== ENetworkType.Private &&
       !validatePublicSubnetInSameAZWithPrivateSubnets(
         pipelineInfo.selectedPublicSubnet,
         pipelineInfo.selectedPrivateSubnet
@@ -1263,6 +1266,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               kafkaSGEmptyError={kafkaSGEmptyError}
               bufferKDSModeEmptyError={bufferKDSModeEmptyError}
               bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
+              changeNetworkType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    network: {
+                      ...prev.network,
+                      type: type,
+                    },
+                  };
+                });
+              }}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
@@ -2576,6 +2590,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           data.network.privateSubnetIds,
           []
         ),
+        type: data.network.type ?? ENetworkType.General,
       },
       bucket: {
         name: defaultStr(data.bucket?.name),

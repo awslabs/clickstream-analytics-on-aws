@@ -34,7 +34,7 @@ import { Construct } from 'constructs';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
-import { getExistVpc } from './common/vpc-utils';
+import { getALBSubnetsCondtion, getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
   createCommonConditions,
@@ -202,6 +202,7 @@ export class IngestionServerNestedStack extends NestedStack {
         batchTimeoutSecs: props.batchTimeout,
       };
     }
+    const isPrivateSubnetsCondition = getALBSubnetsCondtion(this, props.publicSubnetIds, props.privateSubnetIds);
 
     const fleetCommonProps = {
       workerCpu: 1792,
@@ -231,6 +232,9 @@ export class IngestionServerNestedStack extends NestedStack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      publicSubnets: props.publicSubnetIds,
+      privateSubnets: props.privateSubnetIds,
+      isPrivateSubnetsCondition,
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,

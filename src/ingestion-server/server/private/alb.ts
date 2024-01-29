@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
+import { CfnResource, Duration, Stack, CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Ec2Service } from 'aws-cdk-lib/aws-ecs';
 import {
@@ -24,6 +24,7 @@ import {
   IpAddressType,
   SslPolicy,
   CfnListener,
+  CfnLoadBalancer,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../../../common/alb';
@@ -64,6 +65,9 @@ function addECSTargetsToListener(
 
 export interface ApplicationLoadBalancerProps {
   vpc: IVpc;
+  publicSubnets: string;
+  privateSubnets: string;
+  isPrivateSubnetsCondition: CfnCondition;
   certificateArn: string;
   domainName: string;
   protocol: ApplicationProtocol;
@@ -183,5 +187,13 @@ export function createApplicationLoadBalancer(
       ],
     );
   }
+
+  const cfnAlb = alb.node.defaultChild as CfnLoadBalancer;
+  cfnAlb.addPropertyOverride('Scheme',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, 'internal', 'internet-facing').toString());
+
+  cfnAlb.addPropertyOverride('Subnets',
+    Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
+
   return { alb, targetGroup, listener };
 }

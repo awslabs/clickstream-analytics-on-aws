@@ -321,6 +321,11 @@ export enum PipelineSinkType {
   KINESIS = 'kinesis',
 }
 
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
+}
+
 export enum PipelineServerProtocol {
   HTTP = 'HTTP',
   HTTPS = 'HTTPS',

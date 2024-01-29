@@ -12,6 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
+import { ENetworkType } from 'ts/const';
 
 export {};
 declare global {
@@ -51,6 +52,7 @@ declare global {
       vpcId: string;
       publicSubnetIds: string[];
       privateSubnetIds: string[];
+      type?: ENetworkType;
     };
     bucket: {
       name: string;

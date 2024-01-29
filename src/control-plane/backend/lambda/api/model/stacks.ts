@@ -49,6 +49,7 @@ import {
   BucketPrefix,
   ClickStreamBadRequestError,
   DataCollectionSDK,
+  ENetworkType,
   KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
@@ -151,7 +152,10 @@ export class CIngestionServerStack extends JSONObject {
     VpcId?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
+  @JSONObject.custom( (stack :CIngestionServerStack, key:string, value:any) => {
+    if (stack._pipeline?.network.type === ENetworkType.Private) {
+      return stack._pipeline?.network.privateSubnetIds.join(',');
+    }
     validatePattern(key, SUBNETS_PATTERN, value);
     return value;
   })

@@ -419,3 +419,7 @@ export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';
 
 export const POSITIVE_INTEGER_REGEX = new RegExp(`${'^$|^[1-9]\\d*$'}`);
 export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
+}
