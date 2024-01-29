@@ -223,7 +223,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.example.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple+Watch+Case"
+        "string_value" : "https://www.example.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple Watch Case"
       }
     }, {
       "key" : "x-ga-gtm_version",
