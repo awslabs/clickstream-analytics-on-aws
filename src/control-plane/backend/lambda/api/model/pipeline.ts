@@ -14,38 +14,32 @@
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
-import { IDictionary } from './dictionary';
-import { IPlugin } from './plugin';
-import { IProject } from './project';
 import {
-  CAppRegistryStack,
-  CAthenaStack,
-  CDataModelingStack,
-  CDataProcessingStack,
-  CIngestionServerStack,
-  CKafkaConnectorStack,
-  CMetricsStack,
-  CReportingStack,
-  getStackParameters,
-} from './stacks';
-import {
+  CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
+  FULL_SOLUTION_VERSION,
+  PIPELINE_STACKS,
   awsAccountId,
   awsPartition,
   awsRegion,
   awsUrlSuffix,
-  CFN_RULE_PREFIX,
-  CFN_TOPIC_PREFIX,
-  FULL_SOLUTION_VERSION,
   listenStackQueueArn,
-  PIPELINE_STACKS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
 import {
   MULTI_APP_ID_PATTERN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
-import { BuiltInTagKeys, ExecutionDetail, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from '../common/model-ln';
+import {
+  BuiltInTagKeys,
+  ExecutionDetail,
+  PipelineStackType,
+  PipelineStatusDetail,
+  PipelineStatusType,
+} from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
   validateIngestionServerNum,
@@ -71,11 +65,35 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty, getStackPrefix } from '../common/utils';
+import {
+  getPipelineStatusType,
+  getStackName,
+  getStackPrefix,
+  getStackTags,
+  getStateMachineExecutionName,
+  getUpdateTags,
+  isEmpty,
+  mergeIntoPipelineTags,
+  mergeIntoStackTags,
+} from '../common/utils';
 import { StackManager } from '../service/stack';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
+import { IDictionary } from './dictionary';
+import { IPlugin } from './plugin';
+import { IProject } from './project';
+import {
+  CAppRegistryStack,
+  CAthenaStack,
+  CDataModelingStack,
+  CDataProcessingStack,
+  CIngestionServerStack,
+  CKafkaConnectorStack,
+  CMetricsStack,
+  CReportingStack,
+  getStackParameters,
+} from './stacks';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
@@ -770,15 +788,15 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({
+
+      // Add preset tags to the beginning of the tags array
+      this.pipeline.tags.unshift({
         key: BuiltInTagKeys.AWS_SOLUTION,
         value: SolutionInfo.SOLUTION_SHORT_NAME,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
         value: FULL_SOLUTION_VERSION,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
         value: this.pipeline.projectId,
       });
@@ -836,6 +854,7 @@ export class CPipeline {
     const appRegistryStack = new CAppRegistryStack(this.pipeline);
     const appRegistryParameters = getStackParameters(appRegistryStack);
     const appRegistryStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.APP_REGISTRY, this.pipeline.ingestionServer.sinkType);
+
     const appRegistryState: WorkflowState = {
       Type: WorkflowStateType.STACK,
       Data: {
@@ -845,15 +864,23 @@ export class CPipeline {
           StackName: appRegistryStackName,
           TemplateURL: appRegistryTemplateURL,
           Parameters: appRegistryParameters,
-          Tags: this.stackTags,
+          Tags: this.stackTags ? [...this.stackTags] : undefined,
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       Next: PIPELINE_STACKS,
     };
+
+    // Add awsApplication tag to start viewing the cost, security, and operational metrics for the application
+    const awsApplicationTag: Tag = {
+      Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+      Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+    };
+    mergeIntoStackTags(this.stackTags, awsApplicationTag);
+    mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
 
     return {
       Type: WorkflowStateType.PARALLEL,
@@ -911,7 +938,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -947,7 +974,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1010,7 +1037,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
     };
@@ -1037,7 +1064,7 @@ export class CPipeline {
           },
           Callback: {
             BucketName: bucketName,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
           },
         },
         End: true,
@@ -1089,7 +1116,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1121,7 +1148,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1154,7 +1181,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,

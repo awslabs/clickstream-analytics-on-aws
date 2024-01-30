@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Output, CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
@@ -34,6 +34,7 @@ interface SfnStackInput {
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
+  Tags?: Tag[];
 }
 
 interface SfnStackCallback {
@@ -42,6 +43,7 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: any): Promise<any> => {
+  logger.info(event);
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {
@@ -49,7 +51,9 @@ export const handler = async (event: any): Promise<any> => {
       return eventData;
     } else if (eventData.Type === 'Stack') {
       const stack = eventData as WorkFlowStack;
-      return await stackParametersResolve(stack);
+      await stackParametersResolve(stack);
+      await stackTagsResolve(stack);
+      return stack;
     } else if (eventData.Type === 'Parallel') {
       return {
         Type: 'Parallel',
@@ -152,7 +156,55 @@ async function stackParametersResolve(stack: WorkFlowStack) {
       param.ParameterValue = value;
     }
   }
-  return stack;
+}
+
+async function stackTagsResolve(stack: WorkFlowStack) {
+  const tags = stack.Data.Input.Tags;
+  const bucket = stack.Data.Callback.BucketName;
+  const prefix = stack.Data.Callback.BucketPrefix;
+
+  // When the tag Key or Value starts with '#.', resolve the tag using the pattern '#.{stackName}.{outputKeySuffix}'
+  // e.g. origin = '#.Clickstream-ServiceCatalogAppRegistry-249f84aa8dd044c2a7294cb04cebe88b.ServiceCatalogAppRegistryApplicationTagKey'
+  // If unable to find corresponding output, return `undefined`
+  const resolveTagByOutput = async (origin: string): Promise<string | undefined> => {
+    if (!origin.startsWith('#.') || origin.split('.').length !== 3) {
+      return origin;
+    }
+
+    const splitValues = origin.split('.');
+    const stackName = splitValues[1];
+    const outputKeySuffix = splitValues[2];
+    const s3ObjectKey = `${prefix}/${stackName}/output.json`;
+    let outputs;
+    try {
+      const content = await getObject(bucket, s3ObjectKey);
+      outputs = JSON.parse(content as string)[stackName].Outputs as Output[];
+    } catch (err) {
+      logger.error('Stack workflow cannot retrieve stack output upon resolving tags ', { error: err, s3ObjectKey });
+      return undefined;
+    }
+    if (outputs) {
+      const stackOutput = outputs.find(output => output.OutputKey?.endsWith(outputKeySuffix));
+      return stackOutput?.OutputValue;
+    }
+
+    return undefined;
+  };
+
+  if (tags && bucket && prefix) {
+    const resolvedTags: Tag[] = [];
+    for (const tag of tags) {
+      const Key = await resolveTagByOutput(tag.Key!);
+      const Value = await resolveTagByOutput(tag.Value!);
+      if (Key !== undefined && Value !== undefined) {
+        resolvedTags.push({
+          Key,
+          Value,
+        } as Tag);
+      }
+    };
+    stack.Data.Input.Tags = resolvedTags;
+  }
 }
 
 async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, bucket: string, prefix: string) {
