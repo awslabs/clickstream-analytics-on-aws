@@ -761,7 +761,7 @@ public class ServerDataConverter {
     public static String deCodeUri(final String uri) {
         String result = "";
         try {
-            result = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+            result = URLDecoder.decode(uri, StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             log.warn(e.getMessage() + ", uri:" + uri);
         }
