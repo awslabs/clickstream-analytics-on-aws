@@ -13,5 +13,6 @@
 
 
 export const SINK_STREAM_NAME_PREFIX = 'clickstream_streaming_sink_';
+export const KINESIS_SINK_CR_OUTPUT_ATTR = 'Kinesis';
 
 export const STREAMING_SCHEMA_SUFFIX = '_streaming';

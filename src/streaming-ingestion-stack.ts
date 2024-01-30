@@ -28,7 +28,7 @@ import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { addCfnNagForBucketDeployment, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH } from './common/constant';
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON } from './common/constant';
 import { REDSHIFT_MODE } from './common/model';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
@@ -196,6 +196,11 @@ export class StreamingIngestionStack extends Stack {
     new CfnOutput(this, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, {
       description: 'Flink application ARN',
       value: this.flinkApp.applicationArn,
+    });
+
+    new CfnOutput(this, OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON, {
+      description: 'Sink Kinesis info json',
+      value: sinkStream.kinesisInfoJson,
     });
   }
 

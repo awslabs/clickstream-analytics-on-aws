@@ -55,6 +55,8 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
 
     const resp = await handler(emptyAppIds, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(JSON.parse(resp.Data!.Kinesis)).toMatchObject({
+    });
 
     expect(lambdaMock).toHaveReceivedCommandTimes(ListTagsCommand, 0);
     expect(kinesisMock).toHaveReceivedCommandTimes(CreateStreamCommand, 0);
@@ -74,10 +76,11 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
     };
 
     const streamName = getSinkStreamName('project1', 'app1', 'identifier1');
+    const streamArn = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamName}`;
 
     const basicStreamDetails = {
       StreamName: streamName,
-      StreamARN: '',
+      StreamARN: streamArn,
       Shards: [],
       HasMoreShards: false,
       RetentionPeriodHours: 24,
@@ -93,6 +96,13 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
         RetentionPeriodHours: oneAppId.ResourceProperties.dataRetentionHours,
       },
     });
+    kinesisMock.on(DescribeStreamSummaryCommand).resolves({
+      StreamDescriptionSummary: {
+        ...basicStreamDetails,
+        RetentionPeriodHours: oneAppId.ResourceProperties.dataRetentionHours,
+        OpenShardCount: 1,
+      },
+    });
 
     lambdaMock.on(ListTagsCommand).resolves({
       Tags: {
@@ -103,6 +113,9 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
 
     const resp = await handler(oneAppId, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(JSON.parse(resp.Data!.Kinesis)).toMatchObject({
+      app1: streamArn,
+    });
 
     expect(lambdaMock).toHaveReceivedCommandTimes(ListTagsCommand, 1);
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, CreateStreamCommand, {
@@ -111,22 +124,23 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
       ShardCount: undefined,
     });
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, IncreaseStreamRetentionPeriodCommand, {
-      StreamName: streamName,
+      StreamARN: streamArn,
       RetentionPeriodHours: oneAppId.ResourceProperties.dataRetentionHours,
     });
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, StartStreamEncryptionCommand, {
-      StreamName: streamName,
+      StreamARN: streamArn,
       EncryptionType: EncryptionType.KMS,
       KeyId: oneAppId.ResourceProperties.encryptionKeyArn,
     });
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, AddTagsToStreamCommand, {
-      StreamName: streamName,
+      StreamARN: streamArn,
       Tags: {
         name: 'project1',
         version: 'v1.2.0',
       },
     });
     expect(kinesisMock).toHaveReceivedCommandTimes(DescribeStreamCommand, 3);
+    expect(kinesisMock).toHaveReceivedCommandTimes(DescribeStreamSummaryCommand, 1);
     expect(kinesisMock).toHaveReceivedCommandTimes(DeleteStreamCommand, 0);
   });
 
@@ -198,16 +212,19 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
 
     const resp = await handler(oneAppId, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(JSON.parse(resp.Data!.Kinesis)).toMatchObject({
+      app1: streamArn,
+    });
 
     expect(lambdaMock).toHaveReceivedCommandTimes(ListTagsCommand, 1);
     expect(kinesisMock).toHaveReceivedCommandTimes(DescribeStreamSummaryCommand, 1);
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, DecreaseStreamRetentionPeriodCommand, {
-      StreamName: streamName,
+      StreamARN: streamArn,
       RetentionPeriodHours: oneAppId.ResourceProperties.dataRetentionHours,
     });
     expect(kinesisMock).toHaveReceivedCommandTimes(DescribeStreamCommand, 1);
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, AddTagsToStreamCommand, {
-      StreamName: streamName,
+      StreamARN: streamArn,
       Tags: newTags,
     });
     expect(kinesisMock).toHaveReceivedCommandTimes(RemoveTagsFromStreamCommand, 0);
@@ -228,6 +245,8 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
 
     const resp = await handler(twoAppsId, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(JSON.parse(resp.Data!.Kinesis)).toMatchObject({
+    });
 
     expect(lambdaMock).toHaveReceivedCommandTimes(ListTagsCommand, 0);
     expect(kinesisMock).toHaveReceivedCommandTimes(CreateStreamCommand, 0);
@@ -293,41 +312,52 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
       };
     });
     kinesisMock.on(DescribeStreamSummaryCommand).callsFake(input => {
-      if (input.StreamName?.includes('app1')) {
-        return {
-          StreamDescriptionSummary: {
-            ...basicStreamDetails,
-            StreamName: input.StreamName,
-            StreamARN: `arn:aws:kinesis:us-west-2:555555555555:stream/${input.StreamName}`,
-          },
-        };
+      const streamName = input.StreamName!;
+      const streamArn = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamName}`;
+      return {
+        StreamDescriptionSummary: {
+          ...basicStreamDetails,
+          StreamName: streamName,
+          StreamARN: streamArn,
+          OpenShardCount: 1,
+        },
       };
-      throw new Error('Should not describe summary not for app1');
     });
+
+    const streamNameForApp2 = getSinkStreamName('project1', 'app2', 'identifier1');
+    const streamArnForApp2 = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamNameForApp2}`;
+
+    const streamNameForApp1 = getSinkStreamName('project1', 'app1', 'identifier1');
+    const streamArnForApp1 = `arn:aws:kinesis:us-west-2:555555555555:stream/${streamNameForApp1}`;
 
     const resp = await handler(anotherApp, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(JSON.parse(resp.Data!.Kinesis)).toMatchObject({
+      app1: streamArnForApp1,
+      app2: streamArnForApp2,
+    });
 
     // verify the creation of app2
-    const streamNameForApp2 = getSinkStreamName('project1', 'app2', 'identifier1');
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, CreateStreamCommand, {
       StreamName: streamNameForApp2,
       StreamModeDetails: { StreamMode: 'ON_DEMAND' },
       ShardCount: undefined,
     });
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, StartStreamEncryptionCommand, {
-      StreamName: streamNameForApp2,
+      StreamARN: streamArnForApp2,
       EncryptionType: EncryptionType.KMS,
       KeyId: anotherApp.ResourceProperties.encryptionKeyArn,
     });
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, AddTagsToStreamCommand, {
-      StreamName: streamNameForApp2,
+      StreamARN: streamArnForApp2,
       Tags: tags,
+    });
+    expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, DescribeStreamSummaryCommand, {
+      StreamName: streamNameForApp2,
     });
 
     // verify the updating of app1
-    const streamNameForApp1 = getSinkStreamName('project1', 'app1', 'identifier1');
-    expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(1, DescribeStreamSummaryCommand, {
+    expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(2, DescribeStreamSummaryCommand, {
       StreamName: streamNameForApp1,
     });
     expect(kinesisMock).toHaveReceivedCommandTimes(UpdateStreamModeCommand, 0);
@@ -335,7 +365,7 @@ describe('Custom resource - manage the lifecycle of sink kinesis data stream', (
     expect(kinesisMock).toHaveReceivedCommandTimes(DecreaseStreamRetentionPeriodCommand, 0);
     expect(kinesisMock).toHaveReceivedCommandTimes(AddTagsToStreamCommand, 2);
     expect(kinesisMock).toHaveReceivedNthSpecificCommandWith(2, AddTagsToStreamCommand, {
-      StreamName: streamNameForApp1,
+      StreamARN: streamArnForApp1,
       Tags: tags,
     });
     expect(kinesisMock).toHaveReceivedCommandTimes(RemoveTagsFromStreamCommand, 0);

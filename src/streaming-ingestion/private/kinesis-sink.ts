@@ -18,7 +18,7 @@ import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { SINK_STREAM_NAME_PREFIX } from './constant';
+import { KINESIS_SINK_CR_OUTPUT_ATTR, SINK_STREAM_NAME_PREFIX } from './constant';
 import { KinesisProperties } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
@@ -35,6 +35,7 @@ export class KinesisSink extends Construct {
 
   public readonly cr: CustomResource;
   public readonly streamArnPattern: string;
+  public readonly kinesisInfoJson: string;
 
   constructor(scope: Construct, id: string, props: KinesisSinkProps) {
     super(scope, id);
@@ -64,6 +65,7 @@ export class KinesisSink extends Construct {
       },
     });
     this.cr.node.addDependency(policy);
+    this.kinesisInfoJson = this.cr.getAttString(KINESIS_SINK_CR_OUTPUT_ATTR);
   }
 
   private createKinesisManagementFunction(streamArnPattern: string, keyArn: string): IFunction {

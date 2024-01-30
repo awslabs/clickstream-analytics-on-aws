@@ -25,6 +25,7 @@ import { planAppChanges } from '../../../common/custom-resources';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { KINESIS_SINK_CR_OUTPUT_ATTR } from '../../private/constant';
 import { KinesisCustomResourceProps, KinesisProperties } from '../../private/model';
 import { getSinkStreamName } from '../../private/utils';
 
@@ -57,6 +58,7 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
       toBeDeleted,
     });
 
+    let kinesisInfo = {};
     if (toBeAdded.length > 0 || toBeUpdated.length > 0) {
       const funcTags = await getFunctionTags(context);
       const tags: Tag[] = funcTags ? Object.entries(funcTags).map(([key, value]) => ({ Key: key, Value: value })) : [];
@@ -65,13 +67,13 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
 
       const streams = await updateKinesisStreams(props.projectId, toBeUpdated, props.identifier, props, tags);
 
-      response.Data = {
-        ...response.Data,
+      kinesisInfo = {
         ...newStreams,
         ...streams,
       };
     }
     await deleteKinesisStreams(props.projectId, toBeDeleted, props.identifier);
+    response.Data![KINESIS_SINK_CR_OUTPUT_ATTR] = JSON.stringify(kinesisInfo);
   } catch (e) {
     logger.error('Error when managing sink kinesis streams for streaming ingestion', { e });
     throw e;
@@ -112,22 +114,27 @@ async function createKinesisStreams(projectId: string, appIds: string[], identif
       Limit: 2,
     });
 
-    await setStreamDataRetentionPeriod(streamName, 24, Number(kinesisProps.dataRetentionHours));
+    const stream = await kinesisClient.send(new DescribeStreamSummaryCommand({
+      StreamName: streamName,
+    }));
+    const streamArn = stream.StreamDescriptionSummary!.StreamARN!;
+
+    await setStreamDataRetentionPeriod(streamArn, 24, Number(kinesisProps.dataRetentionHours));
 
     if (kinesisProps.encryptionKeyArn) {
-      await setEncryptionKey(streamName, kinesisProps.encryptionKeyArn);
+      await setEncryptionKey(streamArn, kinesisProps.encryptionKeyArn);
     }
 
-    await tagStream(streamName, tags);
-    appStreamMapping[appId] = streamName;
+    await tagStream(streamArn, tags);
+    appStreamMapping[appId] = streamArn;
   }
   return appStreamMapping;
 }
 
-async function setEncryptionKey(streamName: string, kmsKeyArn: string) {
-  logger.info(`Setting stream ${streamName} encryption key to ${kmsKeyArn}`);
+async function setEncryptionKey(streamArn: string, kmsKeyArn: string) {
+  logger.info(`Setting stream ${streamArn} encryption key to ${kmsKeyArn}`);
   await kinesisClient.send(new StartStreamEncryptionCommand({
-    StreamName: streamName,
+    StreamARN: streamArn,
     EncryptionType: EncryptionType.KMS,
     KeyId: kmsKeyArn,
   }));
@@ -136,21 +143,21 @@ async function setEncryptionKey(streamName: string, kmsKeyArn: string) {
     maxWaitTime: 120,
     minDelay: 10,
   }, {
-    StreamName: streamName,
+    StreamARN: streamArn,
     Limit: 2,
   });
 }
 
-async function setStreamDataRetentionPeriod(streamName: string, retentionPeriodHours: number,
+async function setStreamDataRetentionPeriod(streamArn: string, retentionPeriodHours: number,
   newRetentionPeriodHours: number) {
-  logger.info(`Setting stream ${streamName} data retention period from ${retentionPeriodHours} hours to ${newRetentionPeriodHours} hours.`);
+  logger.info(`Setting stream ${streamArn} data retention period from ${retentionPeriodHours} hours to ${newRetentionPeriodHours} hours.`);
   if (newRetentionPeriodHours < 24 || newRetentionPeriodHours > 8760) {
     logger.warn(`New retention hours ${newRetentionPeriodHours} is illegal, ignore this change.`);
     return;
   }
 
   const updateParams = {
-    StreamName: streamName,
+    StreamARN: streamArn,
     RetentionPeriodHours: newRetentionPeriodHours,
   };
   if (newRetentionPeriodHours > retentionPeriodHours) {
@@ -166,13 +173,13 @@ async function setStreamDataRetentionPeriod(streamName: string, retentionPeriodH
     maxWaitTime: 120,
     minDelay: 10,
   }, {
-    StreamName: streamName,
+    StreamARN: streamArn,
     Limit: 2,
   });
 }
 
-async function tagStream(streamName: string, newTags: Tag[], oldTags?: Tag[]) {
-  logger.info(`Tagging stream ${streamName} with tags`, {
+async function tagStream(streamArn: string, newTags: Tag[], oldTags?: Tag[]) {
+  logger.info(`Tagging stream ${streamArn} with tags`, {
     tags: newTags,
     oldTags,
   });
@@ -185,7 +192,7 @@ async function tagStream(streamName: string, newTags: Tag[], oldTags?: Tag[]) {
       record[tag.Key as string] = tag.Value!;
     });
     await kinesisClient.send(new AddTagsToStreamCommand({
-      StreamName: streamName,
+      StreamARN: streamArn,
       Tags: record,
     }));
   }
@@ -193,9 +200,9 @@ async function tagStream(streamName: string, newTags: Tag[], oldTags?: Tag[]) {
   const newTagNames = newTags.map(tag => tag.Key!);
   const removedTags = oldTags?.filter((oldTag) => !newTagNames.includes(oldTag.Key!));
   if (removedTags && removedTags.length > 0) {
-    logger.info(`Removing tags from stream ${streamName}`, { removedTags });
+    logger.info(`Removing tags from stream ${streamArn}`, { removedTags });
     await kinesisClient.send(new RemoveTagsFromStreamCommand({
-      StreamName: streamName,
+      StreamARN: streamArn,
       TagKeys: removedTags.map(tag => tag.Key!),
     }));
   }
@@ -227,8 +234,10 @@ async function updateKinesisStreams(projectId: string, appIds: string[], identif
         stream: stream.StreamDescriptionSummary,
       });
 
+      const streamArn = stream.StreamDescriptionSummary!.StreamARN!;
+
       if (stream.StreamDescriptionSummary?.StreamModeDetails?.StreamMode != kinesisProps.streamMode) {
-        logger.info(`Update stream ${stream.StreamDescriptionSummary?.StreamARN} to new mode`, {
+        logger.info(`Update stream ${streamArn} to new mode`, {
           mode: kinesisProps.streamMode,
         });
         await kinesisClient.send(new UpdateStreamModeCommand({
@@ -242,14 +251,14 @@ async function updateKinesisStreams(projectId: string, appIds: string[], identif
           maxWaitTime: 120,
           minDelay: 10,
         }, {
-          StreamARN: stream.StreamDescriptionSummary?.StreamARN,
+          StreamARN: streamArn,
           Limit: 2,
         });
       }
 
       if (stream.StreamDescriptionSummary?.OpenShardCount != Number(kinesisProps.shardCount) &&
           kinesisProps.streamMode == StreamMode.PROVISIONED) {
-        logger.info(`Update the shard of stream ${stream.StreamDescriptionSummary?.StreamARN} to new shard count ${kinesisProps.shardCount}.`, {
+        logger.info(`Update the shard of stream ${streamArn} to new shard count ${kinesisProps.shardCount}.`, {
           shardCount: kinesisProps.shardCount,
         });
         await kinesisClient.send(new UpdateShardCountCommand({
@@ -262,20 +271,20 @@ async function updateKinesisStreams(projectId: string, appIds: string[], identif
           maxWaitTime: 120,
           minDelay: 10,
         }, {
-          StreamARN: stream.StreamDescriptionSummary?.StreamARN,
+          StreamARN: streamArn,
           Limit: 2,
         });
       }
 
-      await setStreamDataRetentionPeriod(streamName, stream.StreamDescriptionSummary?.RetentionPeriodHours ?? 24,
+      await setStreamDataRetentionPeriod(streamArn, stream.StreamDescriptionSummary?.RetentionPeriodHours ?? 24,
         Number(kinesisProps.dataRetentionHours));
 
       if (stream.StreamDescriptionSummary?.KeyId != kinesisProps.encryptionKeyArn) {
-        await setEncryptionKey(streamName, kinesisProps.encryptionKeyArn);
+        await setEncryptionKey(streamArn, kinesisProps.encryptionKeyArn);
       }
 
-      await tagStream(streamName, tags, await getTags(stream.StreamDescriptionSummary!.StreamARN!));
-      appStreamMapping[appId] = streamName;
+      await tagStream(streamArn, tags, await getTags(streamArn));
+      appStreamMapping[appId] = streamArn;
     } catch (error) {
       if (error instanceof ResourceNotFoundException) {
         logger.error(`Can not find the kinesis stream ${streamName}`);
