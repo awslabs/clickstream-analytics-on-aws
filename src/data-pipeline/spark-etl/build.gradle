@@ -75,7 +75,6 @@ var sparkJavaCompatibleJvmArgs = [
 ]
 
 tasks.named('test') {
-    jvmArgs += sparkJavaCompatibleJvmArgs
     useJUnitPlatform()
 }
 

@@ -121,7 +121,7 @@ public class MaxLengthTransformer {
     }
 
     public static Dataset<Row> runMaxLengthTransformerForItem(final Dataset<Row> newItemsDataset1) {
-        Dataset<Row> newItemsDataset2 = new MaxLengthTransformer().transform(newItemsDataset1, List.of(ID), MAX_STRING_VALUE_LEN);
+        Dataset<Row> newItemsDataset2 = new MaxLengthTransformer().transform(newItemsDataset1, Arrays.asList(ID), MAX_STRING_VALUE_LEN);
         Dataset<Row> newItemsDataset3 = newItemsDataset2.select(
                 APP_ID,
                 EVENT_DATE,
@@ -179,8 +179,8 @@ public class MaxLengthTransformer {
 
     public static Dataset<Row> runMaxLengthTransformerForEventParameter(final Dataset<Row> dataset3) {
         MaxLengthTransformer maxLengthTransformer = new MaxLengthTransformer();
-        Dataset<Row> dataset4 = maxLengthTransformer.transform(dataset3, List.of(EVENT_ID, EVENT_NAME, EVENT_PARAM_KEY), MAX_STRING_VALUE_LEN);
-        Dataset<Row> dataset5 = maxLengthTransformer.transform(dataset4, List.of(EVENT_PARAM_STRING_VALUE), MAX_PARAM_STRING_VALUE_LEN);
+        Dataset<Row> dataset4 = maxLengthTransformer.transform(dataset3, Arrays.asList(EVENT_ID, EVENT_NAME, EVENT_PARAM_KEY), MAX_STRING_VALUE_LEN);
+        Dataset<Row> dataset5 = maxLengthTransformer.transform(dataset4, Arrays.asList(EVENT_PARAM_STRING_VALUE), MAX_PARAM_STRING_VALUE_LEN);
 
         Dataset<Row> eventPrameterTruncatedDataset = dataset5.filter(
                         col(EVENT_PARAM_KEY + TRUNCATED).equalTo(true)
@@ -203,7 +203,7 @@ public class MaxLengthTransformer {
     public static Dataset<Row> runMaxLengthTransformerForEvent(final Dataset<Row> datasetFinal2) {
         MaxLengthTransformer maxLengthTransformer = new MaxLengthTransformer();
         Dataset<Row> datasetFinal3 = maxLengthTransformer.transform(datasetFinal2,
-                List.of(EVENT_ID, EVENT_NAME, USER_PSEUDO_ID, USER_ID, PLATFORM),
+                Arrays.asList(EVENT_ID, EVENT_NAME, USER_PSEUDO_ID, USER_ID, PLATFORM),
                 MAX_STRING_VALUE_LEN);
 
         Dataset<Row> eventTruncatedDataset = datasetFinal3.filter(

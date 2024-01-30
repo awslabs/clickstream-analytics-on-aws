@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
@@ -42,7 +42,7 @@ public class MaxLengthTransformerTest extends BaseSparkTest {
 
         MaxLengthTransformer maxLengthTransformer = new MaxLengthTransformer();
 
-        Dataset<Row> dataset1 = maxLengthTransformer.transform(dataset, List.of( "name", "address"), 10);
+        Dataset<Row> dataset1 = maxLengthTransformer.transform(dataset, Arrays.asList("name", "address"), 10);
 
         Assertions.assertEquals("{\"address\":\"北京市\",\"age\":18,\"name\":\"刘先生\",\"phone\":\"13888888888\",\"sex\":\"M\",\"name_truncated\":false,\"address_truncated\":true}",
                 dataset1.filter(col("name").equalTo("刘先生")).first().json());
