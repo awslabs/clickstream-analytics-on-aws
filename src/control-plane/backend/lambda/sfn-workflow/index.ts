@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { Parameter, Output, CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
@@ -34,6 +34,7 @@ interface SfnStackInput {
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
+  readonly Tags?: Tag[];
 }
 
 interface SfnStackCallback {
@@ -49,7 +50,9 @@ export const handler = async (event: any): Promise<any> => {
       return eventData;
     } else if (eventData.Type === 'Stack') {
       const stack = eventData as WorkFlowStack;
-      return await stackParametersResolve(stack);
+      await stackParametersResolve(stack);
+      await stackTagsResolve(stack);
+      return stack;
     } else if (eventData.Type === 'Parallel') {
       return {
         Type: 'Parallel',
@@ -152,7 +155,21 @@ async function stackParametersResolve(stack: WorkFlowStack) {
       param.ParameterValue = value;
     }
   }
-  return stack;
+}
+
+async function stackTagsResolve(stack: WorkFlowStack) {
+  const tags = stack.Data.Input.Tags;
+  const bucket = stack.Data.Callback.BucketName;
+  const prefix = stack.Data.Callback.BucketPrefix;
+  if (tags && bucket && prefix) {
+    for (let tag of tags) {
+      if (tag.Key?.endsWith('.#') && tag.Value?.startsWith('#.')) {
+        const { key, value } = await _getParameterKeyAndValueByStackOutput(tag.Key, tag.Value, bucket, prefix);
+        tag.Key = key;
+        tag.Value = value;
+      }
+    }
+  }
 }
 
 async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, bucket: string, prefix: string) {
