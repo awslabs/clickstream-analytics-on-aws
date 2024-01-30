@@ -17,6 +17,7 @@ import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
 import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './common/constant';
 import { Parameters } from './common/parameters';
@@ -54,6 +55,12 @@ export class ServiceCatalogAppregistryStack extends Stack {
     Tags.of(application).add('Solutions:SolutionName', SolutionInfo.SOLUTION_NAME);
     Tags.of(application).add('Solutions:SolutionVersion', SolutionInfo.SOLUTION_VERSION_SHORT);
     Tags.of(application).add('Solutions:ApplicationType', SolutionInfo.SOLUTION_TYPE);
+
+    new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG, {
+      description: 'Service Catalog AppRegistry Application Tag',
+      value: Fn.getAtt((application.node.defaultChild as CfnResource).logicalId, 'ApplicationTagValue').toString(),
+      condition: serviceAvailableRegion,
+    });
 
     new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, {
       description: 'Service Catalog AppRegistry Application Arn',
