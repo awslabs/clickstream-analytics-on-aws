@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { afterEach } from 'node:test';
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates } from '../../service/quicksight/sql-builder';
@@ -18,6 +19,10 @@ import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buil
 describe('SQL Builder test', () => {
 
   beforeEach(() => {
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   test('funnel sql - user_cnt', () => {
@@ -18948,8 +18953,6 @@ describe('SQL Builder test', () => {
       ],
 
     });
-
-    jest.useRealTimers();
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
