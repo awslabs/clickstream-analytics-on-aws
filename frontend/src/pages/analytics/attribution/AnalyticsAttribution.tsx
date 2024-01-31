@@ -463,6 +463,12 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
   }, [presetParameters]);
 
   useEffect(() => {
+    if (selectedAttributionModel?.value !== AttributionModelType.POSITION) {
+      clickPreview();
+    }
+  }, [selectedAttributionModel]);
+
+  useEffect(() => {
     if (
       selectedAttributionModel?.value === AttributionModelType.POSITION &&
       !contributionFirstInvalid &&
@@ -687,12 +693,6 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                     options={attributionModelOptions}
                     onChange={(event) => {
                       setSelectedAttributionModel(event.detail.selectedOption);
-                      if (
-                        event.detail.selectedOption?.value !==
-                        AttributionModelType.POSITION
-                      ) {
-                        clickPreview();
-                      }
                     }}
                   />
                 </div>
