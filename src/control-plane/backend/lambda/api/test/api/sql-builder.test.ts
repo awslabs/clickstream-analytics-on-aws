@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { afterEach } from 'node:test';
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates } from '../../service/quicksight/sql-builder';
@@ -18,6 +19,10 @@ import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buil
 describe('SQL Builder test', () => {
 
   beforeEach(() => {
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   test('funnel sql - user_cnt', () => {
@@ -18854,13 +18859,8 @@ describe('SQL Builder test', () => {
   });
 
   test('retention view - relative time range - check date list', () => {
-    const mockedDate = new Date('2024-01-18');
-    const mockedDate2 = new Date();
-    jest.spyOn(global, 'Date').mockImplementationOnce(() => {
-      return mockedDate;
-    }).mockImplementation(() => {
-      return mockedDate2;
-    });
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-18'));
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
@@ -19329,8 +19329,8 @@ describe('SQL Builder test', () => {
             from
               shop.event as event
             where
-              event.event_date >= date '2024-01-22'
-              and event.event_date <= date '2024-01-22'
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
               and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as l
           join (
