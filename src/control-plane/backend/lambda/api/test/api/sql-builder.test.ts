@@ -18854,13 +18854,8 @@ describe('SQL Builder test', () => {
   });
 
   test('retention view - relative time range - check date list', () => {
-    const mockedDate = new Date('2024-01-18');
-    const mockedDate2 = new Date();
-    jest.spyOn(global, 'Date').mockImplementationOnce(() => {
-      return mockedDate;
-    }).mockImplementation(() => {
-      return mockedDate2;
-    });
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2024-01-18'));
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
@@ -18953,6 +18948,8 @@ describe('SQL Builder test', () => {
       ],
 
     });
+
+    jest.useRealTimers();
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -19329,8 +19326,8 @@ describe('SQL Builder test', () => {
             from
               shop.event as event
             where
-              event.event_date >= date '2024-01-22'
-              and event.event_date <= date '2024-01-22'
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
               and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as l
           join (
