@@ -58,7 +58,11 @@ test('Should has output', () => {
     Condition: 'ServiceCatalogAvailableRegion',
   });
 
-  template.hasOutput('ServiceCatalogAppRegistryApplicationTag', {
+  template.hasOutput('ServiceCatalogAppRegistryApplicationTagKey', {
+    Condition: 'ServiceCatalogAvailableRegion',
+  });
+
+  template.hasOutput('ServiceCatalogAppRegistryApplicationTagValue', {
     Condition: 'ServiceCatalogAvailableRegion',
   });
 });
