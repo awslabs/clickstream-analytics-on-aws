@@ -2406,10 +2406,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         });
       if (success) {
         pipelineInfo.selectedTransformPlugins = data.items.filter(
-          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin
+          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin.id
+        );
+        const enrichPluginIds = pipelineInfo.dataProcessing.enrichPlugin.map(
+          (item) => item.id
         );
         pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
-          pipelineInfo.dataProcessing.enrichPlugin.includes(defaultStr(item.id))
+          enrichPluginIds.includes(defaultStr(item.id))
         );
       }
     } catch (error) {
@@ -2602,14 +2605,20 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           data.network.privateSubnetIds,
           []
         ),
-        type: data.network.type ?? ENetworkType.General,
+        type: defaultStr(
+          data.network.type,
+          ENetworkType.General
+        ) as ENetworkType,
       },
       bucket: {
         name: defaultStr(data.bucket?.name),
         prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
-        ingestionType: data.ingestionServer.ingestionType ?? EIngestionType.EC2,
+        ingestionType: defaultStr(
+          data.ingestionServer.ingestionType,
+          EIngestionType.EC2
+        ) as EIngestionType,
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,
@@ -2672,21 +2681,34 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
         sinkType: defaultStr(data.ingestionServer.sinkType, SinkType.MSK),
         sinkBatch: {
-          size: data.ingestionServer.sinkBatch?.size ?? 50000,
-          intervalSeconds:
-            data.ingestionServer.sinkBatch?.intervalSeconds ?? 3000,
+          size: defaultGenericsValue(
+            data.ingestionServer.sinkBatch?.size,
+            50000
+          ),
+          intervalSeconds: defaultGenericsValue(
+            data.ingestionServer.sinkBatch?.intervalSeconds,
+            3000
+          ),
         },
         sinkS3: {
           sinkBucket: {
             name: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.name),
             prefix: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.prefix),
           },
-          s3BufferSize: data.ingestionServer.sinkS3?.s3BufferSize ?? 10,
-          s3BufferInterval:
-            data.ingestionServer.sinkS3?.s3BufferInterval ?? 300,
+          s3BufferSize: defaultGenericsValue(
+            data.ingestionServer.sinkS3?.s3BufferSize,
+            10
+          ),
+          s3BufferInterval: defaultGenericsValue(
+            data.ingestionServer.sinkS3?.s3BufferInterval,
+            300
+          ),
         },
         sinkKafka: {
-          brokers: data.ingestionServer.sinkKafka?.brokers ?? [],
+          brokers: defaultGenericsValue(
+            data.ingestionServer.sinkKafka?.brokers,
+            []
+          ),
           topic: defaultStr(data.ingestionServer.sinkKafka?.topic),
           securityGroupId: defaultStr(
             data.ingestionServer.sinkKafka?.securityGroupId
@@ -2704,8 +2726,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           kinesisStreamMode: defaultStr(
             data.ingestionServer.sinkKinesis?.kinesisStreamMode
           ),
-          kinesisShardCount:
-            data.ingestionServer.sinkKinesis?.kinesisShardCount ?? 2,
+          kinesisShardCount: defaultGenericsValue(
+            data.ingestionServer.sinkKinesis?.kinesisShardCount,
+            2
+          ),
           sinkBucket: {
             name: defaultStr(data.ingestionServer.sinkKinesis?.sinkBucket.name),
             prefix: defaultStr(
@@ -2715,7 +2739,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
       },
       dataProcessing: {
-        dataFreshnessInHour: data.dataProcessing?.dataFreshnessInHour ?? 72,
+        dataFreshnessInHour: defaultGenericsValue(
+          data.dataProcessing?.dataFreshnessInHour,
+          72
+        ),
         scheduleExpression: defaultStr(data.dataProcessing?.scheduleExpression),
         sourceS3Bucket: {
           name: defaultStr(data.dataProcessing?.sourceS3Bucket?.name),
@@ -2730,18 +2757,24 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           prefix: defaultStr(data.dataProcessing?.pipelineBucket?.prefix),
         },
         transformPlugin: defaultStr(data.dataProcessing?.transformPlugin),
-        enrichPlugin: data.dataProcessing?.enrichPlugin ?? [],
+        enrichPlugin: defaultGenericsValue(
+          data.dataProcessing?.enrichPlugin,
+          []
+        ),
       },
       dataModeling: {
         athena: data.dataModeling?.athena ?? false,
         redshift: {
-          dataRange: data.dataModeling?.redshift?.dataRange ?? 0,
+          dataRange: defaultGenericsValue(
+            data.dataModeling?.redshift?.dataRange,
+            0
+          ),
           provisioned: data.dataModeling?.redshift?.provisioned ?? null,
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
       statusType: data.statusType,
-      stackDetails: data.stackDetails ?? [],
+      stackDetails: defaultGenericsValue(data.stackDetails, []),
       executionDetail: data.executionDetail,
       workflow: data.workflow,
       version: defaultStr(data.version),

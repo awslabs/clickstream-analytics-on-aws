@@ -132,8 +132,8 @@ declare global {
         name: string;
         prefix: string;
       };
-      transformPlugin: string;
-      enrichPlugin: string[];
+      transformPlugin: any;
+      enrichPlugin: any[];
     };
     dataModeling: {
       athena: boolean;
