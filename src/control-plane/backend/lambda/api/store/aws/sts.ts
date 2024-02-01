@@ -14,9 +14,12 @@
 
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { STSUploadRole } from '../../common/constants';
+import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const AssumeUploadRole = async (sessionName: string) => {
-  const client = new STSClient({});
+  const client = new STSClient({
+    ...aws_sdk_client_common_config,
+  });
   const command = new AssumeRoleCommand({
     RoleArn: STSUploadRole,
     RoleSessionName: sessionName,
