@@ -33,9 +33,10 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
-import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { ReportingCheck } from './reporting-check';
+import { PairEventAndCondition } from './sql-builder';
+import { DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -1107,13 +1108,8 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
 
 export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.specifyJoinColumn === undefined
     || params.eventAndConditions === undefined
@@ -1157,31 +1153,70 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  const checkResult = _checkDuplicatedEvent(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
+  checkChain.DuplicatedEvent().NodesLimit();
+
+  return checkChain.status;
+}
+
+export function checkAttributionAnalysisParameter(params: any): CheckParamsStatus {
+
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
+
+  if (params.targetEventAndCondition === undefined
+    || params.modelType === undefined
+    || params.eventAndConditions === undefined
+    || params.timeWindowType === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
   }
 
-  const checkNodesLimit = _checkNodesLimit(params);
-  if (checkNodesLimit !== undefined ) {
-    return checkNodesLimit;
+  if (params.eventAndConditions.length < 1) {
+    return {
+      success: false,
+      message: 'At least specify 1 event for attribution analysis',
+    };
   }
 
-  return {
-    success,
-    message,
-  };
+  if (params.modelType === AttributionModelType.POSITION && (params.modelWeights === undefined || params.modelWeights.length < 1) ) {
+    return {
+      success: false,
+      message: 'missing weights for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds === undefined) {
+    return {
+      success: false,
+      message: 'missing time window parameter for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined
+    && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
+    return {
+      success: false,
+      message: 'time window too long for attribution analysis, max is 10 years',
+    };
+  }
+
+  if (params.computeMethod !== ExploreComputeMethod.EVENT_CNT && params.computeMethod !== ExploreComputeMethod.SUM_VALUE) {
+    return {
+      success: false,
+      message: 'unsupported compute method for attribution analysis',
+    };
+  }
+
+  return checkChain.status;
 }
 
 export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.eventAndConditions === undefined
     || params.groupColumn === undefined
@@ -1199,26 +1234,15 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
       message: 'unsupported chart type',
     };
   }
+  checkChain.DuplicatedEvent();
 
-  const checkResult = _checkDuplicatedEvent(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
-  }
-
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.eventAndConditions === undefined
     || params.pathAnalysis === undefined
@@ -1263,21 +1287,13 @@ export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.pairEventAndConditions === undefined
     || (params.pairEventAndConditions !== undefined && params.pairEventAndConditions.length < 1)
@@ -1301,10 +1317,7 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
     return retentionJoinColumnResult;
   }
 
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition[]): CheckParamsStatus | void {
@@ -1322,144 +1335,16 @@ function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition
   }
 }
 
-function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
-
-  if ( params.viewName === undefined
-    || params.projectId === undefined
-    || params.pipelineId === undefined
-    || params.appId === undefined
-    || params.computeMethod === undefined
-    || params.dashboardCreateParameters === undefined
-  ) {
-    return {
-      success: false,
-      message: 'Required parameter is not provided.',
-    };
-  }
-
-  if (params.action !== ExploreRequestAction.PREVIEW && params.action !== ExploreRequestAction.PUBLISH) {
-    return {
-      success: false,
-      message: 'Invalid request action.',
-    };
-  } else if (params.action === ExploreRequestAction.PUBLISH) {
-    if (params.chartTitle === undefined
-      || params.chartTitle === ''
-      || params.dashboardId === undefined
-      || params.sheetId === undefined
-    ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
-      };
-    }
-  }
-
-  if (params.groupCondition !== undefined && params.groupCondition.property === '') {
-    return {
-      success: false,
-      message: '\'property\' attribute of grouping condition is empty.',
-    };
-  }
-
-  if (params.groupCondition !== undefined && params.groupCondition.dataType !== MetadataValueType.STRING) {
-    return {
-      success: false,
-      message: 'Grouping function is not supported on no-string attribute.',
-    };
-  }
-
-  const filterTypeValueCheckResult = _checkFilterTypeAndValue(params);
-  if (filterTypeValueCheckResult !== undefined ) {
-    return filterTypeValueCheckResult;
-  }
-
-  const filterCheckResult = _checkCondition(params);
-  if (filterCheckResult !== undefined ) {
-    return filterCheckResult;
-  }
-
-  const checkResult = _checkTimeParameters(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
-  }
-
+function _checkCommonPartParameter(checkChain: ReportingCheck) {
+  checkChain
+    .CommonParameterRequired()
+    .GroupCondition()
+    .FilterTypeAndValue()
+    .Condition()
+    .TimeParameters()
+    .TimeLargeThan10Years();
 }
 
-function _getRetentionAnalysisConditions(params: any) {
-
-  const allPairConditions:Condition[] = [];
-  const pairEventAndConditions = params.pairEventAndConditions;
-  if (pairEventAndConditions !== undefined) {
-    for (const pairCondition of pairEventAndConditions) {
-      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
-        allPairConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
-      }
-      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
-        allPairConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
-      }
-    }
-  }
-
-  return allPairConditions;
-}
-
-function _checkCondition(params: any): CheckParamsStatus | void {
-
-  const allConditions:Condition[] = [];
-  const eventAndConditions = params.eventAndConditions;
-  if (eventAndConditions !== undefined) {
-    for (const eventCondition of eventAndConditions) {
-      if (eventCondition.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...eventCondition.sqlCondition.conditions);
-      }
-    }
-  }
-
-  const globalEventCondition = params.globalEventCondition;
-  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
-    allConditions.push(...globalEventCondition.conditions);
-  }
-
-  allConditions.push(..._getRetentionAnalysisConditions(params));
-
-  for (const condition of allConditions) {
-
-    if (condition.category === undefined
-      || condition.property === undefined || condition.property === ''
-      ||condition.operator === undefined || condition.operator === ''
-      || condition.value === undefined) {
-
-      return {
-        success: false,
-        message: 'Incomplete filter conditions.',
-      };
-    }
-  }
-}
-
-function _checkTimeParameters(params: any): CheckParamsStatus | void {
-  if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
-    return {
-      success: false,
-      message: 'Invalid parameter [timeScopeType].',
-    };
-  } else if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
-    if (params.timeStart === undefined || params.timeEnd === undefined ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [timeStart, timeEnd].',
-      };
-    }
-  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
-    if (params.lastN === undefined || params.timeUnit === undefined ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [lastN, timeUnit].',
-      };
-    }
-  }
-}
 
 function _getMultipleVisualProps(hasGrouping: boolean) {
   let suffix = '';
@@ -1473,103 +1358,4 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
     suffix,
     smalMultiplesFieldId,
   };
-}
-
-function _checkDuplicatedEvent(params: any): CheckParamsStatus | void {
-
-  const conditions = params.eventAndConditions as EventAndCondition[];
-  const eventNames: string[] = [];
-  for (const condition of conditions) {
-
-    if (eventNames.includes(condition.eventName)) {
-      return {
-        success: false,
-        message: 'Duplicated event.',
-      };
-    } else {
-      eventNames.push(condition.eventName);
-    }
-  }
-}
-
-function _checkNodesLimit(params: any): CheckParamsStatus | void {
-
-  const eventAndConditions = params.eventAndConditions as EventAndCondition[];
-  if (eventAndConditions?.length > 10) {
-    return {
-      success: false,
-      message: 'The maximum number of event conditions is 10.',
-    };
-  }
-
-  const globalEventCondition = params.globalEventCondition as SQLCondition;
-  if (globalEventCondition?.conditions?.length > 10) {
-    return {
-      success: false,
-      message: 'The maximum number of global filter conditions is 10.',
-    };
-  }
-
-  const pairEventAndConditions = params.pairEventAndConditions as PairEventAndCondition[];
-  if (pairEventAndConditions?.length > 5) {
-    return {
-      success: false,
-      message: 'The maximum number of pair event conditions is 5.',
-    };
-  }
-
-}
-
-function _mergeFilterConditionsForRetention(params: any): Condition[] {
-  const allConditions: Condition[] = [];
-  if (params.pairEventAndConditions !== undefined) {
-    for (const pairCondition of params.pairEventAndConditions) {
-      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
-      }
-      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
-      }
-    }
-  }
-
-  return allConditions;
-}
-
-function _mergeFilterConditions(params: any): Condition[] {
-  const allConditions: Condition[] = [];
-  const eventAndConditions = params.eventAndConditions as EventAndCondition[];
-  const globalEventCondition = params.globalEventCondition as SQLCondition;
-
-  if (eventAndConditions !== undefined) {
-    for (const condition of eventAndConditions) {
-      if (condition.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...condition.sqlCondition.conditions);
-      }
-    }
-  }
-
-  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
-    allConditions.push(...globalEventCondition.conditions);
-  }
-
-  allConditions.push(..._mergeFilterConditionsForRetention(params));
-
-  return allConditions;
-}
-
-function _checkFilterTypeAndValue(params: any): CheckParamsStatus | void {
-  const allConditions: Condition[] = _mergeFilterConditions(params);
-  for (const filter of allConditions) {
-    if (filter.dataType !== MetadataValueType.STRING) {
-      for ( const value of filter.value) {
-        if (isNaN(value)) {
-          return {
-            success: false,
-            message: 'Filter value is not a number.',
-          };
-        }
-      }
-    }
-  }
 }
