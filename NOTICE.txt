@@ -150,3 +150,4 @@ amazon-quicksight-embedding-sdk under the Apache-2.0
 sql-formatter under the MIT
 i18next-fs-backend under the MIT
 fast-memoize under the MIT
+hpagent under the MIT
