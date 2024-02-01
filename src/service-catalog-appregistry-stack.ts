@@ -17,6 +17,8 @@ import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
 import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './common/constant';
 import { Parameters } from './common/parameters';
@@ -34,7 +36,6 @@ export class ServiceCatalogAppregistryStack extends Stack {
 
     const projectIdParam = Parameters.createProjectIdParameter(this);
 
-
     const serviceAvailableRegion = new CfnCondition(this, 'ServiceCatalogAvailableRegion', {
       expression: Fn.conditionOr(...SERVICE_CATALOG_SUPPORTED_REGIONS.map(region => Fn.conditionEquals(Aws.REGION, region))),
     });
@@ -46,14 +47,28 @@ export class ServiceCatalogAppregistryStack extends Stack {
       ]),
       description: `Catalog Service AppRegistry application for Clickstream Analytics project: ${projectIdParam.valueAsString}`,
     });
+    const appCfn = application.node.defaultChild as CfnResource;
+
     // Add condition for region validation
-    (application.node.defaultChild as CfnResource).cfnOptions.condition = serviceAvailableRegion;
+    appCfn.cfnOptions.condition = serviceAvailableRegion;
 
     // Add tags for AppRegistry application
     Tags.of(application).add('Solutions:SolutionID', SolutionInfo.SOLUTION_ID);
     Tags.of(application).add('Solutions:SolutionName', SolutionInfo.SOLUTION_NAME);
     Tags.of(application).add('Solutions:SolutionVersion', SolutionInfo.SOLUTION_VERSION_SHORT);
     Tags.of(application).add('Solutions:ApplicationType', SolutionInfo.SOLUTION_TYPE);
+
+    new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, {
+      description: 'Service Catalog AppRegistry Application tag key',
+      value: Fn.getAtt(appCfn.logicalId, 'ApplicationTagKey').toString(),
+      condition: serviceAvailableRegion,
+    });
+
+    new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, {
+      description: 'Service Catalog AppRegistry Application tag value',
+      value: Fn.getAtt(appCfn.logicalId, 'ApplicationTagValue').toString(),
+      condition: serviceAvailableRegion,
+    });
 
     new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, {
       description: 'Service Catalog AppRegistry Application Arn',
