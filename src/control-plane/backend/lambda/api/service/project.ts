@@ -282,13 +282,14 @@ export class ProjectServ {
         }
         const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
+      } else if (latestPipelines.length === 0) {
+        const operator = res.get('X-Click-Stream-Operator');
+        await store.deleteProject(id, operator);
       }
       const existProjects = await store.listProjects('asc');
       if (existProjects.length === 1) {
         await deleteClickstreamUser();
       }
-      const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteProject(id, operator);
       return res.json(new ApiSuccess(null, 'Project deleted.'));
     } catch (error) {
       next(error);

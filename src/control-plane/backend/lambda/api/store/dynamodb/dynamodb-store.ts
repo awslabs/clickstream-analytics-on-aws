@@ -179,7 +179,7 @@ export class DynamoDbStore implements ClickStreamStore {
           '#operator': 'operator',
         },
         ExpressionAttributeValues: {
-          ':d': false,
+          ':d': true,
           ':operator': operator,
         },
         ReturnValues: 'ALL_NEW',
