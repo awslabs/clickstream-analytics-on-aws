@@ -261,6 +261,11 @@
       "type": "runtime"
     },
     {
+      "name": "hpagent",
+      "version": "^1.2.0",
+      "type": "runtime"
+    },
+    {
       "name": "i18next-fs-backend",
       "version": "^2.2.0",
       "type": "runtime"

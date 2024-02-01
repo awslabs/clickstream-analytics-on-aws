@@ -32,6 +32,7 @@ const commonDeps = [
   'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
   'jsonpath-plus@^7.2.0',
+  'hpagent@^1.2.0',
 ];
 
 const commonDevDeps = [

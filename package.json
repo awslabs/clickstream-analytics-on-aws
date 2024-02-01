@@ -96,6 +96,7 @@
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
     "fast-memoize": "^2.5.1",
+    "hpagent": "^1.2.0",
     "i18next": "^22.4.6",
     "i18next-fs-backend": "^2.2.0",
     "json-difference": "^1.9.1",
