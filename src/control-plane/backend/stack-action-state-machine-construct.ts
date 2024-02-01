@@ -12,9 +12,8 @@
  */
 
 import { join } from 'path';
-import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
+import { Aws, aws_iam as iam, aws_lambda, Duration, CfnResource } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -22,13 +21,9 @@ import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
 import {
   addCfnNagSuppressRules,
-  addCfnNagToStack,
-  ruleForLambdaVPCAndReservedConcurrentExecutions,
-  ruleRolePolicyWithWildcardResources,
-  ruleToSuppressRolePolicyWithHighSPCM,
-  ruleToSuppressRolePolicyWithWildcardResources,
+  rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions,
 } from '../../common/cfn-nag';
-import { cloudWatchSendLogs, createENI } from '../../common/lambda';
+import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -47,148 +42,117 @@ export class StackActionStateMachine extends Construct {
   constructor(scope: Construct, id: string, props: StackActionStateMachineProps) {
     super(scope, id);
 
-    // Create a role for lambda
-    const actionFunctionRole = new Role(this, 'ActionFunctionRole', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-    });
-
+    const actionFunctionRolePolicyStatements = [
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
+        actions: [
+          'cloudformation:CreateStack',
+          'cloudformation:UpdateStack',
+          'cloudformation:DeleteStack',
+          'cloudformation:DescribeStacks',
+          'cloudformation:UpdateTerminationProtection',
+        ],
+      }),
+      new iam.PolicyStatement({
+        actions: [
+          'iam:GetRole',
+          'iam:PassRole',
+          'iam:DetachRolePolicy',
+          'iam:GetPolicy',
+          'iam:DeleteRolePolicy',
+          'iam:CreateRole',
+          'iam:DeleteRole',
+          'iam:AttachRolePolicy',
+          'iam:PutRolePolicy',
+          'iam:ListRolePolicies',
+          'iam:GetRolePolicy',
+          'iam:CreateInstanceProfile',
+          'iam:DeleteInstanceProfile',
+          'iam:RemoveRoleFromInstanceProfile',
+          'iam:AddRoleToInstanceProfile',
+          'iam:ListPolicies',
+          'iam:ListRoles',
+          'iam:UpdateRoleDescription',
+          'iam:TagRole',
+          'iam:UntagRole',
+          'iam:ListRoleTags',
+        ],
+        resources: [
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/Clickstream*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/Clickstream*`,
+        ],
+      }),
+      new iam.PolicyStatement({
+        actions: [
+          'iam:PassRole',
+          'iam:CreateServiceLinkedRole',
+        ],
+        resources: [
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry`,
+        ],
+      }),
+      // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
+      new iam.PolicyStatement({
+        actions: [
+          'sns:*',
+          'sqs:*',
+          'redshift-serverless:*',
+          's3:*',
+          'apigateway:*',
+          'logs:*',
+          'redshift:*',
+          'dynamodb:*',
+          'autoscaling:*',
+          'application-autoscaling:*',
+          'glue:*',
+          'cloudwatch:*',
+          'emr-serverless:*',
+          'ssm:*',
+          'ecs:*',
+          'lambda:*',
+          'quicksight:*',
+          'ec2:*',
+          'events:*',
+          'elasticloadbalancing:*',
+          'kinesis:*',
+          'kafka:*',
+          'states:*',
+          'secretsmanager:*',
+          'globalaccelerator:*',
+          'kms:*',
+          'athena:*',
+          'servicecatalog:CreateApplication',
+          'servicecatalog:UpdateApplication',
+          'servicecatalog:DeleteApplication',
+          'servicecatalog:GetApplication',
+          'servicecatalog:GetAssociatedResource',
+          'servicecatalog:AssociateResource',
+          'servicecatalog:DisassociateResource',
+          'servicecatalog:TagResource',
+          'servicecatalog:UntagResource',
+        ],
+        resources: ['*'],
+      }),
+    ];
     this.actionFunction = new SolutionNodejsFunction(this, 'ActionFunction', {
       description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
       tracing: aws_lambda.Tracing.ACTIVE,
-      role: actionFunctionRole,
+      role: createLambdaRole(this, 'ActionFunctionRole', false, actionFunctionRolePolicyStatements),
       timeout: Duration.seconds(15),
       ...props.lambdaFunctionNetwork,
     });
-    cloudWatchSendLogs('action-func-logs', this.actionFunction);
-    createENI('action-func-eni', this.actionFunction);
-    addCfnNagToStack(Stack.of(this), [
-      ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'StackActionStateMachine/ActionFunction/Resource',
-        'ActionFunction',
-      ),
+    addCfnNagSuppressRules(this.actionFunction.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ActionFunction'),
     ]);
-
-    const actionFunctionRolePolicy = new iam.Policy(this, 'ActionFunctionRolePolicy', {
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
-          actions: [
-            'cloudformation:CreateStack',
-            'cloudformation:UpdateStack',
-            'cloudformation:DeleteStack',
-            'cloudformation:DescribeStacks',
-            'cloudformation:UpdateTerminationProtection',
-          ],
-        }),
-        new iam.PolicyStatement({
-          actions: [
-            'iam:GetRole',
-            'iam:PassRole',
-            'iam:DetachRolePolicy',
-            'iam:GetPolicy',
-            'iam:DeleteRolePolicy',
-            'iam:CreateRole',
-            'iam:DeleteRole',
-            'iam:AttachRolePolicy',
-            'iam:PutRolePolicy',
-            'iam:ListRolePolicies',
-            'iam:GetRolePolicy',
-            'iam:CreateInstanceProfile',
-            'iam:DeleteInstanceProfile',
-            'iam:RemoveRoleFromInstanceProfile',
-            'iam:AddRoleToInstanceProfile',
-            'iam:ListPolicies',
-            'iam:ListRoles',
-            'iam:UpdateRoleDescription',
-            'iam:TagRole',
-            'iam:UntagRole',
-            'iam:ListRoleTags',
-          ],
-          resources: [
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/Clickstream*`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/Clickstream*`,
-          ],
-        }),
-        new iam.PolicyStatement({
-          actions: [
-            'iam:PassRole',
-            'iam:CreateServiceLinkedRole',
-          ],
-          resources: [
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator`,
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry`,
-          ],
-        }),
-        // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
-        new iam.PolicyStatement({
-          actions: [
-            'sns:*',
-            'sqs:*',
-            'redshift-serverless:*',
-            's3:*',
-            'apigateway:*',
-            'logs:*',
-            'redshift:*',
-            'dynamodb:*',
-            'autoscaling:*',
-            'application-autoscaling:*',
-            'glue:*',
-            'cloudwatch:*',
-            'emr-serverless:*',
-            'ssm:*',
-            'ecs:*',
-            'lambda:*',
-            'quicksight:*',
-            'ec2:*',
-            'events:*',
-            'elasticloadbalancing:*',
-            'kinesis:*',
-            'kafka:*',
-            'states:*',
-            'secretsmanager:*',
-            'globalaccelerator:*',
-            'kms:*',
-            'athena:*',
-            'servicecatalog:CreateApplication',
-            'servicecatalog:UpdateApplication',
-            'servicecatalog:DeleteApplication',
-            'servicecatalog:GetApplication',
-            'servicecatalog:GetAssociatedResource',
-            'servicecatalog:AssociateResource',
-            'servicecatalog:DisassociateResource',
-            'servicecatalog:TagResource',
-            'servicecatalog:UntagResource',
-          ],
-          resources: ['*'],
-        }),
-      ],
-    });
-    actionFunctionRolePolicy.attachToRole(actionFunctionRole);
-    addCfnNagSuppressRules(
-      actionFunctionRolePolicy.node.defaultChild as iam.CfnPolicy,
-      [
-        {
-          id: 'F4',
-          reason:
-            'This policy requires related actions in order to start/delete/update cloudformation stacks with many other services',
-        },
-        {
-          id: 'F39',
-          reason:
-            'When start/delete/update cloudformation stacks, we have to PassRole to existing undeterministical roles.',
-        },
-        ruleToSuppressRolePolicyWithWildcardResources('Action Lambda', 'This policy needs to be able to start/delete other cloudformation stacks of the plugin with unknown resources names'),
-        ruleToSuppressRolePolicyWithHighSPCM('Action Lambda'),
-      ],
-    );
 
     const executeTask = new LambdaInvoke(this, 'Execute Task', {
       lambdaFunction: this.actionFunction,
@@ -242,25 +206,5 @@ export class StackActionStateMachine extends Construct {
       tracingEnabled: true,
       timeout: Duration.minutes(120),
     });
-
-    const wildcardResourcesStackActionStateMachine = ruleRolePolicyWithWildcardResources('ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
-    const wildcardResourcesActionFunctionRole = ruleRolePolicyWithWildcardResources('ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource', 'StackActionStateMachine', 'xray/logs');
-    addCfnNagToStack(Stack.of(this), [
-      {
-        paths_endswith: wildcardResourcesStackActionStateMachine.paths_endswith,
-        rules_to_suppress: [
-          ...wildcardResourcesStackActionStateMachine.rules_to_suppress,
-        ],
-      },
-    ]);
-    addCfnNagToStack(Stack.of(this), [
-      {
-        paths_endswith: wildcardResourcesActionFunctionRole.paths_endswith,
-        rules_to_suppress: [
-          ...wildcardResourcesActionFunctionRole.rules_to_suppress,
-        ],
-      },
-    ]);
-
   }
 }

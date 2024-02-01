@@ -53,7 +53,6 @@ import { StackActionStateMachine } from './stack-action-state-machine-construct'
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
-import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionInfo } from '../../common/solution-info';
@@ -441,14 +440,8 @@ export class ClickStreamApiConstruct extends Construct {
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
 
-    cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
-    createENI('api-func-eni', this.clickStreamApiFunction);
-
     addCfnNagSuppressRules(this.clickStreamApiFunction.node.defaultChild as CfnResource, [
-      {
-        id: 'W92',
-        reason: 'Lambda function is only used by ClickStreamApiFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-      },
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ApiFunction'),
     ]);
 
     if (props.fronting === 'cloudfront') {
@@ -488,20 +481,6 @@ export class ClickStreamApiConstruct extends Construct {
           burstLimit: 100,
         },
       });
-
-      addCfnNagSuppressRules(
-        this.clickStreamApiFunction.node.defaultChild as CfnResource,
-        rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ApiFunction'),
-      );
-      addCfnNagSuppressRules(
-        stackActionStateMachine.actionFunction.node.defaultChild as CfnResource,
-        [
-          {
-            id: 'W89', //Lambda functions should be deployed inside a VPC
-            reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
-          },
-        ],
-      );
     }
   }
 

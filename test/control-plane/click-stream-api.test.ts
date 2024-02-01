@@ -219,7 +219,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
         'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
         'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       ],
@@ -456,10 +455,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
         'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
-        'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
-        'testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336',
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
         'testClickStreamALBApiBackendEventBusListenStateFuncRoleDefaultPolicy4F429680',
         'testClickStreamALBApiBackendEventBusListenStackFuncRoleDefaultPolicy2D9358B1',
@@ -467,19 +464,270 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
         'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
-        'customresourcefunclogs9B71FED3',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
-        'actionfunclogs394D90DA',
-        'actionfunceniA16F9174',
-        'workflowfunclogs7A318BBF',
-        'workflowfunceniF26BB9B3',
-        'apifunclogs9F7B9244',
-        'apifunceni59253B5A',
       ]);
     // StateMachineActionFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
+              'cloudformation:DeleteStack',
+              'cloudformation:DescribeStacks',
+              'cloudformation:UpdateTerminationProtection',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/Clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'iam:GetRole',
+              'iam:PassRole',
+              'iam:DetachRolePolicy',
+              'iam:GetPolicy',
+              'iam:DeleteRolePolicy',
+              'iam:CreateRole',
+              'iam:DeleteRole',
+              'iam:AttachRolePolicy',
+              'iam:PutRolePolicy',
+              'iam:ListRolePolicies',
+              'iam:GetRolePolicy',
+              'iam:CreateInstanceProfile',
+              'iam:DeleteInstanceProfile',
+              'iam:RemoveRoleFromInstanceProfile',
+              'iam:AddRoleToInstanceProfile',
+              'iam:ListPolicies',
+              'iam:ListRoles',
+              'iam:UpdateRoleDescription',
+              'iam:TagRole',
+              'iam:UntagRole',
+              'iam:ListRoleTags',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':policy/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':instance-profile/Clickstream*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'iam:PassRole',
+              'iam:CreateServiceLinkedRole',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'sns:*',
+              'sqs:*',
+              'redshift-serverless:*',
+              's3:*',
+              'apigateway:*',
+              'logs:*',
+              'redshift:*',
+              'dynamodb:*',
+              'autoscaling:*',
+              'application-autoscaling:*',
+              'glue:*',
+              'cloudwatch:*',
+              'emr-serverless:*',
+              'ssm:*',
+              'ecs:*',
+              'lambda:*',
+              'quicksight:*',
+              'ec2:*',
+              'events:*',
+              'elasticloadbalancing:*',
+              'kinesis:*',
+              'kafka:*',
+              'states:*',
+              'secretsmanager:*',
+              'globalaccelerator:*',
+              'kms:*',
+              'athena:*',
+              'servicecatalog:CreateApplication',
+              'servicecatalog:UpdateApplication',
+              'servicecatalog:DeleteApplication',
+              'servicecatalog:GetApplication',
+              'servicecatalog:GetAssociatedResource',
+              'servicecatalog:AssociateResource',
+              'servicecatalog:DisassociateResource',
+              'servicecatalog:TagResource',
+              'servicecatalog:UntagResource',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
           {
             Action: [
               'xray:PutTraceSegments',
@@ -678,6 +926,11 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Version: '2012-10-17',
       },
       PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        },
+      ],
     });
 
     // ApiStepFunctionPolicy
@@ -716,6 +969,11 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Version: '2012-10-17',
       },
       PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        },
+      ],
     });
     // ApiAWSSdkPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -1007,272 +1265,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Version: '2012-10-17',
       },
       PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
-    });
-
-    // ActionFunctionRolePolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'cloudformation:CreateStack',
-              'cloudformation:UpdateStack',
-              'cloudformation:DeleteStack',
-              'cloudformation:DescribeStacks',
-              'cloudformation:UpdateTerminationProtection',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:*:',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/Clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: [
-              'iam:GetRole',
-              'iam:PassRole',
-              'iam:DetachRolePolicy',
-              'iam:GetPolicy',
-              'iam:DeleteRolePolicy',
-              'iam:CreateRole',
-              'iam:DeleteRole',
-              'iam:AttachRolePolicy',
-              'iam:PutRolePolicy',
-              'iam:ListRolePolicies',
-              'iam:GetRolePolicy',
-              'iam:CreateInstanceProfile',
-              'iam:DeleteInstanceProfile',
-              'iam:RemoveRoleFromInstanceProfile',
-              'iam:AddRoleToInstanceProfile',
-              'iam:ListPolicies',
-              'iam:ListRoles',
-              'iam:UpdateRoleDescription',
-              'iam:TagRole',
-              'iam:UntagRole',
-              'iam:ListRoleTags',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/Clickstream*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':policy/Clickstream*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':instance-profile/Clickstream*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'iam:PassRole',
-              'iam:CreateServiceLinkedRole',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'sns:*',
-              'sqs:*',
-              'redshift-serverless:*',
-              's3:*',
-              'apigateway:*',
-              'logs:*',
-              'redshift:*',
-              'dynamodb:*',
-              'autoscaling:*',
-              'application-autoscaling:*',
-              'glue:*',
-              'cloudwatch:*',
-              'emr-serverless:*',
-              'ssm:*',
-              'ecs:*',
-              'lambda:*',
-              'quicksight:*',
-              'ec2:*',
-              'events:*',
-              'elasticloadbalancing:*',
-              'kinesis:*',
-              'kafka:*',
-              'states:*',
-              'secretsmanager:*',
-              'globalaccelerator:*',
-              'kms:*',
-              'athena:*',
-              'servicecatalog:CreateApplication',
-              'servicecatalog:UpdateApplication',
-              'servicecatalog:DeleteApplication',
-              'servicecatalog:GetApplication',
-              'servicecatalog:GetAssociatedResource',
-              'servicecatalog:AssociateResource',
-              'servicecatalog:DisassociateResource',
-              'servicecatalog:TagResource',
-              'servicecatalog:UntagResource',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
       Roles: [
         {
-          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
         },
       ],
     });
-
   });
 
   test('LogGroup', () => {
@@ -1686,7 +1684,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
         'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
         'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
       ],

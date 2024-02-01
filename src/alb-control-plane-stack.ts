@@ -33,6 +33,8 @@ import {
   addCfnNagToStack,
   ruleToSuppressRolePolicyWithHighSPCM,
   ruleForLambdaVPCAndReservedConcurrentExecutions,
+  ruleToSuppressRolePolicyWithWildcardResources,
+  ruleToSuppressRolePolicyWithWildcardAction,
 } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
@@ -287,7 +289,34 @@ function addCfnNag(stack: Stack) {
         'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        ruleToSuppressRolePolicyWithHighSPCM('ApiFunction'),
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+        ruleToSuppressRolePolicyWithWildcardAction('ActionFunctionRole'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackWorkflowStateMachine/StackWorkflowStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
       ],
     },
     ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'ApiFunction'),
