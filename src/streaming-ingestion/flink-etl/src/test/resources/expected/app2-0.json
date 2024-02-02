@@ -136,7 +136,6 @@
     }
   } ],
   "event_previous_timestamp" : 0,
-  "event_server_timestamp_offset" : -478,
   "event_value_in_usd" : 0,
   "geo" : {
     "city" : "Ashburn",
@@ -148,6 +147,7 @@
     "locale" : "zh_CN_#Hans"
   },
   "ingest_timestamp" : 1705563189000,
+  "event_server_timestamp_offset" : -478,
   "items" : null,
   "platform" : "Android",
   "privacy_info" : {

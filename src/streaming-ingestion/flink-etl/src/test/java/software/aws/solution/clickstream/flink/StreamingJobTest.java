@@ -38,6 +38,7 @@ public class StreamingJobTest extends BaseFlinkTest {
                     "{\"appId\":\"app1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app1Sink\",\"enabled\":true}" +
                     ",{\"appId\":\"app2\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\",\"enabled\":true}" +
                     ",{\"appId\":\"app3\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/app2Sink\",\"enabled\":false}" +
+                    ",{\"appId\":\"sApp1\",\"streamArn\":\"arn:aws:kinesis:us-east-1:123456789012:stream/sApp1Sink\",\"enabled\":true}" +
                     "]}"
     };
 
@@ -73,6 +74,34 @@ public class StreamingJobTest extends BaseFlinkTest {
 
         String expectedStr = resourceFileAsString("/expected/app1-0.json");
         Assertions.assertEquals(expectedStr, jsonOut1);
+    }
+
+    @Test
+    void testExecuteStreamJob_zip_data_sApp1() throws Exception {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.flink.StreamingJobTest.testExecuteStreamJob_zip_data_sApp1
+
+        var props = ApplicationParameters.loadApplicationParameters(args, true);
+        var streamSourceAndSinkProviderMock = new StreamSourceAndSinkProvider() {
+            @Override
+            public SourceFunction<String> createSource() {
+                return new SourceFunctionMock("/zip_data_sapp1.json");
+            }
+
+            @Override
+            public Sink<String> createSink(String appId) {
+                return new MockKinesisSink(appId);
+            }
+        };
+
+        env.setRestartStrategy(RestartStrategies.noRestart());
+        StreamingJob steamingJob = new StreamingJob(env, streamSourceAndSinkProviderMock, props);
+        steamingJob.executeStreamJob();
+        env.execute("test");
+
+        List<String> app1Result = MockKinesisSink.appValues.get("sApp1");
+
+        Assertions.assertEquals(5, app1Result.size());
+
     }
 
     @Test

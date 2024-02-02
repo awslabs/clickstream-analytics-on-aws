@@ -96,7 +96,6 @@
     }
   } ],
   "event_previous_timestamp" : 0,
-  "event_server_timestamp_offset" : 19364121524,
   "event_value_in_usd" : 0,
   "geo" : {
     "city" : "Columbus",
@@ -108,6 +107,7 @@
     "locale" : "pt_BR"
   },
   "ingest_timestamp" : 1704326584236,
+  "event_server_timestamp_offset" : 19364121524,
   "items" : null,
   "platform" : "Android",
   "privacy_info" : { },

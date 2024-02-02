@@ -54,6 +54,7 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
     public static final String PLATFORM = "platform";
     public static final String APP_PACKAGE_NAME = "app_package_name";
     public static final String USER_LTV_REVENUE = "_user_ltv_revenue";
+    public static final String INGEST_TIME = "ingest_time";
     private final String appId;
     private final String projectId;
     private final Enrichment ipEnrich;
@@ -93,25 +94,33 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
             data.set("ecommerce", null);
 
             Map<String, String> uriTransformerParamsMap = new HashMap<>();
-            uriTransformerParamsMap.put(URITransformer.PARAM_KEY_URI, ingestNode.get("uri").asText());
-            data.put(EVENT_BUNDLE_SEQUENCE_ID, this.uriTransformer.transform(uriTransformerParamsMap).get(EVENT_BUNDLE_SEQUENCE_ID).asLong());
-
-            LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dataNode.get(TIMESTAMP).asLong()), ZoneId.of("UTC"));
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String formattedDateTime = dateTime.format(formatter);
-            data.put("event_date", formattedDateTime);
+            if (ingestNode.hasNonNull("uri")) {
+                uriTransformerParamsMap.put(URITransformer.PARAM_KEY_URI, ingestNode.get("uri").asText());
+                data.put(EVENT_BUNDLE_SEQUENCE_ID, this.uriTransformer.transform(uriTransformerParamsMap).get(EVENT_BUNDLE_SEQUENCE_ID).asLong());
+            } else {
+                data.put(EVENT_BUNDLE_SEQUENCE_ID, 0);
+            }
+            if (dataNode.hasNonNull(TIMESTAMP)) {
+                LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dataNode.get(TIMESTAMP).asLong()), ZoneId.of("UTC"));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                String formattedDateTime = dateTime.format(formatter);
+                data.put("event_date", formattedDateTime);
+            }
 
             data.set("event_dimensions", null);
-
             transformEventParams(attributesNode, data);
 
             data.put("event_previous_timestamp", 0);
-            data.put("event_server_timestamp_offset", ingestNode.get("ingest_time").asLong() - dataNode.get(TIMESTAMP).asLong());
             data.put("event_value_in_usd", 0);
 
             transformGeo(ingestNode, dataNode, data);
 
-            data.put("ingest_timestamp", ingestNode.get("ingest_time").asLong());
+            if (ingestNode.hasNonNull(INGEST_TIME)) {
+                data.put("ingest_timestamp", ingestNode.get(INGEST_TIME).asLong());
+                if (dataNode.hasNonNull(TIMESTAMP)) {
+                    data.put("event_server_timestamp_offset", ingestNode.get(INGEST_TIME).asLong() - dataNode.get(TIMESTAMP).asLong());
+                }
+            }
 
             data.set("items", null);
 
@@ -148,8 +157,12 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
 
     private void transformGeo(final JsonNode ingestNode, final JsonNode dataNode, final ObjectNode data) {
         Map<String, String> ipEnrichParamsMap = new HashMap<>();
-        ipEnrichParamsMap.put(IPEnrichment.PARAM_KEY_IP, ingestNode.get("ip").asText());
-        ipEnrichParamsMap.put(IPEnrichment.PARAM_KEY_LOCALE, dataNode.get("locale").asText());
+        if (ingestNode.hasNonNull("ip")) {
+            ipEnrichParamsMap.put(IPEnrichment.PARAM_KEY_IP, ingestNode.get("ip").asText());
+        }
+        if (dataNode.hasNonNull("locale")) {
+            ipEnrichParamsMap.put(IPEnrichment.PARAM_KEY_LOCALE, dataNode.get("locale").asText());
+        }
         data.set("geo", this.ipEnrich.enrich(OBJECT_MAPPER.createObjectNode(), ipEnrichParamsMap));
     }
 
@@ -254,21 +267,57 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
 
     private void transformDevice(final JsonNode dataNode, final JsonNode ingestNode, final ObjectNode data) {
         Map<String, String> deviceParamMap = new HashMap<>();
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_VENDOR_ID, dataNode.get("device_id").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_BRAND, dataNode.get("brand").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_MODEL, dataNode.get("model").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_MAKE, dataNode.get("make").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_SCREEN_WIDTH, dataNode.get("screen_width").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_SCREEN_HEIGHT, dataNode.get("screen_height").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_CARRIER, dataNode.get("carrier").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_NETWORK_TYPE, dataNode.get("network_type").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_OPERATING_SYSTEM, dataNode.get(PLATFORM).asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_OS_VERSION, dataNode.get("os_version").asText());
+        if (dataNode.hasNonNull("device_id")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_VENDOR_ID, dataNode.get("device_id").asText());
+        }
+
+        if (dataNode.hasNonNull("brand")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_BRAND, dataNode.get("brand").asText());
+        }
+
+        if (dataNode.hasNonNull("model")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_MODEL, dataNode.get("model").asText());
+        }
+
+        if (dataNode.hasNonNull("make")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_MAKE, dataNode.get("make").asText());
+        }
+
+        if (dataNode.hasNonNull("screen_width")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_SCREEN_WIDTH, dataNode.get("screen_width").asText());
+        }
+
+        if (dataNode.hasNonNull("screen_height")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_SCREEN_HEIGHT, dataNode.get("screen_height").asText());
+        }
+
+        if (dataNode.hasNonNull("carrier")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_CARRIER, dataNode.get("carrier").asText());
+        }
+
+        if (dataNode.hasNonNull("network_type")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_NETWORK_TYPE, dataNode.get("network_type").asText());
+        }
+
+        if (dataNode.hasNonNull(PLATFORM)) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_OPERATING_SYSTEM, dataNode.get(PLATFORM).asText());
+        }
+
+        if (dataNode.hasNonNull("os_version")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_OS_VERSION, dataNode.get("os_version").asText());
+        }
+
         if (ingestNode.hasNonNull("ua")) {
             deviceParamMap.put(DeviceTransformer.PARAM_KEY_UA, ingestNode.get("ua").asText());
         }
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_SYSTEM_LANGUAGE, dataNode.get("system_language").asText());
-        deviceParamMap.put(DeviceTransformer.PARAM_KEY_ZONE_OFFSET, dataNode.get("zone_offset").asText());
+
+        if (dataNode.hasNonNull("system_language")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_SYSTEM_LANGUAGE, dataNode.get("system_language").asText());
+        }
+
+        if (dataNode.hasNonNull("zone_offset")) {
+            deviceParamMap.put(DeviceTransformer.PARAM_KEY_ZONE_OFFSET, dataNode.get("zone_offset").asText());
+        }
         data.set("device", this.deviceTransformer.transform(deviceParamMap));
     }
 }
