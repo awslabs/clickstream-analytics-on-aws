@@ -1547,7 +1547,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.user_pseudo_id_0 as x_id
         from
@@ -1558,7 +1558,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id
         from
@@ -1569,7 +1569,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.event_id_2 as x_id
         from
@@ -6836,6 +6836,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
@@ -6870,6 +6876,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -6877,7 +6889,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id
         from
@@ -6888,7 +6900,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id
         from
@@ -6899,7 +6911,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.user_pseudo_id_2 as x_id
         from
@@ -9504,6 +9516,10 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
@@ -9547,7 +9563,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id,
           table_0._session_id_0 as _session_id
@@ -9559,7 +9575,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id,
           table_1._session_id_1 as _session_id
@@ -9571,7 +9587,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.event_id_2 as x_id,
           table_2._session_id_2 as _session_id
@@ -9778,6 +9794,10 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
@@ -9821,7 +9841,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id,
           table_0.geo_country_0 as geo_country
@@ -9833,7 +9853,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id,
           table_1.geo_country_1 as geo_country
@@ -9845,7 +9865,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.event_id_2 as x_id,
           table_2.geo_country_2 as geo_country
@@ -14956,42 +14976,42 @@ describe('SQL Builder test', () => {
               platform::varchar as platform,
               geo.country::varchar as geo_country,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shop.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -15078,6 +15098,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
@@ -15114,6 +15140,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -15121,7 +15153,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id,
           table_0.geo_country_0 as geo_country
@@ -15133,7 +15165,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id,
           table_1.geo_country_1 as geo_country
@@ -15145,7 +15177,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.user_pseudo_id_2 as x_id,
           table_2.geo_country_2 as geo_country
@@ -17571,6 +17603,7 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (_channel = 'apple')
       ),
       table_1 as (
         select
@@ -17612,7 +17645,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id
         from
@@ -17623,7 +17656,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id
         from
@@ -17634,7 +17667,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.event_id_2 as x_id
         from
@@ -18813,7 +18846,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.user_pseudo_id_0 as x_id
         from
@@ -18824,7 +18857,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id
         from
@@ -18835,7 +18868,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.event_id_2 as x_id
         from
@@ -19438,6 +19471,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            (
+              platform is null
+              or platform not in ('AAA', 'BBB')
+            )
+            and (
+              geo_country is null
+              or geo_country not like '%JP%'
+            )
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
@@ -19472,6 +19517,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -19479,7 +19530,7 @@ describe('SQL Builder test', () => {
           table_0.week,
           table_0.day,
           table_0.hour,
-          table_0.event_name_0 as event_name,
+          1 || '_' || table_0.event_name_0 as event_name,
           table_0.event_timestamp_0 as event_timestamp,
           table_0.event_id_0 as x_id
         from
@@ -19490,7 +19541,7 @@ describe('SQL Builder test', () => {
           table_1.week,
           table_1.day,
           table_1.hour,
-          table_1.event_name_1 as event_name,
+          2 || '_' || table_1.event_name_1 as event_name,
           table_1.event_timestamp_1 as event_timestamp,
           table_1.event_id_1 as x_id
         from
@@ -19501,7 +19552,7 @@ describe('SQL Builder test', () => {
           table_2.week,
           table_2.day,
           table_2.hour,
-          table_2.event_name_2 as event_name,
+          3 || '_' || table_2.event_name_2 as event_name,
           table_2.event_timestamp_2 as event_timestamp,
           table_2.user_pseudo_id_2 as x_id
         from

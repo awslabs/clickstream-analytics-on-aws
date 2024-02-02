@@ -1198,7 +1198,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     , table_${index}.week
     , table_${index}.day
     , table_${index}.hour
-    , table_${index}.event_name_${index} as event_name
+    , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
     , table_${index}.event_timestamp_${index} as event_timestamp
     ${idSql}
     ${groupColSql}
@@ -1904,12 +1904,19 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
       ,${newColumnTemplate.replace(/####/g, `_${index}`)}
     `;
 
+    let filterSql = '';
+    filterSql = buildConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
+    if (filterSql !== '') {
+      filterSql = `and (${filterSql}) `;
+    }
+
     sql = sql.concat(`
     table_${index} as (
       select 
         ${tableColumns}
       from base_data base
       where event_name = '${event}'
+      ${filterSql}
     ),
     `);
   }
@@ -2518,6 +2525,9 @@ export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndC
       hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
       eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
     }
+
+    //todo
+
   }
 
   return {
