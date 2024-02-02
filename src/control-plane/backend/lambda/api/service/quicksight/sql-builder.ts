@@ -1157,12 +1157,12 @@ function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: 
 
 function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
-  let sql = _buildCommonPartSql(eventNames, sqlParameters);
-  const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
+  let sql = _buildCommonPartSql(eventNames, sqlParameters, false, false, true);
+  const buildResult = _buildEventCondition(sqlParameters, sql);
   sql = buildResult.sql;
 
   let joinTableSQL = '';
-  for (const [index, _item] of eventNames.entries()) {
+  for (const [index, _item] of sqlParameters.eventAndConditions!.entries()) {
 
     let unionSql = '';
     if (index > 0) {
@@ -1188,7 +1188,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     , table_${index}.week
     , table_${index}.day
     , table_${index}.hour
-    , table_${index}.event_name_${index} as event_name
+    , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
     , table_${index}.event_timestamp_${index} as event_timestamp
     ${idSql}
     ${groupColSql}
@@ -1449,12 +1449,12 @@ function _buildNecessaryEventColumnsSql(eventConditionProps: EventConditionProps
 }
 
 export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
+  isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false, skipAllCondition: boolean = false) : string {
 
   let resultSql = 'with';
   const commonConditionSql = _getCommonConditionSql(sqlParameters, 'event.');
   let allConditionSql = '';
-  if (_shouldAddAllCondition(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis, isRetentionAnalysis)) {
+  if (_shouldAddAllCondition(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis, skipAllCondition)) {
     allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathAnalysis);
   }
 
@@ -1553,9 +1553,9 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
 }
 
 function _shouldAddAllCondition(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathAnalysis: boolean, isNodePathAnalysis: boolean, isRetentionAnalysis: boolean): boolean {
+  isEventPathAnalysis: boolean, isNodePathAnalysis: boolean, skipAllCondition: boolean): boolean {
 
-  if ( isRetentionAnalysis || isNodePathAnalysis
+  if ( skipAllCondition || isNodePathAnalysis
     || (isEventPathAnalysis && eventNames.length < sqlParameters.eventAndConditions!.length) ) {
     return false;
   }
@@ -1876,7 +1876,7 @@ function _getColNameWithPrefix(groupCondition: GroupingCondition) {
   return `${prefix}${groupCondition.property}`;
 }
 
-function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) {
+function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
   let sql = baseSQL;
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
@@ -1885,7 +1885,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
     newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(sqlParameters.groupCondition)}####`;
   }
   const computedMethodList: ExploreComputeMethod[] = [];
-  for (const [index, event] of eventNames.entries()) {
+  for (const [index, event] of sqlParameters.eventAndConditions!.entries()) {
     computedMethodList.push(sqlParameters.eventAndConditions![index].computeMethod ?? ExploreComputeMethod.EVENT_CNT);
     let tableColumns = `
        month
@@ -1895,12 +1895,19 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
       ,${newColumnTemplate.replace(/####/g, `_${index}`)}
     `;
 
+    let filterSql = '';
+    filterSql = buildConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
+    if (filterSql !== '') {
+      filterSql = `and (${filterSql}) `;
+    }
+
     sql = sql.concat(`
     table_${index} as (
       select 
         ${tableColumns}
       from base_data base
-      where event_name = '${event}'
+      where event_name = '${event.eventName}'
+      ${filterSql}
     ),
     `);
   }
