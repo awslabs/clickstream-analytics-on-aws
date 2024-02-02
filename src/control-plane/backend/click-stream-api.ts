@@ -47,7 +47,7 @@ import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import { BackendEventBus } from './event-bus-construct';
 import { AddAdminUser } from './insert-admin-user';
-import { getStackPrefix } from './lambda/api/common/utils';
+import { getRolePrefix } from './lambda/api/common/utils';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
@@ -82,7 +82,7 @@ export interface ClickStreamApiProps {
   readonly authProps?: AuthProps;
   readonly healthCheckPath: string;
   readonly adminUserEmail: string;
-  readonly iamRolePrefix?: string;
+  readonly iamRolePrefix: string;
 }
 
 export interface LambdaFunctionNetworkProps {
@@ -520,7 +520,7 @@ export class ClickStreamApiConstruct extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${getStackPrefix(props.iamRolePrefix)}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${getRolePrefix(props.iamRolePrefix)}*`,
         ],
         actions: [
           'sts:AssumeRole',

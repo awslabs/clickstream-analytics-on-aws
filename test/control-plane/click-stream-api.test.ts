@@ -552,7 +552,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':role/*',
+                    ':role/Clickstream*',
                   ],
                 ],
               },
@@ -568,7 +568,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':policy/*',
+                    ':policy/Clickstream*',
                   ],
                 ],
               },
@@ -584,7 +584,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':instance-profile/*',
+                    ':instance-profile/Clickstream*',
                   ],
                 ],
               },
@@ -2416,7 +2416,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
       ],
     });
 
-    // ApiFunctionRolePolicy
+    // ApiFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
@@ -2745,7 +2745,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':role/testRolePrefix-Clickstream*',
+                  ':role/testRolePrefix*',
                 ],
               ],
             },

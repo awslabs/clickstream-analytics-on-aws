@@ -251,6 +251,7 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
     });
 
     const template = Template.fromStack(stack);
@@ -314,6 +315,7 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
     });
 
     const template = Template.fromStack(stack);

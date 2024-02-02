@@ -18,7 +18,7 @@ import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskIn
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
-import { getStackPrefix } from './lambda/api/common/utils';
+import { getRolePrefix, getStackPrefix } from './lambda/api/common/utils';
 import {
   addCfnNagSuppressRules,
   rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions,
@@ -79,9 +79,9 @@ export class StackActionStateMachine extends Construct {
           'iam:ListRoleTags',
         ],
         resources: [
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${props.iamRolePrefix}*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/${props.iamRolePrefix}*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/${props.iamRolePrefix}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${getRolePrefix(props.iamRolePrefix)}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/${getRolePrefix(props.iamRolePrefix)}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/${getRolePrefix(props.iamRolePrefix)}*`,
         ],
       }),
       new iam.PolicyStatement({
