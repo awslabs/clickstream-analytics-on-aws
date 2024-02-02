@@ -80,6 +80,19 @@ bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
 yarn test
 ```
 
+## Local development
+After deploy the web console(create DynamoDB tables, State Machine and other resources).
+
+```shell
+# run backend server local
+cd deployment/local && bash start.sh -s backend
+```
+
+```shell
+# run frontend server local
+cd deployment/local && bash start.sh -s frontend
+```
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
