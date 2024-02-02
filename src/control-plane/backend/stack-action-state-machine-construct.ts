@@ -13,7 +13,6 @@
 
 import { join } from 'path';
 import { Aws, aws_iam as iam, aws_lambda, Duration, CfnResource } from 'aws-cdk-lib';
-import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -28,7 +27,6 @@ import { createLogGroup } from '../../common/logs';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface StackActionStateMachineProps {
-  readonly clickStreamTable: Table;
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly targetToCNRegions?: boolean;
   readonly workflowBucket: IBucket;
@@ -141,12 +139,13 @@ export class StackActionStateMachine extends Construct {
         resources: ['*'],
       }),
     ];
+    const deployInVpc = props.lambdaFunctionNetwork.vpc !== undefined;
     this.actionFunction = new SolutionNodejsFunction(this, 'ActionFunction', {
       description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
       tracing: aws_lambda.Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ActionFunctionRole', false, actionFunctionRolePolicyStatements),
+      role: createLambdaRole(this, 'ActionFunctionRole', deployInVpc, actionFunctionRolePolicyStatements),
       timeout: Duration.seconds(15),
       ...props.lambdaFunctionNetwork,
     });

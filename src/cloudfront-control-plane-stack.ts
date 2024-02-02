@@ -463,6 +463,15 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
       ],
     },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunctionRoleDefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('ApiFunctionRoleDefaultPolicy', 'lambda'),
+      ],
+    },
     ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'AddAdminUserFunction'),
   ];
   addCfnNagToStack(stack, cfnNagList);

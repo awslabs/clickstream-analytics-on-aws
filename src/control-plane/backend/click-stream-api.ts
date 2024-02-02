@@ -13,7 +13,6 @@
 
 import path from 'path';
 import {
-  aws_iam as iam,
   CfnResource,
   Duration,
   RemovalPolicy,
@@ -40,7 +39,7 @@ import {
   SubnetSelection,
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
-import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, Effect, PolicyDocument, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -51,8 +50,9 @@ import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
-import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
+import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionInfo } from '../../common/solution-info';
@@ -90,15 +90,31 @@ export interface LambdaFunctionNetworkProps {
 }
 
 export class ClickStreamApiConstruct extends Construct {
-  public readonly clickStreamApiFunction: LambdaFunction;
+  public readonly apiFunction: LambdaFunction;
   public readonly lambdaRestApi?: RestApi;
   public readonly batchInsertDDBCustomResource: BatchInsertDDBCustomResource;
   public readonly addAdminUserCustomResource: AddAdminUser;
 
+  private readonly dictionaryTable: Table;
+  private readonly metadataTable: Table;
+  private readonly analyticsMetadataTable: Table;
+  private readonly stackActionStateMachine: StackActionStateMachine;
+  private readonly stackWorkflowStateMachine: StackWorkflowStateMachine;
+  private readonly backendEventBus: BackendEventBus;
+  private readonly uploadRole: Role;
+
+  private readonly prefixTimeGSIName: string;
+  private readonly prefixMonthGSIName: string;
+
+  private readonly lambdaFunctionNetwork: any;
+
   constructor(scope: Construct, id: string, props: ClickStreamApiProps) {
     super(scope, id);
 
-    const dictionaryTable = new Table(this, 'ClickstreamDictionary', {
+    this.prefixTimeGSIName = 'prefix-time-index';
+    this.prefixMonthGSIName = 'prefix-month-index';
+
+    this.dictionaryTable = new Table(this, 'ClickstreamDictionary', {
       partitionKey: {
         name: 'name',
         type: AttributeType.STRING,
@@ -109,7 +125,7 @@ export class ClickStreamApiConstruct extends Construct {
       encryption: TableEncryption.AWS_MANAGED,
     });
 
-    const clickStreamTable = new Table(this, 'ClickstreamMetadata', {
+    this.metadataTable = new Table(this, 'ClickstreamMetadata', {
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -124,9 +140,8 @@ export class ClickStreamApiConstruct extends Construct {
       encryption: TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'ttl',
     });
-    const prefixTimeGSIName = 'prefix-time-index';
-    clickStreamTable.addGlobalSecondaryIndex({
-      indexName: prefixTimeGSIName,
+    this.metadataTable.addGlobalSecondaryIndex({
+      indexName: this.prefixTimeGSIName,
       partitionKey: {
         name: 'prefix',
         type: AttributeType.STRING,
@@ -137,7 +152,7 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
 
-    const analyticsMetadataTable = new Table(this, 'AnalyticsMetadata', {
+    this.analyticsMetadataTable = new Table(this, 'AnalyticsMetadata', {
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -151,9 +166,8 @@ export class ClickStreamApiConstruct extends Construct {
       pointInTimeRecovery: true,
       encryption: TableEncryption.AWS_MANAGED,
     });
-    const prefixMonthGSIName = 'prefix-month-index';
-    analyticsMetadataTable.addGlobalSecondaryIndex({
-      indexName: prefixMonthGSIName,
+    this.analyticsMetadataTable.addGlobalSecondaryIndex({
+      indexName: this.prefixMonthGSIName,
       partitionKey: {
         name: 'prefix',
         type: AttributeType.STRING,
@@ -166,283 +180,52 @@ export class ClickStreamApiConstruct extends Construct {
 
     // Dictionary data init
     this.batchInsertDDBCustomResource = new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
-      table: dictionaryTable,
+      table: this.dictionaryTable,
       targetToCNRegions: props.targetToCNRegions ?? false,
     });
 
     // Add admin user
     this.addAdminUserCustomResource = new AddAdminUser(this, 'AddAdminUserCustomResource', {
       uid: props.adminUserEmail,
-      userTable: clickStreamTable,
+      userTable: this.metadataTable,
     });
 
-    let lambdaFunctionNetwork = {};
-    if (props.fronting === 'alb') {
-      if (!props.applicationLoadBalancer) {
-        throw new Error('Application Load Balancer fronting backend api must be have applicationLoadBalancer parameters.');
-      }
-      const apiLambdaSG = new SecurityGroup(this, 'ClickStreamApiFunctionSG', {
-        vpc: props.applicationLoadBalancer.vpc,
-        allowAllOutbound: true,
-      });
-      apiLambdaSG.connections.allowFrom(
-        new Connections({
-          securityGroups: [props.applicationLoadBalancer.securityGroup],
-        }),
-        Port.allTcp(),
-        'allow all traffic from application load balancer',
-      );
-      addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
-
-      lambdaFunctionNetwork = {
-        vpc: props.applicationLoadBalancer.vpc,
-        vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
-        securityGroups: [apiLambdaSG],
-      };
-    }
+    this.lambdaFunctionNetwork = this.getLambdaNetworkConfig(props);
 
     // Create stack action StateMachine
-    const stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
-      clickStreamTable,
-      lambdaFunctionNetwork,
+    this.stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
+      lambdaFunctionNetwork: this.lambdaFunctionNetwork,
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
     });
 
     // Create stack workflow StateMachine
-    const stackWorkflowStateMachine = new StackWorkflowStateMachine(this, 'StackWorkflowStateMachine', {
-      stateActionMachine: stackActionStateMachine.stateMachine,
-      lambdaFunctionNetwork,
+    this.stackWorkflowStateMachine = new StackWorkflowStateMachine(this, 'StackWorkflowStateMachine', {
+      stateActionMachine: this.stackActionStateMachine.stateMachine,
+      lambdaFunctionNetwork: this.lambdaFunctionNetwork,
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
     });
-    stackActionStateMachine.stateMachine.grantStartExecution(stackWorkflowStateMachine.stackWorkflowMachine);
+    this.stackActionStateMachine.stateMachine.grantStartExecution(this.stackWorkflowStateMachine.stackWorkflowMachine);
 
     // Create event bus to listen stack status
-    const backendEventBus = new BackendEventBus(this, 'BackendEventBus', {
-      clickStreamTable,
-      prefixTimeGSIName,
-      lambdaFunctionNetwork,
-      listenStateMachine: stackWorkflowStateMachine.stackWorkflowMachine,
+    this.backendEventBus = new BackendEventBus(this, 'BackendEventBus', {
+      clickStreamTable: this.metadataTable,
+      prefixTimeGSIName: this.prefixTimeGSIName,
+      lambdaFunctionNetwork: this.lambdaFunctionNetwork,
+      listenStateMachine: this.stackWorkflowStateMachine.stackWorkflowMachine,
     });
 
-    // Create a role for lambda
-    const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-    });
-    const stepFunctionPolicy = new iam.Policy(this, 'ClickStreamApiStepFunctionPolicy', {
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [
-            stackActionStateMachine.stateMachine.stateMachineArn,
-            stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
-            Arn.format(
-              {
-                resource: 'stateMachine',
-                service: 'states',
-                region: '*',
-                resourceName: `${SCAN_METADATA_WORKFLOW_PREFIX}*`,
-                arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-              }, Stack.of(this),
-            ),
-          ],
-          actions: [
-            'states:StartExecution',
-          ],
-        }),
-      ],
-    });
-    stepFunctionPolicy.attachToRole(clickStreamApiFunctionRole);
-    const awsSdkPolicy = new iam.Policy(this, 'ClickStreamApiAWSSdkPolicy', {
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: ['*'],
-          actions: [
-            'ec2:DescribeRegions',
-            'ec2:DescribeVpcs',
-            'ec2:DescribeSecurityGroups',
-            'ec2:DescribeSubnets',
-            'ec2:DescribeRouteTables',
-            'ec2:DescribeVpcEndpoints',
-            'ec2:DescribeSecurityGroupRules',
-            'ec2:DescribeAvailabilityZones',
-            'ec2:DescribeNatGateways',
-            'kafka:ListClustersV2',
-            'kafka:ListClusters',
-            'kafka:ListNodes',
-            's3:ListAllMyBuckets',
-            'redshift:DescribeClusters',
-            'redshift:DescribeClusterSubnetGroups',
-            'redshift-serverless:ListWorkgroups',
-            'redshift-serverless:GetWorkgroup',
-            'redshift-serverless:GetNamespace',
-            'redshift-data:BatchExecuteStatement',
-            's3:ListBucket',
-            'ds:AuthorizeApplication',
-            'ds:UnauthorizeApplication',
-            'ds:CheckAlias',
-            'ds:CreateAlias',
-            'ds:DescribeDirectories',
-            'ds:DescribeTrusts',
-            'ds:DeleteDirectory',
-            'ds:CreateIdentityPoolDirectory',
-            's3:GetBucketLocation',
-            's3:GetBucketPolicy',
-            'route53:ListHostedZones',
-            'iam:ListRoles',
-            'iam:ListServerCertificates',
-            'iam:GetContextKeysForCustomPolicy',
-            'iam:SimulateCustomPolicy',
-            'states:DescribeExecution',
-            'acm:ListCertificates',
-            'cloudformation:DescribeStacks',
-            'cloudformation:DescribeType',
-            'secretsmanager:ListSecrets',
-            'secretsmanager:GetSecretValue',
-            'cloudwatch:DescribeAlarms',
-            'cloudwatch:EnableAlarmActions',
-            'cloudwatch:DisableAlarmActions',
-            'events:PutRule',
-            'events:ListTargetsByRule',
-            'events:PutTargets',
-            'events:TagResource',
-            'events:UntagResource',
-            'sns:CreateTopic',
-            'sns:Subscribe',
-            'sns:SetTopicAttributes',
-            'sns:TagResource',
-            'sns:UntagResource',
-          ],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:datasource/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
-          ],
-          actions: [
-            'quicksight:UpdateDashboardPermissions',
-            'quicksight:CreateDataSet',
-            'quicksight:DeleteDataSet',
-            'quicksight:PassDataSet',
-            'quicksight:PassDataSource',
-            'quicksight:CreateDashboard',
-            'quicksight:DeleteDashboard',
-            'quicksight:UpdateDashboard',
-            'quicksight:DescribeDashboard',
-            'quicksight:UpdateDashboardPublishedVersion',
-            'quicksight:CreateAnalysis',
-            'quicksight:UpdateAnalysis',
-            'quicksight:DeleteAnalysis',
-            'quicksight:CreateFolderMembership',
-            'quicksight:ListFolderMembers',
-            'quicksight:DescribeFolder',
-            'quicksight:CreateFolder',
-          ],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/*`,
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
-          ],
-          actions: [
-            'quicksight:GenerateEmbedUrlForRegisteredUser',
-            'quicksight:RegisterUser',
-            'quicksight:DeleteUser',
-            'quicksight:ListUsers',
-            'quicksight:ListDataSets',
-            'quicksight:ListDashboards',
-            'quicksight:ListAnalyses',
-          ],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [
-            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:*`,
-          ],
-          actions: [
-            'quicksight:DescribeAccountSubscription',
-          ],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [
-            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream-DataModeling*`,
-          ],
-          actions: [
-            'sts:AssumeRole',
-          ],
-        }),
-      ],
-    });
-    awsSdkPolicy.attachToRole(clickStreamApiFunctionRole);
-    addCfnNagSuppressRules(awsSdkPolicy.node.defaultChild as iam.CfnPolicy, [
-      ruleToSuppressRolePolicyWithWildcardResources('AWS SDK Policy', 'The lambda need to be queried all resources under the current account by design'),
-      ruleToSuppressRolePolicyWithHighSPCM('AWS SDK Policy'),
-    ]);
-
+    // Create a role for api function
+    const apiFunctionRole = this.createApiFunctionRole(props);
     // Create a role for upload object to S3
-    const uploadRole = new iam.Role(this, 'UploadRole', {
-      assumedBy: new ArnPrincipal(clickStreamApiFunctionRole.roleArn),
+    this.uploadRole = new Role(this, 'UploadRole', {
+      assumedBy: new ArnPrincipal(apiFunctionRole.roleArn),
     });
-    props.stackWorkflowS3Bucket.grantPut(uploadRole, `${props.pluginPrefix}*`);
+    props.stackWorkflowS3Bucket.grantPut(this.uploadRole, `${props.pluginPrefix}*`);
 
-    this.clickStreamApiFunction = new LambdaFunction(this, 'ApiFunction', {
-      description: 'Lambda function for api of solution Clickstream Analytics on AWS',
-      code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
-        file: './src/control-plane/backend/Dockerfile',
-      }),
-      handler: 'run.sh',
-      runtime: Runtime.NODEJS_18_X,
-      architecture: Architecture.ARM_64,
-      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
-      environment: {
-        AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
-        CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
-        DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
-        ANALYTICS_METADATA_TABLE_NAME: analyticsMetadataTable.tableName,
-        STACK_ACTION_STATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
-        STACK_WORKFLOW_STATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
-        STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
-        PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
-        PREFIX_MONTH_GSI_NAME: prefixMonthGSIName,
-        AWS_ACCOUNT_ID: Stack.of(this).account,
-        AWS_PARTITION: Aws.PARTITION,
-        AWS_URL_SUFFIX: Aws.URL_SUFFIX,
-        WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
-        ISSUER: props.authProps?.issuer ?? '',
-        STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
-        QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
-        HEALTH_CHECK_PATH: props.healthCheckPath,
-        WITH_VALIDATE_ROLE: 'true',
-        FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
-        LISTEN_STACK_QUEUE_ARN: backendEventBus.listenStackQueue.queueArn,
-        ...POWERTOOLS_ENVS,
-      },
-      timeout: Duration.seconds(30),
-      memorySize: 512,
-      role: clickStreamApiFunctionRole,
-      logRetention: RetentionDays.ONE_MONTH,
-      logFormat: 'JSON',
-      applicationLogLevel: 'WARN',
-      ...lambdaFunctionNetwork,
-    });
-
-    dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
-    clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
-    analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
-
-    addCfnNagSuppressRules(this.clickStreamApiFunction.node.defaultChild as CfnResource, [
-      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ApiFunction'),
-    ]);
+    // Create api function
+    this.apiFunction = this.createApiFunction(props, this.lambdaFunctionNetwork, apiFunctionRole);
 
     if (props.fronting === 'cloudfront') {
       if (!props.apiGateway) {
@@ -452,7 +235,7 @@ export class ClickStreamApiConstruct extends Construct {
       const apiGatewayAccessLogGroup = createLogGroup(this, {});
 
       this.lambdaRestApi = new LambdaRestApi(this, 'ClickStreamApi', {
-        handler: this.clickStreamApiFunction,
+        handler: this.apiFunction,
         proxy: true,
         defaultMethodOptions: {
           authorizationType: AuthorizationType.CUSTOM,
@@ -488,13 +271,13 @@ export class ClickStreamApiConstruct extends Construct {
     if (targetToCNRegions) {
       return '';
     }
-    const quickSightEmbedRole = new iam.Role(this, 'QuickSightEmbedRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    const quickSightEmbedRole = new Role(this, 'QuickSightEmbedRole', {
+      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
       inlinePolicies: {
-        quickSightEmbedPolicy: new iam.PolicyDocument({
+        quickSightEmbedPolicy: new PolicyDocument({
           statements: [
-            new iam.PolicyStatement({
-              effect: iam.Effect.ALLOW,
+            new PolicyStatement({
+              effect: Effect.ALLOW,
               resources: [
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
@@ -508,5 +291,237 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
     return quickSightEmbedRole.roleArn;
+  }
+
+  private createApiFunction(props: ClickStreamApiProps, lambdaFunctionNetwork: any, role: Role): LambdaFunction {
+    const fn = new LambdaFunction(this, 'ApiFunction', {
+      description: 'Lambda function for api of solution Clickstream Analytics on AWS',
+      code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
+        file: './src/control-plane/backend/Dockerfile',
+      }),
+      handler: 'run.sh',
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.ARM_64,
+      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
+      environment: {
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
+        CLICK_STREAM_TABLE_NAME: this.metadataTable.tableName,
+        DICTIONARY_TABLE_NAME: this.dictionaryTable.tableName,
+        ANALYTICS_METADATA_TABLE_NAME: this.analyticsMetadataTable.tableName,
+        STACK_ACTION_STATE_MACHINE: this.stackActionStateMachine.stateMachine.stateMachineArn,
+        STACK_WORKFLOW_STATE_MACHINE: this.stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
+        STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
+        PREFIX_TIME_GSI_NAME: this.prefixTimeGSIName,
+        PREFIX_MONTH_GSI_NAME: this.prefixMonthGSIName,
+        AWS_ACCOUNT_ID: Stack.of(this).account,
+        AWS_PARTITION: Aws.PARTITION,
+        AWS_URL_SUFFIX: Aws.URL_SUFFIX,
+        WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
+        ISSUER: props.authProps?.issuer ?? '',
+        STS_UPLOAD_ROLE_ARN: this.uploadRole.roleArn,
+        QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
+        HEALTH_CHECK_PATH: props.healthCheckPath,
+        WITH_VALIDATE_ROLE: 'true',
+        FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
+        LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
+        ...POWERTOOLS_ENVS,
+      },
+      timeout: Duration.seconds(30),
+      memorySize: 512,
+      role,
+      logRetention: RetentionDays.ONE_MONTH,
+      logFormat: 'JSON',
+      applicationLogLevel: 'WARN',
+      ...lambdaFunctionNetwork,
+    });
+
+    this.dictionaryTable.grantReadWriteData(fn);
+    this.metadataTable.grantReadWriteData(fn);
+    this.analyticsMetadataTable.grantReadWriteData(fn);
+
+    addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('ApiFunction'),
+    ]);
+
+    return fn;
+  }
+
+  private getLambdaNetworkConfig(props: ClickStreamApiProps) {
+    let lambdaFunctionNetwork = {};
+    if (props.fronting === 'alb') {
+      if (!props.applicationLoadBalancer) {
+        throw new Error('Application Load Balancer fronting backend api must be have applicationLoadBalancer parameters.');
+      }
+      const apiLambdaSG = new SecurityGroup(this, 'ClickStreamApiFunctionSG', {
+        vpc: props.applicationLoadBalancer.vpc,
+        allowAllOutbound: true,
+      });
+      apiLambdaSG.connections.allowFrom(
+        new Connections({
+          securityGroups: [props.applicationLoadBalancer.securityGroup],
+        }),
+        Port.allTcp(),
+        'allow all traffic from application load balancer',
+      );
+      addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
+
+      lambdaFunctionNetwork = {
+        vpc: props.applicationLoadBalancer.vpc,
+        vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
+        securityGroups: [apiLambdaSG],
+      };
+    }
+    return lambdaFunctionNetwork;
+  }
+
+  private createApiFunctionRole(props: ClickStreamApiProps): Role {
+    const deployInVpc = props.fronting === 'alb';
+    const apiFunctionPolicyStatements: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          this.stackActionStateMachine.stateMachine.stateMachineArn,
+          this.stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
+          Arn.format(
+            {
+              resource: 'stateMachine',
+              service: 'states',
+              region: '*',
+              resourceName: `${SCAN_METADATA_WORKFLOW_PREFIX}*`,
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            }, Stack.of(this),
+          ),
+        ],
+        actions: [
+          'states:StartExecution',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: ['*'],
+        actions: [
+          'ec2:DescribeRegions',
+          'ec2:DescribeVpcs',
+          'ec2:DescribeSecurityGroups',
+          'ec2:DescribeSubnets',
+          'ec2:DescribeRouteTables',
+          'ec2:DescribeVpcEndpoints',
+          'ec2:DescribeSecurityGroupRules',
+          'ec2:DescribeAvailabilityZones',
+          'ec2:DescribeNatGateways',
+          'kafka:ListClustersV2',
+          'kafka:ListClusters',
+          'kafka:ListNodes',
+          's3:ListAllMyBuckets',
+          'redshift:DescribeClusters',
+          'redshift:DescribeClusterSubnetGroups',
+          'redshift-serverless:ListWorkgroups',
+          'redshift-serverless:GetWorkgroup',
+          'redshift-serverless:GetNamespace',
+          'redshift-data:BatchExecuteStatement',
+          's3:ListBucket',
+          'ds:AuthorizeApplication',
+          'ds:UnauthorizeApplication',
+          'ds:CheckAlias',
+          'ds:CreateAlias',
+          'ds:DescribeDirectories',
+          'ds:DescribeTrusts',
+          'ds:DeleteDirectory',
+          'ds:CreateIdentityPoolDirectory',
+          's3:GetBucketLocation',
+          's3:GetBucketPolicy',
+          'route53:ListHostedZones',
+          'iam:ListRoles',
+          'iam:ListServerCertificates',
+          'iam:GetContextKeysForCustomPolicy',
+          'iam:SimulateCustomPolicy',
+          'states:DescribeExecution',
+          'acm:ListCertificates',
+          'cloudformation:DescribeStacks',
+          'cloudformation:DescribeType',
+          'secretsmanager:ListSecrets',
+          'secretsmanager:GetSecretValue',
+          'cloudwatch:DescribeAlarms',
+          'cloudwatch:EnableAlarmActions',
+          'cloudwatch:DisableAlarmActions',
+          'events:PutRule',
+          'events:ListTargetsByRule',
+          'events:PutTargets',
+          'events:TagResource',
+          'events:UntagResource',
+          'sns:CreateTopic',
+          'sns:Subscribe',
+          'sns:SetTopicAttributes',
+          'sns:TagResource',
+          'sns:UntagResource',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:datasource/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
+        ],
+        actions: [
+          'quicksight:UpdateDashboardPermissions',
+          'quicksight:CreateDataSet',
+          'quicksight:DeleteDataSet',
+          'quicksight:PassDataSet',
+          'quicksight:PassDataSource',
+          'quicksight:CreateDashboard',
+          'quicksight:DeleteDashboard',
+          'quicksight:UpdateDashboard',
+          'quicksight:DescribeDashboard',
+          'quicksight:UpdateDashboardPublishedVersion',
+          'quicksight:CreateAnalysis',
+          'quicksight:UpdateAnalysis',
+          'quicksight:DeleteAnalysis',
+          'quicksight:CreateFolderMembership',
+          'quicksight:ListFolderMembers',
+          'quicksight:DescribeFolder',
+          'quicksight:CreateFolder',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:analysis/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/*`,
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
+        ],
+        actions: [
+          'quicksight:GenerateEmbedUrlForRegisteredUser',
+          'quicksight:RegisterUser',
+          'quicksight:DeleteUser',
+          'quicksight:ListUsers',
+          'quicksight:ListDataSets',
+          'quicksight:ListDashboards',
+          'quicksight:ListAnalyses',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:*`,
+        ],
+        actions: [
+          'quicksight:DescribeAccountSubscription',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream-DataModeling*`,
+        ],
+        actions: [
+          'sts:AssumeRole',
+        ],
+      }),
+    ];
+    return createLambdaRole(this, 'ApiFunctionRole', deployInVpc, apiFunctionPolicyStatements);
   }
 }

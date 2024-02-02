@@ -232,7 +232,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     controlPlane.addRoute('api-targets', {
       routePath: '/api/*',
       priority: controlPlane.rootPathPriority - 1,
-      target: [new LambdaTarget(clickStreamApi.clickStreamApiFunction)],
+      target: [new LambdaTarget(clickStreamApi.apiFunction)],
       healthCheck: {
         enabled: true,
         path: healthCheckPath,
@@ -317,6 +317,15 @@ function addCfnNag(stack: Stack) {
       ],
       rules_to_suppress: [
         ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunctionRoleDefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('ApiFunctionRoleDefaultPolicy', 'lambda'),
       ],
     },
     ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'ApiFunction'),

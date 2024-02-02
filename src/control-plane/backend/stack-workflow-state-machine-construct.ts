@@ -63,12 +63,13 @@ export class StackWorkflowStateMachine extends Construct {
       }),
     ];
 
+    const deployInVpc = props.lambdaFunctionNetwork.vpc !== undefined;
     const workflowFunction = new SolutionNodejsFunction(this, 'WorkflowFunction', {
       description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-workflow/index.ts'),
       handler: 'handler',
       tracing: aws_lambda.Tracing.ACTIVE,
-      role: createLambdaRole(this, 'WorkflowFunctionRole', false, cfnPolicyStatements),
+      role: createLambdaRole(this, 'WorkflowFunctionRole', deployInVpc, cfnPolicyStatements),
       timeout: Duration.seconds(15),
       ...props.lambdaFunctionNetwork,
     });

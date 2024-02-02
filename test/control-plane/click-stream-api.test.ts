@@ -219,8 +219,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+        'testClickStreamALBApiApiFunctionRole3C2198E5',
       ],
     });
 
@@ -322,12 +322,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
       'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1',
       'testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5',
-      'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       'testClickStreamALBApiUploadRoleD732B7C0',
       'testClickStreamALBApiBackendEventBusListenStackFuncRole122CABAC',
       'testClickStreamALBApiBackendEventBusListenStateFuncRole498CB106',
       'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB',
       'AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2',
+      'testClickStreamALBApiApiFunctionRole3C2198E5',
     ];
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Role').sort())
       .toEqual([
@@ -460,9 +460,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
         'testClickStreamALBApiBackendEventBusListenStateFuncRoleDefaultPolicy4F429680',
         'testClickStreamALBApiBackendEventBusListenStackFuncRoleDefaultPolicy2D9358B1',
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-        'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
       ]);
@@ -475,6 +473,17 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'logs:CreateLogStream',
               'logs:PutLogEvents',
               'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -818,125 +827,24 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Statement: [
           {
             Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
             ],
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
+            Resource: '*',
           },
           {
             Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
             ],
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamMetadataA721B303',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
+            Resource: '*',
           },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
-        },
-      ],
-    });
-
-    // ApiStepFunctionPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: 'states:StartExecution',
             Effect: 'Allow',
@@ -965,20 +873,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               },
             ],
           },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
-        },
-      ],
-    });
-    // ApiAWSSdkPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: [
               'ec2:DescribeRegions',
@@ -1261,13 +1155,119 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               ],
             },
           },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
+      PolicyName: 'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
       Roles: [
         {
-          Ref: 'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+          Ref: 'testClickStreamALBApiApiFunctionRole3C2198E5',
         },
       ],
     });
@@ -1684,8 +1684,8 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
+        'testClickStreamCloudfrontApiApiFunctionRoleDefaultPolicyE0B97DC3',
+        'testClickStreamCloudfrontApiApiFunctionRole1C15F66B',
       ],
     });
 
