@@ -36,7 +36,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressCloudWatchLogEncryption, ruleToSuppressRolePolicyWithHighSPCM, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardAction, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
@@ -430,18 +430,46 @@ function addCfnNag(stack: Stack) {
   const cfnNagList = [
     {
       paths_endswith: [
-        'ClickStreamApi/ApiGatewayAccessLogs/Resource',
+        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        ruleToSuppressCloudWatchLogEncryption(),
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
       ],
     },
     {
       paths_endswith: [
-        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+        'ClickStreamApi/StackWorkflowStateMachine/StackWorkflowStateMachine/Role/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        ruleToSuppressRolePolicyWithHighSPCM('ApiFunction'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardAction('ActionFunctionRole'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunctionRoleDefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('ApiFunctionRoleDefaultPolicy', 'lambda'),
       ],
     },
     ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'AddAdminUserFunction'),

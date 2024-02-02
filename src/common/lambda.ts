@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { Arn, ArnFormat } from 'aws-cdk-lib';
 import {
   Policy,
   PolicyStatement,
@@ -20,37 +19,8 @@ import {
   ServicePrincipal,
   PrincipalBase,
 } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { IConstruct } from 'constructs';
 import { addCfnNagSuppressRules } from './cfn-nag';
-
-export function cloudWatchSendLogs(id: string, func: IFunction): IFunction {
-  if (func.role !== undefined) {
-    const logGroupArn = getLambdaLogGroupArn(func);
-    const lambdaPolicy = new Policy(func.stack, id, {
-      statements: getLambdaBasicPolicyStatements(false, logGroupArn),
-    });
-    lambdaPolicy.attachToRole(func.role);
-
-    suppressLogsWildcardResources(lambdaPolicy);
-  }
-  return func;
-}
-
-export function createENI(id: string, func: IFunction): IFunction {
-  if (func.role !== undefined) {
-    const lambdaPolicy = new Policy(func.stack, id, {
-      statements: [
-        getLambdaInVpcRolePolicyStatement(),
-      ],
-    });
-    lambdaPolicy.attachToRole(func.role);
-    func.node.addDependency(lambdaPolicy);
-
-    suppressENIWildcardResources(lambdaPolicy);
-  }
-  return func;
-}
 
 function suppressLogsWildcardResources(policy: Policy) {
   suppressWildcardResources(policy, 'The lambda service writes to undetermined logs stream by design');
@@ -98,18 +68,6 @@ function getLambdaInVpcRolePolicyStatement(): PolicyStatement {
     ],
     resources: ['*'],
   });
-}
-
-function getLambdaLogGroupArn(func: IFunction) {
-  return Arn.format(
-    {
-      resource: 'log-group',
-      service: 'logs',
-      resourceName: `/aws/lambda/${func.functionName}:*`,
-      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-    },
-    func.stack,
-  );
 }
 
 export function createLambdaRole(

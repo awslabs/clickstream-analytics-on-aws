@@ -14,13 +14,13 @@
 
 import { statSync } from 'fs';
 import { join, resolve } from 'path';
-import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
+import { Duration, CustomResource, CfnResource } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { cloudWatchSendLogs, createLambdaRole } from '../../common/lambda';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
+import { createLambdaRole } from '../../common/lambda';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface CdkCallCustomResourceProps {
@@ -45,12 +45,9 @@ export class BatchInsertDDBCustomResource extends Construct {
     });
 
     props.table.grantReadWriteData(customResourceLambda);
-    cloudWatchSendLogs('custom-resource-func-logs', customResourceLambda);
-    addCfnNagToStack(Stack.of(this), [
-      ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'BatchInsertDDBCustomResource/DicInitCustomResourceFunction/Resource',
-        'DicInitCustomResourceFunction',
-      ),
+
+    addCfnNagSuppressRules(customResourceLambda.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('DicInitCustomResourceFunction'),
     ]);
 
     const customResourceProvider = new Provider(
