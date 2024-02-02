@@ -219,9 +219,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+        'testClickStreamALBApiApiFunctionRole3C2198E5',
       ],
     });
 
@@ -323,12 +322,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
       'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1',
       'testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5',
-      'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       'testClickStreamALBApiUploadRoleD732B7C0',
       'testClickStreamALBApiBackendEventBusListenStackFuncRole122CABAC',
       'testClickStreamALBApiBackendEventBusListenStateFuncRole498CB106',
       'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB',
       'AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2',
+      'testClickStreamALBApiApiFunctionRole3C2198E5',
     ];
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Role').sort())
       .toEqual([
@@ -456,30 +455,288 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
         'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
-        'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
-        'testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336',
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
         'testClickStreamALBApiBackendEventBusListenStateFuncRoleDefaultPolicy4F429680',
         'testClickStreamALBApiBackendEventBusListenStackFuncRoleDefaultPolicy2D9358B1',
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-        'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
-        'customresourcefunclogs9B71FED3',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
-        'actionfunclogs394D90DA',
-        'actionfunceniA16F9174',
-        'workflowfunclogs7A318BBF',
-        'workflowfunceniF26BB9B3',
-        'apifunclogs9F7B9244',
-        'apifunceni59253B5A',
       ]);
     // StateMachineActionFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
         Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
+              'cloudformation:DeleteStack',
+              'cloudformation:DescribeStacks',
+              'cloudformation:UpdateTerminationProtection',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/Clickstream-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'iam:GetRole',
+              'iam:PassRole',
+              'iam:DetachRolePolicy',
+              'iam:GetPolicy',
+              'iam:DeleteRolePolicy',
+              'iam:CreateRole',
+              'iam:DeleteRole',
+              'iam:AttachRolePolicy',
+              'iam:PutRolePolicy',
+              'iam:ListRolePolicies',
+              'iam:GetRolePolicy',
+              'iam:CreateInstanceProfile',
+              'iam:DeleteInstanceProfile',
+              'iam:RemoveRoleFromInstanceProfile',
+              'iam:AddRoleToInstanceProfile',
+              'iam:ListPolicies',
+              'iam:ListRoles',
+              'iam:UpdateRoleDescription',
+              'iam:TagRole',
+              'iam:UntagRole',
+              'iam:ListRoleTags',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':policy/Clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':instance-profile/Clickstream*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'iam:PassRole',
+              'iam:CreateServiceLinkedRole',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'sns:*',
+              'sqs:*',
+              'redshift-serverless:*',
+              's3:*',
+              'apigateway:*',
+              'logs:*',
+              'redshift:*',
+              'dynamodb:*',
+              'autoscaling:*',
+              'application-autoscaling:*',
+              'glue:*',
+              'cloudwatch:*',
+              'emr-serverless:*',
+              'ssm:*',
+              'ecs:*',
+              'lambda:*',
+              'quicksight:*',
+              'ec2:*',
+              'events:*',
+              'elasticloadbalancing:*',
+              'kinesis:*',
+              'kafka:*',
+              'states:*',
+              'secretsmanager:*',
+              'globalaccelerator:*',
+              'kms:*',
+              'athena:*',
+              'servicecatalog:CreateApplication',
+              'servicecatalog:UpdateApplication',
+              'servicecatalog:DeleteApplication',
+              'servicecatalog:GetApplication',
+              'servicecatalog:GetAssociatedResource',
+              'servicecatalog:AssociateResource',
+              'servicecatalog:DisassociateResource',
+              'servicecatalog:TagResource',
+              'servicecatalog:UntagResource',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
           {
             Action: [
               'xray:PutTraceSegments',
@@ -570,120 +827,24 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Statement: [
           {
             Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
             ],
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
+            Resource: '*',
           },
           {
             Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
             ],
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamMetadataA721B303',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
+            Resource: '*',
           },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-    });
-
-    // ApiStepFunctionPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: 'states:StartExecution',
             Effect: 'Allow',
@@ -712,15 +873,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               },
             ],
           },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-    });
-    // ApiAWSSdkPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: [
               'ec2:DescribeRegions',
@@ -1003,218 +1155,68 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               ],
             },
           },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
-    });
-
-    // ActionFunctionRolePolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: [
-              'cloudformation:CreateStack',
-              'cloudformation:UpdateStack',
-              'cloudformation:DeleteStack',
-              'cloudformation:DescribeStacks',
-              'cloudformation:UpdateTerminationProtection',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':cloudformation:*:',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':stack/Clickstream-*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: [
-              'iam:GetRole',
-              'iam:PassRole',
-              'iam:DetachRolePolicy',
-              'iam:GetPolicy',
-              'iam:DeleteRolePolicy',
-              'iam:CreateRole',
-              'iam:DeleteRole',
-              'iam:AttachRolePolicy',
-              'iam:PutRolePolicy',
-              'iam:ListRolePolicies',
-              'iam:GetRolePolicy',
-              'iam:CreateInstanceProfile',
-              'iam:DeleteInstanceProfile',
-              'iam:RemoveRoleFromInstanceProfile',
-              'iam:AddRoleToInstanceProfile',
-              'iam:ListPolicies',
-              'iam:ListRoles',
-              'iam:UpdateRoleDescription',
-              'iam:TagRole',
-              'iam:UntagRole',
-              'iam:ListRoleTags',
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
             ],
             Effect: 'Allow',
             Resource: [
               {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/Clickstream*',
-                  ],
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
                 ],
               },
               {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':policy/Clickstream*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':instance-profile/Clickstream*',
-                  ],
-                ],
+                Ref: 'AWS::NoValue',
               },
             ],
           },
           {
             Action: [
-              'iam:PassRole',
-              'iam:CreateServiceLinkedRole',
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
             ],
             Effect: 'Allow',
             Resource: [
               {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
-                  ],
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
                 ],
               },
               {
                 'Fn::Join': [
                   '',
                   [
-                    'arn:',
                     {
-                      Ref: 'AWS::Partition',
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
                     },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':iam::',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
+                    '/index/*',
                   ],
                 ],
               },
@@ -1222,57 +1224,53 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
-              'sns:*',
-              'sqs:*',
-              'redshift-serverless:*',
-              's3:*',
-              'apigateway:*',
-              'logs:*',
-              'redshift:*',
-              'dynamodb:*',
-              'autoscaling:*',
-              'application-autoscaling:*',
-              'glue:*',
-              'cloudwatch:*',
-              'emr-serverless:*',
-              'ssm:*',
-              'ecs:*',
-              'lambda:*',
-              'quicksight:*',
-              'ec2:*',
-              'events:*',
-              'elasticloadbalancing:*',
-              'kinesis:*',
-              'kafka:*',
-              'states:*',
-              'secretsmanager:*',
-              'globalaccelerator:*',
-              'kms:*',
-              'athena:*',
-              'servicecatalog:CreateApplication',
-              'servicecatalog:UpdateApplication',
-              'servicecatalog:DeleteApplication',
-              'servicecatalog:GetApplication',
-              'servicecatalog:GetAssociatedResource',
-              'servicecatalog:AssociateResource',
-              'servicecatalog:DisassociateResource',
-              'servicecatalog:TagResource',
-              'servicecatalog:UntagResource',
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
             ],
             Effect: 'Allow',
-            Resource: '*',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
           },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
+      PolicyName: 'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
       Roles: [
         {
-          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+          Ref: 'testClickStreamALBApiApiFunctionRole3C2198E5',
         },
       ],
     });
-
   });
 
   test('LogGroup', () => {
@@ -1686,9 +1684,8 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
+        'testClickStreamCloudfrontApiApiFunctionRoleDefaultPolicyE0B97DC3',
+        'testClickStreamCloudfrontApiApiFunctionRole1C15F66B',
       ],
     });
 
