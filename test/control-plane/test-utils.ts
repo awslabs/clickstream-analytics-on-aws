@@ -257,6 +257,31 @@ export class TestEnv {
     return { stack, template };
   }
 
+  public static newALBWithRolePrefixApiStack(outdir: string): ApiStackElements {
+
+    const stack = new TestStack(new TestApp(outdir), 'apiTestStack');
+    const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
+
+    const pluginPrefix = 'plugins/';
+    new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
+      fronting: 'alb',
+      applicationLoadBalancer: {
+        vpc: stack.vpc,
+        subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroup: stack.sg,
+      },
+      targetToCNRegions: false,
+      stackWorkflowS3Bucket: s3Bucket,
+      pluginPrefix,
+      healthCheckPath: '/',
+      adminUserEmail: 'fake@example.com',
+      iamRolePrefix: 'testRolePrefix',
+    });
+
+    const template = Template.fromStack(stack);
+    return { stack, template };
+  }
+
   public static newCloudfrontApiStack(outdir: string, cn: boolean = false): ApiStackElements {
 
     const stack = new TestStack(new TestApp(outdir), 'apiTestStack');

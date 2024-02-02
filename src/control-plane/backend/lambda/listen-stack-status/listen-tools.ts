@@ -22,6 +22,7 @@ import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { CFN_TOPIC_PREFIX } from '../api/common/constants';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
+import { getStackPrefix } from '../api/common/utils';
 
 const MAX_RETRY_COUNT = 3;
 
@@ -37,6 +38,7 @@ const docClient = DynamoDBDocumentClient.from(ddbClient, {
 
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
+export const stackPrefix = getStackPrefix(process.env.IAM_ROLE_PREFIX);
 
 export interface CloudFormationStackStatusChangeNotificationEventDetail {
   'stack-id': string;
@@ -162,10 +164,11 @@ export function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatus
   const existedStackNames = stackDetails.map(s => s.stackName);
   for (const stackName of stackNames) {
     if (!existedStackNames.includes(stackName)) {
+      const cutPrefixName = stackName.substring(stackPrefix.length);
       stackDetails.push({
         stackId: '',
         stackName: stackName,
-        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackType: cutPrefixName.split('-')[1] as PipelineStackType,
         stackStatus: undefined,
         stackStatusReason: '',
         stackTemplateVersion: '',

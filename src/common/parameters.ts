@@ -46,6 +46,7 @@ import {
   SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
+  IAM_ROLE_PREFIX_PATTERN,
 } from './constant';
 import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
@@ -641,4 +642,25 @@ export class Parameters {
       type: 'String',
     });
   }
+
+  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct) {
+    const iamRolePrefixParam = new CfnParameter(scope, 'IamRolePrefix', {
+      description: 'The prefix of all IAM Roles.',
+      type: 'String',
+      allowedPattern: IAM_ROLE_PREFIX_PATTERN,
+      default: '',
+    });
+
+    const iamRoleBoundaryArnParam = new CfnParameter(scope, 'IamRoleBoundaryArn', {
+      description: 'The arn of all IAM Roles.',
+      type: 'String',
+      default: '',
+    });
+
+    return {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    };
+  }
+
 }

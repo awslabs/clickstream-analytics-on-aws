@@ -36,8 +36,10 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
+import { RoleNamePrefixAspect, RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardAction, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
+import { createLambdaRole } from './common/lambda';
 import { Parameters } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
@@ -85,6 +87,11 @@ export class CloudFrontControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + '- Control Plane';
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
 
     let domainProps: DomainProps | undefined = undefined;
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
@@ -226,7 +233,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     const authorizer = this.createAuthorizer(oidcInfo);
     const pluginPrefix = 'plugins/';
     const clickStreamApi = this.createBackendApi(authorizer, oidcInfo, pluginPrefix,
-      solutionBucket.bucket, props?.targetToCNRegions);
+      solutionBucket.bucket, props?.targetToCNRegions, iamRolePrefixParam.valueAsString);
 
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
@@ -318,6 +325,8 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     // nag
     addCfnNag(this);
+    Aspects.of(this).add(new RoleNamePrefixAspect(iamRolePrefixParam.valueAsString));
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 
   private oidcInfo(controlPlaneUrl?: string): OIDCInfo {
@@ -367,6 +376,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         retention: RetentionDays.TEN_YEARS,
       },
       applicationLogLevel: 'WARN',
+      role: createLambdaRole(this, 'AuthorizerFunctionRole', false, []),
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
       ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
@@ -382,7 +392,7 @@ export class CloudFrontControlPlaneStack extends Stack {
   }
 
   private createBackendApi(authorizer: IAuthorizer, oidcInfo: OIDCInfo, pluginPrefix: string,
-    bucket: IBucket, targetToCNRegions?: boolean): ClickStreamApiConstruct {
+    bucket: IBucket, targetToCNRegions?: boolean, iamRolePrefix?: string): ClickStreamApiConstruct {
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'cloudfront',
       apiGateway: {
@@ -394,6 +404,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       pluginPrefix: pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: oidcInfo.adminEmail,
+      iamRolePrefix: iamRolePrefix,
     });
 
     return clickStreamApi;

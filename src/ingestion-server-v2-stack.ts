@@ -20,13 +20,16 @@ import {
   Stack,
   StackProps,
   ICfnConditionExpression,
+  Aspects,
 } from 'aws-cdk-lib';
 import {
   SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { getALBSubnetsCondtion } from './common/vpc-utils';
@@ -308,6 +311,12 @@ export class IngestionServerStackV2 extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 

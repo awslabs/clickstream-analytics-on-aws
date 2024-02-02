@@ -235,16 +235,20 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
   return value!;
 }
 
+function getStackPrefix(prefix?: string): string {
+  return prefix ? `${prefix}-${SolutionInfo.SOLUTION_SHORT_NAME}` : SolutionInfo.SOLUTION_SHORT_NAME;
+}
+
 function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
   const names: Map<string, string> = new Map();
-  names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
-  names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
-  names.set(PipelineStackType.DATA_PROCESSING, `Clickstream-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
-  names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `Clickstream-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
-  names.set(PipelineStackType.REPORTING, `Clickstream-${PipelineStackType.REPORTING}-${pipelineId}`);
-  names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
-  names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
-  names.set(PipelineStackType.APP_REGISTRY, `Clickstream-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
+  names.set(PipelineStackType.INGESTION, `${getStackPrefix()}-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
+  names.set(PipelineStackType.KAFKA_CONNECTOR, `${getStackPrefix()}-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_PROCESSING, `${getStackPrefix()}-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `${getStackPrefix()}-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
+  names.set(PipelineStackType.REPORTING, `${getStackPrefix()}-${PipelineStackType.REPORTING}-${pipelineId}`);
+  names.set(PipelineStackType.METRICS, `${getStackPrefix()}-${PipelineStackType.METRICS}-${pipelineId}`);
+  names.set(PipelineStackType.ATHENA, `${getStackPrefix()}-${PipelineStackType.ATHENA}-${pipelineId}`);
+  names.set(PipelineStackType.APP_REGISTRY, `${getStackPrefix()}-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 
@@ -1296,6 +1300,7 @@ export {
   getEmailFromRequestContext,
   getTokenFromRequestContext,
   getBucketPrefix,
+  getStackPrefix,
   getStackName,
   getKafkaTopic,
   getPluginInfo,

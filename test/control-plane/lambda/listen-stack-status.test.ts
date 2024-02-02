@@ -20,11 +20,12 @@ import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../src/common/model';
 import { handler } from '../../../src/control-plane/backend/lambda/listen-stack-status';
-import { CloudFormationStackStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-stack-status/listen-tools';
+import { CloudFormationStackStatusChangeNotificationEventDetail, stackPrefix } from '../../../src/control-plane/backend/lambda/listen-stack-status/listen-tools';
 import 'aws-sdk-client-mock-jest';
 
 const cloudFormationMock = mockClient(CloudFormationClient);
 const docMock = mockClient(DynamoDBDocumentClient);
+
 
 describe('Listen CFN Stack Status Lambda Function', () => {
 
@@ -40,7 +41,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     'region': 'ap-southeast-1',
     'detail-type': 'CloudFormation Stack Status Change',
     'detail': {
-      'stack-id': `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}/5b6971e0-f261-11ed-a7e3-02a848659f60`,
+      'stack-id': `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${stackPrefix}-Ingestion-kafka-${MOCK_PIPELINE_ID}/5b6971e0-f261-11ed-a7e3-02a848659f60`,
       'status-details': {
         'status': StackStatus.CREATE_COMPLETE,
         'status-reason': 'Stack creation completed',
@@ -72,8 +73,8 @@ describe('Listen CFN Stack Status Lambda Function', () => {
   };
 
   const mockIngestionKafkaStack: Stack = {
-    StackId: `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}/5b6971e0-f261-11ed-a7e3-02a848659f60`,
-    StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+    StackId: `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${stackPrefix}-Ingestion-kafka-${MOCK_PIPELINE_ID}/5b6971e0-f261-11ed-a7e3-02a848659f60`,
+    StackName: `${stackPrefix}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
     CreationTime: new Date('2021-09-01T00:00:00Z'),
     StackStatus: StackStatus.CREATE_COMPLETE,
     StackStatusReason: 'Stack creation completed',
@@ -97,7 +98,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-KafkaConnector-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-KafkaConnector-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -106,7 +107,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -115,7 +116,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-DataProcessing-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-DataProcessing-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -124,7 +125,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-DataModelingRedshift-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-DataModelingRedshift-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -133,7 +134,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-Reporting-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-Reporting-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -142,7 +143,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     {
       stackId: '',
       outputs: [],
-      stackName: 'Clickstream-Metrics-6972c135cb864885b25c5b7ebe584fdf',
+      stackName: `${stackPrefix}-Metrics-6972c135cb864885b25c5b7ebe584fdf`,
       stackStatus: undefined,
       stackStatusReason: '',
       stackTemplateVersion: '',
@@ -170,7 +171,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
-                    StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                   },
                   Callback: {
                     BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -187,7 +188,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
-                    StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                   },
                   Callback: {
                     BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -209,7 +210,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
-                    StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-DataProcessing-${MOCK_PIPELINE_ID}`,
                   },
                   Callback: {
                     BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -226,7 +227,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                     Action: 'Create',
                     Parameters: [],
-                    StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-Reporting-${MOCK_PIPELINE_ID}`,
                   },
                   Callback: {
                     BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -248,7 +249,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                         ParameterValue: 'rate(16 minutes)',
                       },
                     ],
-                    StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                   },
                   Callback: {
                     BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -273,7 +274,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [],
-                    StackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
+                    StackName: `${stackPrefix}-Metrics-${MOCK_PIPELINE_ID}`,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                   },
                 },
@@ -309,7 +310,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(mockStackDetails).toContainEqual({
-      stackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+      stackId: `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${stackPrefix}-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60`,
       outputs: [],
       stackName: mockIngestionKafkaStack.StackName,
       stackStatus: mockIngestionKafkaStack.StackStatus,
@@ -359,7 +360,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(docMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
     expect(mockStackDetails).toContainEqual({
-      stackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
+      stackId: `arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${stackPrefix}-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60`,
       outputs: [],
       stackName: mockIngestionKafkaStack.StackName,
       stackStatus: mockIngestionKafkaStack.StackStatus,

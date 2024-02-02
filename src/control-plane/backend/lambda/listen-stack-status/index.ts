@@ -12,7 +12,7 @@
  */
 
 import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
-import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, getWorkflowStacks, updatePipelineStackStatus } from './listen-tools';
+import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, getWorkflowStacks, stackPrefix, updatePipelineStackStatus } from './listen-tools';
 import { logger } from '../../../../common/powertools';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
@@ -23,7 +23,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
   const stackId = eventDetail['stack-id'];
   const stackName = stackId.split('/')[1];
 
-  if (!stackName.startsWith('Clickstream')) {
+  if (!stackName.startsWith(stackPrefix)) {
     return;
   }
   const stackDetail = await describeStack(stackId, region);

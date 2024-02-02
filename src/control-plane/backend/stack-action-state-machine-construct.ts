@@ -18,6 +18,7 @@ import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskIn
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
+import { getStackPrefix } from './lambda/api/common/utils';
 import {
   addCfnNagSuppressRules,
   rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions,
@@ -30,6 +31,7 @@ export interface StackActionStateMachineProps {
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly targetToCNRegions?: boolean;
   readonly workflowBucket: IBucket;
+  readonly iamRolePrefix?: string;
 }
 
 export class StackActionStateMachine extends Construct {
@@ -43,7 +45,7 @@ export class StackActionStateMachine extends Construct {
     const actionFunctionRolePolicyStatements = [
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${getStackPrefix(props.iamRolePrefix)}*`],
         actions: [
           'cloudformation:CreateStack',
           'cloudformation:UpdateStack',
@@ -77,9 +79,9 @@ export class StackActionStateMachine extends Construct {
           'iam:ListRoleTags',
         ],
         resources: [
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/Clickstream*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/Clickstream*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/Clickstream*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${props.iamRolePrefix}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/${props.iamRolePrefix}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/${props.iamRolePrefix}*`,
         ],
       }),
       new iam.PolicyStatement({
