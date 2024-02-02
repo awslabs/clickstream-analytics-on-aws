@@ -2525,9 +2525,6 @@ export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndC
       hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
       eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
     }
-
-    //todo
-
   }
 
   return {
