@@ -20,7 +20,6 @@ plugins {
     id 'com.github.johnrengelman.shadow' version "$shadowVersion"
     id 'java'
     id 'java-library'
-    id 'maven-publish'
 }
 
 apply plugin: 'idea'
@@ -72,8 +71,8 @@ dependencies {
     api "org.apache.flink:flink-connector-aws-kinesis-streams:$flinkVersion"
     api "org.apache.flink:flink-streaming-java:$flinkVersion"
     api "org.apache.flink:flink-clients:$flinkVersion"
-    api "software.amazon.awssdk:bom:2.21.2"
-    api "software.amazon.awssdk:s3:2.21.2"
+    api "software.amazon.awssdk:bom:$awsSdkVersion"
+    api "software.amazon.awssdk:s3:$awsSdkVersion"
 //    compileOnly "org.apache.flink:flink-streaming-java:$flinkVersion"
 //    compileOnly "org.apache.flink:flink-clients:$flinkVersion"
     testImplementation "org.apache.flink:flink-runtime:$flinkVersion"
@@ -129,14 +128,6 @@ jacocoTestReport {
         xml.enabled true
         csv.enabled true
         html.enabled true
-    }
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
     }
 }
 
