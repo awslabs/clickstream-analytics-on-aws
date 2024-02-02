@@ -39,5 +39,4 @@ export WITH_AUTH_MIDDLEWARE=false
 export WITH_VALIDATE_ROLE=false
 
 # Run the server
-cd ../../src/control-plane/backend/lambda/api
-yarn dev
+cd ../backend/lambda/api && yarn dev

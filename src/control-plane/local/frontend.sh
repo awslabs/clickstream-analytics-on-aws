@@ -25,7 +25,7 @@ if [ -z "$SolutionDataBucket" ]; then
 fi
 
 # Create new file setupProxy.js and add the content into file
-cat > ../../frontend/src/setupProxy.js <<EOF
+cat > ../../../frontend/src/setupProxy.js <<EOF
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
@@ -41,7 +41,7 @@ module.exports = function (app) {
 EOF
 
 # Create new file aws-exports.json and add the content into file
-cat > ../../frontend/public/aws-exports.json <<EOF
+cat > ../../../frontend/public/aws-exports.json <<EOF
 {
     "oidc_provider": "https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId",
     "oidc_client_id": "75oj7ch4ls3lnhhiglt0bu27k8",
@@ -56,7 +56,7 @@ EOF
 
 
 # Run the server
-cd ../../frontend/ && yarn install && yarn start
+cd ../../../frontend/ && yarn install && yarn start
 
 
 
