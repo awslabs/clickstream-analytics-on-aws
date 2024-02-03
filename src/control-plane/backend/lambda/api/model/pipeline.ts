@@ -29,20 +29,21 @@ import {
   getStackParameters,
 } from './stacks';
 import {
+  CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
+  FULL_SOLUTION_VERSION,
+  PIPELINE_STACKS,
   awsAccountId,
   awsPartition,
   awsRegion,
   awsUrlSuffix,
-  CFN_RULE_PREFIX,
-  CFN_TOPIC_PREFIX,
-  FULL_SOLUTION_VERSION,
   listenStackQueueArn,
-  PIPELINE_STACKS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
 import {
   MULTI_APP_ID_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
@@ -51,7 +52,7 @@ import {
   ExecutionDetail,
   PipelineStackType,
   PipelineStatusDetail,
-  PipelineStatusType
+  PipelineStatusType,
 } from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
@@ -84,7 +85,9 @@ import {
   getStackTags,
   getStateMachineExecutionName,
   getUpdateTags,
-  isEmpty
+  isEmpty,
+  mergeIntoPipelineTags,
+  mergeIntoStackTags,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
@@ -871,14 +874,11 @@ export class CPipeline {
 
     // Add awsApplication tag to start viewing the cost, security, and operational metrics for the application
     const awsApplicationTag: Tag = {
-      Key: 'awsApplication.#',
-      Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN}`
+      Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+      Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
     };
-    if (this.stackTags) {
-      this.stackTags.push(awsApplicationTag);
-    } else {
-      this.stackTags = [awsApplicationTag];
-    }
+    mergeIntoStackTags(this.stackTags, awsApplicationTag);
+    mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
 
     return {
       Type: WorkflowStateType.PARALLEL,

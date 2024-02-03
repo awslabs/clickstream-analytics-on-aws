@@ -1145,6 +1145,47 @@ function getDefaultTags(projectId: string) {
   return tags;
 }
 
+/**
+ * Merge one tag into stackTags
+ * @param stackTags stack tags array, could be undefined
+ * @param newTag
+ * @returns Tag[]
+ */
+function mergeIntoStackTags(stackTags: Tag[] | undefined, newTag: Tag): Tag[] {
+  if (stackTags === undefined) {
+    return [newTag];
+  }
+
+  const index = stackTags.findIndex(tag => tag.Key === newTag.Key);
+  if (index !== -1) {
+    stackTags.splice(index, 1);
+  }
+
+  stackTags.push(newTag);
+
+  return stackTags;
+}
+
+/**
+ * Merge one tag into pipelineTags
+ * @param pipelineTags pipeline tags array
+ * @param newTag Tag type
+ * @returns ITag[]
+ */
+function mergeIntoPipelineTags(pipelineTags: ITag[], newTag: Tag): ITag[] {
+  const index = pipelineTags.findIndex(tag => tag.key === newTag.Key);
+  if (index !== -1) {
+    pipelineTags.splice(index, 1);
+  }
+
+  pipelineTags.push({
+    key: newTag.Key!,
+    value: newTag.Value!,
+  });
+
+  return pipelineTags;
+}
+
 function getStateMachineExecutionName(pipelineId: string) {
   return `main-${pipelineId}-${new Date().getTime()}`;
 }
@@ -1332,6 +1373,8 @@ export {
   getStackTags,
   getUpdateTags,
   getDefaultTags,
+  mergeIntoStackTags,
+  mergeIntoPipelineTags,
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,

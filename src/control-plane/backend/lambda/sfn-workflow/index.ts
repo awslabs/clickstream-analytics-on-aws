@@ -34,7 +34,7 @@ interface SfnStackInput {
   readonly StackName: string;
   readonly TemplateURL: string;
   readonly Parameters: Parameter[];
-  readonly Tags?: Tag[];
+  Tags?: Tag[];
 }
 
 interface SfnStackCallback {
@@ -43,6 +43,7 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: any): Promise<any> => {
+  logger.info(event);
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {
@@ -161,14 +162,48 @@ async function stackTagsResolve(stack: WorkFlowStack) {
   const tags = stack.Data.Input.Tags;
   const bucket = stack.Data.Callback.BucketName;
   const prefix = stack.Data.Callback.BucketPrefix;
-  if (tags && bucket && prefix) {
-    for (let tag of tags) {
-      if (tag.Key?.endsWith('.#') && tag.Value?.startsWith('#.')) {
-        const { key, value } = await _getParameterKeyAndValueByStackOutput(tag.Key, tag.Value, bucket, prefix);
-        tag.Key = key;
-        tag.Value = value;
-      }
+
+  // When the tag Key or Value starts with '#.', resolve the tag using the pattern '#.{stackName}.{outputKeySuffix}'
+  // e.g. origin = '#.Clickstream-ServiceCatalogAppRegistry-249f84aa8dd044c2a7294cb04cebe88b.ServiceCatalogAppRegistryApplicationTagKey'
+  // If unable to find corresponding output, return `undefined`
+  const resolveTagByOutput = async (origin: string): Promise<string | undefined> => {
+    if (!origin.startsWith('#.') || origin.split('.').length !== 3) {
+      return origin;
     }
+
+    const splitValues = origin.split('.');
+    const stackName = splitValues[1];
+    const outputKeySuffix = splitValues[2];
+    const s3ObjectKey = `${prefix}/${stackName}/output.json`;
+    let outputs;
+    try {
+      const content = await getObject(bucket, s3ObjectKey);
+      outputs = JSON.parse(content as string)[stackName].Outputs;
+    } catch (err) {
+      logger.error('Stack workflow cannot retrieve stack output resolve tags upon ', { error: err, s3ObjectKey });
+      return undefined;
+    }
+    if (outputs) {
+      const stackOutput = outputs.find(output => output.OutputKey?.endsWith(outputKeySuffix));
+      return stackOutput?.OutputValue;
+    }
+
+    return undefined;
+  };
+
+  if (tags && bucket && prefix) {
+    const resolvedTags: Tag[] = [];
+    tags.forEach(async (tag: Tag) => {
+      const Key = await resolveTagByOutput(tag.Key!);
+      const Value = await resolveTagByOutput(tag.Value!);
+      if (Key !== undefined && Value !== undefined) {
+        resolvedTags.push({
+          Key,
+          Value,
+        } as Tag);
+      }
+    });
+    stack.Data.Input.Tags = resolvedTags;
   }
 }
 
