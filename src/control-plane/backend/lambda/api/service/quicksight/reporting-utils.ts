@@ -1179,7 +1179,6 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
       message: 'unsupported chart type',
     };
   }
-  checkChain.DuplicatedEvent();
 
   return checkChain.status;
 }
