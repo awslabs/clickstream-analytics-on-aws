@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.zip.GZIPInputStream;
 
 @Slf4j
@@ -54,7 +55,8 @@ public final class Utils {
 
     public static String getStackError(final Exception e) {
         StringBuilder sb = new StringBuilder();
-        sb.append(e.getMessage()).append("\n");
+        sb.append(e.getMessage()).append("\n")
+                .append(e.getClass()).append("\n");
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             sb.append(stackTraceElement.toString()).append("\n");
         }
@@ -123,4 +125,12 @@ public final class Utils {
             throw e;
         }
     }
+
+    public static long getCurrentTimeMillis() {
+        if (System.getProperty("_LOCAL_TEST_TIME") != null) {
+            return Long.parseLong(System.getProperty("_LOCAL_TEST_TIME"));
+        }
+        return Instant.now().toEpochMilli();
+    }
+
 }

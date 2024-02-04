@@ -1,4 +1,8 @@
 {
+  "audit_info" : {
+    "kda_process_timestamp" : 1707028087000,
+    "rid" : "3516b363c97fad46902c293783d209ed"
+  },
   "project_id" : "project1",
   "event_name" : "PageView3",
   "event_id" : "event_id-e1705563189478-8969",

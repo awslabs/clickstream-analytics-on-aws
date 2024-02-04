@@ -48,14 +48,25 @@ public class DeviceTransformer implements Transformer {
         String brand = paramMap.get(PARAM_KEY_BRAND);
         String model = paramMap.get(PARAM_KEY_MODEL);
         String make = paramMap.get(PARAM_KEY_MAKE);
-        int screenWidth = Integer.parseInt(paramMap.get(PARAM_KEY_SCREEN_WIDTH));
-        int screenHeight = Integer.parseInt(paramMap.get(PARAM_KEY_SCREEN_HEIGHT));
+        int screenWidth = 0;
+        int screenHeight = 0;
+        if (paramMap.containsKey(PARAM_KEY_SCREEN_WIDTH)) {
+            screenWidth = Integer.parseInt(paramMap.get(PARAM_KEY_SCREEN_WIDTH));
+        }
+        if (paramMap.containsKey(PARAM_KEY_SCREEN_HEIGHT)) {
+            screenHeight = Integer.parseInt(paramMap.get(PARAM_KEY_SCREEN_HEIGHT));
+        }
         String carrier = paramMap.get(PARAM_KEY_CARRIER);
         String networkType = paramMap.get(PARAM_KEY_NETWORK_TYPE);
         String operatingSystem = paramMap.get(PARAM_KEY_OPERATING_SYSTEM);
         String osVersion = paramMap.get(PARAM_KEY_OS_VERSION);
         String systemLanguage = paramMap.get(PARAM_KEY_SYSTEM_LANGUAGE);
-        long zoneOffset = Long.parseLong(paramMap.get(PARAM_KEY_ZONE_OFFSET));
+
+        long zoneOffset = 0;
+        if (paramMap.containsKey(PARAM_KEY_ZONE_OFFSET)) {
+            zoneOffset = Long.parseLong(paramMap.get(PARAM_KEY_ZONE_OFFSET));
+        }
+
         device.put(PARAM_KEY_VENDOR_ID, vendorId);
         device.put("mobile_brand_name", brand);
         device.put("mobile_model_name", model);

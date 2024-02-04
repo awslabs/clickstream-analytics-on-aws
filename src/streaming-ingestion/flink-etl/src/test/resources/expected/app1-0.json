@@ -1,4 +1,8 @@
 {
+  "audit_info" : {
+    "kda_process_timestamp" : 1707028087000,
+    "rid" : "bde86c46b0594297d753f3d42cff1834"
+  },
   "project_id" : "project1",
   "event_name" : "_app_start",
   "event_id" : "1917e95b-6d75-4609-a2a0-18b45fb183c2",

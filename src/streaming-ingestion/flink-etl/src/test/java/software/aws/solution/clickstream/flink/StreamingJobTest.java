@@ -20,6 +20,7 @@ import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import software.aws.solution.clickstream.flink.mock.MockKinesisSink;
@@ -45,6 +46,7 @@ public class StreamingJobTest extends BaseFlinkTest {
     @Test
     void testExecuteStreamJob_app1() throws Exception {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.flink.StreamingJobTest.testExecuteStreamJob_app1
+        System.setProperty("_LOCAL_TEST_TIME", "1707028087000");
 
         var props = ApplicationParameters.loadApplicationParameters(args, true);
         var streamSourceAndSinkProviderMock = new StreamSourceAndSinkProvider() {
@@ -107,6 +109,7 @@ public class StreamingJobTest extends BaseFlinkTest {
     @Test
     void testExecuteStreamJob_app2_none_zip() throws Exception {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.flink.StreamingJobTest.testExecuteStreamJob_app2_none_zip
+        System.setProperty("_LOCAL_TEST_TIME", "1707028087000");
 
         var props = ApplicationParameters.loadApplicationParameters(args, true);
         var streamSourceAndSinkProviderMock = new StreamSourceAndSinkProvider() {
@@ -160,7 +163,10 @@ public class StreamingJobTest extends BaseFlinkTest {
         steamingJob.executeStreamJob();
         env.execute("test");
 
-        Assertions.assertTrue(MockKinesisSink.appValues.keySet().isEmpty());
+        Assertions.assertEquals(1, MockKinesisSink.appValues.size());
+        var resultValue = MockKinesisSink.appValues.get("app1").get(0);
+        System.out.println(resultValue);
+        Assertions.assertTrue(resultValue.contains("\"error\":"));
     }
 
     @Test

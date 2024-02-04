@@ -18,6 +18,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 import software.aws.solution.clickstream.flink.Utils;
 import software.aws.solution.clickstream.plugin.enrich.Enrichment;
@@ -41,6 +42,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static software.aws.solution.clickstream.flink.Utils.getCurrentTimeMillis;
 import static software.aws.solution.clickstream.flink.Utils.getValueType;
 
 @Slf4j
@@ -75,10 +77,18 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
 
     @Override
     public String map(final Tuple2<JsonNode, JsonNode> value) throws Exception {
+        ObjectNode data = OBJECT_MAPPER.createObjectNode();
         try {
-            ObjectNode data = OBJECT_MAPPER.createObjectNode();
             JsonNode ingestNode = value.f0;
             JsonNode dataNode = value.f1;
+
+            ObjectNode auditInfo = OBJECT_MAPPER.createObjectNode();
+            auditInfo.set("kda_process_timestamp", JsonNodeFactory.instance.numberNode(getCurrentTimeMillis()));
+            if (ingestNode.hasNonNull("rid")) {
+                auditInfo.put("rid", ingestNode.get("rid").asText());
+            }
+            data.set("audit_info", auditInfo);
+
             JsonNode attributesNode = dataNode.get("attributes");
             JsonNode userNode = dataNode.get("user");
 
@@ -140,18 +150,16 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
             } else {
                 data.set("user_id", null);
             }
-
             transformLtv(userNode, data);
-
             transformUser(userNode, data);
-
             String dataResult = OBJECT_MAPPER.writeValueAsString(data);
             log.debug("map.result: {}", dataResult);
             return dataResult;
         } catch (Exception e) {
-            log.warn("Map ERROR: {}, appId: {} ignore data: {}", e.getMessage(), this.appId, value.f1);
+            log.warn("Map ERROR: {}, appId: {} ignore data: {}", e.getClass(), this.appId, value.f1);
             log.error(Utils.getStackError(e));
-            return null;
+            data.put("error", e.getMessage() + " " + e.getClass() + ", data: " + value.f1);
+            return OBJECT_MAPPER.writeValueAsString(data);
         }
     }
 
@@ -170,7 +178,9 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         ObjectNode appInfo = OBJECT_MAPPER.createObjectNode();
         appInfo.set(APP_ID, dataNode.get(APP_ID));
         appInfo.set("id", dataNode.get(APP_PACKAGE_NAME));
-        appInfo.set("install_source", attributesNode.get("_channel"));
+        if (attributesNode != null){
+            appInfo.set("install_source", attributesNode.get("_channel"));
+        }
         appInfo.set("version", dataNode.get("app_version"));
         appInfo.set(APP_PACKAGE_NAME, dataNode.get(APP_PACKAGE_NAME));
         data.set("app_info", appInfo);
@@ -320,4 +330,5 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         }
         data.set("device", this.deviceTransformer.transform(deviceParamMap));
     }
+
 }
