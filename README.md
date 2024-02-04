@@ -80,6 +80,26 @@ bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
 yarn test
 ```
 
+## Local development for web console
+
+- Step1: Deploy the solution control plane(create DynamoDB tables, State Machine and other resources). 
+- Step2: Open **Amazon Cognito** console, select the corresponding **User pool**, click the **App integration** tab, select application details in the **App client list**, edit **Hosted UI**, and set a new URL: `http://localhost:3000/signin` into **Allowed callback URLs**.
+- Step3: Goto the folder: `src/control-plane/local`
+
+```shell
+cd src/control-plane/local
+```
+
+```shell
+# run backend server local
+bash start.sh -s backend
+```
+
+```shell
+# run frontend server local
+bash start.sh -s frontend
+```
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
