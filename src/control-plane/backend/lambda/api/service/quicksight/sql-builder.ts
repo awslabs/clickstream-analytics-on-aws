@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
+import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
 import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
@@ -20,19 +20,19 @@ export interface Condition {
   readonly category: ConditionCategory;
   readonly property: string;
   readonly operator: string;
-  readonly value: any[];
+  value: any[];
   readonly dataType: MetadataValueType;
 }
 
 export interface EventAndCondition {
-  readonly eventName: string;
+  eventName: string;
   readonly sqlCondition?: SQLCondition;
   readonly retentionJoinColumn?: RetentionJoinColumn;
   readonly computeMethod?: ExploreComputeMethod;
 }
 
 export interface AttributionTouchPoint {
-  readonly eventName: string;
+  eventName: string;
   readonly sqlCondition?: SQLCondition;
   readonly groupColumn?: ColumnAttribute;
 }
@@ -2261,9 +2261,9 @@ function buildSqlForNestAttributeStringCondition(condition: Condition, propertyK
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
       return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not in (${notValues}))))`;
     case ExploreAnalyticsOperators.CONTAINS:
-      return `(${propertyKey} = '${condition.property}' and ${propertyValue} like '%${condition.value[0]}%')`;
+      return `(${propertyKey} = '${condition.property}' and ${propertyValue} like '%${_encodeValueForLikeOperator(condition.value[0])}%')`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not like '%${condition.value[0]}%')))`;
+      return `(${propertyKey} is null or (${propertyKey} = '${condition.property}' and (${propertyValue} is null or ${propertyValue} not like '%${_encodeValueForLikeOperator(condition.value[0])}%')))`;
     case ExploreAnalyticsOperators.NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is null)`;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2319,9 +2319,9 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
       const notValues = '\'' + condition.value.join('\',\'') + '\'';
       return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not in (${notValues}))`;
     case ExploreAnalyticsOperators.CONTAINS:
-      return `${prefix}${condition.property} like '%${condition.value[0]}%'`;
+      return `${prefix}${condition.property} like '%${_encodeValueForLikeOperator(condition.value[0])}%'`;
     case ExploreAnalyticsOperators.NOT_CONTAINS:
-      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not like '%${condition.value[0]}%')`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} not like '%${_encodeValueForLikeOperator(condition.value[0])}%')`;
     case ExploreAnalyticsOperators.NULL:
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:
@@ -2331,6 +2331,10 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
       throw new Error('Unsupported condition');
   }
 
+}
+
+function _encodeValueForLikeOperator(value: string) {
+  return value.replace(/%/g, '\\\\%').replace(/_/g, '\\\\_');
 }
 
 function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : string {
@@ -2508,34 +2512,6 @@ function _getGroupingConditionProps(groupCondition: GroupingCondition) {
   };
 }
 
-
-export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
-
-  let hasEventAttribute = false;
-  const eventAttributes: ColumnAttribute[] = [];
-  let hasEventNonNestAttribute = false;
-  const eventNonNestAttributes: ColumnAttribute[] = [];
-
-  for (const eventCondition of eventAndConditions) {
-    if (eventCondition.sqlCondition?.conditions !== undefined) {
-      const allAttribute = buildConditionProps(eventCondition.sqlCondition?.conditions);
-      hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
-      eventAttributes.push(...allAttribute.eventAttributes);
-
-      hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
-      eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
-    }
-  }
-
-  return {
-    hasEventAttribute,
-    hasEventNonNestAttribute,
-    eventAttributes,
-    eventNonNestAttributes,
-  };
-
-}
-
 function _getEventConditionProps(sqlParameters: SQLParameters) {
 
   let hasEventAttribute = false;
@@ -2630,6 +2606,8 @@ function _getUserConditionProps(sqlParameters: SQLParameters) {
   const conditionProps = _getUserConditionPropsRetentionAnalysis(sqlParameters);
   hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
   userAttributes.push(...conditionProps.userAttributes);
+  hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
+  userAttributes.push(...conditionProps.userOuterAttributes);
 
   return {
     hasNestUserAttribute,

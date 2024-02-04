@@ -45,12 +45,19 @@ import { clickStreamTableName } from '../../common/constants';
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
+import { EventAndCondition, ExploreAnalyticsOperators, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 const quickSightMock = mockClient(QuickSightClient);
 const redshiftClientMock = mockClient(RedshiftDataClient);
+
+jest.mock('../../service/quicksight/sql-builder', () => ({
+  ...jest.requireActual('../../service/quicksight/sql-builder'),
+  buildRetentionAnalysisView: jest.fn((_sqlParameters) => {
+    return '';
+  }),
+}));
 
 const dashboardDef =
   {
@@ -3205,6 +3212,8 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
+
+  
 
   afterAll((done) => {
     server.close();

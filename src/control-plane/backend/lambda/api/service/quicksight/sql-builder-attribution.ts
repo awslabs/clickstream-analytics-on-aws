@@ -12,8 +12,8 @@
  */
 
 import { format } from 'sql-formatter';
-import { formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
+import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
@@ -28,8 +28,12 @@ export interface AttributionSQLParameters extends BaseSQLParameters {
 
 export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
 
-  const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
-  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
+  const eventNames = [];
+  for (const eventAndCondition of params.eventAndConditions) {
+    eventNames.push(eventAndCondition.eventName);
+  }
+
+  const commonPartSql = buildCommonSqlForAttribution([...new Set(eventNames)], params);
 
   let modelBaseDataSql = '';
   if (params.modelType === AttributionModelType.LAST_TOUCH) {
@@ -759,7 +763,7 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
   if (sqlParameters.eventAndConditions) {
-    const eventCondition = buildEventConditionPropsFromEvents(sqlParameters.eventAndConditions as EventAndCondition[]);
+    const eventCondition = buildEventConditionPropsFromEvents(sqlParameters.eventAndConditions as AttributionTouchPoint[]);
     hasEventAttribute = hasEventAttribute || eventCondition.hasEventAttribute;
     eventAttributes.push(...eventCondition.eventAttributes);
 

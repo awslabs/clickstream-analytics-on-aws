@@ -34,12 +34,12 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { PairEventAndCondition } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { AttributionSQLParameters } from './sql-builder-attribution';
 import { DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
-
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -975,6 +975,33 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 }
 
+export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[] | AttributionTouchPoint[]) {
+
+  let hasEventAttribute = false;
+  const eventAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
+  for (const eventCondition of eventAndConditions) {
+    if (eventCondition.sqlCondition?.conditions !== undefined) {
+      const allAttribute = buildConditionProps(eventCondition.sqlCondition?.conditions);
+      hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+      eventAttributes.push(...allAttribute.eventAttributes);
+
+      hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+      eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
+    }
+  }
+
+  return {
+    hasEventAttribute,
+    hasEventNonNestAttribute,
+    eventAttributes,
+    eventNonNestAttributes,
+  };
+
+}
+
 function findElementByPath(jsonData: any, path: string): any {
   const pathKeys = path.split('.');
 
@@ -1353,6 +1380,66 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
   }
 
   return checkChain.status;
+}
+
+export function encodeQueryValueForSql(params: SQLParameters) {
+  if (params.eventAndConditions !== undefined) {
+    for (const item of (params.eventAndConditions as EventAndCondition[])) {
+      _encodeFilterValue(item.sqlCondition?.conditions);
+      item.eventName = _encodeSqlSpecialChars(item.eventName);
+    }
+  }
+
+  _encodeFilterValue(params.globalEventCondition?.conditions);
+
+  if (params.pairEventAndConditions !== undefined) {
+    for (const item of (params.pairEventAndConditions as PairEventAndCondition[])) {
+      _encodeFilterValue(item.startEvent.sqlCondition?.conditions);
+      _encodeFilterValue(item.backEvent.sqlCondition?.conditions);
+
+      item.startEvent.eventName = _encodeSqlSpecialChars(item.startEvent.eventName);
+      item.backEvent.eventName = _encodeSqlSpecialChars(item.backEvent.eventName);
+    }
+  }
+}
+
+export function encodeAttributionQueryValueForSql(params: AttributionSQLParameters) {
+  if (params.eventAndConditions !== undefined) {
+    for (const item of (params.eventAndConditions as AttributionTouchPoint[])) {
+      _encodeFilterValue(item.sqlCondition?.conditions);
+      item.eventName = _encodeSqlSpecialChars(item.eventName);
+    }
+  }
+
+  _encodeFilterValue(params.targetEventAndCondition?.sqlCondition?.conditions);
+  params.targetEventAndCondition.eventName = _encodeSqlSpecialChars(params.targetEventAndCondition.eventName);
+
+  _encodeFilterValue(params.globalEventCondition?.conditions);
+
+}
+
+function _encodeFilterValue(conditions: Condition[] | undefined) {
+  if (conditions !== undefined) {
+    for (const condition of conditions) {
+      if (condition.dataType === MetadataValueType.STRING) {
+        let values = [];
+        for (const [index, value] of condition.value.entries()) {
+          values[index] = _encodeSqlSpecialChars(value);
+        }
+        condition.value = values;
+      }
+    }
+  }
+}
+
+function _encodeSqlSpecialChars(input: string): string {
+  const sqlSpecialChars: { [key: string]: string } = {
+    "'": "''",
+  };
+
+  const encodedString = input.replace(/[\']/g, (match) => sqlSpecialChars[match]);
+
+  return encodedString;
 }
 
 function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition[]): CheckParamsStatus | void {
