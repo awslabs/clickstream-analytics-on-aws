@@ -12,10 +12,9 @@
  */
 
 import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
-import { Aspects, Aws, CfnCondition, CfnOutput, CfnResource, Fn, Stack, Tags } from 'aws-cdk-lib';
+import { Aws, CfnCondition, CfnOutput, CfnResource, Fn, Stack, Tags } from 'aws-cdk-lib';
 import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
-import { RolePermissionBoundaryAspect } from './common/aspects';
 import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
@@ -76,11 +75,5 @@ export class ServiceCatalogAppregistryStack extends Stack {
       value: application.applicationArn,
       condition: serviceAvailableRegion,
     });
-
-    // Add IAM role permission boundary aspect
-    const {
-      iamRoleBoundaryArnParam,
-    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
-    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
