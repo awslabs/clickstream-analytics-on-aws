@@ -561,7 +561,7 @@ export class ReportingService {
       }
 
       encodeQueryValueForSql(query as SQLParameters);
-      
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
