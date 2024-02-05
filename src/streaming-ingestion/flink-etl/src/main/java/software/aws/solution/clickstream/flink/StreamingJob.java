@@ -43,7 +43,6 @@ public class StreamingJob {
         this.streamProvider = streamSourceAndSinkProvider;
         this.props = props;
         this.env = env;
-        env.enableCheckpointing(5000);
 
         log.info("Application properties: {}", this.props);
 
