@@ -94,6 +94,24 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
     DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
     ```
 
+### Migrate the existing data after upgrading from 1.1.x
+
+1. Open [Redshift query editor v2][query-editor], and create a new SQL Editor.
+
+2. Execute below SQL in editor.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    CALL "<app-id>".sp_migrate_event_1_1_to_1_2();
+    ```
+
+3. (Optinal) Drop the procedure `sp_migrate_event_1_1_to_1_2()`
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    DROP PROCEDURE  "<app-id>".sp_migrate_event_1_1_to_1_2();
+    ```
+
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md

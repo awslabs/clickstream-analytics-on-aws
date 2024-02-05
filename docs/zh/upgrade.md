@@ -94,6 +94,24 @@
     DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
     ```
 
+### 从1.1.x升级后迁移现有数据
+
+1. 打开 [Redshift 查询编辑器 v2][查询编辑器]， 新建一个SQL编辑器。
+
+2. 在编辑器中执行以下 SQL，并等待 SQL 完成。
+
+    ```sql
+    -- 请将 `<app-id>` 替换为您的实际应用 ID
+    CALL "<app-id>".sp_migrate_event_1_1_to_1_2();
+    ```
+
+3. （可选）删除存储过程`sp_migrate_event_1_1_to_1_2()`
+
+    ```sql
+    -- 请将 `<app-id>` 替换为您的实际应用 ID
+    DROP PROCEDURE  "<app-id>".sp_migrate_event_1_1_to_1_2();
+    ```
+
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
