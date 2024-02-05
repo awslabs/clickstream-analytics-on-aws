@@ -79,6 +79,7 @@
   } ],
   "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198",
   "user_id" : "312121",
+  "session_id" : "see000201912dk-23u92-1df0020",
   "ua" : "Apache-HttpClient/4.5.12 (Java/11.0.15)",
   "geo_for_enrich" : {
     "ip" : "13.212.229.59",

@@ -94,6 +94,7 @@ import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID_COL_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_REFERER;
@@ -365,7 +366,8 @@ public final class TransformerV2 {
                 .withColumn(EVENT_DATE, to_date(timestamp_seconds(dataCol.getItem(TIMESTAMP).$div(1000))))
                 .withColumn(EVENT_TIMESTAMP, dataCol.getItem(TIMESTAMP))
                 .withColumn(USER_FIRST_TOUCH_TIMESTAMP, get_json_object(dataCol.getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType))
-                .withColumn(USER_ID, get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType));
+                .withColumn(USER_ID, get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType))
+                .withColumn(SESSION_ID_COL_NAME, get_json_object(dataCol.getField(ATTRIBUTES), "$._session_id").cast(DataTypes.StringType));
         Dataset<Row> dataset1 = convertAppInfo(dataset0);
 
         Dataset<Row> eventDataset = extractEvent(dataset1);
@@ -419,6 +421,7 @@ public final class TransformerV2 {
                 col(ITEMS),
                 col(USER_PSEUDO_ID),
                 col(USER_ID),
+                col(SESSION_ID_COL_NAME),
                 col(UA),
                 col(GEO_FOR_ENRICH),
         };

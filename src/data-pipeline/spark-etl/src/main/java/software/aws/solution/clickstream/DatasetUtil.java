@@ -172,6 +172,7 @@ public final class DatasetUtil {
     public static final String GTM_PAGE_LOCATION = "page_location";
     public static final String GTM_PAGE_REFERRER = "page_referrer";
     public static final String SESSION_ID = "_session_id";
+    public static final String SESSION_ID_COL_NAME = "session_id";
     public static final String PAGE_TITLE = "_page_title";
     public static final String PAGE_URL = "_page_url";
     public static final String GTM_BRANDS = "brands";
