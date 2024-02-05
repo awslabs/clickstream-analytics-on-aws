@@ -71,6 +71,7 @@ import {
   BASE_ATHENA_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
+  BOUNDARY_ARN_PARAMETER,
   DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS,
   DATA_PROCESSING_PLUGIN1_PARAMETERS,
   DATA_PROCESSING_PLUGIN2_PARAMETERS,
@@ -4702,5 +4703,137 @@ describe('Workflow test', () => {
   afterAll((done) => {
     server.close();
     done();
+  });
+});
+
+describe('Workflow test with boundary', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+    kafkaMock.reset();
+    redshiftMock.reset();
+    redshiftServerlessMock.reset();
+    sfnMock.reset();
+    secretsManagerMock.reset();
+    ec2Mock.reset();
+    quickSightMock.reset();
+    s3Mock.reset();
+    iamMock.reset();
+    cloudWatchEventsMock.reset();
+    snsMock.reset();
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+
+  it('Generate Workflow ingestion-server-s3 with boundary', async () => {
+    process.env.IAM_ROLE_BOUNDARY_ARN = 'arn:aws:iam::555555555555:policy/test-boundary-policy';
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      noVpcEndpoint: true,
+    });
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_S3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              BOUNDARY_ARN_PARAMETER,
+                            ],
+                            StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              BOUNDARY_ARN_PARAMETER,
+                            ],
+                            StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
+                  },
+                },
+                Next: 'PipelineStacks',
+                Type: 'Stack',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+    process.env.IAM_ROLE_BOUNDARY_ARN = '';
   });
 });

@@ -1062,6 +1062,15 @@ function getAppRegistryApplicationArn(pipeline: IPipeline): string {
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
 
+function getIamRoleBoundaryArn(): string | undefined {
+  const iamRoleBoundaryArn = process.env.IAM_ROLE_BOUNDARY_ARN;
+  if (!iamRoleBoundaryArn || iamRoleBoundaryArn.trim() === '') {
+    return undefined;
+  } else {
+    return iamRoleBoundaryArn.trim();
+  }
+}
+
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
   const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
@@ -1342,6 +1351,7 @@ export {
   getCurMonthStr,
   getVersionFromTags,
   getAppRegistryApplicationArn,
+  getIamRoleBoundaryArn,
   deserializeContext,
   pipelineAnalysisStudioEnabled,
   isFinallyPipelineStatus,

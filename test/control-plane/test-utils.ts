@@ -252,6 +252,7 @@ export class TestEnv {
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
     });
 
     const template = Template.fromStack(stack);
@@ -277,6 +278,7 @@ export class TestEnv {
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: 'testRolePrefix',
+      iamRoleBoundaryArn: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
     });
 
     const template = Template.fromStack(stack);
@@ -316,6 +318,7 @@ export class TestEnv {
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
     });
 
     const template = Template.fromStack(stack);

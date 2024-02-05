@@ -234,6 +234,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       healthCheckPath: healthCheckPath,
       adminUserEmail: emailParameter.valueAsString,
       iamRolePrefix: iamRolePrefixParam.valueAsString,
+      iamRoleBoundaryArn: iamRoleBoundaryArnParam.valueAsString,
     });
 
     controlPlane.addRoute('api-targets', {

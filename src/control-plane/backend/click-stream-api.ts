@@ -83,6 +83,7 @@ export interface ClickStreamApiProps {
   readonly healthCheckPath: string;
   readonly adminUserEmail: string;
   readonly iamRolePrefix: string;
+  readonly iamRoleBoundaryArn: string;
 }
 
 export interface LambdaFunctionNetworkProps {
@@ -329,6 +330,7 @@ export class ClickStreamApiConstruct extends Construct {
         WITH_VALIDATE_ROLE: 'true',
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
+        IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
