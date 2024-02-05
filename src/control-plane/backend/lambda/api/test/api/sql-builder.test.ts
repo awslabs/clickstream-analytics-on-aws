@@ -19814,7 +19814,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('event nalysis - special char \'', () => {
+  test('event analysis - special char \'', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
