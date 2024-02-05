@@ -83,6 +83,7 @@ import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_ID;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_NUM;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.ID;
@@ -97,6 +98,7 @@ import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID_COL_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_VISIT;
@@ -230,6 +232,7 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias(LOCALE)))
 
                 // session id
+                .withColumn(SESSION_ID_COL_NAME, dataCol.getField(GTM_SESSION_ID))
                 .withColumn(GTM_SESSION_NUM, dataCol.getField(GTM_SESSION_NUM));
 
         Column[] selectCols = new Column[]{
@@ -250,6 +253,7 @@ public class GTMServerDataTransformer {
                 col(ITEMS),
                 col(USER_PSEUDO_ID),
                 col(USER_ID),
+                col(SESSION_ID_COL_NAME),
                 col(UA),
                 col(GEO_FOR_ENRICH)
         };

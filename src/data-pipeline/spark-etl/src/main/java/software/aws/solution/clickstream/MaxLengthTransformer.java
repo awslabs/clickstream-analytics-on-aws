@@ -53,6 +53,7 @@ import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VAL
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID_COL_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.TRUNCATED;
 import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
 import static software.aws.solution.clickstream.DatasetUtil.USER_PSEUDO_ID;
@@ -203,7 +204,7 @@ public class MaxLengthTransformer {
     public static Dataset<Row> runMaxLengthTransformerForEvent(final Dataset<Row> datasetFinal2) {
         MaxLengthTransformer maxLengthTransformer = new MaxLengthTransformer();
         Dataset<Row> datasetFinal3 = maxLengthTransformer.transform(datasetFinal2,
-                List.of(EVENT_ID, EVENT_NAME, USER_PSEUDO_ID, USER_ID, PLATFORM),
+                List.of(EVENT_ID, EVENT_NAME, USER_PSEUDO_ID, USER_ID, PLATFORM, SESSION_ID_COL_NAME),
                 MAX_STRING_VALUE_LEN);
 
         Dataset<Row> eventTruncatedDataset = datasetFinal3.filter(
@@ -212,13 +213,15 @@ public class MaxLengthTransformer {
                                 .or(col(USER_PSEUDO_ID + TRUNCATED).equalTo(true))
                                 .or(col(USER_ID + TRUNCATED).equalTo(true))
                                 .or(col(PLATFORM + TRUNCATED).equalTo(true))
+                                .or(col(SESSION_ID_COL_NAME + TRUNCATED).equalTo(true))
                 )
                 .select(expr(APP_INFO + "." + APP_ID).alias(APP_ID), col(EVENT_TIMESTAMP),
                         col(EVENT_ID), col(EVENT_ID + TRUNCATED),
                         col(EVENT_NAME), col(EVENT_NAME + TRUNCATED),
                         col(USER_PSEUDO_ID), col(USER_PSEUDO_ID + TRUNCATED),
                         col(USER_ID), col(USER_ID + TRUNCATED),
-                        col(PLATFORM), col(PLATFORM + TRUNCATED)
+                        col(PLATFORM), col(PLATFORM + TRUNCATED),
+                        col(SESSION_ID_COL_NAME), col(SESSION_ID_COL_NAME + TRUNCATED)
                 );
 
         saveTruncatedDataset(eventTruncatedDataset,

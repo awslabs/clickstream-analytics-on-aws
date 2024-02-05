@@ -325,6 +325,11 @@
     "nullable" : true,
     "metadata" : { }
   }, {
+    "name" : "session_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "ua",
     "type" : "string",
     "nullable" : true,

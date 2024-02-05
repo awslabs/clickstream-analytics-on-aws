@@ -60,6 +60,7 @@
   } ],
   "platform" : "ANDROID",
   "project_id" : "test_project_id_01",
+  "session_id" : "see000201912dk-23u92-1df0020",
   "traffic_source" : {
     "medium" : "TSM",
     "name" : "TSN",
