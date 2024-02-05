@@ -137,14 +137,6 @@ const mockClients = {
 
 const InitTags = [
   {
-    Key: 'customerKey1',
-    Value: 'tagValue1',
-  },
-  {
-    Key: 'customerKey2',
-    Value: 'tagValue2',
-  },
-  {
     Key: BuiltInTagKeys.AWS_SOLUTION,
     Value: SolutionInfo.SOLUTION_SHORT_NAME,
   },
@@ -155,6 +147,14 @@ const InitTags = [
   {
     Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
     Value: MOCK_PROJECT_ID,
+  },
+  {
+    Key: 'customerKey1',
+    Value: 'tagValue1',
+  },
+  {
+    Key: 'customerKey2',
+    Value: 'tagValue2',
   },
 ];
 

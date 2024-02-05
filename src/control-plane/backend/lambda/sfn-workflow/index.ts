@@ -178,9 +178,9 @@ async function stackTagsResolve(stack: WorkFlowStack) {
     let outputs;
     try {
       const content = await getObject(bucket, s3ObjectKey);
-      outputs = JSON.parse(content as string)[stackName].Outputs;
+      outputs = JSON.parse(content as string)[stackName].Outputs as Output[];
     } catch (err) {
-      logger.error('Stack workflow cannot retrieve stack output resolve tags upon ', { error: err, s3ObjectKey });
+      logger.error('Stack workflow cannot retrieve stack output upon resolving tags ', { error: err, s3ObjectKey });
       return undefined;
     }
     if (outputs) {
@@ -193,7 +193,7 @@ async function stackTagsResolve(stack: WorkFlowStack) {
 
   if (tags && bucket && prefix) {
     const resolvedTags: Tag[] = [];
-    tags.forEach(async (tag: Tag) => {
+    for (const tag of tags) {
       const Key = await resolveTagByOutput(tag.Key!);
       const Value = await resolveTagByOutput(tag.Value!);
       if (Key !== undefined && Value !== undefined) {
@@ -202,7 +202,7 @@ async function stackTagsResolve(stack: WorkFlowStack) {
           Value,
         } as Tag);
       }
-    });
+    };
     stack.Data.Input.Tags = resolvedTags;
   }
 }

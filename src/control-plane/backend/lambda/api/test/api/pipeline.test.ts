@@ -2823,6 +2823,8 @@ describe('Pipeline test', () => {
       });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+    console.log('*******************************');
+    console.log(res);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({

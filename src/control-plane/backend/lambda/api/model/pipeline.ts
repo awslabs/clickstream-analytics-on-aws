@@ -786,15 +786,15 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({
+
+      // Add preset tags to the beginning of the tags array
+      this.pipeline.tags.unshift({
         key: BuiltInTagKeys.AWS_SOLUTION,
         value: SolutionInfo.SOLUTION_SHORT_NAME,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
         value: FULL_SOLUTION_VERSION,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
         value: this.pipeline.projectId,
       });
