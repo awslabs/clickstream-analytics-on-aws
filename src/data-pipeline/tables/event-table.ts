@@ -247,5 +247,9 @@ export function getEventTableColumns(): Column[] {
       name: 'user_id',
       type: Schema.STRING,
     },
+    {
+      name: 'session_id',
+      type: Schema.STRING,
+    },
   ];
 }
