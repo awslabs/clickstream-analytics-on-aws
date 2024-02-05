@@ -18,7 +18,7 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { embedAnalyzesUrl, getPipelineDetailByProjectId } from 'apis/analytics';
+import { clean, embedAnalyzesUrl, getPipelineDetailByProjectId } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -62,7 +62,10 @@ const AnalyticsAnalyzes: React.FC = () => {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
       if (success && data.analysisStudioEnabled) {
-        await getAnalyzes();
+        await Promise.all([
+          getAnalyzes(),
+          clean(data.region),
+        ]);
       }
       setLoadingData(false);
     } catch (error) {
@@ -70,6 +73,7 @@ const AnalyticsAnalyzes: React.FC = () => {
       console.log(error);
     }
   };
+
 
   useEffect(() => {
     if (projectId && appId) {

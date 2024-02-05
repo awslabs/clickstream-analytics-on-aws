@@ -48,7 +48,7 @@ import {
 } from './quicksight/reporting-utils';
 import { SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -684,7 +684,6 @@ export class ReportingService {
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        principals.exploreUserArn,
         principals.publishUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
@@ -827,10 +826,6 @@ export class ReportingService {
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: `${resourceName}`,
-      Permissions: [{
-        Principal: principals.exploreUserArn,
-        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-      }],
       Definition: dashboard as AnalysisDefinition,
     });
 
@@ -840,11 +835,11 @@ export class ReportingService {
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
       Name: `${resourceName}`,
-      Permissions: [{
-        Principal: principals.exploreUserArn,
-        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-      }],
       Definition: dashboard,
+      Permissions: [{
+        Principal: principals.publishUserArn,
+        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
+      }],
     });
 
     let dashboardEmbedUrl = '';
@@ -854,7 +849,6 @@ export class ReportingService {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
           dashboardCreateParameters.allowedDomain,
-          false,
           dashboardId,
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;
@@ -996,12 +990,7 @@ async function _cleanDatasets(quickSight: QuickSight) {
   }
 
   for (const dataSetSummary of dataSetSummaries) {
-    if (
-      dataSetSummary.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
-      && dataSetSummary.CreatedTime !== undefined
-      && (new Date().getTime() - dataSetSummary.CreatedTime.getTime()) > 60 * 60 * 1000
-    ) {
-
+    if (dataSetSummary.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)) {
       const dataSetId = dataSetSummary.DataSetId;
       logger.info(`deleting data set: ${ dataSetId }`);
       const deletedRes = await quickSight.deleteDataSet({
@@ -1030,11 +1019,7 @@ async function _cleanAnalyses(quickSight: QuickSight) {
 
   for (const analysisSummary of analysisSummaries) {
     const analysisId = analysisSummary.AnalysisId;
-    if (analysisSummary.Status !== ResourceStatus.DELETED
-      && analysisSummary.CreatedTime !== undefined
-      && analysisSummary.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
-      (new Date().getTime() - analysisSummary.CreatedTime.getTime()) > 60 * 60 * 1000
-    ) {
+    if (analysisSummary.Status !== ResourceStatus.DELETED) {
       await quickSight.deleteAnalysis({
         AwsAccountId: awsAccountId,
         AnalysisId: analysisId,
@@ -1062,10 +1047,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
   for (const dashboardSummary of dashboardSummaries) {
     const dashboardId = dashboardSummary.DashboardId;
-    if (dashboardSummary.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
-      && dashboardSummary.CreatedTime !== undefined
-      && (new Date().getTime() - dashboardSummary.CreatedTime.getTime()) > 60 * 60 * 1000
-    ) {
+    if (dashboardSummary.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)) {
       await quickSight.deleteDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
