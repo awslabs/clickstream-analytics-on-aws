@@ -116,11 +116,12 @@
   "platform" : "Android",
   "privacy_info" : { },
   "traffic_source" : {
-    "_traffic_source_source" : "bytedance",
-    "_traffic_source_medium" : "Search"
+    "source" : "bytedance",
+    "medium" : "Search"
   },
   "user_first_touch_timestamp" : 1681218459820,
   "user_id" : "81c94dc5-01d7-48d7-a351-4ac730e3deec",
+  "session_id" : "9c0e2ac6-20230524-210742709",
   "user_ltv" : { },
   "user_properties" : [ {
     "key" : "_user_first_touch_timestamp",

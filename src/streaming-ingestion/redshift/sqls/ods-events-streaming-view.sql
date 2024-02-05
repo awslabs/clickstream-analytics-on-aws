@@ -26,4 +26,5 @@ select approximate_arrival_timestamp
 , event_data.user_id::VARCHAR as user_id
 , event_data.user_ltv::SUPER as user_ltv
 , event_data.user_properties::SUPER as user_properties
+, event_data.session_id::VARCHAR as session_id
 from {{app_schema}}.ods_events_streaming_mv;

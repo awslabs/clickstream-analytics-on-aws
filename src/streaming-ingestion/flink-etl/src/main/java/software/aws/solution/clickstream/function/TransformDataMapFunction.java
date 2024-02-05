@@ -57,6 +57,9 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
     public static final String APP_PACKAGE_NAME = "app_package_name";
     public static final String USER_LTV_REVENUE = "_user_ltv_revenue";
     public static final String INGEST_TIME = "ingest_time";
+    public static final String TRAFFIC_SOURCE = "_traffic_source_";
+    public static final String PRIVACY_INFO = "_privacy_info_";
+    public static final String USER_LTV = "_user_ltv_";
     private final String appId;
     private final String projectId;
     private final Enrichment ipEnrich;
@@ -150,6 +153,9 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
             } else {
                 data.set("user_id", null);
             }
+
+            data.set("session_id", attributesNode.get("_session_id"));
+
             transformLtv(userNode, data);
             transformUser(userNode, data);
             String dataResult = OBJECT_MAPPER.writeValueAsString(data);
@@ -192,7 +198,7 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         while (attrIterator.hasNext()) {
             String attrName = attrIterator.next();
             JsonNode attrValue = attributesNode.get(attrName);
-            if (attrName.startsWith("_traffic_source") || attrName.startsWith("_privacy_info")) {
+            if (attrName.startsWith(TRAFFIC_SOURCE) || attrName.startsWith(PRIVACY_INFO)) {
                 continue;
             }
             String valueType = getValueType(attrValue);
@@ -208,11 +214,12 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         while (attrIterator.hasNext()) {
             String attrName = attrIterator.next();
             JsonNode attrValue = attributesNode.get(attrName);
-            if (!attrName.startsWith("_privacy_info")) {
+            if (!attrName.startsWith(PRIVACY_INFO)) {
                 continue;
             }
             String valueType = getValueType(attrValue);
-            privacyInfoList.add(new JsonObjectNode(attrName, attrValue, valueType));
+            String shortAttrName = attrName.replace(PRIVACY_INFO, "");
+            privacyInfoList.add(new JsonObjectNode(shortAttrName, attrValue, valueType));
         }
 
         data.set("privacy_info", objNodeTransformer.transformObjectNode(privacyInfoList));
@@ -220,19 +227,19 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
 
     private void transformLtv(final JsonNode userNode, final ObjectNode data) {
         List<JsonObjectNode> userLtv = new ArrayList<>();
-        if (userNode.hasNonNull(USER_LTV_REVENUE)
-                && userNode.get(USER_LTV_REVENUE).hasNonNull(VALUE)) {
-            userLtv.add(new JsonObjectNode(USER_LTV_REVENUE,
-                    userNode.get(USER_LTV_REVENUE).get(VALUE),
-                    ObjectNodeTransformer.PARAM_KEY_DOUBLE_VALUE));
-        }
-        if (userNode.hasNonNull(USER_LTV_CURRENCY)
-                && userNode.get(USER_LTV_CURRENCY).hasNonNull(VALUE)) {
-            userLtv.add(new JsonObjectNode(USER_LTV_CURRENCY,
-                    userNode.get(USER_LTV_CURRENCY).get(VALUE),
-                    ObjectNodeTransformer.PARAM_KEY_STRING_VALUE));
-        }
+        Iterator<String> attrIterator = userNode.fieldNames();
+        while (attrIterator.hasNext()) {
+            String attrName = attrIterator.next();
+            if (!(attrName.startsWith(USER_LTV) && userNode.get(attrName).hasNonNull(VALUE))) {
+                continue;
+            }
+            JsonNode attrValue = userNode.get(attrName).get(VALUE);
+            String valueType = getValueType(attrValue);
 
+            String shortAttrName = attrName.replace(USER_LTV, "");
+
+            userLtv.add(new JsonObjectNode(shortAttrName, attrValue, valueType));
+        }
         data.set("user_ltv", this.objNodeTransformer.transformObjectNode(userLtv));
     }
 
@@ -243,11 +250,14 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         while (attrIterator.hasNext()) {
             String attrName = attrIterator.next();
             JsonNode attrValue = attributesNode.get(attrName);
-            if (!attrName.startsWith("_traffic_source_")) {
+            if (!attrName.startsWith(TRAFFIC_SOURCE)) {
                 continue;
             }
             String valueType = getValueType(attrValue);
-            trafficSourceParamList.add(new JsonObjectNode(attrName, attrValue, valueType));
+
+            String shortAttrName = attrName.replace(TRAFFIC_SOURCE, "");
+
+            trafficSourceParamList.add(new JsonObjectNode(shortAttrName, attrValue, valueType));
         }
         data.set("traffic_source", objNodeTransformer.transformObjectNode(trafficSourceParamList));
     }
@@ -257,12 +267,15 @@ public class TransformDataMapFunction implements MapFunction<Tuple2<JsonNode, Js
         Iterator<String> userIterator = userNode.fieldNames();
         while (userIterator.hasNext()) {
             String attrName = userIterator.next();
+            if (!userNode.get(attrName).hasNonNull(VALUE)) {
+                continue;
+            }
             JsonNode attrValue = userNode.get(attrName).get(VALUE);
             Long setTimestamp = null;
             if (userNode.get(attrName).hasNonNull("set_timestamp")) {
                 setTimestamp = userNode.get(attrName).get("set_timestamp").asLong();
             }
-            if (attrName.startsWith("_user_ltv")) {
+            if (attrName.startsWith(USER_LTV)) {
                 continue;
             }
             String valueType = getValueType(attrValue);

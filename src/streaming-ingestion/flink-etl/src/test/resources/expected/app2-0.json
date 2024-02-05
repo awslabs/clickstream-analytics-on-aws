@@ -155,20 +155,21 @@
   "items" : null,
   "platform" : "Android",
   "privacy_info" : {
-    "_privacy_info_ads_storage" : "PIAS1705542178771",
-    "_privacy_info_analytics_storage" : "PIAAS1705542178771",
-    "_privacy_info_uses_transient_token" : "PIUTT1705542178771"
+    "ads_storage" : "PIAS1705542178771",
+    "analytics_storage" : "PIAAS1705542178771",
+    "uses_transient_token" : "PIUTT1705542178771"
   },
   "traffic_source" : {
-    "_traffic_source_medium" : "TSM-1-1705542178771",
-    "_traffic_source_name" : "TSN-1-1705542178771",
-    "_traffic_source_source" : "TSS-1-"
+    "medium" : "TSM-1-1705542178771",
+    "name" : "TSN-1-1705542178771",
+    "source" : "TSS-1-"
   },
   "user_first_touch_timestamp" : 1705563189445,
   "user_id" : "U1660134",
+  "session_id" : "see000201912dk-23u92-1df0020",
   "user_ltv" : {
-    "_user_ltv_revenue" : 1094.44,
-    "_user_ltv_currency" : "USD"
+    "currency" : "USD",
+    "revenue" : 1094.44
   },
   "user_properties" : [ {
     "key" : "_user_id",
