@@ -435,8 +435,8 @@ export class CPipeline {
   }
 
   private _editStackTags(oldPipeline: IPipeline): boolean {
-    const newStackTags = this.pipeline.tags;
-    const oldStackTags = oldPipeline.tags;
+    const newStackTags = [...this.pipeline.tags];
+    const oldStackTags = [...oldPipeline.tags];
     newStackTags.sort((a, b) => a.key.localeCompare(b.key));
     oldStackTags.sort((a, b) => a.key.localeCompare(b.key));
     const diffTags = getDiff(newStackTags, oldStackTags);
