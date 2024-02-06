@@ -17,7 +17,7 @@ import {
   Stack,
   StackProps,
   Fn,
-  CfnOutput, Aws, Aspects,
+  CfnOutput, Aws, Aspects, CfnCondition,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -219,6 +219,25 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     const healthCheckPath = '/';
 
     const pluginPrefix = 'plugins/';
+
+    const isEmptyRolePrefixCondition = new CfnCondition(
+      this,
+      'IsEmptyRolePrefixCondition',
+      {
+        expression: Fn.conditionEquals(iamRolePrefixParam.valueAsString, ''),
+      },
+    );
+    const conditionStringRolePrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      iamRolePrefixParam.valueAsString,
+    ).toString();
+    const conditionStringStackPrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      `${iamRolePrefixParam.valueAsString}-${SolutionInfo.SOLUTION_SHORT_NAME}`,
+    ).toString();
+
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'alb',
       applicationLoadBalancer: {
@@ -235,6 +254,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       adminUserEmail: emailParameter.valueAsString,
       iamRolePrefix: iamRolePrefixParam.valueAsString,
       iamRoleBoundaryArn: iamRoleBoundaryArnParam.valueAsString,
+      conditionStringRolePrefix: conditionStringRolePrefix,
+      conditionStringStackPrefix: conditionStringStackPrefix,
     });
 
     controlPlane.addRoute('api-targets', {

@@ -47,7 +47,6 @@ import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
 import { BackendEventBus } from './event-bus-construct';
 import { AddAdminUser } from './insert-admin-user';
-import { getRolePrefix } from './lambda/api/common/utils';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
@@ -57,6 +56,7 @@ import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionInfo } from '../../common/solution-info';
+
 export interface ApplicationLoadBalancerProps {
   readonly vpc: IVpc;
   readonly subnets: SubnetSelection;
@@ -84,6 +84,8 @@ export interface ClickStreamApiProps {
   readonly adminUserEmail: string;
   readonly iamRolePrefix: string;
   readonly iamRoleBoundaryArn: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
 }
 
 export interface LambdaFunctionNetworkProps {
@@ -201,6 +203,8 @@ export class ClickStreamApiConstruct extends Construct {
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
       iamRolePrefix: props.iamRolePrefix ?? '',
+      conditionStringRolePrefix: props.conditionStringRolePrefix,
+      conditionStringStackPrefix: props.conditionStringStackPrefix,
     });
 
     // Create stack workflow StateMachine
@@ -210,6 +214,8 @@ export class ClickStreamApiConstruct extends Construct {
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
       iamRolePrefix: props.iamRolePrefix ?? '',
+      conditionStringRolePrefix: props.conditionStringRolePrefix,
+      conditionStringStackPrefix: props.conditionStringStackPrefix,
     });
     this.stackActionStateMachine.stateMachine.grantStartExecution(this.stackWorkflowStateMachine.stackWorkflowMachine);
 
@@ -220,6 +226,8 @@ export class ClickStreamApiConstruct extends Construct {
       lambdaFunctionNetwork: this.lambdaFunctionNetwork,
       listenStateMachine: this.stackWorkflowStateMachine.stackWorkflowMachine,
       iamRolePrefix: props.iamRolePrefix ?? '',
+      conditionStringRolePrefix: props.conditionStringRolePrefix,
+      conditionStringStackPrefix: props.conditionStringStackPrefix,
     });
 
     // Create a role for api function
@@ -522,7 +530,7 @@ export class ClickStreamApiConstruct extends Construct {
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${getRolePrefix(props.iamRolePrefix)}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${props.conditionStringRolePrefix}*`,
         ],
         actions: [
           'sts:AssumeRole',

@@ -1013,3 +1013,86 @@ describe('CloudFrontS3PortalStack - existing OIDC provider', () => {
     });
   });
 });
+
+describe('CloudFrontS3PortalStack - IAM role prefix', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack-prefix';
+  const app = new TestApp(cdkOut);
+  const commonPortalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack');
+  const commonTemplate = Template.fromStack(commonPortalStack);
+
+  test('exist parameters', () => {
+    commonTemplate.hasParameter('IamRolePrefix', {});
+    commonTemplate.hasParameter('IamRoleBoundaryArn', {});
+  });
+  test('exist condition', () => {
+    commonTemplate.hasCondition('IsEmptyRolePrefixCondition', {});
+  });
+  test('check policy', () => {
+    const policy = findFirstResourceByKeyPrefix(commonTemplate, 'AWS::IAM::Policy', 'ClickStreamApiStackActionStateMachineActionFunctionRoleDefaultPolicy');
+    expect(policy.resource.Properties.PolicyDocument.Statement[1].Resource).toEqual({
+      'Fn::Join': [
+        '',
+        [
+          'arn:',
+          {
+            Ref: 'AWS::Partition',
+          },
+          ':cloudformation:*:',
+          {
+            Ref: 'AWS::AccountId',
+          },
+          ':stack/',
+          {
+            'Fn::If': [
+              'IsEmptyRolePrefixCondition',
+              'Clickstream',
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      Ref: 'IamRolePrefix',
+                    },
+                    '-Clickstream',
+                  ],
+                ],
+              },
+            ],
+          },
+          '*',
+        ],
+      ],
+    });
+    expect(policy.resource.Properties.PolicyDocument.Statement[2].Resource[0]).toEqual(
+      {
+        'Fn::Join': [
+          '',
+          [
+            'arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':iam::',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':role/',
+            {
+              'Fn::If': [
+                'IsEmptyRolePrefixCondition',
+                'Clickstream',
+                {
+                  Ref: 'IamRolePrefix',
+                },
+              ],
+            },
+            '*',
+          ],
+        ],
+      });
+  });
+});
