@@ -44,7 +44,7 @@ import {
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../../../common/constant';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
@@ -299,6 +299,27 @@ const getDataSetPermission = (sharePrincipalArn: string, ownerPrincipalArn: stri
     {
       Principal: sharePrincipalArn,
       Actions: DATASET_READER_PERMISSION_ACTIONS,
+    },
+  ];
+};
+
+const getDataSourcePermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
+  if (sharePrincipalArn === ownerPrincipalArn) {
+    return [
+      {
+        Principal: sharePrincipalArn,
+        Actions: DATA_SOURCE_OWNER_PERMISSION_ACTIONS,
+      },
+    ];
+  }
+  return [
+    {
+      Principal: ownerPrincipalArn,
+      Actions: DATA_SOURCE_OWNER_PERMISSION_ACTIONS,
+    },
+    {
+      Principal: sharePrincipalArn,
+      Actions: DATA_SOURCE_OWNER_PERMISSION_ACTIONS,
     },
   ];
 };
@@ -1165,7 +1186,7 @@ const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: 
   await quickSight.updateDataSourcePermissions({
     AwsAccountId: awsAccountId,
     DataSourceId: dataSourceId,
-    GrantPermissions: getDataSetPermission(sharePrincipalArn, ownerPrincipalArn),
+    GrantPermissions: getDataSourcePermission(sharePrincipalArn, ownerPrincipalArn),
   });
 };
 
