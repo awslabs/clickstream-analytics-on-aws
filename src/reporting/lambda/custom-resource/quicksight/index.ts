@@ -39,6 +39,7 @@ import {
   FolderType,
   SharingModel,
   ResourceExistsException,
+  ResourcePermission,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -260,6 +261,86 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   };
 };
 
+const getFolderPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
+  if (sharePrincipalArn === ownerPrincipalArn) {
+    return [
+      {
+        Principal: sharePrincipalArn,
+        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+      },
+    ];
+  }
+  return [
+    {
+      Principal: sharePrincipalArn,
+      Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+    },
+    {
+      Principal: ownerPrincipalArn,
+      Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+    },
+  ];
+};
+
+const getDataSetPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
+  if (sharePrincipalArn === ownerPrincipalArn) {
+    return [
+      {
+        Principal: sharePrincipalArn,
+        Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
+      },
+    ];
+  }
+  return [
+    {
+      Principal: ownerPrincipalArn,
+      Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
+    },
+    {
+      Principal: sharePrincipalArn,
+      Actions: DATASET_READER_PERMISSION_ACTIONS,
+    },
+  ];
+};
+
+const getAnalysisPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
+  if (sharePrincipalArn === ownerPrincipalArn) {
+    return [
+      {
+        Principal: sharePrincipalArn,
+        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
+      },
+    ];
+  }
+  return [
+    {
+      Principal: ownerPrincipalArn,
+      Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
+    },
+  ];
+};
+
+const getDashboardPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
+  if (sharePrincipalArn === ownerPrincipalArn) {
+    return [
+      {
+        Principal: sharePrincipalArn,
+        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
+      },
+    ];
+  }
+  return [
+    {
+      Principal: ownerPrincipalArn,
+      Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
+    },
+    {
+      Principal: sharePrincipalArn,
+      Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
+    },
+  ];
+};
+
 const createQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   sharePrincipalArn: string,
@@ -307,16 +388,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
       Name: getQuickSightFolderName(commonParams.databaseName, commonParams.schema),
       FolderType: FolderType.SHARED,
       SharingModel: SharingModel.ACCOUNT,
-      Permissions: [
-        {
-          Principal: commonParams.sharePrincipalArn,
-          Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
-        },
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
-        },
-      ],
+      Permissions: getFolderPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
     });
   }
 
@@ -590,16 +662,7 @@ const updateFolderMembership = async (quickSight: QuickSight, commonParams: Reso
   await quickSight.updateFolderPermissions({
     AwsAccountId: commonParams.awsAccountId,
     FolderId: folderId,
-    GrantPermissions: [
-      {
-        Principal: commonParams.sharePrincipalArn,
-        Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
-      },
-      {
-        Principal: commonParams.ownerPrincipalArn,
-        Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
-      },
-    ],
+    GrantPermissions: getFolderPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
   });
 
 };
@@ -703,16 +766,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
-      Permissions: [
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
-        },
-        {
-          Principal: commonParams.sharePrincipalArn,
-          Actions: DATASET_READER_PERMISSION_ACTIONS,
-        },
-      ],
+      Permissions: getDataSetPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       DatasetParameters: datasetParameters,
       ImportMode: props.importMode,
       PhysicalTableMap: {
@@ -760,13 +814,7 @@ const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       AwsAccountId: commonParams.awsAccountId,
       AnalysisId: analysisId,
       Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
-      Permissions: [
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-        },
-      ],
-
+      Permissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       SourceEntity: sourceEntity,
     });
     await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
@@ -792,17 +840,8 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
-      Permissions: [{
-        Principal: commonParams.ownerPrincipalArn,
-        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-      },
-      {
-        Principal: commonParams.sharePrincipalArn,
-        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-      }],
-
+      Permissions: getDashboardPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
       SourceEntity: sourceEntity,
-
     });
     await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
     logger.info(`Create dashboard finished. Id: ${dashboardId}`);
@@ -1001,16 +1040,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     await quickSight.updateDataSetPermissions({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
-      GrantPermissions: [
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
-        },
-        {
-          Principal: commonParams.sharePrincipalArn,
-          Actions: DATASET_READER_PERMISSION_ACTIONS,
-        },
-      ],
+      GrantPermissions: getDataSetPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
     });
 
     logger.info(`grant dataset permissions to new principal ${commonParams.ownerPrincipalArn}, ${commonParams.sharePrincipalArn}`);
@@ -1044,12 +1074,7 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
     await quickSight.updateAnalysisPermissions({
       AwsAccountId: commonParams.awsAccountId,
       AnalysisId: analysisId,
-      GrantPermissions: [
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-        },
-      ],
+      GrantPermissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
     });
 
     logger.info(`grant analysis permissions to new principal ${commonParams.ownerPrincipalArn}`);
@@ -1119,16 +1144,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     await quickSight.updateDashboardPermissions({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
-      GrantPermissions: [
-        {
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-        },
-        {
-          Principal: commonParams.sharePrincipalArn,
-          Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-        },
-      ],
+      GrantPermissions: getDashboardPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
     });
 
     logger.info(`grant dashboard permissions to new principal ${commonParams.ownerPrincipalArn} and ${commonParams.sharePrincipalArn}`);
@@ -1149,30 +1165,7 @@ const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: 
   await quickSight.updateDataSourcePermissions({
     AwsAccountId: awsAccountId,
     DataSourceId: dataSourceId,
-    GrantPermissions: [
-      {
-        Principal: ownerPrincipalArn,
-        Actions: [
-          'quicksight:UpdateDataSourcePermissions',
-          'quicksight:DescribeDataSourcePermissions',
-          'quicksight:PassDataSource',
-          'quicksight:DescribeDataSource',
-          'quicksight:DeleteDataSource',
-          'quicksight:UpdateDataSource',
-        ],
-      },
-      {
-        Principal: sharePrincipalArn,
-        Actions: [
-          'quicksight:UpdateDataSourcePermissions',
-          'quicksight:DescribeDataSourcePermissions',
-          'quicksight:PassDataSource',
-          'quicksight:DescribeDataSource',
-          'quicksight:DeleteDataSource',
-          'quicksight:UpdateDataSource',
-        ],
-      },
-    ],
+    GrantPermissions: getDataSetPermission(sharePrincipalArn, ownerPrincipalArn),
   });
 };
 
