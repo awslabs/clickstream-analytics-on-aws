@@ -19814,4 +19814,969 @@ describe('SQL Builder test', () => {
 
   });
 
+  test('event analysis - special char \'', () => {
+
+    const sql = buildEventAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.GEO,
+            property: 'country',
+            operator: ExploreAnalyticsOperators.EQUAL,
+            value: ['China\'\''],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: ExploreAnalyticsOperators.EQUAL,
+                value: ['China\'\''],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+        user_base as (
+          select
+            COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+            user_id as user_id,
+            user_first_touch_timestamp,
+            _first_visit_date,
+            _first_referer,
+            _first_traffic_source_type,
+            _first_traffic_medium,
+            _first_traffic_source,
+            _channel,
+            user_properties.key::varchar as user_param_key,
+            user_properties.value.string_value::varchar as user_param_string_value,
+            user_properties.value.int_value::bigint as user_param_int_value,
+            user_properties.value.float_value::double precision as user_param_float_value,
+            user_properties.value.double_value::double precision as user_param_double_value
+          from
+            shop.user_m_view u,
+            u.user_properties as user_properties
+        ),
+        event_base as (
+          select
+            event_date,
+            event_name,
+            event_id,
+            event_timestamp,
+            geo_country,
+            platform,
+            COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+            r.user_id,
+            month,
+            week,
+            day,
+            hour
+          from
+            (
+              select
+                event_date,
+                event_name::varchar as event_name,
+                event_id::varchar as event_id,
+                event_timestamp::bigint as event_timestamp,
+                geo.country::varchar as geo_country,
+                platform::varchar as platform,
+                user_pseudo_id,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM'
+                ) as month,
+                TO_CHAR(
+                  date_trunc(
+                    'week',
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                  ),
+                  'YYYY-MM-DD'
+                ) as week,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM-DD'
+                ) as day,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM-DD HH24'
+                ) || '00:00' as hour
+              from
+                shop.event as event
+              where
+                event.event_date >= date '2023-10-01'
+                and event.event_date <= date '2025-10-10'
+                and event.event_name in ('view_item', 'purchase')
+            ) as l
+            join (
+              select
+                user_pseudo_id,
+                user_id
+              from
+                shop.user_m_view
+              group by
+                user_pseudo_id,
+                user_id
+            ) as r on l.user_pseudo_id = r.user_pseudo_id
+        ),
+        base_data as (
+          select
+            _user_first_touch_timestamp,
+            _session_duration,
+            event_base.*
+          from
+            event_base
+            join (
+              select
+                event_base.event_id,
+                max(
+                  case
+                    when event_param_key = '_session_duration' then event_param_int_value
+                    else null
+                  end
+                ) as _session_duration
+              from
+                event_base
+                join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+                and event_base.event_id = event_param.event_id
+              group by
+                event_base.event_id
+            ) as event_join_table on event_base.event_id = event_join_table.event_id
+            join (
+              select
+                event_base.user_pseudo_id,
+                max(
+                  case
+                    when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                    else null
+                  end
+                ) as _user_first_touch_timestamp
+              from
+                event_base
+                join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+              group by
+                event_base.user_pseudo_id
+            ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+          where
+            1 = 1
+            and (geo_country = 'China''')
+        ),
+        table_0 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            event_date as event_date_0,
+            event_name as event_name_0,
+            event_timestamp as event_timestamp_0,
+            event_id as event_id_0,
+            user_id as user_id_0,
+            user_pseudo_id as user_pseudo_id_0
+          from
+            base_data base
+          where
+            event_name = 'view_item'
+            and (geo_country = 'China''')
+        ),
+        table_1 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            event_date as event_date_1,
+            event_name as event_name_1,
+            event_timestamp as event_timestamp_1,
+            event_id as event_id_1,
+            user_id as user_id_1,
+            user_pseudo_id as user_pseudo_id_1
+          from
+            base_data base
+          where
+            event_name = 'purchase'
+            and (
+              platform = 'Android'
+              and geo_country = 'China'
+              and _user_first_touch_timestamp > 1686532526770
+              and _session_duration > 200
+            )
+        ),
+        join_table as (
+          select
+            table_0.month,
+            table_0.week,
+            table_0.day,
+            table_0.hour,
+            1 || '_' || table_0.event_name_0 as event_name,
+            table_0.event_timestamp_0 as event_timestamp,
+            table_0.event_id_0 as x_id
+          from
+            table_0
+          union all
+          select
+            table_1.month,
+            table_1.week,
+            table_1.day,
+            table_1.hour,
+            2 || '_' || table_1.event_name_1 as event_name,
+            table_1.event_timestamp_1 as event_timestamp,
+            table_1.user_pseudo_id_1 as x_id
+          from
+            table_1
+        )
+      select
+        day::date as event_date,
+        event_name,
+        x_id as id
+      from
+        join_table
+      where
+        x_id is not null
+      group by
+        day,
+        event_name,
+        x_id
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('special char \'', () => {
+
+    const sql = buildRetentionAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.OTHER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android\'\''],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'and',
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.WEEK,
+      timeStart: new Date('2023-06-19'),
+      timeEnd: new Date('2023-06-22'),
+      pairEventAndConditions: [
+        {
+          startEvent: {
+            eventName: 'view_item',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.USER_OUTER,
+                  property: '_channel',
+                  operator: '=',
+                  value: ['apple\'\''],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+          backEvent: {
+            eventName: 'add_to_cart',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.USER_OUTER,
+                  property: '_channel',
+                  operator: '=',
+                  value: ['apple\'\''],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+        },
+        {
+          startEvent: {
+            eventName: 'view_item',
+          },
+          backEvent: {
+            eventName: 'purchase',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.DEVICE,
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+        },
+      ],
+
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+        base_data as (
+          select
+            event_base.*,
+            user_base.*
+          from
+            (
+              select
+                event_date,
+                event_name,
+                event_id,
+                event_timestamp,
+                platform,
+                device_screen_height,
+                COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+                r.user_id,
+                month,
+                week,
+                day,
+                hour
+              from
+                (
+                  select
+                    event_date,
+                    event_name::varchar as event_name,
+                    event_id::varchar as event_id,
+                    event_timestamp::bigint as event_timestamp,
+                    platform::varchar as platform,
+                    device.screen_height::bigint as device_screen_height,
+                    user_pseudo_id,
+                    TO_CHAR(
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                      'YYYY-MM'
+                    ) as month,
+                    TO_CHAR(
+                      date_trunc(
+                        'week',
+                        TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                      ),
+                      'YYYY-MM-DD'
+                    ) as week,
+                    TO_CHAR(
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                      'YYYY-MM-DD'
+                    ) as day,
+                    TO_CHAR(
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                      'YYYY-MM-DD HH24'
+                    ) || '00:00' as hour
+                  from
+                    shop.event as event
+                  where
+                    event.event_date >= date '2023-06-19'
+                    and event.event_date <= date '2023-06-22'
+                    and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+                ) as l
+                join (
+                  select
+                    user_pseudo_id,
+                    user_id
+                  from
+                    shop.user_m_view
+                  group by
+                    user_pseudo_id,
+                    user_id
+                ) as r on l.user_pseudo_id = r.user_pseudo_id
+            ) as event_base
+            join (
+              select
+                COALESCE(user_id, user_pseudo_id) as user_pseudo_id_join,
+                user_id as user_id_join,
+                user_first_touch_timestamp,
+                _first_visit_date,
+                _first_referer,
+                _first_traffic_source_type,
+                _first_traffic_medium,
+                _first_traffic_source,
+                _channel
+              from
+                shop.user_m_view u
+            ) as user_base on event_base.user_pseudo_id = user_base.user_pseudo_id_join
+          where
+            1 = 1
+            and (platform = 'Android''')
+        ),
+        date_list as (
+          select
+            '2023-06-19'::date as event_date
+          union all
+          select
+            '2023-06-20'::date as event_date
+          union all
+          select
+            '2023-06-21'::date as event_date
+          union all
+          select
+            '2023-06-22'::date as event_date
+        ),
+        first_date as (
+          select
+            min(event_date) as first_date
+          from
+            date_list
+        ),
+        first_table_0 as (
+          select
+            event_date,
+            event_name,
+            user_pseudo_id
+          from
+            base_data
+            join first_date on base_data.event_date = first_date.first_date
+          where
+            event_name = 'view_item'
+            and (_channel = 'apple''')
+        ),
+        second_table_0 as (
+          select
+            event_date,
+            event_name,
+            user_pseudo_id
+          from
+            base_data
+            join first_date on base_data.event_date >= first_date.first_date
+          where
+            event_name = 'add_to_cart'
+            and (_channel = 'apple''')
+        ),
+        first_table_1 as (
+          select
+            event_date,
+            event_name,
+            user_pseudo_id
+          from
+            base_data
+            join first_date on base_data.event_date = first_date.first_date
+          where
+            event_name = 'view_item'
+        ),
+        second_table_1 as (
+          select
+            event_date,
+            event_name,
+            user_pseudo_id
+          from
+            base_data
+            join first_date on base_data.event_date >= first_date.first_date
+          where
+            event_name = 'purchase'
+            and (device_screen_height > 1400)
+        ),
+        result_table as (
+          select
+            first_table_0.event_name || '_' || 0 as grouping,
+            first_table_0.event_date as start_event_date,
+            first_table_0.user_pseudo_id as start_user_pseudo_id,
+            date_list.event_date as event_date,
+            second_table_0.user_pseudo_id as end_user_pseudo_id,
+            second_table_0.event_date as end_event_date
+          from
+            first_table_0
+            join date_list on 1 = 1
+            left join second_table_0 on date_list.event_date = second_table_0.event_date
+            and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+          union all
+          select
+            first_table_1.event_name || '_' || 1 as grouping,
+            first_table_1.event_date as start_event_date,
+            first_table_1.user_pseudo_id as start_user_pseudo_id,
+            date_list.event_date as event_date,
+            second_table_1.user_pseudo_id as end_user_pseudo_id,
+            second_table_1.event_date as end_event_date
+          from
+            first_table_1
+            join date_list on 1 = 1
+            left join second_table_1 on date_list.event_date = second_table_1.event_date
+            and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+        )
+      select
+        grouping,
+        DATE_TRUNC('week', start_event_date) - INTERVAL '1 day' as start_event_date,
+        DATE_TRUNC('week', event_date) - INTERVAL '1 day' as event_date,
+        (
+          count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+        )::decimal(20, 4) as retention
+      from
+        result_table
+      group by
+        grouping,
+        start_event_date,
+        event_date
+      order by
+        grouping,
+        event_date
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('special char for like condition', () => {
+
+    const sql = buildRetentionAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.DEVICE,
+            property: 'platform',
+            operator: ExploreAnalyticsOperators.CONTAINS,
+            value: ['%'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.EVENT,
+            property: 'project_category',
+            operator: ExploreAnalyticsOperators.CONTAINS,
+            value: ['%'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+        conditionOperator: 'and',
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.WEEK,
+      timeStart: new Date('2023-06-19'),
+      timeEnd: new Date('2023-06-22'),
+      pairEventAndConditions: [
+        {
+          startEvent: {
+            eventName: 'view_item',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.DEVICE,
+                  property: 'platform',
+                  operator: ExploreAnalyticsOperators.CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT,
+                  property: 'project_category',
+                  operator: ExploreAnalyticsOperators.CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+          backEvent: {
+            eventName: 'add_to_cart',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.DEVICE,
+                  property: 'platform',
+                  operator: ExploreAnalyticsOperators.CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.EVENT,
+                  property: 'project_category',
+                  operator: ExploreAnalyticsOperators.CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+        },
+        {
+          startEvent: {
+            eventName: 'view_item',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.APP_INFO,
+                  property: 'install_source',
+                  operator: ExploreAnalyticsOperators.NOT_CONTAINS,
+                  value: ['_'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: 'status',
+                  operator: ExploreAnalyticsOperators.NOT_CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+          backEvent: {
+            eventName: 'purchase',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: ConditionCategory.APP_INFO,
+                  property: 'install_source',
+                  operator: ExploreAnalyticsOperators.NOT_CONTAINS,
+                  value: ['_'],
+                  dataType: MetadataValueType.STRING,
+                },
+                {
+                  category: ConditionCategory.USER,
+                  property: 'status',
+                  operator: ExploreAnalyticsOperators.NOT_CONTAINS,
+                  value: ['%'],
+                  dataType: MetadataValueType.STRING,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+        },
+      ],
+
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      user_base as (
+        select
+          COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+          user_id as user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          shop.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_timestamp,
+          device_platform,
+          app_info_install_source,
+          COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+          r.user_id,
+          month,
+          week,
+          day,
+          hour
+        from
+          (
+            select
+              event_date,
+              event_name::varchar as event_name,
+              event_id::varchar as event_id,
+              event_timestamp::bigint as event_timestamp,
+              device.platform::varchar as device_platform,
+              app_info.install_source::varchar as app_info_install_source,
+              user_pseudo_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-06-19'
+              and event.event_date <= date '2023-06-22'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
+      ),
+      base_data as (
+        select
+          status,
+          project_category,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = 'project_category' then event_param_string_value
+                  else null
+                end
+              ) as project_category
+            from
+              event_base
+              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = 'status' then user_param_string_value
+                  else null
+                end
+              ) as status
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            device_platform like '%\\\\%%'
+            and project_category like '%\\\\%%'
+          )
+      ),
+      date_list as (
+        select
+          '2023-06-19'::date as event_date
+        union all
+        select
+          '2023-06-20'::date as event_date
+        union all
+        select
+          '2023-06-21'::date as event_date
+        union all
+        select
+          '2023-06-22'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
+      ),
+      first_table_0 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date = first_date.first_date
+        where
+          event_name = 'view_item'
+          and (
+            device_platform like '%\\\\%%'
+            or project_category like '%\\\\%%'
+          )
+      ),
+      second_table_0 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date >= first_date.first_date
+        where
+          event_name = 'add_to_cart'
+          and (
+            device_platform like '%\\\\%%'
+            or project_category like '%\\\\%%'
+          )
+      ),
+      first_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date = first_date.first_date
+        where
+          event_name = 'view_item'
+          and (
+            (
+              app_info_install_source is null
+              or app_info_install_source not like '%\\\\_%'
+            )
+            or (
+              status is null
+              or status not like '%\\\\%%'
+            )
+          )
+      ),
+      second_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date >= first_date.first_date
+        where
+          event_name = 'purchase'
+          and (
+            (
+              app_info_install_source is null
+              or app_info_install_source not like '%\\\\_%'
+            )
+            or (
+              status is null
+              or status not like '%\\\\%%'
+            )
+          )
+      ),
+      result_table as (
+        select
+          first_table_0.event_name || '_' || 0 as grouping,
+          first_table_0.event_date as start_event_date,
+          first_table_0.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_0.user_pseudo_id as end_user_pseudo_id,
+          second_table_0.event_date as end_event_date
+        from
+          first_table_0
+          join date_list on 1 = 1
+          left join second_table_0 on date_list.event_date = second_table_0.event_date
+          and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+        union all
+        select
+          first_table_1.event_name || '_' || 1 as grouping,
+          first_table_1.event_date as start_event_date,
+          first_table_1.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_1.user_pseudo_id as end_user_pseudo_id,
+          second_table_1.event_date as end_event_date
+        from
+          first_table_1
+          join date_list on 1 = 1
+          left join second_table_1 on date_list.event_date = second_table_1.event_date
+          and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+      )
+    select
+      grouping,
+      DATE_TRUNC('week', start_event_date) - INTERVAL '1 day' as start_event_date,
+      DATE_TRUNC('week', event_date) - INTERVAL '1 day' as event_date,
+      (
+        count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+      )::decimal(20, 4) as retention
+    from
+      result_table
+    group by
+      grouping,
+      start_event_date,
+      event_date
+    order by
+      grouping,
+      event_date
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
 });
