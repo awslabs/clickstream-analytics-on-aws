@@ -17,7 +17,7 @@ import {
   Stack,
   StackProps,
   Fn,
-  CfnOutput, Aws,
+  CfnOutput, Aws, Aspects,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -27,6 +27,7 @@ import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { RoleNamePrefixAspect, RolePermissionBoundaryAspect } from './common/aspects';
 import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
@@ -83,6 +84,11 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
 
     let vpc:IVpc|undefined = undefined;
 
@@ -227,6 +233,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       pluginPrefix: pluginPrefix,
       healthCheckPath: healthCheckPath,
       adminUserEmail: emailParameter.valueAsString,
+      iamRolePrefix: iamRolePrefixParam.valueAsString,
+      iamRoleBoundaryArn: iamRoleBoundaryArnParam.valueAsString,
     });
 
     controlPlane.addRoute('api-targets', {
@@ -279,6 +287,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
     // nag
     addCfnNag(this);
+    Aspects.of(this).add(new RoleNamePrefixAspect(iamRolePrefixParam.valueAsString));
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -286,7 +296,7 @@ function addCfnNag(stack: Stack) {
   const cfnNagList = [
     {
       paths_endswith: [
-        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
         ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),

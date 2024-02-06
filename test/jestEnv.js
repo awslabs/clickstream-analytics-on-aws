@@ -30,6 +30,8 @@ process.env.DICTIONARY_TABLE_NAME = 'dictionary-table-name'
 process.env.QUICKSIGHT_EMBED_ROLE_ARN = 'arn:aws:iam::555555555555:role/QuickSightEmbeddingRole'
 process.env.FULL_SOLUTION_VERSION = 'v1.1.0-202311200542_dev'
 process.env.LISTEN_STACK_QUEUE_ARN = 'arn:aws:sqs:us-east-1:555555555555:queue-8ddb6980'
+process.env.IAM_ROLE_PREFIX = 'test-prefix'
+process.env.IAM_ROLE_BOUNDARY_ARN = ''
 
 // web console bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'

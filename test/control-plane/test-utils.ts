@@ -251,6 +251,34 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
+    });
+
+    const template = Template.fromStack(stack);
+    return { stack, template };
+  }
+
+  public static newALBWithRolePrefixApiStack(outdir: string): ApiStackElements {
+
+    const stack = new TestStack(new TestApp(outdir), 'apiTestStack');
+    const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
+
+    const pluginPrefix = 'plugins/';
+    new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
+      fronting: 'alb',
+      applicationLoadBalancer: {
+        vpc: stack.vpc,
+        subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroup: stack.sg,
+      },
+      targetToCNRegions: false,
+      stackWorkflowS3Bucket: s3Bucket,
+      pluginPrefix,
+      healthCheckPath: '/',
+      adminUserEmail: 'fake@example.com',
+      iamRolePrefix: 'testRolePrefix',
+      iamRoleBoundaryArn: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
     });
 
     const template = Template.fromStack(stack);
@@ -289,6 +317,8 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
     });
 
     const template = Template.fromStack(stack);

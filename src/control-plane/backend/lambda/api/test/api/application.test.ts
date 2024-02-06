@@ -26,6 +26,7 @@ import request from 'supertest';
 import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
+import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -502,7 +503,7 @@ describe('Application test', () => {
             status: PipelineStatusType.ACTIVE,
             stackDetails: [
               {
-                stackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                stackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 stackType: PipelineStackType.INGESTION,
                 stackStatus: StackStatus.CREATE_COMPLETE,
                 stackStatusReason: '',
@@ -555,7 +556,7 @@ describe('Application test', () => {
           statusType: PipelineStatusType.CREATING,
           stackDetails: [
             {
-              stackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+              stackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
               stackType: PipelineStackType.INGESTION,
               stackStatus: StackStatus.CREATE_COMPLETE,
               stackStatusReason: '',

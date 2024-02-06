@@ -11,11 +11,12 @@
  *  and limitations under the License.
  */
 
-import { CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { ISecurityGroup, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceProvider, ruleToSuppressRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithHighSPCM } from './common/cfn-nag';
 import { DOMAIN_NAME_PATTERN } from './common/constant';
 import { Parameters } from './common/parameters';
@@ -202,6 +203,12 @@ export class KafkaS3SinkConnectorStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 

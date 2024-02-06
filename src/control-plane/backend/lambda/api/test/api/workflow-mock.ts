@@ -13,6 +13,7 @@
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { getStackPrefix } from '../../common/utils';
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
@@ -805,7 +806,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'EMRServerlessApplicationId.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.EMRServerlessApplicationId',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.EMRServerlessApplicationId`,
   },
   {
     ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
@@ -959,7 +960,7 @@ const BASE_REPORTING_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
   },
 ];
 
@@ -1007,11 +1008,11 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftEndpointParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress`,
   },
   {
     ParameterKey: 'RedshiftPortParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort`,
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
@@ -1023,7 +1024,7 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
   },
 ];
 
@@ -1061,20 +1062,25 @@ export const BASE_METRICS_EMAILS_PARAMETERS = mergeParameters(
 export const BASE_ATHENA_PARAMETERS = [
   {
     ParameterKey: 'AthenaDatabase.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueDatabase',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.GlueDatabase`,
   },
   {
     ParameterKey: 'AthenaEventTable.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueEventTable',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.GlueEventTable`,
   },
 ];
 
 export const APPREGISTRY_APPLICATION_ARN_PARAMETER = {
   ParameterKey: 'AppRegistryApplicationArn.#',
-  ParameterValue: '#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn',
+  ParameterValue: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`,
 };
 
 export const APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER = {
   ParameterKey: 'AppRegistryApplicationArn',
   ParameterValue: '',
+};
+
+export const BOUNDARY_ARN_PARAMETER = {
+  ParameterKey: 'IamRoleBoundaryArn',
+  ParameterValue: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
 };

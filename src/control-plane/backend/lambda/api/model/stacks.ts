@@ -66,6 +66,7 @@ import {
   corsStackInput,
   getAppRegistryApplicationArn,
   getSinkType,
+  getIamRoleBoundaryArn,
 } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
@@ -395,6 +396,9 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.optional(undefined)
     SinkType?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
@@ -458,6 +462,7 @@ export class CIngestionServerStack extends JSONObject {
       KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -590,6 +595,9 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
@@ -622,6 +630,7 @@ export class CKafkaConnectorStack extends JSONObject {
 
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -768,6 +777,9 @@ export class CDataProcessingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const pluginInfo = getPluginInfo(pipeline, resources);
 
@@ -797,6 +809,7 @@ export class CDataProcessingStack extends JSONObject {
 
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1038,6 +1051,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataModeling?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
@@ -1085,6 +1101,7 @@ export class CDataModelingStack extends JSONObject {
       ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1193,6 +1210,9 @@ export class CReportingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
@@ -1216,6 +1236,7 @@ export class CReportingStack extends JSONObject {
       ),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1236,6 +1257,9 @@ export class CAthenaStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline) {
     super({
       AthenaDatabase: getValueFromStackOutputSuffix(
@@ -1250,6 +1274,7 @@ export class CAthenaStack extends JSONObject {
       ),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1288,6 +1313,9 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const projectEmails = resources.project?.emails?.split(',');
     const operators = pipeline.operator.split(',');
@@ -1299,6 +1327,7 @@ export class CMetricsStack extends JSONObject {
       ProjectId: pipeline.projectId,
       Emails: uniqueEmails?.join(','),
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }

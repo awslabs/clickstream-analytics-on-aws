@@ -85,7 +85,7 @@ import {
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
-import { getDefaultTags } from '../../common/utils';
+import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -3282,7 +3282,7 @@ describe('Pipeline test', () => {
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
       Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
-      EventPattern: '{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/Clickstream*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}',
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
       ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',

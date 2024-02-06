@@ -33,7 +33,7 @@ import {
 } from '../../common/constants-ln';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, getAppRegistryApplicationArn, isEmpty } from '../../common/utils';
+import { containRule, corsStackInput, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -780,7 +780,7 @@ describe('Network test', () => {
 
   it('Get valid Service Catalog AppRegistry application arn', () => {
     expect(getAppRegistryApplicationArn(S3_INGESTION_PIPELINE))
-      .toEqual('#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn');
+      .toEqual(`#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`);
   });
 
   it('Return empty string as Service Catalog AppRegistry application arn', () => {

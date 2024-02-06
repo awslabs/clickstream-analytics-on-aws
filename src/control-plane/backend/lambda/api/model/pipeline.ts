@@ -71,7 +71,7 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
+import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty, getStackPrefix } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
@@ -322,7 +322,7 @@ export class CPipeline {
     if (!topicArn) {
       throw new ClickStreamBadRequestError('Topic create failed. Please check and try again.');
     }
-    const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
+    const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/${getStackPrefix()}*${this.pipeline.pipelineId}/*`;
     const ruleArn = await createRuleAndAddTargets(
       this.pipeline.region,
       this.pipeline.projectId,
@@ -390,7 +390,7 @@ export class CPipeline {
     for (let key of editKeys) {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
-      if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
+      if (stackName.startsWith(`${getStackPrefix()}-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
         continue; // skip reporting stack when template version is v1.0
       }
       if (!editStacks.includes(stackName)) {
@@ -718,7 +718,8 @@ export class CPipeline {
     const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
     const stackTemplateMap = new Map();
     for (let stackName of stackNames) {
-      const stackType = stackName.split('-')[1] as PipelineStackType;
+      const cutPrefixName = stackName.substring(getStackPrefix().length);
+      const stackType = cutPrefixName.split('-')[1] as PipelineStackType;
       let templateName: string = stackType;
       if (stackType === PipelineStackType.INGESTION) {
         templateName = `${stackType}_${this.pipeline.ingestionServer.sinkType}`;

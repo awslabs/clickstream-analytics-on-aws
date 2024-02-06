@@ -267,7 +267,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },
@@ -541,7 +541,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },
@@ -900,7 +900,7 @@ describe('CloudFrontS3PortalStack - China region', () => {
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },

@@ -12,6 +12,7 @@
  */
 
 import {
+  Aspects,
   CfnCondition,
   CfnOutput,
   CfnStack,
@@ -25,6 +26,7 @@ import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
 import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
@@ -41,6 +43,7 @@ import {
   TABLE_NAME_ITEM,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from './common/constant';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -78,6 +81,12 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 

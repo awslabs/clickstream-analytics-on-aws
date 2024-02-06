@@ -459,6 +459,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'AppIds',
       'RedshiftServerlessWorkgroupName',
       'VpcId',
+      'IamRoleBoundaryArn',
       'ODSEventFileSuffix',
       'PrivateSubnetIds',
       'ODSEventBucket',

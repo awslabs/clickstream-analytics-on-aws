@@ -14,6 +14,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
+  Aspects,
   Aws,
   CfnCondition,
   CfnOutput,
@@ -24,6 +25,7 @@ import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { CfnDataSource, CfnTemplate, CfnVPCConnection } from 'aws-cdk-lib/aws-quicksight';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
@@ -33,6 +35,7 @@ import {
   ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
 import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
 import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
@@ -192,6 +195,10 @@ export class DataReportingQuickSightStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 

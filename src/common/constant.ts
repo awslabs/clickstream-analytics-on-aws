@@ -256,6 +256,7 @@ export const SUBNETS_THREE_AZ_PATTERN =
 export const QUICKSIGHT_USER_NAME_PATTERN =
   '^[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
+export const IAM_ROLE_PREFIX_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,20})?$';
 export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
 export const REDSHIFT_DB_USER_NAME_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
 export const REDSHIFT_CLUSTER_IDENTIFIER_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';

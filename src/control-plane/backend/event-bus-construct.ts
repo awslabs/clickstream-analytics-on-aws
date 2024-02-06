@@ -24,6 +24,7 @@ import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
 import { CFN_RULE_PREFIX, CFN_TOPIC_PREFIX } from './lambda/api/common/constants';
+import { getStackPrefix } from './lambda/api/common/utils';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
@@ -35,6 +36,7 @@ export interface BackendEventBusProps {
   readonly prefixTimeGSIName: string;
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly listenStateMachine: StateMachine;
+  readonly iamRolePrefix: string;
 }
 
 export class BackendEventBus extends Construct {
@@ -131,13 +133,14 @@ export class BackendEventBus extends Construct {
       handler: 'handler',
       tracing: Tracing.ACTIVE,
       role: createLambdaRole(this, 'ListenStackFuncRole', true, [
-        ...this.getDescribeStackPolicyStatements(),
+        ...this.getDescribeStackPolicyStatements(props),
         ...this.getSQSPolicyStatements(),
       ]),
       timeout: Duration.seconds(60),
       environment: {
         CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
         PREFIX_TIME_GSI_NAME: props.prefixTimeGSIName,
+        IAM_ROLE_PREFIX: props.iamRolePrefix,
       },
       ...props.lambdaFunctionNetwork,
     });
@@ -173,11 +176,11 @@ export class BackendEventBus extends Construct {
     return fn;
   }
 
-  private getDescribeStackPolicyStatements(): PolicyStatement[] {
+  private getDescribeStackPolicyStatements(props: BackendEventBusProps): PolicyStatement[] {
     const policyStatements: PolicyStatement[] = [
       new PolicyStatement({
         effect: Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream*`],
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${getStackPrefix(props.iamRolePrefix)}*`],
         actions: [
           'cloudformation:DescribeStacks',
         ],
