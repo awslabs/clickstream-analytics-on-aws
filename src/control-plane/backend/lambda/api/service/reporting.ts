@@ -45,8 +45,9 @@ import {
   checkEventAnalysisParameter,
   checkPathAnalysisParameter,
   checkRetentionAnalysisParameter,
+  encodeQueryValueForSql,
 } from './quicksight/reporting-utils';
-import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
+import { SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX, REDSHIFT_EVENT_TABLE_NAME } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
@@ -75,6 +76,8 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+
+      encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
@@ -304,6 +307,8 @@ export class ReportingService {
         return res.status(400).json(new ApiFail(checkResult.message));
       }
 
+      encodeQueryValueForSql(query as SQLParameters);
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
@@ -475,6 +480,9 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+
+      encodeQueryValueForSql(query as SQLParameters);
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       let sql = this._buildSqlForPathAnalysis(query);
@@ -552,6 +560,8 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+
+      encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);

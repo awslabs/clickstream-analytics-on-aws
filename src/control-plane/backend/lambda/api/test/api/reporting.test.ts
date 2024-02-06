@@ -47,12 +47,19 @@ import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
+import { EventAndCondition, ExploreAnalyticsOperators, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 const quickSightMock = mockClient(QuickSightClient);
 const redshiftClientMock = mockClient(RedshiftDataClient);
+
+jest.mock('../../service/quicksight/sql-builder', () => ({
+  ...jest.requireActual('../../service/quicksight/sql-builder'),
+  buildRetentionAnalysisView: jest.fn((_sqlParameters) => {
+    return '';
+  }),
+}));
 
 const dashboardDef =
   {
@@ -2300,6 +2307,395 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds.length).toEqual(2);
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+  });
+
+  it('retention visual - special chars', async () => {
+    tokenMock(ddbMock, false);
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
+      Name: 'dashboard-test',
+    });
+
+    quickSightMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(UpdateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+
+    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
+
+    const res = await request(app)
+      .post('/api/reporting/retention')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PUBLISH',
+        locale: ExploreLocales.EN_US,
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
+        viewName: 'testview0002',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
+        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-aaaa',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        computeMethod: 'USER_ID_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+        },
+        pairEventAndConditions: [
+          {
+            startEvent: {
+              eventName: 'add_button_click\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.GEO,
+                    property: 'country',
+                    operator: '=',
+                    value: ['China\''],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+            backEvent: {
+              eventName: 'note_share\'',
+            },
+          },
+          {
+            startEvent: {
+              eventName: 'add_button_click\'',
+            },
+            backEvent: {
+              eventName: 'note_export\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.GEO,
+                    property: 'country',
+                    operator: '=',
+                    value: ['China\''],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+          },
+        ],
+      });
+
+    expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
+      {
+        schemaName: 'app1',
+        computeMethod: 'USER_ID_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        globalEventCondition: undefined,
+        groupCondition: undefined,
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        timeStart: undefined,
+        timeEnd: undefined,
+        pairEventAndConditions: [
+          {
+            startEvent: {
+              eventName: 'add_button_click\'\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.GEO,
+                    property: 'country',
+                    operator: '=',
+                    value: ['China\'\''],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+            backEvent: {
+              eventName: 'note_share\'\'',
+            },
+          },
+          {
+            startEvent: {
+              eventName: 'add_button_click\'\'',
+            },
+            backEvent: {
+              eventName: 'note_export\'\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.GEO,
+                    property: 'country',
+                    operator: '=',
+                    value: ['China\'\''],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+          },
+        ],
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
+
+  });
+
+
+  it('retention visual - special chars for like condition', async () => {
+    tokenMock(ddbMock, false);
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
+      Name: 'dashboard-test',
+    });
+
+    quickSightMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(UpdateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+
+    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
+
+    const res = await request(app)
+      .post('/api/reporting/retention')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PUBLISH',
+        locale: ExploreLocales.EN_US,
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
+        viewName: 'testview0002',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
+        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-aaaa',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        computeMethod: 'USER_ID_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+        },
+        pairEventAndConditions: [
+          {
+            startEvent: {
+              eventName: 'add_button_click\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.DEVICE,
+                    property: 'platform',
+                    operator: ExploreAnalyticsOperators.CONTAINS,
+                    value: ['%'],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+            backEvent: {
+              eventName: 'note_share\'',
+            },
+          },
+          {
+            startEvent: {
+              eventName: 'add_button_click\'',
+            },
+            backEvent: {
+              eventName: 'note_export\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.APP_INFO,
+                    property: 'install_source',
+                    operator: ExploreAnalyticsOperators.NOT_CONTAINS,
+                    value: ['_'],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+          },
+        ],
+      });
+
+    expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
+      {
+        schemaName: 'app1',
+        computeMethod: 'USER_ID_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        globalEventCondition: undefined,
+        groupCondition: undefined,
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        timeStart: undefined,
+        timeEnd: undefined,
+        pairEventAndConditions: [
+          {
+            startEvent: {
+              eventName: 'add_button_click\'\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.DEVICE,
+                    property: 'platform',
+                    operator: 'contains',
+                    value: ['%'],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+            backEvent: {
+              eventName: 'note_share\'\'',
+            },
+          },
+          {
+            startEvent: {
+              eventName: 'add_button_click\'\'',
+            },
+            backEvent: {
+              eventName: 'note_export\'\'',
+              sqlCondition: {
+                conditions: [
+                  {
+                    category: ConditionCategory.APP_INFO,
+                    property: 'install_source',
+                    operator: 'not_contains',
+                    value: ['_'],
+                    dataType: MetadataValueType.STRING,
+                  },
+                ],
+                conditionOperator: 'and',
+              },
+            },
+          },
+        ],
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
+
   });
 
   afterAll((done) => {
