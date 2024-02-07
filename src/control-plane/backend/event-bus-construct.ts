@@ -24,7 +24,6 @@ import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
 import { CFN_RULE_PREFIX, CFN_TOPIC_PREFIX } from './lambda/api/common/constants';
-import { getStackPrefix } from './lambda/api/common/utils';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
@@ -37,6 +36,8 @@ export interface BackendEventBusProps {
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly listenStateMachine: StateMachine;
   readonly iamRolePrefix: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
 }
 
 export class BackendEventBus extends Construct {
@@ -180,7 +181,9 @@ export class BackendEventBus extends Construct {
     const policyStatements: PolicyStatement[] = [
       new PolicyStatement({
         effect: Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${getStackPrefix(props.iamRolePrefix)}*`],
+        resources: [
+          `arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${props.conditionStringStackPrefix}*`,
+        ],
         actions: [
           'cloudformation:DescribeStacks',
         ],

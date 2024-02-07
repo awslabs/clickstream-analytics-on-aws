@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, Aws, CfnCondition, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -232,8 +232,29 @@ export class CloudFrontControlPlaneStack extends Stack {
     const oidcInfo = this.oidcInfo(createCognitoUserPool ? controlPlane.controlPlaneUrl : undefined);
     const authorizer = this.createAuthorizer(oidcInfo);
     const pluginPrefix = 'plugins/';
+
+    const isEmptyRolePrefixCondition = new CfnCondition(
+      this,
+      'IsEmptyRolePrefixCondition',
+      {
+        expression: Fn.conditionEquals(iamRolePrefixParam.valueAsString, ''),
+      },
+    );
+    const conditionStringRolePrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      iamRolePrefixParam.valueAsString,
+    ).toString();
+    const conditionStringStackPrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      `${iamRolePrefixParam.valueAsString}-${SolutionInfo.SOLUTION_SHORT_NAME}`,
+    ).toString();
     const clickStreamApi = this.createBackendApi(authorizer, oidcInfo, pluginPrefix,
-      solutionBucket.bucket, iamRolePrefixParam.valueAsString, iamRoleBoundaryArnParam.valueAsString, props?.targetToCNRegions);
+      solutionBucket.bucket,
+      iamRolePrefixParam.valueAsString, iamRoleBoundaryArnParam.valueAsString,
+      conditionStringRolePrefix, conditionStringStackPrefix,
+      props?.targetToCNRegions);
 
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
@@ -392,7 +413,9 @@ export class CloudFrontControlPlaneStack extends Stack {
   }
 
   private createBackendApi(authorizer: IAuthorizer, oidcInfo: OIDCInfo, pluginPrefix: string,
-    bucket: IBucket, iamRolePrefix: string, iamRoleBoundaryArn: string, targetToCNRegions?: boolean): ClickStreamApiConstruct {
+    bucket: IBucket, iamRolePrefix: string, iamRoleBoundaryArn: string,
+    conditionStringRolePrefix: string, conditionStringStackPrefix: string,
+    targetToCNRegions?: boolean): ClickStreamApiConstruct {
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'cloudfront',
       apiGateway: {
@@ -406,6 +429,8 @@ export class CloudFrontControlPlaneStack extends Stack {
       adminUserEmail: oidcInfo.adminEmail,
       iamRolePrefix: iamRolePrefix,
       iamRoleBoundaryArn: iamRoleBoundaryArn,
+      conditionStringRolePrefix: conditionStringRolePrefix,
+      conditionStringStackPrefix: conditionStringStackPrefix,
     });
 
     return clickStreamApi;

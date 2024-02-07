@@ -253,6 +253,8 @@ export class TestEnv {
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: '',
       iamRoleBoundaryArn: '',
+      conditionStringRolePrefix: 'Clickstream',
+      conditionStringStackPrefix: 'Clickstream',
     });
 
     const template = Template.fromStack(stack);
@@ -279,6 +281,8 @@ export class TestEnv {
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: 'testRolePrefix',
       iamRoleBoundaryArn: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
+      conditionStringRolePrefix: 'testRolePrefix',
+      conditionStringStackPrefix: 'testRolePrefix-Clickstream',
     });
 
     const template = Template.fromStack(stack);
@@ -319,6 +323,8 @@ export class TestEnv {
       adminUserEmail: 'fake@example.com',
       iamRolePrefix: '',
       iamRoleBoundaryArn: '',
+      conditionStringRolePrefix: 'Clickstream',
+      conditionStringStackPrefix: 'Clickstream',
     });
 
     const template = Template.fromStack(stack);

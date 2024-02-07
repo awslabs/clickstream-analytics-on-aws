@@ -30,7 +30,6 @@ import {
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
-import { getStackPrefix } from './lambda/api/common/utils';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
@@ -42,7 +41,9 @@ export interface StackWorkflowStateMachineProps {
   readonly targetToCNRegions?: boolean;
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly workflowBucket: IBucket;
-  readonly iamRolePrefix?: string;
+  readonly iamRolePrefix: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
 }
 
 export class StackWorkflowStateMachine extends Construct {
@@ -58,7 +59,7 @@ export class StackWorkflowStateMachine extends Construct {
     const cfnPolicyStatements = [
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${getStackPrefix(props.iamRolePrefix)}*`],
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${props.conditionStringStackPrefix}*`],
         actions: [
           'cloudformation:DescribeStacks',
         ],

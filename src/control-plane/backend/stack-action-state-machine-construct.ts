@@ -18,7 +18,6 @@ import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskIn
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
-import { getRolePrefix, getStackPrefix } from './lambda/api/common/utils';
 import {
   addCfnNagSuppressRules,
   rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions,
@@ -31,7 +30,9 @@ export interface StackActionStateMachineProps {
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly targetToCNRegions?: boolean;
   readonly workflowBucket: IBucket;
-  readonly iamRolePrefix?: string;
+  readonly iamRolePrefix: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
 }
 
 export class StackActionStateMachine extends Construct {
@@ -45,7 +46,7 @@ export class StackActionStateMachine extends Construct {
     const actionFunctionRolePolicyStatements = [
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${getStackPrefix(props.iamRolePrefix)}*`],
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${props.conditionStringStackPrefix}*`],
         actions: [
           'cloudformation:CreateStack',
           'cloudformation:UpdateStack',
@@ -79,9 +80,9 @@ export class StackActionStateMachine extends Construct {
           'iam:ListRoleTags',
         ],
         resources: [
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${getRolePrefix(props.iamRolePrefix)}*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/${getRolePrefix(props.iamRolePrefix)}*`,
-          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/${getRolePrefix(props.iamRolePrefix)}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/${props.conditionStringRolePrefix}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:policy/${props.conditionStringRolePrefix}*`,
+          `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:instance-profile/${props.conditionStringRolePrefix}*`,
         ],
       }),
       new iam.PolicyStatement({
