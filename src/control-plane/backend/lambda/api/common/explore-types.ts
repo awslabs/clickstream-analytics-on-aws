@@ -40,6 +40,16 @@ export enum ExploreComputeMethod {
   USER_ID_CNT = 'USER_ID_CNT', // nullif(user_id,user_pseudo_id)
   EVENT_CNT = 'EVENT_CNT',
   SUM_VALUE = 'SUM_VALUE',
+  COUNT_PROPERTY = 'COUNT_PROPERTY',
+  AGGREGATION_PROPERTY = 'AGGREGATION_PROPERTY',
+}
+
+export enum ExploreAggregationMethod {
+  MIN = 'MIN',
+  MAX = 'MAX',
+  SUM = 'SUM',
+  AVG = 'AVG',
+  MEDIAN = 'MEDIAN',
 }
 
 export enum ExploreConversionIntervalType {

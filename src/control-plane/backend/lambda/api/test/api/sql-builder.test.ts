@@ -12,9 +12,9 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreAggregationMethod, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
-import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates } from '../../service/quicksight/sql-builder';
+import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -20776,6 +20776,238 @@ describe('SQL Builder test', () => {
       event_date
   `.trim().replace(/ /g, ''),
     );
+
+  });
+
+  test('count on property', () => {
+
+    const sql = buildEventPropertyAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+console.log(sql);
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('sum on property', () => {
+    const sql = buildEventPropertyAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+sql
+// console.log(sql);
+//     expect(sql.trim().replace(/ /g, '')).toEqual(`
+    
+//   `.trim().replace(/ /g, ''),
+//     );
+
+  });
+
+  test('mix count and sum computed method', () => {
+
+    const sql = buildEventPropertyAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+    sql
+    // console.log(sql);
+    //     expect(sql.trim().replace(/ /g, '')).toEqual(`
+        
+    //   `.trim().replace(/ /g, ''),
+    //     );
+
+  });
+
+  test('mix all computed method', () => {
+
+    const sql = buildEventPropertyAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.GEO,
+              property: 'country',
+              dataType: MetadataValueType.STRING,
+            },
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+    sql
+    // console.log(sql);
+    //     expect(sql.trim().replace(/ /g, '')).toEqual(`
+        
+    //   `.trim().replace(/ /g, ''),
+    //     );
 
   });
 
