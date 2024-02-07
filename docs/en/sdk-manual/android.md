@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.10.0'
+    implementation 'software.aws.solution:clickstream:0.10.1'
 }
 ```
 
