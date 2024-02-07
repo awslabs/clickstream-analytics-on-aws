@@ -66,16 +66,23 @@ async function _handler(event: EventType): Promise<ResponseType> {
 async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient): Promise<SubmitSqlResponse> {
   logger.info('submitSql() sqlOrs3File: ' + sqlOrs3File);
 
-  const provisionedRedshiftProps = {
-    clusterIdentifier,
-    databaseName,
-    dbUser: dbUser,
-  };
+  let provisionedRedshiftProps = undefined;
+  let serverlessRedshiftProps = undefined;
 
-  const serverlessRedshiftProps = {
-    workgroupName,
-    databaseName,
-  };
+  if (clusterIdentifier) {
+    provisionedRedshiftProps = {
+      clusterIdentifier,
+      databaseName,
+      dbUser: dbUser,
+    };
+  }
+
+  if (workgroupName) {
+    serverlessRedshiftProps = {
+      workgroupName,
+      databaseName,
+    };
+  }
   const res = await exeucteBySqlorS3File(sqlOrs3File, redShiftClient, serverlessRedshiftProps, provisionedRedshiftProps, databaseName);
   logger.info('submitSql() return queryId: ' + res.queryId);
   return res;
