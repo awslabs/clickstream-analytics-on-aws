@@ -45,11 +45,11 @@ export enum ExploreComputeMethod {
 }
 
 export enum ExploreAggregationMethod {
-  MIN = 'MIN',
-  MAX = 'MAX',
-  SUM = 'SUM',
-  AVG = 'AVG',
-  MEDIAN = 'MEDIAN',
+  MIN = 'min',
+  MAX = 'max',
+  SUM = 'sum',
+  AVG = 'avg',
+  MEDIAN = 'median',
 }
 
 export enum ExploreConversionIntervalType {
