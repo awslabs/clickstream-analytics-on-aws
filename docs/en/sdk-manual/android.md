@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.10.0'
+    implementation 'software.aws.solution:clickstream:0.10.1'
 }
 ```
 
@@ -233,19 +233,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 Here is an explanation of each method.
 
-| Method name                     | Parameter type | Required | Default value | Description                                                  |
-| ------------------------------- | -------------- | -------- | ------------- | ------------------------------------------------------------ |
-| withAppId()                     | String         | true     | --            | the app id of your application in web console                |
-| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server |
-| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie |
-| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                       |
-| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds          |
-| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                    |
-| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                  |
-| withLogEvents()                 | boolean        | false    | true          | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns) |
-| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events. |
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| withLogEvents()                 | boolean        | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
+| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
 
 #### Debug events
 

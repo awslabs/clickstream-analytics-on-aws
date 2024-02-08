@@ -19,7 +19,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.10.0'
+    implementation 'software.aws.solution:clickstream:0.10.1'
 }
 ```
 
@@ -234,19 +234,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 以下是每个方法的说明
 
-| 方法名                          | 参数类型 | 是否必需 | 默认值  | 描述                                               |
-| ------------------------------- | -------- | -------- | ------- | -------------------------------------------------- |
-| withAppId()                     | String   | 是       | --      | 在解决方案控制平面中您应用程序的 ID                |
-| withEndpoint()                  | String   | 是       | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
-| withAuthCookie()                | String   | 否       | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie         |
-| withSendEventsInterval()        | long     | 否       | 100000  | 事件发送间隔（毫秒）                               |
-| withSessionTimeoutDuration()    | long     | 否       | 1800000 | 会话超时的时长（毫秒）                             |
-| withTrackScreenViewEvents()     | boolean  | 否       | true    | 是否自动记录 screen view（屏幕浏览） 事件          |
-| withTrackUserEngagementEvents() | boolean  | 否       | true    | 是否自动记录 user engagement（用户参与） 事件      |
-| withTrackAppExceptionEvents()   | boolean  | 否       | true    | 是否自动记录应用崩溃事件                           |
-| withLogEvents()                 | boolean  | 否       | true    | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
-| withCustomDns()                 | String   | 否       | --      | 设置自定义 DNS 的方法, [了解更多](#dns)            |
-| withCompressEvents()            | boolean  | 否       | true    | 上传事件时是否通过gzip压缩事件内容                 |
+| 方法名                             | 参数类型     | 是否必需 | 默认值     | 描述                                |
+|---------------------------------|----------|------|---------|-----------------------------------|
+| withAppId()                     | String   | 是    | --      | 在解决方案控制平面中您应用程序的 ID               |
+| withEndpoint()                  | String   | 是    | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
+| withAuthCookie()                | String   | 否    | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
+| withSendEventsInterval()        | long     | 否    | 100000  | 事件发送间隔（毫秒）                        |
+| withSessionTimeoutDuration()    | long     | 否    | 1800000 | 会话超时的时长（毫秒）                       |
+| withTrackScreenViewEvents()     | boolean  | 否    | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
+| withTrackUserEngagementEvents() | boolean  | 否    | true    | 是否自动记录 user engagement（用户参与） 事件   |
+| withTrackAppExceptionEvents()   | boolean  | 否    | true    | 是否自动记录应用崩溃事件                      |
+| withLogEvents()                 | boolean  | 否    | false   | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
+| withCustomDns()                 | String   | 否    | --      | 设置自定义 DNS 的方法, [了解更多](#dns)       |
+| withCompressEvents()            | boolean  | 否    | true    | 上传事件时是否通过gzip压缩事件内容               |
 
 #### 调试事件
 
