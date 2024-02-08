@@ -14,6 +14,20 @@
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
+import { IDictionary } from './dictionary';
+import { IPlugin } from './plugin';
+import { IProject } from './project';
+import {
+  CAppRegistryStack,
+  CAthenaStack,
+  CDataModelingStack,
+  CDataProcessingStack,
+  CIngestionServerStack,
+  CKafkaConnectorStack,
+  CMetricsStack,
+  CReportingStack,
+  getStackParameters,
+} from './stacks';
 import {
   CFN_RULE_PREFIX,
   CFN_TOPIC_PREFIX,
@@ -80,20 +94,6 @@ import { StackManager } from '../service/stack';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
-import { IDictionary } from './dictionary';
-import { IPlugin } from './plugin';
-import { IProject } from './project';
-import {
-  CAppRegistryStack,
-  CAthenaStack,
-  CDataModelingStack,
-  CDataProcessingStack,
-  CIngestionServerStack,
-  CKafkaConnectorStack,
-  CMetricsStack,
-  CReportingStack,
-  getStackParameters,
-} from './stacks';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
