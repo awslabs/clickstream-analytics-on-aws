@@ -21548,7 +21548,7 @@ describe('SQL Builder test', () => {
     from
       join_table
     `.trim().replace(/ /g, ''),
-      );
+    );
 
   });
 
@@ -21764,7 +21764,7 @@ describe('SQL Builder test', () => {
       x_id,
       custom_attr_id
     `.trim().replace(/ /g, ''),
-      );
+    );
 
   });
 
@@ -22081,7 +22081,7 @@ describe('SQL Builder test', () => {
     from
       join_table
     `.trim().replace(/ /g, ''),
-      );
+    );
 
   });
 
@@ -22406,7 +22406,7 @@ describe('SQL Builder test', () => {
     from
       join_table
     `.trim().replace(/ /g, ''),
-      );
+    );
   });
 
   test('mix all computed method with different aggregation method with group condition', () => {
@@ -22753,7 +22753,7 @@ describe('SQL Builder test', () => {
     from
       join_table
     `.trim().replace(/ /g, ''),
-      );
+    );
   });
 
 
