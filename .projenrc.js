@@ -116,7 +116,6 @@ const depsForApiProject = [
   'i18next@^22.4.6',
   'i18next-fs-backend@^2.2.0',
   'fast-memoize@^2.5.1',
-  'lodash@^4.17.21',
   ...smithyPackagesDeps,
   ...awsSDKPackagesDeps,
   ...awsSDKPackagesDepsForApiProject,
@@ -125,8 +124,9 @@ const depsForApiProject = [
 
 const devDepsForApiProject = [
   ...commonDevDeps,
-  'supertest@^6.3.3',
+  'lodash@^4.17.21',
   'nodemon@^2.0.20',
+  'supertest@^6.3.3',
   'ts-node@^10.9.1',
   '@types/express@^4.17.16',
   '@types/lodash@^4.14.202',

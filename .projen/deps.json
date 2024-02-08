@@ -372,11 +372,6 @@
       "type": "runtime"
     },
     {
-      "name": "lodash",
-      "version": "^4.17.21",
-      "type": "runtime"
-    },
-    {
       "name": "mustache",
       "version": "^4.2.0",
       "type": "runtime"

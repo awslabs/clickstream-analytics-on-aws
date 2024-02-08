@@ -79,6 +79,11 @@
       "type": "build"
     },
     {
+      "name": "lodash",
+      "version": "^4.17.21",
+      "type": "build"
+    },
+    {
       "name": "mock-fs",
       "version": "^5.2.0",
       "type": "build"
@@ -298,11 +303,6 @@
     {
       "name": "jwks-rsa",
       "version": "^3.0.1",
-      "type": "runtime"
-    },
-    {
-      "name": "lodash",
-      "version": "^4.17.21",
       "type": "runtime"
     },
     {
