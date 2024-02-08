@@ -516,28 +516,25 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   const computeMethodProps = _getComputeMethodProps(sqlParameters);
   if (!computeMethodProps.isMixedMethod) {
     if (computeMethodProps.hasAggregationPropertyMethod) {
-      resultSql = resultSql.concat(`
+
+      if (!computeMethodProps.isSameAggregationMethod) {
+        resultSql = resultSql.concat(`
           select 
-            day::date as event_date, 
-            event_name, 
-            ${groupColSQL}
-            custom_attr_id as id
-          from (
+            *
+          from join_table
+        `);
+      } else {
+        resultSql = resultSql.concat(`
             select 
-              month,
-              week,
-              day,
-              hour,
-              event_name,
-              event_timestamp,
-              x_id,
-              custom_attr_id
+              day::date as event_date, 
+              event_name, 
+              ${groupColSQL}
+              custom_attr_id as id
             from join_table
-            group by 1,2,3,4,5,6,7,8
-          ) tmp
-          group by
-          day, event_name, ${groupCol} custom_attr_id
-      `);
+            group by
+            day, event_name, ${groupCol} custom_attr_id
+        `);
+      }
     } else {
       resultSql = resultSql.concat(`
           select 
@@ -1365,13 +1362,13 @@ function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCo
   return idSql;
 }
 
-function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string) {
+function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string, dateGroupCol: string) {
   let sql = '';
 
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
       || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     sql = `
-      day,
+      ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
       null as custom_attr_id,
@@ -1379,7 +1376,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
     `;
   } else if (eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
     sql = `
-      day,
+      ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
       custom_attr_id,
@@ -1387,7 +1384,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
     `;
   } else {
     sql = `
-      day,
+      ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
       null as custom_attr_id,
@@ -1426,7 +1423,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
       joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
       select 
-        ${_buildQueryColumnSqlMixedMode(item, groupCol)}
+        ${_buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn!)}
         from(
           select
             table_${index}.month
@@ -1439,7 +1436,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
           ${groupColSql}
           from table_${index}
         ) as union_table_${index}
-        group by day, event_name ${groupCol === '' ? '': ',' + groupCol} ,custom_attr_id
+        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ,custom_attr_id
       `);
     }
   } else {

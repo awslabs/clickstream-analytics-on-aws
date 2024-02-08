@@ -21243,33 +21243,288 @@ describe('SQL Builder test', () => {
     day::date as event_date,
     event_name,
     custom_attr_id as id
-  from
-    (
-      select
-        month,
-        week,
-        day,
-        hour,
-        event_name,
-        event_timestamp,
-        x_id,
-        custom_attr_id
-      from
-        join_table
-      group by
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8
-    ) tmp
+  from 
+    join_table  
   group by
     day,
     event_name,
     custom_attr_id
+    `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('aggregate on property with different compute method', () => {
+    const sql = buildEventPropertyAnalysisView({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.SUM,
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.MAX,
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.AGGREGATION_PROPERTY,
+          eventExtParameter: {
+            targetProperty: {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              dataType: MetadataValueType.INTEGER,
+            },
+            aggregationMethod: ExploreAggregationMethod.MEDIAN,
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      event_base as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_timestamp,
+          COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+          r.user_id,
+          month,
+          week,
+          day,
+          hour
+        from
+          (
+            select
+              event_date,
+              event_name::varchar as event_name,
+              event_id::varchar as event_id,
+              event_timestamp::bigint as event_timestamp,
+              user_pseudo_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
+      ),
+      base_data as (
+        select
+          _session_duration,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration
+            from
+              event_base
+              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+        where
+          1 = 1
+          and (
+            (event_name = 'view_item')
+            or (event_name = 'purchase')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          _session_duration as custom_attr_0,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+      ),
+      table_1 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          _session_duration as custom_attr_1,
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+      ),
+      table_2 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          _session_duration as custom_attr_2,
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+      ),
+      join_table as (
+        select
+          DAY as event_date,
+          event_name,
+          null as custom_attr_id,
+          sum(custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_0.month,
+              table_0.week,
+              table_0.day,
+              table_0.hour,
+              1 || '_' || table_0.event_name_0 as event_name,
+              table_0.event_timestamp_0 as event_timestamp,
+              table_0.event_id_0 as x_id,
+              table_0.custom_attr_0 as custom_attr_id
+            from
+              table_0
+          ) as union_table_0
+        group by
+          DAY,
+          event_name,
+          custom_attr_id
+        union all
+        select
+          DAY as event_date,
+          event_name,
+          null as custom_attr_id,
+          max(custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_1.month,
+              table_1.week,
+              table_1.day,
+              table_1.hour,
+              2 || '_' || table_1.event_name_1 as event_name,
+              table_1.event_timestamp_1 as event_timestamp,
+              table_1.event_id_1 as x_id,
+              table_1.custom_attr_1 as custom_attr_id
+            from
+              table_1
+          ) as union_table_1
+        group by
+          DAY,
+          event_name,
+          custom_attr_id
+        union all
+        select
+          DAY as event_date,
+          event_name,
+          null as custom_attr_id,
+          median (custom_attr_id) as "count/aggregation amount"
+        from
+          (
+            select
+              table_2.month,
+              table_2.week,
+              table_2.day,
+              table_2.hour,
+              3 || '_' || table_2.event_name_2 as event_name,
+              table_2.event_timestamp_2 as event_timestamp,
+              table_2.event_id_2 as x_id,
+              table_2.custom_attr_2 as custom_attr_id
+            from
+              table_2
+          ) as union_table_2
+        group by
+          DAY,
+          event_name,
+          custom_attr_id
+      )
+    select
+      *
+    from
+      join_table
     `.trim().replace(/ /g, ''),
     );
 
@@ -21472,7 +21727,7 @@ describe('SQL Builder test', () => {
       ),
       join_table as (
         select
-          day,
+          DAY as event_date,
           event_name,
           custom_attr_id,
           count(1) as "count/aggregation amount"
@@ -21491,12 +21746,12 @@ describe('SQL Builder test', () => {
               table_0
           ) as union_table_0
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           sum(custom_attr_id) as "count/aggregation amount"
@@ -21515,12 +21770,12 @@ describe('SQL Builder test', () => {
               table_1
           ) as union_table_1
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           custom_attr_id,
           count(1) as "count/aggregation amount"
@@ -21539,7 +21794,7 @@ describe('SQL Builder test', () => {
               table_2
           ) as union_table_2
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
       )
@@ -21981,7 +22236,7 @@ describe('SQL Builder test', () => {
       ),
       join_table as (
         select
-          day,
+          DAY as event_date,
           event_name,
           custom_attr_id,
           count(1) as "count/aggregation amount"
@@ -22000,12 +22255,12 @@ describe('SQL Builder test', () => {
               table_0
           ) as union_table_0
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           sum(custom_attr_id) as "count/aggregation amount"
@@ -22024,12 +22279,12 @@ describe('SQL Builder test', () => {
               table_1
           ) as union_table_1
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
@@ -22048,12 +22303,12 @@ describe('SQL Builder test', () => {
               table_2
           ) as union_table_2
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
@@ -22072,7 +22327,7 @@ describe('SQL Builder test', () => {
               table_3
           ) as union_table_3
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
       )
@@ -22306,7 +22561,7 @@ describe('SQL Builder test', () => {
       ),
       join_table as (
         select
-          day,
+          DAY as event_date,
           event_name,
           custom_attr_id,
           count(1) as "count/aggregation amount"
@@ -22325,12 +22580,12 @@ describe('SQL Builder test', () => {
               table_0
           ) as union_table_0
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           sum(custom_attr_id) as "count/aggregation amount"
@@ -22349,12 +22604,12 @@ describe('SQL Builder test', () => {
               table_1
           ) as union_table_1
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           max(custom_attr_id) as "count/aggregation amount"
@@ -22373,12 +22628,12 @@ describe('SQL Builder test', () => {
               table_2
           ) as union_table_2
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
         union all
         select
-          day,
+          DAY as event_date,
           event_name,
           null as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
@@ -22397,7 +22652,7 @@ describe('SQL Builder test', () => {
               table_3
           ) as union_table_3
         group by
-          day,
+          DAY,
           event_name,
           custom_attr_id
       )
@@ -22467,7 +22722,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-      groupColumn: ExploreGroupColumn.DAY,
+      groupColumn: ExploreGroupColumn.WEEK,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
@@ -22641,7 +22896,7 @@ describe('SQL Builder test', () => {
       ),
       join_table as (
         select
-          day,
+          WEEK as event_date,
           event_name,
           platform,
           custom_attr_id,
@@ -22662,13 +22917,13 @@ describe('SQL Builder test', () => {
               table_0
           ) as union_table_0
         group by
-          day,
+          WEEK,
           event_name,
           platform,
           custom_attr_id
         union all
         select
-          day,
+          WEEK as event_date,
           event_name,
           platform,
           null as custom_attr_id,
@@ -22689,13 +22944,13 @@ describe('SQL Builder test', () => {
               table_1
           ) as union_table_1
         group by
-          day,
+          WEEK,
           event_name,
           platform,
           custom_attr_id
         union all
         select
-          day,
+          WEEK as event_date,
           event_name,
           platform,
           null as custom_attr_id,
@@ -22716,13 +22971,13 @@ describe('SQL Builder test', () => {
               table_2
           ) as union_table_2
         group by
-          day,
+          WEEK,
           event_name,
           platform,
           custom_attr_id
         union all
         select
-          day,
+          WEEK as event_date,
           event_name,
           platform,
           null as custom_attr_id,
@@ -22743,7 +22998,7 @@ describe('SQL Builder test', () => {
               table_3
           ) as union_table_3
         group by
-          day,
+          WEEK,
           event_name,
           platform,
           custom_attr_id
