@@ -98,7 +98,6 @@ export class StreamingIngestionStack extends Stack {
       true,
       dataBucket,
       appPrefix,
-      '-x checkstyleMain',
     );
 
     // create managed flink application
