@@ -37,33 +37,36 @@ import {
 import { SNSClient } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
+import cloneDeep from 'lodash/cloneDeep';
+import 'aws-sdk-client-mock-jest';
 import {
-  createPipelineMock,
-  createPipelineMockForBJSRegion,
-  dictionaryMock,
   MOCK_APP_ID,
   MOCK_PROJECT_ID,
   MOCK_SOLUTION_VERSION,
+  createPipelineMock,
+  createPipelineMockForBJSRegion,
+  dictionaryMock,
 } from './ddb-mock';
 import {
   KAFKA_INGESTION_PIPELINE,
   KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
-  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
   KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
+  MSK_DATA_PROCESSING_ATHENA_PIPELINE,
+  MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW,
-  S3_DATA_PROCESSING_PIPELINE,
-  S3_INGESTION_PIPELINE, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
-  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
-  S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
-  MSK_DATA_PROCESSING_ATHENA_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED,
-  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+  S3_DATA_PROCESSING_PIPELINE,
+  S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
+  S3_INGESTION_PIPELINE,
 } from './pipeline-mock';
 import {
   APPREGISTRY_APPLICATION_ARN_PARAMETER,
@@ -96,6 +99,7 @@ import {
   mergeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '../../common/constants-ln';
 import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { ENetworkType, IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';
@@ -103,7 +107,6 @@ import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
-import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -134,15 +137,7 @@ const mockClients = {
   snsMock,
 };
 
-const Tags = [
-  {
-    Key: 'customerKey1',
-    Value: 'tagValue1',
-  },
-  {
-    Key: 'customerKey2',
-    Value: 'tagValue2',
-  },
+const InitTags = [
   {
     Key: BuiltInTagKeys.AWS_SOLUTION,
     Value: SolutionInfo.SOLUTION_SHORT_NAME,
@@ -155,6 +150,24 @@ const Tags = [
     Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
     Value: MOCK_PROJECT_ID,
   },
+  {
+    Key: 'customerKey1',
+    Value: 'tagValue1',
+  },
+  {
+    Key: 'customerKey2',
+    Value: 'tagValue2',
+  },
+];
+
+const appRegistryApplicationTag = {
+  Key: `#.Clickstream-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+  Value: `#.Clickstream-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+};
+
+const Tags = [
+  ...InitTags,
+  appRegistryApplicationTag,
 ];
 
 describe('Workflow test', () => {
@@ -179,7 +192,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_INGESTION_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -262,7 +275,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -285,7 +298,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...S3_INGESTION_PIPELINE,
+      ...cloneDeep(S3_INGESTION_PIPELINE),
       network: {
         ...S3_INGESTION_PIPELINE.network,
         type: ENetworkType.Private,
@@ -373,7 +386,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -396,7 +409,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...S3_INGESTION_PIPELINE,
+      ...cloneDeep(S3_INGESTION_PIPELINE),
       ingestionServer: {
         ...S3_INGESTION_PIPELINE.ingestionServer,
         ingestionType: IngestionType.Fargate,
@@ -488,7 +501,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -515,7 +528,7 @@ describe('Workflow test', () => {
     });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
-      ...S3_INGESTION_PIPELINE,
+      ...cloneDeep(S3_INGESTION_PIPELINE),
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -600,7 +613,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -622,7 +635,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...KAFKA_INGESTION_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(KAFKA_INGESTION_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -705,7 +718,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -727,7 +740,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -831,7 +844,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -859,7 +872,7 @@ describe('Workflow test', () => {
     });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
-      ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
+      ...cloneDeep(MSK_WITH_CONNECTOR_INGESTION_PIPELINE),
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -965,7 +978,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -988,7 +1001,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_ON_DEMAND_INGESTION_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(KINESIS_ON_DEMAND_INGESTION_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1071,7 +1084,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1098,7 +1111,7 @@ describe('Workflow test', () => {
     });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
-      ...KINESIS_PROVISIONED_INGESTION_PIPELINE,
+      ...cloneDeep(KINESIS_PROVISIONED_INGESTION_PIPELINE),
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -1183,7 +1196,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1205,7 +1218,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_DATA_PROCESSING_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1314,7 +1327,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1337,7 +1350,7 @@ describe('Workflow test', () => {
       subnetsIsolated: true,
       subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1467,7 +1480,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1491,7 +1504,7 @@ describe('Workflow test', () => {
       subnetsCross3AZ: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...MSK_DATA_PROCESSING_ATHENA_PIPELINE,
+      ...cloneDeep(MSK_DATA_PROCESSING_ATHENA_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -1644,7 +1657,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1668,7 +1681,7 @@ describe('Workflow test', () => {
       subnetsCross3AZ: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
+      ...cloneDeep(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -1842,7 +1855,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -1866,7 +1879,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -1998,7 +2011,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -2021,7 +2034,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE,
+      ...cloneDeep(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -2174,7 +2187,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -2197,7 +2210,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
+      ...cloneDeep(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -2371,7 +2384,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -2393,7 +2406,7 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE });
+    const pipeline: CPipeline = new CPipeline(cloneDeep(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2544,7 +2557,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -2568,7 +2581,7 @@ describe('Workflow test', () => {
       noVpcEndpoint: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -2721,7 +2734,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
@@ -2746,7 +2759,7 @@ describe('Workflow test', () => {
       noApp: true,
     });
     const pipeline: CPipeline = new CPipeline({
-      ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
+      ...cloneDeep(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE),
       templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
@@ -2926,7 +2939,7 @@ describe('Workflow test', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },

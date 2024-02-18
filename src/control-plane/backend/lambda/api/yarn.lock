@@ -3125,6 +3125,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/lodash@^4.14.202":
+  version "4.14.202"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.202.tgz#f09dbd2fb082d507178b2f2a5c7e74bd72ff98f8"
+  integrity sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==
+
 "@types/methods@^1.1.4":
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/@types/methods/-/methods-1.1.4.tgz#d3b7ac30ac47c91054ea951ce9eed07b1051e547"
