@@ -527,6 +527,38 @@ describe('managed Flink application for real-time data processing', () => {
               },
             ],
           },
+          {
+            Action: [
+              'kinesis:PutRecord',
+              'kinesis:PutRecords',
+              'kinesis:ListShards',
+            ],
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':kinesis:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stream/clickstream_streaming_sink_',
+                  {
+                    Ref: 'ProjectId',
+                  },
+                  '_*',
+                ],
+              ],
+            },
+            Effect: 'Allow',
+          },
         ]),
       }),
     });

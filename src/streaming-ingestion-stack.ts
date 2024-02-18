@@ -15,6 +15,7 @@ import path from 'path';
 import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
+  Arn,
   CfnCondition,
   CfnOutput,
   CfnStack,
@@ -22,7 +23,7 @@ import {
   Stack,
   StackProps,
 } from 'aws-cdk-lib';
-import { Role } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -37,6 +38,7 @@ import { getExistVpc } from './common/vpc-utils';
 import {
   createStackParameters,
 } from './streaming-ingestion/parameter';
+import { SINK_STREAM_NAME_PREFIX } from './streaming-ingestion/private/constant';
 import { KinesisSink } from './streaming-ingestion/private/kinesis-sink';
 import { StreamingIngestionRedshiftStack } from './streaming-ingestion/private/redshift-stack';
 
@@ -132,6 +134,18 @@ export class StreamingIngestionStack extends Stack {
     dataBucket.grantRead(this.flinkApp, applicationJarKey);
     dataBucket.grantRead(this.flinkApp, geoDBKey);
     dataBucket.grantRead(this.flinkApp, mappingConfgKey);
+    this.flinkApp.addToRolePolicy(new PolicyStatement({
+      actions: [
+        'kinesis:PutRecord',
+        'kinesis:PutRecords',
+        'kinesis:ListShards',
+      ],
+      resources: [Arn.format({
+        service: 'kinesis',
+        resource: 'stream',
+        resourceName: `${SINK_STREAM_NAME_PREFIX}${projectId}_*`,
+      }, Stack.of(this))],
+    }));
     this.flinkApp.node.addDependency(deployment);
 
     // update Redshift IAM role association and schema and table per application
