@@ -244,12 +244,12 @@ export function createStackParameters(scope: Construct): {
   const { redshiftServerlessWorkgroupIdParam, redshiftServerlessNamespaceIdParam } =
     Parameters.createRedshiftServerlessWorkgroupAndNamespaceParameters(scope);
 
-  const redshiftServerlessIAMRoleParam = Parameters.createRedshiftServerlessDataRoleParameter(scope);
+  const redshiftDataAPIRoleParam = Parameters.createRedshiftDataAPIRoleParameter(scope);
 
   Parameters.createRedshiftServerlessParametersRule(scope, {
     redshiftModeParam,
     redshiftServerlessWorkgroupNameParam,
-    redshiftServerlessIAMRoleParam,
+    redshiftDataAPIRoleParam: redshiftDataAPIRoleParam,
   });
 
   existingRedshiftServerlessParamsGroup.push({
@@ -258,7 +258,7 @@ export function createStackParameters(scope: Construct): {
       redshiftServerlessNamespaceIdParam.logicalId,
       redshiftServerlessWorkgroupNameParam.logicalId,
       redshiftServerlessWorkgroupIdParam.logicalId,
-      redshiftServerlessIAMRoleParam.logicalId,
+      redshiftDataAPIRoleParam.logicalId,
     ],
   });
 
@@ -272,7 +272,7 @@ export function createStackParameters(scope: Construct): {
     [redshiftServerlessNamespaceIdParam.logicalId]: {
       default: 'Namespace Id',
     },
-    [redshiftServerlessIAMRoleParam.logicalId]: {
+    [redshiftDataAPIRoleParam.logicalId]: {
       default: 'Role ARN',
     },
   };
@@ -360,7 +360,7 @@ export function createStackParameters(scope: Construct): {
           redshift: {
             mode: redshiftModeParam.valueAsString,
             defaultDatabaseName: redshiftDefaultDatabaseParam.valueAsString,
-            dataAPIRoleArn: redshiftServerlessIAMRoleParam.valueAsString,
+            dataAPIRoleArn: redshiftDataAPIRoleParam.valueAsString,
             existingServerless: {
               workgroupName: redshiftServerlessWorkgroupNameParam.valueAsString,
               workgroupId: redshiftServerlessWorkgroupIdParam.valueAsString,

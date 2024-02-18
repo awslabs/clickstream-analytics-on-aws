@@ -515,6 +515,16 @@ export class Parameters {
     return redshiftServerlessIAMRoleParam;
   }
 
+  public static createRedshiftDataAPIRoleParameter(scope: Construct) {
+    const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftDataAPIRole', {
+      description: 'The role ARN for on-behalf executing queries in Redshift.',
+      type: 'String',
+      allowedPattern: 'arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/.*',
+    });
+
+    return redshiftServerlessIAMRoleParam;
+  }
+
   public static createRedshiftServerlessWorkgroupAndNamespaceParameters(scope: Construct) {
     const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
       description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
@@ -539,7 +549,7 @@ export class Parameters {
   public static createRedshiftServerlessParametersRule(scope: Construct, parameters: {
     redshiftModeParam: CfnParameter;
     redshiftServerlessWorkgroupNameParam: CfnParameter;
-    redshiftServerlessIAMRoleParam: CfnParameter;
+    redshiftDataAPIRoleParam: CfnParameter;
   }) {
     new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
       ruleCondition: Fn.conditionEquals(parameters.redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
@@ -550,7 +560,7 @@ export class Parameters {
               Fn.conditionEquals(parameters.redshiftServerlessWorkgroupNameParam.valueAsString, ''),
             ),
             Fn.conditionNot(
-              Fn.conditionEquals(parameters.redshiftServerlessIAMRoleParam.valueAsString, ''),
+              Fn.conditionEquals(parameters.redshiftDataAPIRoleParam.valueAsString, ''),
             ),
           ),
           assertDescription:

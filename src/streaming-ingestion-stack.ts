@@ -168,7 +168,7 @@ export class StreamingIngestionStack extends Stack {
     const ingestionParams = {
       projectId,
       appIds,
-      dataAPIRole: Role.fromRoleArn(this, 'RedshiftDataAPIRole', pipeline.destination.redshift.dataAPIRoleArn),
+      dataAPIRole: Role.fromRoleArn(this, 'ExistingRedshiftDataAPIRole', pipeline.destination.redshift.dataAPIRoleArn),
       workflowBucketInfo: {
         s3Bucket: dataBucket,
         prefix: `clickstream/${projectId}/tmp/`,

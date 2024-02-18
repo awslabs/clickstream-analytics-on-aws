@@ -120,14 +120,14 @@ describe('common parameter test of StreamingIngestionStack', () => {
     });
   });
 
-  test('Should has Parameter RedshiftServerlessIAMRole', () => {
-    template.hasParameter('RedshiftServerlessIAMRole', {
+  test('Should has Parameter RedshiftDataAPIRole', () => {
+    template.hasParameter('RedshiftDataAPIRole', {
       Type: 'String',
     });
   });
 
-  test('RedshiftIAMRole allowedPattern', () => {
-    const param = template.toJSON().Parameters.RedshiftServerlessIAMRole;
+  test('RedshiftDataAPIRole allowedPattern', () => {
+    const param = template.toJSON().Parameters.RedshiftDataAPIRole;
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
@@ -146,6 +146,7 @@ describe('common parameter test of StreamingIngestionStack', () => {
       'b-1.test.com:9092,b-2.test.com:9092',
       'b1.test.com:9092',
       'b_1.test.com',
+      '',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
@@ -168,7 +169,7 @@ describe('common parameter test of StreamingIngestionStack', () => {
     const rule = template.toJSON().Rules.ExistingRedshiftServerlessParameters;
     for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
       expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessWorkgroupName' ||
-          e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessIAMRole').toBeTruthy();
+          e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftDataAPIRole').toBeTruthy();
     }
   });
 });

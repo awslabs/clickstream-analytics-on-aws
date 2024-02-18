@@ -442,7 +442,7 @@ export function createStackParameters(scope: Construct): {
   Parameters.createRedshiftServerlessParametersRule(scope, {
     redshiftModeParam,
     redshiftServerlessWorkgroupNameParam,
-    redshiftServerlessIAMRoleParam,
+    redshiftDataAPIRoleParam: redshiftServerlessIAMRoleParam,
   });
 
   // Set Redshift cluster parameters
