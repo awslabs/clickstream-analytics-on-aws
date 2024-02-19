@@ -19,11 +19,11 @@
     "screen_width" : 1080,
     "system_language" : "zh",
     "time_zone_offset_seconds" : 28800,
-    "ua_browser" : "Apache-HttpClient",
-    "ua_browser_version" : "4.4.12",
-    "ua_device" : "Other",
+    "ua_browser" : null,
+    "ua_browser_version" : null,
+    "ua_device" : null,
     "ua_device_category" : null,
-    "ua_os" : "Other",
+    "ua_os" : null,
     "ua_os_version" : null,
     "vendor_id" : "deviceid-1682319109447",
     "viewport_height" : null,
@@ -39,14 +39,10 @@
   "geo" : {
     "city" : null,
     "continent" : null,
-    "country" : null,
-    "locale" : "zh_CN_#Hans",
+    "country" :  null,
     "metro" : null,
     "region" : null,
-    "sub_continent" : null
-  },
-  "geo_for_enrich" : {
-    "ip" : "13.212.229.59, 21.212.229.59",
+    "sub_continent" : null,
     "locale" : "zh_CN_#Hans"
   },
   "ingest_timestamp" : 1682319109403,
