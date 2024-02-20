@@ -2,7 +2,7 @@
 
 ## 介绍
 
-Clickstream Swift SDK 可以帮助您轻松从 iOS 设备收集和报告应用内事件到 AWS。作为 {{ solution_name }} 解决方案的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
+Clickstream Swift SDK 可以帮助您轻松从 iOS 设备收集和发送应用内事件到您配置的解决方案数据管道。
 
 该 SDK 基于 Amplify for Swift 核心库，并根据 Amplify Swift SDK 插件规范进行开发。此外，该 SDK 还配备了自动收集常见用户事件和属性（例如，屏幕查看和首次打开）的功能，以简化用户的数据收集过程。
 
@@ -132,7 +132,7 @@ struct YourApp: App {
     ```
 === "Objective-C"
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // 记录带有自定义参数的事件
     NSDictionary *attributes =@{
@@ -165,7 +165,7 @@ struct YourApp: App {
     ```
 === "Objective-C"
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     NSDictionary *attributes =@{
         @"channel": @"apple",
@@ -196,7 +196,7 @@ struct YourApp: App {
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // 当用户登录成功时设置
     [ClickstreamObjc setUserId:@"userId"];
@@ -222,7 +222,7 @@ struct YourApp: App {
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     NSDictionary *userAttributes =@{
         @"_user_age": @21,
@@ -235,7 +235,58 @@ struct YourApp: App {
 
 !!! info "重要提示"
 
-    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstrema SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
+    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
+
+#### 记录带有 Item 的事件
+
+您可以添加以下代码来记录带有 Item 的事件。
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+
+    let attributes: ClickstreamAttribute = [
+        ClickstreamAnalytics.Item.ITEM_ID: "123",
+        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        "event_category": "recommended"
+    ]
+    
+    let item_book: ClickstreamAttribute = [
+        ClickstreamAnalytics.Item.ITEM_ID: 123,
+        ClickstreamAnalytics.Item.ITEM_NAME: "Nature",
+        ClickstreamAnalytics.Item.ITEM_CATEGORY: "book",
+        ClickstreamAnalytics.Item.PRICE: 99.9,
+        "book_publisher": "Nature Research"
+    ]
+    ClickstreamAnalytics.recordEvent("view_item", attributes, [item_book])
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    @import Clickstream;
+    
+    NSDictionary *attributes = @{
+        ClickstreamItemKey.ITEM_ID: @"123",
+        ClickstreamItemKey.CURRENCY: @"USD",
+        "event_category": @"recommended"
+    };
+    NSDictionary *item_book = @{
+        ClickstreamItemKey.ITEM_ID: @123,
+        ClickstreamItemKey.ITEM_NAME: @"Nature",
+        ClickstreamItemKey.ITEM_CATEGORY: @"book",
+        ClickstreamItemKey.PRICE: @99.9,
+        "book_publisher": @"Nature Research"
+    };
+    [ClickstreamObjc recordEvent:@"view_item" :attributes, @[item_book]];
+    ```
+
+要记录 Item 中的更多属性，请参阅 [Item 属性](#item_1).
+
+!!! warning "重要提示"
+
+    数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 
 #### 实时发送事件
 
@@ -250,7 +301,7 @@ struct YourApp: App {
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     // 实时发送事件
     [ClickstreamObjc flushEvents];
     ```
@@ -274,7 +325,7 @@ struct YourApp: App {
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // 禁用 SDK
     [ClickstreamObjc disable];
@@ -311,7 +362,7 @@ struct YourApp: App {
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // 在初始化后更新SDK配置
     ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
@@ -381,18 +432,23 @@ Clickstream Swift SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称        | 建议         | 硬限制          | 超过限制的处理策略                               | 错误码     |
-|:----------|:-----------|:-------------|:----------------------------------------|:--------|
-| 事件名称合规    | --         | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001    |
-| 事件名称长度    | 25 个字符以下   | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002    |
-| 事件属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001    |
-| 属性名称合规    | --         | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002    |
-| 事件属性值的长度  | 少于 100 个字符 | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003    |
-| 每个事件的事件属性 | 50 属性以下    | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004    |
-| 用户属性数     | 25岁以下属性    | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001    |
-| 用户属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002    |
-| 用户属性名称合规  | --         | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003    |
-| 用户属性值的长度  | 50 个字符以下   | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004    |
+| 名称                | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码   |
+|:------------------|:-------------|:-------------|:----------------------------------------|:------|
+| 事件名称合规            | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001  |
+| 事件名称长度            | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002  |
+| 事件属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
+| 属性名称合规            | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
+| 事件属性值的长度          | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
+| 每个事件的事件属性         | 50 属性以下      | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
+| 用户属性数             | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
+| 用户属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
+| 用户属性名称合规          | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
+| 用户属性值的长度          | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004  |
+| 事件中 Item 的个数      | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001  |
+| Item 属性值的长度       | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002  |
+| 一个 Item 中自定义属性的个数 | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003  |
+| Item 属性名的长度       | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004  |
+| Item 属性名称合规       | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005  |
 
 !!! info "重要提示"
 
@@ -573,6 +629,27 @@ Clickstream Swift SDK 支持以下数据类型：
 | _session_number          | int      | 是      | 在所有事件中添加                                                 |
 | _screen_name             | String   | 是      | 在所有事件中添加                                                 |
 | _screen_unique_id        | String   | 是      | 在所有事件中添加                                                 |
+
+### Item 属性
+
+| 属性名           | 数据类型     | 是否必需 | 描述        |
+|---------------|----------|------|-----------|
+| id            | string   | 否    | item的id   |
+| name          | string   | 否    | item的名称   |
+| brand         | string   | 否    | item的品牌   |
+| currency      | string   | 否    | item的货币   |
+| price         | number   | 否    | item的价格   |
+| quantity      | string   | 否    | item的数量   |
+| creative_name | string   | 否    | item的创意名称 |
+| creative_slot | string   | 否    | item的创意槽  |
+| location_id   | string   | 否    | item的位置id |
+| category      | string   | 否    | item的类别   |
+| category2     | string   | 否    | item的类别2  |
+| category3     | string   | 否    | item的类别3  |
+| category4     | string   | 否    | item的类别4  |
+| category5     | string   | 否    | item的类别5  |
+
+您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
 
 ## SDK更新日志
 

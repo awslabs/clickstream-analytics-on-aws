@@ -42,6 +42,7 @@ interface IEventTableItem {
 }
 
 interface MetadataEventsTableProps {
+  analysisStudioEnabled: boolean;
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
 }
 
@@ -51,7 +52,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
   const { projectId, appId } = useParams();
   const { t } = useTranslation();
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
-  const { setShowDetails } = props;
+  const { setShowDetails, analysisStudioEnabled } = props;
 
   const renderEditNameCell = (
     item: IEventTableItem,
@@ -250,6 +251,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
 
   return (
     <MetadataTable
+      analysisStudioEnabled={analysisStudioEnabled}
       resourceName="Event"
       infoType={HelpPanelType.METADATA_EVENT_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}

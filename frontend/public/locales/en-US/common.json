@@ -3,6 +3,8 @@
   "info": "Info",
   "oops": "Oops...",
   "welcome": "Welcome to Clickstream Analytics on AWS",
+  "noEmailError": "The logged in user does not have an email address",
+  "unknownError": "Unknown error:",
   "breadCrumb": {
     "name": "Clickstream Analytics",
     "pipelines": "Pipelines",
@@ -180,6 +182,7 @@
     "createDashboard": "Create Dashboard",
     "deleteDashboard": "Delete Dashboard",
     "addEvent": "Add Event",
+    "addTouchPoint": "Add Touch Point",
     "addNode": "Add Node",
     "addFunnelStep": "Add Step",
     "addFilter": "Add Filter",
@@ -190,7 +193,8 @@
     "clearFiltersText": "Clear filters",
     "applyActionText": "Apply",
     "clear": "Clear",
-    "fullWindowView": "Full window view"
+    "fullWindowView": "Full window view",
+    "scanMetadata": "Scan metadata"
   },
   "item": "item",
   "items": "items",
@@ -200,6 +204,7 @@
     "status": "Status",
     "active": "Active",
     "failed": "Failed",
+    "deleted": "Deleted",
     "warning": "Warning",
     "creating": "Creating",
     "updating": "Updating",

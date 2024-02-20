@@ -3,6 +3,8 @@
   "info": "信息",
   "oops": "错误...",
   "welcome": "欢迎来到亚马逊云科技点击流分析解决方案",
+  "noEmailError": "登录的用户没有设置电子邮箱地址",
+  "unknownError": "未知错误: ",
   "breadCrumb": {
     "name": "点击流分析",
     "pipelines": "数据管道",
@@ -181,6 +183,7 @@
     "createDashboard": "创建仪表板",
     "deleteDashboard": "删除仪表板",
     "addEvent": "添加事件",
+    "addTouchPoint": "添加触点",
     "addNode": "添加节点",
     "addFunnelStep": "添加步骤",
     "addFilter": "添加条件",
@@ -191,7 +194,8 @@
     "clearFiltersText": "清除过滤器",
     "applyActionText": "应用",
     "clear": "清除",
-    "fullWindowView": "全窗口查看"
+    "fullWindowView": "全窗口查看",
+    "scanMetadata": "扫描元数据"
   },
   "item": "项目",
   "items": "项目",
@@ -201,6 +205,7 @@
     "status": "状态",
     "active": "活跃",
     "failed": "失败",
+    "deleted": "已删除",
     "warning": "警告",
     "creating": "正在创建",
     "updating": "正在更新",

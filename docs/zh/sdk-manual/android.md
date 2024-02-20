@@ -2,8 +2,7 @@
 
 ## 简介
 
-Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和报告应用内事件到 AWS。作为解决方案 {{ solution_name }}
-的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
+Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和发送应用内事件到您配置的解决方案数据管道。
 
 该 SDK 基于 Amplify for Android SDK 核心库开发，并根据 Amplify Android SDK 插件规范进行了扩展。此外，该 SDK
 还具有自动收集常见用户事件和属性（例如，屏幕查看和首次打开）的功能，以简化用户的数据收集过程。
@@ -20,7 +19,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.9.0'
+    implementation 'software.aws.solution:clickstream:0.10.1'
 }
 ```
 
@@ -150,7 +149,40 @@ api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更
 
 !!! info "重要提示"
 
-    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstrema SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
+    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
+
+#### 记录带有 Item 的事件
+
+您可以添加以下代码来记录带有 Item 的事件。
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytcs;
+import software.aws.solution.clickstream.ClickstreamItem;
+
+ClickstreamItem item_book = ClickstreamItem.builder()
+    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
+    .add(ClickstreamAnalytics.Item.ITEM_NAME, "Nature")
+    .add(ClickstreamAnalytics.Item.ITEM_CATEGORY, "book")
+    .add(ClickstreamAnalytics.Item.PRICE, 99)
+    .add("book_publisher", "Nature Research")
+    .build();
+
+ClickstreamEvent event = ClickstreamEvent.builder()
+    .name("view_item")
+    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
+    .add(ClickstreamAnalytics.Item.CURRENCY, "USD")
+    .add("event_category", "recommended")
+    .setItems(new ClickstreamItem[] {item_book})
+    .build();
+
+ClickstreamAnalytics.recordEvent(event);
+```
+
+要记录 Item 中的更多属性，请参阅 [Item 属性](#item_1).
+
+!!! warning "重要提示"
+
+    数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 
 #### 实时发送事件
 
@@ -202,19 +234,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 以下是每个方法的说明
 
-| 方法名                          | 参数类型 | 是否必需 | 默认值  | 描述                                               |
-| ------------------------------- | -------- | -------- | ------- | -------------------------------------------------- |
-| withAppId()                     | String   | 是       | --      | 在解决方案控制平面中您应用程序的 ID                |
-| withEndpoint()                  | String   | 是       | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
-| withAuthCookie()                | String   | 否       | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie         |
-| withSendEventsInterval()        | long     | 否       | 100000  | 事件发送间隔（毫秒）                               |
-| withSessionTimeoutDuration()    | long     | 否       | 1800000 | 会话超时的时长（毫秒）                             |
-| withTrackScreenViewEvents()     | boolean  | 否       | true    | 是否自动记录 screen view（屏幕浏览） 事件          |
-| withTrackUserEngagementEvents() | boolean  | 否       | true    | 是否自动记录 user engagement（用户参与） 事件      |
-| withTrackAppExceptionEvents()   | boolean  | 否       | true    | 是否自动记录应用崩溃事件                           |
-| withLogEvents()                 | boolean  | 否       | true    | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
-| withCustomDns()                 | String   | 否       | --      | 设置自定义 DNS 的方法, [了解更多](#dns)            |
-| withCompressEvents()            | boolean  | 否       | true    | 上传事件时是否通过gzip压缩事件内容                 |
+| 方法名                             | 参数类型     | 是否必需 | 默认值     | 描述                                |
+|---------------------------------|----------|------|---------|-----------------------------------|
+| withAppId()                     | String   | 是    | --      | 在解决方案控制平面中您应用程序的 ID               |
+| withEndpoint()                  | String   | 是    | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
+| withAuthCookie()                | String   | 否    | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
+| withSendEventsInterval()        | long     | 否    | 100000  | 事件发送间隔（毫秒）                        |
+| withSessionTimeoutDuration()    | long     | 否    | 1800000 | 会话超时的时长（毫秒）                       |
+| withTrackScreenViewEvents()     | boolean  | 否    | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
+| withTrackUserEngagementEvents() | boolean  | 否    | true    | 是否自动记录 user engagement（用户参与） 事件   |
+| withTrackAppExceptionEvents()   | boolean  | 否    | true    | 是否自动记录应用崩溃事件                      |
+| withLogEvents()                 | boolean  | 否    | false   | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
+| withCustomDns()                 | String   | 否    | --      | 设置自定义 DNS 的方法, [了解更多](#dns)       |
+| withCompressEvents()            | boolean  | 否    | true    | 上传事件时是否通过gzip压缩事件内容               |
 
 #### 调试事件
 
@@ -277,18 +309,23 @@ Clickstream Android SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称        | 建议         | 硬限制          | 超过限制的处理策略                               | 错误码   |
-|:----------|:-----------|:-------------|:----------------------------------------|:------|
-| 事件名称合规    | --         | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001  |
-| 事件名称长度    | 25 个字符以下   | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002  |
-| 事件属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
-| 属性名称合规    | --         | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
-| 事件属性值的长度  | 少于 100 个字符 | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
-| 每个事件的事件属性 | 50 属性以下    | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
-| 用户属性数     | 25岁以下属性    | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
-| 用户属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
-| 用户属性名称合规  | --         | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
-| 用户属性值的长度  | 50 个字符以下   | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004  |
+| 名称                | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码   |
+|:------------------|:-------------|:-------------|:----------------------------------------|:------|
+| 事件名称合规            | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001  |
+| 事件名称长度            | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002  |
+| 事件属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
+| 属性名称合规            | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
+| 事件属性值的长度          | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
+| 每个事件的事件属性         | 50 属性以下      | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
+| 用户属性数             | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
+| 用户属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
+| 用户属性名称合规          | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
+| 用户属性值的长度          | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004  |
+| 事件中 Item 的个数      | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001  |
+| Item 属性值的长度       | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002  |
+| 一个 Item 中自定义属性的个数 | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003  |
+| Item 属性名的长度       | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004  |
+| Item 属性名称合规       | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005  |
 
 !!! info "重要提示"
 
@@ -469,6 +506,27 @@ Clickstream Android SDK 支持以下数据类型：
 | _session_number          | int     | 是       | 在所有事件中添加                                                 |
 | _screen_name             | String  | 是       | 在所有事件中添加                                                 |
 | _screen_unique_id        | String  | 是       | 在所有事件中添加                                                 |
+
+### Item 属性
+
+| 属性名           | 数据类型     | 是否必需 | 描述        |
+|---------------|----------|------|-----------|
+| id            | string   | 否    | item的id   |
+| name          | string   | 否    | item的名称   |
+| brand         | string   | 否    | item的品牌   |
+| currency      | string   | 否    | item的货币   |
+| price         | number   | 否    | item的价格   |
+| quantity      | string   | 否    | item的数量   |
+| creative_name | string   | 否    | item的创意名称 |
+| creative_slot | string   | 否    | item的创意槽  |
+| location_id   | string   | 否    | item的位置id |
+| category      | string   | 否    | item的类别   |
+| category2     | string   | 否    | item的类别2  |
+| category3     | string   | 否    | item的类别3  |
+| category4     | string   | 否    | item的类别4  |
+| category5     | string   | 否    | item的类别5  |
+
+您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
 
 ## SDK更新日志
 

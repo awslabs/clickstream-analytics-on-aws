@@ -11,12 +11,25 @@
  *  and limitations under the License.
  */
 
+import { CfnResource, RemovalPolicy } from 'aws-cdk-lib';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { LogGroup, LogGroupClass, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../common/cfn-nag';
+import { POWERTOOLS_ENVS } from '../common/powertools';
+
+export interface SolutionNodejsFunctionProps extends Omit<NodejsFunctionProps, 'logRetention'> {
+  logConf?: {
+    retention?: RetentionDays;
+    removalPolicy?: RemovalPolicy;
+    logGroupClass?: LogGroupClass;
+  };
+}
 
 export class SolutionNodejsFunction extends NodejsFunction {
 
-  constructor(scope: Construct, id: string, props?: NodejsFunctionProps) {
+  constructor(scope: Construct, id: string, props?: SolutionNodejsFunctionProps) {
     super(scope, id, {
       ...props,
       bundling: props?.bundling ? {
@@ -25,6 +38,31 @@ export class SolutionNodejsFunction extends NodejsFunction {
       } : {
         externalModules: [],
       },
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.ARM_64,
+      environment: {
+        ...POWERTOOLS_ENVS,
+        ...(props?.environment ?? {}),
+      },
+      logGroup: props?.logGroup ?? getLogGroup(scope, id, props?.logConf),
+      logFormat: 'JSON',
+      applicationLogLevel: props?.applicationLogLevel ?? 'INFO',
     });
   }
+}
+
+function getLogGroup(scope: Construct, id: string, logConf?: {
+  retention?: RetentionDays;
+  removalPolicy?: RemovalPolicy;
+  logGroupClass?: LogGroupClass;
+}) {
+  const logGroup = new LogGroup(scope, `${id}-log`, {
+    removalPolicy: logConf?.removalPolicy ?? RemovalPolicy.DESTROY,
+    retention: logConf?.retention ?? RetentionDays.ONE_MONTH,
+    logGroupClass: logConf?.logGroupClass ?? LogGroupClass.STANDARD,
+  });
+  addCfnNagSuppressRules(logGroup.node.defaultChild as CfnResource, [
+    ruleToSuppressCloudWatchLogEncryption(),
+  ]);
+  return logGroup;
 }

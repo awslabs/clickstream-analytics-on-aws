@@ -15,7 +15,7 @@ import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
@@ -25,7 +25,6 @@ import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, ScanMe
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 import { WorkflowStatus } from '../private/constant';
 
@@ -77,7 +76,7 @@ export class ScanMetadataWorkflow extends Construct {
          *  You can also implement with the path stored in the state like:
          *  sfn.WaitTime.secondsPath('$.waitSeconds')
       */
-      time: WaitTime.duration(Duration.seconds(30)),
+      time: WaitTime.duration(Duration.seconds(60)),
     });
 
     const scanMetadataJobFailed = new Fail(this, `${this.node.id} - scan metadata job fails`, {
@@ -124,6 +123,7 @@ export class ScanMetadataWorkflow extends Construct {
       payload: TaskInput.fromObject({
         'lastJobStartTimestamp.$': '$.workflowInfo.Payload.jobStartTimestamp',
         'lastScanEndDate.$': '$.workflowInfo.Payload.scanEndDate',
+        'eventSource.$': '$.workflowInfo.Payload.eventSource',
       }),
       outputPath: '$.Payload',
     });
@@ -154,7 +154,7 @@ export class ScanMetadataWorkflow extends Construct {
         resultPath: '$.doScanMetadata',
       },
     );
-    doScanMetadataJob.iterator(scanMetaDataDefinition);
+    doScanMetadataJob.itemProcessor(scanMetaDataDefinition);
     doScanMetadataJob.next(updateWorkflowInfoJob);
 
     const doNothing = new Succeed(this, `${this.node.id} - Do Nothing`);
@@ -163,12 +163,23 @@ export class ScanMetadataWorkflow extends Construct {
       .when(Condition.isPresent('$.GetJobList.appIdList'), doScanMetadataJob)
       .otherwise(doNothing);
 
-    const getJobList = new Pass(this, `${this.node.id} - Get app_id`, {
+    const getAppListFromProps = new Pass(this, `${this.node.id} - Get app_id from props`, {
       parameters: {
         'appIdList.$': `States.StringSplit('${props.appIds}', ',')`,
       },
       resultPath: '$.GetJobList',
     }).next(checkJobExist);
+
+    const getJobListFromInput = new Pass(this, `${this.node.id} - Get app_id from input`, {
+      parameters: {
+        'appIdList.$': 'States.StringSplit($.appIdList, \',\')',
+      },
+      resultPath: '$.GetJobList',
+    }).next(checkJobExist);
+
+    const getAppIdList = new Choice(this, `${this.node.id} - Check if app_id list exists`)
+      .when(Condition.isPresent('$.appIdList'), getJobListFromInput)
+      .otherwise(getAppListFromProps);
 
     const checkWorkflowStartFn = this.checkWorkflowStartFn(props, bucket);
     const checkWorkflowStartJob = new LambdaInvoke(this, `${this.node.id} - Check whether scan metadata should start`, {
@@ -186,7 +197,7 @@ export class ScanMetadataWorkflow extends Construct {
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.FAILED), checkWorkflowStartJobFailed)
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.ABORTED), checkWorkflowStartJobFailed)
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.SKIP), checkWorkflowStartJobSKIP)
-          .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.CONTINUE), getJobList));
+          .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.CONTINUE), getAppIdList));
 
     // Create state machine
     const scanMetadataStateMachine = new StateMachine(this, 'ScanMetadataStateMachine', {
@@ -223,7 +234,6 @@ export class ScanMetadataWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckWorkflowStart', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-metadata-workflow-start.ts',
@@ -231,7 +241,9 @@ export class ScanMetadataWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckWorkflowStartRole', true, []),
       ...props.networkConfig,
@@ -241,8 +253,8 @@ export class ScanMetadataWorkflow extends Construct {
         PIPELINE_S3_PREFIX: props.scanMetadataWorkflowData.pipelineS3Prefix,
         WORKFLOW_MIN_INTERVAL: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         PROJECT_ID: props.projectId,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     bucket.grantRead(fn, `${props.scanMetadataWorkflowData.pipelineS3Prefix}*`);
@@ -252,7 +264,6 @@ export class ScanMetadataWorkflow extends Construct {
   private scanMetadataFn(props: ScanMetadataWorkflowProps): IFunction {
     const fnSG = props.securityGroupForLambda;
     const fn = new SolutionNodejsFunction(this, 'ScanMetadataFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'scan-metadata.ts',
@@ -260,7 +271,9 @@ export class ScanMetadataWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'ScanMetadataRole', true, []),
       ...props.networkConfig,
@@ -269,8 +282,8 @@ export class ScanMetadataWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         TOP_FREQUENT_PROPERTIES_LIMIT: props.scanMetadataWorkflowData.topFrequentPropertiesLimit,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -291,7 +304,6 @@ export class ScanMetadataWorkflow extends Construct {
     ];
 
     const fn = new SolutionNodejsFunction(this, 'UpdateWorkflowInfoFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'update-workflow-info.ts',
@@ -299,7 +311,9 @@ export class ScanMetadataWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'UpdateWorkflowInfoRole', true, policyStatements),
       ...props.networkConfig,
@@ -309,8 +323,8 @@ export class ScanMetadataWorkflow extends Construct {
         PIPELINE_S3_PREFIX: props.scanMetadataWorkflowData.pipelineS3Prefix,
         PROJECT_ID: props.projectId,
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     bucket.grantPut(fn, `${props.scanMetadataWorkflowData.pipelineS3Prefix}*`);
@@ -333,7 +347,6 @@ export class ScanMetadataWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckScanMetadataStatusFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-scan-metadata-status.ts',
@@ -341,7 +354,9 @@ export class ScanMetadataWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(2),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckScanMetadataStatusRole', true, []),
       ...props.networkConfig,
@@ -349,8 +364,8 @@ export class ScanMetadataWorkflow extends Construct {
       environment: {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -364,13 +379,15 @@ export class ScanMetadataWorkflow extends Construct {
         actions: [
           'dynamodb:BatchWriteItem',
           'dynamodb:BatchGetItem',
+          'dynamodb:GetItem',
+          'dynamodb:Query',
+          'dynamodb:PutItem',
         ],
         resources: [props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn],
       }),
     ];
 
     const fn = new SolutionNodejsFunction(this, 'StoreMetadataIntoDDBFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'store-metadata-into-ddb.ts',
@@ -378,7 +395,9 @@ export class ScanMetadataWorkflow extends Construct {
       handler: 'handler',
       memorySize: 1024,
       timeout: Duration.minutes(15),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'StoreMetadataIntoDDBRole', true, policyStatements),
       ...props.networkConfig,
@@ -387,8 +406,8 @@ export class ScanMetadataWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;

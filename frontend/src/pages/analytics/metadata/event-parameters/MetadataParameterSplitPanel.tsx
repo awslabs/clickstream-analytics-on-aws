@@ -18,7 +18,6 @@ import {
   FormField,
   SpaceBetween,
   SplitPanel,
-  StatusIndicator,
   Tabs,
   TextContent,
   Textarea,
@@ -33,7 +32,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types';
 import {
+  alertMsg,
   defaultStr,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
@@ -162,6 +163,8 @@ const MetadataParameterSplitPanel: React.FC<
         });
       if (success) {
         setParameterDetails(data);
+        setPrevDisplayName(data.displayName);
+        setPrevDesc(data.description);
         setLoadingData(false);
       }
     } catch (error) {
@@ -250,6 +253,15 @@ const MetadataParameterSplitPanel: React.FC<
                             loading={loadingUpdateDisplayName}
                             variant="primary"
                             onClick={() => {
+                              if (
+                                parameterDetails.metadataSource ===
+                                MetadataSource.PRESET
+                              ) {
+                                alertMsg(
+                                  t('analytics:valid.metadataNotAllowEditError')
+                                );
+                                return;
+                              }
                               updateEventInfo('displayName');
                             }}
                           >
@@ -332,6 +344,15 @@ const MetadataParameterSplitPanel: React.FC<
                           loading={loadingUpdateDesc}
                           variant="primary"
                           onClick={() => {
+                            if (
+                              parameterDetails.metadataSource ===
+                              MetadataSource.PRESET
+                            ) {
+                              alertMsg(
+                                t('analytics:valid.metadataNotAllowEditError')
+                              );
+                              return;
+                            }
                             updateEventInfo('description');
                           }}
                         >
@@ -341,18 +362,6 @@ const MetadataParameterSplitPanel: React.FC<
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('analytics:metadata.eventParameter.tableColumnHasData')}
-              </Box>
-              <div className="mb-10">
-                <StatusIndicator
-                  type={parameter.hasData ? 'success' : 'stopped'}
-                >
-                  {parameter.hasData ? 'Yes' : 'No'}
-                </StatusIndicator>
               </div>
             </div>
           </ColumnLayout>

@@ -23,6 +23,8 @@ export enum HelpPanelType {
   EXPLORE_FUNNEL_INFO = 'EXPLORE_FUNNEL_INFO',
   EXPLORE_PATH_INFO = 'EXPLORE_PATH_INFO',
   EXPLORE_RETENTION_INFO = 'EXPLORE_RETENTION_INFO',
+  EXPLORE_ATTRIBUTION_INFO = 'EXPLORE_ATTRIBUTION_INFO',
+  EXPLORE_ATTRIBUTION_MODEL_INFO = 'EXPLORE_ATTRIBUTION_MODEL_INFO',
   ANALYTICS_ANALYZES = 'ANALYTICS_ANALYZES_INFO',
   ANALYTICS_METADATA = 'ANALYTICS_METADATA',
   METADATA_EVENT_INFO = 'METADATA_EVENT_INFO',
@@ -40,6 +42,7 @@ export interface IState {
 }
 
 export enum StateActionType {
+  CLEAR_HELP_PANEL = 'CLEAR_HELP_PANEL',
   SHOW_HELP_PANEL = 'SHOW_HELP_PANEL',
   HIDE_HELP_PANEL = 'HIDE_HELP_PANEL',
   RESET_VALID_ERROR = 'RESET_VALID_ERROR',
@@ -61,6 +64,13 @@ export const initialState: IState = {
 
 export const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
+    case StateActionType.CLEAR_HELP_PANEL: {
+      return {
+        ...state,
+        helpPanelType: HelpPanelType.NONE,
+        showHelpPanel: false,
+      };
+    }
     case StateActionType.SHOW_HELP_PANEL: {
       return { ...state, showHelpPanel: true, helpPanelType: action.payload };
     }

@@ -1,0 +1,64 @@
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
+BACKUP NO
+SORTKEY(first_date)
+AUTO REFRESH NO
+AS
+WITH user_first_date AS (
+  SELECT
+    user_pseudo_id,
+    min(event_date) as first_date
+  FROM {{schema}}.event
+  GROUP BY user_pseudo_id
+),
+
+retention_data AS (
+SELECT
+    user_pseudo_id,
+    first_date,
+    DATE_DIFF('day', first_date, event_date) AS day_diff
+  FROM {{schema}}.event
+  JOIN user_first_date USING (user_pseudo_id)
+),
+
+retention_counts AS (
+  select 
+    first_date,
+    day_diff,
+    COUNT(user_pseudo_id) AS returned_user_count
+  from (
+    SELECT
+      first_date,
+      day_diff,
+      user_pseudo_id
+    FROM retention_data
+    WHERE day_diff <= 42 -- Calculate retention rate for the last 42 days
+    GROUP BY first_date, day_diff, user_pseudo_id
+  ) t1
+  GROUP BY first_date, day_diff
+),
+
+total_users AS (
+  SELECT
+    first_date,
+    COUNT(user_pseudo_id) AS total_users
+  FROM (
+    select 
+      first_date,
+      user_pseudo_id
+    from user_first_date group by 1,2
+  ) t2
+  group by 1
+),
+
+retention_rate AS (
+  SELECT
+    first_date,
+    day_diff,
+    returned_user_count,
+    total_users
+  FROM retention_counts join total_users using(first_date)
+)
+
+SELECT
+*
+FROM retention_rate;

@@ -12,6 +12,7 @@
  */
 
 import {
+  Aspects,
   CfnCondition,
   CfnOutput,
   CfnStack,
@@ -25,6 +26,7 @@ import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
 import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
@@ -33,12 +35,15 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   TABLE_NAME_EVENT,
   TABLE_NAME_EVENT_PARAMETER,
   TABLE_NAME_USER,
   TABLE_NAME_ITEM,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from './common/constant';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -76,6 +81,12 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -125,6 +136,7 @@ export function createRedshiftAnalyticsStack(
     tablesOdsSource,
     loadDataConfig,
     workflowBucketInfo,
+    mvRefreshInterval: props.redshift.mvRefreshInterval,
 
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
@@ -236,17 +248,17 @@ export function createRedshiftAnalyticsStack(
     condition: isNewRedshiftServerless,
   }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME);
   new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: newRedshiftServerlessStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isNewRedshiftServerless,
   }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftExistingServerlessStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftProvisionedStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isRedshiftProvisioned,
   }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
@@ -282,6 +294,39 @@ export function createRedshiftAnalyticsStack(
     description: 'Redshift data api role arn',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`);
+
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: redshiftProvisionedStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isRedshiftProvisioned,
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: newRedshiftServerlessStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isNewRedshiftServerless,
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: redshiftExistingServerlessStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isExistingRedshiftServerless,
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
+
+  // add scan metadata workflow arn in stack output for manually trigger scan metadata workflow
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
+    value: redshiftProvisionedStack.scanMetadataWorkflowArn,
+    description: 'Scan metadata workflow stepfunction arn',
+    condition: isRedshiftProvisioned,
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
+    value: newRedshiftServerlessStack.scanMetadataWorkflowArn,
+    description: 'Scan metadata workflow stepfunction arn',
+    condition: isNewRedshiftServerless,
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
+    value: redshiftExistingServerlessStack.scanMetadataWorkflowArn,
+    description: 'Scan metadata workflow stepfunction arn',
+    condition: isExistingRedshiftServerless,
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

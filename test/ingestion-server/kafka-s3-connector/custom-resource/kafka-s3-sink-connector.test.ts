@@ -182,7 +182,7 @@ process.env.LOG_LEVEL = 'WARN';
 
 import { handler as msk_sink_handler } from '../../../../src/ingestion-server/kafka-s3-connector/custom-resource/kafka-s3-sink-connector';
 
-test('Create connector, there is exsiting connector', async () => {
+test('Create connector, there is existing connector', async () => {
   KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
     if (command.command == 'CreateConnectorCommand') {
       throw new Error(

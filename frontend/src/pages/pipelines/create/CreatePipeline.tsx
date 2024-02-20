@@ -23,6 +23,7 @@ import {
   getCertificates,
   getMSKList,
   getRedshiftCluster,
+  getS3BucketList,
   getSSMSecrets,
   getSecurityGroups,
   getSubnetList,
@@ -43,6 +44,8 @@ import {
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
   DEFAULT_TRANSFORM_SDK_IDS,
+  EIngestionType,
+  ENetworkType,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -111,6 +114,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [regionEmptyError, setRegionEmptyError] = useState(false);
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
+  const [tagsKeyValueEmptyError, setTagsKeyValueEmptyError] = useState(false);
   const [assetsBucketEmptyError, setAssetsBucketEmptyError] = useState(false);
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
@@ -188,6 +192,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     useState(false);
 
   const [unSupportedServices, setUnSupportedServices] = useState('');
+  const [quickSightDisabled, setQuickSightDisabled] = useState(false);
 
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>(
     updatePipeline
@@ -232,14 +237,27 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setAssetsBucketEmptyError(true);
       return false;
     }
+    if (
+      pipelineInfo.tags.some(
+        (tag) =>
+          !tag.key ||
+          tag.key.trim() === '' ||
+          !tag.value ||
+          tag.value.trim() === ''
+      )
+    ) {
+      setTagsKeyValueEmptyError(true);
+      return false;
+    }
     return true;
   };
 
   const validateIngestionSubnets = () => {
     // Validate public subnets
     if (
-      pipelineInfo.selectedPublicSubnet.length < 2 ||
-      !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2)
+      pipelineInfo.network.type !== ENetworkType.Private &&
+      (pipelineInfo.selectedPublicSubnet.length < 2 ||
+        !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2))
     ) {
       setPublicSubnetError(true);
       return false;
@@ -256,6 +274,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
     // Validate private subnet in the same AZ with public subnets
     if (
+      pipelineInfo.network.type !== ENetworkType.Private &&
       !validatePublicSubnetInSameAZWithPrivateSubnets(
         pipelineInfo.selectedPublicSubnet,
         pipelineInfo.selectedPrivateSubnet
@@ -782,67 +801,19 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             data,
             'quicksight'
           );
-          if (update) {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                serviceStatus: {
-                  AGA: agaAvailable,
-                  EMR_SERVERLESS: emrAvailable,
-                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
-                  MSK: mskAvailable,
-                  QUICK_SIGHT: quickSightAvailable,
-                },
-              };
-            });
-          } else {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                serviceStatus: {
-                  AGA: agaAvailable,
-                  EMR_SERVERLESS: emrAvailable,
-                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
-                  MSK: mskAvailable,
-                  QUICK_SIGHT: quickSightAvailable,
-                },
-                // Below to set resources to empty by regions
-                selectedVPC: null,
-                selectedPublicSubnet: [],
-                selectedPrivateSubnet: [],
-                selectedSecret: null, // clear secret
-                selectedCertificate: null, // clear certificates
-                showServiceStatus: false,
-                redshiftBaseCapacity: null,
-                redshiftServerlessSG: [],
-                redshiftServerlessVPC: null,
-                redshiftServerlessSubnets: [],
-                ingestionServer: {
-                  ...prev.ingestionServer,
-                  sinkS3: {
-                    // set sink s3 to null
-                    ...prev.ingestionServer.sinkS3,
-                    sinkBucket: {
-                      name: '',
-                      prefix: '',
-                    },
-                  },
-                  domain: {
-                    ...prev.ingestionServer.domain,
-                    certificateArn: '', // set certificate arn to empty
-                  },
-                  loadBalancer: {
-                    ...prev.ingestionServer.loadBalancer,
-                    authenticationSecretArn: '', // set secret value to null
-                    logS3Bucket: {
-                      ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                      name: '',
-                    },
-                  },
-                },
-              };
-            });
-
+          setPipelineInfo((prev) => {
+            return {
+              ...prev,
+              serviceStatus: {
+                AGA: agaAvailable,
+                EMR_SERVERLESS: emrAvailable,
+                REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
+                MSK: mskAvailable,
+                QUICK_SIGHT: quickSightAvailable,
+              },
+            };
+          });
+          if (!update) {
             // Set show alert information when has unsupported services
             const unSupportedServiceList = data.filter(
               (service) => !service.available
@@ -963,6 +934,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'selectedRegion',
       'selectedVPC',
       'selectedSDK',
+      'selectedS3Bucket',
       'selectedPublicSubnet',
       'selectedPrivateSubnet',
       'enableEdp',
@@ -1038,6 +1010,48 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   // Monitor Region Changed and validate Service Available
   useEffect(() => {
     if (pipelineInfo.region) {
+      if (!update) {
+        setPipelineInfo((prev) => {
+          return {
+            ...prev,
+            // Below to set resources to empty by regions
+            selectedVPC: null,
+            selectedS3Bucket: null,
+            selectedPublicSubnet: [],
+            selectedPrivateSubnet: [],
+            selectedSecret: null, // clear secret
+            selectedCertificate: null, // clear certificates
+            showServiceStatus: false,
+            redshiftBaseCapacity: null,
+            redshiftServerlessSG: [],
+            redshiftServerlessVPC: null,
+            redshiftServerlessSubnets: [],
+            ingestionServer: {
+              ...prev.ingestionServer,
+              sinkS3: {
+                // set sink s3 to null
+                ...prev.ingestionServer.sinkS3,
+                sinkBucket: {
+                  name: '',
+                  prefix: '',
+                },
+              },
+              domain: {
+                ...prev.ingestionServer.domain,
+                certificateArn: '', // set certificate arn to empty
+              },
+              loadBalancer: {
+                ...prev.ingestionServer.loadBalancer,
+                authenticationSecretArn: '', // set secret value to null
+                logS3Bucket: {
+                  ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                  name: '',
+                },
+              },
+            },
+          };
+        });
+      }
       validServiceAvailable(pipelineInfo.region);
     }
   }, [pipelineInfo.region]);
@@ -1065,6 +1079,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           return;
         }
         if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
+          return;
+        }
+        if (
+          detail.requestedStepIndex === 4 &&
+          quickSightDisabled &&
+          pipelineInfo.enableReporting
+        ) {
           return;
         }
         setActiveStepIndex(detail.requestedStepIndex);
@@ -1096,6 +1117,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               regionEmptyError={regionEmptyError}
               vpcEmptyError={vpcEmptyError}
               sdkEmptyError={sdkEmptyError}
+              tagsKeyValueEmptyError={tagsKeyValueEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
               loadingServiceAvailable={loadingServiceAvailable}
@@ -1155,9 +1177,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
+                    selectedS3Bucket: bucket,
                     bucket: {
                       ...prev.bucket,
-                      name: bucket,
+                      name: defaultStr(bucket.value),
                     },
                     ingestionServer: {
                       ...prev.ingestionServer,
@@ -1165,21 +1188,21 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.ingestionServer.loadBalancer,
                         logS3Bucket: {
                           ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                       sinkKinesis: {
                         ...prev.ingestionServer.sinkKinesis,
                         sinkBucket: {
                           ...prev.ingestionServer.sinkKinesis.sinkBucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
                         sinkBucket: {
                           ...prev.ingestionServer.sinkS3.sinkBucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                     },
@@ -1187,21 +1210,22 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.dataProcessing,
                       sourceS3Bucket: {
                         ...prev.dataProcessing.sourceS3Bucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                       sinkS3Bucket: {
                         ...prev.dataProcessing.sinkS3Bucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                       pipelineBucket: {
                         ...prev.dataProcessing.pipelineBucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                     },
                   };
                 });
               }}
               changeTags={(tags) => {
+                setTagsKeyValueEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1243,6 +1267,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               kafkaSGEmptyError={kafkaSGEmptyError}
               bufferKDSModeEmptyError={bufferKDSModeEmptyError}
               bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
+              changeNetworkType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    network: {
+                      ...prev.network,
+                      type: type,
+                    },
+                  };
+                });
+              }}
               changePublicSubnets={(subnets) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
@@ -1270,6 +1305,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       privateSubnetIds: subnets.map((element) =>
                         defaultStr(element.value)
                       ),
+                    },
+                  };
+                });
+              }}
+              changeIngestionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      ingestionType: type,
                     },
                   };
                 });
@@ -2094,6 +2140,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeLoadingQuickSight={(loading) => {
                 setloadingQuickSight(loading);
               }}
+              changeQuickSightDisabled={(disabled) => {
+                setQuickSightDisabled(disabled);
+              }}
               changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {
                   return {
@@ -2137,7 +2186,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 ) => {
   const { t } = useTranslation();
   const { update } = props;
-  const { id, pid } = useParams();
+  const { pid } = useParams();
 
   const [loadingData, setLoadingData] = useState(true);
   const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
@@ -2186,6 +2235,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     pipelineInfo.selectedSDK = SDK_LIST.filter(
       (sdk) => sdk.value === pipelineInfo.dataCollectionSDK
     )[0];
+  };
+  const setUpdateS3Bucket = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<S3Response[]> =
+        await getS3BucketList(pipelineInfo.region);
+      if (success) {
+        const selectedS3Bucket = data.filter(
+          (element) => element.name === pipelineInfo.bucket.name
+        )[0];
+        pipelineInfo.selectedS3Bucket = {
+          label: selectedS3Bucket.name,
+          value: selectedS3Bucket.name,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   const setUpdateSubnetList = async (pipelineInfo: IExtPipeline) => {
     try {
@@ -2340,10 +2406,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         });
       if (success) {
         pipelineInfo.selectedTransformPlugins = data.items.filter(
-          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin
+          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin.id
+        );
+        const enrichPluginIds = pipelineInfo.dataProcessing.enrichPlugin.map(
+          (item) => item.id
         );
         pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
-          pipelineInfo.dataProcessing.enrichPlugin.includes(defaultStr(item.id))
+          enrichPluginIds.includes(defaultStr(item.id))
         );
       }
     } catch (error) {
@@ -2536,12 +2605,20 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           data.network.privateSubnetIds,
           []
         ),
+        type: defaultStr(
+          data.network.type,
+          ENetworkType.General
+        ) as ENetworkType,
       },
       bucket: {
         name: defaultStr(data.bucket?.name),
         prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
+        ingestionType: defaultStr(
+          data.ingestionServer.ingestionType,
+          EIngestionType.EC2
+        ) as EIngestionType,
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,
@@ -2604,21 +2681,34 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
         sinkType: defaultStr(data.ingestionServer.sinkType, SinkType.MSK),
         sinkBatch: {
-          size: data.ingestionServer.sinkBatch?.size ?? 50000,
-          intervalSeconds:
-            data.ingestionServer.sinkBatch?.intervalSeconds ?? 3000,
+          size: defaultGenericsValue(
+            data.ingestionServer.sinkBatch?.size,
+            50000
+          ),
+          intervalSeconds: defaultGenericsValue(
+            data.ingestionServer.sinkBatch?.intervalSeconds,
+            3000
+          ),
         },
         sinkS3: {
           sinkBucket: {
             name: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.name),
             prefix: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.prefix),
           },
-          s3BufferSize: data.ingestionServer.sinkS3?.s3BufferSize ?? 10,
-          s3BufferInterval:
-            data.ingestionServer.sinkS3?.s3BufferInterval ?? 300,
+          s3BufferSize: defaultGenericsValue(
+            data.ingestionServer.sinkS3?.s3BufferSize,
+            10
+          ),
+          s3BufferInterval: defaultGenericsValue(
+            data.ingestionServer.sinkS3?.s3BufferInterval,
+            300
+          ),
         },
         sinkKafka: {
-          brokers: data.ingestionServer.sinkKafka?.brokers ?? [],
+          brokers: defaultGenericsValue(
+            data.ingestionServer.sinkKafka?.brokers,
+            []
+          ),
           topic: defaultStr(data.ingestionServer.sinkKafka?.topic),
           securityGroupId: defaultStr(
             data.ingestionServer.sinkKafka?.securityGroupId
@@ -2636,8 +2726,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           kinesisStreamMode: defaultStr(
             data.ingestionServer.sinkKinesis?.kinesisStreamMode
           ),
-          kinesisShardCount:
-            data.ingestionServer.sinkKinesis?.kinesisShardCount ?? 2,
+          kinesisShardCount: defaultGenericsValue(
+            data.ingestionServer.sinkKinesis?.kinesisShardCount,
+            2
+          ),
           sinkBucket: {
             name: defaultStr(data.ingestionServer.sinkKinesis?.sinkBucket.name),
             prefix: defaultStr(
@@ -2647,7 +2739,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
       },
       dataProcessing: {
-        dataFreshnessInHour: data.dataProcessing?.dataFreshnessInHour ?? 72,
+        dataFreshnessInHour: defaultGenericsValue(
+          data.dataProcessing?.dataFreshnessInHour,
+          72
+        ),
         scheduleExpression: defaultStr(data.dataProcessing?.scheduleExpression),
         sourceS3Bucket: {
           name: defaultStr(data.dataProcessing?.sourceS3Bucket?.name),
@@ -2662,23 +2757,26 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           prefix: defaultStr(data.dataProcessing?.pipelineBucket?.prefix),
         },
         transformPlugin: defaultStr(data.dataProcessing?.transformPlugin),
-        enrichPlugin: data.dataProcessing?.enrichPlugin ?? [],
+        enrichPlugin: defaultGenericsValue(
+          data.dataProcessing?.enrichPlugin,
+          []
+        ),
       },
       dataModeling: {
         athena: data.dataModeling?.athena ?? false,
         redshift: {
-          dataRange: data.dataModeling?.redshift?.dataRange ?? 0,
+          dataRange: defaultGenericsValue(
+            data.dataModeling?.redshift?.dataRange,
+            0
+          ),
           provisioned: data.dataModeling?.redshift?.provisioned ?? null,
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
-      status: {
-        status: defaultStr(data.status?.status),
-        stackDetails: data.status?.stackDetails ?? [],
-      },
+      statusType: data.statusType,
+      stackDetails: defaultGenericsValue(data.stackDetails, []),
+      executionDetail: data.executionDetail,
       workflow: data.workflow,
-      executionName: data.executionName,
-      executionArn: data.executionArn,
       version: defaultStr(data.version),
       versionTag: defaultStr(data.versionTag),
       createAt: defaultGenericsValue(data.createAt, 0),
@@ -2702,9 +2800,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         setLoadingData(true);
         const { success, data }: ApiResponse<IExtPipeline> =
           await getPipelineDetail({
-            id: defaultStr(id),
-            pid: defaultStr(pid),
-            cache: true,
+            projectId: defaultStr(pid),
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);
@@ -2712,6 +2808,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
             setUpdateRegion(extPipeline),
             setUpdateVpc(extPipeline),
             setUpdateSDK(extPipeline),
+            setUpdateS3Bucket(extPipeline),
             setUpdateSubnetList(extPipeline),
             setUpdateCetificate(extPipeline),
             setUpdateSSMSecret(extPipeline),

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.split;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
@@ -57,7 +58,7 @@ public class IPEnrichment {
         ));
         Dataset<Row> ipEnrichDataset = dataset.withColumn("geo",
                 udfEnrichIP.apply(
-                        col(GEO_FOR_ENRICH).getItem("ip"),
+                        split(col(GEO_FOR_ENRICH).getItem("ip"), ",").getItem(0),
                         col(GEO_FOR_ENRICH).getItem("locale")
                 )).drop(GEO_FOR_ENRICH);
 

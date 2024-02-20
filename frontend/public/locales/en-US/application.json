@@ -47,7 +47,8 @@
     "iosInitSDKDesc": "Once you have configured the parameters, you need to initialize it in the AppDelegate application() method to use the SDK.",
     "webInstallSDK": "1. Install Clickstream SDK",
     "webInstallSDKDesc": "Please use npm or a module bundler to install the Clickstream SDK.",
-    "webSDKSetupDesc": "Add the initialize code to your app's root entry point, for example index.js/app.tsx in React or main.ts in Vue/Angular."
+    "webSDKSetupDesc": "Add the initialize code to your app's root entry point, for example index.js/app.tsx in React or main.ts in Vue/Angular.",
+    "flutterSDKSetupDesc": "Copy your configuration code from your clickstream solution web console, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console."
   },
   "detail": {
     "basicInfo": "Basic Information",
@@ -55,6 +56,7 @@
     "android": "Android",
     "ios": "iOS",
     "web": "Web",
+    "flutter": "Flutter",
     "pipelineInfo": "Pipeline Information",
     "serverEdp": "Server Endpoint",
     "serverDomain": "Server Domain"

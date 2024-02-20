@@ -11,8 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, ListClustersV2Command, paginateListNodes, NodeInfo, ClientAuthentication } from '@aws-sdk/client-kafka';
-import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
+import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, paginateListNodes, NodeInfo, ClientAuthentication } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { MSKCluster } from '../../common/types';
@@ -106,31 +105,6 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
   }
   return nodeEndpoints;
 
-};
-
-export const mskPing = async (region: string): Promise<boolean> => {
-  try {
-    const kafkaClient = new KafkaClient({
-      ...aws_sdk_client_common_config,
-      maxAttempts: 1,
-      region,
-    });
-    const params: ListClustersV2Command = new ListClustersV2Command({});
-    await kafkaClient.send(params);
-    const kafkaConnectClient = new KafkaConnectClient({
-      ...aws_sdk_client_common_config,
-      maxAttempts: 1,
-      region,
-    });
-    const paramsConnect: ListConnectorsCommand = new ListConnectorsCommand({});
-    await kafkaConnectClient.send(paramsConnect);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
-      return false;
-    }
-  }
-  return true;
 };
 
 function _getAuthenticationMethods(clientAuth?: ClientAuthentication) {

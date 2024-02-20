@@ -17,7 +17,7 @@ import { UserContext } from 'context/UserContext';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { ANALYTICS_NAV_STATUS } from 'ts/const';
+import { ANALYTICS_NAV_ITEM, ANALYTICS_NAV_STATUS } from 'ts/const';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,
@@ -31,6 +31,7 @@ interface INavigationProps {
 interface IAnalyticsItemType {
   text: string | null;
   href: string;
+  value: string;
   icon?: any;
 }
 
@@ -44,10 +45,12 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   const [isExpanded, setIsExpanded] = useState<boolean>(
     localStorage.getItem(ANALYTICS_NAV_STATUS) === 'close' ? false : true
   );
-
   const toggleNavigation = () => {
     localStorage.setItem(ANALYTICS_NAV_STATUS, isExpanded ? 'close' : 'open');
     setIsExpanded(!isExpanded);
+  };
+  const onChangeNavItem = (item: string) => {
+    localStorage.setItem(ANALYTICS_NAV_ITEM, item);
   };
 
   const analyticsNavItems: IAnalyticsItemType[] = [
@@ -55,21 +58,25 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       text: t('nav.analytics.dashboards'),
       icon: <ExtendIcon icon="BsKanban" />,
       href: `/analytics/${projectId}/app/${appId}/dashboards`,
+      value: 'dashboards',
     },
     {
       text: t('nav.analytics.explore'),
       icon: <ExtendIcon icon="BsFunnel" />,
       href: `/analytics/${projectId}/app/${appId}/explore`,
+      value: 'explore',
     },
     {
       text: t('nav.analytics.analyzes'),
       icon: <ExtendIcon icon="BsPencilSquare" />,
       href: `/analytics/${projectId}/app/${appId}/analyzes`,
+      value: 'analyzes',
     },
     {
       text: t('nav.analytics.data-management'),
       icon: <ExtendIcon icon="BsTagsFill" />,
       href: `/analytics/${projectId}/app/${appId}/data-management`,
+      value: 'data-management',
     },
   ];
 
@@ -90,7 +97,13 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
             title={defaultStr(item.text)}
             aria-labelledby={defaultStr(item.text)}
           >
-            <Link to={item.href} aria-labelledby={defaultStr(item.text)}>
+            <Link
+              to={item.href}
+              aria-labelledby={defaultStr(item.text)}
+              onClick={() => {
+                onChangeNavItem(item.value);
+              }}
+            >
               <span className="icon" aria-labelledby={defaultStr(item.text)}>
                 {item.icon}
               </span>

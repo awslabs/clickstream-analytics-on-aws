@@ -2,55 +2,16 @@
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
   "event_timestamp" : 1682319109442,
-  "user_id" : "p3121211_ts1",
+  "user_id" : null,
   "user_pseudo_id" : "uu_p3121211_ts1",
   "user_first_touch_timestamp" : 1667877267895,
-  "user_properties" : [ {
-    "key" : "_user_id",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "p3121211_ts1",
-      "set_timestamp_micros" : 1667877566697000
-    }
-  }, {
-    "key" : "_user_name",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "example",
-      "set_timestamp_micros" : 1667877566697000
-    }
-  }, {
-    "key" : "_user_age",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : 20,
-      "string_value" : null,
-      "set_timestamp_micros" : 1667877566697000
-    }
-  }, {
-    "key" : "_user_first_touch_timestamp",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : 1667877267895,
-      "string_value" : null,
-      "set_timestamp_micros" : 1667877566697000
-    }
-  } ],
-  "user_ltv" : {
-    "revenue" : 123.45,
-    "currency" : "USD"
-  },
+  "user_properties" : null,
+  "user_ltv" : null,
   "_first_visit_date" : "2022-11-08",
   "_first_referer" : null,
   "_first_traffic_source_type" : "TSN1",
   "_first_traffic_medium" : "TSM1",
   "_first_traffic_source" : "TSS1",
-  "device_id_list" : [ "deviceid-1", "deviceid-2" ],
+  "device_id_list" : null,
   "_channel" : null
 }

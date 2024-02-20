@@ -11,20 +11,23 @@
  *  and limitations under the License.
  */
 
-import { Annotations, App, Aspects, IAspect, Stack } from 'aws-cdk-lib';
-import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture } from '@aws-sdk/client-lambda';
+import { Annotations, App, Aspects, CfnCondition, Fn, IAspect, Stack } from 'aws-cdk-lib';
+import { CfnFunction, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
 import { IConstruct } from 'constructs';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
+import { commonCdkNagRules } from './common/cfn-nag';
 import { SolutionInfo } from './common/solution-info';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
 import { DataReportingQuickSightStack } from './data-reporting-quicksight-stack';
 import { IngestionServerStack } from './ingestion-server-stack';
+import { IngestionServerStackV2 } from './ingestion-server-v2-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
@@ -38,125 +41,123 @@ function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) 
   });
 }
 
-const commonSuppresionRulesForALBLambdaPattern = [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
-];
+if (!(/true/i).test(app.node.tryGetContext('ignoreWebConsoleSynth'))) {
+  const commonSuppressionRulesForALBLambdaPattern = [
+    { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
+    { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
+  ];
+
+  stackSuppressions([
+    new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: false,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+    new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForALBLambdaPattern);
+
+
+  stackSuppressions([
+    new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: false,
+      useCustomDomain: false,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+    new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-cognito-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: false,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForALBLambdaPattern);
+
+  const commonSuppressionRulesForCloudFrontS3Pattern = [
+    { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+    { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+    { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
+    { id: 'AwsSolutions-COG4', reason: 'The REST API validate input via OIDC authorizer, there is no need to use Cognito user pool authorizer.' },
+  ];
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
+      targetToCNRegions: true,
+      useCustomDomainName: true,
+      synthesizer: synthesizer(),
+    }),
+  ], [
+    ...commonSuppressionRulesForCloudFrontS3Pattern,
+    { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
+  ]);
+
+  const commonSuppressionRulesForCloudFrontS3PatternInGlobal = [
+    ...commonSuppressionRulesForCloudFrontS3Pattern,
+    { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+    { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
+  ];
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+      synthesizer: synthesizer(),
+    }),
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForCloudFrontS3PatternInGlobal);
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
+      useCustomDomainName: true,
+      synthesizer: synthesizer(),
+    }),
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain-oidc', {
+      useCustomDomainName: true,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+  ], [
+    ...commonSuppressionRulesForCloudFrontS3PatternInGlobal,
+    { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
+  ]);
+}
 
 stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: true,
-    useCustomDomain: false,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: true,
-    useCustomDomain: true,
-    useExistingOIDCProvider: false,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppresionRulesForALBLambdaPattern);
-
-
-stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: false,
-    useCustomDomain: false,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-cognito-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: false,
-    useCustomDomain: true,
-    useExistingOIDCProvider: false,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppresionRulesForALBLambdaPattern);
-
-const commonSuppressionRulesForCloudFrontS3Pattern = [
-  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
-  { id: 'AwsSolutions-COG4', reason: 'The REST API validate input via OIDC authorizer, there is no need to use Cognito user pool authorizer.' },
-];
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
-    targetToCNRegions: true,
-    useCustomDomainName: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  ...commonSuppressionRulesForCloudFrontS3Pattern,
-  { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
-]);
-
-const commonSuppressionRulesForCloudFrontS3PatternInGlobal = [
-  ...commonSuppressionRulesForCloudFrontS3Pattern,
-  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
-  { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
-];
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
-    synthesizer: synthesizer(),
-  }),
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppressionRulesForCloudFrontS3PatternInGlobal);
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
-    useCustomDomainName: true,
-    synthesizer: synthesizer(),
-  }),
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain-oidc', {
-    useCustomDomainName: true,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  ...commonSuppressionRulesForCloudFrontS3PatternInGlobal,
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
-]);
-
-stackSuppressions([
-  new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToKafkaStackName') ?? 'ingestion-server-kafka-stack', { //To Kafka
     synthesizer: synthesizer(),
     deliverToKafka: true,
     deliverToKinesis: false,
     deliverToS3: false,
   }),
-  new IngestionServerStack(app, 'ingestion-server-kinesis-stack', { //To Kinesis
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToKinesisStackName') ?? 'ingestion-server-kinesis-stack', { //To Kinesis
     synthesizer: synthesizer(),
     deliverToKafka: false,
     deliverToKinesis: true,
     deliverToS3: false,
   }),
-  new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToS3StackName') ?? 'ingestion-server-s3-stack', { //To S3
     synthesizer: synthesizer(),
     deliverToKafka: false,
     deliverToKinesis: false,
     deliverToS3: true,
   }),
+
+  // for Ingestion V2
+  new IngestionServerStackV2(app, 'ingestion-server-v2-stack', { //To Ingestion V2
+    synthesizer: synthesizer(),
+  }),
 ], [
-  {
-    id: 'AwsSolutions-IAM4',
-    reason:
-        'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
-  },
-  {
-    id: 'AwsSolutions-IAM5',
-    reason:
-        'LogRetention lambda policy which are created by CDK contains wildcard permissions',
-  },
+  ...commonCdkNagRules,
   {
     id: 'AwsSolutions-AS3',
     reason: 'notifications configuration for autoscaling group is optional',
@@ -185,69 +186,39 @@ stackSuppressions([
     id: 'AwsSolutions-SNS3',
     reason: 'The SNS Topic is set by cfnParameter, not created in this stack',
   },
-  {
-    id: 'AwsSolutions-L1',
-    // The non-container Lambda function is not configured to use the latest runtime version
-    reason:
-        'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
-  },
 ]);
 
-new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', { // Kafka S3 sink connector
+new KafkaS3SinkConnectorStack(app, app.node.tryGetContext('kafkaS3SinkStackName') ?? 'kafka-s3-sink-stack', { // Kafka S3 sink connector
   synthesizer: synthesizer(),
 });
 
-new DataPipelineStack(app, 'data-pipeline-stack', {
+new DataPipelineStack(app, app.node.tryGetContext('dataProcessingStackName') ?? 'data-pipeline-stack', {
   synthesizer: synthesizer(),
 });
 
 stackSuppressions([
-  new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('stackName') ?? 'data-analytics-redshift-stack', {
+  new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('modelRedshiftStackName') ?? 'data-analytics-redshift-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
-  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention/BucketNotificationsHandler with wildcard policy' },
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
-]);
+], commonCdkNagRules);
 
-new DataModelingAthenaStack(app, app.node.tryGetContext('stackName') ?? 'data-modeling-athena-stack', {
+new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') ?? 'data-modeling-athena-stack', {
   synthesizer: synthesizer(),
 });
 
 stackSuppressions([
-  new DataReportingQuickSightStack(app, 'data-reporting-quicksight-stack', {
+  new DataReportingQuickSightStack(app, app.node.tryGetContext('reportingStackName') ?? 'data-reporting-quicksight-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  {
-    id: 'AwsSolutions-IAM4',
-    reason:
-      'LogRetention lambda role which are created by CDK uses AWSLambdaBasicExecutionRole',
-  },
-  {
-    id: 'AwsSolutions-IAM5',
-    reason:
-      'LogRetention lambda policy which are created by CDK contains wildcard permissions',
-  },
-  {
-    id: 'AwsSolutions-L1',
-    reason:
-      'Caused by CDK built-in custom resource provider not using latest Nodejs runtime',
-  },
-]);
+], commonCdkNagRules);
 
 stackSuppressions([
-  new MetricsStack(app, 'metrics-stack', {
+  new MetricsStack(app, app.node.tryGetContext('metricsStackName') ?? 'metrics-stack', {
     synthesizer: synthesizer(),
   }),
-], [
-  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
-  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler with wildcard policy' },
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
-]);
+], commonCdkNagRules);
 
-new ServiceCatalogAppregistryStack(app, 'service-catalog-appregistry-stack', {
+new ServiceCatalogAppregistryStack(app, app.node.tryGetContext('appRegistryStackName') ?? 'service-catalog-appregistry-stack', {
   synthesizer: synthesizer(),
 });
 
@@ -284,6 +255,49 @@ class NodejsFunctionSanityAspect implements IAspect {
   }
 }
 Aspects.of(app).add(new NodejsFunctionSanityAspect());
+
+class CNLambdaFunctionAspect implements IAspect {
+
+  private conditionCache: { [key: string]: CfnCondition } = {};
+
+  public visit(node: IConstruct): void {
+    if (node instanceof Function) {
+      const func = node.node.defaultChild as CfnFunction;
+      if (func.loggingConfig) {
+        func.addPropertyOverride('LoggingConfig',
+          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
+            Fn.ref('AWS::NoValue'), {
+              LogFormat: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logFormat,
+              ApplicationLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).applicationLogLevel,
+              LogGroup: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logGroup,
+              SystemLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).systemLogLevel,
+            }));
+      }
+      if (func.architectures && func.architectures[0] == Architecture.arm64) {
+        func.addPropertyOverride('Architectures',
+          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
+            Fn.ref('AWS::NoValue'), func.architectures));
+      }
+    }
+  }
+
+  private awsChinaCondition(stack: Stack): CfnCondition {
+    const conditionName = 'AWSCNCondition';
+    // Check if the resource already exists
+    const existingResource = this.conditionCache[stack.artifactId];
+
+    if (existingResource) {
+      return existingResource;
+    } else {
+      const awsCNCondition = new CfnCondition(stack, conditionName, {
+        expression: Fn.conditionEquals('aws-cn', stack.partition),
+      });
+      this.conditionCache[stack.artifactId] = awsCNCondition;
+      return awsCNCondition;
+    }
+  }
+}
+Aspects.of(app).add(new CNLambdaFunctionAspect());
 
 function synthesizer() {
   return process.env.USE_BSS ? new BootstraplessStackSynthesizer(): undefined;

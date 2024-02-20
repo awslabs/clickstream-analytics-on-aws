@@ -9,7 +9,7 @@ on:
       - src/analytics/private/sqls/**
       - .github/workflows/ghpage.yml
   pull_request:
-
+  merge_group: {}
 jobs:
   pages:
     runs-on: ubuntu-latest
@@ -21,9 +21,20 @@ jobs:
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Check non-ascii characters
+        run: |
+          set -uxo pipefail
+          nonAsciiLine=$(grep --color='auto' -r -P -n "[^\x00-\x7F]"  ./docs/en | wc -l || true)
+          if [ $nonAsciiLine -gt 0 ]; then
+            echo "Non-ascii characters found in ./docs/en"
+            grep --color='auto' -r -P -n "[^\x00-\x7F]"  ./docs/en
+            exit 1
+          else
+            echo "No non-ascii characters found in ./docs/en"
+          fi
 
       - name: Install mkdocs and material theme
         run: |
@@ -37,10 +48,10 @@ jobs:
           mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
 
-      - name: Publish doc - 1.1.x
+      - name: Publish doc - 1.2.x
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
-          VERSION: 1.1.x
+          VERSION: 1.2.x
           LINK_EN: ${{ vars.LINK_EN }}
           LINK_ZH: ${{ vars.LINK_ZH }}
         run: |

@@ -15,6 +15,7 @@ import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
+import { IMetadataBuiltInList } from 'ts/explore-types';
 import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
   CategoryItemType,
@@ -32,13 +33,17 @@ interface EventsSelectProps {
   eventDataDispatch: AnalyticsDispatchFunction;
   maxSelectNum?: number;
   disableAddCondition?: boolean;
+  disableAddEvent?: boolean;
   addEventButtonLabel: string;
   loading: boolean;
   eventOptionList: CategoryItemType[];
   defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
+  enableChangeMultiSelect: boolean;
   enableChangeRelation: boolean;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
 }
 const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
@@ -50,12 +55,16 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     eventDataDispatch,
     maxSelectNum,
     disableAddCondition,
+    disableAddEvent,
     addEventButtonLabel,
     eventOptionList,
     defaultComputeMethodOption,
     isMultiSelect,
+    enableChangeMultiSelect,
     enableChangeRelation,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     loading,
   } = props;
@@ -66,24 +75,30 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
         return (
           <div key={identity(index)}>
             <div className="cs-analytics-parameter">
-              <div className="cs-para-name">
-                {element.customOrderName ??
-                  (element?.listOrderType === 'alphabet'
-                    ? ALPHABETS[index]
-                    : index + 1)}
-              </div>
+              {!disableAddEvent && (
+                <div className="cs-para-name">
+                  {element.customOrderName ??
+                    (element?.listOrderType === 'alphabet'
+                      ? ALPHABETS[index]
+                      : index + 1)}
+                </div>
+              )}
               <div className="flex-1">
                 <EventItem
                   type="event"
                   placeholder={eventPlaceholder}
                   calcMethodOption={element.calculateMethodOption}
+                  calcMethodOptions={element.calculateMethodOptions}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {
                     eventDataDispatch({
                       type: 'changeCurCategoryOption',
+                      enableChangeMultiSelect,
                       eventIndex: index,
                       categoryOption: item,
+                      builtInMetadata,
                       metadataEvents,
+                      metadataEventParameters,
                       metadataUserAttributes,
                     });
                   }}
@@ -208,22 +223,24 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
           </div>
         );
       })}
-      <div className="mt-10">
-        <Button
-          iconName="add-plus"
-          onClick={() => {
-            eventDataDispatch({
-              type: 'addNewEventAnalyticsItem',
-              defaultComputeMethodOption,
-              isMultiSelect,
-              enableChangeRelation,
-            });
-          }}
-          disabled={eventDataState.length >= (maxSelectNum ?? 10)}
-        >
-          {addEventButtonLabel}
-        </Button>
-      </div>
+      {!disableAddEvent && (
+        <div className="mt-10">
+          <Button
+            iconName="add-plus"
+            onClick={() => {
+              eventDataDispatch({
+                type: 'addNewEventAnalyticsItem',
+                defaultComputeMethodOption,
+                isMultiSelect,
+                enableChangeRelation,
+              });
+            }}
+            disabled={eventDataState.length >= (maxSelectNum ?? 10)}
+          >
+            {addEventButtonLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

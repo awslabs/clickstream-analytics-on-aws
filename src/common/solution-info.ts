@@ -22,7 +22,7 @@ export class SolutionInfo {
   static SOLUTION_ID = 'SO0219';
   static SOLUTION_NAME = 'Clickstream Analytics on AWS';
   static SOLUTION_SHORT_NAME = 'Clickstream';
-  static SOLUTION_VERSION = process.env.SOLUTION_VERSION || 'v1.0.0';
+  static SOLUTION_VERSION = process.env.SOLUTION_VERSION || 'v1.2.0';
   static SOLUTION_VERSION_DETAIL = versionDetail(SolutionInfo.SOLUTION_VERSION);
   static SOLUTION_VERSION_SHORT = parseVersion(SolutionInfo.SOLUTION_VERSION).short;
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;

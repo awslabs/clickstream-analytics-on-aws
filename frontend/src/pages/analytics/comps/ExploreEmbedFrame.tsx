@@ -19,12 +19,13 @@ import { useTranslation } from 'react-i18next';
 interface ExploreEmbedFrameProps {
   embedType: 'dashboard' | 'visual' | 'console';
   embedUrl: string;
+  embedPage: 'dashboard' | 'explore' | 'analyze';
 }
 
 const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   props: ExploreEmbedFrameProps
 ) => {
-  const { embedType, embedUrl } = props;
+  const { embedType, embedUrl, embedPage } = props;
   const { t, i18n } = useTranslation();
 
   const embedContainer = async () => {
@@ -86,9 +87,21 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             color="text-status-inactive"
           >
             <ExtendIcon icon="ClipboardData" color="#666" />
-            <SpaceBetween size="m">
-              {t('analytics:emptyDataMessage')}
-            </SpaceBetween>
+            {embedPage === 'explore' && (
+              <SpaceBetween size="m">
+                {t('analytics:emptyDataMessage')}
+              </SpaceBetween>
+            )}
+            {embedPage === 'dashboard' && (
+              <SpaceBetween size="m">
+                {t('analytics:emptyDashboardMessage')}
+              </SpaceBetween>
+            )}
+            {embedPage === 'analyze' && (
+              <SpaceBetween size="m">
+                {t('analytics:emptyAnalyzeMessage')}
+              </SpaceBetween>
+            )}
           </Box>
         </div>
       )}

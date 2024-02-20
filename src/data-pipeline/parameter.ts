@@ -124,7 +124,7 @@ export function createStackParameters(scope: Construct) {
   const emrVersionParam = new CfnParameter(scope, 'EmrVersion', {
     description: 'EMR Version',
     allowedPattern: EMR_VERSION_PATTERN,
-    default: 'emr-6.11.0',
+    default: 'emr-6.15.0',
     type: 'String',
   });
 

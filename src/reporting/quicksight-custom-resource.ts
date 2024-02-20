@@ -12,8 +12,8 @@
  */
 
 import { join } from 'path';
+import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -42,16 +42,15 @@ import {
   CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
   CLICKSTREAM_USER_DIM_VIEW_NAME,
   CLICKSTREAM_RETENTION_VIEW_NAME,
-  CLICKSTREAM_SESSION_VIEW_NAME,
   CLICKSTREAM_USER_ATTR_VIEW_NAME,
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_DEVICE_VIEW_NAME,
   CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
+  CLICKSTREAM_SESSION_VIEW_NAME,
 } from '../common/constant';
 
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export function createQuicksightCustomResource(
@@ -67,6 +66,12 @@ export function createQuicksightCustomResource(
       logRetention: RetentionDays.ONE_WEEK,
     },
   );
+
+  const currentDate = new Date();
+  const tenYearsAgo = new Date(currentDate);
+  tenYearsAgo.setFullYear(currentDate.getFullYear() - 10);
+  const futureDate = new Date(currentDate);
+  futureDate.setFullYear(currentDate.getFullYear() + 10);
 
   const databaseName = props.databaseName;
   const dashboardDefProps: QuickSightDashboardDefProps = {
@@ -133,8 +138,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_session_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         projectedColumns: [
           'session_id',
           'user_pseudo_id',
@@ -173,8 +190,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_event_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         tagColumnOperations: [
           {
             columnName: 'geo_country',
@@ -242,8 +271,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_device_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         projectedColumns: [
           'device_id',
           'event_date',
@@ -274,8 +315,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_event_parameter_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         projectedColumns: [
           'event_id',
           'event_name',
@@ -295,8 +348,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_lifecycle_daily_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         projectedColumns: [
           'time_period',
           'this_day_value',
@@ -306,8 +371,20 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_lifecycle_weekly_view_columns,
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
         projectedColumns: [
           'time_period',
           'this_week_value',
@@ -340,7 +417,6 @@ function createQuicksightLambda(
 ): SolutionNodejsFunction {
   const role = createRoleForQuicksightCustomResourceLambda(scope, templateArn);
   const fn = new SolutionNodejsFunction(scope, 'QuicksightCustomResourceLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'lambda',
@@ -350,11 +426,10 @@ function createQuicksightLambda(
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
-    role,
-    environment: {
-      ...POWERTOOLS_ENVS,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
     },
+    role,
   });
 
   return fn;

@@ -1,5 +1,8 @@
 {
   "analytics": "分析",
+  "sumGroup": "按照...求和 (SUM)",
+  "sumGroupLabel": "按照{{label}}求和 (SUM)",
+  "avgGroupLabel": "按照{{label}}求平均值 (AVG)",
   "dashboard": {
     "title": "仪表板",
     "description": "您可以在此处查看方案预置的的用户生命周期分析仪表板，或者创建自定义仪表板。",
@@ -16,6 +19,7 @@
     "deleteTip1": "您确定要删除该仪表板吗 ",
     "deleteTip2": " 删除仪表板将删除 QuickSight 中的相关的仪表板。",
     "defaultUserLifecycle": "用户生命周期报表",
+    "defaultUserLifecycleDescription": "由解决方案创建的开箱即用的用户生命周期分析面板。",
     "defaultTag": "预置"
   },
   "realtime": {
@@ -37,17 +41,19 @@
     "funnelAnalysis": "漏斗分析",
     "eventAnalysis": "事件分析",
     "pathAnalysis": "路径分析",
+    "attributionAnalysis": "归因分析",
     "retentionAnalysis": "留存分析",
     "userAnalytics": "用户分析",
     "userSearch": "用户细查",
     "userSegmentation": "用户分群"
   },
   "list": {
-    "loading": "正在加载仪表板。",
-    "noDashboard": "您还没有任何点击流分析仪表板。",
+    "loading": "正在加载仪表板",
+    "noDashboard": "您还没有任何点击流分析仪表板",
     "id": "ID",
     "description": "描述",
     "createAt": "创建时间",
+    "updateAt": "更新时间",
     "createdBy": "创建者"
   },
   "header": {
@@ -65,7 +71,7 @@
     "inputVisualDescriptionPlaceholder": "请输入图表描述"
   },
   "options": {
-    "eventNumber": "事件数",
+    "eventNumber": "总次数",
     "userNumber": "用户数",
     "customWindow": "自定义",
     "theDayWindow": "当天",
@@ -74,6 +80,7 @@
     "minuteWindowUnit": "分钟",
     "hourWindowUnit": "小时",
     "dayWindowUnit": "天",
+    "monthWindowUnit": "月",
     "hourTimeGranularity": "小时级",
     "dayTimeGranularity": "天级",
     "weekTimeGranularity": "周级",
@@ -90,13 +97,19 @@
     "platformIOS": "iOS",
     "platformWechatMinPro": "微信小程序",
     "directlyFollowed": "直接跟随",
-    "indirectlyFollowed": "非直接跟随"
+    "indirectlyFollowed": "非直接跟随",
+    "firstTouchAttributionModel": "首次归因",
+    "lastTouchAttributionModel": "末次归因",
+    "linearAttributionModel": "线性归因",
+    "positionBasedAttributionModel": "位置归因",
+    "timeDecayAttributionModel": "时间衰减"
   },
   "metadata": {
     "description": "您可以在此处查看和管理事件和属性的元数据。",
+    "scanTriggeredSuccessfully": "扫描已成功触发, 请等待执行完成",
     "event": {
       "title": "事件",
-      "description": "此表列出了您选择的点击流分析App中的所有事件。",
+      "description": "此表列出了您选择的App中的所有事件。",
       "tableColumnID": "ID",
       "tableColumnName": "事件名称",
       "tableColumnDisplayName": "显示名称",
@@ -119,28 +132,28 @@
       }
     },
     "eventParameter": {
-      "title": "事件属性",
-      "description": "事件属性的描述",
+      "title": "事件参数",
+      "description": "该表列出了所选App中的所有事件参数。",
       "tableColumnID": "ID",
-      "tableColumnName": "属性名称",
+      "tableColumnName": "参数名称",
       "tableColumnDisplayName": "显示名称",
       "tableColumnDescription": "描述",
       "tableColumnMetadataSource": "来源",
-      "tableColumnParameterType": "属性类型",
+      "tableColumnParameterType": "参数类型",
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
       "tableColumnDataType": "数据类型",
-      "filteringAriaLabel": "查找属性",
-      "filteringPlaceholder": "查找属性",
+      "filteringAriaLabel": "查找参数",
+      "filteringPlaceholder": "查找参数",
       "split": {
-        "title": "事件属性详细信息",
+        "title": "事件参数详细信息",
         "associatedEvents": "关联的事件",
         "dictionary": "字典"
       }
     },
     "userAttribute": {
       "title": "用户属性",
-      "description": "用户属性的描述",
+      "description": "该表列出了所选应用程序中的所有用户属性。",
       "tableColumnID": "ID",
       "tableColumnName": "属性名称",
       "tableColumnDisplayName": "显示名称",
@@ -175,21 +188,27 @@
     "day": "天",
     "week": "周",
     "month": "个月",
-    "year": "年"
+    "year": "年",
+    "startDate": "开始日期",
+    "revisitDate": "回访日期"
   },
   "valid": {
     "please": "请",
     "projectSelectError": "必须选择一个项目",
     "appSelectError": "必须选择一个应用程序",
     "dashboardNameEmptyError": "请输入仪表板名称",
-    "dashboardSheetTooMuchError": "工作表不能超过10个",
+    "dashboardSheetNumError": "工作表不能超过10个，并且不能为空",
     "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的数据管道",
     "dashboardSelectError": "必须选择一个仪表板",
     "sheetSelectError": "必须选择一个工作表",
     "dateRangeIncomplete": "所选日期范围不完整。请为日期范围选择开始和结束日期。",
     "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。",
     "inputVisualNameError": "请输入图表名称",
-    "selectTwoEvent": "请最少选择 2 个步骤"
+    "selectTwoEvent": "查询指标错误: 请最少选择 2 个步骤",
+    "retentionJoinColumnDatatype": "查询指标错误: 留存分析每一组关联属性的数据类型必须相同",
+    "errorProjectOrApp": "不存在的的项目或应用程序: ",
+    "notSupportProjectOrApp": "当前项目或应用程序不支持分析工作坊: ",
+    "metadataNotAllowEditError": "预置元数据不支持编辑"
   },
   "operators": {
     "null": "空",
@@ -208,12 +227,12 @@
   "labels": {
     "eventTitle": "事件",
     "attributeTitle": "属性",
-    "eventAttribute": "事件属性",
-    "publicEventAttribute": "公共事件属性",
-    "privateEventAttribute": "私有事件属性",
+    "eventAttribute": "事件参数",
+    "publicEventAttribute": "公共事件参数",
+    "privateEventAttribute": "私有事件参数",
     "userAttribute": "用户属性",
-    "customAttribute": "自定义属性",
-    "presetAttribute": "预置属性",
+    "customAttribute": "自定义参数",
+    "presetAttribute": "预置参数",
     "customEvent": "自定义事件",
     "presetEvent": "预置事件",
     "previewName": "名称",
@@ -221,6 +240,7 @@
     "previewDataType": "数据类型",
     "previewUpdateTime": "更新时间",
     "previewPlatform": "平台",
+    "previewCategory": "类别",
     "metrics": "指标",
     "associateParameter": "关联参数",
     "window": "漏斗窗口",
@@ -243,28 +263,40 @@
     "retentionMetrics": "留存指标",
     "eventSelectPlaceholder": "选择事件",
     "nodeSelectPlaceholder": "选择节点",
-    "attributeSelectPlaceholder": "选择属性",
+    "attributeSelectPlaceholder": "选择参数或属性",
     "operatorSelectPlaceholder": "选择操作符",
     "conditionValuePlaceholder": "输入值",
     "funnelModel": "漏斗模式",
-    "attributeGrouping": "属性分组",
+    "attributeGrouping": "分组",
     "defineMetrics": "定义指标",
     "realtimeStopped": "实时流已停止",
     "realtimeStarted": "实时流已启动",
-    "reportingNotEnabled": "Reporting模块未启用",
+    "analyticsStudioNotAvailable": "分析工作坊不可用",
     "setStartNode": "设置起始节点",
     "participateNodes": "选择参与分析的节点",
     "includingOtherEvents": "包括其他事件",
     "mergeConsecutiveEvents": "合并连续事件",
-    "groupApplyToFirst": "仅将分组应用于第一步"
+    "groupApplyToFirst": "仅将分组应用于第一步",
+    "setConversionGoal": "设置转换目标",
+    "setConversionWindow": "转换窗口期",
+    "selectTouchpointEvent": "选择触点事件",
+    "attributionDateRange": "日期范围",
+    "attributionModel": "归因模型",
+    "attributionFirst": "第一个归因位",
+    "attributionInBetween": "其余位置",
+    "attributionLast": "最后一个归因位"
   },
   "emptyData": "无数据",
-  "emptyDataMessage": "请配置要查询的指标",
+  "emptyDataMessage": "请配置指标进行查询",
+  "emptyExploreMessage": "当前项目没有任何探索模块可用",
+  "emptyAnalyzeMessage": "当前项目尚未找到任何分析数据",
+  "emptyDashboardMessage": "尚未找到对应的仪表板",
   "noDataAvailableTitle": "没有可用于分析的点击流数据",
-  "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
+  "noDataAvailableMessage": "尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
   "information": {
     "funnelMetricsInfo": "选择计算的漏斗转化率的主体。",
     "funnelWindowInfo": "窗口期指用户完成转化的时间，用户在设定的窗口期内完成所有的转化步骤才算做转化成功。",
+    "funnelStepsInfo": "选择事件作为转化漏斗的步骤。",
     "eventDefineMetricInfo": "请选择事件、计算方式及过滤条件进行查询。您可以为一个事件添加多个过滤条件。",
     "filterInfo": "通过设置过滤条件全局筛选事件，此筛选条件将会作用于所有指标。",
     "groupInfo": "统计结果将按照所选属性值分组计算。",
@@ -278,6 +310,9 @@
     "retentionMetricInfo": "选择起始和回访事件，支持筛选。",
     "introducingAnalyticsHeader": "介绍分析工作坊",
     "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和仪表板的访问。",
-    "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。"
+    "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。",
+    "attributionSetConversionGoalInfo": "转化目标通常是能够代表某一业务目标的事件，常见的事件有购买、支付成功、注册等。",
+    "attributionSetConversionWindowInfo": "只有距目标转化时间在转化窗口发生的事件才会被纳入分析。",
+    "attributionSelectTouchpointEventInfo": "参与归因分析的事件，通常为推广运营为的点击事件、落地页的进入。"
   }
 }

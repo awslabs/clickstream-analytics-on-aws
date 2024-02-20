@@ -37,9 +37,12 @@ import java.util.Map;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.max_by;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
+import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
+import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.MAX_SN;
 
 @Slf4j
 public final class DatasetUtil {
@@ -111,6 +114,10 @@ public final class DatasetUtil {
     public static final String EVENT_FIRST_OPEN = "_first_open";
     public static final String EVENT_FIRST_VISIT = "_first_visit";
     public static final String EVENT_APP_END = "_app_end";
+    public static final String EVENT_APP_START = "_app_start";
+    public static final String EVENT_SESSION_END = "_session_end";
+    public static final String EVENT_SESSION_START = "_session_start";
+    public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String APP_INFO = "app_info";
     public static final String MOBILE = "mobile";
     public static final String MODEL = "model";
@@ -120,6 +127,7 @@ public final class DatasetUtil {
     public static final String CLIENT_ID = "client_id";
     public static final String GA_SESSION_ID = "ga_session_id";
     public static final String GA_SESSION_NUMBER = "ga_session_number";
+    public static final String SESSION_NUMBER = "_session_number";
     public static final String X_GA_JS_CLIENT_ID = "x-ga-js_client_id";
     public static final String GTM_SCREEN_WIDTH = "screenWidth";
     public static final String GTM_SCREEN_HEIGHT = "screenHeight";
@@ -128,6 +136,8 @@ public final class DatasetUtil {
     public static final String GTM_REQUEST_START_TIME_MS = "requestStartTimeMs";
     public static final String GTM_LANGUAGE = "language";
     public static final String GTM_UC = "uc";
+    public static final String GTM_SESSION_ID = "gtmSessionId";
+    public static final String GTM_SESSION_NUM = "gtmSessionNum";
     public static final String GTM_ID = "gtmId";
     public static final String GTM_VERSION = "gtmVersion";
     public static final String EVENT_ITEMS = "eventItems";
@@ -155,6 +165,7 @@ public final class DatasetUtil {
     public static final String FIRST_REFERER = "_first_referer";
     public static final String TABLE_NAME_ETL_GTM_USER_VISIT = "etl_gtm_user_visit";
     public static final String TABLE_NAME_ETL_GTM_USER_REFERRER = "etl_gtm_user_referrer";
+    public static final String TABLE_NAME_ETL_GTM_USER_SESSION = "etl_gtm_user_session";
     public static final String TABLE_NAME_ETL_MERGE_STATE = "etl_merge_state";
     public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
     public static final String GTM_PAGE_TITLE = "page_title";
@@ -166,6 +177,17 @@ public final class DatasetUtil {
     public static final String GTM_BRANDS = "brands";
     public static final String GTM_BRAND = "brand";
     public static final String GTM_CLIENT_BRAND = "clientBrand";
+    public static final String EVENT_BUNDLE_SEQUENCE_ID = "event_bundle_sequence_id";
+    public static final String DEVICE = "device";
+    public static final String TRAFFIC_SOURCE = "traffic_source";
+    public static final String PROJECT_ID = "project_id";
+    public static final String GEO = "geo";
+    public static final String APP_INF = "app_info";
+    public static final String GA_ENGAGEMENT_TIME_MSEC = "engagement_time_msec";
+    public static final String ENGAGEMENT_TIME_MSEC = "_engagement_time_msec";
+    public static final String SESSION_DURATION = "_session_duration";
+    public static final String SESSION_START_TIMESTAMP = "_session_start_timestamp";
+    public static final String TRUNCATED = "_truncated";
 
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,
@@ -174,7 +196,6 @@ public final class DatasetUtil {
             FULL_SUFFIX,
             INCREMENTAL_SUFFIX);
     private static final Map<String, StructType> SCHEMA_MAP = new HashMap<>();
-
     public static Map<String, StructType> getSchemaMap() {
         return SCHEMA_MAP;
     }
@@ -201,6 +222,29 @@ public final class DatasetUtil {
         log.info("aggTrafficSourceDataset count:" + aggUserRefererDataset.count());
         saveFullDatasetToPath(pathInfo.getFull(), aggUserRefererDataset);
         return aggUserRefererDataset;
+    }
+
+
+    public static Dataset<Row> loadPreviousUserSessionDataset(final Dataset<Row> newUserSessionDataset, final PathInfo pathInfo) {
+        SparkSession spark = newUserSessionDataset.sparkSession();
+        int sessionKeepDays = Integer.parseInt(System.getProperty(GTM_PREVIOUS_SESSION_KEEP_DAYS, "2"));
+        Dataset<Row> allUserSessionDataset = readDatasetFromPath(spark, pathInfo.getIncremental(), sessionKeepDays);
+        allUserSessionDataset.cache();
+        log.info("allUserSessionDataset count:" + allUserSessionDataset.count());
+
+        Dataset<Row> aggAllUserSessionDataset = getAggUserSessionDataset(allUserSessionDataset);
+
+        saveIncrementalDatasetToPath(pathInfo.getIncremental(), newUserSessionDataset);
+        return aggAllUserSessionDataset;
+    }
+
+    private static Dataset<Row> getAggUserSessionDataset(final Dataset<Row> allUserSessionDataset) {
+        String maxSn = MAX_SN;
+        return allUserSessionDataset.groupBy(APP_ID, USER_PSEUDO_ID)
+                .agg(max(maxSn).alias(maxSn))
+                .select(
+                col(APP_ID), col(USER_PSEUDO_ID), col(maxSn)
+        );
     }
 
 
@@ -324,16 +368,17 @@ public final class DatasetUtil {
 
             fullItemsDataset = fullItemsDatasetRead.filter(expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
                     .and(expr(String.format("%s >= %s", EVENT_TIMESTAMP, nDaysBeforeDate.getTime()))));
-
+            fullItemsDataset.cache();
+            // forces Spark to load the data immediately and cache it in memory
+            log.info(pathInfo + ",cache data count:" + fullItemsDataset.count());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("readDatasetFromPath " + e.getMessage());
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
                 List<Row> dataList = new ArrayList<>();
                 return spark.createDataFrame(dataList, schemaRead);
             }
             throw e;
         }
-        log.info(pathInfo + ", return count:" + fullItemsDataset.count());
         return fullItemsDataset;
     }
 
@@ -342,7 +387,7 @@ public final class DatasetUtil {
         boolean forceMerge = System.getProperty("force.merge", "false").equals("true");
 
         // run this process daily
-        if (isDatasetMergedToday(sparkSession) && !forceMerge) {
+        if (!isNeedMergedDataset(sparkSession) && !forceMerge) {
             return;
         }
         log.info("start merging incremental tables");
@@ -357,7 +402,7 @@ public final class DatasetUtil {
     }
 
 
-    public static boolean isDatasetMergedToday(final SparkSession sparkSession) {
+    public static boolean isNeedMergedDataset(final SparkSession sparkSession) {
         boolean mergedToday = false;
         Date now = new Date();
         DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
@@ -371,11 +416,13 @@ public final class DatasetUtil {
 
         });
         Dataset<Row> existingState;
+        boolean isFirstRun = false;
         try {
             existingState = sparkSession.read().schema(schema).parquet(statePath);
         } catch (Exception e) {
             log.error(e.getMessage());
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
+                isFirstRun = true;
                 List<Row> emptyList = new ArrayList<>();
                 existingState = sparkSession.createDataFrame(emptyList, schema);
             } else {
@@ -393,11 +440,11 @@ public final class DatasetUtil {
             Dataset<Row> newState = sparkSession.createDataFrame(dataList, schema);
             newState.coalesce(1).write().partitionBy(UPDATE_DATE).option(COMPRESSION, SNAPPY).mode(SaveMode.Append).parquet(statePath);
         }
-
+        log.info("isNeedMergedDataset() isFirstRun: " + isFirstRun + ", mergedToday: " + mergedToday);
         if (mergedToday) {
             log.info("Datasets merged today, detail: " + mergedState.first().json());
         }
-        return mergedToday;
+        return !mergedToday && !isFirstRun;
     }
 
     public static class TableInfo {

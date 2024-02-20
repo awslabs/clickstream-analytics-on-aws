@@ -170,6 +170,45 @@ export const parametersConvertToCategoryItemType = (
   return categoryItems;
 };
 
+export const getAttributionMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
+    },
+    {
+      label: defaultStr(i18n.t('analytics:sumGroup')),
+      value: ExploreComputeMethod.SUM_VALUE,
+      subList: [],
+    },
+  ];
+  const numberParameters = parameterItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberAttributes = userAttributeItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberParametersAndAttributes = [
+    ...numberParameters,
+    ...numberAttributes,
+  ];
+  for (const parameter of numberParametersAndAttributes) {
+    computeMethodOptions[1].subList?.push({
+      value: parameter.name,
+      label: parameter.displayName,
+      name: parameter.name,
+      valueType: parameter.valueType,
+      category: parameter.category,
+      groupName: ExploreComputeMethod.SUM_VALUE,
+      itemType: 'children',
+    } as IAnalyticsItem);
+  }
+  return computeMethodOptions;
+};
+
 function patchSameName(
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems: IMetadataEventParameter[]
@@ -254,6 +293,17 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   );
 };
 
+export const validRetentionJoinColumnDatatype = (
+  items: IRetentionAnalyticsItem[]
+) => {
+  return items.every((item) => {
+    return (
+      item.startEventRelationAttribute?.valueType ===
+      item.revisitEventRelationAttribute?.valueType
+    );
+  });
+};
+
 export const validMultipleRetentionAnalyticsItem = (
   items: IRetentionAnalyticsItem[]
 ) => {
@@ -284,6 +334,110 @@ export const validConditionItemType = (condition: IConditionItemType) => {
   );
 };
 
+export const getTouchPointsAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  const touchPoints: AttributionTouchPoint[] = [];
+  eventOptionData.forEach((item) => {
+    if (validEventAnalyticsItem(item)) {
+      const conditions: ICondition[] = [];
+      item.conditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
+            value: condition.conditionValue,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
+          };
+          conditions.push(conditionObj);
+        }
+      });
+
+      const touchPoint: AttributionTouchPoint = {
+        eventName: defaultStr(item.selectedEventOption?.name),
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
+      };
+      touchPoints.push(touchPoint);
+    }
+  });
+  return touchPoints;
+};
+
+export const getGoalAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  const conditions: ICondition[] = [];
+  goalData.conditionList.forEach((condition) => {
+    if (validConditionItemType(condition)) {
+      const conditionObj: ICondition = {
+        category: defaultStr(
+          condition.conditionOption?.category,
+          ConditionCategory.OTHER
+        ),
+        property: defaultStr(condition.conditionOption?.name),
+        operator: defaultStr(condition.conditionOperator?.value),
+        value: condition.conditionValue,
+        dataType: defaultStr(
+          condition.conditionOption?.valueType,
+          MetadataValueType.STRING
+        ),
+      };
+      conditions.push(conditionObj);
+    }
+  });
+  let groupColumn: IColumnAttribute | undefined;
+  if (goalData.calculateMethodOption?.name) {
+    groupColumn = {
+      category: defaultStr(
+        goalData.calculateMethodOption?.category,
+        ConditionCategory.OTHER
+      ),
+      property: defaultStr(goalData.calculateMethodOption?.name),
+      dataType: defaultStr(
+        goalData.calculateMethodOption?.valueType,
+        MetadataValueType.STRING
+      ),
+    };
+  }
+  return {
+    eventName: defaultStr(goalData.selectedEventOption?.name),
+    sqlCondition: {
+      conditions: conditions,
+      conditionOperator: goalData.conditionRelationShip,
+    },
+    groupColumn,
+  } as AttributionTouchPoint;
+};
+
+export const getTargetComputeMethod = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  if (
+    goalData.calculateMethodOption?.value === ExploreComputeMethod.EVENT_CNT
+  ) {
+    return ExploreComputeMethod.EVENT_CNT;
+  }
+  return ExploreComputeMethod.SUM_VALUE;
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
@@ -311,9 +465,7 @@ export const getEventAndConditions = (
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
@@ -374,7 +526,7 @@ export const getPairEventAndConditions = (
         }
       });
 
-      const pairEventAndCondition: IPairEventAndCondition = {
+      let pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
           eventName: defaultStr(item.startEventOption?.name, ''),
           sqlCondition: {
@@ -390,6 +542,47 @@ export const getPairEventAndConditions = (
           },
         },
       };
+      if (item.startEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          startEvent: {
+            ...pairEventAndCondition.startEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.startEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(item.startEventRelationAttribute?.name, ''),
+              dataType: defaultStr(
+                item.startEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
+              ),
+            },
+          },
+        };
+      }
+      if (item.revisitEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          backEvent: {
+            ...pairEventAndCondition.backEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.revisitEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(
+                item.revisitEventRelationAttribute?.name,
+                ''
+              ),
+              dataType: defaultStr(
+                item.revisitEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
+              ),
+            },
+          },
+        };
+      }
       pairEventAndConditions.push(pairEventAndCondition);
     }
   });
@@ -464,6 +657,8 @@ export const getIntervalInSeconds = (
         return Number(windowValue) * 60 * 60;
       case 'day':
         return Number(windowValue) * 60 * 60 * 24;
+      case 'month':
+        return Number(windowValue) * 60 * 60 * 24 * 30;
       default:
         return Number(windowValue) * 60;
     }

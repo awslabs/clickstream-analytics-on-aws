@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Clickstream Android SDK can help you easily collect in-app click stream data from Android devices to your AWS environments through the data pipeline provisioned by this solution. This SDK is part of an AWS solution - {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as S3, Redshift.
+Clickstream Android SDK can help you easily collect in-app click stream data from Android devices to your AWS environments through the data pipeline provisioned by this solution.
 
 The SDK is based on the Amplify for Android SDK Core Library and developed according to the Amplify Android SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, screen view and first open) to accelerate data collection for users.
 
@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.9.0'
+    implementation 'software.aws.solution:clickstream:0.10.1'
 }
 ```
 
@@ -149,6 +149,40 @@ Current login user's attributes will be cached in disk, so the next time app lau
 
     If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstream SDK for the first time to ensure that subsequent events contains user attributes.
 
+
+#### Record event with items
+
+You can add the following code to log an event with an item.
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytcs;
+import software.aws.solution.clickstream.ClickstreamItem;
+
+ClickstreamItem item_book = ClickstreamItem.builder()
+    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
+    .add(ClickstreamAnalytics.Item.ITEM_NAME, "Nature")
+    .add(ClickstreamAnalytics.Item.ITEM_CATEGORY, "book")
+    .add(ClickstreamAnalytics.Item.PRICE, 99)
+    .add("book_publisher", "Nature Research")
+    .build();
+
+ClickstreamEvent event = ClickstreamEvent.builder()
+    .name("view_item")
+    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
+    .add(ClickstreamAnalytics.Item.CURRENCY, "USD")
+    .add("event_category", "recommended")
+    .setItems(new ClickstreamItem[] {item_book})
+    .build();
+
+ClickstreamAnalytics.recordEvent(event);
+```
+
+For logging more attribute in an item, please refer to [item attributes](#item-attributes).
+
+!!! warning "Important"
+
+    Only pipelines from version 1.1+ can handle items with custom attribute.
+
 #### Send event immediately
 
 ```java
@@ -199,19 +233,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 Here is an explanation of each method.
 
-| Method name                     | Parameter type | Required | Default value | Description                                                  |
-| ------------------------------- | -------------- | -------- | ------------- | ------------------------------------------------------------ |
-| withAppId()                     | String         | true     | --            | the app id of your application in web console                |
-| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server |
-| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie |
-| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                       |
-| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds          |
-| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                    |
-| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                  |
-| withLogEvents()                 | boolean        | false    | true          | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns) |
-| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events. |
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| withLogEvents()                 | boolean        | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
+| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
 
 #### Debug events
 
@@ -248,9 +282,9 @@ Clickstream Android SDK supports the following data types.
 
 | Data type | Range                                      | Example       |
 |-----------|--------------------------------------------|---------------|
-| int       | -2147483648 ～ 2147483647                   | 12            |
-| long      | -9223372036854775808 ～ 9223372036854775807 | 26854775808   |
-| double    | 4.9E-324 ～ 1.7976931348623157E308          | 3.14          |
+| int       | -2147483648 ~ 2147483647                   | 12            |
+| long      | -9223372036854775808 ~ 9223372036854775807 | 26854775808   |
+| double    | 4.9E-324 ~ 1.7976931348623157E308          | 3.14          |
 | boolean   | true, false                                | true          |
 | String    | max 1024 characters                        | "Clickstream" |
 
@@ -266,18 +300,23 @@ Clickstream Android SDK supports the following data types.
 
 In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:
 
-| Name                            | Suggestion           | Hard limit           | Strategy                                                                           | Error code |
-|---------------------------------|----------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid              | --                   | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name            | under 25 characters  | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event       | under 50 attributes  | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number           | under 25 attributes  | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value  | under 50 characters  | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
+|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event                | under 50 attributes        | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
+| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
+| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
+| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
+| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
+| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
 
 !!! info "Important"
 
@@ -456,6 +495,29 @@ All user attributes will be stored in `user` object, and all custom and global a
 | _session_number          | int       | true       | Added in all events.                                                                                                                                       |
 | _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
 | _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
+
+
+### Item attributes
+
+| Attribute name | Data type | Required | Description                   |
+|----------------|-----------|----------|-------------------------------|
+| id             | string    | False    | The id of the item            |
+| name           | string    | False    | The name of the item          |
+| brand          | string    | False    | The brand of the item         |
+| currency       | string    | False    | The currency of the item      |
+| price          | number    | False    | The price of the item         |
+| quantity       | string    | False    | The quantity of the item      |
+| creative_name  | string    | False    | The creative name of the item |
+| creative_slot  | string    | False    | The creative slot of the item |
+| location_id    | string    | False    | The location id of the item   |
+| category       | string    | False    | The category of the item      |
+| category2      | string    | False    | The category2 of the item     |
+| category3      | string    | False    | The category3 of the item     |
+| category4      | string    | False    | The category4 of the item     |
+| category5      | string    | False    | The category5 of the item     |
+
+You can use the above preset item attributes, of course, you can also add custom attributes to an item. In addition to the preset attributes, an item can add up to 10 custom attributes.
+
 
 ## Change log
 

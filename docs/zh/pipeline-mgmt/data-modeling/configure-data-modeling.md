@@ -4,17 +4,18 @@
 
 ## 预设数据视图
 
-| 数据模型名称                 | Redshift | Athena | 描述                                                                  |
-|-----------------------------|-----------|--------|----------------------------------------------------------------------|
-| clickstream_ods_event_rt_view    | 物化视图    | 视图 | 包含所有事件维度的视图。      |
-| clickstream_ods_event_parameter_rt_view    | 物化视图    | 视图 | 包含所有事件参数的视图。        |
-| clickstream_user_dim_view    | 物化视图    | 视图 | 包含所有用户维度的视图。                     |
-| clickstream_user_attr_view    | 物化视图    | 视图 | 包含所有用户自定义属性的视图。        |
-| clickstream_session_view    | 物化视图    | 视图 | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
-| clickstream_retention_view    | 物化视图    | 视图 | 包含按日期和返回日度量的保留指标的视图。        |
-| clickstream_lifecycle_daily_view    | 物化视图    | 视图 | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_lifecycle_weekly_view    | 物化视图    | 视图 | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
-| clickstream_path_view    | 物化视图    | 视图 | 包含关于每个会话中用户旅程的信息的视图。        |
+| 数据模型名称                 | Redshift | 描述                                                                  |
+|-----------------------------|-----------|----------------------------------------------------------------------|
+| clickstream_device_view_v1    | 物化视图    | 包含所有设备相关信息的视图                     |
+| clickstream_event_view_v2    | 视图    | 包含所有事件维度的视图。      |
+| clickstream_event_parameter_view_v1    | 物化视图      | 包含所有事件参数的视图。        |
+| clickstream_user_dim_view_v1    | 物化视图     | 包含所有用户维度的视图。                     |
+| clickstream_user_attr_view_v1    | 物化视图      | 包含所有用户自定义属性的视图。        |
+| clickstream_session_view_v2    | 视图     | 包含所有会话维度和相关度量，例如，会话持续时间，会话视图。        |
+| clickstream_retention_view_v2    | 物化视图      | 包含按日期和返回日度量的留存指标的视图。       |
+| clickstream_lifecycle_daily_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。        |
+| clickstream_lifecycle_weekly_view_v2    | 视图    | 包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。        |
+
 
 您可以选择使用Redshift或Athena，或两者都用。
 
@@ -47,9 +48,5 @@
         * **数据库用户**: 该解决方案需要权限才能在 Redshift 集群中访问和创建数据库。默认情况下，它授予 Redshift Data API 管理员用户执行命令以创建数据库、表和视图以及加载数据的权限。
 
     * **数据范围**：考虑到让 Redshift 保存所有数据的成本效益问题，我们建议 Redshift 仅保存热数据，而所有数据都存储在 S3 中。需要定期在 Redshift 中删除过期数据。
-
-* **附加设置**
-
-    * **用户表插入更新频率**：由于所有版本的用户属性都保存在 Redshift 中。我们在 DWD 层创建了一个用户范围的自定义维度表 `dim_users`，以便 BI 仪表板可以报告最新的用户属性。工作流按计划运行以插入更新（更新和插入）用户。
 
 * **Athena**：选择 Athena 使用在 Glue 数据目录中创建的表查询 S3 上的所有数据。

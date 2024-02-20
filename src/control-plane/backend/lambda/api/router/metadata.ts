@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { defaultOrderValueValid, isAppId, isProjectId, isRequestIdExisted, isValidEmpty, isXSSRequest, metadataDisplayLength, validate } from '../common/request-valid';
 import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
@@ -24,9 +24,9 @@ const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAtt
 router_metadata.put(
   '/display',
   validate([
-    body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
+    body().custom(isValidEmpty).custom(metadataDisplayLength).custom(isXSSRequest),
+    body('projectId').custom(isProjectId),
+    body('appId').custom(isAppId),
     body('id').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
@@ -41,7 +41,7 @@ router_metadata.get(
     query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.listPathNodes(req, res, next);
+    return metadataEventParameterServ.listPathNodes(req, res, next);
   });
 
 router_metadata.get(
@@ -83,6 +83,10 @@ router_metadata.get('/event_parameter', async (req: express.Request, res: expres
   return metadataEventParameterServ.details(req, res, next);
 });
 
+router_metadata.get('/built_in_metadata', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventParameterServ.builtInMetadata(req, res, next);
+});
+
 router_metadata.get(
   '/user_attributes',
   validate([
@@ -93,8 +97,8 @@ router_metadata.get(
     return metadataUserAttributeServ.list(req, res, next);
   });
 
-router_metadata.get('/user_attribute', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  return metadataUserAttributeServ.details(req, res, next);
+router_metadata.post('/trigger', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventServ.trigger(req, res, next);
 });
 
 export {

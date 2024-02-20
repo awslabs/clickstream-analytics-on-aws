@@ -15,7 +15,6 @@ import {
   Button,
   ColumnLayout,
   Container,
-  DateRangePickerProps,
   Header,
   SegmentedControl,
   SegmentedControlProps,
@@ -45,7 +44,6 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -54,6 +52,8 @@ import {
   ExploreComputeMethod,
   ExploreGroupColumn,
   ExploreRequestAction,
+  ExploreTimeScopeType,
+  IMetadataBuiltInList,
   QuickSightChartType,
 } from 'ts/explore-types';
 import {
@@ -62,12 +62,11 @@ import {
   defaultStr,
   getEventParameters,
   getUserInfoFromLocalStorage,
-  getAbsoluteStartEndRange,
   isAnalystAuthorRole,
+  getAbsoluteStartEndRange,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
-  getDateRange,
   getGlobalEventCondition,
   getGroupCondition,
   getLngFromLocalStorage,
@@ -75,17 +74,20 @@ import {
   parametersConvertToCategoryItemType,
   validMultipleRetentionAnalyticsItem,
   validRetentionAnalyticsItem,
+  validRetentionJoinColumnDatatype,
   validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDatePicker from '../comps/ExploreDatePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 interface AnalyticsRetentionProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -100,7 +102,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -149,8 +153,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     null
   );
 
-  const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
+  const [startDate, setStartDate] = useState<string>(
+    getAbsoluteStartEndRange().startDate
+  );
+
+  const [revisitDate, setRevisitDate] = useState<string>(
+    getAbsoluteStartEndRange().endDate
+  );
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -168,7 +177,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(getAbsoluteStartEndRange());
+    setStartDate(getAbsoluteStartEndRange().startDate);
+    setRevisitDate(getAbsoluteStartEndRange().endDate);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -194,7 +204,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     if (!parameters) {
       return;
     }
-    const dateRangeParams = getDateRange(dateRangeValue);
+    const dateRangeParams = {
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: startDate,
+      timeEnd: revisitDate,
+    };
     let saveParams = {};
     if (action === ExploreRequestAction.PUBLISH) {
       saveParams = {
@@ -226,7 +240,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       eventAndConditions: [],
       pairEventAndConditions: getPairEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(filterOptionData),
-      timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       groupCondition: getGroupCondition(groupOption, null),
       ...dateRangeParams,
@@ -260,10 +273,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -277,6 +287,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     setLoadingData(false);
   };
 
+  const validateRetentionJoinColumnDatatype = () => {
+    if (!validRetentionJoinColumnDatatype(eventOptionData)) {
+      alertMsg(t('analytics:valid.retentionJoinColumnDatatype'), 'error');
+      return false;
+    }
+    return true;
+  };
   const validateEventSelection = () => {
     if (!validMultipleRetentionAnalyticsItem(eventOptionData)) {
       dispatch?.({
@@ -327,10 +344,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     try {
       const body = getRetentionRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');
@@ -592,7 +606,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeStartEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -611,7 +627,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeRevisitEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -669,7 +687,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             variant="primary"
             iconName="search"
             onClick={() => {
-              if (validateEventSelection() && validateFilterSelection()) {
+              if (
+                validateRetentionJoinColumnDatatype() &&
+                validateEventSelection() &&
+                validateFilterSelection()
+              ) {
                 clickPreview();
               }
             }}
@@ -680,13 +702,15 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         </Container>
         <Container>
           <div className="cs-analytics-data-range">
-            <ExploreDateRangePicker
+            <ExploreDatePicker
               disableSelect={loadingChart}
-              dateRangeValue={dateRangeValue}
-              setDateRangeValue={setDateRangeValue}
+              startDate={startDate}
+              revisitDate={revisitDate}
               timeGranularity={timeGranularity}
               timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
+              setStartDate={setStartDate}
+              setRevisitDate={setRevisitDate}
             />
             <SegmentedControl
               selectedId={chartType}
@@ -706,6 +730,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
+              embedPage="explore"
             />
           )}
         </Container>

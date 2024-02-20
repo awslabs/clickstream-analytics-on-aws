@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
 import static software.aws.solution.clickstream.ContextUtil.*;
 
 public class ServerDataConverterTest extends BaseSparkTest {
@@ -121,6 +122,61 @@ public class ServerDataConverterTest extends BaseSparkTest {
         Dataset<Row> corrupDataset =
                 spark.read().json("/tmp/warehouse/etl_gtm_corrupted_json_data");
         Assertions.assertTrue(corrupDataset.count() > 0);
+    }
+
+    @Test
+    void test_convert_fv_session() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_fv_session
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-fv-session.json")).getPath());
+
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(7, outDataset.count());
+
+        Long fvCount = outDataset.select(expr("dataOut.*")).select("event_name").where(col("event_name").equalTo("_first_open")).count();
+        Assertions.assertEquals(2, fvCount);
+    }
+
+    @Test
+    void test_convert_session_start() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_session_start
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "sessionStartAppId");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-session-start.json")).getPath());
+
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(2, outDataset.count());
+
+        Dataset<Row>  dataset1 = outDataset.filter(expr("dataOut.event_name == '_user_engagement'"));
+        Dataset<Row>  dataset2 = outDataset.filter(expr("dataOut.event_name == '_session_start'"));
+
+        String expectedJson1 = resourceFileAsString("/gtm-server/expected/test_convert_session_start1.json");
+        String expectedJson2 = resourceFileAsString("/gtm-server/expected/test_convert_session_start2.json");
+
+        Assertions.assertEquals(expectedJson1, dataset1.first().prettyJson(), "_user_engagement event is not converted correctly");
+        Assertions.assertEquals(expectedJson2, dataset2.first().prettyJson(), "_session_start event is not converted correctly");
+
+    }
+
+    @Test
+    void test_decode_uri() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_decode_uri
+        String uri = "https://www.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&qs=n&form=QBRE&=%25eManage%20Your%20Search%20History%25E&sp=-1&lq=0&pq=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=";
+        String decodeUri = ServerDataConverter.deCodeUri(uri);
+        System.out.println(decodeUri);
+        Assertions.assertEquals(
+                "https://www.bing.com/search?q=中国你好&qs=n&form=QBRE&=%eManage Your Search History%E&sp=-1&lq=0&pq=中国你好&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=",
+                decodeUri
+        );
     }
 
 }

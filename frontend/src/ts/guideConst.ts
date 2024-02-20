@@ -10,23 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-
-import { ZH_LANGUAGE_LIST } from './const';
-
 export const CLICKSTREAM_IOS_REPO_LINK =
   'https://github.com/awslabs/clickstream-swift';
-
-export const SDK_GUIDE_LINK_EN =
-  'https://awslabs.github.io/clickstream-analytics-on-aws/en';
-export const SDK_GUIDE_LINK_ZH =
-  'https://awslabs.github.io/clickstream-analytics-on-aws/zh';
-
-export const buildSDKDocumentLink = (lang: string, url?: string) => {
-  if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return SDK_GUIDE_LINK_ZH + (url ?? '');
-  }
-  return SDK_GUIDE_LINK_EN + (url ?? '');
-};
 
 export const DOWNLOAD_FILENAME = 'amplifyconfiguration.json';
 export const TEMPLATE_APP_ID = '{{APP_ID}}';
@@ -192,4 +177,40 @@ ClickstreamAnalytics.setUserId("UserId");
 
 // when user logout
 ClickstreamAnalytics.setUserId(null);
+`;
+
+export const FLUTTER_INSTALL_GUIDE = `// Install SDK
+flutter pub add clickstream_analytics
+
+// After complete, rebuild your Flutter application.
+flutter run`;
+
+export const FLUTTER_INIT_SDK_TEXT = `import 'package:clickstream_analytics/clickstream_analytics.dart';
+
+final analytics = ClickstreamAnalytics();
+analytics.init(
+  appId: "${TEMPLATE_APP_ID}", // Your application ID
+  endpoint: "${TEMPLATE_SERVER_ENDPOINT}" // Your server endpoint
+);
+`;
+
+export const FLUTTER_RECORD_EVENT = `import 'package:clickstream_analytics/clickstream_analytics.dart';
+
+final analytics = ClickstreamAnalytics();
+
+// record event with attributes
+analytics.record(name: 'button_click', attributes: {
+  "event_category": "shoes",
+  "currency": "CNY",
+  "value": 279.9
+});
+
+// record event with name
+analytics.record(name: "button_click");
+`;
+
+export const FLUTTER_ADD_USER_ATTR = `analytics.setUserAttributes({
+  "userName":"carl",
+  "userAge": 22
+});
 `;

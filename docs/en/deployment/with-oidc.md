@@ -45,7 +45,10 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
 2. Set up the hosted UI with the Amazon Cognito console based on this [guide][congnito-guide]. Please pay attentions to below two configurations
       - Choose **Public client** when selecting the **App type**. Make sure don't change the selection **Don't generate a client secret** for **Client secret**.
       - Add **Profile** in **OpenID Connect scopes**.
-3. Enter the **Callback URL** and **Sign out URL** using your domain name for {{ solution_name }} console. 
+3. Enter the **Callback URL** and **Sign out URL** using your domain name for {{ solution_name }} console as the following:
+      -  **Callback URL**: `http[s]://<domain-name>/signin`
+      -  **Sign out URL**: `http[s]://<domain-name>`
+
     !!! info "Note"
         If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, `clickstream.example.com`. Then update it following guidelines in Step 3.
 
@@ -53,7 +56,7 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
 
        ![cognito host ui](../images/OIDC/cognito-hostUI-new.jpeg)
 
-6. Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.
+5. Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.
 
        ![cognito client id](../images/OIDC/cognito-new-console-clientID.png)
        ![cognito userpool id](../images/OIDC/cognito-new-console-userpoolID.png)
@@ -75,7 +78,9 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
     ![authing endpoint info](../images/OIDC/authing-endpoint-info.png)
 
-8. Update the `Login Callback URL` and `Logout Callback URL` to your IPC recorded domain name.
+8. Update the `Login Callback URL` and `Logout Callback URL`, note that you need to add **`/signin`** to your domain name for `Login Callback URL` as follow:
+      -  **Callback URL**: `http[s]://<domain-name>/signin`
+      -  **Sign out URL**: `http[s]://<domain-name>`
 
 9. Set the Authorization Configuration.
 
@@ -106,7 +111,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
 6. Go back to Keycloak console and select **Clients** on the left navigation bar, and choose **Create**.
 7. Enter a Client ID, which must contain letters (case-insensitive) or numbers. Record the **Client ID** which will be used later.
-8. Change client settings. Enter `http[s]://<{{ solution_name }} Console domain>/signin` in **Valid Redirect URIs**，and enter `<console domain>` and `+` in **Web Origins**.
+8. Change client settings. Enter `http[s]://<{{ solution_name }} Console domain>/signin` in **Valid Redirect URIs**, and enter `<console domain>` and `+` in **Web Origins**.
 
     !!! tip "Tip"
         If you're not using custom domain for the console, the domain name of console is not available yet. You can enter a fake one, for example, `clickstream.example.com`, and then update it following guidelines in Step 3.
@@ -178,6 +183,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
         | ---------- | ---------------- | ------------------------------------------------------------ |
         | OIDCClientId | `<Requires input>` | OpenID Connect client Id. |
         | OIDCProvider  | `<Requires input>` | OpenID Connect provider issuer. The issuer must begin with `https://` |
+        | Email | `<Requires input>` | Specify the email of the Administrator. |
 
         !!! info "Important"
             {%

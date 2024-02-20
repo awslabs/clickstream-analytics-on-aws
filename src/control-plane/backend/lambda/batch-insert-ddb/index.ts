@@ -26,17 +26,21 @@ import { NativeAttributeValue, marshall } from '@aws-sdk/util-dynamodb';
 import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
+  CloudFormationCustomResourceUpdateEvent,
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../api/common/sdk-client-config-ln';
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
+import dictionary from '../../lambda/api/config/dictionary.json';
 
-// Create an Amazon DynamoDB service client object.
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
-// Create the DynamoDB Document client.
-const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { ...marshallOptions, convertTopLevelContainer: false },
+  unmarshallOptions: { ...unmarshallOptions },
+});
 
 interface DicItem {
   readonly name: string;
@@ -47,7 +51,7 @@ export const handler = async (
   event: CdkCustomResourceEvent,
   context: Context,
 ): Promise<CdkCustomResourceResponse> => {
-  logger.info('Lambda is invoked', JSON.stringify(event, null, 2));
+  logger.debug('dictionary:', { dictionary });
 
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,
@@ -74,7 +78,16 @@ export const handler = async (
 async function _handler(event: CdkCustomResourceEvent) {
   const requestType = event.RequestType;
 
-  if (requestType == 'Create' || requestType == 'Update') {
+  if (requestType == 'Create') {
+    await cleanData(event);
+    await batchInsert(event);
+  } else if (requestType == 'Update') {
+    const lastModifiedTime = event.ResourceProperties.lastModifiedTime;
+    const oldLastModifiedTime = (event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties.lastModifiedTime;
+    if (lastModifiedTime === oldLastModifiedTime) {
+      logger.info('No change in dictionary. Skip batch insert.');
+      return;
+    }
     await cleanData(event);
     await batchInsert(event);
   }
@@ -82,15 +95,10 @@ async function _handler(event: CdkCustomResourceEvent) {
 
 async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
   const tableName: string = event.ResourceProperties.tableName;
-  const items: DicItem[] = event.ResourceProperties.items;
+  const items: DicItem[] = dictionary;
   const itemsAsDynamoPutRequest: any[] = [];
   items.forEach(item => {
-    const marshallItem = marshall(item, {
-      convertEmptyValues: false,
-      removeUndefinedValues: true,
-      convertClassInstanceToMap: true,
-      convertTopLevelContainer: false,
-    });
+    const marshallItem = marshall(item, { ...marshallOptions, convertTopLevelContainer: false });
     itemsAsDynamoPutRequest.push({
       PutRequest: {
         Item: marshallItem,

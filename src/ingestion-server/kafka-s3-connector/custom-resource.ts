@@ -15,14 +15,12 @@ import { join } from 'path';
 import { CfnResource, CustomResource, Duration, Stack } from 'aws-cdk-lib';
 import { ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { IRole } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
-import { addCfnNagSuppressRules } from '../../common/cfn-nag';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -112,7 +110,6 @@ function createS3SinkConnectorLambda(
   });
 
   const fn = new SolutionNodejsFunction(scope, 's3SinkConnectorCustomResourceLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -122,26 +119,15 @@ function createS3SinkConnectorLambda(
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
-    role,
-    environment: {
-      ... POWERTOOLS_ENVS,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
     },
+    role,
   });
   fn.node.addDependency(role);
-  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
-    {
-      id: 'W89',
-      reason:
-        'Lambda is used as custom resource, ignore VPC settings',
-    },
-
-    {
-      id: 'W92',
-      reason:
-        'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
-    },
-  ]);
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('KafkaS3ConnectorCR'),
+  );
 
   return fn;
 }

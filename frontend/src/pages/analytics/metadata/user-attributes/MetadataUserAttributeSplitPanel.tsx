@@ -18,7 +18,6 @@ import {
   FormField,
   SpaceBetween,
   SplitPanel,
-  StatusIndicator,
   TextContent,
   Textarea,
 } from '@cloudscape-design/components';
@@ -28,7 +27,12 @@ import { UserContext } from 'context/UserContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { getUserInfoFromLocalStorage, isAnalystAuthorRole } from 'ts/utils';
+import { MetadataSource } from 'ts/explore-types';
+import {
+  alertMsg,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -105,6 +109,8 @@ const MetadataUserAttributeSplitPanel: React.FC<
     setIsEditingDisplayName(false);
     setIsEditingDesc(false);
     setAttributeDetails(attribute);
+    setPrevDisplayName(attribute.name);
+    setPrevDesc(attribute.description);
     setLoadingData(false);
   }, [attribute.id]);
 
@@ -183,6 +189,15 @@ const MetadataUserAttributeSplitPanel: React.FC<
                             loading={loadingUpdateDisplayName}
                             variant="primary"
                             onClick={() => {
+                              if (
+                                attributeDetails.metadataSource ===
+                                MetadataSource.PRESET
+                              ) {
+                                alertMsg(
+                                  t('analytics:valid.metadataNotAllowEditError')
+                                );
+                                return;
+                              }
                               updateEventInfo('displayName');
                             }}
                           >
@@ -199,18 +214,6 @@ const MetadataUserAttributeSplitPanel: React.FC<
                 {t('analytics:metadata.userAttribute.tableColumnDataType')}
               </Box>
               <div className="mb-10">{attribute.valueType}</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('analytics:metadata.userAttribute.tableColumnHasData')}
-              </Box>
-              <div className="mb-10">
-                <StatusIndicator
-                  type={attribute.hasData ? 'success' : 'stopped'}
-                >
-                  {attribute.hasData ? 'Yes' : 'No'}
-                </StatusIndicator>
-              </div>
             </div>
             <div>
               <Box variant="awsui-key-label">
@@ -264,6 +267,15 @@ const MetadataUserAttributeSplitPanel: React.FC<
                           loading={loadingUpdateDesc}
                           variant="primary"
                           onClick={() => {
+                            if (
+                              attributeDetails.metadataSource ===
+                              MetadataSource.PRESET
+                            ) {
+                              alertMsg(
+                                t('analytics:valid.metadataNotAllowEditError')
+                              );
+                              return;
+                            }
                             updateEventInfo('description');
                           }}
                         >

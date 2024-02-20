@@ -14,7 +14,7 @@
 import { ConditionCategory, MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { isEmpty } from '../common/utils';
-import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList } from '../model/metadata';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -68,7 +68,7 @@ export class CMetadataDisplay {
     const prefix = event.prefix.split('#')[0];
     const key = `${prefix}#${event.projectId}#${event.appId}#${event.name}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
-    event.displayName = metadataDisplay?.displayName ?? event.name;
+    event.displayName = metadataDisplay?.displayName ?? { 'en-US': event.name, 'zh-CN': event.name };
     event.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
@@ -76,11 +76,12 @@ export class CMetadataDisplay {
     const presetEvent = this.builtList.PresetEvents.find((e: any) => e.name === event.name);
     event.metadataSource = presetEvent ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     if (!metadataDisplay && presetEvent) {
+      event.displayName = presetEvent ? presetEvent.displayName : event.displayName;
       event.description = presetEvent ? presetEvent.description : event.description;
     }
   }
 
-  private patchEventParameterInfo(parameter: IMetadataEventParameter) {
+  private patchEventParameterInfo(parameter: IMetadataEventParameter, eventName?: string) {
     if (!this.displays) {
       return;
     }
@@ -89,18 +90,53 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
     parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
+    this._patchEventParameterInfoFromPresetConfiguration(parameter, eventName);
+  }
+
+  private _patchEventParameterInfoFromPresetConfiguration(
+    parameter: IMetadataEventParameter,
+    eventName?: string) {
     if (!this.builtList) {
       return;
     }
-    const presetEventParameter = this.builtList.PresetEventParameters.find(
-      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
-    const publicEventParameter = this.builtList.PublicEventParameters.find(
-      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
-    if (!metadataDisplay && presetEventParameter) {
-      parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
+    this._findInPresetConfiguration(this.builtList, parameter, eventName);
+  }
+
+  private _findInPresetConfiguration(builtList: IMetadataBuiltInList, parameter: IMetadataEventParameter, eventName?: string) {
+    let matchParameter: any;
+    if (eventName) {
+      matchParameter = builtList.PresetEventParameters.find(
+        (e: any) => e.eventName === eventName && e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PRIVATE;
+      }
     }
-    parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
+    if (!matchParameter) {
+      matchParameter = builtList.PresetEventParameters.find(
+        (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PRIVATE;
+      }
+    }
+    if (!matchParameter) {
+      matchParameter = builtList.PublicEventParameters.find((e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PUBLIC;
+      }
+    }
+    if (!matchParameter) {
+      parameter.metadataSource = MetadataSource.CUSTOM;
+      parameter.parameterType = MetadataParameterType.PRIVATE;
+    }
   }
 
   private patchUserAttributeInfo(attribute: IMetadataUserAttribute) {
@@ -119,12 +155,14 @@ export class CMetadataDisplay {
       (e: any) => e.name === attribute.name && e.dataType === attribute.valueType);
     attribute.metadataSource = presetUserAttribute ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     if (!metadataDisplay && presetUserAttribute) {
+      attribute.displayName = presetUserAttribute ? presetUserAttribute.displayName : attribute.displayName;
       attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
     }
   }
 
   public async patch(projectId: string, appId: string,
-    metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
+    metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[],
+    eventName?: string) {
     try {
       await this.getDisplay(projectId, appId);
       await this.getBuiltList();
@@ -134,12 +172,12 @@ export class CMetadataDisplay {
           case 'EVENT':
             let event = metadata as IMetadataEvent;
             this.patchEventInfo(event);
-            event.associatedParameters = this.patchAssociated(event.associatedParameters) as IMetadataEventParameter[];
+            event.associatedParameters = this.patchAssociated(event.associatedParameters, event.name) as IMetadataEventParameter[];
             event.associatedParameters = this.patchValues(event.associatedParameters) as IMetadataEventParameter[];
             break;
           case 'EVENT_PARAMETER':
             let parameter = metadata as IMetadataEventParameter;
-            this.patchEventParameterInfo(parameter);
+            this.patchEventParameterInfo(parameter, eventName);
             parameter.associatedEvents = this.patchAssociated(parameter.associatedEvents) as IMetadataEvent[];
             parameter = this.patchValues([parameter])[0] as IMetadataEventParameter;
             break;
@@ -158,7 +196,7 @@ export class CMetadataDisplay {
     return metadataArray;
   }
 
-  private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {
+  private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined, eventName?: string) {
     if (!associated || associated.length === 0) {
       return [];
     }
@@ -171,7 +209,7 @@ export class CMetadataDisplay {
           break;
         case 'EVENT_PARAMETER':
           const parameter = metadata as IMetadataEventParameter;
-          this.patchEventParameterInfo(parameter);
+          this.patchEventParameterInfo(parameter, eventName);
           break;
         default:
           break;
@@ -193,7 +231,7 @@ export class CMetadataDisplay {
         const display = displays.find((d: IMetadataDisplay) => d.id === key);
         values.push({
           value: e.value,
-          displayValue: display?.displayName ?? e.value,
+          displayValue: display?.displayName['en-US'] ?? e.value,
         });
       }
       parameter.valueEnum = undefined;
@@ -202,7 +240,10 @@ export class CMetadataDisplay {
     return parameters;
   }
 
-  private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: string) {
-    return !isEmpty(displayName) ? displayName : `${category}.${name}`;
+  private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: IMetadataDisplayNameAndDescription) {
+    return {
+      'en-US': !isEmpty(displayName?.['en-US']) ? displayName?.['en-US'] : `[${category}] ${name}`,
+      'zh-CN': !isEmpty(displayName?.['zh-CN']) ? displayName?.['zh-CN'] : `[${category}] ${name}`,
+    } as IMetadataDisplayNameAndDescription;
   }
 }

@@ -5,6 +5,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-01-16
+
+### Updated
+
+* improve the performance of querying metadata
+* improve the performance of exploration queries
+
+### Fixed
+
+* mitigate the intermittent failure of creating QuickSight stack
+* mitigate the potential timeout when upgrading data modeling in Redshift
+* few dashboard rendering issues
+* the metadata scanning failure with long non-ascii data
+* coordinate the alarm period of scanning metadata workflow
+* manually trigger metadata scanning
+* choose S3 bucket in other regions
+* transform session data in GTM transformer
+
+## [1.1.1] - 2023-12-22
+
+### Fixed
+
+#### Web Console and Data pipeline
+
+* mitigate the data modeling by putting the Redshift stack into UPDATE_ROLLBACK_FAILED status when updating pipeline
+* fail to update the endpoint path, domain name and auth of ingestion
+* fail to get pipeline detail if its age is more than 90 days
+
+#### Analytics Studio
+
+* wrong user count in the built-in dashboard
+* incorrect default value of dataset parameter causes the failure to load values of selectable fields in the built-in dashboard
+
+## [1.1.0] - 2023-12-08
+
+### Web Console and Data pipeline
+
+#### Added
+
+* support self-hosted Apache Kafka cluster
+* add resource awareness to the Data Processing scheduler
+* add user roles management
+* add metadata scanning workflow
+* add third-party transform plug-in: GTM Server Side plug-in
+
+#### Changed
+
+* update the ingestion configuration of the existing data pipeline
+* data schema updates
+* update out-of-box reporting dashboards
+* improve pipeline status management
+* improve the reliability of service availability checks
+
+#### Fixed
+
+* check the incorrect configuration of NAT gateway or VPC endpoints for data pipeline
+* gracefully handle with the incomplete user profile
+
+### SDK
+
+#### Added
+
+* add Flutter SDK
+* add Wechat Miniprogram SDK
+
+### Analytics Studio
+
+#### Added
+
+* Dashboard
+* Explore
+* Analyzes
+* Data management
+
 ## [1.0.3] - 2023-10-30
 
 ### Fixed

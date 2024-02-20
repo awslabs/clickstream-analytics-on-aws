@@ -12,6 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
+import { ENetworkType } from 'ts/const';
 
 export {};
 declare global {
@@ -51,12 +52,14 @@ declare global {
       vpcId: string;
       publicSubnetIds: string[];
       privateSubnetIds: string[];
+      type?: ENetworkType;
     };
     bucket: {
       name: string;
       prefix: string;
     };
     ingestionServer: {
+      ingestionType: EIngestionType;
       size: {
         serverMin: number;
         serverMax: number;
@@ -129,8 +132,8 @@ declare global {
         name: string;
         prefix: string;
       };
-      transformPlugin: string;
-      enrichPlugin: string[];
+      transformPlugin: any;
+      enrichPlugin: any[];
     };
     dataModeling: {
       athena: boolean;
@@ -155,14 +158,11 @@ declare global {
         accountName: string;
       };
     };
-    status?: {
-      status: string;
-      stackDetails: IStackStatus[];
-    };
+    statusType?: PipelineStatusType;
+    stackDetails?: PipelineStatusDetail[];
+    executionDetail?: ExecutionDetail;
     templateVersion?: string;
     workflow?: WorkflowTemplate;
-    executionName?: string;
-    executionArn?: string;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
     templateInfo?: {
@@ -170,6 +170,7 @@ declare global {
       pipelineVersion: string;
       solutionVersion: string;
     };
+    analysisStudioEnabled?: boolean;
     version?: string;
     versionTag?: string;
     createAt?: number;
@@ -183,6 +184,7 @@ declare global {
     selectedRegion: SelectProps.Option | null;
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
+    selectedS3Bucket: SelectProps.Option | null;
     selectedPublicSubnet: SelectProps.Option[];
 
     selectedPrivateSubnet: SelectProps.Option[];

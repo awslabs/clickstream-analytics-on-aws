@@ -13,16 +13,22 @@
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Architecture } from '@aws-sdk/client-emr-serverless';
-import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import {
   addCfnNagForBucketDeployment,
-  addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention, addCfnNagToStack,
+  commonCdkNagRules,
+  ruleRolePolicyWithWildcardResources,
+  ruleRolePolicyWithWildcardResourcesAndHighSPCM,
 } from './common/cfn-nag';
 import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
@@ -242,6 +248,12 @@ export class DataPipelineStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -280,26 +292,13 @@ function addCfnNag(stack: Stack) {
     'partitionSyncerLambdaRole/DefaultPolicy/Resource',
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
-    'EmrJobStateListenerLambdaRole/DefaultPolicy/Resource',
     'CreateEMRServelsssApplicationLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
   );
 
   addCfnNagToStack(stack, [
-    {
-      paths_endswith: ['EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource'],
-      rules_to_suppress: [
-        {
-          id: 'W12',
-          reason: 'Some permissions are not resource based, need set * in resource',
-        },
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
-      ],
-    },
+    ruleRolePolicyWithWildcardResourcesAndHighSPCM('EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource', 'EmrSparkJobSubmitterLambda', 'eni'),
   ]);
 
   NagSuppressions.addStackSuppressions(stack, [... commonCdkNagRules,

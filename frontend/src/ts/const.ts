@@ -17,14 +17,9 @@ export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const ANALYTICS_NAV_STATUS = 'ClickStreamAnalyticsNavigationStatus';
+export const ANALYTICS_NAV_ITEM = 'ClickStreamAnalyticsNavigationItem';
 export const CLICK_STREAM_USER_DATA = 'ClickStreamAnalyticsUserInformation';
 export const CONFIG_URL = '/aws-exports.json';
-export const COMMON_ALERT_TYPE = {
-  Success: 'success',
-  Error: 'error',
-  Warning: 'warning',
-  Info: 'info',
-};
 
 export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
   String.fromCharCode(65 + index)
@@ -86,6 +81,7 @@ export enum EPipelineStatus {
   Creating = 'Creating',
   Updating = 'Updating',
   Deleting = 'Deleting',
+  Deleted = 'Deleted',
   Pending = 'Pending',
 }
 
@@ -421,3 +417,19 @@ export const EVENT_DISPLAY_PREFIX = 'EVENT#';
 export const EVENT_PARAMETER_DISPLAY_PREFIX = 'EVENT_PARAMETER#';
 export const USER_ATTRIBUTE_DISPLAY_PREFIX = 'USER_ATTRIBUTE#';
 export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';
+
+export const POSITIVE_INTEGER_REGEX = new RegExp(`${'^$|^[1-9]\\d*$'}`);
+export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);
+export const PERCENTAGE_REGEX = new RegExp(
+  `${'^$|^(100|[1-9]?\\d)$|^(100|[1-9]?\\d)\\.\\d{1,2}$'}`
+);
+
+export enum EIngestionType {
+  Fargate = 'Fargate',
+  EC2 = 'EC2',
+}
+
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
+}

@@ -20,6 +20,7 @@ import {
   Stack,
   StackProps,
   ICfnConditionExpression,
+  Aspects,
 } from 'aws-cdk-lib';
 import {
   InstanceType,
@@ -31,10 +32,13 @@ import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
+import { SINK_TYPE_MODE } from './common/model';
+import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
-import { getExistVpc } from './common/vpc-utils';
+import { getALBSubnetsCondtion, getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import {
   createCommonConditions,
@@ -54,7 +58,7 @@ import {
 import { createStackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
 
-interface IngestionServerNestStackProps extends StackProps {
+export interface IngestionServerNestStackProps extends StackProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string;
   readonly privateSubnetIds: string;
@@ -112,13 +116,7 @@ export class IngestionServerNestedStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    // Vpc
-    const vpc = getExistVpc(this, 'from-vpc', {
-      vpcId: props.vpcId,
-      availabilityZones: Fn.getAzs(),
-      publicSubnetIds: Fn.split(',', props.publicSubnetIds),
-      privateSubnetIds: Fn.split(',', props.privateSubnetIds),
-    });
+    const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig } = createCommonResources(this, props);
 
     let notificationsTopic;
 
@@ -136,37 +134,6 @@ export class IngestionServerNestedStack extends NestedStack {
         'from-logS3Bucket',
         props.logBucketName,
       );
-    }
-
-
-    let kafkaSinkConfig: KafkaSinkConfig | undefined;
-    if (props.kafkaBrokers && props.kafkaTopic) {
-      let mskSecurityGroup;
-      if (props.mskSecurityGroupId) {
-        mskSecurityGroup = SecurityGroup.fromSecurityGroupId(
-          this,
-          'from-mskSecurityGroupId',
-          props.mskSecurityGroupId,
-        );
-      }
-
-      kafkaSinkConfig = {
-        kafkaBrokers: props.kafkaBrokers,
-        kafkaTopic: props.kafkaTopic,
-        mskClusterName: props.mskClusterName,
-        mskSecurityGroup,
-      };
-    }
-
-    let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
-    if (props.kinesisDataStreamArn) {
-      kinesisSinkConfig = {
-        kinesisDataStream: Stream.fromStreamArn(
-          this,
-          'from-kinesis-arn',
-          props.kinesisDataStreamArn,
-        ),
-      };
     }
 
     let protocol = ApplicationProtocol.HTTP;
@@ -188,20 +155,7 @@ export class IngestionServerNestedStack extends NestedStack {
       authenticationSecretArn = props.authenticationSecretArn;
     }
 
-    let s3SinkConfig: S3SinkConfig | undefined = undefined;
-    if (props.s3BucketName && props.s3Prefix && props.batchMaxBytes && props.batchTimeout) {
-      const s3Bucket = Bucket.fromBucketName(
-        this,
-        'from-s3Bucket',
-        props.s3BucketName,
-      );
-      s3SinkConfig = {
-        s3Bucket,
-        s3Prefix: props.s3Prefix,
-        batchMaxBytes: props.batchMaxBytes,
-        batchTimeoutSecs: props.batchTimeout,
-      };
-    }
+    const isPrivateSubnetsCondition = getALBSubnetsCondtion(this, props.publicSubnetIds, props.privateSubnetIds);
 
     const fleetCommonProps = {
       workerCpu: 1792,
@@ -231,6 +185,9 @@ export class IngestionServerNestedStack extends NestedStack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      publicSubnets: props.publicSubnetIds,
+      privateSubnets: props.privateSubnetIds,
+      isPrivateSubnetsCondition,
       fleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
@@ -279,6 +236,76 @@ export class IngestionServerNestedStack extends NestedStack {
       description: 'Server Url',
     });
   }
+}
+
+export function createCommonResources(scope : Construct, props: {
+  vpcId: string;
+  publicSubnetIds: string;
+  privateSubnetIds: string;
+  kafkaBrokers?: string;
+  kafkaTopic?: string;
+  mskSecurityGroupId?: string;
+  mskClusterName?: string;
+  kinesisDataStreamArn?: string;
+  s3BucketName?: string;
+  s3Prefix?: string;
+  batchMaxBytes?: number;
+  batchTimeout?: number;
+},
+) {
+  // Vpc
+  const vpc = getExistVpc(scope, 'from-vpc', {
+    vpcId: props.vpcId,
+    availabilityZones: Fn.getAzs(),
+    publicSubnetIds: Fn.split(',', props.publicSubnetIds),
+    privateSubnetIds: Fn.split(',', props.privateSubnetIds),
+  });
+
+  let kafkaSinkConfig: KafkaSinkConfig | undefined;
+  if (props.kafkaBrokers && props.kafkaTopic) {
+    let mskSecurityGroup;
+    if (props.mskSecurityGroupId) {
+      mskSecurityGroup = SecurityGroup.fromSecurityGroupId(
+        scope,
+        'from-mskSecurityGroupId',
+        props.mskSecurityGroupId,
+      );
+    }
+
+    kafkaSinkConfig = {
+      kafkaBrokers: props.kafkaBrokers,
+      kafkaTopic: props.kafkaTopic,
+      mskClusterName: props.mskClusterName,
+      mskSecurityGroup,
+    };
+  }
+
+  let kinesisSinkConfig: KinesisSinkConfig | undefined = undefined;
+  if (props.kinesisDataStreamArn) {
+    kinesisSinkConfig = {
+      kinesisDataStream: Stream.fromStreamArn(
+        scope,
+        'from-kinesis-arn',
+        props.kinesisDataStreamArn,
+      ),
+    };
+  }
+
+  let s3SinkConfig: S3SinkConfig | undefined = undefined;
+  if (props.s3BucketName && props.s3Prefix && props.batchMaxBytes && props.batchTimeout) {
+    const s3Bucket = Bucket.fromBucketName(
+      scope,
+      'from-s3Bucket',
+      props.s3BucketName,
+    );
+    s3SinkConfig = {
+      s3Bucket,
+      s3Prefix: props.s3Prefix,
+      batchMaxBytes: props.batchMaxBytes,
+      batchTimeoutSecs: props.batchTimeout,
+    };
+  }
+  return { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig };
 }
 
 export interface IngestionServerStackProps extends StackProps {
@@ -347,6 +374,7 @@ export class IngestionServerStack extends Stack {
         vpcIdParam,
         privateSubnetIdsParam,
         kinesisParams,
+        sinkType: SINK_TYPE_MODE.SINK_TYPE_KDS,
       });
     }
 
@@ -442,6 +470,12 @@ export class IngestionServerStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 

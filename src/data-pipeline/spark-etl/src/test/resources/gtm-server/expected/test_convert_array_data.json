@@ -18,7 +18,7 @@
     "_corrupt_record" : null,
     "gtmId" : "G-000000002",
     "gtmVersion" : "45je39i0",
-    "event_id" : "0-1695260713-2",
+    "event_id" : "0-1695260713-0",
     "user_id" : null,
     "event_name" : "PDP Clicks",
     "ip" : "70.123.241.83",
@@ -64,14 +64,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "https://www.example.com/product/screen-protector"
-      }
-    }, {
-      "key" : "engagement_time_msec",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 1,
-        "string_value" : null
       }
     }, {
       "key" : "x-ga-ur",
@@ -130,20 +122,20 @@
         "string_value" : null
       }
     }, {
+      "key" : "_session_duration",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 0,
+        "string_value" : null
+      }
+    }, {
       "key" : "Text",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
         "string_value" : ""
-      }
-    }, {
-      "key" : "ga_session_number",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 2,
-        "string_value" : null
       }
     }, {
       "key" : "screen_resolution",
@@ -168,6 +160,22 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1695260713"
+      }
+    }, {
+      "key" : "_session_number",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 2,
+        "string_value" : null
+      }
+    }, {
+      "key" : "_engagement_time_msec",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 1,
+        "string_value" : null
       }
     }, {
       "key" : "x-ga-protocol_version",
@@ -238,6 +246,8 @@
     "eventItems" : [ ],
     "user" : null,
     "requestStartTimeMs" : 1695261256542,
-    "uc" : "US"
+    "uc" : "US",
+    "gtmSessionId" : "1695260713",
+    "gtmSessionNum" : 0
   }
 }

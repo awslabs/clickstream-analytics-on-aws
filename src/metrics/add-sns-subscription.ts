@@ -14,14 +14,12 @@
 import { join } from 'path';
 import { CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export interface AddSubscriptionCustomResourceProps {
@@ -33,7 +31,7 @@ export function addSubscriptionCustomResource(
   scope: Construct,
   props: AddSubscriptionCustomResourceProps,
 ) {
-  const fn = createaddSubscriptionLambda(scope, props);
+  const fn = createAddSubscriptionLambda(scope, props);
   const provider = new Provider(
     scope,
     'addSubscriptionCustomResourceProvider',
@@ -54,11 +52,12 @@ export function addSubscriptionCustomResource(
 }
 
 
-function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): SolutionNodejsFunction {
+function createAddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): SolutionNodejsFunction {
   const role = createLambdaRole(scope, 'addSubscriptionLambdaRole', false, [
     new PolicyStatement({
       actions: [
         'sns:Subscribe',
+        'sns:ListSubscriptionsByTopic',
       ],
       resources: [props.snsTopic.topicArn],
     }),
@@ -66,7 +65,6 @@ function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCus
   ]);
 
   const fn = new SolutionNodejsFunction(scope, 'addSubscriptionLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -76,12 +74,13 @@ function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCus
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(1),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
     environment: {
       SNS_TOPIC_ARN: props.snsTopic.topicArn,
       EMAILS: props.emails,
-      ...POWERTOOLS_ENVS,
     },
   });
   fn.node.addDependency(role);

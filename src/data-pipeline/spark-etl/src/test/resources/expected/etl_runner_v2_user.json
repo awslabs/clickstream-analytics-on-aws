@@ -2,7 +2,6 @@
   "_channel" : "C001",
   "_first_referer" : "http://myhost.com/_page_referer_003",
   "_first_visit_date" : "2022-11-08",
-  "device_id_list" : [ "deviceid-1", "deviceid-3", "deviceid-4" ],
   "event_timestamp" : 1682319109447,
   "user_first_touch_timestamp" : 1667877267895,
   "user_id" : "p3121211",

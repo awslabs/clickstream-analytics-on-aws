@@ -25,8 +25,9 @@ export interface IProject {
   readonly region: string;
   readonly environment: ProjectEnvironment | string;
   pipelineId: string;
+  pipelineVersion: string;
   applications: IApplication[];
-  reportingEnabled: boolean;
+  analysisStudioEnabled: boolean;
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;
@@ -41,25 +42,15 @@ export interface IProjectList {
 
 export interface IDashboard {
   readonly id: string;
-  readonly type: string;
-  readonly prefix: string;
-
-  readonly projectId: string;
-  readonly appId: string;
-  readonly dashboardId: string;
-
   readonly name: string;
   readonly description: string;
+  readonly projectId: string;
+  readonly appId: string;
   readonly region: string;
   readonly sheets: IDashboardSheet[];
-  readonly ownerPrincipal: string;
-  readonly defaultDataSourceArn: string;
   embedUrl?: string;
-
   readonly createAt: number;
   readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
 }
 
 export interface IDashboardSheet {

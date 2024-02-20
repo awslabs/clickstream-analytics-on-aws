@@ -16,12 +16,12 @@ import { CronDate, parseExpression } from 'cron-parser';
 import { SOLUTION_COMMON_VPC_ENDPOINTS, SOLUTION_DATA_MODELING_VPC_ENDPOINTS, SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS, SOLUTION_INGESTION_VPC_ENDPOINTS, SOLUTION_VPC_ENDPOINTS } from './constants';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
-import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
+import { ClickStreamBadRequestError, ClickStreamSubnet, ENetworkType, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { describeNatGateways, describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { simulateCustomPolicy } from '../store/aws/iam';
-import { describeAccountSubscription } from '../store/aws/quicksight';
+import { quickSightIsEnterprise } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
 
@@ -340,8 +340,8 @@ async function _checkForReporting(pipeline: IPipeline, quickSightSubnets: ClickS
   portOfRedshift: number, redshiftSecurityGroups: string[], redshiftSecurityGroupsRules: SecurityGroupRule[],
   redshiftType: string) {
   if (pipeline.reporting?.quickSight) {
-    const accountInfo = await describeAccountSubscription();
-    if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
+    const isEnterprise = await quickSightIsEnterprise();
+    if (!isEnterprise) {
       throw new ClickStreamBadRequestError(
         'Validation error: QuickSight edition is not enterprise in your account.',
       );
@@ -486,34 +486,39 @@ async function _checkSubnets(pipeline: IPipeline) {
       'Validation error: you must select at least two private subnets for the ingestion endpoint.',
     );
   }
-  if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
+  if ((network.type !== ENetworkType.Private && network.publicSubnetIds.length < 2) || network.privateSubnetIds.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
+      'Validation error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
     );
   }
 
   const allSubnets = await describeSubnetsWithType(pipeline.region, network.vpcId, SubnetType.ALL);
   const privateSubnets = allSubnets.filter(subnet => network.privateSubnetIds.includes(subnet.id));
   const publicSubnets = allSubnets.filter(subnet => network.publicSubnetIds.includes(subnet.id));
+  if ((network.type !== ENetworkType.Private && publicSubnets.length === 0) || privateSubnets.length === 0) {
+    throw new ClickStreamBadRequestError(
+      'Validation error: region does not match VPC or subnets, please check parameters.',
+    );
+  }
   const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
   const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
-  if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
+  if ((network.type !== ENetworkType.Private && publicSubnetsAZ.length < 2) || privateSubnetsAZ.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
+      'Validation error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
     );
   }
   const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
-  if (azInPublic.length !== privateSubnetsAZ.length) {
+  if (network.type !== ENetworkType.Private && azInPublic.length !== privateSubnetsAZ.length) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
+      'Validation error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
       'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
     );
   }
   const natGateways = await describeNatGateways(pipeline.region, network.vpcId);
 
-  if (!_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
+  if (network.type !== ENetworkType.Private && !_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the NAT gateway must create in public subnet.',
+      'Validation error: the NAT gateway must create in public subnet and connectivity type must be public.',
     );
   }
 

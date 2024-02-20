@@ -28,15 +28,15 @@ declare global {
     region: string;
     description: string;
     pipelineId?: string;
+    pipelineVersion?: string;
     applications?: IApplication[];
-    reportingEnabled?: boolean;
+    analysisStudioEnabled?: boolean;
     updateAt?: number;
     operator?: string;
     deleted?: boolean;
     createAt?: number;
     type?: string;
     status?: string;
-    pipelineId?: string;
   }
 
   interface IAlarmPromiseResult {

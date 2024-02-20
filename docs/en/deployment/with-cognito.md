@@ -33,7 +33,7 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
         | Parameter  | Default          | Description                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Admin User Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
+        | Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
 
         !!! info "Important"
             {%
@@ -65,7 +65,7 @@ Meanwhile, an auto-generated temporary password will be sent to your email addre
 
 1. Sign in to the [AWS CloudFormation console][cloudformation]{target='_blank'}.
 
-2. On the **Stacks** page, select the solution’s stack.
+2. On the **Stacks** page, select the solution's stack.
 
 3. Choose the **Outputs** tab and record the domain name.
 

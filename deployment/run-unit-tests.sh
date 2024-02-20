@@ -30,4 +30,4 @@ npx yarn install --check-files --frozen-lockfile --cwd frontend
 npx yarn --cwd frontend run test
 
 docker run -i --rm -v `pwd`/src/data-pipeline/spark-etl/:/data --workdir /data \
-  public.ecr.aws/docker/library/gradle:7.6-jdk11 gradle test jacocoAggregatedReport
+  public.ecr.aws/docker/library/gradle:7.6-jdk17 gradle test jacocoAggregatedReport

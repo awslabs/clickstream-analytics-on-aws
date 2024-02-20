@@ -12,11 +12,12 @@
  */
 
 import { CertificateStatus } from '@aws-sdk/client-acm';
-import { Parameter, Tag, StackStatus, Output } from '@aws-sdk/client-cloudformation';
+import { Parameter, Tag } from '@aws-sdk/client-cloudformation';
 import { RouteTable } from '@aws-sdk/client-ec2';
 import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { PipelineStatusDetail, PipelineStatusType } from './model-ln';
 
 export class ClickStreamBadRequestError extends Error {
   constructor(message: string) {
@@ -265,15 +266,6 @@ export interface PipelineStatus {
   };
 }
 
-export interface PipelineStatusDetail {
-  readonly stackName: string;
-  readonly stackType: PipelineStackType;
-  readonly stackStatus: StackStatus | undefined;
-  readonly stackStatusReason: string;
-  readonly stackTemplateVersion: string;
-  readonly outputs: Output[];
-}
-
 export interface SSMSecret {
   readonly name: string;
   readonly arn: string;
@@ -283,26 +275,6 @@ export enum AssumeRoleType {
   ALL = 'All',
   SERVICE = 'Service',
   ACCOUNT = 'Account',
-}
-
-export enum PipelineStackType {
-  INGESTION = 'Ingestion',
-  KAFKA_CONNECTOR = 'KafkaConnector',
-  DATA_PROCESSING = 'DataProcessing',
-  DATA_MODELING_REDSHIFT = 'DataModelingRedshift',
-  REPORTING = 'Reporting',
-  METRICS = 'Metrics',
-  ATHENA = 'DataModelingAthena',
-  APP_REGISTRY = 'ServiceCatalogAppRegistry',
-}
-
-export enum PipelineStatusType {
-  ACTIVE = 'Active',
-  FAILED = 'Failed',
-  WARNING = 'Warning',
-  CREATING = 'Creating',
-  UPDATING = 'Updating',
-  DELETING = 'Deleting',
 }
 
 export enum KinesisStreamMode {
@@ -318,6 +290,16 @@ export enum PipelineSinkType {
   S3 = 's3',
   KAFKA = 'kafka',
   KINESIS = 'kinesis',
+}
+
+export enum IngestionType {
+  Fargate = 'Fargate',
+  EC2 = 'EC2',
+}
+
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
 }
 
 export enum PipelineServerProtocol {

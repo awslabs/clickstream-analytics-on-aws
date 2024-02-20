@@ -55,7 +55,6 @@ export interface CheckMetadataWorkflowEvent {
   };
  */
 export const handler = async (event: CheckMetadataWorkflowEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
   try {
     const eventSource = event.originalInput.eventSource;
     const hasRunningExecution: boolean = await hasOtherRunningExecutions(event.executionId);
@@ -72,6 +71,7 @@ export const handler = async (event: CheckMetadataWorkflowEvent) => {
         return {
           status: WorkflowStatus.CONTINUE,
           scanEndDate: scanEndDate,
+          eventSource: '',
           jobStartTimestamp: currentTimestamp,
           scanStartDate: scanStartDate,
         };
@@ -104,6 +104,7 @@ async function handleEventFromUpstreamWorkflow() {
       result = {
         status: WorkflowStatus.CONTINUE,
         scanEndDate: scanEndDate,
+        eventSource: 'LoadDataFlow',
         jobStartTimestamp: currentTimestamp,
         scanStartDate: startScanDate,
       };
@@ -118,6 +119,7 @@ async function handleEventFromUpstreamWorkflow() {
       status: WorkflowStatus.CONTINUE,
       scanEndDate: scanEndDate,
       jobStartTimestamp: currentTimestamp,
+      eventSource: 'LoadDataFlow',
       scanStartDate: '',
     };
   }

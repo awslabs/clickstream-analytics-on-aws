@@ -28,6 +28,11 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [Android][android-sdk]
 - [Swift][swift-sdk]
 - [Web][web-sdk]
+- [Flutter][flutter-sdk]
+- [WeChat Mini Program][wechat-sdk]
+- [HTTP API][http-api]
+
+See [this repo][sdk-samples] for different kinds of SDK samples.
 
 ## Deployment
 
@@ -53,10 +58,46 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 npx cdk deploy cloudfront-s3-control-plane-stack-global --parameters Email=<your email> --require-approval never
 ```
 
+#### Deploy pipeline stacks
+
+```shell
+# deploy the ingestion server with s3 sink
+# 1. check stack name in src/main.ts for other stacks
+# 2. check the stack for required CloudFormation parameters
+npx cdk deploy ingestion-server-s3-stack --parameters ...
+```
+
+#### Deploy local code for updating existing stacks created by the web console
+
+```shell
+# update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
+```
+
 ## Test
 
 ```shell
 yarn test
+```
+
+## Local development for web console
+
+- Step1: Deploy the solution control plane(create DynamoDB tables, State Machine and other resources). 
+- Step2: Open **Amazon Cognito** console, select the corresponding **User pool**, click the **App integration** tab, select application details in the **App client list**, edit **Hosted UI**, and set a new URL: `http://localhost:3000/signin` into **Allowed callback URLs**.
+- Step3: Goto the folder: `src/control-plane/local`
+
+```shell
+cd src/control-plane/local
+```
+
+```shell
+# run backend server local
+bash start.sh -s backend
+```
+
+```shell
+# run frontend server local
+bash start.sh -s frontend
 ```
 
 ## Security
@@ -155,8 +196,12 @@ Upon successfully cloning the repository into your local development environment
 
 [android-sdk]: https://github.com/awslabs/clickstream-android
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
+[flutter-sdk]: https://github.com/awslabs/clickstream-flutter
 [web-sdk]: https://github.com/awslabs/clickstream-web
+[wechat-sdk]: https://github.com/awslabs/clickstream-wechat
+[http-api]: https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/http-api/
 [configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
 [aws-cdk]: https://aws.amazon.com/cdk/
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
 [doc-deployment]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/deployment.html
+[sdk-samples]: https://github.com/aws-samples/clickstream-sdk-samples

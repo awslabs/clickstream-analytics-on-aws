@@ -10,20 +10,31 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         The availability zones where the public subnets are located must be consistent with those of the private subnets.
 
 * **Ingestion capacity**: This configuration sets the capacity of the ingestion server, and the ingestion server will automatically scale up or down based on the utilization of the processing CPU.
+    * Ingestion Capacity Unit (ICU): A single Ingestion Compute Unit (ICU) represents billable compute and memory units, approximately 8 gigabytes (GB) of memory and 2 vCPUs. 1 ICU generally can support 4000~6000 requests per second.
     * Minimum capacity: The minimum capacity to which the ingestion server will scale down.
     * Maximum capacity: The maximum capacity to which the ingestion server will scale up.
-    * Warm pool: Warm pool gives you the ability to decrease latency for your applications that have exceptionally long boot time. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
+    * Warm pool: Warm pool gives you the ability to decrease latency of ingestion service scale up. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
 
 * **Enable HTTPS**: Users can choose HTTPS/HTTP protocol for the Ingestion endpoint.
     * Enable HTTPS: If users choose to enable HTTPS, the ingestion server will provide HTTPS endpoint. 
-        * Domain name: input a domain name. Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint. 
+        * Domain name: input a domain name.  
+         
+        !!! note "Note"
+
+            Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.
         * SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer [create public certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) to create it.
+
     * Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.
 
         !!! warning "Warning"
 
-            Using HTTP protocol is not secure, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
-* **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., https://www.example.com, http://localhost:8080. Use comma to separate domain if you have multiple domain for this setting.
+            DO NOT use HTTP in production, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
+
+    !!! warning "Warning"
+
+        If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.
+
+* **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., `https://www.example.com`, `http://localhost:8080`. Use comma to separate domain if you have multiple domain for this setting.
 
         !!! warning "Warning"
 
@@ -54,6 +65,12 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         ```
       **Note**: In the OIDC provider, you need to add `https://<ingestion server endpoint>/oauth2/idpresponse` to "Allowed callback URLs"
 
+        **Note**: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to [alb headless authentication client code][alb-headless-authentication-client] to setup your client to obtain the authentication token automatically.
+
+        !!! warning "Warning"
+
+            If you switch between enabling Authentication and disabling Authentication, ingestion service interruption will occur.
+
     * Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.
 
         !!! tip "Tip"
@@ -80,30 +97,30 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
             Replace `elb-account-id` with the ID of the AWS account for Elastic Load Balancing for your Region:
 
-            - US East (N. Virginia) – 127311923021
-            - US East (Ohio) – 033677994240
-            - US West (N. California) – 027434742980
-            - US West (Oregon) – 797873946194
-            - Africa (Cape Town) – 098369216593
-            - Asia Pacific (Hong Kong) – 754344448648
-            - Asia Pacific (Jakarta) – 589379963580
-            - Asia Pacific (Mumbai) – 718504428378
-            - Asia Pacific (Osaka) – 383597477331
-            - Asia Pacific (Seoul) – 600734575887
-            - Asia Pacific (Singapore) – 114774131450
-            - Asia Pacific (Sydney) – 783225319266
-            - Asia Pacific (Tokyo) – 582318560864
-            - Canada (Central) – 985666609251
-            - Europe (Frankfurt) – 054676820928
-            - Europe (Ireland) – 156460612806
-            - Europe (London) – 652711504416
-            - Europe (Milan) – 635631232127
-            - Europe (Paris) – 009996457667
-            - Europe (Stockholm) – 897822967062
-            - Middle East (Bahrain) – 076674570225
-            - South America (São Paulo) – 507241528517
-            - China (Beijing) – 638102146993
-            - China (Ningxia) – 037604701340
+            - US East (N. Virginia) - 127311923021
+            - US East (Ohio) - 033677994240
+            - US West (N. California) - 027434742980
+            - US West (Oregon) - 797873946194
+            - Africa (Cape Town) - 098369216593
+            - Asia Pacific (Hong Kong) - 754344448648
+            - Asia Pacific (Jakarta) - 589379963580
+            - Asia Pacific (Mumbai) - 718504428378
+            - Asia Pacific (Osaka) - 383597477331
+            - Asia Pacific (Seoul) - 600734575887
+            - Asia Pacific (Singapore) - 114774131450
+            - Asia Pacific (Sydney) - 783225319266
+            - Asia Pacific (Tokyo) - 582318560864
+            - Canada (Central) - 985666609251
+            - Europe (Frankfurt) - 054676820928
+            - Europe (Ireland) - 156460612806
+            - Europe (London) - 652711504416
+            - Europe (Milan) - 635631232127
+            - Europe (Paris) - 009996457667
+            - Europe (Stockholm) - 897822967062
+            - Middle East (Bahrain) - 076674570225
+            - South America (Sao Paulo) - 507241528517
+            - China (Beijing) - 638102146993
+            - China (Ningxia) - 037604701340
 
 <!--
             Below is an example policy for the bucket in **regions available as of August 2022 or later**,
@@ -134,3 +151,4 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 -->
 
 [alb-permission]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
+[alb-headless-authentication-client]: https://github.com/aws-samples/alb-headless-authentication-client

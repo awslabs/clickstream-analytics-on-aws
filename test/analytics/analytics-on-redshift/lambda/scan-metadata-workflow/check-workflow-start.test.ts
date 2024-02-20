@@ -71,6 +71,7 @@ describe('Lambda - check workflow start', () => {
       scanEndDate: '2023-10-26',
       jobStartTimestamp: 1698330523913,
       scanStartDate: '',
+      eventSource: 'LoadDataFlow',
     });
   });
 
@@ -165,6 +166,7 @@ describe('Lambda - check workflow start', () => {
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
+      eventSource: 'LoadDataFlow',
       scanEndDate: '2023-10-27',
       jobStartTimestamp: 1698416923914,
       scanStartDate: '2023-10-24',
@@ -186,6 +188,7 @@ describe('Lambda - check workflow start', () => {
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
+      eventSource: '',
       scanEndDate: '2023-10-20',
       jobStartTimestamp: 1698416923914,
       scanStartDate: '2023-10-10',
@@ -208,6 +211,7 @@ describe('Lambda - check workflow start', () => {
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
+      eventSource: '',
       scanEndDate: '2023-10-27',
       jobStartTimestamp: 1698416923914,
       scanStartDate: '',

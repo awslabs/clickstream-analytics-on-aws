@@ -12,9 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
-import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Aws, aws_iam as iam, aws_lambda, Duration, Stack, CfnResource } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import {
   Choice,
@@ -31,19 +29,21 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { StackActionStateMachineFuncProps } from './stack-action-state-machine-construct';
-import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
-import { cloudWatchSendLogs, createENI } from '../../common/lambda';
+import { LambdaFunctionNetworkProps } from './click-stream-api';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
+import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface StackWorkflowStateMachineProps {
   readonly stateActionMachine: StateMachine;
   readonly targetToCNRegions?: boolean;
-  readonly lambdaFuncProps: StackActionStateMachineFuncProps;
+  readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly workflowBucket: IBucket;
+  readonly iamRolePrefix: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
 }
 
 export class StackWorkflowStateMachine extends Construct {
@@ -56,46 +56,30 @@ export class StackWorkflowStateMachine extends Construct {
     const stackWorkflowMachineName = `clickstream-stack-workflow-${getShortIdOfStack(Stack.of(scope))}`;
     const stackWorkflowMachineNameArn = `arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:stateMachine:${stackWorkflowMachineName}`;
 
-    // Create a role for lambda
-    const workflowFunctionRole = new Role(this, 'WorkflowFunctionRole', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-    });
-    const cfnPolicy = new iam.Policy(this, 'WorkflowCFNPolicy', {
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
-          actions: [
-            'cloudformation:DescribeStacks',
-          ],
-        }),
-      ],
-    });
-    cfnPolicy.attachToRole(workflowFunctionRole);
+    const cfnPolicyStatements = [
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/${props.conditionStringStackPrefix}*`],
+        actions: [
+          'cloudformation:DescribeStacks',
+        ],
+      }),
+    ];
 
+    const deployInVpc = props.lambdaFunctionNetwork.vpc !== undefined;
     const workflowFunction = new SolutionNodejsFunction(this, 'WorkflowFunction', {
       description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-workflow/index.ts'),
       handler: 'handler',
-      runtime: Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
-      role: workflowFunctionRole,
-      architecture: Architecture.X86_64,
+      role: createLambdaRole(this, 'WorkflowFunctionRole', deployInVpc, cfnPolicyStatements),
       timeout: Duration.seconds(15),
-      environment: {
-        ...POWERTOOLS_ENVS,
-      },
-      ...props.lambdaFuncProps,
+      ...props.lambdaFunctionNetwork,
     });
     props.workflowBucket.grantReadWrite(workflowFunction, 'clickstream/*');
 
-    cloudWatchSendLogs('workflow-func-logs', workflowFunction);
-    createENI('workflow-func-eni', workflowFunction);
-    addCfnNagToStack(Stack.of(this), [
-      ruleForLambdaVPCAndReservedConcurrentExecutions(
-        'StackWorkflowStateMachine/WorkflowFunction/Resource',
-        'WorkflowFunction',
-      ),
+    addCfnNagSuppressRules(workflowFunction.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('portal_fn'),
     ]);
 
     const inputTask = new LambdaInvoke(this, 'InputTask', {
@@ -143,13 +127,13 @@ export class StackWorkflowStateMachine extends Construct {
       maxConcurrency: 1,
       itemsPath: JsonPath.stringAt('$'),
     });
-    serialMap.iterator(serialCallSelf);
+    serialMap.itemProcessor(serialCallSelf);
 
     const parallelMap = new SFNMap(this, 'ParallelMap', {
       maxConcurrency: 40,
       itemsPath: JsonPath.stringAt('$'),
     });
-    parallelMap.iterator(parallelCallSelf);
+    parallelMap.itemProcessor(parallelCallSelf);
 
     const pass = new Pass(this, 'Pass');
 
@@ -177,22 +161,5 @@ export class StackWorkflowStateMachine extends Construct {
       tracingEnabled: true,
       timeout: Duration.days(3),
     });
-
-    const wildcardResources = ruleRolePolicyWithWildcardResources('StackWorkflowStateMachine/Role/DefaultPolicy/Resource', 'StackWorkflowStateMachine', 'xray/logs');
-    addCfnNagToStack(Stack.of(this), [
-      {
-        paths_endswith: wildcardResources.paths_endswith,
-        rules_to_suppress: [
-          ...wildcardResources.rules_to_suppress,
-          {
-            id: 'W76',
-            reason: 'The state machine default policy document create by many CallAwsService.',
-          },
-        ],
-      },
-    ]);
-    addCfnNagToStack(Stack.of(this), [
-      ruleRolePolicyWithWildcardResources('WorkflowFunctionRole/DefaultPolicy/Resource', 'WorkflowFunInStateAction', 'xray'),
-    ]);
   }
 }

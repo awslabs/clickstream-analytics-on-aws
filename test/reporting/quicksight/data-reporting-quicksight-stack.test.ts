@@ -511,6 +511,39 @@ describe('DataReportingQuickSightStack resource test', () => {
               ],
             },
           },
+          {
+            Action: [
+              'quicksight:CreateFolderMembership',
+              'quicksight:DeleteFolderMembership',
+              'quicksight:DescribeFolder',
+              'quicksight:CreateFolder',
+              'quicksight:DeleteFolder',
+              'quicksight:UpdateFolder',
+              'quicksight:UpdateFolderPermissions',
+              'quicksight:ListFolderMembers',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':folder/clickstream*',
+                ],
+              ],
+            },
+          },
         ],
         Version: '2012-10-17',
       },
@@ -537,6 +570,13 @@ describe('DataReportingQuickSightStack resource test', () => {
         POWERTOOLS_LOGGER_LOG_EVENT: 'true',
         LOG_LEVEL: 'WARN',
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      },
+    },
+    LoggingConfig: {
+      LogFormat: 'JSON',
+      ApplicationLogLevel: 'INFO',
+      LogGroup: {
+        Ref: 'QuicksightCustomResourceLambdalog376BFB51',
       },
     },
     Handler: 'index.handler',
@@ -605,26 +645,9 @@ describe('DataReportingQuickSightStack resource test', () => {
     Timeout: 900,
   }, 1);
 
-  template.resourcePropertiesCountIs('Custom::LogRetention', {
-    ServiceToken: {
-      'Fn::GetAtt': [
-        Match.stringLikeRegexp('LogRetention[a-zA-Z0-9]+'),
-        'Arn',
-      ],
-    },
-    LogGroupName: {
-      'Fn::Join': [
-        '',
-        [
-          '/aws/lambda/',
-          {
-            Ref: Match.stringLikeRegexp('QuicksightCustomResourceLambda[a-zA-Z0-9]+'),
-          },
-        ],
-      ],
-    },
+  template.resourcePropertiesCountIs('AWS::Logs::LogGroup', {
     RetentionInDays: 7,
-  }, 1);
+  }, 2);
 
   template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
     AwsAccountId: {
@@ -704,7 +727,6 @@ describe('DataReportingQuickSightStack resource test', () => {
       ],
     },
   }, 1);
-
 
   template.resourcePropertiesCountIs('AWS::QuickSight::DataSource', {
     AwsAccountId: {
@@ -873,6 +895,41 @@ describe('DataReportingQuickSightStack resource test', () => {
             'Arn',
           ],
         },
+        templateId: {
+          'Fn::Join': [
+            '',
+            [
+              'clickstream_template_',
+              {
+                Ref: 'RedshiftDBParam',
+              },
+              '_',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
         dataSourceArn: {
           'Fn::GetAtt': [
             'ClickstreamDataSource',
@@ -988,7 +1045,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Retention_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v2',
             columns: [
               {
                 Name: 'first_date',
@@ -1017,7 +1074,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Session_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'session_id',
@@ -1070,6 +1127,16 @@ describe('DataReportingQuickSightStack resource test', () => {
               {
                 Name: 'exit_view',
                 Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
@@ -1155,7 +1222,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_event_view_v2 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'event_date',
@@ -1346,6 +1413,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             tagColumnOperations: [
               {
                 columnName: 'geo_country',
@@ -1419,7 +1496,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Device_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_device_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_device_view_v1 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'device_id',
@@ -1518,6 +1595,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'device_id',
               'event_date',
@@ -1548,7 +1635,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_Parameter_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'event_id',
@@ -1603,6 +1690,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'event_id',
               'event_name',
@@ -1622,7 +1719,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Daily_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'time_period',
@@ -1637,6 +1734,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'time_period',
               'this_day_value',
@@ -1646,7 +1753,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Weekly_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1',
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v2 where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
             columns: [
               {
                 Name: 'time_period',
@@ -1661,12 +1768,41 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'time_period',
               'this_week_value',
               'sum',
             ],
           },
+        ],
+      },
+    }, 1);
+
+  template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource',
+    {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          'NetworkInterfaceCheckCustomResourceProviderframeworkonEvent123C1881',
+          'Arn',
+        ],
+      },
+      awsRegion: {
+        Ref: 'AWS::Region',
+      },
+      networkInterfaces: {
+        'Fn::GetAtt': [
+          'ClickstreamVPCConnectionResource',
+          'NetworkInterfaces',
         ],
       },
     }, 1);

@@ -15,6 +15,7 @@ import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
+import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
@@ -25,6 +26,7 @@ import {
   IUserRole,
 } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
+import { IMetadataBuiltInList } from './explore-types';
 
 /**
  * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
@@ -69,7 +71,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
   return [];
 };
 
-export const alertMsg = (alertTxt: string, alertType: AlertType) => {
+export const alertMsg = (alertTxt: string, alertType: AlertType = 'error') => {
   const patchEvent = new CustomEvent('showAlertMsg', {
     detail: {
       alertTxt,
@@ -293,8 +295,8 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return (
     update &&
-    (pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-      pipelineInfo?.status?.status === EPipelineStatus.Active)
+    (pipelineInfo?.statusType === EPipelineStatus.Failed ||
+      pipelineInfo?.statusType === EPipelineStatus.Active)
   );
 };
 
@@ -333,7 +335,7 @@ export const getValueFromStackOutputs = (
   keys: string[]
 ) => {
   const res: Map<string, string> = new Map<string, string>();
-  const stackDetail = pipeline.status?.stackDetails?.find(
+  const stackDetail = pipeline.stackDetails?.find(
     (s) => s.stackType === stackType
   );
   if (!stackDetail) {
@@ -381,17 +383,53 @@ export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
 };
 
 export const getEventParameters = (
+  metadataEventParameters: IMetadataEventParameter[],
   metadataEvents: IMetadataEvent[],
+  builtInMetadata?: IMetadataBuiltInList,
   eventName?: string
 ) => {
   if (!eventName) {
     return [];
   }
+  if (metadataEventParameters?.[0]?.eventNames?.length > 0) {
+    const associatedParameters = metadataEventParameters.filter((p) =>
+      p.eventNames.includes(eventName)
+    );
+    patchBuiltInMetadata(eventName, associatedParameters, builtInMetadata);
+    return associatedParameters;
+  }
   const event = metadataEvents.find((item) => item.name === eventName);
   if (event) {
-    return event.associatedParameters ?? [];
+    const associatedParameters = event.associatedParameters ?? [];
+    patchBuiltInMetadata(eventName, associatedParameters, builtInMetadata);
+    return associatedParameters;
   }
   return [];
+};
+
+const patchBuiltInMetadata = (
+  eventName: string,
+  metadataEventParameters: IMetadataEventParameter[],
+  builtInMetadata?: IMetadataBuiltInList
+) => {
+  if (!builtInMetadata) {
+    return metadataEventParameters;
+  }
+  const presetEventParameters = builtInMetadata.PresetEventParameters;
+  for (const parameter of metadataEventParameters) {
+    const presetParameter = presetEventParameters.find(
+      (item) =>
+        item.name === parameter.name &&
+        item.eventName === eventName &&
+        item.category === parameter.category &&
+        item.dataType === parameter.valueType
+    );
+    if (presetParameter) {
+      const localeLng = getLngFromLocalStorage();
+      parameter.displayName = (presetParameter.displayName as any)[localeLng];
+      parameter.description = (presetParameter.description as any)[localeLng];
+    }
+  }
 };
 
 export const getUserInfoFromLocalStorage = () => {
@@ -448,4 +486,22 @@ export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
   return roles.some(
     (role) => role === IUserRole.ANALYST || role === IUserRole.ADMIN
   );
+};
+
+export const getProjectAppFromOptions = (
+  projectId: string,
+  appId: string,
+  projectGroupOptions: SelectProps.OptionGroup[]
+) => {
+  for (const projectOption of projectGroupOptions) {
+    const appOptions = projectOption.options as IProjectSelectItem[];
+    for (const appOption of appOptions) {
+      if (appOption.projectId === projectId && appOption.appId === appId) {
+        return {
+          ...appOption,
+          disabled: projectOption.disabled,
+        };
+      }
+    }
+  }
 };

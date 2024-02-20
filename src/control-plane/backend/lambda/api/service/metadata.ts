@@ -12,15 +12,31 @@
  */
 
 import { CMetadataDisplay } from './display';
+import { PipelineServ } from './pipeline';
+import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '../common/constants-ln';
+import { ConditionCategory, MetadataValueType } from '../common/explore-types';
+import { MetadataVersionType, PipelineStackType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupByParameterByName, pathNodesToAttribute } from '../common/utils';
-import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { groupAssociatedEventParametersByName, groupByParameterByName, getMetadataVersionType, pathNodesToAttribute, getLocalDateISOString, getStackOutputFromPipelineStatus } from '../common/utils';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { startExecution } from '../store/aws/sfn';
+import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 import { MetadataStore } from '../store/metadata-store';
 
 const metadataStore: MetadataStore = new DynamoDbMetadataStore();
 const metadataDisplay: CMetadataDisplay = new CMetadataDisplay();
+const pipelineServ: PipelineServ = new PipelineServ();
+const clickStreamStore: ClickStreamStore = new DynamoDbStore();
 
+const getVersionType = async (projectId: string) => {
+  const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+  if (!pipeline) {
+    return MetadataVersionType.UNSUPPORTED;
+  }
+  return getMetadataVersionType(pipeline);
+};
 export class MetadataEventServ {
 
   public async updateDisplay(req: any, res: any, next: any) {
@@ -28,7 +44,7 @@ export class MetadataEventServ {
       const { projectId, appId, id, displayName, description } = req.body;
       const result = await metadataDisplay.update({ id, projectId, appId, description, displayName } as IMetadataDisplay);
       if (!result) {
-        res.json(new ApiSuccess(null, 'Updated failed.'));
+        res.json(new ApiFail('Updated failed.'));
       }
       return res.json(new ApiSuccess(null, 'Updated success.'));
     } catch (error) {
@@ -36,39 +52,45 @@ export class MetadataEventServ {
     }
   }
 
-  public async listPathNodes(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId } = req.query;
-      const parameters = await metadataStore.listEventParameters(projectId, appId);
-      const pageTitles: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_title') as IMetadataEventParameter;
-      const pageUrls: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_url') as IMetadataEventParameter;
-      const screenNames: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_name') as IMetadataEventParameter;
-      const screenIds: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_id') as IMetadataEventParameter;
-
-      return res.json(new ApiSuccess({
-        pageTitles: pathNodesToAttribute(pageTitles?.valueEnum),
-        pageUrls: pathNodesToAttribute(pageUrls?.valueEnum),
-        screenNames: pathNodesToAttribute(screenNames?.valueEnum),
-        screenIds: pathNodesToAttribute(screenIds?.valueEnum),
-      }));
-    } catch (error) {
-      next(error);
+  private async listRawEvents(projectId: string, appId: string, associated: boolean, metadataVersion: MetadataVersionType) {
+    let rawEvents: IMetadataEvent[] = [];
+    if (metadataVersion === MetadataVersionType.V2) {
+      rawEvents = await metadataStore.listEventsV2(projectId, appId);
+    } else {
+      rawEvents = await metadataStore.listEvents(projectId, appId);
+      if (associated) {
+        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
+        rawEvents = groupAssociatedEventParametersByName(rawEvents, eventParameters);
+      }
     }
-  };
+    return rawEvents;
+  }
+
+  private async getRawEvent(projectId: string, appId: string, name: string, metadataVersion: MetadataVersionType) {
+    let event: IMetadataEvent | undefined;
+    if (metadataVersion === MetadataVersionType.V2) {
+      event = await metadataStore.getEventV2(projectId, appId, name);
+    } else {
+      event = await metadataStore.getEvent(projectId, appId, name);
+      if (!event) {
+        return event;
+      }
+      let eventParameters = await metadataStore.listEventParameters(projectId, appId);
+      eventParameters = groupByParameterByName(eventParameters, name);
+      event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
+    }
+    return event;
+  }
 
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, attribute } = req.query;
-      let events = await metadataStore.listEvents(projectId, appId);
       const associated = attribute && attribute === 'true';
-      if (associated) {
-        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
-        events = groupAssociatedEventParametersByName(events, eventParameters);
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
       }
+      let events = await this.listRawEvents(projectId, appId, associated, metadataVersion);
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
       return res.json(new ApiSuccess({
         totalCount: events.length,
@@ -83,28 +105,134 @@ export class MetadataEventServ {
     try {
       const { name } = req.params;
       const { projectId, appId } = req.query;
-      let event = await metadataStore.getEvent(projectId, appId, name);
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
+      }
+      let event = await this.getRawEvent(projectId, appId, name, metadataVersion);
       if (!event) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      let eventParameters = await metadataStore.listEventParameters(projectId, appId);
-      eventParameters = groupByParameterByName(eventParameters, name);
-      event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
       event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
       next(error);
     }
   };
+
+  public async trigger(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.body;
+      const trigger = await clickStreamStore.isManualTrigger(projectId, appId);
+      if (trigger) {
+        return res.status(429).json(new ApiFail('Do not trigger metadata scans frequently, please try again in 10 minutes.'));
+      }
+      const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      const scanMetadataWorkflowArn = getStackOutputFromPipelineStatus(
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
+      );
+      if (!scanMetadataWorkflowArn) {
+        return res.status(400).json(new ApiFail('Scan metadata workflow not found'));
+      }
+      await startExecution(
+        pipeline.region,
+        scanMetadataWorkflowArn,
+        `manual-trigger-${new Date().getTime()}`,
+        JSON.stringify({
+          scanStartDate: getLocalDateISOString(new Date(), -7),
+          scanEndDate: getLocalDateISOString(new Date()),
+          appIdList: appId,
+        }),
+      );
+      await clickStreamStore.saveManualTrigger(projectId, appId);
+      return res.json(new ApiSuccess(null, 'Trigger success'));
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+interface IPathNodes {
+  pageTitles: IMetadataAttributeValue[];
+  pageUrls: IMetadataAttributeValue[];
+  screenNames: IMetadataAttributeValue[];
+  screenIds: IMetadataAttributeValue[];
 }
 
 export class MetadataEventParameterServ {
+  private async listRawParameters(projectId: string, appId: string, metadataVersion: MetadataVersionType) {
+    let rawEventParameters: IMetadataEventParameter[] = [];
+    if (metadataVersion === MetadataVersionType.V2) {
+      rawEventParameters = await metadataStore.listEventParametersV2(projectId, appId);
+    } else {
+      const results = await metadataStore.listEventParameters(projectId, appId);
+      rawEventParameters = groupByParameterByName(results);
+    }
+    return rawEventParameters;
+  }
+
+  private async getRawEventParameter(projectId: string, appId: string,
+    name: string, category: ConditionCategory, type: MetadataValueType, metadataVersion: MetadataVersionType) {
+    let parameter: IMetadataEventParameter | undefined;
+    if (metadataVersion === MetadataVersionType.V2) {
+      parameter = await metadataStore.getEventParameterV2(projectId, appId, name, category, type);
+    } else {
+      parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
+    }
+    return parameter;
+  }
+
+  private filterPathNodes(parameters: IMetadataEventParameter[]) {
+    const pathNodes: IPathNodes = {
+      pageTitles: [],
+      pageUrls: [],
+      screenNames: [],
+      screenIds: [],
+    };
+    const pageTitles =
+      parameters.find((p: IMetadataEventParameter) => p.name === '_page_title') as IMetadataEventParameter;
+    const pageUrls =
+      parameters.find((p: IMetadataEventParameter) => p.name === '_page_url') as IMetadataEventParameter;
+    const screenNames =
+      parameters.find((p: IMetadataEventParameter) => p.name === '_screen_name') as IMetadataEventParameter;
+    const screenIds =
+      parameters.find((p: IMetadataEventParameter) => p.name === '_screen_id') as IMetadataEventParameter;
+    pathNodes.pageTitles = pathNodesToAttribute(pageTitles?.valueEnum);
+    pathNodes.pageUrls = pathNodesToAttribute(pageUrls?.valueEnum);
+    pathNodes.screenNames = pathNodesToAttribute(screenNames?.valueEnum);
+    pathNodes.screenIds = pathNodesToAttribute(screenIds?.valueEnum);
+    return pathNodes;
+  }
+
+  public async listPathNodes(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.query;
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
+      }
+      const rawParameters = await this.listRawParameters(projectId, appId, metadataVersion);
+      const results = this.filterPathNodes(rawParameters);
+      return res.json(new ApiSuccess(results));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      let results = await metadataStore.listEventParameters(projectId, appId);
-      results = groupByParameterByName(results);
-      results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
+      }
+      const parameters = await this.listRawParameters(projectId, appId, metadataVersion);
+      const results = await metadataDisplay.patch(projectId, appId, parameters) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,
         items: results,
@@ -117,7 +245,11 @@ export class MetadataEventParameterServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { projectId, appId, name, category, type } = req.query;
-      let parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
+      }
+      let parameter = await this.getRawEventParameter(projectId, appId, name, category, type, metadataVersion);
       if (!parameter) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
@@ -127,35 +259,43 @@ export class MetadataEventParameterServ {
       next(error);
     }
   };
+
+  public async builtInMetadata(_req: any, res: any, next: any) {
+    try {
+      const results = await metadataDisplay.getBuiltList();
+      return res.json(new ApiSuccess(results));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export class MetadataUserAttributeServ {
+  private async listRawUserAttributes(projectId: string, appId: string, metadataVersion: MetadataVersionType) {
+    let rawUserAttributes: IMetadataUserAttribute[] = [];
+    if (metadataVersion === MetadataVersionType.V2) {
+      rawUserAttributes = await metadataStore.listUserAttributesV2(projectId, appId);
+    } else {
+      rawUserAttributes = await metadataStore.listUserAttributes(projectId, appId);
+    }
+    return rawUserAttributes;
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      const results = await metadataStore.listUserAttributes(projectId, appId);
-      const attributes = await metadataDisplay.patch(projectId, appId, results) as IMetadataUserAttribute[];
+      const metadataVersion = await getVersionType(projectId);
+      if (metadataVersion === MetadataVersionType.UNSUPPORTED) {
+        return res.status(400).json(new ApiFail('The current version does not support.'));
+      }
+      const attributes = await this.listRawUserAttributes(projectId, appId, metadataVersion);
+      const results = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
-        items: attributes,
+        items: results,
       }));
     } catch (error) {
       next(error);
     }
   };
-
-  public async details(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId, name, type } = req.query;
-      let attribute = await metadataStore.getUserAttribute(projectId, appId, name, type);
-      if (!attribute) {
-        return res.status(404).json(new ApiFail('User attribute not found'));
-      }
-      attribute = (await metadataDisplay.patch(projectId, appId, [attribute]) as IMetadataUserAttribute[])[0];
-      return res.json(new ApiSuccess(attribute));
-    } catch (error) {
-      next(error);
-    }
-  };
-
 }

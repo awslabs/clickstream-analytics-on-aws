@@ -26,11 +26,14 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   dataProcessingCronOrRateExpression: string;
   loadDataWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
+  scanWorkflowMinInterval: string;
   clearExpiredEventsWorkflow: IStateMachine;
+  sqlExecutionWorkflow: IStateMachine;
 }) {
 
   const processingJobInterval = new GetInterval(scope, 'dataProcess', {
     expression: props.dataProcessingCronOrRateExpression,
+    scanWorkflowMinInterval: props.scanWorkflowMinInterval,
   });
 
   const statesNamespace = 'AWS/States';
@@ -45,6 +48,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
   const clearExpiredEventsWorkflowDimension = [
     'StateMachineArn', props.clearExpiredEventsWorkflow.stateMachineArn,
+  ];
+
+  const sqlExecutionWorkflowDimension = [
+    'StateMachineArn', props.sqlExecutionWorkflow.stateMachineArn,
   ];
 
   const customNamespace = MetricsNamespace.REDSHIFT_ANALYTICS;
@@ -73,7 +80,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmDescription: `Scan metadata workflow failed, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Scan Metadata Workflow'),
   });
-  (scanMetadataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
+  (scanMetadataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getScanWorkflowMinIntervalSeconds());
 
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -105,6 +112,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         alarms: [
           loadDataWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
+          scanMetadataWorkflowAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
       },
@@ -116,6 +124,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
     [scanMetadataWorkflowDimension, 'Scan metadata'],
+    [sqlExecutionWorkflowDimension, 'SQL execution'],
   ].flatMap(dimName => {
     return [
       {

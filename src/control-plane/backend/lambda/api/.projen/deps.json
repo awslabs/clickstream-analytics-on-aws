@@ -1,6 +1,11 @@
 {
   "dependencies": [
     {
+      "name": "@types/aws-lambda",
+      "version": "^8.10.110",
+      "type": "build"
+    },
+    {
       "name": "@types/express",
       "version": "^4.17.16",
       "type": "build"
@@ -12,6 +17,11 @@
     {
       "name": "@types/jsonpath-plus",
       "version": "^5.0.2",
+      "type": "build"
+    },
+    {
+      "name": "@types/lodash",
+      "version": "^4.14.202",
       "type": "build"
     },
     {
@@ -46,12 +56,12 @@
     },
     {
       "name": "aws-sdk-client-mock-jest",
-      "version": "^2.1.1",
+      "version": "^3.0.1",
       "type": "build"
     },
     {
       "name": "aws-sdk-client-mock",
-      "version": "^2.1.1",
+      "version": "^3.0.1",
       "type": "build"
     },
     {
@@ -69,6 +79,11 @@
       "type": "build"
     },
     {
+      "name": "lodash",
+      "version": "^4.17.21",
+      "type": "build"
+    },
+    {
       "name": "mock-fs",
       "version": "^5.2.0",
       "type": "build"
@@ -76,11 +91,6 @@
     {
       "name": "nodemon",
       "version": "^2.0.20",
-      "type": "build"
-    },
-    {
-      "name": "npm-check-updates",
-      "version": "^16",
       "type": "build"
     },
     {
@@ -107,12 +117,12 @@
     },
     {
       "name": "@aws-lambda-powertools/logger",
-      "version": "^1.8.0",
+      "version": "^1.17.0",
       "type": "runtime"
     },
     {
       "name": "@aws-lambda-powertools/metrics",
-      "version": "^1.8.0",
+      "version": "^1.17.0",
       "type": "runtime"
     },
     {
@@ -121,12 +131,12 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-athena",
+      "name": "@aws-sdk/client-cloudformation",
       "version": "^3.405.0",
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-cloudformation",
+      "name": "@aws-sdk/client-cloudwatch-events",
       "version": "^3.405.0",
       "type": "runtime"
     },
@@ -146,22 +156,12 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-emr-serverless",
-      "version": "^3.405.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-iam",
       "version": "^3.405.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.405.0",
-      "type": "runtime"
-    },
-    {
-      "name": "@aws-sdk/client-kafkaconnect",
       "version": "^3.405.0",
       "type": "runtime"
     },
@@ -206,6 +206,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "version": "^3.405.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sts",
       "version": "^3.405.0",
       "type": "runtime"
@@ -246,11 +251,6 @@
       "type": "runtime"
     },
     {
-      "name": "@types/aws-lambda",
-      "version": "^8.10.110",
-      "type": "runtime"
-    },
-    {
       "name": "cidr-block",
       "version": "^1.3.2",
       "type": "runtime"
@@ -273,6 +273,11 @@
     {
       "name": "fast-memoize",
       "version": "^2.5.1",
+      "type": "runtime"
+    },
+    {
+      "name": "hpagent",
+      "version": "^1.2.0",
       "type": "runtime"
     },
     {

@@ -31,7 +31,7 @@ import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
@@ -39,7 +39,11 @@ const AnalyticsDashboardDetail: React.FC = () => {
   const { dashboardId, projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
-  const [dashboard, setDashboard] = useState({} as IAnalyticsDashboard);
+  const [dashboard, setDashboard] = useState({
+    name: '',
+    description: '',
+    embedUrl: '',
+  } as IAnalyticsDashboard);
   const dispatch = useContext(DispatchContext);
   const state = useContext(StateContext);
   const getAnalyticsDashboardDetails = async () => {
@@ -69,9 +73,17 @@ const AnalyticsDashboardDetail: React.FC = () => {
   }, [dashboardId]);
 
   const getDashboardName = () => {
-    return dashboard.name === DEFAULT_DASHBOARD_NAME
-      ? `${DEFAULT_DASHBOARD_NAME} - default`
+    return dashboard?.name?.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX)
+      ? `${t('analytics:dashboard.defaultUserLifecycle')} - ${t(
+          'analytics:dashboard.defaultTag'
+        )}`
       : dashboard.name;
+  };
+
+  const getDashboardDescription = () => {
+    return dashboard?.name?.startsWith(DEFAULT_DASHBOARD_NAME_PREFIX)
+      ? `${t('analytics:dashboard.defaultUserLifecycleDescription')}`
+      : dashboard.description;
   };
 
   const breadcrumbItems = [
@@ -118,10 +130,12 @@ const AnalyticsDashboardDetail: React.FC = () => {
                 <SpaceBetween size="m">
                   <Header
                     variant="h1"
-                    description={dashboard.description}
+                    description={getDashboardDescription()}
                     info={
                       <>
-                        {dashboard.name === DEFAULT_DASHBOARD_NAME ? (
+                        {dashboard.name.startsWith(
+                          DEFAULT_DASHBOARD_NAME_PREFIX
+                        ) ? (
                           <InfoLink
                             onFollow={() => {
                               dispatch?.({
@@ -146,7 +160,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                       </SpaceBetween>
                     }
                   >
-                    {dashboard.name}
+                    {getDashboardName()}
                   </Header>
                 </SpaceBetween>
               }
@@ -158,6 +172,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="dashboard"
                     embedUrl={dashboardEmbedUrl}
+                    embedPage="dashboard"
                   />
                 )}
               </Container>

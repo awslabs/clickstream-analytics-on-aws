@@ -18,7 +18,7 @@
     "_corrupt_record" : null,
     "gtmId" : "G-7W7D6ZHG1T",
     "gtmVersion" : "45je3b81v9137860177",
-    "event_id" : "0-1700462767-22",
+    "event_id" : "0-1700462767-0",
     "user_id" : null,
     "event_name" : "product_exposure",
     "ip" : "72.21.198.65",
@@ -106,14 +106,6 @@
         "string_value" : "1"
       }
     }, {
-      "key" : "engagement_time_msec",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 14,
-        "string_value" : null
-      }
-    }, {
       "key" : "event_location.region",
       "value" : {
         "double_value" : null,
@@ -186,20 +178,20 @@
         "string_value" : "false"
       }
     }, {
+      "key" : "_session_duration",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 0,
+        "string_value" : null
+      }
+    }, {
       "key" : "x-ga-mp2-gcd",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
         "string_value" : "11l1l1l1l1"
-      }
-    }, {
-      "key" : "ga_session_number",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : 22,
-        "string_value" : null
       }
     }, {
       "key" : "screen_resolution",
@@ -240,6 +232,22 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1700462767"
+      }
+    }, {
+      "key" : "_session_number",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 22,
+        "string_value" : null
+      }
+    }, {
+      "key" : "_engagement_time_msec",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 14,
+        "string_value" : null
       }
     }, {
       "key" : "x-ga-protocol_version",
@@ -310,6 +318,8 @@
     "eventItems" : [ ],
     "user" : null,
     "requestStartTimeMs" : 1700463874488,
-    "uc" : "US"
+    "uc" : "US",
+    "gtmSessionId" : "1700462767",
+    "gtmSessionNum" : 0
   }
 }

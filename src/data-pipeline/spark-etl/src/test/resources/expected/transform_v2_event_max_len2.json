@@ -1,0 +1,87 @@
+{
+  "event_id" : "event_idevent_idevent_idevent_idevent_idevent_idevent_idevent_idevent_id1fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39",
+  "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
+  "event_previous_timestamp" : null,
+  "event_name" : "_profile_set",
+  "event_value_in_usd" : null,
+  "event_bundle_sequence_id" : 111,
+  "ingest_timestamp" : 1682319109403,
+  "device" : {
+    "mobile_brand_name" : "Brand HUAWEI",
+    "mobile_model_name" : "HUAWEI-P10",
+    "manufacturer" : "Make HUAWEI",
+    "screen_width" : 1080,
+    "screen_height" : 2259,
+    "carrier" : "CDMA",
+    "network_type" : "Mobile",
+    "operating_system_version" : "os-v1.0",
+    "operating_system" : "ANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROID",
+    "ua_browser" : null,
+    "ua_browser_version" : null,
+    "ua_os" : null,
+    "ua_os_version" : null,
+    "ua_device" : null,
+    "ua_device_category" : null,
+    "system_language" : "zh",
+    "time_zone_offset_seconds" : 28800,
+    "vendor_id" : "deviceid-1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id",
+    "advertising_id" : "device_unique_iddevice_unique_iddevice_unique_iduf24bec657ea8eff7-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe45780771519883e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198",
+    "host_name" : "https://host-name-001.com",
+    "viewport_width" : null,
+    "viewport_height" : null
+  },
+  "geo" : {
+    "country" : null,
+    "continent" : null,
+    "sub_continent" : null,
+    "locale" : "zh_CN_#Hans",
+    "region" : null,
+    "metro" : null,
+    "city" : null
+  },
+  "traffic_source" : {
+    "medium" : "TSM-_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium",
+    "name" : "TSN-_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name",
+    "source" : "TSS-_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source"
+  },
+  "app_info" : {
+    "app_id" : "maxLenTestItemUser",
+    "id" : "com.example.demoapplication",
+    "install_source" : "_channel_channel_channel_channelC001-312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121",
+    "version" : "1.0",
+    "sdk_version" : "0.2.0",
+    "sdk_name" : "aws-solution-clickstream-sdk"
+  },
+  "platform" : "ANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDAND",
+  "project_id" : "test_project_id_01",
+  "items" : [ {
+    "id" : "item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1item_id1",
+    "quantity" : 42,
+    "price" : 52.99,
+    "currency" : null,
+    "creative_name" : "Creative Name",
+    "creative_slot" : "Creative Slot"
+  }, {
+    "id" : "d3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3l",
+    "quantity" : null,
+    "price" : 52.99,
+    "currency" : null,
+    "creative_name" : null,
+    "creative_slot" : null
+  }, {
+    "id" : "item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3item_id034394ldmf3",
+    "quantity" : 19,
+    "price" : 42.33,
+    "currency" : null,
+    "creative_name" : "Creative Name 3",
+    "creative_slot" : "Creative Slot 3"
+  } ],
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-98",
+  "user_id" : "_user_id_user_id_user_id312121-312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121-3121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213",
+  "ua" : "Apache-HttpClient/4.5.12 (Java/11.0.15)",
+  "geo_for_enrich" : {
+    "ip" : "13.212.229.59",
+    "locale" : "zh_CN_#Hans"
+  }
+}

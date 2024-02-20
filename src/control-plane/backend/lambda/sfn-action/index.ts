@@ -62,7 +62,6 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: SfnStackEvent, _context: any): Promise<any> => {
-  logger.info('Lambda is invoked', JSON.stringify(event, null, 2));
   if (event.Action === StackAction.CREATE) {
     return createStack(event);
   } else if (event.Action === StackAction.UPDATE) {

@@ -36,8 +36,7 @@ const commonApp = new TestApp(cdkOut);
 const frontendProps = {
   assetPath: 'frontend',
   dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-  buildCommand: [
-    'bash', '-c',
+  buildCommands: [
     'echo test > /asset-output/test',
   ],
   autoInvalidFilePaths: ['/index.html'],
@@ -156,7 +155,7 @@ describe('CloudFrontS3Portal', () => {
     });
 
     //Distribution
-    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 2);
 
     //Lambda function
     commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -255,6 +254,10 @@ describe('CloudFrontS3Portal', () => {
             '',
             [
               'clickstream-controlplane-oac-',
+              {
+                Ref: 'AWS::Region',
+              },
+              '-',
               {
                 'Fn::Select': [
                   0,
@@ -638,6 +641,10 @@ test('test cache policy name uniqueness', () => {
           '',
           [
             'cachepolicy-',
+            {
+              Ref: 'AWS::Region',
+            },
+            '-',
             {
               'Fn::Select': [
                 0,

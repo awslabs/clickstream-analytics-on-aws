@@ -41,10 +41,11 @@ import static org.apache.spark.sql.functions.flatten;
 import static org.apache.spark.sql.functions.from_json;
 import static org.apache.spark.sql.functions.get_json_object;
 import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.max;
+import static org.apache.spark.sql.functions.min;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.regexp_extract;
 import static org.apache.spark.sql.functions.struct;
-import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
@@ -55,9 +56,12 @@ import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
+import static software.aws.solution.clickstream.DatasetUtil.DEVICE;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
@@ -73,15 +77,19 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
+import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_MEDIUM;
+import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE_TYPE;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_VISIT_DATE;
+import static software.aws.solution.clickstream.DatasetUtil.GEO;
 import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.DatasetUtil.ID;
+import static software.aws.solution.clickstream.DatasetUtil.INGEST_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
-import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
-import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.NEW_USER_COUNT;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.REFERER;
@@ -92,9 +100,11 @@ import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
 import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
@@ -114,6 +124,10 @@ import static software.aws.solution.clickstream.DatasetUtil.loadFullUserRefererD
 import static software.aws.solution.clickstream.DatasetUtil.readDatasetFromPath;
 import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPath;
 import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEvent;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEventParameter;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForItem;
+import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForUser;
 
 
 @Slf4j
@@ -345,12 +359,15 @@ public final class TransformerV2 {
         Column dataCol = col("data");
 
         Dataset<Row> dataset0 = cleanedDataset.withColumn(APP_ID, dataCol.getField(APP_ID))
+                .withColumn(EVENT_ID, dataCol.getItem(EVENT_ID))
                 .withColumn(USER_PSEUDO_ID, dataCol.getField("unique_id").cast(DataTypes.StringType))
                 .withColumn(EVENT_NAME, dataCol.getField("event_type"))
                 .withColumn(EVENT_DATE, to_date(timestamp_seconds(dataCol.getItem(TIMESTAMP).$div(1000))))
                 .withColumn(EVENT_TIMESTAMP, dataCol.getItem(TIMESTAMP))
+                .withColumn(USER_FIRST_TOUCH_TIMESTAMP, get_json_object(dataCol.getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType))
                 .withColumn(USER_ID, get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType));
         Dataset<Row> dataset1 = convertAppInfo(dataset0);
+
         Dataset<Row> eventDataset = extractEvent(dataset1);
         log.info(new ETLMetric(eventDataset, "eventDataset").toString());
 
@@ -372,10 +389,10 @@ public final class TransformerV2 {
     private Dataset<Row> extractEvent(final Dataset<Row> dataset) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
         Column dataCol = col("data");
-        Dataset<Row> dataset1 = dataset.withColumn(EVENT_ID, dataCol.getItem(EVENT_ID))
-                .withColumn(EVENT_PREVIOUS_TIMESTAMP, dataCol.getField(EVENT_PREVIOUS_TIMESTAMP).cast(DataTypes.LongType))
+        Dataset<Row> dataset1 = dataset.withColumn(EVENT_PREVIOUS_TIMESTAMP, dataCol.getField(EVENT_PREVIOUS_TIMESTAMP).cast(DataTypes.LongType))
                 .withColumn(EVENT_VALUE_IN_USD, dataCol.getItem(EVENT_VALUE_IN_USD).cast(DataTypes.FloatType))
-                .withColumn(PLATFORM, dataCol.getItem(PLATFORM)).withColumn("project_id", lit(projectId))
+                .withColumn(PLATFORM, dataCol.getItem(PLATFORM))
+                .withColumn("project_id", lit(projectId))
                 .withColumn("ingest_timestamp", col("ingest_time"));
 
         Dataset<Row> dataset2 = convertUri(dataset1, "event_bundle_sequence_id", DataTypes.LongType);
@@ -383,53 +400,70 @@ public final class TransformerV2 {
         Dataset<Row> dataset4 = convertGeo(dataset3);
         Dataset<Row> dataset5 = convertTrafficSource(dataset4);
         Dataset<Row> datasetFinal = convertItems(dataset5);
+
+        Column[] selectedColumns = new Column[]{
+                col(EVENT_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(EVENT_PREVIOUS_TIMESTAMP),
+                col(EVENT_NAME),
+                col(EVENT_VALUE_IN_USD),
+                col(EVENT_BUNDLE_SEQUENCE_ID),
+                col(INGEST_TIMESTAMP),
+                col(DEVICE),
+                col(GEO),
+                col(TRAFFIC_SOURCE),
+                col(APP_INFO),
+                col(PLATFORM),
+                col(PROJECT_ID),
+                col(ITEMS),
+                col(USER_PSEUDO_ID),
+                col(USER_ID),
+                col(UA),
+                col(GEO_FOR_ENRICH),
+        };
+
+        Dataset<Row> datasetFinal2 = datasetFinal.select(selectedColumns);
+
+        Dataset<Row> datasetFinal3 = runMaxLengthTransformerForEvent(datasetFinal2);
+
         log.info("extractEvent done");
-        return datasetFinal.select(EVENT_ID,
-                EVENT_DATE,
-                EVENT_TIMESTAMP,
-                EVENT_PREVIOUS_TIMESTAMP,
-                EVENT_NAME,
-                EVENT_VALUE_IN_USD,
-                "event_bundle_sequence_id",
-                "ingest_timestamp",
-                "device",
-                "geo",
-                "traffic_source",
-                APP_INFO,
-                "platform",
-                "project_id",
-                ITEMS,
-                USER_PSEUDO_ID,
-                USER_ID,
-                "ua",
-                GEO_FOR_ENRICH);
+        return datasetFinal3.select(
+                selectedColumns
+        );
+
     }
 
+
+
     private Dataset<Row> extractEventParameter(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
         Dataset<Row> dataset1 = eventParamsConverter.transform(dataset);
         Dataset<Row> dataset2 = dataset1.select(
                 col(APP_ID),
                 col(EVENT_DATE),
                 col(EVENT_TIMESTAMP),
-                dataCol.getItem(EVENT_ID).cast(DataTypes.StringType).alias(EVENT_ID),
+                col(EVENT_ID),
                 col(EVENT_NAME),
                 col("event_params"));
 
-        return explodeKeyValue(dataset2, "event_params", "event_param_")
-                .select(
-                        col(APP_ID),
-                        col(EVENT_DATE),
-                        col(EVENT_TIMESTAMP),
-                        col(EVENT_ID),
-                        col(EVENT_NAME),
-                        col(EVENT_PARAM_KEY),
-                        col(EVENT_PARAM_DOUBLE_VALUE),
-                        col(EVENT_PARAM_FLOAT_VALUE),
-                        col(EVENT_PARAM_INT_VALUE),
-                        substring(col(EVENT_PARAM_STRING_VALUE), 0, MAX_PARAM_STRING_VALUE_LEN).alias(EVENT_PARAM_STRING_VALUE)
-                );
+        Column[] selectColumns = new Column[] {
+                col(APP_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(EVENT_ID),
+                col(EVENT_NAME),
+                col(EVENT_PARAM_KEY),
+                col(EVENT_PARAM_DOUBLE_VALUE),
+                col(EVENT_PARAM_FLOAT_VALUE),
+                col(EVENT_PARAM_INT_VALUE),
+                col(EVENT_PARAM_STRING_VALUE)
+        };
+        Dataset<Row> dataset3 = explodeKeyValue(dataset2, "event_params", "event_param_")
+                .select(selectColumns);
 
+        Dataset<Row> datasetOut = runMaxLengthTransformerForEventParameter(dataset3);
+
+        return datasetOut.select(selectColumns);
     }
 
     private Optional<Dataset<Row>> extractItem(final Dataset<Row> dataset) {
@@ -444,31 +478,40 @@ public final class TransformerV2 {
         excludedAttributes.add(ID);
 
         Dataset<Row> dataset1 = kvConverter.transform(datasetItems, col(itemJson), PROPERTIES, excludedAttributes);
-        Dataset<Row> newItemsDataset = dataset1
+
+        Column[] selectedColumns = new Column[] {
+                col(APP_ID),
+                col(EVENT_DATE),
+                col(EVENT_TIMESTAMP),
+                col(ID),
+                col(PROPERTIES)
+        };
+
+        Dataset<Row> newItemsDataset1 = dataset1
                 .withColumn(ID, get_json_object(col(itemJson), "$." + ID).cast(DataTypes.StringType))
                 .filter(col(ID).isNotNull())
                 .select(
-                        APP_ID,
-                        EVENT_DATE,
-                        EVENT_TIMESTAMP,
-                        ID,
-                        PROPERTIES
+                        selectedColumns
                 ).distinct();
 
         String tableName = ETLRunner.TableName.ITEM.getTableName();
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset, tableName, TABLE_VERSION_SUFFIX_V1);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset1, tableName, TABLE_VERSION_SUFFIX_V1);
 
-        log.info("newItemsDataset count:" + newItemsDataset.count());
+        log.info("newItemsDataset count:" + newItemsDataset1.count());
 
-        if (newItemsDataset.count() == 0) {
+        if (newItemsDataset1.count() == 0) {
             return Optional.empty();
         }
 
-        Dataset<Row> newAggeItemsDataset = getAggItemDataset(newItemsDataset);
-        loadFullItemDataset(newItemsDataset, pathInfo);
+        Dataset<Row> newItemsDatasetOut = runMaxLengthTransformerForItem(newItemsDataset1);
+
+        Dataset<Row> newAggeItemsDataset = getAggItemDataset(newItemsDatasetOut.select(selectedColumns));
+        loadFullItemDataset(newAggeItemsDataset, pathInfo);
 
         return Optional.of(newAggeItemsDataset);
     }
+
+
 
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
 
@@ -480,41 +523,65 @@ public final class TransformerV2 {
                                 EVENT_PROFILE_SET,
                                 EVENT_FIRST_OPEN,
                                 EVENT_FIRST_VISIT,
-                                EVENT_APP_END)
+                                EVENT_APP_END,
+                                EVENT_APP_START
+                        )
                 ));
 
-        Dataset<Row> newUserIdDataset = newUserEventDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
-        long newUserCount = newUserIdDataset.count();
-        log.info("newUserIdDataset: " + newUserCount);
+        long newUserEventCount = newUserEventDataset.count();
+        log.info("newUserEventDataset: " + newUserEventCount);
 
-        Dataset<Row> profileSetDataset = newUserEventDataset
-                .filter(col(EVENT_NAME).isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
-        log.info("profileSetDataset count: " + profileSetDataset.count());
+        Dataset<Row> newUniqueUserDataset = newUserEventDataset
+                .select(col(APP_ID), col(USER_PSEUDO_ID), col(EVENT_DATE), col(EVENT_TIMESTAMP), col(USER_FIRST_TOUCH_TIMESTAMP))
+                .groupBy(col(APP_ID), col(USER_PSEUDO_ID))
+                .agg(
+                        max(EVENT_TIMESTAMP).alias(EVENT_TIMESTAMP),
+                        max(EVENT_DATE).alias(EVENT_DATE),
+                        min(USER_FIRST_TOUCH_TIMESTAMP).alias(USER_FIRST_TOUCH_TIMESTAMP)
+                )
+                .select(
+                        col(APP_ID),
+                        col(EVENT_DATE),
+                        col(USER_PSEUDO_ID),
+                        col(EVENT_TIMESTAMP),
+                        coalesce(col(USER_FIRST_TOUCH_TIMESTAMP), col(EVENT_TIMESTAMP)).alias(USER_FIRST_TOUCH_TIMESTAMP)
+                );
 
-        Dataset<Row> appEndDataset = newUserEventDataset
-                .filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
+        long newUserCount = newUniqueUserDataset.count();
+        log.info("newUniqueUserDataset: " + newUserCount);
+
+        // for `DeviceId` get from event: _app_start
+        Dataset<Row> appStartDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_APP_START));
+        log.info("appStartDataset count: " + appStartDataset.count());
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(appStartDataset, newUserCount);
+
+        // for `PageReferer` and `Channel` get from events: _first_open, _first_visit
+        Dataset<Row> firstVisitDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
+        log.info("firstVisitDataset count: " + firstVisitDataset.count());
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(firstVisitDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(firstVisitDataset, newUserCount);
+
+        // for `TrafficSource` get from event: _app_end
+        Dataset<Row> appEndDataset = newUserEventDataset.filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
         log.info("appEndDataset count: " + appEndDataset.count());
-
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(profileSetDataset, newUserCount);
-        Dataset<Row> userChannelDataset = getUserChannelDataset(profileSetDataset, newUserCount);
-
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(newUserEventDataset, newUserCount);
         Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(appEndDataset, newUserCount);
 
-        Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(newUserEventDataset);
+        // for user_properties and others get from _profile_set
+        Dataset<Row> profileSetDataset = newUserEventDataset
+                .filter(col(EVENT_NAME).isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET));
+        log.info("profileSetDataset count: " + profileSetDataset.count());
+
+        Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(profileSetDataset);
 
         Dataset<Row> newUserProfileMainDataset = newProfileSetDataset
-                .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
                 .select(
                         APP_ID,
                         EVENT_DATE,
                         EVENT_TIMESTAMP,
                         USER_ID,
                         USER_PSEUDO_ID,
-                        USER_FIRST_TOUCH_TIMESTAMP,
-                        "user_properties",
-                        "user_ltv",
-                        FIRST_VISIT_DATE
+                        USER_PROPERTIES,
+                        USER_LTV
                 ).distinct();
 
         String tableName = ETLRunner.TableName.USER.getTableName();
@@ -530,43 +597,75 @@ public final class TransformerV2 {
         Objects.requireNonNull(userTrafficSourceDataset);
         Objects.requireNonNull(userChannelDataset);
 
-        Dataset<Row> fullAggUserDataset = loadFullUserDataset(newUserProfileMainDataset, pathInfo);
+        userReferrerDataset = reRepartitionUserDataset(userReferrerDataset);
+        userDeviceIdDataset = reRepartitionUserDataset(userDeviceIdDataset);
+        userTrafficSourceDataset = reRepartitionUserDataset(userTrafficSourceDataset);
+        userChannelDataset = reRepartitionUserDataset(userChannelDataset);
 
-        Column userPseudoIdCol = fullAggUserDataset.col(USER_PSEUDO_ID);
-        Column appIdCol = fullAggUserDataset.col(APP_ID);
-        Column eventTimestampCol = fullAggUserDataset.col(EVENT_TIMESTAMP);
+        Dataset<Row> userPropsDataset = loadFullUserDataset(newUserProfileMainDataset, pathInfo);
+        userPropsDataset = reRepartitionUserDataset(userPropsDataset);
 
-        Column userIdJoinForNewUserId = userPseudoIdCol.equalTo(newUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(newUserIdDataset.col(APP_ID)));
+        Column userPseudoIdCol = newUniqueUserDataset.col(USER_PSEUDO_ID);
+        Column appIdCol = newUniqueUserDataset.col(APP_ID);
+
+        Column userIdJoinForUserPropertiesUserId = userPseudoIdCol.equalTo(userPropsDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userPropsDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
         Column userIdJoinForChannel = userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
-        Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
-                .join(newUserIdDataset, userIdJoinForNewUserId, "inner")
+        Dataset<Row> joinedPossibleUpdateUserDataset = newUniqueUserDataset
+                .join(userPropsDataset, userIdJoinForUserPropertiesUserId, "left")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
                 .join(userChannelDataset, userIdJoinForChannel, "left");
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
-        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt1 = joinedPossibleUpdateUserDataset
+                .select(
+                        appIdCol,
+                        newUniqueUserDataset.col(EVENT_DATE),
+                        newUniqueUserDataset.col(EVENT_TIMESTAMP),
+                        col(USER_ID),
+                        userPseudoIdCol,
+                        newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP),
+                        col(USER_PROPERTIES),
+                        col(USER_LTV),
+                        timestamp_seconds(newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)).cast(DataTypes.DateType).alias(FIRST_VISIT_DATE),
+                        col(COL_PAGE_REFERER).alias(FIRST_REFERER),
+                        col(TRAFFIC_SOURCE_NAME).alias(FIRST_TRAFFIC_SOURCE_TYPE),
+                        col(TRAFFIC_SOURCE_MEDIUM).alias(FIRST_TRAFFIC_MEDIUM),
+                        col(TRAFFIC_SOURCE_SOURCE).alias(FIRST_TRAFFIC_SOURCE),
+                        col(DEVICE_ID_LIST),
+                        col(CHANNEL)
+                        );
+
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt2 = runMaxLengthTransformerForUser(joinedPossibleUpdateUserDatasetRt1);
+
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt3 = joinedPossibleUpdateUserDatasetRt2.select(
+                col(APP_ID),
                 col(EVENT_DATE),
-                eventTimestampCol,
+                col(EVENT_TIMESTAMP),
                 col(USER_ID),
-                userPseudoIdCol,
+                col(USER_PSEUDO_ID),
                 col(USER_FIRST_TOUCH_TIMESTAMP),
                 col(USER_PROPERTIES),
                 col(USER_LTV),
                 col(FIRST_VISIT_DATE),
-                substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
-                col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
-                col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
-                col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),
+                col(FIRST_REFERER),
+                col(FIRST_TRAFFIC_SOURCE_TYPE),
+                col(FIRST_TRAFFIC_MEDIUM),
+                col(FIRST_TRAFFIC_SOURCE),
                 col(DEVICE_ID_LIST),
-                col(CHANNEL));
+                col(CHANNEL)
+        );
+        return Optional.of(joinedPossibleUpdateUserDatasetRt3);
+    }
 
-        return Optional.of(joinedPossibleUpdateUserDatasetRt);
+
+    private static Dataset<Row> reRepartitionUserDataset(final Dataset<Row> userDataset) {
+        return userDataset.repartition(col(APP_ID), col(USER_PSEUDO_ID));
     }
 
     private Dataset<Row> convertItems(final Dataset<Row> dataset) {
@@ -630,7 +729,7 @@ public final class TransformerV2 {
 
     private Dataset<Row> convertDevice(final Dataset<Row> dataset) {
         Column dataCol = col(DATA);
-        return dataset.withColumn("device", struct(
+        return dataset.withColumn(DEVICE, struct(
                 (dataCol.getItem("brand")).alias("mobile_brand_name"),
                 (dataCol.getItem("model")).alias("mobile_model_name"),
                 (dataCol.getItem("make")).alias("manufacturer"),
@@ -663,6 +762,5 @@ public final class TransformerV2 {
         mergeIncrementalTables(sparkSession);
         return dataset.drop("ua", GEO_FOR_ENRICH);
     }
-
 
 }

@@ -17,26 +17,23 @@ import { Construct } from 'constructs';
 
 export interface LambdaAdapterLayerProps {
   readonly version?: string;
-  readonly platform?: 'linux/arm64' | 'linux/amd64';
   readonly arch?: 'aarch64' | 'x86_64';
 }
 
 export class LambdaAdapterLayer extends LayerVersion {
   constructor(scope: Construct, id: string, props?: LambdaAdapterLayerProps) {
-    const defaultVersion = props?.arch ?? '0.7.1';
-    const defaultPlatform = props?.platform ?? 'linux/amd64';
+    const defaultVersion = props?.version ?? '0.7.1';
     const defaultArch = props?.arch ?? 'x86_64';
 
     super(scope, id, {
       code: Code.fromDockerBuild(path.join(__dirname, '.'), {
         file: 'Dockerfile',
         buildArgs: {
-          TARGET_PLATFORM: defaultPlatform,
           ARCH: defaultArch,
           ADAPTER_VERSION: defaultVersion,
         },
       }),
-      compatibleRuntimes: [Runtime.NODEJS_16_X, Runtime.NODEJS_18_X],
+      compatibleRuntimes: [Runtime.NODEJS_16_X, Runtime.NODEJS_18_X, Runtime.NODEJS_20_X, Runtime.NODEJS_LATEST],
     });
   }
 }

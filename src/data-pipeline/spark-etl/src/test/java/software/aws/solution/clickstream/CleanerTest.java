@@ -71,4 +71,20 @@ class CleanerTest extends BaseSparkTest {
         assertEquals(0, cleanedDataset.count());
     }
 
+
+    @Test
+    public void should_clean_when_data_is_null() {
+       //  DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.CleanerTest.should_clean_when_data_is_null
+        String path = requireNonNull(getClass().getResource("/")).getPath();
+        System.setProperty(JOB_DATA_DIR_PROP, path);
+        System.setProperty(APP_IDS_PROP, "uba-app");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_null.json")).getPath());
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
+
+        assertEquals(0, cleanedDataset.count());
+    }
+
+
 }

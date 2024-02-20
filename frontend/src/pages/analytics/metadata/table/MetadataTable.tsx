@@ -16,7 +16,6 @@ import { Box, SpaceBetween } from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
-
 import { HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import {
@@ -25,11 +24,16 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import { MetadataSource } from 'ts/explore-types';
+import { alertMsg } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataTableProps {
+  analysisStudioEnabled: boolean;
   infoType: HelpPanelType;
   resourceName: string;
   tableColumnDefinitions: any[];
@@ -61,6 +65,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   props: MetadataTableProps
 ) => {
   const {
+    analysisStudioEnabled,
     infoType,
     selectionType,
     resourceName,
@@ -73,6 +78,9 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     fetchUpdateFunc,
   } = props;
 
+  const { t } = useTranslation();
+
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -99,7 +107,9 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   };
 
   useEffect(() => {
-    fetchData();
+    if (projectId && appId && analysisStudioEnabled) {
+      fetchData();
+    }
   }, []);
 
   const {
@@ -178,6 +188,10 @@ const MetadataTable: React.FC<MetadataTableProps> = (
       throw new Error('Inline error');
     }
     const newItem = { ...currentItem, [column.id]: value };
+    if (newItem.metadataSource === MetadataSource.PRESET) {
+      alertMsg(t('analytics:valid.metadataNotAllowEditError'));
+      return;
+    }
     await fetchUpdateFunc(newItem);
     let fullCollection = data;
 

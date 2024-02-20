@@ -14,10 +14,11 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
-import { APP_ID_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
+import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
+import { IMetadataDisplay } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -232,7 +233,54 @@ export const isEmails: CustomValidator = value => {
   const regexp = new RegExp(MULTI_EMAIL_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validation error: projectId: ${value} not match ${MULTI_EMAIL_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: value: ${value} not match ${MULTI_EMAIL_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isEmail: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(EMAIL_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: value: ${value} not match ${EMAIL_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isProjectId: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(PROJECT_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const metadataDisplayLength: CustomValidator = value => {
+  const display = value as IMetadataDisplay;
+  if (display?.displayName['en-US'].length > 255 || display?.displayName['zh-CN'].length > 255) {
+    return Promise.reject('Validation error: displayName length must be less than 255.');
+  }
+  if (display?.description['en-US'].length > 1024 || display?.description['zh-CN'].length > 1024) {
+    return Promise.reject('Validation error: description length must be less than 1024.');
+  }
+  return true;
+};
+
+export const isAppId: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(APP_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: appId: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
   }
   return true;
 };

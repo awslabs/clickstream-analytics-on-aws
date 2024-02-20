@@ -12,9 +12,9 @@
  */
 
 // solution
-SOLUTION_VERSION='v1.0.0_dev'
+const SOLUTION_VERSION='v1.0.0_dev'
 
-// controlpalne backend API
+// web console backend API
 process.env.AWS_REGION = 'us-east-1'
 process.env.AWS_ACCOUNT_ID = '555555555555'
 process.env.AWS_URL_SUFFIX = 'amazonaws.com'
@@ -28,9 +28,12 @@ process.env.CLICK_STREAM_TABLE_NAME = 'click-stream-table-name'
 process.env.ANALYTICS_METADATA_TABLE_NAME = 'analytics-metadata-table-name'
 process.env.DICTIONARY_TABLE_NAME = 'dictionary-table-name'
 process.env.QUICKSIGHT_EMBED_ROLE_ARN = 'arn:aws:iam::555555555555:role/QuickSightEmbeddingRole'
-process.env.FULL_SOLUTION_VERSION = 'v1.0.0-202311200542_dev'
+process.env.FULL_SOLUTION_VERSION = 'v1.1.0-202311200542_dev'
+process.env.LISTEN_STACK_QUEUE_ARN = 'arn:aws:sqs:us-east-1:555555555555:queue-8ddb6980'
+process.env.IAM_ROLE_PREFIX = 'test-prefix'
+process.env.IAM_ROLE_BOUNDARY_ARN = ''
 
-// controlplane bundling
+// web console bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'
 
 // env variables for analytics stack
@@ -50,3 +53,5 @@ process.env.WORKFLOW_INFO_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:1111222233
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
+
+process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING = 'true'

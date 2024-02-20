@@ -12,10 +12,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { StackManager } from './stack';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
-import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData } from '../common/utils';
+import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled, getPipelineStatusType, isEmpty } from '../common/utils';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -30,6 +30,7 @@ export class PipelineServ {
       const result = await store.listPipeline(pid, version, order);
       for (let item of result) {
         const pipeline = new CPipeline(item);
+        item.statusType = getPipelineStatusType(item);
         await pipeline.refreshStatus();
       }
       return res.json(new ApiSuccess({
@@ -55,13 +56,6 @@ export class PipelineServ {
       const body: IPipeline = req.body;
       const pipeline = new CPipeline(body);
       await pipeline.create();
-      const templateInfo = pipeline.getTemplateInfo();
-      body.templateVersion = templateInfo.solutionVersion;
-      body.status = {
-        status: PipelineStatusType.CREATING,
-        stackDetails: [],
-        executionDetail: {},
-      };
       // save metadata
       const id = await store.addPipeline(body);
       return res.status(201).json(new ApiSuccess({ id }, 'Pipeline added.'));
@@ -72,45 +66,46 @@ export class PipelineServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { pid, cache } = req.query;
+      const { pid, refresh } = req.query;
       const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
       if (latestPipelines.length === 0) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const latestPipeline = latestPipelines[0];
-      if (!cache || cache === 'false') {
-        const pipeline = new CPipeline(latestPipeline);
-        const stackManager: StackManager = new StackManager(latestPipeline);
-        latestPipeline.status = await stackManager.getPipelineStatus();
-        await store.updatePipelineAtCurrentVersion(latestPipeline);
-        const pluginsInfo = await pipeline.getPluginsInfo();
-        const templateInfo = pipeline.getTemplateInfo();
-        return res.json(new ApiSuccess({
-          ...latestPipeline,
-          dataProcessing: {
-            ...latestPipeline.dataProcessing,
-            transformPlugin: pluginsInfo.transformPlugin,
-            enrichPlugin: pluginsInfo.enrichPlugin,
-          },
-          endpoint: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
-          dns: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
-          dashboards: getReportingDashboardsUrl(latestPipeline.status, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),
-          metricsDashboardName: getStackOutputFromPipelineStatus(
-            latestPipeline.status, PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
-          templateInfo,
-        }));
-      }
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.refreshStatus(refresh);
+      const pluginsInfo = await pipeline.getPluginsInfo();
+      const templateInfo = pipeline.getTemplateInfo();
       return res.json(new ApiSuccess({
         ...latestPipeline,
-        endpoint: null,
-        dns: null,
-        dashboards: null,
-        metricsDashboardName: null,
-        templateInfo: null,
+        statusType: getPipelineStatusType(latestPipeline),
+        dataProcessing: !isEmpty(latestPipeline.dataProcessing) ? {
+          ...latestPipeline.dataProcessing,
+          transformPlugin: pluginsInfo.transformPlugin,
+          enrichPlugin: pluginsInfo.enrichPlugin,
+        } : {},
+        endpoint: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+        dns: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+        dashboards: getReportingDashboardsUrl(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),
+        metricsDashboardName: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
+        templateInfo,
+        analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
       }));
     } catch (error) {
       next(error);
     }
+  };
+
+  public async getPipelineByProjectId(projectId: string) {
+    const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+    if (latestPipelines.length === 0) {
+      return;
+    }
+    return latestPipelines[0];
   };
 
   public async update(req: any, res: any, next: any) {
@@ -125,6 +120,13 @@ export class PipelineServ {
         return res.status(404).send(new ApiFail('Pipeline resource does not exist.'));
       }
       const newPipeline = new CPipeline(body);
+      // Check pipeline status
+      const statusType = getPipelineStatusType(curPipeline);
+      if (statusType === PipelineStatusType.CREATING ||
+        statusType === PipelineStatusType.DELETING ||
+        statusType === PipelineStatusType.UPDATING) {
+        return res.status(400).json(new ApiFail('Pipeline status can not allow update.'));
+      }
       await newPipeline.update(curPipeline);
       return res.status(201).send(new ApiSuccess({ id: body.pipelineId }, 'Pipeline updated.'));
     } catch (error) {
@@ -142,11 +144,12 @@ export class PipelineServ {
       if (!curPipeline) {
         return res.status(404).send(new ApiFail('Pipeline resource does not exist.'));
       }
+      const newPipeline = { ...curPipeline };
+      newPipeline.statusType = getPipelineStatusType(newPipeline);
       // Check pipeline status
-      if (curPipeline.status?.status !== PipelineStatusType.ACTIVE) {
+      if (newPipeline.statusType !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow upgrade.'));
       }
-      const newPipeline = { ...curPipeline };
       const pipeline = new CPipeline(newPipeline);
       const templateInfo = pipeline.getTemplateInfo();
       if (templateInfo.isLatest) {
@@ -186,8 +189,9 @@ export class PipelineServ {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       // Check pipeline status
-      if (ddbPipeline.status?.status !== PipelineStatusType.FAILED &&
-        ddbPipeline.status?.status !== PipelineStatusType.WARNING) {
+      const statusType = getPipelineStatusType(ddbPipeline);
+      if (statusType !== PipelineStatusType.FAILED &&
+        statusType !== PipelineStatusType.WARNING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow retry.'));
       }
       const pipeline = new CPipeline(ddbPipeline);

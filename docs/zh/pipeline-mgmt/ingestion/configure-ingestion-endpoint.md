@@ -32,11 +32,15 @@
 
             使用 HTTP 协议是不安全的，因为数据将在没有任何加密的情况下发送，数据在传输过程中存在泄漏或篡改的高风险。请确认风险后再进行操作。
 
+    !!! warning "重要提示"
+
+        如果您在启用和禁用 HTTPS 之间进行切换，会导致服务中断。            
+
 * **跨源资源共享 (CORS)**: 您可以启用 CORS 来限制来自特定域的数据摄取 API 的请求。请注意，你需要输入一个完整的互联网地址，例如 https://www.example.com、http://localhost:8080。如果您有多个域用于此设置，请使用逗号分隔域。
 
-        !!! warning "Warning"
+    !!! warning "重要提示"
 
-            如果您要从网站收集数据，则必须设置 CORS。如果您未为此参数设置值，则摄取服务器将拒绝所有从网页平台来的请求。
+        如果您要从网站收集数据，则必须设置 CORS。如果您未为此参数设置值，则摄取服务器将拒绝所有从网页平台来的请求。
 
 * 其他设置
 
@@ -72,6 +76,12 @@
           }
         ```
       **注意**：在 OIDC 提供程序中，您需要将 `https://<ingestion server endpoint>/oauth2/idpresponse` 添加到“允许回调 URL”。
+
+        **注意**：如果您需要在不手动输入凭据（用户名/密码）的情况下直接获取身份验证令牌，您可以参考[ALB无头身份验证客户端代码][alb-headless-authentication-client]来设置您的客户端以自动获取身份验证令牌。
+
+        !!! warning "重要提示"
+
+            如果您在启用和禁用鉴权之间进行切换，会导致服务中断。
 
     * 访问日志：ALB 支持提供其接收的所有请求的详细日志。如果您启用此选项，则解决方案将自动为您启用访问日志，并将日志存储在您之前选择的 S3 存储桶中。
 
@@ -153,3 +163,4 @@
 -->
 
 [alb-permission]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
+[alb-headless-authentication-client]: https://github.com/aws-samples/alb-headless-authentication-client

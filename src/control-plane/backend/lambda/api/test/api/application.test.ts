@@ -11,8 +11,10 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { SNSClient } from '@aws-sdk/client-sns';
 import {
   DynamoDBDocumentClient,
   PutCommand,
@@ -21,25 +23,29 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
-import { PipelineStatusType } from '../../common/types';
+import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
+import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
-const cloudFormationClient = mockClient(CloudFormationClient);
+const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 describe('Application test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
-    cloudFormationClient.reset();
+    cloudWatchEventsMock.reset();
   });
   it('Create application', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -69,7 +75,7 @@ describe('Application test', () => {
                             Action: 'Create',
                             Parameters: [],
                             StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
+                            TemplateURL: 'https://example.com',
                           },
                         },
                         End: true,
@@ -114,9 +120,10 @@ describe('Application test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock ddb error', async () => {
-    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));;
+    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
     projectExistedMock(ddbMock, true);
-
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -128,6 +135,36 @@ describe('Application test', () => {
             },
             ingestionServer: {
               sinkType: 's3',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://example.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
             },
             executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
@@ -141,6 +178,7 @@ describe('Application test', () => {
           },
         ],
       });
+    sfnMock.on(StartExecutionCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -171,7 +209,12 @@ describe('Application test', () => {
             name: 'Pipeline-01',
             pipelineId: MOCK_PROJECT_ID,
             status: {
-              status: PipelineStatusType.FAILED,
+              status: PipelineStatusType.ACTIVE,
+              stackDetails: [],
+              executionDetail: {
+                name: MOCK_EXECUTION_ID,
+                status: ExecutionStatus.RUNNING,
+              },
             },
             ingestionServer: {
               sinkType: 's3',
@@ -188,10 +231,6 @@ describe('Application test', () => {
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
-    // Mock DynamoDB error
-    ddbMock.on(PutCommand).resolvesOnce({})
-      .rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -460,30 +499,36 @@ describe('Application test', () => {
       Items: [
         {
           pipelineId: MOCK_PROJECT_ID,
-          status: ExecutionStatus.RUNNING,
+          status: {
+            status: PipelineStatusType.ACTIVE,
+            stackDetails: [
+              {
+                stackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                stackType: PipelineStackType.INGESTION,
+                stackStatus: StackStatus.CREATE_COMPLETE,
+                stackStatusReason: '',
+                stackTemplateVersion: MOCK_SOLUTION_VERSION,
+                outputs: [
+                  {
+                    OutputKey: 'IngestionServerC000IngestionServerURL',
+                    OutputValue: 'http://xxx/xxx',
+                  },
+                  {
+                    OutputKey: 'IngestionServerC000IngestionServerDNS',
+                    OutputValue: 'yyy/yyy',
+                  },
+                ],
+              },
+            ],
+            executionDetail: {
+              name: MOCK_EXECUTION_ID,
+              status: ExecutionStatus.RUNNING,
+            },
+          },
           ingestionServer: {
             sinkType: 's3',
           },
           executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
-        },
-      ],
-    });
-    cloudFormationClient.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Outputs: [
-            {
-              OutputKey: 'IngestionServerC000IngestionServerURL',
-              OutputValue: 'http://xxx/xxx',
-            },
-            {
-              OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
-            },
-          ],
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          CreationTime: new Date(),
         },
       ],
     });
@@ -506,9 +551,32 @@ describe('Application test', () => {
         pipeline: {
           customDomain: '',
           endpoint: 'http://xxx/xxx',
-          dns: 'http://yyy/yyy',
+          dns: 'yyy/yyy',
           id: MOCK_PROJECT_ID,
-          status: 'RUNNING',
+          statusType: PipelineStatusType.CREATING,
+          stackDetails: [
+            {
+              stackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+              stackType: PipelineStackType.INGESTION,
+              stackStatus: StackStatus.CREATE_COMPLETE,
+              stackStatusReason: '',
+              stackTemplateVersion: MOCK_SOLUTION_VERSION,
+              outputs: [
+                {
+                  OutputKey: 'IngestionServerC000IngestionServerURL',
+                  OutputValue: 'http://xxx/xxx',
+                },
+                {
+                  OutputKey: 'IngestionServerC000IngestionServerDNS',
+                  OutputValue: 'yyy/yyy',
+                },
+              ],
+            },
+          ],
+          executionDetail: {
+            name: MOCK_EXECUTION_ID,
+            status: ExecutionStatus.RUNNING,
+          },
         },
       },
     });
@@ -656,6 +724,8 @@ describe('Application test', () => {
   it('Delete application', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -686,7 +756,7 @@ describe('Application test', () => {
                             Action: 'Create',
                             Parameters: [],
                             StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://xxx.com',
+                            TemplateURL: 'https://example.com',
                           },
                         },
                         End: true,
@@ -726,6 +796,8 @@ describe('Application test', () => {
   it('Delete application with mock ddb error', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -851,7 +923,14 @@ describe('Application test', () => {
         {
           name: 'Pipeline-01',
           pipelineId: MOCK_PROJECT_ID,
-          status: ExecutionStatus.RUNNING,
+          status: {
+            status: PipelineStatusType.ACTIVE,
+            stackDetails: [],
+            executionDetail: {
+              name: MOCK_EXECUTION_ID,
+              status: ExecutionStatus.RUNNING,
+            },
+          },
           ingestionServer: {
             sinkType: 's3',
           },

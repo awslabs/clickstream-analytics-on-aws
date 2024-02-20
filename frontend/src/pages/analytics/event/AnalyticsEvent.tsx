@@ -43,7 +43,6 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -54,12 +53,12 @@ import {
   ExploreRequestAction,
   ExploreGroupColumn,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,
   generateStr,
-  getAbsoluteStartEndRange,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
 } from 'ts/utils';
@@ -75,14 +74,18 @@ import {
   validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 interface AnalyticsEventProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -97,7 +100,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -154,7 +159,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   );
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -172,7 +177,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(getAbsoluteStartEndRange());
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -205,10 +210,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -332,10 +334,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     try {
       const body = getEventRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');
@@ -424,10 +423,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 addEventButtonLabel={t('common:button.addEvent')}
                 eventOptionList={categoryEvents}
                 defaultComputeMethodOption={defaultComputeMethodOption}
+                builtInMetadata={builtInMetadata}
                 metadataEvents={metadataEvents}
+                metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 enableChangeRelation={true}
                 isMultiSelect={true}
+                enableChangeMultiSelect={false}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
@@ -493,6 +495,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
+              embedPage="explore"
             />
           )}
         </Container>

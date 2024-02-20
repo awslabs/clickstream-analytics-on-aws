@@ -121,8 +121,10 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       items={getNavItems()}
       activeHref={activeHref}
       onFollow={(e) => {
-        e.preventDefault();
-        navigate(e.detail.href);
+        if (!e.detail.external) {
+          e.preventDefault();
+          navigate(e.detail.href);
+        }
       }}
     />
   );

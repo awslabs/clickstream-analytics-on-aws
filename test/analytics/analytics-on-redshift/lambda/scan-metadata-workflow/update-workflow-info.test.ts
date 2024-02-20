@@ -18,9 +18,10 @@ import { handler, UpdateWorkflowInfoEvent } from '../../../../../src/analytics/l
 import 'aws-sdk-client-mock-jest';
 
 
-const updateWorkflowInfoEvent: UpdateWorkflowInfoEvent = {
+let updateWorkflowInfoEvent: UpdateWorkflowInfoEvent = {
   lastJobStartTimestamp: 1698330523913,
   lastScanEndDate: '2023-10-26',
+  eventSource: 'LoadDataFlow',
 };
 
 describe('Lambda - check workflow start', () => {
@@ -50,5 +51,16 @@ describe('Lambda - check workflow start', () => {
         lastJobStartTimestamp: 1698330523913,
       },
     });
+  });
+
+  test('update workflow if event source is not LoadDataFlow', async () => {
+    updateWorkflowInfoEvent = {
+      lastJobStartTimestamp: 1698330523913,
+      lastScanEndDate: '2023-10-26',
+      eventSource: '',
+    };
+    await handler(updateWorkflowInfoEvent);
+    expect(s3ClientMock).not.toHaveReceivedCommand(PutObjectCommand);
+    expect(dynamoDBMock).not.toHaveReceivedCommand(PutCommand);
   });
 });

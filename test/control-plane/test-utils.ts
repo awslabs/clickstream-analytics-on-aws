@@ -29,7 +29,7 @@ import {
   FrontendProps,
   NetworkProps,
 } from '../../src/control-plane/alb-lambda-portal';
-import { ClickStreamApiConstruct, DicItem } from '../../src/control-plane/backend/click-stream-api';
+import { ClickStreamApiConstruct } from '../../src/control-plane/backend/click-stream-api';
 import { SolutionNodejsFunction } from '../../src/private/function';
 import { TestApp } from '../common/jest';
 
@@ -48,7 +48,6 @@ export const vpcFromAttr = (
 };
 
 export class TestStack extends Stack {
-  public readonly dics: DicItem[];
   public readonly vpc: IVpc;
   public readonly sg: ISecurityGroup;
 
@@ -58,27 +57,6 @@ export class TestStack extends Stack {
   ) {
     super(scope, id);
 
-
-    this.dics = [
-      {
-        name: 'D0',
-        data: {
-          s: '',
-        },
-      },
-      {
-        name: 'D1',
-        data: 1,
-      },
-      {
-        name: 'D2',
-        data: '2',
-      },
-      {
-        name: 'D3',
-        data: false,
-      },
-    ];
     this.vpc = vpcFromAttr(this, {
       vpcId: 'vpc-11111111111111111',
       availabilityZones: ['test-1a', 'test-1b'],
@@ -273,6 +251,38 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
+      conditionStringRolePrefix: 'Clickstream',
+      conditionStringStackPrefix: 'Clickstream',
+    });
+
+    const template = Template.fromStack(stack);
+    return { stack, template };
+  }
+
+  public static newALBWithRolePrefixApiStack(outdir: string): ApiStackElements {
+
+    const stack = new TestStack(new TestApp(outdir), 'apiTestStack');
+    const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
+
+    const pluginPrefix = 'plugins/';
+    new ClickStreamApiConstruct(stack, 'testClickStreamALBApi', {
+      fronting: 'alb',
+      applicationLoadBalancer: {
+        vpc: stack.vpc,
+        subnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroup: stack.sg,
+      },
+      targetToCNRegions: false,
+      stackWorkflowS3Bucket: s3Bucket,
+      pluginPrefix,
+      healthCheckPath: '/',
+      adminUserEmail: 'fake@example.com',
+      iamRolePrefix: 'testRolePrefix',
+      iamRoleBoundaryArn: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
+      conditionStringRolePrefix: 'testRolePrefix',
+      conditionStringStackPrefix: 'testRolePrefix-Clickstream',
     });
 
     const template = Template.fromStack(stack);
@@ -311,6 +321,10 @@ export class TestEnv {
       pluginPrefix,
       healthCheckPath: '/',
       adminUserEmail: 'fake@example.com',
+      iamRolePrefix: '',
+      iamRoleBoundaryArn: '',
+      conditionStringRolePrefix: 'Clickstream',
+      conditionStringStackPrefix: 'Clickstream',
     });
 
     const template = Template.fromStack(stack);

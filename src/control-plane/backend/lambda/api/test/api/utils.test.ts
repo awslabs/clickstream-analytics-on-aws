@@ -29,10 +29,11 @@ import {
   SECRETS_MANAGER_ARN_PATTERN,
   CORS_PATTERN,
   STACK_CORS_PATTERN,
+  EMAIL_PATTERN,
 } from '../../common/constants-ln';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, getAppRegistryApplicationArn, isEmpty } from '../../common/utils';
+import { containRule, corsStackInput, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -238,6 +239,24 @@ describe('Utils test', () => {
       '',
     ];
     invalidValues.forEach(v => expect(() => validatePattern('Plugin Files', S3_PATH_PLUGIN_FILES_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+  });
+
+  it('Email valid', async () => {
+    const validValues = [
+      'fake@example.com',
+      'fake1@example.com',
+      `${Array(309).join('a')}@example.com`,
+    ];
+    validValues.forEach(v => expect(validatePattern('Email', EMAIL_PATTERN, v)).toEqual(true));
+    const invalidValues = [
+      'a.com',
+      'fake@example.com ',
+      '@example.com',
+      'fake@example.com,',
+      `${Array(310).join('a')}@example.com`,
+      '',
+    ];
+    invalidValues.forEach(v => expect(() => validatePattern('Email', EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Emails valid', async () => {
@@ -761,7 +780,7 @@ describe('Network test', () => {
 
   it('Get valid Service Catalog AppRegistry application arn', () => {
     expect(getAppRegistryApplicationArn(S3_INGESTION_PIPELINE))
-      .toEqual('#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn');
+      .toEqual(`#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`);
   });
 
   it('Return empty string as Service Catalog AppRegistry application arn', () => {

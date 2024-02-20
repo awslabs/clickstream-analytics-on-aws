@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus } from '@aws-sdk/client-quicksight';
+import { AnalysisSummary, DashboardSummary, DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, TimeGranularity, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -32,6 +32,18 @@ export interface QuicksightCustomResourceProps {
   readonly databaseName: string;
   readonly quickSightProps: QuickSightProps;
   readonly redshiftProps: RedShiftProps;
+};
+
+export interface NetworkInterfaceCheckCustomResourceProps {
+  readonly networkInterfaces: string;
+  readonly vpcConnectionId: string;
+};
+
+export type NetworkInterfaceCheckCustomResourceLambdaProps = {
+  readonly awsRegion: string;
+  readonly awsAccountId: string;
+  readonly networkInterfaces: any[];
+  readonly vpcConnectionId: string;
 };
 
 export interface QuicksightCustomResourceLambdaProps {
@@ -56,6 +68,12 @@ export interface ColumnGroupsProps {
   geoSpatialColumnGroupColumns: string[];
 };
 
+export interface DateTimeParameter {
+  name: string;
+  timeGranularity: TimeGranularity;
+  defaultValue: Date;
+};
+
 export interface DataSetProps {
   tableName: string;
   columns: InputColumn[];
@@ -64,6 +82,7 @@ export interface DataSetProps {
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
   customSql: string;
+  dateTimeDatasetParameter?: DateTimeParameter[];
 };
 
 export interface QuickSightDashboardDefProps {
@@ -75,48 +94,6 @@ export interface QuickSightDashboardDefProps {
   databaseName: string;
   dataSets: DataSetProps[];
 };
-
-export const dataSetReaderPermissionActions = [
-  'quicksight:DescribeDataSet',
-  'quicksight:DescribeDataSetPermissions',
-  'quicksight:PassDataSet',
-  'quicksight:DescribeIngestion',
-  'quicksight:ListIngestions',
-];
-
-export const dataSetAdminPermissionActions = [
-  ...dataSetReaderPermissionActions,
-  'quicksight:UpdateDataSetPermissions',
-  'quicksight:UpdateDataSet',
-  'quicksight:DeleteDataSet',
-  'quicksight:CreateIngestion',
-  'quicksight:CancelIngestion',
-];
-
-export const analysisAdminPermissionActions = [
-  'quicksight:DescribeAnalysis',
-  'quicksight:UpdateAnalysisPermissions',
-  'quicksight:QueryAnalysis',
-  'quicksight:UpdateAnalysis',
-  'quicksight:RestoreAnalysis',
-  'quicksight:DeleteAnalysis',
-  'quicksight:DescribeAnalysisPermissions',
-];
-
-export const dashboardReaderPermissionActions = [
-  'quicksight:DescribeDashboard',
-  'quicksight:ListDashboardVersions',
-  'quicksight:QueryDashboard',
-];
-
-export const dashboardAdminPermissionActions = [
-  ...dashboardReaderPermissionActions,
-  'quicksight:UpdateDashboard',
-  'quicksight:DeleteDashboard',
-  'quicksight:UpdateDashboardPermissions',
-  'quicksight:DescribeDashboardPermissions',
-  'quicksight:UpdateDashboardPublishedVersion',
-];
 
 export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
@@ -200,7 +177,7 @@ export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, acc
 };
 
 export async function waitForTemplateChangeCompleted(quickSight: QuickSight, accountId: string, templateId: string) {
-  for (const _i of Array(60).keys()) {
+  for (const _i of Array(300).keys()) {
     try {
       const analysis = await quickSight.describeTemplateDefinition({
         AwsAccountId: accountId,
@@ -366,18 +343,37 @@ export const existDashboard = async (quickSight: QuickSight, accountId: string, 
   }
 };
 
+export const existFolder = async (quickSight: QuickSight, accountId: string, folderId: string) => {
+
+  try {
+    await quickSight.describeFolder({
+      AwsAccountId: accountId,
+      FolderId: folderId,
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
 export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeDashboardId: string|undefined) => {
   try {
-    const dashboards = await quickSight.listDashboards({
+    const dashboardSummaries: DashboardSummary[] = [];
+    for await (const page of paginateListDashboards({ client: quickSight }, {
       AwsAccountId: accountId,
-    });
-    if (dashboards.DashboardSummaryList === undefined) {
-      return undefined;
+    })) {
+      if (page.DashboardSummaryList !== undefined) {
+        dashboardSummaries.push(...page.DashboardSummaryList);
+      }
     }
 
-    for (const dashboard of dashboards.DashboardSummaryList) {
-      if (dashboard.DashboardId?.startsWith(prefix) && dashboard.DashboardId !== excludeDashboardId ) {
-        return dashboard.DashboardId;
+    for (const dashboardSummary of dashboardSummaries) {
+      if (dashboardSummary.DashboardId?.startsWith(prefix) && dashboardSummary.DashboardId !== excludeDashboardId ) {
+        return dashboardSummary.DashboardId;
       }
     }
 
@@ -390,16 +386,19 @@ export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId:
 
 export const findAnalysisWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeAnalysisId: string|undefined) => {
   try {
-    const analyses = await quickSight.listAnalyses({
+
+    const analysisSummaries: AnalysisSummary[] = [];
+    for await (const page of paginateListAnalyses({ client: quickSight }, {
       AwsAccountId: accountId,
-    });
-    if (analyses.AnalysisSummaryList === undefined) {
-      return undefined;
+    })) {
+      if (page.AnalysisSummaryList !== undefined) {
+        analysisSummaries.push(...page.AnalysisSummaryList);
+      }
     }
 
-    for (const analysis of analyses.AnalysisSummaryList) {
-      if (analysis.AnalysisId?.startsWith(prefix) && analysis.AnalysisId !== excludeAnalysisId ) {
-        return analysis.AnalysisId;
+    for (const analysisSummary of analysisSummaries) {
+      if (analysisSummary.AnalysisId?.startsWith(prefix) && analysisSummary.AnalysisId !== excludeAnalysisId ) {
+        return analysisSummary.AnalysisId;
       }
     }
 

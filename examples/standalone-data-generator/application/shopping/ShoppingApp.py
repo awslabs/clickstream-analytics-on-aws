@@ -110,6 +110,12 @@ def get_launch_events(user, event):
     traffic_source = enums.traffic_source.get_random_item()
     event["attributes"]["_traffic_source_source"] = traffic_source[0]
     event["attributes"]["_traffic_source_medium"] = traffic_source[1]
+    # init session
+    user.session_number += 1
+    new_session_id = get_new_session_id(event["unique_id"], user.current_timestamp)
+    event["attributes"]["_session_start_timestamp"] = user.current_timestamp
+    event["attributes"]["_session_id"] = new_session_id
+    event["attributes"]["_session_number"] = user.session_number
     # generate latest referrer for web
     if user.platform == enums.Platform.Web:
         referrer = enums.latest_referrer.get_random_item()
@@ -132,11 +138,6 @@ def get_launch_events(user, event):
         event["user"]["_user_id"] = user_id
 
     # handle session
-    user.session_number += 1
-    new_session_id = get_new_session_id(event["unique_id"], user.current_timestamp)
-    event["attributes"]["_session_start_timestamp"] = user.current_timestamp
-    event["attributes"]["_session_id"] = new_session_id
-    event["attributes"]["_session_number"] = user.session_number
     events.append(get_final_event(user, EventType.SESSION_START, clean_event(event)))
 
     app_start_event = clean_event(event)

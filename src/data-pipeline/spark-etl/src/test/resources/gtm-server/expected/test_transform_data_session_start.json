@@ -1,0 +1,66 @@
+{
+  "event_id" : "55384aaeda62c5b20a462076ec59f3f5-0-1704867229-0-1",
+  "event_date" : "2024-01-10",
+  "event_timestamp" : 1704867230837,
+  "event_previous_timestamp" : null,
+  "event_name" : "_session_start",
+  "event_value_in_usd" : null,
+  "event_bundle_sequence_id" : null,
+  "ingest_timestamp" : 1704867230000,
+  "device" : {
+    "mobile_brand_name" : "Not_A Brand|Chromium|Microsoft Edge",
+    "mobile_model_name" : null,
+    "manufacturer" : null,
+    "screen_width" : 3440,
+    "screen_height" : 1440,
+    "carrier" : null,
+    "network_type" : null,
+    "operating_system_version" : "13.6.3",
+    "operating_system" : "macOS",
+    "ua_browser" : null,
+    "ua_browser_version" : null,
+    "ua_os" : null,
+    "ua_os_version" : null,
+    "ua_device" : null,
+    "ua_device_category" : null,
+    "system_language" : "en-us",
+    "time_zone_offset_seconds" : null,
+    "vendor_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+    "advertising_id" : null,
+    "host_name" : null,
+    "viewport_width" : null,
+    "viewport_height" : null
+  },
+  "geo" : {
+    "country" : null,
+    "continent" : null,
+    "sub_continent" : null,
+    "locale" : null,
+    "region" : null,
+    "metro" : null,
+    "city" : null
+  },
+  "traffic_source" : {
+    "medium" : null,
+    "name" : null,
+    "source" : null
+  },
+  "app_info" : {
+    "app_id" : "sessionStartAppId1",
+    "id" : "G-5HX07RSCP2",
+    "install_source" : null,
+    "version" : "45je4180v9137682176",
+    "sdk_version" : null,
+    "sdk_name" : "GTM"
+  },
+  "platform" : "macOS",
+  "project_id" : "test_project_id_gtm_server",
+  "items" : [ ],
+  "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "user_id" : null,
+  "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+  "geo_for_enrich" : {
+    "ip" : "52.94.133.141",
+    "locale" : null
+  }
+}

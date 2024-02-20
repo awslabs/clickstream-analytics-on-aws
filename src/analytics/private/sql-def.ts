@@ -12,43 +12,49 @@
  */
 
 import { SQLDef, SQLViewDef } from './model';
-import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME } from '../../common/constant';
+import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME } from '../../common/constant';
 
 export const reportingViewsDef: SQLViewDef[] = [
   {
-    updatable: 'false',
+    viewName: CLICKSTREAM_EVENT_ATTR_VIEW_NAME,
+  },
+  {
     viewName: CLICKSTREAM_EVENT_VIEW_NAME,
   },
   {
-    updatable: 'false',
     viewName: CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
   },
   {
-    updatable: 'false',
+    viewName: CLICKSTREAM_LIFECYCLE_VIEW_NAME,
+  },
+  {
     viewName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   },
   {
-    updatable: 'false',
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
   {
-    updatable: 'true',
+    viewName: CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME,
+  },
+  {
     viewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
   },
   {
-    updatable: 'false',
+    viewName: CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME,
+  },
+  {
+    viewName: CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME,
+  },
+  {
     viewName: CLICKSTREAM_SESSION_VIEW_NAME,
   },
   {
-    updatable: 'false',
     viewName: CLICKSTREAM_DEVICE_VIEW_NAME,
   },
   {
-    updatable: 'false',
     viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
   },
   {
-    updatable: 'true',
     viewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
   },
 ];
@@ -57,63 +63,48 @@ export const reportingViewsDef: SQLViewDef[] = [
 // keep order
 export const schemaDefs: SQLDef[] = [
   {
-    updatable: 'true',
     sqlFile: 'clickstream-log.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'event.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'event-parameter.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'user.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'item.sql',
   },
   {
-    updatable: 'false',
     sqlFile: 'item-m-view.sql',
   },
   {
-    updatable: 'false',
     sqlFile: 'user-m-view.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-clickstream-log.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-clickstream-log-non-atomic.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'grant-permissions-to-bi-user-1.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'grant-permissions-to-bi-user-2.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-scan-metadata.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-clear-expired-events.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-clear-item-and-user.sql',
   },
   {
-    updatable: 'true',
     sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
   },
 ];

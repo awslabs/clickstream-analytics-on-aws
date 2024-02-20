@@ -243,9 +243,11 @@ export const OIDC_ISSUER_PATTERN =
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const MULTI_APP_ID_PATTERN = `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`;
-export const EMAIL_PATTERN =
+export const EMAIL_BASE_PATTERN =
   '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
-export const MULTI_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;
+export const EMAIL_PATTERN =
+  `^(?=.{0,320}$)${EMAIL_BASE_PATTERN}`;
+export const MULTI_EMAIL_PATTERN = `^(?=(?:[^,]{0,320},)*[^,]{0,320}$)\\s*${EMAIL_BASE_PATTERN}\\s*(?:,\\s*${EMAIL_BASE_PATTERN}\\s*)*$`;
 export const POSITIVE_INTEGERS = '^[1-9]\\d*';
 export const S3_PATH_PLUGIN_JARS_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
@@ -254,6 +256,7 @@ export const SUBNETS_THREE_AZ_PATTERN =
 export const QUICKSIGHT_USER_NAME_PATTERN =
   '^[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
 export const QUICKSIGHT_NAMESPACE_PATTERN = '^([A-Za-z])[A-Za-z0-9]{4,63}$';
+export const IAM_ROLE_PREFIX_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,20})?$';
 export const REDSHIFT_DB_NAME_PATTERN = `^${PROJECT_ID_PATTERN}$`;
 export const REDSHIFT_DB_USER_NAME_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
 export const REDSHIFT_CLUSTER_IDENTIFIER_PATTERN = '^([a-zA-Z][a-zA-Z0-9-_]{1,63})?$';
@@ -299,6 +302,9 @@ export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
   'OpenID Connector Jwks Uri Suffix';
 
+export const KDS_ON_DEMAND_MODE = 'ON_DEMAND';
+export const KDS_PROVISIONED_MODE = 'PROVISIONED';
+
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
@@ -335,6 +341,8 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX =
   'BIUserName';
 export const OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX =
   'RedshiftDataApiRoleArn';
+export const OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX =
+  'ScanMetadataWorkflowArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
   'DataSourceArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =
@@ -345,11 +353,15 @@ export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
 export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN = 'ServiceCatalogAppRegistryApplicationArn';
+export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY = 'ServiceCatalogAppRegistryApplicationTagKey';
+export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE = 'ServiceCatalogAppRegistryApplicationTagValue';
 
 export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 
 export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
   'RedshiftBIUsername';
+
+export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX = 'SQLExecutionStateMachineArn';
 
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
@@ -357,6 +369,7 @@ export const ALARM_NAME_PREFIX = 'Clickstream';
 
 export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';
 export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
+export const DEFAULT_DASHBOARD_NAME_PREFIX = 'Clickstream Dashboard ';
 
 export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
 
@@ -374,18 +387,89 @@ export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'Lifecycle_Daily_Vie
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
 export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'User_Attr_View';
 
-export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
-export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v1';
+export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v2';
+export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v2';
+export const CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME = 'clickstream_session_duration_attr_view_v1';
+export const CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME = 'clickstream_session_page_attr_view_v1';
 export const CLICKSTREAM_USER_DIM_VIEW_NAME = 'clickstream_user_dim_view_v1';
-export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v1';
+export const CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME = 'clickstream_user_first_attr_view_v1';
+export const CLICKSTREAM_EVENT_ATTR_VIEW_NAME = 'clickstream_event_attr_view_v1';
+export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v2';
 export const CLICKSTREAM_DEVICE_VIEW_NAME = 'clickstream_device_view_v1';
 export const CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME = 'clickstream_event_parameter_view_v1';
-export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME = 'clickstream_lifecycle_daily_view_v1';
-export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v1';
+export const CLICKSTREAM_LIFECYCLE_VIEW_NAME = 'clickstream_lifecycle_view_v1';
+export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME = 'clickstream_lifecycle_daily_view_v2';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v2';
 export const CLICKSTREAM_USER_ATTR_VIEW_NAME = 'clickstream_user_attr_view_v1';
+export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
+  'clickstream_session_view_v1',
+  'clickstream_event_view_v1',
+  'clickstream_lifecycle_daily_view_v1',
+  'clickstream_lifecycle_weekly_view_v1',
+  'clickstream_retention_view_v1',
+];
 
 export const QUICKSIGHT_RESOURCE_NAME_PREFIX = 'clickstream';
 export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
+
+export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
+
+export const DATASET_READER_PERMISSION_ACTIONS = [
+  'quicksight:DescribeDataSet',
+  'quicksight:DescribeDataSetPermissions',
+  'quicksight:PassDataSet',
+  'quicksight:DescribeIngestion',
+  'quicksight:ListIngestions',
+];
+
+export const DATASET_ADMIN_PERMISSION_ACTIONS = [
+  ...DATASET_READER_PERMISSION_ACTIONS,
+  'quicksight:UpdateDataSetPermissions',
+  'quicksight:UpdateDataSet',
+  'quicksight:DeleteDataSet',
+  'quicksight:CreateIngestion',
+  'quicksight:CancelIngestion',
+];
+
+export const ANALYSIS_ADMIN_PERMISSION_ACTIONS = [
+  'quicksight:DescribeAnalysis',
+  'quicksight:UpdateAnalysisPermissions',
+  'quicksight:QueryAnalysis',
+  'quicksight:UpdateAnalysis',
+  'quicksight:RestoreAnalysis',
+  'quicksight:DeleteAnalysis',
+  'quicksight:DescribeAnalysisPermissions',
+];
+
+export const DASHBOARD_READER_PERMISSION_ACTIONS = [
+  'quicksight:DescribeDashboard',
+  'quicksight:ListDashboardVersions',
+  'quicksight:QueryDashboard',
+];
+
+export const DASHBOARD_ADMIN_PERMISSION_ACTIONS = [
+  ...DASHBOARD_READER_PERMISSION_ACTIONS,
+  'quicksight:UpdateDashboard',
+  'quicksight:DeleteDashboard',
+  'quicksight:UpdateDashboardPermissions',
+  'quicksight:DescribeDashboardPermissions',
+  'quicksight:UpdateDashboardPublishedVersion',
+];
+
+export const FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS = [
+  'quicksight:CreateFolder',
+  'quicksight:DescribeFolder',
+  'quicksight:CreateFolderMembership',
+  'quicksight:DeleteFolderMembership',
+  'quicksight:DescribeFolderPermissions',
+];
+
+export const FOLDER_OWNER_PERMISSION_ACTIONS = [
+  ...FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+  'quicksight:UpdateFolder',
+  'quicksight:DeleteFolder',
+  'quicksight:UpdateFolderPermissions',
+];

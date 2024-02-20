@@ -50,11 +50,12 @@ declare global {
     readonly appId: string;
 
     readonly eventName: string;
+    readonly eventNames: string[];
 
     readonly parameterId: string;
     readonly name: string;
     displayName: string;
-    readonly description: string;
+    description: string;
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;
     readonly platform: MetadataPlatform[];
@@ -144,6 +145,21 @@ declare global {
     readonly groupCondition?: GroupingCondition;
   }
 
+  interface AttributionTouchPoint {
+    readonly eventName: string;
+    readonly sqlCondition?: ISQLCondition;
+    readonly groupColumn?: IColumnAttribute;
+  }
+
+  interface IExploreAttributionRequest extends IExploreRequest {
+    targetEventAndCondition: AttributionTouchPoint;
+    eventAndConditions: AttributionTouchPoint[];
+    modelType: AttributionModelType;
+    modelWeights?: number[];
+    timeWindowType: ExploreAttributionTimeWindowType;
+    timeWindowInSeconds?: number;
+  }
+
   interface ICondition {
     readonly category: string;
     readonly property: string;
@@ -152,10 +168,7 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  interface IRetentionJoinColumn {
-    readonly category: string;
-    readonly property: string;
-  }
+  type IRetentionJoinColumn = IColumnAttribute;
 
   interface IEventAndCondition {
     readonly eventName: string;
@@ -179,24 +192,15 @@ declare global {
 
   interface IAnalyticsDashboard {
     readonly id: string;
-    readonly type: string;
-    readonly prefix: string;
-
-    readonly projectId: string;
-    readonly appId: string;
-    readonly dashboardId: string;
-
     readonly name: string;
     readonly description: string;
+    readonly projectId: string;
+    readonly appId: string;
     readonly region: string;
-    readonly sheets: IAnalyticsDashboardSheet[];
-    readonly defaultDataSourceArn: string;
-    readonly embedUrl?: string;
-
+    readonly sheets: IDashboardSheet[];
+    embedUrl?: string;
     readonly createAt: number;
     readonly updateAt: number;
-    readonly operator: string;
-    readonly deleted: boolean;
   }
 
   interface IAnalyticsDashboardSheet {

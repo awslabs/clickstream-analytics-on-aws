@@ -41,12 +41,27 @@ export interface IAnalyticsItem extends SelectProps.Option {
   valueType?: MetadataValueType;
   platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
+  groupName?: string;
+  itemType?: string;
+  subList?: IAnalyticsItem[];
 }
 
+export interface IProjectSelectItem extends SelectProps.Option {
+  projectId?: string;
+  projectName?: string;
+  appId?: string;
+  appName?: string;
+}
 export interface CategoryItemType {
   categoryName: string;
   categoryType: string;
   itemList: IAnalyticsItem[];
+}
+
+export enum AnalyticsProjectAppStatus {
+  NoExist = 'NoExist',
+  Disabled = 'Disabled',
+  Enable = 'Enable',
 }
 
 export enum ERelationShip {
@@ -58,7 +73,8 @@ export interface IEventAnalyticsItem {
   customOrderName?: string;
   selectedEventOption: IAnalyticsItem | null;
   selectedEventAttributeOption: CategoryItemType[];
-  calculateMethodOption?: SelectProps.Option | null;
+  calculateMethodOptions?: IAnalyticsItem[];
+  calculateMethodOption?: IAnalyticsItem | null;
   conditionOptions: CategoryItemType[];
   conditionList: IConditionItemType[];
   conditionRelationShip: ERelationShip;
@@ -93,7 +109,7 @@ export const DEFAULT_EVENT_ITEM = {
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
   isMultiSelect: true,
-  enableChangeRelation: false,
+  enableChangeRelation: true,
 };
 
 export const DEFAULT_RETENTION_ITEM = {

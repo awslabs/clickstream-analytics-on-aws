@@ -27,8 +27,8 @@ import {
   WEB_INIT_SDK_TEXT,
   WEB_RECORD_EVENT,
   WEB_ADD_USER_ATTR,
-  buildSDKDocumentLink,
 } from 'ts/guideConst';
+import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 
 interface ConfigSDKProps {
@@ -97,7 +97,11 @@ const ConfigWebSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
             sdkType: 'Web',
           })}
           <Link
-            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/web')}
+            href={buildDocumentLink(
+              i18n.language,
+              '/web-sdk.html',
+              '/sdk-manual/web'
+            )}
             external
           >
             {t('application:sdkGuide.devGuide')}

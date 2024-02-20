@@ -94,7 +94,6 @@ export const handler = async (
   event: CloudFormationCustomResourceEvent | SSMEventType,
   context: Context,
 ) => {
-  logger.info(JSON.stringify(event));
   try {
     return await _handler(event, context);
   } catch (e: any) {
@@ -105,21 +104,21 @@ export const handler = async (
 
 async function _handler(
   event: CloudFormationCustomResourceEvent | SSMEventType,
-  context: Context,
+  _context: Context,
 ) {
-
+  logger.injectLambdaContext();
   let requestType = (event as CloudFormationCustomResourceEvent).RequestType;
   let parameterName = (event as SSMEventType).detail?.name;
+  logger.info('Inputs: ', {
+    requestType: requestType,
+    parameterName: parameterName,
+    region: region,
+    dashboardName: dashboardName,
+    proejctId: projectId,
+    columnNumber: columnNumber,
+    snsTopicArn: snsTopicArn,
 
-  logger.info('requestType: ' + requestType);
-  logger.info('parameterName: ' + parameterName);
-
-  logger.info('functionName: ' + context.functionName);
-  logger.info('region: ' + region);
-  logger.info('dashboardName: ' + dashboardName);
-  logger.info('projectId: ' + projectId);
-  logger.info('columnNumber: ' + columnNumber);
-  logger.info('snsTopicArn: ' + snsTopicArn);
+  });
 
   if (requestType == 'Delete') {
     logger.info('ignore requestType ' + requestType);

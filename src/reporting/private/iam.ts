@@ -14,6 +14,7 @@
 import { Arn, ArnFormat, Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export function createRoleForQuicksightCustomResourceLambda(
@@ -105,9 +106,59 @@ export function createRoleForQuicksightCustomResourceLambda(
       ],
     }),
 
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        `${arnPrefix}:folder/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
+      ],
+      actions: [
+        'quicksight:CreateFolderMembership',
+        'quicksight:DeleteFolderMembership',
+        'quicksight:DescribeFolder',
+        'quicksight:CreateFolder',
+        'quicksight:DeleteFolder',
+        'quicksight:UpdateFolder',
+        'quicksight:UpdateFolderPermissions',
+        'quicksight:ListFolderMembers',
+      ],
+    }),
+
   ];
 
   const principal = new ServicePrincipal('lambda.amazonaws.com');
   return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
+
+}
+
+export function createNetworkInterfaceCheckCustomResourceLambda(
+  scope: Construct,
+) {
+  const logGroupArn = Arn.format(
+    {
+      resource: 'log-group',
+      service: 'logs',
+      resourceName: '/aws/lambda/*',
+      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+      region: Aws.REGION,
+      account: Aws.ACCOUNT_ID,
+      partition: Aws.PARTITION,
+    },
+  );
+
+  const policyStatements = [
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        '*',
+      ],
+      actions: [
+        'ec2:DescribeNetworkInterfaces',
+        'quicksight:DescribeVPCConnection',
+      ],
+    }),
+  ];
+
+  const principal = new ServicePrincipal('lambda.amazonaws.com');
+  return createLambdaRole(scope, 'NetworkInterfaceCheckCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
 
 }

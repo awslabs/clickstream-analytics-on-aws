@@ -45,7 +45,7 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
+import { POSITIVE_INTEGER_REGEX } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -58,12 +58,12 @@ import {
   ExplorePathSessionDef,
   MetadataPlatform,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,
   generateStr,
-  getAbsoluteStartEndRange,
   getEventParameters,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
@@ -82,7 +82,9 @@ import {
   validMultipleEventAnalyticsItems,
   validateFilterConditions,
 } from '../analytics-utils';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 import StartNodeSelect from '../comps/StartNodeSelect';
@@ -90,7 +92,9 @@ import StartNodeSelect from '../comps/StartNodeSelect';
 interface AnalyticsPathProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -110,7 +114,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -236,7 +242,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     useState<SelectProps.Option | null>(webPlatformOption);
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
+    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -256,14 +262,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       isMultiSelect: false,
-      enableChangeRelation: false,
+      enableChangeRelation: true,
       disabled: true,
     });
     filterOptionDataDispatch({
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(getAbsoluteStartEndRange());
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
@@ -308,10 +314,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -461,10 +464,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     try {
       const body = getPathRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');
@@ -491,7 +491,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       isMultiSelect: false,
-      enableChangeRelation: false,
+      enableChangeRelation: true,
       disabled: true,
     });
     filterOptionDataDispatch({
@@ -627,6 +627,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                         placeholder="5"
                         value={windowValue}
                         onChange={(event) => {
+                          if (
+                            !POSITIVE_INTEGER_REGEX.test(event.detail.value)
+                          ) {
+                            return false;
+                          }
                           setWindowValue(event.detail.value);
                         }}
                       />
@@ -686,7 +691,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   );
                   const eventName = option?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -700,7 +707,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                         ...DEFAULT_EVENT_ITEM,
                         selectedEventOption: option,
                         conditionOptions: parameterOption,
-                        enableChangeRelation: false,
+                        enableChangeRelation: true,
                         isMultiSelect: false,
                         disabled: true,
                       },
@@ -725,10 +732,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 addEventButtonLabel={t('common:button.addNode')}
                 eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
+                builtInMetadata={builtInMetadata}
                 metadataEvents={metadataEvents}
+                metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
-                enableChangeRelation={false}
+                enableChangeRelation={true}
+                enableChangeMultiSelect={false}
               />
 
               <div className="cs-analytics-config">
@@ -809,6 +819,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
+              embedPage="explore"
             />
           )}
         </Container>

@@ -46,7 +46,7 @@
     "sub_continent" : null
   },
   "geo_for_enrich" : {
-    "ip" : "13.212.229.59",
+    "ip" : "13.212.229.59, 21.212.229.59",
     "locale" : "zh_CN_#Hans"
   },
   "ingest_timestamp" : 1682319109403,

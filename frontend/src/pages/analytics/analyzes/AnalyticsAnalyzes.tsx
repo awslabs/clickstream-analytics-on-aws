@@ -11,19 +11,6 @@
  *  and limitations under the License.
  */
 
-/**
- *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
- *  with the License. A copy of the License is located at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
- *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
- *  and limitations under the License.
- */
-
 import {
   AppLayout,
   Container,
@@ -31,7 +18,7 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { embedAnalyzesUrl } from 'apis/analytics';
+import { embedAnalyzesUrl, getPipelineDetailByProjectId } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -69,9 +56,24 @@ const AnalyticsAnalyzes: React.FC = () => {
     setLoadingData(false);
   };
 
+  const loadPipeline = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && data.analysisStudioEnabled) {
+        await getAnalyzes();
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    if (projectId) {
-      getAnalyzes();
+    if (projectId && appId) {
+      loadPipeline();
     }
   }, [projectId]);
 
@@ -86,6 +88,10 @@ const AnalyticsAnalyzes: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -95,16 +101,20 @@ const AnalyticsAnalyzes: React.FC = () => {
         <AppLayout
           toolsOpen={state?.showHelpPanel}
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_ANALYZES,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           tools={<HelpInfo />}
@@ -139,6 +149,7 @@ const AnalyticsAnalyzes: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="console"
                     embedUrl={dashboardEmbedUrl}
+                    embedPage="analyze"
                   />
                 )}
               </Container>

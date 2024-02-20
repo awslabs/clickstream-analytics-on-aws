@@ -25,6 +25,7 @@ import {
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { sleep } from '../../../common/utils';
 
 const region = process.env.AWS_REGION!;
 
@@ -42,7 +43,6 @@ interface ResourcePropertiesType {
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
   try {
     await _handler(event, context);
     logger.info('=== complete ===');
@@ -131,7 +131,7 @@ async function updateEcsService(ecsServiceName: string, ecsClusterName: string) 
       if (runningCount === 0) {
         break;
       } else {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 10 seconds
+        await sleep(5000); // Sleep for 5 seconds
       }
     } else {
       break;

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { join } from 'path';
 import {
   Stack,
   NestedStack,
@@ -22,21 +23,21 @@ import {
   SubnetSelection,
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
-import { TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
+import { PolicyStatement, Role, AccountPrincipal, IRole, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { ApplicationSchemas } from './private/app-schema';
+import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
 import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, WorkflowBucketInfo, LoadDataConfig } from './private/model';
-import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
+import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW } from '../common/constant';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources } from '../common/cfn-nag';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
@@ -53,6 +54,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly projectId: string;
   readonly appIds: string;
   readonly tablesOdsSource: TablesODSSource;
+  readonly mvRefreshInterval: number;
   readonly loadDataConfig: LoadDataConfig;
   readonly newRedshiftServerlessProps?: NewRedshiftServerlessProps;
   readonly existingRedshiftServerlessProps?: ExistingRedshiftServerlessProps;
@@ -67,8 +69,10 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
 export class RedshiftAnalyticsStack extends NestedStack {
 
   readonly redshiftServerlessWorkgroup: RedshiftServerless | undefined;
-  readonly applicationSchema: ApplicationSchemas;
+  readonly applicationSchema: ApplicationSchemasAndReporting;
   readonly redshiftDataAPIExecRole: IRole;
+  readonly sqlExecutionWorkflow: IStateMachine;
+  readonly scanMetadataWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -206,7 +210,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
       item: REDSHIFT_ITEM_TABLE_NAME,
     };
 
-    this.applicationSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
+    const functionEntry = join(
+      __dirname + '/lambdas/custom-resource',
+      'create-schemas.ts',
+    );
+    const codePath = __dirname + '/private/sqls/redshift';
+    this.applicationSchema = new ApplicationSchemasAndReporting(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
       appIds: props.appIds,
       serverlessRedshift: existingRedshiftServerlessProps,
@@ -214,24 +223,37 @@ export class RedshiftAnalyticsStack extends NestedStack {
       odsTableNames: redshiftTables,
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      codePath,
+      functionEntry,
+      workflowBucketInfo: props.workflowBucketInfo,
     });
+
+    this.sqlExecutionWorkflow =this.applicationSchema.sqlExecutionStepFunctions;
+
+    // for upgrading backward compatibility
+    (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)
+      .overrideLogicalId('CreateApplicationSchemasRedshiftSchemasCustomResourceProviderframeworkonEventA11E8EDC');
+    (this.applicationSchema.crForSQLExecution.node.defaultChild as CfnResource)
+      .overrideLogicalId('CreateApplicationSchemasRedshiftSchemasCustomResource7AA8CC71');
     if (redshiftUserCR) {
-      this.applicationSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
+      this.applicationSchema.crForSQLExecution.node.addDependency(redshiftUserCR);
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const { cr: crForModifyClusterIAMRoles, redshiftRoleForCopyFromS3 } = createCustomResourceAssociateIAMRole(this,
+    const redshiftRoleForCopyFromS3 = new Role(this, 'CopyDataFromS3Role', {
+      assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
+    });
+    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateS3CopyRole',
       {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
-      });
-
-    crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
+        role: redshiftRoleForCopyFromS3,
+      }).cr;
+    crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForSQLExecution);
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
 
-
-    const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
+    const scanMetadataWorkflow = new ScanMetadataWorkflow(this, SCAN_METADATA_WORKFLOW_PREFIX, {
       appIds: props.appIds,
       projectId: props.projectId,
       networkConfig: {
@@ -245,6 +267,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       scanMetadataWorkflowData: props.scanMetadataWorkflowData,
     });
+
+    this.scanMetadataWorkflowArn = scanMetadataWorkflow.scanMetadataWorkflow.stateMachineArn;
 
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
@@ -263,12 +287,14 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const loadDataProps = {
       projectId: props.projectId,
+      appIds: props.appIds,
       networkConfig: {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
       securityGroupForLambda,
       databaseName: projectDatabaseName,
+      mvRefreshInterval: props.mvRefreshInterval,
       dataAPIRole: this.redshiftDataAPIExecRole,
       emrServerlessApplicationId: props.emrServerlessApplicationId,
       serverlessRedshift: existingRedshiftServerlessProps,
@@ -290,7 +316,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     const loadRedshiftTablesWorkflow = new LoadOdsDataToRedshiftWorkflow(this, 'LoadData', loadDataProps);
     (loadRedshiftTablesWorkflow.loadDataWorkflow.node.defaultChild as CfnResource).overrideLogicalId('ClickstreamLoadDataWorkflow');
 
-
     if (this.redshiftServerlessWorkgroup) {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
@@ -299,7 +324,9 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+        sqlExecutionWorkflow: this.sqlExecutionWorkflow,
 
       });
     }
@@ -312,7 +339,9 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+        sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
     }
 
@@ -323,8 +352,9 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
-
+        sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
     }
 
@@ -362,7 +392,7 @@ function createDDBStatusTable(scope: Construct, tableId: string): ITable {
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftSchemasCustomResource', 'RedshiftDbSchemasCustomResourceProvider');
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for RedshiftSchemasCustomResourceProvider', 'RedshiftSchemasCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for RedshiftSQLExecutionCustomResourceProvider', 'RedshiftSQLExecutionCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftAssociateIAMRoleCustomResource', 'RedshiftAssociateIAMRoleCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
@@ -371,10 +401,13 @@ function addCfnNag(stack: Stack) {
       'ClearExpiredEventsWorkflow/ClearExpiredEventsStateMachine/Role/DefaultPolicy/Resource',
       'ClearExpiredEventsWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
+      'CreateApplicationSchemas/SQLExecutionStateMachine/Role/DefaultPolicy/Resource',
+      'SQLExecutionStateMachine', 'redshift-data'),
+    ruleRolePolicyWithWildcardResources(
       'RedshiftDataExecRole/DefaultPolicy/Resource',
       'RedshiftDataExecRole', 'redshift-data'),
     ruleForLambdaVPCAndReservedConcurrentExecutions(
-      'CreateApplicationSchemas/CreateSchemaForApplicationsFn/Resource', 'CreateApplicationSchemas'),
+      'CreateApplicationSchemas/RedshiftSQLExecutionFn/Resource', 'CreateApplicationSchemas'),
     ruleForLambdaVPCAndReservedConcurrentExecutions(
       'AssociateIAMRoleToRedshiftFn/Resource', 'AssociateIAMRoleToRedshift'),
     {
@@ -385,10 +418,7 @@ function addCfnNag(stack: Stack) {
           reason:
             'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
         },
-        {
-          id: 'W12',
-          reason: 'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
-        },
+        ruleToSuppressRolePolicyWithWildcardResources('Associate Role to Redshift', 'passRole'),
       ],
     },
 
@@ -398,10 +428,7 @@ function addCfnNag(stack: Stack) {
         ...ruleRolePolicyWithWildcardResources(
           'LoadDataStateMachine/Role/DefaultPolicy/Resource',
           'loadDataFlow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('LoadData'),
       ],
     },
 
@@ -411,20 +438,14 @@ function addCfnNag(stack: Stack) {
         ...ruleRolePolicyWithWildcardResources(
           'ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
           'ScanMetadataWorkflow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('ScanMetadata'),
       ],
     },
 
     {
       paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
       ],
     },
 

@@ -11,10 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, DescribeTypeCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { PipelineStackType, PipelineStatusDetail } from '../../common/model-ln';
+import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
-import { getVersionFromTags } from '../../common/utils';
+import { getStackPrefix, getVersionFromTags } from '../../common/utils';
 
 export const describeStack = async (region: string, stackName: string) => {
   try {
@@ -40,9 +41,12 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
     const stackDetails: PipelineStatusDetail[] = [];
     for (let stackName of stackNames) {
       const stack = await describeStack(region, stackName);
+      const name = stack?.StackName ?? stackName;
+      const cutPrefixName = name.substring(getStackPrefix().length);
       stackDetails.push({
-        stackName: stackName,
-        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackId: stack?.StackId ?? '',
+        stackName: name,
+        stackType: cutPrefixName.split('-')[1] as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
         stackTemplateVersion: getVersionFromTags(stack?.Tags),
@@ -53,4 +57,53 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
   } catch (error) {
     return [];
   }
+};
+
+export const describeType = async (region: string, typeName: string) => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: DescribeTypeCommand = new DescribeTypeCommand({
+      Type: 'RESOURCE',
+      TypeName: typeName,
+    });
+    return await cloudFormationClient.send(params);
+  } catch (error) {
+    logger.error('Describe AWS Resource Types Error', { error });
+    return undefined;
+  }
+};
+
+export const pingServiceResource = async (region: string, service: string) => {
+  let resourceName = '';
+  switch (service) {
+    case 'emr-serverless':
+      resourceName = 'AWS::EMRServerless::Application';
+      break;
+    case 'msk':
+      resourceName = 'AWS::KafkaConnect::Connector';
+      break;
+    case 'redshift-serverless':
+      resourceName = 'AWS::RedshiftServerless::Workgroup';
+      break;
+    case 'quicksight':
+      resourceName = 'AWS::QuickSight::Dashboard';
+      break;
+    case 'athena':
+      resourceName = 'AWS::Athena::WorkGroup';
+      break;
+    case 'global-accelerator':
+      resourceName = 'AWS::GlobalAccelerator::Accelerator';
+      break;
+    default:
+      break;
+  };
+  if (!resourceName) return false;
+  if (service === 'quicksight' && region.startsWith('cn-')) {
+    return false;
+  }
+  const resource = await describeType(region, resourceName);
+  return resource?.Arn ? true : false;
 };

@@ -12,8 +12,8 @@
  */
 
 import { Tag } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
-import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -29,17 +29,31 @@ import {
   getStackParameters,
 } from './stacks';
 import {
-  awsUrlSuffix,
+  CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
   FULL_SOLUTION_VERSION,
   PIPELINE_STACKS,
+  awsAccountId,
+  awsPartition,
+  awsRegion,
+  awsUrlSuffix,
+  listenStackQueueArn,
   stackWorkflowS3Bucket,
 } from '../common/constants';
 import {
   MULTI_APP_ID_PATTERN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
-import { BuiltInTagKeys } from '../common/model-ln';
+import {
+  BuiltInTagKeys,
+  ExecutionDetail,
+  PipelineStackType,
+  PipelineStatusDetail,
+  PipelineStatusType,
+} from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
   validateIngestionServerNum,
@@ -49,14 +63,14 @@ import {
 } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
+  ENetworkType,
   IngestionServerSinkBatchProps,
   IngestionServerSizeProps,
+  IngestionType,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
-  PipelineStackType,
   PipelineStatus,
-  PipelineStatusType,
   RedshiftInfo,
   StackUpdateParameter,
   WorkflowParallelBranch,
@@ -65,13 +79,27 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, isEmpty } from '../common/utils';
+import {
+  getPipelineStatusType,
+  getStackName,
+  getStackPrefix,
+  getStackTags,
+  getStateMachineExecutionName,
+  getUpdateTags,
+  isEmpty,
+  mergeIntoPipelineTags,
+  mergeIntoStackTags,
+} from '../common/utils';
 import { StackManager } from '../service/stack';
-import { describeStack } from '../store/aws/cloudformation';
+import { getStacksDetailsByNames } from '../store/aws/cloudformation';
+import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
+import { isBucketExist } from '../store/aws/s3';
+import { getExecutionDetail } from '../store/aws/sfn';
+import { createTopicAndSubscribeSQSQueue } from '../store/aws/sns';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -118,6 +146,7 @@ interface NetworkProps {
   readonly vpcId: string;
   readonly publicSubnetIds: string[];
   privateSubnetIds: string[];
+  readonly type?: ENetworkType;
 }
 
 interface RedshiftNetworkProps {
@@ -127,6 +156,7 @@ interface RedshiftNetworkProps {
 }
 
 interface IngestionServer {
+  readonly ingestionType?: IngestionType;
   readonly size: IngestionServerSizeProps;
   readonly domain?: IngestionServerDomainProps;
   readonly loadBalancer: IngestionServerLoadBalancerProps;
@@ -229,14 +259,16 @@ export interface IPipeline {
   lastAction?: string;
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
-  executionName?: string;
-  executionArn?: string;
   templateVersion?: string;
+  statusType?: PipelineStatusType;
+  stackDetails?: PipelineStatusDetail[];
+  executionDetail?: ExecutionDetail;
+  executionArn?: string;
 
   readonly version: string;
   readonly versionTag: string;
   readonly createAt: number;
-  readonly updateAt: number;
+  updateAt: number;
   readonly operator: string;
   readonly deleted: boolean;
 }
@@ -267,14 +299,21 @@ export class CPipeline {
   }
 
   public async create(): Promise<void> {
-    // state machine
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Create';
-    this.pipeline.executionName = `main-${uuidv4()}`;
-    this.pipeline.workflow = await this.generateWorkflow();
-
+    this.pipeline.statusType = PipelineStatusType.CREATING;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
-
-    this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this.pipeline.workflow = await this.generateWorkflow();
+    const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.stackDetails = [];
+    this.pipeline.statusType = PipelineStatusType.CREATING;
     // bind plugin
     const pluginIds: string[] = [];
     if (this.pipeline.dataProcessing?.transformPlugin && !this.pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
@@ -287,31 +326,62 @@ export class CPipeline {
     }
   }
 
+  private async _createRules() {
+    if (!listenStackQueueArn) {
+      throw new ClickStreamBadRequestError('Queue ARN not found. Please check and try again.');
+    }
+    const topicName = `${CFN_TOPIC_PREFIX}-${this.pipeline.pipelineId}`;
+    const topicArn = await createTopicAndSubscribeSQSQueue(
+      this.pipeline.region,
+      this.pipeline.projectId,
+      topicName,
+      listenStackQueueArn,
+    );
+    if (!topicArn) {
+      throw new ClickStreamBadRequestError('Topic create failed. Please check and try again.');
+    }
+    const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/${getStackPrefix()}*${this.pipeline.pipelineId}/*`;
+    const ruleArn = await createRuleAndAddTargets(
+      this.pipeline.region,
+      this.pipeline.projectId,
+      `${CFN_RULE_PREFIX}-${this.pipeline.id}`,
+      `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`,
+      topicArn,
+    );
+    if (!ruleArn) {
+      throw new ClickStreamBadRequestError('Rule create failed. Please check and try again.');
+    }
+  }
+
   public async update(oldPipeline: IPipeline): Promise<void> {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Update';
+    this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    this.pipeline.executionName = `main-${uuidv4()}`;
-
-    this.pipeline.status = await this.stackManager.getPipelineStatus();
-    if (this.pipeline.status.status === PipelineStatusType.CREATING ||
-      this.pipeline.status.status === PipelineStatusType.DELETING ||
-      this.pipeline.status.status === PipelineStatusType.UPDATING) {
-      throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
-    }
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     const { editStacks, editParameters } = await this._getEditStacksAndParameters(oldPipeline);
     // update workflow
     this.stackManager.updateWorkflowParameters(editParameters);
     this.stackManager.updateWorkflowAction(editStacks);
+    // update tags
+    this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
+    if (this._editStackTags(oldPipeline)) {
+      this.stackManager.updateWorkflowTags();
+    }
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
-    this.pipeline.templateVersion = oldPipeline.templateVersion;
-    this.pipeline.tags = oldPipeline.tags;
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     this.pipeline.workflow = this.stackManager.getWorkflow();
-
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -338,7 +408,7 @@ export class CPipeline {
     for (let key of editKeys) {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
-      if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
+      if (stackName.startsWith(`${getStackPrefix()}-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
         continue; // skip reporting stack when template version is v1.0
       }
       if (!editStacks.includes(stackName)) {
@@ -364,11 +434,21 @@ export class CPipeline {
     };
   }
 
+  private _editStackTags(oldPipeline: IPipeline): boolean {
+    const newStackTags = [...this.pipeline.tags];
+    const oldStackTags = [...oldPipeline.tags];
+    newStackTags.sort((a, b) => a.key.localeCompare(b.key));
+    oldStackTags.sort((a, b) => a.key.localeCompare(b.key));
+    const diffTags = getDiff(newStackTags, oldStackTags);
+    return !isEmpty(diffTags.edited) || !isEmpty(diffTags.added) || !isEmpty(diffTags.removed);
+  }
+
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
@@ -377,20 +457,91 @@ export class CPipeline {
     this.stackManager.upgradeWorkflow(oldStackNames);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
-  public async refreshStatus(): Promise<void> {
-    this.pipeline.status = await this.stackManager.getPipelineStatus();
+  public async refreshStatus(refresh?: string): Promise<void> {
+    if (refresh && refresh === 'force') {
+      await this._forceRefreshStatus();
+    } else {
+      if (!this.pipeline.executionDetail) {
+        this.pipeline.executionDetail = {
+          executionArn: this.pipeline.executionArn ?? '',
+          name: this.pipeline.status?.executionDetail.name ?? '',
+          status: this.pipeline.status?.executionDetail.status as ExecutionStatus ?? ExecutionStatus.SUCCEEDED,
+        };
+      }
+      if (!this.pipeline.stackDetails) {
+        this.pipeline.stackDetails = this.pipeline.status?.stackDetails ?? [];
+      }
+      this.pipeline.statusType = getPipelineStatusType(this.pipeline);
+    }
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
+  private async _forceRefreshStatus(): Promise<void> {
+    let executionDetail;
+    if (this.pipeline.executionDetail?.executionArn) {
+      executionDetail = await getExecutionDetail(awsRegion, this.pipeline.executionDetail?.executionArn);
+      if (executionDetail) {
+        this.pipeline.executionDetail = {
+          executionArn: executionDetail.executionArn ?? '',
+          name: executionDetail.name ?? '',
+          status: executionDetail.status,
+        };
+      }
+    }
+    if (!executionDetail) {
+      this.pipeline.executionDetail = {
+        executionArn: this.pipeline.executionDetail?.executionArn ?? '',
+        name: this.pipeline.executionDetail?.name ?? '',
+        status: ExecutionStatus.SUCCEEDED,
+      };
+    }
+    await this._forceRefreshStacksById();
+  }
+
+  private async _forceRefreshStacksByName(): Promise<void> {
+    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
+    const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackNames);
+    if (stackStatusDetails.length > 0) {
+      this.pipeline.stackDetails = stackStatusDetails;
+    }
+  }
+
+  private async _forceRefreshStacksById(): Promise<void> {
+    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
+    const stackDetails = this.pipeline.stackDetails ?? [];
+    const stackIds: string[] = [];
+    for (let stackName of stackNames) {
+      const detail = stackDetails.find(s => s.stackName === stackName);
+      if (detail?.stackId) {
+        stackIds.push(detail?.stackId);
+      } else {
+        stackIds.push(stackName);
+      }
+    }
+
+    const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackIds);
+    if (stackStatusDetails.length > 0) {
+      this.pipeline.stackDetails = stackStatusDetails;
+      this.pipeline.statusType = getPipelineStatusType(this.pipeline);
+    }
+  }
+
   public async updateApp(appIds: string[]): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Update';
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
     const dataProcessingStackName = getStackName(
@@ -403,21 +554,37 @@ export class CPipeline {
     this.stackManager.updateWorkflowForApp(appIds, ingestionStackName, dataProcessingStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
+    this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
   public async delete(): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
+    await this._forceRefreshStacksByName();
     this.pipeline.lastAction = 'Delete';
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     // update workflow
     this.stackManager.deleteWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.DELETING;
     // update pipeline metadata
+    this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
 
     // bind plugin
@@ -433,12 +600,19 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    // create rule to listen CFN stack
+    await this._createRules();
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
@@ -449,9 +623,11 @@ export class CPipeline {
 
     await this._fillResources();
 
+    await this._checkExistenceS3Bucket();
+
     if (!this.stackTags || this.stackTags?.length === 0) {
       this.patchBuiltInTags();
-      this.stackTags = this.getStackTags();
+      this.stackTags = getStackTags(this.pipeline);
     }
 
     if (!this.validateNetworkOnce) {
@@ -475,6 +651,13 @@ export class CPipeline {
         ...this.resources,
         quickSightUser: quickSightUser,
       };
+    }
+  }
+
+  private async _checkExistenceS3Bucket() {
+    const isExisted = await isBucketExist(this.pipeline.region, this.pipeline.bucket.name);
+    if (!isExisted) {
+      throw new ClickStreamBadRequestError(`Validation error: bucket ${this.pipeline.bucket.name} not found. Please check and try again.`);
     }
   }
 
@@ -553,7 +736,8 @@ export class CPipeline {
     const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
     const stackTemplateMap = new Map();
     for (let stackName of stackNames) {
-      const stackType = stackName.split('-')[1] as PipelineStackType;
+      const cutPrefixName = stackName.substring(getStackPrefix().length);
+      const stackType = cutPrefixName.split('-')[1] as PipelineStackType;
       let templateName: string = stackType;
       if (stackType === PipelineStackType.INGESTION) {
         templateName = `${stackType}_${this.pipeline.ingestionServer.sinkType}`;
@@ -604,32 +788,19 @@ export class CPipeline {
           keys.splice(index, 1);
         }
       }
-      this.pipeline.tags.push({
+
+      // Add preset tags to the beginning of the tags array
+      this.pipeline.tags.unshift({
         key: BuiltInTagKeys.AWS_SOLUTION,
         value: SolutionInfo.SOLUTION_SHORT_NAME,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
         value: FULL_SOLUTION_VERSION,
-      });
-      this.pipeline.tags.push({
+      }, {
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
         value: this.pipeline.projectId,
       });
     }
-  };
-
-  private getStackTags() {
-    const stackTags: Tag[] = [];
-    if (this.pipeline.tags) {
-      for (let tag of this.pipeline.tags) {
-        stackTags.push({
-          Key: tag.key,
-          Value: tag.value,
-        });
-      }
-    }
-    return stackTags;
   };
 
   public async generateWorkflow(): Promise<WorkflowTemplate> {
@@ -683,6 +854,7 @@ export class CPipeline {
     const appRegistryStack = new CAppRegistryStack(this.pipeline);
     const appRegistryParameters = getStackParameters(appRegistryStack);
     const appRegistryStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.APP_REGISTRY, this.pipeline.ingestionServer.sinkType);
+
     const appRegistryState: WorkflowState = {
       Type: WorkflowStateType.STACK,
       Data: {
@@ -692,15 +864,23 @@ export class CPipeline {
           StackName: appRegistryStackName,
           TemplateURL: appRegistryTemplateURL,
           Parameters: appRegistryParameters,
-          Tags: this.stackTags,
+          Tags: this.stackTags ? [...this.stackTags] : undefined,
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       Next: PIPELINE_STACKS,
     };
+
+    // Add awsApplication tag to start viewing the cost, security, and operational metrics for the application
+    const awsApplicationTag: Tag = {
+      Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+      Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+    };
+    mergeIntoStackTags(this.stackTags, awsApplicationTag);
+    mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
 
     return {
       Type: WorkflowStateType.PARALLEL,
@@ -758,7 +938,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -794,7 +974,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -833,9 +1013,13 @@ export class CPipeline {
   }
 
   private async _getIngestionWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
-    const ingestionTemplateURL = await this.getTemplateUrl(`${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`);
+    let ingestionTemplateKey = `${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`;
+    if (this.pipeline.ingestionServer.ingestionType === IngestionType.Fargate) {
+      ingestionTemplateKey = `${PipelineStackType.INGESTION}_v2`;
+    }
+    const ingestionTemplateURL = await this.getTemplateUrl(ingestionTemplateKey);
     if (!ingestionTemplateURL) {
-      throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+      throw new ClickStreamBadRequestError(`Template: ${ingestionTemplateKey} not found in dictionary.`);
     }
     const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
     const ingestionStackParameters = getStackParameters(ingestionStack);
@@ -853,7 +1037,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
     };
@@ -880,7 +1064,7 @@ export class CPipeline {
           },
           Callback: {
             BucketName: bucketName,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
           },
         },
         End: true,
@@ -932,7 +1116,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -964,7 +1148,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -997,7 +1181,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name ?? this.pipeline.status?.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1006,18 +1190,16 @@ export class CPipeline {
     return athenaState;
   }
 
-  public async getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Promise<Map<string, string>> {
+  public getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Map<string, string> {
     const res: Map<string, string> = new Map<string, string>();
-    const stack = await describeStack(
-      this.pipeline.region,
-      getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
-    );
+    const stackDetails = this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails;
+    const stack = stackDetails?.filter(s => s.stackType === stackType);
     if (!stack) {
       return res;
     }
     for (let suffix of outputKeySuffixes) {
-      if (stack.Outputs) {
-        for (let out of stack.Outputs) {
+      if (stack[0].outputs) {
+        for (let out of stack[0].outputs) {
           if (out.OutputKey?.endsWith(suffix)) {
             res.set(suffix, out.OutputValue ?? '');
             break;

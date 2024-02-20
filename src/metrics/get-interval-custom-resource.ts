@@ -14,17 +14,16 @@
 
 import { join } from 'path';
 import { CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export interface GetIntervalProps {
   readonly expression: string;
+  readonly scanWorkflowMinInterval?: string;
   readonly evaluationPeriods?: number;
 }
 
@@ -37,6 +36,10 @@ export class GetInterval extends Construct {
 
   public getIntervalSeconds(): string {
     return this.intervalCustomResource.getAttString('intervalSeconds');
+  }
+
+  public getScanWorkflowMinIntervalSeconds(): string {
+    return this.intervalCustomResource.getAttString('scanWorkflowMinIntervalSeconds');
   }
 }
 
@@ -58,6 +61,7 @@ function createGetIntervalCustomResource(
     serviceToken: provider.serviceToken,
     properties: {
       expression: props.expression,
+      scanWorkflowMinInterval: props.scanWorkflowMinInterval,
       evaluationPeriods: props.evaluationPeriods || '1',
       version: new Date().getTime(),
     },
@@ -69,7 +73,6 @@ function createGetIntervalCustomResource(
 function createGetIntervalResourceLambda(scope: Construct, id: string): SolutionNodejsFunction {
   const role = createLambdaRole(scope, id + 'LambdaRole', false, []);
   const fn = new SolutionNodejsFunction(scope, id + 'Lambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -79,12 +82,10 @@ function createGetIntervalResourceLambda(scope: Construct, id: string): Solution
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.seconds(10),
-    logRetention: RetentionDays.ONE_WEEK,
-    role,
-    environment: {
-      ...POWERTOOLS_ENVS,
-
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
     },
+    role,
   });
 
   fn.node.addDependency(role);

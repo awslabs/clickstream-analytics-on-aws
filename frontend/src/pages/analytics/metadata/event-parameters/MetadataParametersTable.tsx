@@ -34,6 +34,7 @@ import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
 interface MetadataParametersTableProps {
+  analysisStudioEnabled: boolean;
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
 }
 
@@ -41,7 +42,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
   props: MetadataParametersTableProps
 ) => {
   const { projectId, appId } = useParams();
-  const { setShowDetails } = props;
+  const { setShowDetails, analysisStudioEnabled } = props;
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const { t } = useTranslation();
@@ -287,6 +288,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
   return (
     <MetadataTable
       resourceName="EventParameter"
+      analysisStudioEnabled={analysisStudioEnabled}
       infoType={HelpPanelType.METADATA_EVENT_PARAM_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}
       tableContentDisplay={CONTENT_DISPLAY}

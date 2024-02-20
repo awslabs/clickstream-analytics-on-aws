@@ -13,20 +13,25 @@
 
 import {
   AppLayout,
+  Button,
   Container,
   ContentLayout,
   Header,
+  SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
+import { getPipelineDetailByProjectId, triggerScan } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
+import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { DispatchContext, StateContext } from 'context/StateContext';
 import { StateActionType, HelpPanelType } from 'context/reducer';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { alertMsg, defaultStr } from 'ts/utils';
 import MetadataDetails from './MetadataDetails';
 import MetadataParametersTable from '../metadata/event-parameters/MetadataParametersTable';
 import MetadataEventsTable from '../metadata/events/MetadataEventsTable';
@@ -36,7 +41,10 @@ const AnalyticsDataManagement: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
 
+  const [loadingData, setLoadingData] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
+  const [scanLoading, setScanLoading] = useState(false);
+  const [analysisStudioEnabled, setAnalysisStudioEnabled] = useState(false);
   const [curMetadata, setCurMetadata] = useState<IMetadataType | null>(null);
   const [curType, setCurType] = useState<
     'event' | 'eventParameter' | 'userAttribute'
@@ -55,6 +63,48 @@ const AnalyticsDataManagement: React.FC = () => {
     },
   ];
 
+  const onClickTriggerScan = async () => {
+    setScanLoading(true);
+    try {
+      const { success }: ApiResponse<any> = await triggerScan(
+        defaultStr(projectId),
+        defaultStr(appId)
+      );
+      setScanLoading(false);
+      if (success) {
+        alertMsg(t('analytics:metadata.scanTriggeredSuccessfully'), 'success');
+      }
+    } catch (error) {
+      console.log(error);
+      setScanLoading(false);
+    }
+  };
+
+  const loadPipeline = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success) {
+        setAnalysisStudioEnabled(data.analysisStudioEnabled ?? false);
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (projectId && appId) {
+      loadPipeline();
+    }
+  }, []);
+
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -64,16 +114,20 @@ const AnalyticsDataManagement: React.FC = () => {
         <AppLayout
           toolsOpen={state?.showHelpPanel}
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_METADATA,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           tools={<HelpInfo />}
@@ -94,75 +148,93 @@ const AnalyticsDataManagement: React.FC = () => {
                     />
                   }
                   description={t('analytics:metadata.description')}
+                  actions={
+                    <SpaceBetween size="xs" direction="horizontal">
+                      <Button
+                        loading={scanLoading}
+                        iconName="refresh"
+                        onClick={onClickTriggerScan}
+                      >
+                        {t('common:button.scanMetadata')}
+                      </Button>
+                    </SpaceBetween>
+                  }
                 >
                   {t('nav.analytics.data-management')}
                 </Header>
               }
             >
               <Container>
-                <Tabs
-                  onChange={() => {
-                    dispatch?.({
-                      type: StateActionType.HIDE_HELP_PANEL,
-                    });
-                  }}
-                  tabs={[
-                    {
-                      label: t('analytics:metadata.event.title'),
-                      id: 'first',
-                      content: (
-                        <MetadataEventsTable
-                          setShowDetails={(
-                            show: boolean,
-                            data?: IMetadataType
-                          ) => {
-                            setShowSplit(show);
-                            if (data) {
-                              setCurMetadata(data as IMetadataEvent);
-                              setCurType('event');
-                            }
-                          }}
-                        />
-                      ),
-                    },
-                    {
-                      label: t('analytics:metadata.eventParameter.title'),
-                      id: 'second',
-                      content: (
-                        <MetadataParametersTable
-                          setShowDetails={(
-                            show: boolean,
-                            data?: IMetadataType
-                          ) => {
-                            setShowSplit(show);
-                            if (data) {
-                              setCurMetadata(data as IMetadataEventParameter);
-                              setCurType('eventParameter');
-                            }
-                          }}
-                        />
-                      ),
-                    },
-                    {
-                      label: t('analytics:metadata.userAttribute.title'),
-                      id: 'third',
-                      content: (
-                        <MetadataUserAttributesTable
-                          setShowDetails={(
-                            show: boolean,
-                            data?: IMetadataType
-                          ) => {
-                            setShowSplit(show);
-                            if (data) {
-                              setCurMetadata(data as IMetadataUserAttribute);
-                              setCurType('userAttribute');
-                            }
-                          }}
-                        />
-                      ),
-                    },
-                  ]}
-                />
+                {loadingData ? (
+                  <Loading />
+                ) : (
+                  <Tabs
+                    onChange={() => {
+                      dispatch?.({
+                        type: StateActionType.HIDE_HELP_PANEL,
+                      });
+                    }}
+                    tabs={[
+                      {
+                        label: t('analytics:metadata.event.title'),
+                        id: 'first',
+                        content: (
+                          <MetadataEventsTable
+                            analysisStudioEnabled={analysisStudioEnabled}
+                            setShowDetails={(
+                              show: boolean,
+                              data?: IMetadataType
+                            ) => {
+                              setShowSplit(show);
+                              if (data) {
+                                setCurMetadata(data as IMetadataEvent);
+                                setCurType('event');
+                              }
+                            }}
+                          />
+                        ),
+                      },
+                      {
+                        label: t('analytics:metadata.eventParameter.title'),
+                        id: 'second',
+                        content: (
+                          <MetadataParametersTable
+                            analysisStudioEnabled={analysisStudioEnabled}
+                            setShowDetails={(
+                              show: boolean,
+                              data?: IMetadataType
+                            ) => {
+                              setShowSplit(show);
+                              if (data) {
+                                setCurMetadata(data as IMetadataEventParameter);
+                                setCurType('eventParameter');
+                              }
+                            }}
+                          />
+                        ),
+                      },
+                      {
+                        label: t('analytics:metadata.userAttribute.title'),
+                        id: 'third',
+                        content: (
+                          <MetadataUserAttributesTable
+                            analysisStudioEnabled={analysisStudioEnabled}
+                            setShowDetails={(
+                              show: boolean,
+                              data?: IMetadataType
+                            ) => {
+                              setShowSplit(show);
+                              if (data) {
+                                setCurMetadata(data as IMetadataUserAttribute);
+                                setCurType('userAttribute');
+                              }
+                            }}
+                          />
+                        ),
+                      },
+                    ]}
+                  />
+                )}
               </Container>
             </ContentLayout>
           }

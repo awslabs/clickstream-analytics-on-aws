@@ -43,16 +43,17 @@ import {
   REDSHIFT_DB_USER_NAME_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
 } from '../common/constants-ln';
-import { REDSHIFT_MODE } from '../common/model-ln';
+import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
   DataCollectionSDK,
+  ENetworkType,
+  IngestionType,
   KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
-  PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
 import {
@@ -64,6 +65,8 @@ import {
   isEmail,
   corsStackInput,
   getAppRegistryApplicationArn,
+  getSinkType,
+  getIamRoleBoundaryArn,
 } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
@@ -120,6 +123,8 @@ export class CIngestionServerStack extends JSONObject {
       'EnableAuthentication',
       'AuthenticationSecretArn',
       'EnableApplicationLoadBalancerAccessLog',
+      'Protocol',
+      'SinkType',
     ];
     return allowedList;
   }
@@ -150,7 +155,10 @@ export class CIngestionServerStack extends JSONObject {
     VpcId?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
+  @JSONObject.custom( (stack :CIngestionServerStack, key:string, value:any) => {
+    if (stack._pipeline?.network.type === ENetworkType.Private) {
+      return stack._pipeline?.network.privateSubnetIds.join(',');
+    }
     validatePattern(key, SUBNETS_PATTERN, value);
     return value;
   })
@@ -284,7 +292,9 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.gte(60)
   @JSONObject.lte(1830)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+    if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
+      return 120;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
       return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 330;
     }
     return undefined;
@@ -383,6 +393,11 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    SinkType?: string;
+
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
@@ -425,6 +440,8 @@ export class CIngestionServerStack extends JSONObject {
       // Log
       LogS3Bucket: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? pipeline.bucket.name,
       LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_ALB, pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
+
+      SinkType: getSinkType(pipeline),
       // S3 sink
       S3DataBucket: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
       S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
@@ -445,6 +462,7 @@ export class CIngestionServerStack extends JSONObject {
       KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -577,6 +595,9 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
@@ -609,6 +630,7 @@ export class CKafkaConnectorStack extends JSONObject {
 
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -755,6 +777,9 @@ export class CDataProcessingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const pluginInfo = getPluginInfo(pipeline, resources);
 
@@ -784,6 +809,7 @@ export class CDataProcessingStack extends JSONObject {
 
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1025,6 +1051,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataModeling?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
@@ -1072,6 +1101,7 @@ export class CDataModelingStack extends JSONObject {
       ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1180,6 +1210,9 @@ export class CReportingStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
@@ -1203,6 +1236,7 @@ export class CReportingStack extends JSONObject {
       ),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1223,6 +1257,9 @@ export class CAthenaStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline) {
     super({
       AthenaDatabase: getValueFromStackOutputSuffix(
@@ -1237,6 +1274,7 @@ export class CAthenaStack extends JSONObject {
       ),
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1275,6 +1313,9 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
+  @JSONObject.optional(undefined)
+    IamRoleBoundaryArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const projectEmails = resources.project?.emails?.split(',');
     const operators = pipeline.operator.split(',');
@@ -1286,6 +1327,7 @@ export class CMetricsStack extends JSONObject {
       ProjectId: pipeline.projectId,
       Emails: uniqueEmails?.join(','),
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }

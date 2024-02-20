@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
+import { DeleteUserCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
+import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { SNSClient } from '@aws-sdk/client-sns';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -22,18 +26,26 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_TOKEN, createEventRuleMock, createSNSTopicMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
+const quickSightMock = mockClient(QuickSightClient);
+const cloudFormationMock = mockClient(CloudFormationClient);
+const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 describe('Project test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
+    quickSightMock.reset();
+    cloudFormationMock.reset();
+    cloudWatchEventsMock.reset();
+    snsMock.reset();
   });
   it('Create project', async () => {
     tokenMock(ddbMock, false);
@@ -271,11 +283,11 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-01', pipelineId: 'pipeline-01', reportingEnabled: false, applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
-          { name: 'Project-02', pipelineId: 'pipeline-02', reportingEnabled: false, applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
-          { name: 'Project-03', pipelineId: 'pipeline-03', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', reportingEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
-          { name: 'Project-05', pipelineId: 'pipeline-05', reportingEnabled: false, applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
+          { name: 'Project-01', pipelineId: 'pipeline-01', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
+          { name: 'Project-02', pipelineId: 'pipeline-02', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-05', pipelineId: 'pipeline-05', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
         ],
         totalCount: 5,
       },
@@ -337,8 +349,8 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03', pipelineId: 'pipeline-03', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', reportingEnabled: true, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
         ],
         totalCount: 5,
       },
@@ -473,17 +485,19 @@ describe('Project test', () => {
   });
   it('Delete project', async () => {
     projectExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
       Items: [
-        { type: 'project-01' },
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
       ],
     });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -492,10 +506,177 @@ describe('Project test', () => {
       success: true,
       message: 'Project deleted.',
     });
-
+    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project and it status is failed', async () => {
+    projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+      output: 'FAILED',
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project and it status is warning', async () => {
+    projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        lastAction: 'Update',
+      }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+      output: 'FAILED',
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project last one', async () => {
+    projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
+  });
+  it('Delete project witch no pipeline', async () => {
+    projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
+  });
+  it('Delete project with ddb exception', async () => {
+    projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    quickSightMock.on(DeleteUserCommand).resolves({});
     // Mock DynamoDB error
-    ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
+    ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
+    const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);

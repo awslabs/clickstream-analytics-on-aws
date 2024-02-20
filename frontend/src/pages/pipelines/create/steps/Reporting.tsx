@@ -38,6 +38,7 @@ interface ReportingProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
   changeEnableReporting: (enable: boolean) => void;
+  changeQuickSightDisabled: (disabled: boolean) => void;
   changeQuickSightAccountName: (accountName: string) => void;
   changeLoadingQuickSight?: (loading: boolean) => void;
 }
@@ -48,6 +49,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     update,
     pipelineInfo,
     changeEnableReporting,
+    changeQuickSightDisabled,
     changeQuickSightAccountName,
     changeLoadingQuickSight,
   } = props;
@@ -67,7 +69,12 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         data.accountSubscriptionStatus === 'ACCOUNT_CREATED'
       ) {
         setQuickSightEnabled(true);
+        changeQuickSightDisabled(false);
         changeQuickSightAccountName(data.accountName);
+      } else {
+        changeEnableReporting(false);
+        setQuickSightEnabled(false);
+        changeQuickSightDisabled(true);
       }
       if (success && data && data.edition.includes('ENTERPRISE')) {
         setQuickSightEnterprise(true);
@@ -118,80 +125,91 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
     >
       {pipelineInfo.enableDataProcessing && pipelineInfo.enableRedshift ? (
         <>
-          <SpaceBetween direction="vertical" size="l">
-            <FormField>
-              <Toggle
-                controlId="test-quicksight-id"
-                disabled={
-                  isDisabled(update, pipelineInfo) ??
-                  (!pipelineInfo.serviceStatus?.QUICK_SIGHT ||
-                    !pipelineInfo.enableRedshift)
-                }
-                onChange={({ detail }) => changeEnableReporting(detail.checked)}
-                checked={pipelineInfo.enableReporting}
-                description={
-                  <div>
-                    <Trans
-                      i18nKey="pipeline:create.createSampleQuickSightDesc"
-                      components={{
-                        learnmore_anchor: (
+          {loadingQuickSight ? (
+            <Spinner />
+          ) : (
+            <>
+              <SpaceBetween direction="vertical" size="l">
+                <FormField>
+                  <Toggle
+                    controlId="test-quicksight-id"
+                    disabled={
+                      isDisabled(update, pipelineInfo) ??
+                      (!pipelineInfo.serviceStatus?.QUICK_SIGHT ||
+                        !pipelineInfo.enableRedshift)
+                    }
+                    onChange={({ detail }) =>
+                      changeEnableReporting(detail.checked)
+                    }
+                    checked={pipelineInfo.enableReporting}
+                    description={
+                      <div>
+                        <Trans
+                          i18nKey="pipeline:create.createSampleQuickSightDesc"
+                          components={{
+                            learnmore_anchor: (
+                              <Link
+                                external
+                                href={buildDocumentLink(
+                                  i18n.language,
+                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
+                                  PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
+                                )}
+                              />
+                            ),
+                            guide_anchor: (
+                              <Link
+                                external
+                                href={buildDocumentLink(
+                                  i18n.language,
+                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
+                                  PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
+                                )}
+                              />
+                            ),
+                          }}
+                        />
+                      </div>
+                    }
+                  >
+                    <b>{t('pipeline:create.createSampleQuickSight')}</b>
+                  </Toggle>
+                </FormField>
+
+                {pipelineInfo.enableReporting &&
+                  (loadingQuickSight ? (
+                    <Spinner />
+                  ) : (
+                    <>
+                      {!quickSightEnabled && (
+                        <Alert
+                          type="warning"
+                          header={t('pipeline:create.quickSightNotSub')}
+                        >
+                          {t('pipeline:create.quickSightNotSubDesc1')}
                           <Link
                             external
-                            href={buildDocumentLink(
-                              i18n.language,
-                              PIPELINE_QUICKSIGHT_LEARNMORE_LINK_EN,
-                              PIPELINE_QUICKSIGHT_LEARNMORE_LINK_CN
-                            )}
-                          />
-                        ),
-                        guide_anchor: (
-                          <Link
-                            external
-                            href={buildDocumentLink(
-                              i18n.language,
-                              PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
-                              PIPELINE_QUICKSIGHT_GUIDE_LINK_CN
-                            )}
-                          />
-                        ),
-                      }}
-                    />
-                  </div>
-                }
-              >
-                <b>{t('pipeline:create.createSampleQuickSight')}</b>
-              </Toggle>
-            </FormField>
+                            href={buildQuickSightSubscriptionLink()}
+                          >
+                            {t('pipeline:create.quickSightSubscription')}
+                          </Link>
+                          {t('pipeline:create.quickSightNotSubDesc2')}
+                        </Alert>
+                      )}
 
-            {pipelineInfo.enableReporting &&
-              (loadingQuickSight ? (
-                <Spinner />
-              ) : (
-                <>
-                  {!quickSightEnabled && (
-                    <Alert
-                      type="warning"
-                      header={t('pipeline:create.quickSightNotSub')}
-                    >
-                      {t('pipeline:create.quickSightNotSubDesc1')}
-                      <Link external href={buildQuickSightSubscriptionLink()}>
-                        {t('pipeline:create.quickSightSubscription')}
-                      </Link>
-                      {t('pipeline:create.quickSightNotSubDesc2')}
-                    </Alert>
-                  )}
-
-                  {quickSightEnabled && !quickSightEnterprise && (
-                    <Alert
-                      type="warning"
-                      header={t('pipeline:create.quickSightNotEnterprise')}
-                    >
-                      {t('pipeline:create.quickSightNotEnterpriseDesc')}
-                    </Alert>
-                  )}
-                </>
-              ))}
-          </SpaceBetween>
+                      {quickSightEnabled && !quickSightEnterprise && (
+                        <Alert
+                          type="warning"
+                          header={t('pipeline:create.quickSightNotEnterprise')}
+                        >
+                          {t('pipeline:create.quickSightNotEnterpriseDesc')}
+                        </Alert>
+                      )}
+                    </>
+                  ))}
+              </SpaceBetween>
+            </>
+          )}
         </>
       ) : (
         <Alert header={t('pipeline:create.reportNotSupported')}>

@@ -1,0 +1,17 @@
+{
+  "app_id" : "appStartTest",
+  "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109440,
+  "user_id" : null,
+  "user_pseudo_id" : "uuid1",
+  "user_first_touch_timestamp" : 1682319109440,
+  "user_properties" : null,
+  "user_ltv" : null,
+  "_first_visit_date" : "2023-04-24",
+  "_first_referer" : null,
+  "_first_traffic_source_type" : null,
+  "_first_traffic_medium" : null,
+  "_first_traffic_source" : null,
+  "device_id_list" : [ "deviceid-1682319109447" ],
+  "_channel" : null
+}

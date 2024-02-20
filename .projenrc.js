@@ -12,7 +12,7 @@
  */
 
 const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
-const version = '1.0.0';
+const version = '1.2.0';
 const cdkVersion = '2.81.0';
 const minNodeVersion = '18.17.0';
 
@@ -23,9 +23,8 @@ const cdkAlphaModules = [
 
 const commonDeps = [
   'uuid@^9.0.0',
-  '@types/aws-lambda@^8.10.110',
-  '@aws-lambda-powertools/logger@^1.8.0',
-  '@aws-lambda-powertools/metrics@^1.8.0',
+  '@aws-lambda-powertools/logger@^1.17.0',
+  '@aws-lambda-powertools/metrics@^1.17.0',
   'jsonwebtoken@^9.0.0',
   'jwks-rsa@^3.0.1',
   'mustache@^4.2.0',
@@ -33,12 +32,14 @@ const commonDeps = [
   'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
   'jsonpath-plus@^7.2.0',
+  'hpagent@^1.2.0',
 ];
 
 const commonDevDeps = [
+  '@types/aws-lambda@^8.10.110',
   '@types/uuid@^9.0.0',
-  'aws-sdk-client-mock@^2.1.1',
-  'aws-sdk-client-mock-jest@^2.1.1',
+  'aws-sdk-client-mock@^3.0.1',
+  'aws-sdk-client-mock-jest@^3.0.1',
   '@types/mustache@^4.2.2',
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
@@ -91,15 +92,14 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
   '@aws-sdk/client-route-53',
-  '@aws-sdk/client-athena',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
+  '@aws-sdk/client-sns',
   '@aws-sdk/client-cloudwatch',
+  '@aws-sdk/client-cloudwatch-events',
   '@aws-sdk/lib-dynamodb',
-  '@aws-sdk/client-emr-serverless',
-  '@aws-sdk/client-kafkaconnect',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const depsForApiProject = [
@@ -124,10 +124,12 @@ const depsForApiProject = [
 
 const devDepsForApiProject = [
   ...commonDevDeps,
-  'supertest@^6.3.3',
+  'lodash@^4.17.21',
   'nodemon@^2.0.20',
+  'supertest@^6.3.3',
   'ts-node@^10.9.1',
   '@types/express@^4.17.16',
+  '@types/lodash@^4.14.202',
   '@types/supertest@^2.0.12',
 ];
 const defaultBranch = 'main';
@@ -161,6 +163,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'src/data-pipeline/spark-etl/bin',
     'src/data-pipeline/spark-etl/?/',
     'code-coverage-results.md',
+    'metastore_db',
+    'nohup.out',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -220,8 +224,7 @@ project.eslint?.addRules({
   'import/no-namespace': [
     'error', { ignore: ['*.ext'] },
   ],
-});
-project.eslint?.addRules({
+  'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   'import/order': [
     'error',
     {
@@ -379,6 +382,9 @@ const runner = 'LARGE_RUNNER_L';
 project.buildWorkflow.workflow.file?.patch(
   JsonPatch.replace('/jobs/build/runs-on', `$\{\{ vars.${runner} || 'ubuntu-latest' }}`),
 );
+project.buildWorkflow.workflow.file?.patch(
+  JsonPatch.replace('/on/merge_group', {}),
+);
 
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade frontend dependencies',
@@ -390,6 +396,9 @@ project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
 });
 project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
+project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
+project.github.actions.set('actions/upload-artifact', 'actions/upload-artifact@v4');
+project.github.actions.set('actions/download-artifact', 'actions/download-artifact@v4');
 project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
 project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v5');
 
@@ -694,7 +703,7 @@ gitlabMain.createNestedTemplates({
       'etl-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },
@@ -738,7 +747,7 @@ gitlabMain.createNestedTemplates({
       'etl-plugin-samples-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },

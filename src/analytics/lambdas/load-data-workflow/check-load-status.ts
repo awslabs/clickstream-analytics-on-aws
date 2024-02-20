@@ -79,7 +79,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         logger.debug(`delFinishedJobInDynamodb s3Uri:${url}`);
         try {
           const dynamodbResponse = await delFinishedJobInDynamodb(dynamodbTableName, url);
-          logger.debug('delFinishedJobInDynamodb response:', JSON.stringify(dynamodbResponse));
+          logger.debug('delFinishedJobInDynamodb response:', { dynamodbResponse });
         } catch (err) {
           errMsg = 'Error when deleting loaded jobs in DDB.';
           throw err;
@@ -92,7 +92,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
       logger.debug(`delFinishedJobInS3 s3Bucket:${s3Bucket}, s3Object:${s3Object}`);
       try {
         const s3Response = await delFinishedJobInS3(s3Bucket, s3Object);
-        logger.debug('delFinishedJobInS3 response:', JSON.stringify(s3Response));
+        logger.debug('delFinishedJobInS3 response:', { s3Response });
       } catch (err) {
         logger.error(`Error when deleting manifest file ${s3Object} in S3 bucket ${s3Bucket}.`, (err as Error));
       }
@@ -148,9 +148,9 @@ export const checkLoadStatus = async (queryId: string) => {
   try {
     const response = await redshiftDataApiClient.send(params);
     if (response.Status == 'FAILED') {
-      logger.error(`Get load status: ${response.Status}`, JSON.stringify(response));
+      logger.error(`Get load status: ${response.Status}`, { response });
     } else {
-      logger.info(`Get load status: ${response.Status}`, JSON.stringify(response));
+      logger.info(`Get load status: ${response.Status}`, { response });
     }
     return response;
   } catch (err) {

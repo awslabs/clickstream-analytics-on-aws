@@ -48,7 +48,6 @@ const emrServerlessClient = new EMRServerlessClient({
 });
 
 export const handler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
   try {
     const res = await _handler(event, context);
     logger.info('lambda returned', { res });
@@ -79,12 +78,24 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
 
 async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<string> {
   let architecture = props.architecture;
+  let javaPathSuffix = 'x86_64';
   if (props.architecture === EMR_ARCHITECTURE_AUTO) {
     architecture = Architecture.ARM64;
     if (region.startsWith('cn-')) {
       architecture = Architecture.X86_64;
     }
   }
+  if (architecture == Architecture.ARM64) {
+    javaPathSuffix = 'aarch64';
+  }
+
+  let javaVersion = 8;
+  if (compareVersions(props.version, 'emr-6.11.0') >= 0) {
+    javaVersion = 17;
+  }
+  // "/usr/lib/jvm/java-17-amazon-corretto.x86_64/"
+  // "/usr/lib/jvm/java-17-amazon-corretto.aarch64/"
+  const javaHome = `/usr/lib/jvm/java-${javaVersion}-amazon-corretto.${javaPathSuffix}/`;
 
   const input: CreateApplicationCommandInput = {
     name: props.name.slice(0, 64), // serverless app name length should not more than 64
@@ -102,6 +113,15 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
       enabled: true,
       idleTimeoutMinutes: parseInt(props.idleTimeoutMinutes),
     },
+    runtimeConfiguration: [
+      {
+        classification: 'spark-defaults',
+        properties: {
+          'spark.emr-serverless.driverEnv.JAVA_HOME': javaHome,
+          'spark.executorEnv.JAVA_HOME': javaHome,
+        },
+      },
+    ],
   };
 
   logger.info('CreateApplicationCommand input', { input });
@@ -165,6 +185,27 @@ async function deleteEMRServerlessAppById(appId: string) {
     // if app is 'started' state, which cannot be deleted,  we ignore this error.
     logger.error(err + '');
   }
+}
+
+function compareVersions(version1: string, version2: string) {
+  // Remove non-numeric prefix
+  version1 = version1.replace(/^[^\d]+/, '');
+  version2 = version2.replace(/^[^\d]+/, '');
+
+  // Split version strings into parts
+  const parts1 = version1.split('.');
+  const parts2 = version2.split('.');
+
+  // Compare each part
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const part1 = parseInt(parts1[i] || '0', 10);
+    const part2 = parseInt(parts2[i] || '0', 10);
+
+    if (part1 !== part2) {
+      return part1 - part2;
+    }
+  }
+  return 0;
 }
 
 

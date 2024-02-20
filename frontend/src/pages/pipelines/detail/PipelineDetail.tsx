@@ -38,7 +38,7 @@ import BasicInfo from '../comps/BasicInfo';
 
 const PipelineDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { id, pid } = useParams();
+  const { pid } = useParams();
   const location = useLocation();
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
@@ -50,13 +50,13 @@ const PipelineDetail: React.FC = () => {
     activeTab || 'ingestion'
   );
 
-  const getProjectPipelineDetail = async () => {
+  const getProjectPipelineDetail = async (refresh: string) => {
     try {
       setLoadingPipeline(true);
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: defaultStr(id),
-          pid: defaultStr(pid),
+          projectId: defaultStr(pid),
+          refresh,
         });
       if (success) {
         setProjectPipeline(data);
@@ -76,7 +76,7 @@ const PipelineDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        getProjectPipelineDetail();
+        getProjectPipelineDetail('false');
       }
     } catch (error) {
       setLoadingData(false);
@@ -99,7 +99,7 @@ const PipelineDetail: React.FC = () => {
   ];
 
   useEffect(() => {
-    getProjectPipelineDetail();
+    getProjectPipelineDetail('false');
     getProjectDetailById();
   }, []);
 
@@ -121,8 +121,8 @@ const PipelineDetail: React.FC = () => {
               <BasicInfo
                 pipelineInfo={projectPipeline}
                 loadingRefresh={loadingPipeline}
-                reloadPipeline={() => {
-                  getProjectPipelineDetail();
+                reloadPipeline={(refresh: string) => {
+                  getProjectPipelineDetail(refresh);
                 }}
               />
               <Container disableContentPaddings>

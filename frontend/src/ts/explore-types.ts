@@ -39,6 +39,8 @@ export enum MetadataParameterType {
 export enum ExploreComputeMethod {
   USER_ID_CNT = 'USER_ID_CNT', // user_id
   EVENT_CNT = 'EVENT_CNT',
+  SUM_VALUE = 'SUM_VALUE',
+  AVG_VALUE = 'AVG_VALUE',
 }
 
 export enum ExplorePathSessionDef {
@@ -115,4 +117,54 @@ export enum QuickSightChartType {
   LINE = 'line',
   FUNNEL = 'funnel',
   SANKEY = 'sankey',
+  TABLE = 'table',
+}
+
+export enum AttributionModelType {
+  LAST_TOUCH = 'LAST_TOUCH',
+  FIRST_TOUCH = 'FIRST_TOUCH',
+  LINEAR = 'LINEAR',
+  TIME_DECAY = 'TIME_DECAY',
+  POSITION = 'POSITION',
+}
+
+export enum ExploreAttributionTimeWindowType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+  SESSION = 'SESSION',
+}
+
+export interface IMetadataDisplayNameAndDescription {
+  'zh-CN': string;
+  'en-US': string;
+}
+
+export interface IMetadataBuiltInList {
+  readonly PresetEvents: Array<{
+    name: string;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PresetEventParameters: Array<{
+    name: string;
+    eventName?: string;
+    category: ConditionCategory;
+    dataType: MetadataValueType;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PublicEventParameters: Array<{
+    name: string;
+    dataType: MetadataValueType;
+    category: ConditionCategory;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PresetUserAttributes: Array<{
+    name: string;
+    dataType: MetadataValueType;
+    category: ConditionCategory;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
 }

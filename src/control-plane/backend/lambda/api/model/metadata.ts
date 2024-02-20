@@ -18,6 +18,12 @@ export interface IMetadataRawValue {
   readonly count: number;
 }
 
+export interface ISummaryEventParameter {
+  readonly name: string;
+  readonly valueType: MetadataValueType;
+  readonly category: ConditionCategory;
+}
+
 export interface IMetadataRaw {
   readonly id: string;
   readonly month: string;
@@ -31,12 +37,18 @@ export interface IMetadataRaw {
   readonly category?: ConditionCategory;
   readonly valueType?: MetadataValueType;
 
+  readonly createTimestamp?: number;
+  readonly updateTimestamp?: number;
+
   readonly summary: {
     readonly platform?: MetadataPlatform[];
     readonly sdkVersion?: string[];
     readonly sdkName?: string[];
     readonly valueEnum?: IMetadataRawValue[];
     readonly hasData?: boolean;
+    readonly latestCount?: number;
+    readonly associatedParameters?: ISummaryEventParameter[];
+    readonly associatedEvents?: string[];
   };
 }
 
@@ -55,11 +67,11 @@ export interface IMetadataEvent {
   readonly sdkVersion: string[];
   readonly sdkName: string[];
 
-  displayName?: string;
-  description?: IMetadataDescription;
+  displayName?: IMetadataDisplayNameAndDescription;
+  description?: IMetadataDisplayNameAndDescription;
   metadataSource?: MetadataSource;
 
-  associatedParameters? : IMetadataEventParameter[];
+  associatedParameters?: IMetadataEventParameter[];
 }
 
 export interface IMetadataAttributeValue {
@@ -75,15 +87,15 @@ export interface IMetadataEventParameter {
   readonly projectId: string;
   readonly appId: string;
   readonly name: string;
-  readonly eventName: string;
+  readonly eventName?: string;
+  readonly eventNames?: string[];
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
   readonly platform: MetadataPlatform[];
 
-  displayName?: string;
-  description?: IMetadataDescription;
+  displayName?: IMetadataDisplayNameAndDescription;
+  description?: IMetadataDisplayNameAndDescription;
   metadataSource?: MetadataSource;
   parameterType?: MetadataParameterType;
   valueEnum?: IMetadataRawValue[];
@@ -103,10 +115,9 @@ export interface IMetadataUserAttribute {
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
 
-  displayName?: string;
-  description?: IMetadataDescription;
+  displayName?: IMetadataDisplayNameAndDescription;
+  description?: IMetadataDisplayNameAndDescription;
   metadataSource?: MetadataSource;
   valueEnum?: IMetadataRawValue[];
   values?: IMetadataAttributeValue[];
@@ -117,38 +128,42 @@ export interface IMetadataDisplay {
   readonly projectId: string;
   readonly appId: string;
 
-  readonly displayName: string;
-  readonly description: IMetadataDescription;
+  readonly displayName: IMetadataDisplayNameAndDescription;
+  readonly description: IMetadataDisplayNameAndDescription;
   readonly updateAt: number;
 }
 
 export interface IMetadataBuiltInList {
   readonly PresetEvents: Array<{
     name: string;
-    description: IMetadataDescription;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
   }>;
   readonly PresetEventParameters: Array<{
     name: string;
     eventName?: string;
     category: ConditionCategory;
     dataType: MetadataValueType;
-    description: IMetadataDescription;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
   }>;
   readonly PublicEventParameters: Array<{
     name: string;
     dataType: MetadataValueType;
     category: ConditionCategory;
-    description: IMetadataDescription;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
   }>;
   readonly PresetUserAttributes: Array<{
     name: string;
     dataType: MetadataValueType;
     category: ConditionCategory;
-    description: IMetadataDescription;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
   }>;
 }
 
-export interface IMetadataDescription {
+export interface IMetadataDisplayNameAndDescription {
   'zh-CN': string;
   'en-US': string;
 }

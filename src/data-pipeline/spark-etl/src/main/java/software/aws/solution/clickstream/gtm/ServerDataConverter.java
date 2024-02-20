@@ -16,11 +16,13 @@ package software.aws.solution.clickstream.gtm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.api.java.UDF1;
+import org.apache.spark.sql.api.java.UDF2;
 import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.ArrayType;
@@ -31,6 +33,8 @@ import software.aws.solution.clickstream.ETLMetric;
 import software.aws.solution.clickstream.KvConverter;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,27 +51,39 @@ import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.CORRUPT_RECORD;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_BRAND;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_BRANDS;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_LOCATION;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_TITLE;
-import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
-import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.ENGAGEMENT_TIME_MSEC;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PAGE_VIEW;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAMS;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_USER_ENGAGEMENT;
 import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.GA_ENGAGEMENT_TIME_MSEC;
+import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_BRAND;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_BRANDS;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_LOCATION;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_TITLE;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_NUM;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_UC;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.ID;
 import static software.aws.solution.clickstream.DatasetUtil.INT_VALUE;
@@ -76,7 +92,6 @@ import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.ITEM_ID;
 import static software.aws.solution.clickstream.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MOBILE;
 import static software.aws.solution.clickstream.DatasetUtil.MODEL;
@@ -87,14 +102,13 @@ import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.PRICE;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
 import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_DURATION;
 import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_NUMBER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_START_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_UC;
 import static software.aws.solution.clickstream.DatasetUtil.USER;
 import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
 import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
@@ -102,16 +116,17 @@ import static software.aws.solution.clickstream.DatasetUtil.VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.X_GA_JS_CLIENT_ID;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
+import static software.aws.solution.clickstream.MaxLengthTransformer.checkStringValueLength;
 
 @Slf4j
 public class ServerDataConverter {
-    public static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
-    public static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
+    protected static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
+    protected static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
 
-    private static UDF1<String, Row[]> convertGTMServerData() {
-        return (String value) -> {
+    private static UDF2<String, Long, Row[]> convertGTMServerData() {
+        return (String value, Long ingestTimestamp) -> {
             try {
-                return getGenericRows(value);
+                return getGenericRows(value, ingestTimestamp);
             } catch (Exception e) {
                 log.error("cannot convert data: " + value + ", error: " + e.getMessage());
                 return getCorruptGenericRows(value, e);
@@ -146,11 +161,13 @@ public class ServerDataConverter {
                         null,
                         null,
                         null,
+                        null,
+                        null,
                 })
         };
     }
 
-    private static Row[] getGenericRows(final String jsonString) throws JsonProcessingException {
+    private static Row[] getGenericRows(final String jsonString, final Long ingestTimestamp) throws JsonProcessingException {
         List<Row> rows = new ArrayList<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -158,17 +175,17 @@ public class ServerDataConverter {
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.add(getGenericRow(elementsIt.next(), index));
+                rows.addAll(getGenericRow(elementsIt.next(), index, ingestTimestamp));
                 index++;
             }
         } else {
-            rows.add(getGenericRow(jsonNode, index));
+            rows.addAll(getGenericRow(jsonNode, index, ingestTimestamp));
         }
         return rows.toArray(new Row[0]);
 
     }
 
-    private static Row getGenericRow(final JsonNode jsonNode, final int index) {
+    private static List<GenericRow> getGenericRow(final JsonNode jsonNode, final int index, final Long ingestTimestamp) {
 
         RowResult result = parseJsonNode(jsonNode);
 
@@ -186,9 +203,16 @@ public class ServerDataConverter {
         } else {
             sessionId = String.valueOf(new Date().getTime());
         }
-        String sessionNum = "";
+        String sessionNum = "0";
         if (result.attrMap.containsKey(GA_SESSION_NUMBER)) {
-            sessionNum =  result.attrMap.get(GA_SESSION_NUMBER).asText();
+            sessionNum = result.attrMap.get(GA_SESSION_NUMBER).asText();
+        }
+
+        Long sessionNumber;
+        try {
+            sessionNumber = Long.parseLong(sessionNum);
+        } catch (Exception e) {
+            sessionNumber = 0L;
         }
 
         String eventId = String.format("%s-%s-%s",
@@ -196,18 +220,39 @@ public class ServerDataConverter {
                 sessionId,
                 sessionNum
         );
+
+        result.attrMap.put(SESSION_DURATION, JsonNodeFactory.instance.numberNode(0));
+
         eventId = checkStringValue(eventId, MAX_STRING_VALUE_LEN - 32);
         String gtmId = result.attrMap.get("x-ga-measurement_id").asText();
         String gtmVersion = result.attrMap.get("x-ga-gtm_version").asText();
 
-        Long requestStartTimeMs = null;
+        Long requestStartTimeMs = ingestTimestamp;
         if (result.attrMap.containsKey("x-sst-system_properties.request_start_time_ms")) {
             requestStartTimeMs = result.attrMap.get("x-sst-system_properties.request_start_time_ms").asLong();
         }
 
         String uc = null;
-        if (result.attrMap.containsKey("x-sst-system_properties.uc")) {
+        if (result.attrMap.containsKey("event_location.country")) {
+            uc = result.attrMap.get("event_location.country").asText();
+        } else if (result.attrMap.containsKey("x-sst-system_properties.uc")) {
             uc = result.attrMap.get("x-sst-system_properties.uc").asText();
+        }
+
+        boolean firstVisit = false;
+        if (result.attrMap.containsKey("x-ga-system_properties.fv")) {
+            firstVisit = true;
+        }
+
+        boolean seesionStart = false;
+        if (result.attrMap.containsKey("x-ga-system_properties.ss")) {
+            seesionStart = true;
+            result.attrMap.put(SESSION_START_TIMESTAMP, JsonNodeFactory.instance.numberNode(requestStartTimeMs));
+        }
+
+        if (result.attrMap.containsKey(PAGE_URL)) {
+            String url = deCodeUri(result.attrMap.get(PAGE_URL).asText());
+            result.attrMap.put(PAGE_URL, JsonNodeFactory.instance.textNode(url));
         }
 
         List<GenericRow> eventParams = new ArrayList<>();
@@ -224,13 +269,51 @@ public class ServerDataConverter {
 
         String clickstreamEventName = mapEventNameToClickstream(result.eventInfo.eventName);
 
+        GenericRow originRow = createGenericRowFromResult(
+                new EventParams(clickstreamEventName, gtmId, gtmVersion, eventId, uc),
+                result,
+                eventParams,
+                new SessionParams(requestStartTimeMs, sessionId, sessionNumber));
+        List<GenericRow> eventList = new ArrayList<>();
+        eventList.add(originRow);
+
+        int eventIndex = 0;
+        if (firstVisit) {
+            String eventId2 = String.format("%s-%s", eventId, ++eventIndex);
+            GenericRow firstVisitEvent = createGenericRowFromResult(
+                    new EventParams(EVENT_FIRST_OPEN, gtmId, gtmVersion, eventId2, uc),
+                    result,
+                    eventParams,
+                    new SessionParams(requestStartTimeMs, sessionId, sessionNumber)
+            );
+            eventList.add(firstVisitEvent);
+        }
+
+        if (seesionStart) {
+            String eventId3 = String.format("%s-%s", eventId, ++eventIndex);
+            GenericRow sessionStartEvent = createGenericRowFromResult(
+                    new EventParams(EVENT_SESSION_START, gtmId, gtmVersion, eventId3, uc),
+                    result,
+                    eventParams,
+                    new SessionParams(requestStartTimeMs, sessionId, sessionNumber)
+            );
+            eventList.add(sessionStartEvent);
+        }
+
+        return eventList;
+    }
+
+    private static GenericRow createGenericRowFromResult(final EventParams ep,
+                                                         final RowResult result,
+                                                         final List<GenericRow> eventParams,
+                                                         final SessionParams sessionParams) {
         return new GenericRow(new Object[]{
                 null,
-                gtmId,
-                gtmVersion,
-                eventId,
+                ep.gtmId,
+                ep.gtmVersion,
+                ep.eventId,
                 result.eventInfo.userId,
-                clickstreamEventName,
+                ep.clickstreamEventName,
                 result.eventInfo.ip,
                 result.eventInfo.clientId,
                 result.eventInfo.ua,
@@ -247,8 +330,10 @@ public class ServerDataConverter {
                 result.items.toArray(new GenericRow[0]),
                 result.eventItems.toArray(new GenericRow[0]),
                 result.user,
-                requestStartTimeMs,
-                uc
+                sessionParams.requestStartTimeMs,
+                ep.uc,
+                sessionParams.sessionId,
+                sessionParams.sessionNumber,
         });
     }
 
@@ -310,10 +395,12 @@ public class ServerDataConverter {
                 }
 
                 case GTM_PAGE_REFERRER: {
-                    pageReferrer = checkStringValue(attrValue.asText());
+                    pageReferrer = attrValue.asText();
+                    pageReferrer = checkStringValue(deCodeUri(pageReferrer));
                     addValueToParamsMap(attrMap, attrName, attrValue);
                     break;
                 }
+
                 case "client_hints": {
                     clientHint = getClientHint(attrValue);
                     addValueToParamsMap(attrMap, attrName, attrValue);
@@ -366,15 +453,15 @@ public class ServerDataConverter {
             clientPlatformVersion = attrValue.get(PLATFORM_VERSION).asText();
         }
         if (attrValue.hasNonNull(GTM_BRANDS)) {
-           JsonNode brandsArr = attrValue.get(GTM_BRANDS);
-           if (brandsArr.isArray()) {
-               for (Iterator<JsonNode> els = brandsArr.elements(); els.hasNext();) {
-                   JsonNode brandObj =  els.next();
-                   if (brandObj.hasNonNull(GTM_BRAND)) {
-                       brands.add(brandObj.get(GTM_BRAND).asText());
-                   }
-               }
-           }
+            JsonNode brandsArr = attrValue.get(GTM_BRANDS);
+            if (brandsArr.isArray()) {
+                for (Iterator<JsonNode> els = brandsArr.elements(); els.hasNext(); ) {
+                    JsonNode brandObj = els.next();
+                    if (brandObj.hasNonNull(GTM_BRAND)) {
+                        brands.add(brandObj.get(GTM_BRAND).asText());
+                    }
+                }
+            }
         }
         if (!brands.isEmpty()) {
             clientBrand = String.join("|", brands);
@@ -415,15 +502,19 @@ public class ServerDataConverter {
         Map<String, String> eventNameMap = new HashMap<>();
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
+        eventNameMap.put("user_engagement", EVENT_USER_ENGAGEMENT);
+        eventNameMap.put("click", "_click");
         return eventNameMap;
     }
 
     private static Map<String, String> createPropNameMap() {
         Map<String, String> propsNameMap = new HashMap<>();
         propsNameMap.put(GA_SESSION_ID, SESSION_ID);
+        propsNameMap.put(GA_SESSION_NUMBER, SESSION_NUMBER);
         propsNameMap.put(GTM_PAGE_TITLE, PAGE_TITLE);
         propsNameMap.put(GTM_PAGE_LOCATION, PAGE_URL);
-        propsNameMap.put(GTM_PAGE_REFERRER,  PROP_PAGE_REFERRER); // _page_referrer
+        propsNameMap.put(GTM_PAGE_REFERRER, PROP_PAGE_REFERRER); // _page_referrer
+        propsNameMap.put(GA_ENGAGEMENT_TIME_MSEC, ENGAGEMENT_TIME_MSEC);
         return propsNameMap;
     }
 
@@ -527,15 +618,11 @@ public class ServerDataConverter {
     }
 
     private static String checkStringValue(final String sValue) {
-        return checkStringValue(sValue, MAX_STRING_VALUE_LEN);
+        return  checkStringValueLength(sValue, MAX_STRING_VALUE_LEN);
     }
 
     private static String checkStringValue(final String sValue, final int len) {
-        String reString = sValue;
-        if (reString != null && reString.length() > len) {
-            reString = reString.substring(0, len);
-        }
-        return reString;
+        return  checkStringValueLength(sValue, len);
     }
 
     public static void addValueToParamsMap(final Map<String, JsonNode> attrMap, final String attrName, final JsonNode attrValue) {
@@ -557,6 +644,19 @@ public class ServerDataConverter {
         }
     }
 
+    private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
+        log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverter corruptDataset").toString());
+        String jobName = System.getProperty(JOB_NAME_PROP);
+        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_gtm_corrupted_json_data";
+        log.info("save corruptedDataset to " + s3FilePath);
+        corruptDataset
+                .withColumn(JOB_NAME_COL, lit(jobName))
+                .write()
+                .partitionBy(JOB_NAME_COL)
+                .option("compression", "gzip")
+                .mode(SaveMode.Append)
+                .json(s3FilePath);
+    }
 
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
@@ -635,12 +735,14 @@ public class ServerDataConverter {
                 DataTypes.createStructField(USER, userType, true),
                 DataTypes.createStructField(GTM_REQUEST_START_TIME_MS, DataTypes.LongType, true),
                 DataTypes.createStructField(GTM_UC, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_SESSION_ID, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_SESSION_NUM, DataTypes.LongType, true),
         });
 
         ArrayType dataItemArrayType = DataTypes.createArrayType(dataItemType);
 
         UserDefinedFunction convertStringToKeyValueUdf = udf(convertGTMServerData(), dataItemArrayType);
-        Dataset<Row> convertedKeyValueDataset = dataset.withColumn(DATA_OUT, explode(convertStringToKeyValueUdf.apply(col(DATA))))
+        Dataset<Row> convertedKeyValueDataset = dataset.withColumn(DATA_OUT, explode(convertStringToKeyValueUdf.apply(col(DATA), col("ingest_time"))))
                 .drop(DATA);
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
@@ -656,18 +758,30 @@ public class ServerDataConverter {
         return okDataset;
     }
 
-    private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
-        log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverter corruptDataset").toString());
-        String jobName = System.getProperty(JOB_NAME_PROP);
-        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_gtm_corrupted_json_data";
-        log.info("save corruptedDataset to " + s3FilePath);
-        corruptDataset
-                .withColumn(JOB_NAME_COL, lit(jobName))
-                .write()
-                .partitionBy(JOB_NAME_COL)
-                .option("compression", "gzip")
-                .mode(SaveMode.Append)
-                .json(s3FilePath);
+    public static String deCodeUri(final String uri) {
+        String result = "";
+        try {
+            result = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.warn(e.getMessage() + ", uri:" + uri);
+        }
+        return result;
+    }
+
+    @AllArgsConstructor
+    static class EventParams {
+        final String clickstreamEventName;
+        final String gtmId;
+        final String gtmVersion;
+        final String eventId;
+        final String uc;
+    }
+
+    @AllArgsConstructor
+    static class SessionParams {
+        final  Long requestStartTimeMs;
+        final  String sessionId;
+        final Long sessionNumber;
     }
 
     private static class EventInfo {
@@ -702,6 +816,7 @@ public class ServerDataConverter {
         public final String clientPlatform;
         public final String clientPlatformVersion;
         public final String clientBrand;
+
         ClientHint(final Boolean isClientMobile, final String clientModel, final String clientPlatform, final String clientPlatformVersion,
                    final String clientBrand) {
             this.isClientMobile = isClientMobile;

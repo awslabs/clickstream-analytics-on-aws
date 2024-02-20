@@ -13,7 +13,6 @@
 
 import {
   Alert,
-  Autosuggest,
   AutosuggestProps,
   Button,
   Container,
@@ -29,7 +28,7 @@ import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AWS_REGION_MAP, SDK_LIST } from 'ts/const';
+import { AWS_REGION_MAP, EPipelineStatus, SDK_LIST } from 'ts/const';
 import { defaultStr, isDisabled } from 'ts/utils';
 
 interface BasicInformationProps {
@@ -39,10 +38,11 @@ interface BasicInformationProps {
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
   changeTags: (tag: TagEditorProps.Tag[]) => void;
-  changeS3Bucket: (bucket: string) => void;
+  changeS3Bucket: (bucket: SelectProps.Option) => void;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
+  tagsKeyValueEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
   loadingServiceAvailable: boolean;
   unSupportedServices: string;
@@ -63,6 +63,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     regionEmptyError,
     vpcEmptyError,
     sdkEmptyError,
+    tagsKeyValueEmptyError,
     assetsS3BucketEmptyError,
     loadingServiceAvailable,
     unSupportedServices,
@@ -148,6 +149,13 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     }
   };
 
+  const getS3BucketErrorMessage = () => {
+    if (assetsS3BucketEmptyError) {
+      return t('pipeline:valid.s3BucketEmpty');
+    }
+    return '';
+  };
+
   // Monitor region change
   useEffect(() => {
     if (
@@ -211,7 +219,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.vpc')}
           description={t('pipeline:create.vpcDesc')}
           secondaryControl={
-            !update || pipelineInfo.status?.status === 'Failed' ? (
+            !update || pipelineInfo.statusType === EPipelineStatus.Failed ? (
               <Button
                 disabled={!pipelineInfo.region}
                 loading={loadingVPC}
@@ -259,7 +267,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.s3Assets')}
           description={t('pipeline:create.s3AssetsDesc')}
           secondaryControl={
-            !update || pipelineInfo.status?.status === 'Failed' ? (
+            !update || pipelineInfo.statusType === EPipelineStatus.Failed ? (
               <Button
                 disabled={!pipelineInfo.region}
                 loading={loadingBucket}
@@ -270,27 +278,39 @@ const BasicInformation: React.FC<BasicInformationProps> = (
               />
             ) : null
           }
-          errorText={
-            assetsS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
-          }
+          errorText={getS3BucketErrorMessage()}
         >
-          <Autosuggest
+          <Select
             disabled={isDisabled(update, pipelineInfo)}
             placeholder={defaultStr(t('pipeline:create.selectS3'))}
             statusType={loadingBucket ? 'loading' : 'finished'}
-            onChange={({ detail }) => changeS3Bucket(detail.value)}
-            value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}
+            selectedOption={pipelineInfo.selectedS3Bucket}
             options={s3BucketOptionList}
-            enteredTextLabel={(value) => `${t('use')}: "${value}"`}
+            filteringType="auto"
+            selectedAriaLabel="Selected"
+            onChange={(e) => {
+              changeS3Bucket(e.detail.selectedOption);
+            }}
           />
         </FormField>
 
         <Tags
-          tags={pipelineInfo.tags}
+          tags={pipelineInfo.tags.filter(
+            (tag) => !tag.key.startsWith('#.') && !tag.value.startsWith('#.')
+          )} // filter internal tags with '#.' prefix
           changeTags={(tags) => {
             changeTags(tags);
           }}
         />
+        <div>
+          {tagsKeyValueEmptyError ? (
+            <StatusIndicator type="error">
+              {t('pipeline:valid.tagsKeyValueEmpty')}
+            </StatusIndicator>
+          ) : (
+            ''
+          )}
+        </div>
       </SpaceBetween>
     </Container>
   );

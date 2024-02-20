@@ -18,7 +18,6 @@ import {
   FormField,
   SpaceBetween,
   SplitPanel,
-  StatusIndicator,
   Tabs,
   TextContent,
   Textarea,
@@ -32,6 +31,7 @@ import { useParams } from 'react-router-dom';
 import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
 import {
+  alertMsg,
   defaultStr,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
@@ -161,6 +161,8 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
         });
       if (success) {
         setEventDetails(data);
+        setPrevDisplayName(data.displayName);
+        setPrevDesc(data.description);
         setLoadingData(false);
       }
     } catch (error) {
@@ -249,6 +251,15 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                             loading={loadingUpdateDisplayName}
                             variant="primary"
                             onClick={() => {
+                              if (
+                                eventDetails.metadataSource ===
+                                MetadataSource.PRESET
+                              ) {
+                                alertMsg(
+                                  t('analytics:valid.metadataNotAllowEditError')
+                                );
+                                return;
+                              }
                               updateEventInfo('displayName');
                             }}
                           >
@@ -331,6 +342,15 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                           loading={loadingUpdateDesc}
                           variant="primary"
                           onClick={() => {
+                            if (
+                              eventDetails.metadataSource ===
+                              MetadataSource.PRESET
+                            ) {
+                              alertMsg(
+                                t('analytics:valid.metadataNotAllowEditError')
+                              );
+                              return;
+                            }
                             updateEventInfo('description');
                           }}
                         >
@@ -340,16 +360,6 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('analytics:metadata.event.tableColumnHasData')}
-              </Box>
-              <div className="mb-10">
-                <StatusIndicator type={event.hasData ? 'success' : 'stopped'}>
-                  {event.hasData ? 'Yes' : 'No'}
-                </StatusIndicator>
               </div>
             </div>
             <div>
