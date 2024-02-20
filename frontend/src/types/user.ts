@@ -11,28 +11,6 @@
  *  and limitations under the License.
  */
 
-import { IUserRole } from 'ts/const';
-
 export {};
 declare global {
-  interface IUser {
-    readonly id: string;
-    readonly type: string;
-    readonly prefix: string;
-
-    readonly name?: string;
-    readonly roles: IUserRole[];
-
-    readonly createAt: number;
-    readonly updateAt: number;
-    readonly operator: string;
-    readonly deleted: boolean;
-  }
-  interface IUserSettings {
-    readonly roleJsonPath: string;
-    readonly adminRoleNames: string;
-    readonly operatorRoleNames: string;
-    readonly analystRoleNames: string;
-    readonly analystReaderRoleNames: string;
-  }
 }

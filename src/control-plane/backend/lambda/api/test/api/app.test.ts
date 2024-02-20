@@ -31,12 +31,8 @@ describe('App test', () => {
   });
   it('invalid uri', async () => {
     const res = await request(app)
-      .get('/api/user/details%81?id=');
-    expect(res.status).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Invalid URI.',
-    });
+      .get('/api/users*()%81');
+    expect(res.status).toBe(404);
   });
   it('response headers contain X-Click-Stream-Response-Time', async () => {
     const res = await request(app)

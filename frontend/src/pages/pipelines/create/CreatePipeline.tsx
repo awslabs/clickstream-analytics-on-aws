@@ -90,6 +90,19 @@ import {
   validatePublicSubnetInSameAZWithPrivateSubnets,
   validateSubnetCrossInAZs,
 } from 'ts/utils';
+import {
+  ListACMCertificatesResponse,
+  ListBucketsResponse,
+  ListMSKClustersResponse,
+  ListRedshiftClustersResponse,
+  ListSSMSecretsResponse,
+  ListSecurityGroupsResponse,
+  ListSubnetsResponse,
+  ListVpcResponse,
+  IServiceAvailable,
+  ListPluginsResponse,
+  ServicesAvailableResponse,
+} from 'types/api-types';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
 import DataProcessing from './steps/DataProcessing';
@@ -763,7 +776,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   };
 
   const findServiceAvailability = (
-    data: ServiceAvailableResponse[],
+    data: IServiceAvailable[],
     serviceName: string
   ) => {
     return (
@@ -783,8 +796,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setUnSupportedServices('');
       try {
         setLoadingServiceAvailable(true);
-        const { success, data }: ApiResponse<ServiceAvailableResponse[]> =
-          await checkServicesAvailable({ region });
+        const { success, data }: ApiResponse<ServicesAvailableResponse> =
+          await checkServicesAvailable({
+            region,
+            services:
+              'emr-serverless,msk,quicksight,redshift-serverless,global-accelerator',
+          });
         if (success && data) {
           // Set Service available
           const agaAvailable = findServiceAvailability(
@@ -1630,10 +1647,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        securityGroupId: mskCluster?.securityGroupId || '',
+                        securityGroupId: mskCluster?.SecurityGroupId || '',
                         mskCluster: {
-                          name: mskCluster?.name || '',
-                          arn: mskCluster?.arn || '',
+                          name: mskCluster?.ClusterName || '',
+                          arn: mskCluster?.ClusterArn || '',
                         },
                       },
                     },
@@ -2214,17 +2231,17 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateVpc = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: pipelineInfo.region,
       });
       if (success) {
         const selectVpc = data.filter(
-          (element) => element.id === pipelineInfo.network.vpcId
+          (element) => element.VpcId === pipelineInfo.network.vpcId
         )[0];
         pipelineInfo.selectedVPC = {
-          label: `${selectVpc.name}(${selectVpc.id})`,
-          value: selectVpc.id,
-          description: selectVpc.cidr,
+          label: `${selectVpc.Name}(${selectVpc.VpcId})`,
+          value: selectVpc.VpcId,
+          description: selectVpc.CidrBlock,
         };
       }
     } catch (error) {
@@ -2238,15 +2255,17 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateS3Bucket = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<S3Response[]> =
-        await getS3BucketList(pipelineInfo.region);
+      const { success, data }: ApiResponse<ListBucketsResponse> =
+        await getS3BucketList({
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectedS3Bucket = data.filter(
-          (element) => element.name === pipelineInfo.bucket.name
+          (element) => element.Name === pipelineInfo.bucket.name
         )[0];
         pipelineInfo.selectedS3Bucket = {
-          label: selectedS3Bucket.name,
-          value: selectedS3Bucket.name,
+          label: selectedS3Bucket.Name,
+          value: selectedS3Bucket.Name,
         };
       }
     } catch (error) {
@@ -2255,27 +2274,27 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateSubnetList = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.network.vpcId,
         });
       if (success) {
         const publicSubnets = data.filter((element) =>
-          pipelineInfo.network.publicSubnetIds.includes(element.id)
+          pipelineInfo.network.publicSubnetIds.includes(element.SubnetId)
         );
         const privateSubnets = data.filter((element) =>
-          pipelineInfo.network.privateSubnetIds.includes(element.id)
+          pipelineInfo.network.privateSubnetIds.includes(element.SubnetId)
         );
         pipelineInfo.selectedPublicSubnet = publicSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
         pipelineInfo.selectedPrivateSubnet = privateSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
       }
     } catch (error) {
@@ -2287,16 +2306,16 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (!pipelineInfo.ingestionServer.domain.certificateArn) {
         return;
       }
-      const { success, data }: ApiResponse<CetificateResponse[]> =
+      const { success, data }: ApiResponse<ListACMCertificatesResponse> =
         await getCertificates({ region: pipelineInfo.region });
       if (success) {
         const selectCert = data.filter(
           (element) =>
-            element.arn === pipelineInfo.ingestionServer.domain.certificateArn
+            element.Arn === pipelineInfo.ingestionServer.domain.certificateArn
         )[0];
         pipelineInfo.selectedCertificate = {
-          label: selectCert.domain,
-          value: selectCert.arn,
+          label: selectCert.Domain,
+          value: selectCert.Arn,
         };
       }
     } catch (error) {
@@ -2314,17 +2333,19 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (!enableAuthentication) {
         return;
       }
-      const { success, data }: ApiResponse<SSMSecretRepoose[]> =
-        await getSSMSecrets({ region: pipelineInfo.region });
+      const { success, data }: ApiResponse<ListSSMSecretsResponse> =
+        await getSSMSecrets({
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectSecret = data.filter(
           (element) =>
-            element.arn ===
+            element.Arn ===
             pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn
         )[0];
         pipelineInfo.selectedSecret = {
-          label: selectSecret.name,
-          value: selectSecret.arn,
+          label: selectSecret.Name,
+          value: selectSecret.Arn,
         };
       }
     } catch (error) {
@@ -2337,22 +2358,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         return;
       }
       pipelineInfo.mskCreateMethod = ResourceCreateMethod.EXISTING;
-      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
-        vpcId: pipelineInfo.network.vpcId,
-        region: pipelineInfo.region,
-      });
+      const { success, data }: ApiResponse<ListMSKClustersResponse> =
+        await getMSKList({
+          vpcId: pipelineInfo.network.vpcId,
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectMsk = data.filter(
           (element) =>
-            element.arn ===
+            element.ClusterArn ===
             pipelineInfo.ingestionServer?.sinkKafka?.mskCluster?.arn
         )[0];
         pipelineInfo.selectedMSK = {
-          label: selectMsk.name,
-          value: selectMsk.arn,
-          description: `Authentication: ${selectMsk.authentication.join(',')}`,
-          labelTag: selectMsk.type,
-          iconAlt: selectMsk.arn,
+          label: selectMsk.ClusterName,
+          value: selectMsk.ClusterArn,
+          description: `Authentication: ${selectMsk.Authentication.join(',')}`,
+          labelTag: selectMsk.ClusterType,
+          iconAlt: selectMsk.ClusterArn,
         };
       }
     } catch (error) {
@@ -2367,7 +2389,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.mskCreateMethod = ResourceCreateMethod.CREATE;
       pipelineInfo.kafkaBrokers =
         pipelineInfo.ingestionServer.sinkKafka.brokers.join(',');
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.network.vpcId,
@@ -2375,13 +2397,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (success) {
         const selectSG = data.filter(
           (element) =>
-            element.id ===
+            element.GroupId ===
             pipelineInfo.ingestionServer.sinkKafka.securityGroupId
         )[0];
         pipelineInfo.selectedSelfHostedMSKSG = {
-          label: `${selectSG.name}(${selectSG.id})`,
-          value: selectSG.id,
-          description: selectSG.description,
+          label: `${selectSG.GroupName}(${selectSG.GroupId})`,
+          value: selectSG.GroupId,
+          description: selectSG.Description,
         };
       }
     } catch (error) {
@@ -2399,7 +2421,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateListPlugins = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+      const { success, data }: ApiResponse<ListPluginsResponse> =
         await getPluginList({
           pageNumber: 1,
           pageSize: 1000,
@@ -2421,19 +2443,19 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateNewServerlessVpc = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: pipelineInfo.region,
       });
       if (success) {
         const selectVpc = data.filter(
           (element) =>
-            element.id ===
+            element.VpcId ===
             pipelineInfo.dataModeling.redshift.newServerless.network.vpcId
         )[0];
         pipelineInfo.redshiftServerlessVPC = {
-          label: `${selectVpc.name}(${selectVpc.id})`,
-          value: selectVpc.id,
-          description: selectVpc.cidr,
+          label: `${selectVpc.Name}(${selectVpc.VpcId})`,
+          value: selectVpc.VpcId,
+          description: selectVpc.CidrBlock,
         };
       }
     } catch (error) {
@@ -2442,7 +2464,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateNewServerlessSG = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
@@ -2450,13 +2472,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (success) {
         const selectSGs = data.filter((element) =>
           pipelineInfo.dataModeling.redshift.newServerless.network.securityGroups.includes(
-            element.id
+            element.GroupId
           )
         );
         pipelineInfo.redshiftServerlessSG = selectSGs.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.description,
+          label: `${element.GroupName}(${element.GroupId})`,
+          value: element.GroupId,
+          description: element.Description,
         }));
       }
     } catch (error) {
@@ -2468,7 +2490,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
@@ -2476,14 +2498,14 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (success) {
         const selectSubnets = data.filter((element) =>
           pipelineInfo.dataModeling.redshift.newServerless.network.subnetIds.includes(
-            element.id
+            element.SubnetId
           )
         );
         pipelineInfo.redshiftServerlessSubnets = selectSubnets.map(
           (element) => ({
-            label: `${element.name}(${element.id})`,
-            value: element.id,
-            description: `${element.availabilityZone}:${element.cidr}(${element.type})`,
+            label: `${element.Name}(${element.SubnetId})`,
+            value: element.SubnetId,
+            description: `${element.AvailabilityZone}:${element.CidrBlock}(${element.Type})`,
           })
         );
       }
@@ -2498,21 +2520,21 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     try {
-      const { success, data }: ApiResponse<RedshiftResponse[]> =
+      const { success, data }: ApiResponse<ListRedshiftClustersResponse> =
         await getRedshiftCluster({
           region: pipelineInfo.region,
         });
       if (success) {
         const selectCluster = data.filter(
           (element) =>
-            element.name ===
+            element.Name ===
             pipelineInfo.dataModeling.redshift.provisioned.clusterIdentifier
         )[0];
         pipelineInfo.selectedRedshiftCluster = {
-          label: selectCluster.name,
-          value: selectCluster.name,
-          description: selectCluster.endpoint.Address,
-          labelTag: selectCluster.status,
+          label: selectCluster.Name,
+          value: selectCluster.Name,
+          description: selectCluster.Endpoint.Address,
+          labelTag: selectCluster.Status,
         };
       }
     } catch (error) {

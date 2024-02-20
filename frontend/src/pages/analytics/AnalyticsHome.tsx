@@ -21,6 +21,7 @@ import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
+import { IProject } from 'types/api-types';
 
 interface AnalyticsHomeProps {
   auth: AuthContextProps;

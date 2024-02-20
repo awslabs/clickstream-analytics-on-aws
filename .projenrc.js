@@ -91,7 +91,6 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
-  '@aws-sdk/client-route-53',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',

@@ -13,4 +13,5 @@
 
 import { createContext } from 'react';
 import { INIT_USER_DATA } from 'ts/init';
+import { IUser } from 'types/api-types';
 export const UserContext = createContext<IUser | undefined>(INIT_USER_DATA);

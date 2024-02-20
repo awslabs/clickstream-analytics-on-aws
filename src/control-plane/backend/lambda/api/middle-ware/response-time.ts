@@ -12,9 +12,9 @@
  */
 
 import express from 'express';
-import { ProjectServ } from '../service/project';
+import { CProject } from '../model/project';
 
-const projectServ: ProjectServ = new ProjectServ();
+const cProject = new CProject();
 
 // Implement access log middleware function
 export async function responseTime(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -25,7 +25,7 @@ export async function responseTime(req: express.Request, res: express.Response, 
   res.end = async (chunk: any, encoding: BufferEncoding, cb?: () => void) => {
     const requestId = req.get('X-Click-Stream-Request-Id');
     if (requestId && res.statusCode >= 500) {
-      await projectServ.deleteRequestId(requestId);
+      await cProject.deleteRequestId(requestId);
     }
     duration = Date.now() - start;
     res.setHeader('X-Click-Stream-Response-Time', duration);

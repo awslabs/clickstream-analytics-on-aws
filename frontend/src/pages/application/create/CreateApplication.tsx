@@ -24,6 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { GetProjectResponse, IProject } from 'types/api-types';
 import RegisterApp from './comp/RegisterApp';
 
 const CreateApplication = () => {
@@ -53,9 +54,10 @@ const CreateApplication = () => {
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: projectId,
-      });
+      const { success, data }: ApiResponse<GetProjectResponse> =
+        await getProjectDetail({
+          projectId,
+        });
       if (success) {
         setProjectInfo(data);
         setLoadingData(false);

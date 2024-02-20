@@ -20,6 +20,7 @@ import { fetchStatusWithType } from 'apis/resource';
 import CopyText from 'components/common/CopyIcon';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DomainAvailableResponse, FetchType } from 'types/api-types';
 
 interface DomainNameWithStatusProps {
   type: 'domain' | 'endpoint' | 'dns';
@@ -42,15 +43,15 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
   const [showText, setShowText] = useState('');
 
   useEffect(() => {
-    let requestType: StatusWithType = '';
+    let requestType: FetchType;
     if (type === 'domain') {
-      requestType = 'PipelineDomain';
+      requestType = FetchType.PIPELINE_DOMAIN;
       setShowText(customDomain || dns || '');
     } else if (type === 'dns') {
-      requestType = 'PipelineDNS';
+      requestType = FetchType.PIPELINE_DNS;
       setShowText(dns || '');
     } else {
-      requestType = 'PipelineEndpoint';
+      requestType = FetchType.PIPELINE_ENDPOINT;
       setShowText(endpoint || '');
     }
     if (requestType && pipelineId) {
@@ -58,9 +59,8 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
       fetchStatusWithType({
         type: requestType,
         projectId: projectId,
-        pipelineId: pipelineId,
       })
-        .then((response: ApiResponse<StatusWithTypeResponse>) => {
+        .then((response: ApiResponse<DomainAvailableResponse>) => {
           setLoadingData(false);
           if (response.data.ok) {
             setDomainResolved(true);

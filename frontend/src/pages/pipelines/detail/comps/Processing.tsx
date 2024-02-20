@@ -28,6 +28,7 @@ import {
   buildVPCLink,
 } from 'ts/url';
 import { defaultStr, getLocaleLngDescription, ternary } from 'ts/utils';
+import { IPlugin } from 'types/api-types';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;

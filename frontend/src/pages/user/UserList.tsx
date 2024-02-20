@@ -23,9 +23,10 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole, TIME_FORMAT } from 'ts/const';
+import { TIME_FORMAT } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
+import { IUser, IUserRole } from 'types/api-types';
 import UserTable from './UserTable';
 
 interface IUserTableItem {
@@ -120,7 +121,7 @@ const UserList: React.FC = () => {
   ) => {
     return (
       <Multiselect
-        placeholder={defaultStr(t('user:labels.selectUserRolePlaceholder'))}
+        placeholder={defaultStr(t('user:labels.selectIUserRolePlaceholder'))}
         autoFocus={true}
         expandToViewport={true}
         options={roleOptions}
@@ -221,7 +222,13 @@ const UserList: React.FC = () => {
 
   const updateUserInfo = async (newItem: IUser) => {
     try {
-      const { success, message }: ApiResponse<null> = await updateUser(newItem);
+      const { success, message }: ApiResponse<null> = await updateUser({
+        id: newItem.id,
+        name: defaultStr(newItem.name),
+        roles: newItem.roles,
+        createAt: new Date().getTime(),
+        operator: '',
+      });
       if (!success) {
         throw new Error(message);
       }

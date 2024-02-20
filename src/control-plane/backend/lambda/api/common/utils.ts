@@ -17,6 +17,7 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { IUserRole, SubnetType } from './clickstream-types';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import {
   ALBLogServiceAccountMapping,
@@ -31,10 +32,10 @@ import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
-import { IUserSettings } from '../model/user';
+import { RawUserSettings } from '../model/user';
 import { UserService } from '../service/user';
 
 const userService: UserService = new UserService();
@@ -195,7 +196,7 @@ async function getRoleFromToken(decodedToken: any) {
   return mapToRoles(userSettings, oidcRoles);
 }
 
-function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+function mapToRoles(userSettings: RawUserSettings, oidcRoles: string[]) {
   const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
     return userRoles;
@@ -586,13 +587,15 @@ function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
   return azArray;
 }
 
-function paginateData(data: any[], pagination: boolean, pageSize: number, pageNumber: number) {
+function paginateData(data: any[], pagination: boolean, pageSize?: number, pageNumber?: number) {
+  const pSize = pageSize ?? 10;
+  let pNum = pageNumber ?? 1;
   const totalCount = data.length;
   if (pagination) {
     if (totalCount) {
-      pageNumber = Math.min(Math.ceil(totalCount / pageSize), pageNumber);
-      const startIndex = pageSize * (pageNumber - 1);
-      const endIndex = Math.min(pageSize * pageNumber, totalCount);
+      pNum = Math.min(Math.ceil(totalCount / pSize), pNum);
+      const startIndex = pSize * (pNum - 1);
+      const endIndex = Math.min(pSize * pNum, totalCount);
       return data?.slice(startIndex, endIndex);
     }
   }

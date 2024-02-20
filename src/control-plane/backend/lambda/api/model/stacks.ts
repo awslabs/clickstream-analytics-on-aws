@@ -14,6 +14,7 @@
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
+import { ProjectEnvironment } from '../common/clickstream-types';
 import {
   analyticsMetadataTable,
   awsAccountId,
@@ -54,7 +55,6 @@ import {
   KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
-  ProjectEnvironment,
 } from '../common/types';
 import {
   getBucketPrefix,

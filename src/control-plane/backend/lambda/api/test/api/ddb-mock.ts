@@ -33,8 +33,8 @@ import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand, TagResourceCommand as SNSTagResourceCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
+import { IUserRole, ProjectEnvironment } from '../../common/clickstream-types';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { IUserRole, ProjectEnvironment } from '../../common/types';
 import dictionary from '../../config/dictionary.json';
 import { IPipeline } from '../../model/pipeline';
 

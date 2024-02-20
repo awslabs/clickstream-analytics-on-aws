@@ -20,6 +20,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
 import { CLICK_STREAM_USER_DATA } from 'ts/const';
+import { IUser } from 'types/api-types';
 
 const SignedInPage: React.FC = () => {
   const auth = useAuth();
@@ -31,9 +32,9 @@ const SignedInPage: React.FC = () => {
       return;
     }
     try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email
-      );
+      const { success, data }: ApiResponse<IUser> = await getUserDetails({
+        id: auth.user?.profile.email,
+      });
       if (success) {
         window.localStorage.setItem(
           CLICK_STREAM_USER_DATA,

@@ -17,6 +17,7 @@ import { RouteTable } from '@aws-sdk/client-ec2';
 import { Endpoint, VpcSecurityGroupMembership } from '@aws-sdk/client-redshift';
 import { WorkgroupStatus } from '@aws-sdk/client-redshift-serverless';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { SubnetType } from './clickstream-types';
 import { PipelineStatusDetail, PipelineStatusType } from './model-ln';
 
 export class ClickStreamBadRequestError extends Error {
@@ -154,10 +155,6 @@ export interface KeyVal<T> {
   [key: string]: T;
 }
 
-export interface ClickStreamRegion {
-  readonly id: string;
-}
-
 export interface Certificate {
   readonly arn: string;
   readonly domain?: string;
@@ -173,13 +170,6 @@ export interface WorkGroup {
   readonly engineVersion: string;
 }
 
-export interface ClickStreamVpc {
-  readonly id: string;
-  readonly name: string;
-  readonly cidr: string;
-  readonly isDefault: boolean;
-}
-
 export interface ClickStreamSubnet {
   readonly id: string;
   readonly name: string;
@@ -187,22 +177,6 @@ export interface ClickStreamSubnet {
   readonly availabilityZone: string;
   readonly type: SubnetType;
   readonly routeTable?: RouteTable;
-}
-
-export interface IamRole {
-  readonly name: string;
-  readonly id: string;
-  readonly arn: string;
-}
-
-export interface MSKCluster {
-  readonly name: string;
-  readonly arn: string;
-  readonly type: string;
-  readonly authentication: string[];
-  readonly state: string;
-  readonly securityGroupId: string;
-  readonly clientBroker: string;
 }
 
 export interface QuickSightUser {
@@ -221,7 +195,7 @@ export interface QuickSightAccountInfo {
   readonly accountSubscriptionStatus?: string;
 }
 
-export interface RedshiftCluster {
+export interface ClickstreamRedshiftCluster {
   readonly name: string;
   readonly nodeType: string;
   readonly endpoint?: Endpoint;
@@ -246,17 +220,6 @@ export interface Route53HostedZone {
   readonly name: string;
 }
 
-export interface ClickStreamBucket {
-  readonly name: string;
-  readonly location: string;
-}
-
-export interface ClickStreamSecurityGroup {
-  readonly id: string;
-  readonly name: string;
-  readonly description: string;
-}
-
 export interface PipelineStatus {
   status: PipelineStatusType;
   readonly stackDetails: PipelineStatusDetail[];
@@ -264,11 +227,6 @@ export interface PipelineStatus {
     readonly name?: string;
     readonly status?: ExecutionStatus | string;
   };
-}
-
-export interface SSMSecret {
-  readonly name: string;
-  readonly arn: string;
 }
 
 export enum AssumeRoleType {
@@ -305,17 +263,6 @@ export enum ENetworkType {
 export enum PipelineServerProtocol {
   HTTP = 'HTTP',
   HTTPS = 'HTTPS',
-}
-
-export enum PluginType {
-  TRANSFORM = 'Transform',
-  ENRICH = 'Enrich',
-}
-
-export enum ProjectEnvironment {
-  DEV = 'Dev',
-  TEST = 'Test',
-  PROD = 'Prod',
 }
 
 export interface RedshiftInfo {
@@ -381,28 +328,7 @@ export enum MetricsLegendPosition {
   HIDDEN = 'hidden',
 }
 
-export enum SubnetType {
-  ALL = 'all',
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-  ISOLATED = 'isolated',
-}
-
 export enum DataCollectionSDK {
   CLICKSTREAM = 'clickstream',
   THIRDPARTY = 'thirdparty',
-}
-
-export enum FetchType {
-  ANDROIDSDK = 'AndroidSDK',
-  PIPELINE_ENDPOINT = 'PipelineEndpoint',
-  PIPELINE_DOMAIN= 'PipelineDomain',
-  PIPELINE_DNS= 'PipelineDNS',
-}
-
-export enum IUserRole {
-  ADMIN = 'Admin',
-  OPERATOR = 'Operator',
-  ANALYST = 'Analyst',
-  ANALYST_READER = 'AnalystReader',
 }

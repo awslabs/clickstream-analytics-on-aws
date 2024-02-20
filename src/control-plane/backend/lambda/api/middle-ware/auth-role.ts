@@ -13,8 +13,9 @@
 
 import express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
+import { IUserRole } from '../common/clickstream-types';
 import { logger } from '../common/powertools';
-import { ApiFail, IUserRole } from '../common/types';
+import { ApiFail } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest, getUidFromTokenPayload } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -25,11 +26,12 @@ const routerRoles: Map<string, IUserRole[]> = new Map();
 routerRoles.set('GET /api/user/details', []);
 routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('GET /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('POST /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('PUT /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('DELETE /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/projects', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/app/:aid/dashboards', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/app/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('POST /api/project/:pid/app/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('PUT /api/project/:pid/app/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('DELETE /api/project/:pid/app/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST]);
 
 routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
@@ -43,6 +45,7 @@ routerRoles.set('PUT /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('DELETE /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
+routerRoles.set('GET /api/users', [IUserRole.ADMIN]);
 
 
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
@@ -94,6 +97,7 @@ export async function authRole(req: express.Request, res: express.Response, next
 
     const requestKey = `${req.method} ${req.path}`;
     const accessRoles = matchRouter(requestKey);
+
     if (!accessRoles) {
       logger.warn('No access roles found.');
       return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));

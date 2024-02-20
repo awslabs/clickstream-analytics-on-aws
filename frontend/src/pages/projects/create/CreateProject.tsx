@@ -40,6 +40,12 @@ import {
   validateEmails,
   validateProjectId,
 } from 'ts/utils';
+import {
+  CreateProjectResponse,
+  IProject,
+  ProjectEnvironment,
+  VerificationProjectResponse,
+} from 'types/api-types';
 
 interface CreateProjectProps {
   openModel: boolean;
@@ -85,8 +91,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = defaultStr(selectedEnv?.value);
-      const { success, data }: ApiResponse<ResponseCreate> =
+      const { success, data }: ApiResponse<CreateProjectResponse> =
         await createProject(curProject);
       if (success && data.id) {
         navigate(`/project/detail/${data.id}`);
@@ -100,8 +105,8 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const validateProjectIdExists = async () => {
     setValidating(true);
     try {
-      const { success, data }: ApiResponse<ResponseVerify> =
-        await verificationProjectId({ id: curProject.id });
+      const { success, data }: ApiResponse<VerificationProjectResponse> =
+        await verificationProjectId({ projectId: curProject.id });
       if (success && data.exist) {
         alertMsg(t('project:valid.projectIdExisting'), 'error');
         setValidating(false);
@@ -351,7 +356,9 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   setCurProject((prev) => {
                     return {
                       ...prev,
-                      environment: defaultStr(e.detail.selectedOption.value),
+                      environment: defaultStr(
+                        e.detail.selectedOption.value
+                      ) as ProjectEnvironment,
                     };
                   });
                 }}

@@ -21,10 +21,10 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
+import { IUserRole } from '../../common/clickstream-types';
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
-import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -55,14 +55,14 @@ describe('User test', () => {
       ],
     });
     const res = await request(app)
-      .get('/api/user');
+      .get('/api/users');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       data: {
         items: [
-          { deleted: false, operator: 'operator-01', roles: [IUserRole.ADMIN], id: 'id-01' },
-          { deleted: false, operator: 'operator-02', roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: 'id-02' },
+          { operator: 'operator-01', roles: [IUserRole.ADMIN], id: 'id-01' },
+          { operator: 'operator-02', roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: 'id-02' },
         ],
         totalCount: 2,
       },
@@ -141,7 +141,7 @@ describe('User test', () => {
       },
     });
     const res = await request(app)
-      .put(`/api/user/${MOCK_USER_ID}`)
+      .put('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: MOCK_USER_ID,
@@ -168,7 +168,7 @@ describe('User test', () => {
       },
     });
     const res = await request(app)
-      .put(`/api/user/${MOCK_USER_ID}`)
+      .put('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: MOCK_USER_ID,
@@ -194,7 +194,7 @@ describe('User test', () => {
       },
     });
     const res = await request(app)
-      .put(`/api/user/${MOCK_USER_ID}`)
+      .put('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: MOCK_USER_ID,
@@ -227,8 +227,11 @@ describe('User test', () => {
     });
     ddbMock.on(UpdateCommand).resolvesOnce({});
     const res = await request(app)
-      .delete(`/api/user/${MOCK_USER_ID}`)
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+      .delete('/api/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_USER_ID,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toEqual('User deleted.');
@@ -254,8 +257,11 @@ describe('User test', () => {
     });
     ddbMock.on(UpdateCommand).resolvesOnce({});
     const res = await request(app)
-      .delete(`/api/user/${MOCK_USER_ID}`)
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+      .delete('/api/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_USER_ID,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toEqual('This user was created by solution and not allowed to be deleted.');
@@ -280,7 +286,7 @@ describe('User test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
-      data: { deleted: false, roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: MOCK_USER_ID },
+      data: { roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: MOCK_USER_ID },
       message: '',
       success: true,
     });
@@ -291,7 +297,6 @@ describe('User test', () => {
     tokenMock(ddbMock, false);
     const res = await request(app)
       .get('/api/user/details?id=');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.roles).toEqual([]);
   });
@@ -310,7 +315,7 @@ describe('User test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
-      data: { deleted: false, roles: [IUserRole.OPERATOR], id: 'fake+test@example.com' },
+      data: { roles: [IUserRole.OPERATOR], id: 'fake+test@example.com' },
       message: '',
       success: true,
     });

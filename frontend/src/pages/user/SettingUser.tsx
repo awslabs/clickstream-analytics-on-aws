@@ -23,6 +23,7 @@ import { getUserSettings, updateUserSettings } from 'apis/user';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
+import { GetUserSettingsResponse, IUserSettings } from 'types/api-types';
 
 interface SettingUserProps {
   openModel: boolean;
@@ -50,7 +51,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
   const getSettingUser = async () => {
     setLoadingCreate(true);
     try {
-      const { success, data }: ApiResponse<IUserSettings> =
+      const { success, data }: ApiResponse<GetUserSettingsResponse> =
         await getUserSettings();
       if (success) {
         setCurUserSetting(data);
