@@ -12,23 +12,24 @@
  */
 
 import { apiRequest } from 'ts/request';
+import {
+  CreatePluginRequest,
+  DeletePluginRequest,
+  ListPluginsRequest,
+} from 'types/api-types';
 
-const getPluginList = async (params: {
-  pageNumber: number;
-  pageSize: number;
-  type?: string;
-}) => {
-  const result: any = await apiRequest('get', '/plugin', params);
+const getPluginList = async (params: ListPluginsRequest) => {
+  const result: any = await apiRequest('get', '/plugins', params);
   return result;
 };
 
-const createPlugin = async (data: IPlugin) => {
-  const result: any = await apiRequest('post', `/plugin`, data);
+const createPlugin = async (data: CreatePluginRequest) => {
+  const result: any = await apiRequest('post', '/plugin', data);
   return result;
 };
 
-const deletePlugin = async (params: { id: string }) => {
-  const result: any = await apiRequest('delete', `/plugin/${params.id}`);
+const deletePlugin = async (data: DeletePluginRequest) => {
+  const result: any = await apiRequest('delete', `/plugin/${data.pluginId}`);
   return result;
 };
 

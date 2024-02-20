@@ -39,6 +39,7 @@ import {
 } from 'ts/guideConst';
 import { buildDocumentLink } from 'ts/url';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
+import { DomainAvailableResponse, FetchType } from 'types/api-types';
 
 interface ConfigSDKProps {
   appInfo?: IApplication;
@@ -70,9 +71,9 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const getAndroidMavenVersion = async () => {
     try {
       setLoadingSdkVersion(true);
-      const { data }: ApiResponse<StatusWithTypeResponse> =
+      const { data }: ApiResponse<DomainAvailableResponse> =
         await fetchStatusWithType({
-          type: 'AndroidSDK',
+          type: FetchType.ANDROIDSDK,
         });
       setLoadingSdkVersion(false);
       if (data.ok) {

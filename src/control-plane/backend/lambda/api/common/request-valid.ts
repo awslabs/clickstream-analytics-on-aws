@@ -52,6 +52,13 @@ export const validMatchParamId: CustomValidator = (value, { req }) => {
   return true;
 };
 
+export const validMatchParamProjectId: CustomValidator = (value, { req }) => {
+  if (value !== req.params?.projectId) {
+    throw new Error('ID in path does not match ID in body.');
+  }
+  return true;
+};
+
 export const defaultPageValueValid: CustomValidator = (value, { req }) => {
   if (req.query) {
     const { pageNumber, pageSize } = value;

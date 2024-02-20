@@ -36,6 +36,7 @@ import {
 } from 'ts/const';
 import { getDocumentLink } from 'ts/url';
 import { defaultStr, getProjectAppFromOptions } from 'ts/utils';
+import { IProject } from 'types/api-types';
 
 interface IHeaderProps {
   user: any;

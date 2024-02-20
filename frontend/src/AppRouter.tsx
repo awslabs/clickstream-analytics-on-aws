@@ -39,8 +39,12 @@ import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { IUserRole } from 'ts/const';
-import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  defaultStr,
+  getIntersectArrays,
+  getUserInfoFromLocalStorage,
+} from 'ts/utils';
+import { IUser, IUserRole } from 'types/api-types';
 import Home from './pages/home/Home';
 
 interface LoginCallbackProps {
@@ -73,9 +77,9 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
     }
     setNoUserEmailError(false);
     try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email ?? ''
-      );
+      const { success, data }: ApiResponse<IUser> = await getUserDetails({
+        id: defaultStr(auth.user?.profile.email),
+      });
       if (
         success &&
         getIntersectArrays(ANALYTICS_ROLE, data.roles).length > 0

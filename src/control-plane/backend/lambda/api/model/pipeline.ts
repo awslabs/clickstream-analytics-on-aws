@@ -15,8 +15,8 @@ import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
-import { IPlugin } from './plugin';
-import { IProject } from './project';
+import { RawPlugin } from './plugin';
+import { RawProject } from './project';
 import {
   CAppRegistryStack,
   CAthenaStack,
@@ -274,10 +274,10 @@ export interface IPipeline {
 }
 
 export interface CPipelineResources {
-  project?: IProject;
+  project?: RawProject;
   mskBrokers?: string[];
   appIds?: string[];
-  plugins?: IPlugin[];
+  plugins?: RawPlugin[];
   redshift?: RedshiftInfo;
   solution?: IDictionary;
   templates?: IDictionary;

@@ -243,15 +243,6 @@ declare global {
     transformPluginChanged: boolean;
   }
 
-  interface IAlarm {
-    AlarmName: string;
-    AlarmArn: string;
-    AlarmDescription: string;
-    ActionsEnabled: boolean;
-    StateValue: string;
-    StateReason: string;
-  }
-
   interface IInterval {
     value: string;
     unit: string;

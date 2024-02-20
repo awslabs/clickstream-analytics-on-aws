@@ -19,11 +19,11 @@ import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
+import { IUser, IUserRole } from 'types/api-types';
 import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
   ExecutionType,
-  IUserRole,
 } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 import { IMetadataBuiltInList } from './explore-types';

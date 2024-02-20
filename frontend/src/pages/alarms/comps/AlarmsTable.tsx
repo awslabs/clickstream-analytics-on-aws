@@ -23,6 +23,7 @@ import { getAlarmList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ALARM_DISPLAY_STATUS, ALARM_STATUS } from 'ts/const';
+import { IProject } from 'types/api-types';
 import ProjectWithAlarm from './ProjectWithAlarm';
 
 const AlarmTableTable: React.FC = () => {
@@ -90,7 +91,7 @@ const AlarmTableTable: React.FC = () => {
           return {
             params: { project: item },
             promise: getAlarmList({
-              pid: item.id,
+              projectId: item.id,
               pageNumber: 1,
               pageSize: 100,
             }),

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IProject, IUser, ProjectEnvironment } from 'types/api-types';
 import {
   EIngestionType,
   ENetworkType,
@@ -19,14 +20,19 @@ import {
   SinkType,
 } from './const';
 
-export const INIT_PROJECT_DATA = {
+export const INIT_PROJECT_DATA: IProject = {
   id: 'my_project_id',
   name: '',
   description: '',
   emails: '',
-  platform: '',
   region: '',
-  environment: '',
+  environment: ProjectEnvironment.DEV,
+  pipelineId: '',
+  pipelineVersion: '',
+  applications: [],
+  analysisStudioEnabled: false,
+  createAt: 0,
+  updateAt: 0,
 };
 
 export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
@@ -209,12 +215,8 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
 
 export const INIT_USER_DATA: IUser = {
   id: '',
-  type: 'USER',
-  prefix: 'USER',
   name: '',
   roles: [],
   createAt: 0,
-  updateAt: 0,
   operator: '',
-  deleted: false,
 };

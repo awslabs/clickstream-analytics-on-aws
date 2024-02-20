@@ -22,6 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ALARM_DISPLAY_STATUS, ALARM_STATUS } from 'ts/const';
+import { IAlarm } from 'types/api-types';
 
 interface ProjectWithAlarmProps {
   projectAlarmInfo: IProjectWithAlarm;

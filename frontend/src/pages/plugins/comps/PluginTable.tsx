@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 import { defaultStr, getLocaleLngDescription } from 'ts/utils';
+import { IPlugin, ListPluginsResponse } from 'types/api-types';
 
 interface PluginTableProps {
   pipelineInfo?: IExtPipeline;
@@ -112,7 +113,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const listPlugins = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+      const { success, data }: ApiResponse<ListPluginsResponse> =
         await getPluginList({
           pageNumber: currentPage,
           pageSize: PAGE_SIZE,
@@ -151,7 +152,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deletePlugin({
-        id: defaultStr(selectedItems[0]?.id),
+        pluginId: defaultStr(selectedItems[0]?.id),
       });
       if (resData.success) {
         setSelectedItems([]);

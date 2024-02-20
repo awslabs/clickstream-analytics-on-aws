@@ -17,8 +17,8 @@ import { UserContext } from 'context/UserContext';
 import AccessDenied from 'pages/error-page/AccessDenied';
 import { ReactElement, useContext } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
-import { IUserRole } from 'ts/const';
 import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
+import { IUserRole } from 'types/api-types';
 import Loading from './Loading';
 
 const RoleRoute = ({

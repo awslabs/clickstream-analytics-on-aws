@@ -47,6 +47,7 @@ import {
   validatePluginMainFunction,
   validatePluginName,
 } from 'ts/utils';
+import { CredentialsResponse, IPlugin, PluginType } from 'types/api-types';
 
 function Content() {
   const navigate = useNavigate();
@@ -79,15 +80,18 @@ function Content() {
   const [s3Client, setS3Client] = useState<any>();
   const [curDescription, setCurDescription] = useState<string>('');
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
+    id: '',
     name: '',
     description: {
       'en-US': '',
       'zh-CN': '',
     },
-    pluginType: '',
+    pluginType: PluginType.ENRICH,
     mainFunction: '',
     jarFile: '',
     dependencyFiles: [],
+    builtIn: false,
+    createAt: new Date().getTime(),
   });
 
   const splitFileNameWithSuffix = (str: string, substring: string) => {
@@ -149,10 +153,16 @@ function Content() {
       return;
     }
     setLoadingCreate(true);
-    curPlugin.dependencyFiles = dependenciesS3FileKeys;
     try {
       const { success, data }: ApiResponse<ResponseCreate> = await createPlugin(
-        curPlugin
+        {
+          name: curPlugin.name,
+          description: curPlugin.description,
+          pluginType: curPlugin.pluginType,
+          mainFunction: curPlugin.mainFunction,
+          jarFile: curPlugin.jarFile,
+          dependencyFiles: dependenciesS3FileKeys,
+        }
       );
       if (success && data.id) {
         navigate(`/plugins`);
@@ -164,7 +174,7 @@ function Content() {
   };
 
   const initS3ClientWithSTS = async () => {
-    const { success, data }: ApiResponse<UploadTokenResponse> =
+    const { success, data }: ApiResponse<CredentialsResponse> =
       await getSTSUploadRole();
     if (success && data) {
       const s3 = new S3Client({
@@ -424,7 +434,7 @@ function Content() {
                     setCurPlugin((prev) => {
                       return {
                         ...prev,
-                        pluginType: detail.value || '',
+                        pluginType: detail.value as PluginType || PluginType.ENRICH,
                       };
                     });
                   }}

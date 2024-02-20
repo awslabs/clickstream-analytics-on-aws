@@ -36,6 +36,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { GetProjectResponse, IProject } from 'types/api-types';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from './comp/ConfigFlutterSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
@@ -67,9 +68,10 @@ const ApplicationDetail: React.FC = () => {
   const getProjectDetailById = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: defaultStr(pid),
-      });
+      const { success, data }: ApiResponse<GetProjectResponse> =
+        await getProjectDetail({
+          projectId: defaultStr(pid),
+        });
       if (success) {
         setProjectInfo(data);
         setLoadingData(false);

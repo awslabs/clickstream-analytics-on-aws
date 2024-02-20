@@ -23,8 +23,8 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
-import { IUserRole } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
+import { IUser, IUserRole } from 'types/api-types';
 import { UserTableHeader } from './UserTableHeader';
 
 interface UserTableProps {

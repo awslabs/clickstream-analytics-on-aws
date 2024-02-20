@@ -24,8 +24,8 @@ import {
 import { addUser } from 'apis/user';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { IUser, IUserRole } from 'types/api-types';
 
 interface CreateUserProps {
   openModel: boolean;
@@ -40,14 +40,10 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const [visible, setVisible] = useState(openModel);
   const defaultUser: IUser = {
     id: '',
-    type: 'USER',
-    prefix: 'USER',
     name: '',
     roles: [],
     createAt: 0,
-    updateAt: 0,
     operator: '',
-    deleted: false,
   };
   const [curUser, setCurUser] = useState<IUser>(defaultUser);
 
@@ -77,9 +73,11 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const confirmCreateUser = async () => {
     setLoadingCreate(true);
     try {
-      const { success, data }: ApiResponse<ResponseCreate> = await addUser(
-        curUser
-      );
+      const { success, data }: ApiResponse<ResponseCreate> = await addUser({
+        id: curUser.id,
+        name: defaultStr(curUser.name),
+        roles: curUser.roles,
+      });
       if (success && data.id) {
         closeModel();
         refreshPage();
@@ -159,10 +157,10 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
           }}
         />
       </FormField>
-      <FormField label={t('user:labels.createUserRole')}>
+      <FormField label={t('user:labels.createIUserRole')}>
         <Multiselect
           options={roleOptions}
-          placeholder={defaultStr(t('user:labels.selectUserRolePlaceholder'))}
+          placeholder={defaultStr(t('user:labels.selectIUserRolePlaceholder'))}
           onChange={({ detail }) => {
             setSelectedRoleOptions(detail.selectedOptions);
             setCurUser((prev) => {

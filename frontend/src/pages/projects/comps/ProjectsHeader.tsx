@@ -21,6 +21,7 @@ import { deleteProject } from 'apis/project';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { IProject } from 'types/api-types';
 import CreateProject from '../create/CreateProject';
 
 interface ProjectsHeaderProps {
@@ -45,7 +46,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteProject({
-        id: project?.id || '',
+        projectId: project?.id || '',
       });
       if (resData.success) {
         refreshPage();

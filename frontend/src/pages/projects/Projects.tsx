@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { IProject } from 'types/api-types';
 import Environment from './comps/Environment';
 import ProjectsHeader from './comps/ProjectsHeader';
 import SplitPanelContent from './comps/SplitPanel';

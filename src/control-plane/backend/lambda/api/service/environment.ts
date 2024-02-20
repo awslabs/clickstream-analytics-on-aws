@@ -13,25 +13,24 @@
 
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
+import { CredentialsResponse, DescribeQuickSightSubscriptionResponse, DomainAvailableRequest, DomainAvailableResponse, FetchType, ListACMCertificatesRequest, ListACMCertificatesResponse, ListAlarmsRequest, ListAlarmsResponse, ListBucketsRequest, ListBucketsResponse, ListMSKClustersRequest, ListMSKClustersResponse, ListRedshiftClustersRequest, ListRedshiftClustersResponse, ListRedshiftServerlessWorkGroupsRequest, ListRedshiftServerlessWorkGroupsResponse, ListRegionsResponse, ListRolesRequest, ListRolesResponse, ListSSMSecretsRequest, ListSSMSecretsResponse, ListSecurityGroupsRequest, ListSecurityGroupsResponse, ListSubnetsRequest, ListSubnetsResponse, ListVpcRequest, ListVpcResponse, ServicesAvailableRequest, ServicesAvailableResponse, SubnetType, UpdateAlarmsRequest } from '../common/clickstream-types';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { PipelineStackType } from '../common/model-ln';
 import { httpsAgent } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess, FetchType } from '../common/types';
+import { ApiSuccess, AssumeRoleType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
 import { pingServiceResource } from '../store/aws/cloudformation';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
-import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
+import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcSecurityGroups } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
 import { listMSKCluster } from '../store/aws/kafka';
 import {
-  describeClickstreamAccountSubscription,
-  quickSightIsSubscribed,
+  describeAccountSubscription,
 } from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
-import { listHostedZones } from '../store/aws/route53';
 import { listBuckets } from '../store/aws/s3';
 import { listSecrets } from '../store/aws/secretsmanager';
 import { AssumeUploadRole } from '../store/aws/sts';
@@ -44,8 +43,8 @@ export class EnvironmentServ {
 
   public async listRegions(_req: any, res: any, next: any) {
     try {
-      const result = await listRegions();
-      return res.json(new ApiSuccess(result));
+      const response: ListRegionsResponse = await listRegions();
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -53,19 +52,9 @@ export class EnvironmentServ {
 
   public async describeVpcs(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await describeVpcs(region);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async describeVpcs3AZ(req: any, res: any, next: any) {
-    try {
-      const { region } = req.query;
-      const result = await describeVpcs3AZ(region);
-      return res.json(new ApiSuccess(result));
+      const request: ListVpcRequest = req.query;
+      const response: ListVpcResponse = await describeVpcs(request.region);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -73,23 +62,22 @@ export class EnvironmentServ {
 
   public async describeSubnets(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        vpcId,
-        subnetType,
-      } = req.query;
-      const result = await describeSubnetsWithType(region, vpcId, subnetType);
-      result.sort((a, b) => {
-        const fa = a.name.toLowerCase(), fb = b.name.toLowerCase();
-        if (fa < fb) {
-          return -1;
-        }
-        if (fa > fb) {
-          return 1;
-        }
-        return 0;
-      });
-      return res.json(new ApiSuccess(result));
+      const request: ListSubnetsRequest = {
+        ...req.query,
+        ...req.params,
+      };
+      const subnets = await describeSubnetsWithType(request.region, request.vpcId, request.subnetType ?? SubnetType.ALL);
+      const response: ListSubnetsResponse = [];
+      for (let subnet of subnets) {
+        response.push({
+          SubnetId: subnet.id,
+          Name: subnet.name,
+          CidrBlock: subnet.cidr,
+          AvailabilityZone: subnet.availabilityZone,
+          Type: subnet.type,
+        });
+      }
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -97,12 +85,12 @@ export class EnvironmentServ {
 
   public async describeSecurityGroups(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        vpcId,
-      } = req.query;
-      const result = await describeVpcSecurityGroups(region, vpcId);
-      return res.json(new ApiSuccess(result));
+      const request: ListSecurityGroupsRequest = {
+        ...req.query,
+        ...req.params,
+      };
+      const response: ListSecurityGroupsResponse = await describeVpcSecurityGroups(request.region, request.vpcId);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -110,9 +98,9 @@ export class EnvironmentServ {
 
   public async listBuckets(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await listBuckets(region);
-      return res.json(new ApiSuccess(result));
+      const request: ListBucketsRequest = req.query;
+      const response: ListBucketsResponse = await listBuckets(request.region);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -120,12 +108,9 @@ export class EnvironmentServ {
 
   public async listMSKCluster(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        vpcId,
-      } = req.query;
-      const result = await listMSKCluster(region, vpcId);
-      return res.json(new ApiSuccess(result));
+      const request: ListMSKClustersRequest = req.query;
+      const response: ListMSKClustersResponse = await listMSKCluster(request.region, request.vpcId);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -133,22 +118,19 @@ export class EnvironmentServ {
 
   public async describeRedshiftClusters(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        vpcId,
-      } = req.query;
-      const result = await describeRedshiftClusters(region, vpcId);
-      return res.json(new ApiSuccess(result));
+      const request: ListRedshiftClustersRequest = req.query;
+      const response: ListRedshiftClustersResponse = await describeRedshiftClusters(request.region, request.vpcId);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
   }
 
-  public async listRedshiftServerlessWorkgroups(req: any, res: any, next: any) {
+  public async listRedshiftServerlessWorkGroups(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await listRedshiftServerlessWorkgroups(region);
-      return res.json(new ApiSuccess(result));
+      const request: ListRedshiftServerlessWorkGroupsRequest = req.query;
+      const response: ListRedshiftServerlessWorkGroupsResponse = await listRedshiftServerlessWorkgroups(request.region);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -156,30 +138,16 @@ export class EnvironmentServ {
 
   public async listRoles(req: any, res: any, next: any) {
     try {
-      const {
-        type,
-        key,
-      } = req.query;
-      const result = await listRoles(type, key);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async listHostedZones(_req: any, res: any, next: any) {
-    try {
-      const result = await listHostedZones();
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async quickSightIsSubscribed(_req: any, res: any, next: any) {
-    try {
-      const result = await quickSightIsSubscribed();
-      return res.json(new ApiSuccess(result));
+      const request: ListRolesRequest = req.query;
+      let response: ListRolesResponse;
+      if (request.service) {
+        response = await listRoles(AssumeRoleType.SERVICE, request.service);
+      } else if (request.account) {
+        response = await listRoles(AssumeRoleType.ACCOUNT, request.account);
+      } else {
+        response = await listRoles(AssumeRoleType.ALL);
+      }
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -187,11 +155,8 @@ export class EnvironmentServ {
 
   public async describeAccountSubscription(_req: any, res: any, next: any) {
     try {
-      const result = await describeClickstreamAccountSubscription();
-      if (!result) {
-        return res.status(404).send(new ApiFail('QuickSight Unsubscription.'));
-      }
-      return res.json(new ApiSuccess(result));
+      let response: DescribeQuickSightSubscriptionResponse = await describeAccountSubscription();
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -199,9 +164,9 @@ export class EnvironmentServ {
 
   public async listCertificates(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await ListCertificates(region);
-      return res.json(new ApiSuccess(result));
+      const request: ListACMCertificatesRequest = req.query;
+      const response: ListACMCertificatesResponse = await ListCertificates(request.region);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -209,9 +174,9 @@ export class EnvironmentServ {
 
   public async listSecrets(req: any, res: any, next: any) {
     try {
-      const { region } = req.query;
-      const result = await listSecrets(region);
-      return res.json(new ApiSuccess(result));
+      const request: ListSSMSecretsRequest = req.query;
+      const response: ListSSMSecretsResponse = await listSecrets(request.region);
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -220,8 +185,8 @@ export class EnvironmentServ {
   public async AssumeUploadRole(req: any, res: any, next: any) {
     try {
       const requestId = req.get('X-Click-Stream-Request-Id');
-      const result = await AssumeUploadRole(requestId);
-      return res.json(new ApiSuccess(result));
+      const response: CredentialsResponse = await AssumeUploadRole(requestId) as CredentialsResponse;
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -229,12 +194,8 @@ export class EnvironmentServ {
 
   public async alarms(req: any, res: any, next: any) {
     try {
-      const {
-        pid,
-        pageNumber,
-        pageSize,
-      } = req.query;
-      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
+      const request: ListAlarmsRequest = req.query;
+      const latestPipelines = await store.listPipeline(request.projectId, 'latest', 'asc');
       if (latestPipelines.length === 0) {
         return res.json(new ApiSuccess({
           totalCount: -1,
@@ -242,37 +203,26 @@ export class EnvironmentServ {
         }));
       }
       const latestPipeline = latestPipelines[0];
-      const result = await describeAlarmsByProjectId(latestPipeline.region, pid);
-      return res.json(new ApiSuccess({
-        totalCount: result.length,
-        items: paginateData(result, true, pageSize, pageNumber),
-      }));
+      const alarms = await describeAlarmsByProjectId(latestPipeline.region, request.projectId);
+      const response: ListAlarmsResponse = {
+        totalCount: alarms.length,
+        items: paginateData(alarms, true, request.pageSize ?? 10, request.pageNumber ?? 1),
+      };
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
   }
 
-  public async alarmsDisable(req: any, res: any, next: any) {
+  public async alarmsUpdate(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        alarmNames,
-      } = req.body;
-      const result = await disableAlarms(region, alarmNames);
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async alarmsEnable(req: any, res: any, next: any) {
-    try {
-      const {
-        region,
-        alarmNames,
-      } = req.body;
-      const result = await enableAlarms(region, alarmNames);
-      return res.json(new ApiSuccess(result));
+      const request: UpdateAlarmsRequest = req.body;
+      if (request.enabled) {
+        await enableAlarms(request.region, request.alarmNames);
+        return res.json(new ApiSuccess('Alarms enabled.'));
+      }
+      await disableAlarms(request.region, request.alarmNames);
+      return res.json(new ApiSuccess('Alarms disabled.'));
     } catch (error) {
       next(error);
     }
@@ -280,21 +230,18 @@ export class EnvironmentServ {
 
   public async servicesPing(req: any, res: any, next: any) {
     try {
-      const {
-        region,
-        services,
-      } = req.query;
-      const result: any[] = [];
-      if (services) {
-        const serviceNames = services.split(',');
+      const request: ServicesAvailableRequest = req.query;
+      const response: ServicesAvailableResponse = [];
+      if (request.services) {
+        const serviceNames = request.services.split(',');
         const promisePool = pLimit(3);
         const reqs = [];
         for (let serviceName of serviceNames) {
           reqs.push(
             promisePool(
-              () => pingServiceResource(region, serviceName)
+              () => pingServiceResource(request.region, serviceName)
                 .then(available => {
-                  result.push({
+                  response.push({
                     service: serviceName,
                     available: available,
                   });
@@ -303,18 +250,19 @@ export class EnvironmentServ {
         }
         await Promise.all(reqs);
       }
-      return res.json(new ApiSuccess(result));
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
   }
 
-  private async getUrlFromPipeline(type:FetchType, projectId:string, pipelineId:string) {
+  private async getUrlFromPipeline(type:FetchType, projectId:string) {
     let url = '';
-    const latestPipeline = await store.getPipeline(projectId, pipelineId);
-    if (!latestPipeline) {
+    const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+    if (latestPipelines.length === 0) {
       return url;
     }
+    const latestPipeline = latestPipelines[0];
     const pipeline = new CPipeline(latestPipeline);
     if (type === FetchType.PIPELINE_ENDPOINT) {
       const ingestionOutputs = pipeline.getStackOutputBySuffixes(
@@ -342,27 +290,24 @@ export class EnvironmentServ {
 
   public async fetch(req: any, res: any, _next: any) {
     try {
-      const {
-        type,
-        projectId,
-        pipelineId,
-      } = req.body;
+      const request: DomainAvailableRequest = req.query;
       let url = '';
-      if (type === FetchType.ANDROIDSDK) {
+      if (request.type === FetchType.ANDROIDSDK) {
         url = SDK_MAVEN_VERSION_API_LINK;
       } else {
-        url = await this.getUrlFromPipeline(type, projectId, pipelineId);
+        url = await this.getUrlFromPipeline(request.type, request.projectId ?? '');
       }
-      const response = await fetch(url, {
+      const fetchResponse = await fetch(url, {
         method: 'GET',
         agent: httpsAgent,
       });
-      const data = await response.text();
-      return res.json(new ApiSuccess({
-        ok: response.status < 500,
-        status: response.status,
+      const data = await fetchResponse.text();
+      const response: DomainAvailableResponse = {
+        ok: fetchResponse.status < 500,
+        status: fetchResponse.status,
         data: data,
-      }));
+      };
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       return res.json(new ApiSuccess({
         ok: false,

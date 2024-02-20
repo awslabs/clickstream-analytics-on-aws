@@ -31,13 +31,13 @@ import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
 import { IPipeline } from '../../model/pipeline';
-import { IPlugin } from '../../model/plugin';
-import { IProject } from '../../model/project';
-import { IUser, IUserSettings } from '../../model/user';
+import { RawPlugin } from '../../model/plugin';
+import { RawProject } from '../../model/project';
+import { RawUser, RawUserSettings } from '../../model/user';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
-  public async createProject(project: IProject): Promise<string> {
+  public async createProject(project: RawProject): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -47,11 +47,9 @@ export class DynamoDbStore implements ClickStreamStore {
         name: project.name,
         description: project.description,
         emails: project.emails,
-        platform: project.platform,
         region: project.region,
         environment: project.environment,
         pipelineId: '',
-        status: 'ACTIVATED',
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: project.operator?? '',
@@ -62,7 +60,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return project.id;
   };
 
-  public async getProject(id: string): Promise<IProject | undefined> {
+  public async getProject(id: string): Promise<RawProject | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -74,7 +72,7 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const project: IProject = result.Item as IProject;
+    const project = result.Item as RawProject;
     return !project.deleted ? project : undefined;
   };
 
@@ -90,11 +88,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const project: IProject = result.Item as IProject;
+    const project = result.Item as RawProject;
     return project && !project.deleted;
   };
 
-  public async updateProject(project: IProject): Promise<void> {
+  public async updateProject(project: RawProject): Promise<void> {
     let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -115,10 +113,6 @@ export class DynamoDbStore implements ClickStreamStore {
       updateExpression = `${updateExpression}, emails= :e`;
       expressionAttributeValues.set(':e', project.emails);
     }
-    if (project.platform) {
-      updateExpression = `${updateExpression}, platform= :p`;
-      expressionAttributeValues.set(':p', project.platform);
-    }
     if (project.environment) {
       updateExpression = `${updateExpression}, #environment= :env`;
       expressionAttributeValues.set(':env', project.environment);
@@ -128,16 +122,6 @@ export class DynamoDbStore implements ClickStreamStore {
       updateExpression = `${updateExpression}, #region= :r`;
       expressionAttributeValues.set(':r', project.region);
       expressionAttributeNames['#region'] = 'region';
-    }
-    if (project.status) {
-      updateExpression = `${updateExpression}, #status= :s`;
-      expressionAttributeValues.set(':s', project.status);
-      expressionAttributeNames['#status'] = 'status';
-    }
-    if (project.pipelineId) {
-      updateExpression = `${updateExpression}, #pipelineId= :pipelineId`;
-      expressionAttributeValues.set(':pipelineId', project.pipelineId);
-      expressionAttributeNames['#pipelineId'] = 'pipelineId';
     }
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
@@ -165,7 +149,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     };
     const records = await scan(input);
-    const projects = records as IProject[];
+    const projects = records as RawProject[];
     for (let index in projects) {
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
@@ -188,7 +172,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listProjects(order: string): Promise<IProject[]> {
+  public async listProjects(order: string): Promise<RawProject[]> {
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
@@ -204,7 +188,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
-    return records as IProject[];
+    return records as RawProject[];
   };
 
   public async addApplication(app: IApplication): Promise<string> {
@@ -795,7 +779,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async addPlugin(plugin: IPlugin): Promise<string> {
+  public async addPlugin(plugin: RawPlugin): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -820,11 +804,11 @@ export class DynamoDbStore implements ClickStreamStore {
     return plugin.id;
   };
 
-  public async getPlugin(pluginId: string): Promise<IPlugin | undefined> {
+  public async getPlugin(pluginId: string): Promise<RawPlugin | undefined> {
     if (pluginId.startsWith('BUILT-IN')) {
       const dic = await this.getDictionary('BuiltInPlugins');
       if (dic) {
-        const builtInPlugins: IPlugin[] = dic.data;
+        const builtInPlugins: RawPlugin[] = dic.data;
         const plugins = builtInPlugins.filter(p => p.id === pluginId);
         return !isEmpty(plugins) ? plugins[0] : undefined;
       }
@@ -840,11 +824,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const plugin: IPlugin = result.Item as IPlugin;
+    const plugin: RawPlugin = result.Item as RawPlugin;
     return !plugin.deleted ? plugin : undefined;
   };
 
-  public async updatePlugin(plugin: IPlugin): Promise<void> {
+  public async updatePlugin(plugin: RawPlugin): Promise<void> {
     let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -908,7 +892,7 @@ export class DynamoDbStore implements ClickStreamStore {
     }
   };
 
-  public async listPlugin(pluginType: string, order: string): Promise<IPlugin[]> {
+  public async listPlugin(pluginType?: string, order?: string): Promise<RawPlugin[]> {
     let filterExpression = 'deleted = :d';
     let expressionAttributeValues = new Map();
     expressionAttributeValues.set(':d', false);
@@ -918,10 +902,10 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':pluginType', pluginType);
     }
 
-    let plugins: IPlugin[] = [];
+    let plugins: RawPlugin[] = [];
     const dic = await this.getDictionary('BuiltInPlugins');
     if (dic) {
-      const builtInPlugins: IPlugin[] = dic.data;
+      const builtInPlugins: RawPlugin[] = dic.data;
       if (!isEmpty(pluginType)) {
         plugins = builtInPlugins.filter(p => p.pluginType === pluginType);
       } else {
@@ -941,7 +925,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
-    return (plugins).concat(records as IPlugin[]);
+    return (plugins).concat(records as RawPlugin[]);
   };
 
   public async deletePlugin(pluginId: string, operator: string): Promise<void> {
@@ -979,11 +963,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return false;
     }
-    const plugin: IPlugin = result.Item as IPlugin;
+    const plugin: RawPlugin = result.Item as RawPlugin;
     return plugin && !plugin.deleted;
   };
 
-  public async addUser(user: IUser): Promise<string> {
+  public async addUser(user: RawUser): Promise<string> {
     const params: PutCommand = new PutCommand({
       TableName: clickStreamTableName,
       Item: {
@@ -1002,7 +986,7 @@ export class DynamoDbStore implements ClickStreamStore {
     return user.id;
   };
 
-  public async getUser(id: string): Promise<IUser | undefined> {
+  public async getUser(id: string): Promise<RawUser | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -1014,11 +998,11 @@ export class DynamoDbStore implements ClickStreamStore {
     if (!result.Item) {
       return undefined;
     }
-    const user: IUser = result.Item as IUser;
+    const user: RawUser = result.Item as RawUser;
     return !user.deleted ? user : undefined;
   };
 
-  public async updateUser(user: IUser): Promise<void> {
+  public async updateUser(user: RawUser): Promise<void> {
     let updateExpression = 'SET #updateAt= :u, #operator= :operator';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
@@ -1051,7 +1035,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async listUser(): Promise<IUser[]> {
+  public async listUser(): Promise<RawUser[]> {
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
@@ -1066,7 +1050,7 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     };
     const records = await query(input);
-    return records as IUser[];
+    return records as RawUser[];
   };
 
   public async deleteUser(id: string, operator: string): Promise<void> {
@@ -1090,7 +1074,7 @@ export class DynamoDbStore implements ClickStreamStore {
     await docClient.send(params);
   };
 
-  public async getUserSettings(): Promise<IUserSettings | undefined> {
+  public async getUserSettings(): Promise<RawUserSettings | undefined> {
     const params: GetCommand = new GetCommand({
       TableName: clickStreamTableName,
       Key: {
@@ -1099,10 +1083,10 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
-    return result.Item ? result.Item as IUserSettings : undefined;
+    return result.Item ? result.Item as RawUserSettings : undefined;
   };
 
-  public async updateUserSettings(userSettings: IUserSettings): Promise<void> {
+  public async updateUserSettings(userSettings: RawUserSettings): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
       Key: {
