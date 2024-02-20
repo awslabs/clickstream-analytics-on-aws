@@ -259,7 +259,7 @@ importers:
         specifier: ^4.9.5
         version: 4.9.5
 
-  packages/base-lib:
+  src/base-lib:
     devDependencies:
       '@types/jest':
         specifier: ^29.5.12
@@ -377,7 +377,7 @@ importers:
         version: 3.515.0(@aws-sdk/client-dynamodb@3.515.0)
       '@clickstream/base-lib':
         specifier: workspace:*
-        version: link:../../../../../packages/base-lib
+        version: link:../../../../base-lib
       '@smithy/node-http-handler':
         specifier: ^2.0.7
         version: 2.3.1
