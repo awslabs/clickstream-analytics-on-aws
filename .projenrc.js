@@ -249,7 +249,7 @@ project.addFields({ version });
 const baseProject = new typescript.TypeScriptProject({
   parent: project,
   name: '@clickstream/base-lib',
-  outdir: './packages/base-lib',
+  outdir: './src/base-lib',
   description: 'Base project for shared library.',
   version,
   license: 'Apache-2.0',
