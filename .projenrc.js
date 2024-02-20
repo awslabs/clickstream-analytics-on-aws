@@ -12,9 +12,11 @@
  */
 
 const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
+const PnpmWorkspace = require('./projenrc/pnpm');
 const version = '1.2.0';
 const cdkVersion = '2.81.0';
 const minNodeVersion = '18.17.0';
+const pnpmVersion = '8.15.3';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
@@ -141,6 +143,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   description: 'Clickstream Analytics on AWS',
   majorVersion: 1,
   minMajorVersion: 0,
+  packageManager: 'pnpm',
+  projenCommand: 'pnpm dlx projen',
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -241,9 +245,23 @@ project.eslint?.addRules({
 });
 project.addFields({ version });
 
+
+const baseProject = new typescript.TypeScriptProject({
+  parent: project,
+  name: '@clickstream/base-lib',
+  outdir: './packages/base-lib',
+  description: 'Base project for shared library.',
+  version,
+  license: 'Apache-2.0',
+  licensed: true,
+  defaultReleaseBranch: defaultBranch,
+});
+baseProject.addFields({ version });
+
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
+    '@clickstream/base-lib@workspace:*',
   ],
   devDeps: [
     ...devDepsForApiProject,
@@ -279,6 +297,8 @@ const apiProject = new typescript.TypeScriptProject({
       emitDecoratorMetadata: true,
     },
   },
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
@@ -371,10 +391,10 @@ project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade frontend dependencies',
   run: 'yarn upgrade --cwd frontend',
 });
-project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
-  name: 'Upgrade API dependencies',
-  run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
-});
+// project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
+//   name: 'Upgrade API dependencies',
+//   run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
+// });
 project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
 project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
@@ -858,4 +878,8 @@ gitlabMain.createNestedTemplates({
   },
 });
 
+project.package.addField('packageManager', `pnpm@${pnpmVersion}`);
+project.npmrc.addConfig('auto-install-peers', 'true');
+
+new PnpmWorkspace(project);
 project.synth();
