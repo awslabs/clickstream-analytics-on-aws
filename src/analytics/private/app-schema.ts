@@ -14,7 +14,7 @@
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '@aws/clickstream-base-lib';
-import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
+import { Duration, CustomResource, Arn, ArnFormat, Stack, RemovalPolicy } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -134,6 +134,7 @@ export abstract class RedshiftSQLExecution extends Construct {
       timeout: Duration.minutes(15),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
+        removalPolicy: RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
       },
       environment: {
         SUPPRESS_ALL_ERROR: 'false',

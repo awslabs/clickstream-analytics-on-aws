@@ -81,7 +81,7 @@ export interface ProvisionedRedshiftProps extends RedshiftProps {
 }
 
 export type ExistingRedshiftServerlessCustomProps = Omit<ExistingRedshiftServerlessProps, 'createdInStack'>;
-interface CustomProperties {
+export interface CustomProperties {
   readonly serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
 }

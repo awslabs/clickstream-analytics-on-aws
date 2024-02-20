@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Arn, CustomResource, Duration, Stack } from 'aws-cdk-lib';
+import { Arn, CustomResource, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -80,6 +80,7 @@ export class KinesisSink extends Construct {
       timeout: Duration.minutes(10),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
+        removalPolicy: RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
       },
       role: createLambdaRole(this, 'KinesisManagementRole', false, [
         new PolicyStatement({

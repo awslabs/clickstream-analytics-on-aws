@@ -11,15 +11,17 @@
  *  and limitations under the License.
  */
 
-import { SQLDef } from '../../analytics/private/model';
+import { CustomProperties, SQLDef } from '../../analytics/private/model';
 
-export type StreamingIngestionSchemas = {
+export type StreamingIngestionSchemas = CustomProperties & {
   readonly projectId: string;
   readonly appIds: string;
   readonly streamingRoleArn: string;
   readonly schemaDefs: SQLDef[];
   readonly biUsername: string;
   readonly identifier: string;
+  readonly dataAPIRole: string;
+  readonly databaseName: string;
 }
 
 export type MustacheParamType = {

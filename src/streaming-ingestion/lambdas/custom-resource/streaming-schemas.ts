@@ -12,6 +12,7 @@
  */
 
 import { CdkCustomResourceHandler, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { executeStatementsWithWait, getRedshiftClient } from '../../../analytics/lambdas/redshift-data';
 import { SQLDef } from '../../../analytics/private/model';
 import { getSqlContent, getSqlContents } from '../../../analytics/private/utils';
 import { createSchemasInRedshiftAsync } from '../../../common/custom-resource-exec-in-redshift';
@@ -58,6 +59,21 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
         props.projectId, props.streamingRoleArn, addedOrUpdated, props.schemaDefs, props.identifier, props.biUsername);
 
       await createSchemasInRedshiftAsync(props.projectId, schemaSqlsByAppId);
+    }
+
+    if (toBeDeleted.length > 0) {
+      const redshiftClient = getRedshiftClient(props.dataAPIRole);
+      for (const app of toBeDeleted) {
+        logger.info(`Removing views and schema of streaming for app '${app}'.`);
+        const streamSchemaName = `${app}${STREAMING_SCHEMA_SUFFIX}`;
+        try {
+          await executeStatementsWithWait(redshiftClient, [`DROP SCHEMA IF EXISTS ${streamSchemaName} CASCADE;`],
+            props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
+        } catch (err) {
+          logger.error(`Error happened when drop streaming schema '${streamSchemaName}' in Redshift.`, { err });
+          throw err;
+        }
+      }
     }
   } catch (e) {
     logger.error('Error when managing streaming schema in redshift', { e });
