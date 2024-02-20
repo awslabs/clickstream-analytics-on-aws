@@ -454,6 +454,9 @@ importers:
       '@types/jsonpath-plus':
         specifier: ^5.0.2
         version: 5.0.5
+      '@types/jsonwebtoken':
+        specifier: ^9.0.0
+        version: 9.0.5
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.14.202
@@ -4179,7 +4182,6 @@ packages:
     resolution: {integrity: sha512-VRLSGzik+Unrup6BsouBeHsf4d1hOEgYWTm/7Nmw1sXoN1+tRly/Gy/po3yeahnP4jfnQWWAhQAqcNfH7ngOkA==}
     dependencies:
       '@types/node': 18.19.17
-    dev: false
 
   /@types/lodash@4.14.202:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}

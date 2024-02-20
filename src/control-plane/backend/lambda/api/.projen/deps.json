@@ -20,6 +20,11 @@
       "type": "build"
     },
     {
+      "name": "@types/jsonwebtoken",
+      "version": "^9.0.0",
+      "type": "build"
+    },
+    {
       "name": "@types/lodash",
       "version": "^4.14.202",
       "type": "build"
