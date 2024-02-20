@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import express from 'express';
+import express, { Express } from 'express';
 import { accessLog } from './middle-ware/access-log';
 import { authOIDC } from './middle-ware/auth-oidc';
 import { authRole } from './middle-ware/auth-role';
@@ -27,7 +27,7 @@ import { router_project } from './router/project';
 import { router_reporting } from './router/reporting';
 import { router_user } from './router/user';
 
-const app = express();
+const app: Express = express();
 app.disable('x-powered-by');
 const port = process.env.PORT || 8080;
 
