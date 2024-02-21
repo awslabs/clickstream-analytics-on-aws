@@ -8,8 +8,8 @@ mutations-check:
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
-    - yarn install --check-files
-    - npx projen
+    - pnpm install
+    - pnpm projen
     - npx projen eslint
     - git add .
     - git diff --staged --patch --exit-code > .repo.patch || export mutations_happened=true

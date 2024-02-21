@@ -503,9 +503,9 @@ gitlabMain.createNestedTemplates({
           'cd $CI_PROJECT_DIR/frontend',
         ],
         script: [
-          'yarn install',
-          'yarn run build',
-          'yarn run test',
+          'pnpm install',
+          'pnpm run build',
+          'pnpm run test',
         ],
         artifacts: {
           paths: [
@@ -788,8 +788,8 @@ gitlabMain.createNestedTemplates({
           },
         ],
         script: [
-          'yarn install --check-files',
-          'npx projen',
+          'pnpm install',
+          'pnpm projen',
           'npx projen eslint',
           'git add .',
           'git diff --staged --patch --exit-code > .repo.patch || export mutations_happened=true',

@@ -102,9 +102,9 @@ jobs:
           ./build-open-source-dist.sh $SOLUTION_NAME
       - name: install dependencies
         run: |
-          yarn install --check-files --frozen-lockfile
-          npx projen
-          yarn install --check-files --frozen-lockfile --cwd frontend 
+          pnpm install --frozen-lockfile
+          pnpm projen
+          pnpm install --frozen-lockfile --cwd frontend 
       - name: Post-build scan
         env:
           VIPERLIGHT_SCAN_STRATEGY: Enforce

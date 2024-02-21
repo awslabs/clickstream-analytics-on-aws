@@ -40,9 +40,9 @@ buildFrontend:
   before_script:
     - cd $CI_PROJECT_DIR/frontend
   script:
-    - yarn install
-    - yarn run build
-    - yarn run test
+    - pnpm install
+    - pnpm run build
+    - pnpm run test
   artifacts:
     paths:
       - $CI_PROJECT_DIR/frontend/build/

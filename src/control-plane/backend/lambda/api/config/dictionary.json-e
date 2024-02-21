@@ -6,7 +6,7 @@
       "dist_output_bucket": "solution-bucket",
       "target": "feature-rel/test",
       "prefix": "cn/",
-      "version": "v1.2.0-ci-latest"
+      "version": "__SOLUTION_VERSION__"
     }
   },
   {
