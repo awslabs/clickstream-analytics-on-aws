@@ -16,8 +16,8 @@ jobs:
         with:
           node-version: "18"
       - run: |-
+          corepack enable
           cd frontend/
-          npm install yarn -g
           yarn install --frozen-lockfile
           yarn run format
           yarn run build
