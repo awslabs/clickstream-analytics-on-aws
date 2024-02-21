@@ -20,11 +20,6 @@
       "type": "build"
     },
     {
-      "name": "@types/jsonwebtoken",
-      "version": "^9.0.0",
-      "type": "build"
-    },
-    {
       "name": "@types/lodash",
       "version": "^4.14.202",
       "type": "build"
@@ -253,6 +248,11 @@
     {
       "name": "@smithy/util-stream-node",
       "version": "^2.0.7",
+      "type": "runtime"
+    },
+    {
+      "name": "@types/jsonwebtoken",
+      "version": "^9.0.0",
       "type": "runtime"
     },
     {
