@@ -298,6 +298,7 @@ echo "--------------------------------------------------------------------------
 # Install the global aws-cdk package
 # Note: do not install using global (-g) option. This makes build-s3-dist.sh difficult
 # for customers and developers to use, as it globally changes their environment.
+do_cmd npm install -g pnpm
 do_cmd cd $source_dir/
 do_cmd pnpm install --frozen-lockfile
 do_cmd pnpm projen
