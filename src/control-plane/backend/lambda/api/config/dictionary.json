@@ -2,11 +2,11 @@
   {
     "name": "Solution",
     "data": {
-      "name": "test-clickstream-001",
-      "dist_output_bucket": "solution-bucket",
-      "target": "feature-rel/test",
-      "prefix": "cn/",
-      "version": "v1.2.0-ci-latest"
+      "name": "__SOLUTION_NAME__",
+      "dist_output_bucket": "__DIST_OUTPUT_BUCKET__",
+      "target": "__TARGET__",
+      "prefix": "__PREFIX__",
+      "version": "__SOLUTION_VERSION__"
     }
   },
   {
