@@ -54,8 +54,8 @@ echo "${BUILD_VERSION}" > ${GLOBAL_S3_ASSETS_PATH}/version
 title "cdk synth"
 
 run cd ${SRC_PATH}
-run yarn install --check-files --frozen-lockfile
-run npx projen
+run pnpm install --frozen-lockfile
+run pnpm projen
 
 echo "IS_IN_GCR_PIPELINE: $IS_IN_GCR_PIPELINE"
 

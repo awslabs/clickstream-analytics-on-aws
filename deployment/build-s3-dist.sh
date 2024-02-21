@@ -299,8 +299,8 @@ echo "--------------------------------------------------------------------------
 # Note: do not install using global (-g) option. This makes build-s3-dist.sh difficult
 # for customers and developers to use, as it globally changes their environment.
 do_cmd cd $source_dir/
-do_cmd yarn install --check-files --frozen-lockfile
-do_cmd npx projen
+do_cmd pnpm install --frozen-lockfile
+do_cmd pnpm projen
 
 # Add local install to PATH
 export PATH=$(npm bin):$PATH
