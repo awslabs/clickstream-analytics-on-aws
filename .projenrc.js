@@ -262,6 +262,7 @@ baseProject.addFields({ version });
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
+    '@types/jsonwebtoken@^9.0.0',
     '@clickstream/base-lib@workspace:*',
   ],
   devDeps: [
