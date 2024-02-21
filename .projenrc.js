@@ -47,6 +47,7 @@ const commonDevDeps = [
   '@types/mock-fs@^4.13.1',
   '@types/node-fetch@^2.6.4',
   '@types/jsonpath-plus@^5.0.2',
+  '@types/jsonwebtoken@^9.0.0',
 ];
 
 const smithyPackagesVersion = '2.0.7';
@@ -133,6 +134,7 @@ const devDepsForApiProject = [
   '@types/express@^4.17.16',
   '@types/lodash@^4.14.202',
   '@types/supertest@^2.0.12',
+  '@types/jsonwebtoken@^9.0.0',
 ];
 const defaultBranch = 'main';
 const project = new awscdk.AwsCdkTypeScriptApp({
@@ -261,7 +263,6 @@ baseProject.addFields({ version });
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
-    '@types/jsonwebtoken@^9.0.0',
     '@clickstream/base-lib@workspace:*',
   ],
   devDeps: [

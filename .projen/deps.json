@@ -15,6 +15,11 @@
       "type": "build"
     },
     {
+      "name": "@types/jsonwebtoken",
+      "version": "^9.0.0",
+      "type": "build"
+    },
+    {
       "name": "@types/mock-fs",
       "version": "^4.13.1",
       "type": "build"

@@ -28,6 +28,7 @@
     "@types/aws-lambda": "^8.10.110",
     "@types/jest": "^29.5.11",
     "@types/jsonpath-plus": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.0",
     "@types/mock-fs": "^4.13.1",
     "@types/mustache": "^4.2.2",
     "@types/node": "^18",
