@@ -91,7 +91,7 @@
     "build": "node scripts/build.js",
     "crabuild": "node scripts/build.js",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
-    "format": "pnpm run lint --fix & pnpm dlx prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "test": "node scripts/test.js --transformIgnorePatterns"
   },
   "eslintConfig": {
