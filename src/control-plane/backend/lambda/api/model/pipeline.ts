@@ -218,6 +218,7 @@ export interface DataModeling {
 export interface Reporting {
   readonly quickSight?: {
     readonly accountName: string;
+    readonly user?: string;
     readonly namespace?: string;
     readonly vpcConnection?: string;
   };
@@ -646,11 +647,21 @@ export class CPipeline {
     }
 
     if (this.pipeline.reporting) {
-      const quickSightUser = await registerClickstreamUser();
-      this.resources = {
-        ...this.resources,
-        quickSightUser: quickSightUser,
-      };
+      if (this.pipeline.region.startsWith('cn')) {
+        this.resources = {
+          ...this.resources,
+          quickSightUser: {
+            publishUserArn: this.pipeline.reporting.quickSight?.user ?? '',
+            publishUserName: this.pipeline.reporting.quickSight?.user?.split('/').pop() ?? '',
+          },
+        };
+      } else {
+        const quickSightUser = await registerClickstreamUser();
+        this.resources = {
+          ...this.resources,
+          quickSightUser: quickSightUser,
+        };
+      }
     }
   }
 

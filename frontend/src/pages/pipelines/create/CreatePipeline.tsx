@@ -193,6 +193,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const [unSupportedServices, setUnSupportedServices] = useState('');
   const [quickSightDisabled, setQuickSightDisabled] = useState(false);
+  const [quickSightUserEmptyError, setQuickSightUserEmptyError] =
+    useState(false);
 
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>(
     updatePipeline
@@ -642,6 +644,19 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const validateReporting = () => {
+    if (quickSightDisabled && pipelineInfo.enableReporting) {
+      return false;
+    }
+
+    if (!pipelineInfo.selectedQuickSightUser) {
+      setQuickSightUserEmptyError(true);
+      return false;
+    }
+
+    return true;
+  };
+
   const setQuickSightStatus = (quickSightAvailable: boolean) => {
     // Set QuickSight disabled
     if (quickSightAvailable) {
@@ -781,6 +796,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setPrivateSubnetError(false);
       setPrivateSubnetDiffWithPublicError(false);
       setUnSupportedServices('');
+      setQuickSightUserEmptyError(false);
       try {
         setLoadingServiceAvailable(true);
         const { success, data }: ApiResponse<ServiceAvailableResponse[]> =
@@ -1081,11 +1097,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
           return;
         }
-        if (
-          detail.requestedStepIndex === 4 &&
-          quickSightDisabled &&
-          pipelineInfo.enableReporting
-        ) {
+        if (detail.requestedStepIndex === 4 && !validateReporting()) {
           return;
         }
         setActiveStepIndex(detail.requestedStepIndex);
@@ -2137,6 +2149,23 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             <Reporting
               update={update}
               pipelineInfo={pipelineInfo}
+              quickSightUserEmptyError={quickSightUserEmptyError}
+              changeQuickSightSelectedUser={(user) => {
+                setQuickSightUserEmptyError(false);
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    selectedQuickSightUser: user,
+                    reporting: {
+                      ...prev.reporting,
+                      quickSight: {
+                        ...prev.reporting?.quickSight,
+                        user: user.value,
+                      },
+                    },
+                  };
+                });
+              }}
               changeLoadingQuickSight={(loading) => {
                 setloadingQuickSight(loading);
               }}
