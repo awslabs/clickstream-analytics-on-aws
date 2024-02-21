@@ -51,14 +51,14 @@ const UserList: React.FC = () => {
     },
   ];
   const getRolesLabel = (roles: IUserRole[]) => {
-    const roleLabels = [];
+    const roleLabels: string[] = [];
     for (const role of roles) {
       roleLabels.push(getRoleName(role));
     }
     return roleLabels.join(',');
   };
 
-  const getRoleName = (role: IUserRole) => {
+  const getRoleName = (role: IUserRole): string => {
     switch (role) {
       case IUserRole.ADMIN:
         return t('user:options.admin');

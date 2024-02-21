@@ -2563,7 +2563,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
         pipelineInfo.region
       ).filter(
-        (type) =>
+        (type: any) =>
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];
