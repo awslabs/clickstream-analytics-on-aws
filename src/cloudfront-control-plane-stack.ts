@@ -203,6 +203,11 @@ export class CloudFrontControlPlaneStack extends Stack {
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommands: [
           'export APP_PATH=/tmp/app',
+          'npm install -g pnpm',
+          'pnpm projen',
+          'cd ./src/base-lib',
+          'pnpm build',
+          'cd ../../',
           'mkdir $APP_PATH',
           'cd ./frontend/',
           'find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\;',
