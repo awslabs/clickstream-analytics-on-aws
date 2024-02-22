@@ -212,7 +212,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           'pnpm projen',
           'cd src/base-lib',
           'pnpm run build',
-          'cd ./frontend',
+          'cd ../../frontend',
           'pnpm install',
           'pnpm run build',
           'cp -r ./build/* /asset-output/',
