@@ -18,8 +18,9 @@ jobs:
       - run: |-
           npm install -g pnpm
           pnpm projen
-          cd frontend/
-          pnpm install --frozen-lockfile
+          cd src/base-lib
+          pnpm build
+          cd ../../frontend/
           pnpm run format
           pnpm run build
           pnpm run test
