@@ -14,8 +14,8 @@
 //@ts-nocheck
 
 process.env.REDSHIFT_DATABASE = 'testdb';
-process.env.REDSHIFT_CLUSTER_IDENTIFIER = 'testcluster';
-process.env.REDSHIFT_DB_USER = 'testuser';
+process.env.REDSHIFT_CLUSTER_IDENTIFIER = '';
+process.env.REDSHIFT_DB_USER = '';
 process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'testworkgroup';
 process.env.REDSHIFT_DATA_API_ROLE = 'arn:aws:iam::123456789012:role/testrole';
 
@@ -52,9 +52,9 @@ test('handler submit sql - s3 file', async () => {
   expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
 
   expect(redshiftDataMock).toReceiveNthSpecificCommandWith(1, ExecuteStatementCommand, {
-    ClusterIdentifier: 'testcluster',
+    ClusterIdentifier: undefined,
     Database: 'testdb',
-    DbUser: 'testuser',
+    DbUser: undefined,
     Sql: 'select * from test',
     WithEvent: true,
     WorkgroupName: 'testworkgroup',
@@ -73,9 +73,9 @@ test('handler submit sql - raw sql', async () => {
   expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
 
   expect(redshiftDataMock).toReceiveNthSpecificCommandWith(1, ExecuteStatementCommand, {
-    ClusterIdentifier: 'testcluster',
+    ClusterIdentifier: undefined,
     Database: 'testdb',
-    DbUser: 'testuser',
+    DbUser: undefined,
     Sql: 'select * from test1',
     WithEvent: true,
     WorkgroupName: 'testworkgroup',
