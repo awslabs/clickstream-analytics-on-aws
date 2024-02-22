@@ -8,6 +8,7 @@ mutations-check:
     - if: $CI_MERGE_REQUEST_IID
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
+    - npm install -g pnpm
     - pnpm install
     - pnpm projen
     - npx projen eslint

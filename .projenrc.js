@@ -712,6 +712,7 @@ gitlabMain.createNestedTemplates({
           'cd $CI_PROJECT_DIR/frontend',
         ],
         script: [
+          'npm install -g pnpm',
           'pnpm install',
           'pnpm run build',
           'pnpm run test',
@@ -997,6 +998,7 @@ gitlabMain.createNestedTemplates({
           },
         ],
         script: [
+          'npm install -g pnpm',
           'pnpm install',
           'pnpm projen',
           'npx projen eslint',
