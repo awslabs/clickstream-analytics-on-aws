@@ -4,8 +4,10 @@ WORKDIR /home/node/app
 COPY ./ ./
 RUN npm install -g pnpm
 RUN pnpm projen
-RUN cd src/base-lib && pnpm run build
-RUN cd ../../src/control-plane/backend/lambda/api && pnpm install && pnpm run compile
+WORKDIR /home/node/app/src/base-lib
+RUN pnpm run build
+WORKDIR /home/node/app/src/control-plane/backend/lambda/api
+RUN pnpm install && pnpm run compile
 RUN rm -rf node_modules && pnpm install --prod
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
 curl -sf https://gobinaries.com/tj/node-prune | sh && \
