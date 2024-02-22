@@ -146,6 +146,11 @@
       "type": "runtime"
     },
     {
+      "name": "@clickstream/base-lib",
+      "version": "workspace:*",
+      "type": "runtime"
+    },
+    {
       "name": "@cloudscape-design/collection-hooks",
       "version": "^1.0.7",
       "type": "runtime"

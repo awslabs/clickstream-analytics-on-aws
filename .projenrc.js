@@ -404,6 +404,7 @@ const frontendProject = new typescript.TypeScriptProject({
   sampleCode: false,
   deps: [
     ...depsForFrontendProject,
+    '@clickstream/base-lib@workspace:*',
   ],
   devDeps: [
     ...devDepsForFrontendProject,

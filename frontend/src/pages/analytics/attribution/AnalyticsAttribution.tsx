@@ -12,6 +12,10 @@
  */
 
 import {
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+} from '@clickstream/base-lib';
+import {
   Button,
   ColumnLayout,
   Container,
@@ -43,10 +47,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PERCENTAGE_REGEX, POSITIVE_INTEGER_REGEX } from 'ts/const';
-import {
-  QUICKSIGHT_ANALYSIS_INFIX,
-  QUICKSIGHT_DASHBOARD_INFIX,
-} from 'ts/constant-ln';
 import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,

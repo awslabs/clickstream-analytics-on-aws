@@ -276,6 +276,9 @@ importers:
       '@babel/core':
         specifier: ^7.16.0
         version: 7.23.9
+      '@clickstream/base-lib':
+        specifier: workspace:*
+        version: link:../src/base-lib
       '@cloudscape-design/collection-hooks':
         specifier: ^1.0.7
         version: 1.0.36(react@18.2.0)
