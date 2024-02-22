@@ -105,7 +105,7 @@ jobs:
           npm install -g pnpm
           pnpm install --frozen-lockfile
           pnpm projen
-          pnpm install --frozen-lockfile --cwd frontend 
+          pnpm install --frozen-lockfile --dir frontend
       - name: Post-build scan
         env:
           VIPERLIGHT_SCAN_STRATEGY: Enforce
