@@ -9,8 +9,15 @@ ARG CHUNK_MIN_SIZE=819200
 ARG CHUNK_MAX_SIZE=1024000
 # RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE} && yarn install && yarn run crabuild
 RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE}
-# RUN npm install -g pnpm
-# RUN pnpm projen
+RUN npm install -g pnpm
+RUN pnpm projen
+
+WORKDIR /home/node/app/src/base-lib
+RUN pnpm run build
+
+WORKDIR /home/node/app/frontend
+RUN pnpm install
+RUN pnpm run crabuild
 
 FROM public.ecr.aws/docker/library/nginx:1.22
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.6.1	/lambda-adapter /opt/extensions/lambda-adapter
