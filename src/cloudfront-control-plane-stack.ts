@@ -207,8 +207,8 @@ export class CloudFrontControlPlaneStack extends Stack {
           'cd ./frontend/',
           'find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\;',
           'cd $APP_PATH',
-          'yarn install --loglevel error',
-          'yarn run build --loglevel error',
+          'pnpm install --loglevel error',
+          'pnpm run build --loglevel error',
           'cp -r ./build/* /asset-output/',
         ],
         environment: {
