@@ -359,6 +359,11 @@ const baseProject = new typescript.TypeScriptProject({
   license: 'Apache-2.0',
   licensed: true,
   defaultReleaseBranch: defaultBranch,
+  readme: undefined,
+  eslint: false,
+  sampleCode: false,
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
 });
 baseProject.addFields({ version });
 

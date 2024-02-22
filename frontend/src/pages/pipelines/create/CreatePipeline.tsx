@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Wizard } from '@cloudscape-design/components';
+import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -2563,7 +2563,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
         pipelineInfo.region
       ).filter(
-        (type: any) =>
+        (type: SelectProps.Option) =>
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];
