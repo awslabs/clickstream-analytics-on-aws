@@ -18,7 +18,7 @@ rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 
 echo "pnpm install"
-pnpm install --check-files --frozen-lockfile
+pnpm install
 
 pnpm projen
 
@@ -26,8 +26,8 @@ echo "pnpm run test"
 pnpm run test
 
 export CI=true
-# npx yarn install --check-files --frozen-lockfile --cwd frontend
-# npx yarn --cwd frontend run test
+pnpm install --frozen-lockfile --dir frontend
+pnpm --dir frontend run test
 
 docker run -i --rm -v `pwd`/src/data-pipeline/spark-etl/:/data --workdir /data \
   public.ecr.aws/docker/library/gradle:7.6-jdk17 gradle test jacocoAggregatedReport
