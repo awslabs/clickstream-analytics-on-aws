@@ -139,6 +139,15 @@ export class StackActionStateMachine extends Construct {
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry`,
           ],
         }),
+        new iam.PolicyStatement({
+          actions: [
+            'resource-groups:GetGroup',
+            'resource-groups:DisassociateResource',
+          ],
+          resources: [
+            `arn:${Aws.PARTITION}:resource-groups:*:${Aws.ACCOUNT_ID}:group/AWS_AppRegistry_Application-clickstream-analytics-*`,
+          ],
+        }),
         // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
         new iam.PolicyStatement({
           actions: [
@@ -178,6 +187,8 @@ export class StackActionStateMachine extends Construct {
             'servicecatalog:DisassociateResource',
             'servicecatalog:TagResource',
             'servicecatalog:UntagResource',
+            'tag:GetResources',
+            'tag:UntagResources',
           ],
           resources: ['*'],
         }),
