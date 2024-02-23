@@ -88,7 +88,7 @@ function createECSFargateService(
       },
     ],
     environment: {
-      NGINX_WORKER_CONNECTIONS: `${props.fleetProps.proxyMaxConnections}`,
+      NGINX_WORKER_CONNECTIONS: `${props.fargateFleetProps.proxyMaxConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
@@ -116,16 +116,16 @@ function createECSFargateService(
     cluster: props.ecsCluster,
     taskDefinition: taskDefinition,
     securityGroups: [props.ecsSecurityGroup],
-    desiredCount: props.fleetProps.taskMin,
+    desiredCount: props.fargateFleetProps.taskMin,
   });
 
   const scalableTarget = fargateService.autoScaleTaskCount({
-    minCapacity: props.fleetProps.taskMin,
-    maxCapacity: props.fleetProps.taskMax,
+    minCapacity: props.fargateFleetProps.taskMin,
+    maxCapacity: props.fargateFleetProps.taskMax,
   });
 
   scalableTarget.scaleOnCpuUtilization('CpuScaling', {
-    targetUtilizationPercent: props.fleetProps.scaleOnCpuUtilizationPercent || 50,
+    targetUtilizationPercent: props.fargateFleetProps.scaleOnCpuUtilizationPercent || 50,
     scaleInCooldown: Duration.seconds(45),
     scaleOutCooldown: Duration.seconds(1),
   });
@@ -154,11 +154,11 @@ function getVectorEnvs(scope: Construct, props: ECSFargateClusterProps) {
   let workerThreads = DefaultFleetProps.workerThreads;
   let streamAckEnable = DefaultFleetProps.workerStreamAckEnable;
 
-  if (props.fleetProps.workerThreads) {
-    workerThreads = props.fleetProps.workerThreads;
+  if (props.fargateFleetProps.workerThreads) {
+    workerThreads = props.fargateFleetProps.workerThreads;
   }
-  if (props.fleetProps?.workerStreamAckEnable) {
-    streamAckEnable = props.fleetProps.workerStreamAckEnable;
+  if (props.fargateFleetProps?.workerStreamAckEnable) {
+    streamAckEnable = props.fargateFleetProps.workerStreamAckEnable;
   }
 
   return {

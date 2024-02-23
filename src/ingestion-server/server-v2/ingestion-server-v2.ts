@@ -15,6 +15,7 @@ import { CfnCondition, Fn } from 'aws-cdk-lib';
 import {
   IVpc,
   SubnetSelection,
+  InstanceType,
   Port,
 } from 'aws-cdk-lib/aws-ec2';
 import { IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -23,6 +24,7 @@ import { Construct } from 'constructs';
 import { GlobalAcceleratorV2 } from './private/aga-v2';
 import { ApplicationLoadBalancerV2, PROXY_PORT } from './private/alb-v2';
 import { ECSFargateCluster } from './private/ecs-fargate-cluster';
+import { ECSEc2Cluster } from './private/ecs-ec2-cluster';
 import { deleteECSClusterCustomResource } from '../custom-resource/delete-ecs-cluster';
 import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
 import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../server/ingestion-server';
@@ -30,10 +32,11 @@ import { grantMskReadWrite } from '../server/private/iam';
 import { createMetricsWidgetForKafka } from '../server/private/metircs-kafka';
 import { createMetricsWidgetForServerV2 } from '../server/private/metircs-server';
 import { createALBSecurityGroupV2, createECSSecurityGroup } from '../server/private/sg';
+import { ECS_INFRA_TYPE_MODE } from '../../common/model';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
 
-export const DefaultFleetProps = {
+export const DefaultFargateFleetProps = {
   taskCpu: 256,
   taskMemory: 512,
   workerCpu: 128,
@@ -46,7 +49,7 @@ export const DefaultFleetProps = {
   workerStreamAckEnable: true,
 };
 
-export interface FleetV2Props {
+export interface FargateFleetProps {
   readonly workerCpu: number;
   readonly workerMemory: number;
   readonly proxyCpu: number;
@@ -62,6 +65,37 @@ export interface FleetV2Props {
   readonly scaleOnCpuUtilizationPercent: number;
 }
 
+export const DefaultEc2FleetProps = {
+  workerCpu: 1792,
+  proxyCpu: 256,
+  instanceType: new InstanceType('c6i.large'),
+  isArm: false,
+  warmPoolSize: 0,
+  proxyReservedMemory: 900,
+  workerReservedMemory: 900,
+  proxyMaxConnections: 1024,
+  workerThreads: 6,
+  workerStreamAckEnable: true,
+};
+
+export interface Ec2FleetProps {
+  readonly serverMin: number;
+  readonly serverMax: number;
+  readonly taskMin: number;
+  readonly taskMax: number;
+  readonly scaleOnCpuUtilizationPercent: number;
+  readonly instanceType: InstanceType;
+  readonly isArm: boolean;
+  readonly warmPoolSize: number;
+  readonly proxyReservedMemory: number;
+  readonly proxyCpu: number;
+  readonly proxyMaxConnections: number;
+  readonly workerReservedMemory: number;
+  readonly workerCpu: number;
+  readonly workerThreads: number;
+  readonly workerStreamAckEnable: boolean;
+}
+
 export interface MskS3SinkConnectorSetting {
   readonly maxWorkerCount: number;
   readonly minWorkerCount: number;
@@ -74,7 +108,8 @@ export interface IngestionServerV2Props {
   readonly publicSubnets: string;
   readonly privateSubnets: string;
   readonly isPrivateSubnetsCondition: CfnCondition;
-  readonly fleetProps: FleetV2Props;
+  readonly fargateFleetProps: FargateFleetProps;
+  readonly ec2FleetProps: Ec2FleetProps;
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
   readonly kafkaSinkConfig?: KafkaSinkConfig;
@@ -97,6 +132,7 @@ export interface IngestionServerV2Props {
   readonly workerStopTimeout: number;
 
   readonly enableAuthentication: string;
+  readonly ecsInfraType: string;
 }
 
 interface UpdateAlbRulesInput {
@@ -144,14 +180,22 @@ export class IngestionServerV2 extends Construct {
     );
     this.acceleratorEnableCondition = acceleratorEnableCondition;
 
-    const ecsFargateCluster = new ECSFargateCluster(this, 'ECSFargateCluster', {
-      ...props,
-      ecsSecurityGroup,
-    });
+    let ecsCluster;
+    if (props.ecsInfraType === ECS_INFRA_TYPE_MODE.FARGATE) {
+      ecsCluster = new ECSFargateCluster(this, 'ECSFargateCluster', {
+        ...props,
+        ecsSecurityGroup,
+      });    
+    } else {
+      ecsCluster = new ECSEc2Cluster(this, 'ECSEc2Cluster', {
+        ...props,
+        ecsSecurityGroup,
+      });
+    }
 
     const mskClusterName = props.kafkaSinkConfig?.mskClusterName;
     if (mskClusterName) {
-      const autoScalingGroupRole = ecsFargateCluster.ecsInfraRole;
+      const autoScalingGroupRole = ecsCluster.ecsInfraRole;
       grantMskReadWrite(
         this,
         autoScalingGroupRole,
@@ -182,12 +226,12 @@ export class IngestionServerV2 extends Construct {
       publicSubnets: props.publicSubnets,
       privateSubnets: props.privateSubnets,
       isPrivateSubnetsCondition: props.isPrivateSubnetsCondition,
-      service: ecsFargateCluster.ecsService,
+      service: ecsCluster.ecsService,
       sg: albSg,
       ports,
       endpointPath,
       protocol: props.protocol,
-      httpContainerName: ecsFargateCluster.httpContainerName,
+      httpContainerName: ecsCluster.httpContainerName,
       certificateArn: props.certificateArn || '',
       domainName: props.domainName || '',
       enableAccessLog: props.enableApplicationLoadBalancerAccessLog || '',
@@ -215,8 +259,8 @@ export class IngestionServerV2 extends Construct {
     createMetricsWidgetForServerV2(this, {
       projectId: props.projectId,
       albFullName: albConstructor.alb.loadBalancerFullName,
-      ecsServiceName: ecsFargateCluster.ecsService.serviceName,
-      ecsClusterName: ecsFargateCluster.ecsService.cluster.clusterName,
+      ecsServiceName: ecsCluster.ecsService.serviceName,
+      ecsClusterName: ecsCluster.ecsService.cluster.clusterName,
     });
 
     if (props.kafkaSinkConfig && mskClusterName) {
@@ -252,9 +296,9 @@ export class IngestionServerV2 extends Construct {
 
     deleteECSCluster(
       this,
-      ecsFargateCluster.ecsCluster.clusterArn,
-      ecsFargateCluster.ecsCluster.clusterName,
-      ecsFargateCluster.ecsService.serviceName,
+      ecsCluster.ecsCluster.clusterArn,
+      ecsCluster.ecsCluster.clusterName,
+      ecsCluster.ecsService.serviceName,
     );
 
     (aga.accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
