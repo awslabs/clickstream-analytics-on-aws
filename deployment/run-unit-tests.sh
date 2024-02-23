@@ -22,6 +22,13 @@ pnpm install
 
 pnpm projen
 
+# build base lib
+echo "pnpm run build"
+cd src/base-lib
+pnpm install
+pnpm run build
+cd ../..
+
 echo "pnpm run test"
 pnpm run test
 
