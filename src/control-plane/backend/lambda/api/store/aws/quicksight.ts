@@ -39,6 +39,7 @@ import { IDashboard } from '../../model/project';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
+const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
 
 const sdkClient: SDKClient = new SDKClient();
 const promisePool = pLimit(3);
@@ -91,6 +92,27 @@ export const deleteClickstreamUser = async () => {
       UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`,
     });
   } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return;
+    }
+    logger.error('Delete Clickstream User Error.', { err });
+    throw err;
+  }
+};
+
+export const deleteExploreUser = async () => {
+  try {
+    const identityRegion = await sdkClient.QuickSightIdentityRegion();
+    const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
+    await sdkClient.QuickSight({ region: identityRegion }).deleteUser({
+      AwsAccountId: awsAccountId,
+      Namespace: QUICKSIGHT_NAMESPACE,
+      UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`,
+    });
+  } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return;
+    }
     logger.error('Delete Clickstream User Error.', { err });
     throw err;
   }

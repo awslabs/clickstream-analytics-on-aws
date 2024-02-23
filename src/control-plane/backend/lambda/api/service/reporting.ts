@@ -56,7 +56,8 @@ import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { sleep } from '../common/utils-ln';
-import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
+import { IPipeline } from '../model/pipeline';
+import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -959,6 +960,8 @@ export class ReportingService {
 
       const deletedDatasets = await _cleanDatasets(quickSight);
 
+      await _cleanUser();
+
       const result = {
         deletedDashBoards,
         deletedAnalyses,
@@ -1069,4 +1072,18 @@ async function _cleanedDashboard(quickSight: QuickSight) {
   }
 
   return deletedDashBoards;
+}
+
+async function _cleanUser() {
+  const pipelines = await store.listPipeline('', 'latest', 'asc');
+  if (pipelines.every(p => !_needExploreUserVersion(p))) {
+    await deleteExploreUser();
+  }
+}
+
+function _needExploreUserVersion(pipeline: IPipeline) {
+  const version = pipeline.templateVersion?.split('-')[0] ?? '';
+  const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3'];
+  return oldVersions.includes(version);
+
 }
