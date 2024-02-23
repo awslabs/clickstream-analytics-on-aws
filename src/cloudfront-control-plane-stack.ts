@@ -208,7 +208,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           'export PATH=/tmp/node/.npm-global/bin:$PATH',
           'export APP_PATH=/tmp/app',
           'mkdir $APP_PATH',
-          'rsync -av --progress ./ $APP_PATH --exclude "node_modules" --exclude "cdk.out" --exclude "build"\;',
+          'rsync -av --progress ./ $APP_PATH --exclude \'node_modules\' --exclude \'cdk.out\' --exclude \'build\'',
           'cd $APP_PATH',
           'pnpm install',
           'pnpm projen',
