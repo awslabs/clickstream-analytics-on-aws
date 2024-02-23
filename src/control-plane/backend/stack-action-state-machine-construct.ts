@@ -138,6 +138,7 @@ export class StackActionStateMachine extends Construct {
           'servicecatalog:DisassociateResource',
           'servicecatalog:TagResource',
           'servicecatalog:UntagResource',
+          'resource-groups:GetGroup',
         ],
         resources: ['*'],
       }),
