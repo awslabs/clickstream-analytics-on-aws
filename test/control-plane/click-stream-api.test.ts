@@ -697,6 +697,29 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
+              'resource-groups:GetGroup',
+              'resource-groups:DisassociateResource',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':resource-groups:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
               'sns:*',
               'sqs:*',
               'redshift-serverless:*',
@@ -733,7 +756,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'servicecatalog:DisassociateResource',
               'servicecatalog:TagResource',
               'servicecatalog:UntagResource',
-              'resource-groups:GetGroup',
+              'tag:GetResources',
+              'tag:UntagResources',
             ],
             Effect: 'Allow',
             Resource: '*',
@@ -2358,6 +2382,29 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
           },
           {
             Action: [
+              'resource-groups:GetGroup',
+              'resource-groups:DisassociateResource',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':resource-groups:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
               'sns:*',
               'sqs:*',
               'redshift-serverless:*',
@@ -2394,7 +2441,8 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'servicecatalog:DisassociateResource',
               'servicecatalog:TagResource',
               'servicecatalog:UntagResource',
-              'resource-groups:GetGroup',
+              'tag:GetResources',
+              'tag:UntagResources',
             ],
             Effect: 'Allow',
             Resource: '*',
