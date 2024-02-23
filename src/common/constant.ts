@@ -473,3 +473,12 @@ export const FOLDER_OWNER_PERMISSION_ACTIONS = [
   'quicksight:DeleteFolder',
   'quicksight:UpdateFolderPermissions',
 ];
+
+export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
+  'quicksight:UpdateDataSourcePermissions',
+  'quicksight:DescribeDataSourcePermissions',
+  'quicksight:PassDataSource',
+  'quicksight:DescribeDataSource',
+  'quicksight:DeleteDataSource',
+  'quicksight:UpdateDataSource',
+];
