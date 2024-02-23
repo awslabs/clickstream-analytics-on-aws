@@ -1193,7 +1193,7 @@ export class CReportingStack extends JSONObject {
       QuickSightUserParam: resources.quickSightUser?.publishUserName,
       QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
       QuickSightPrincipalParam: resources.quickSightUser?.publishUserArn,
-      QuickSightOwnerPrincipalParam: resources.quickSightUser?.exploreUserArn,
+      QuickSightOwnerPrincipalParam: resources.quickSightUser?.publishUserArn,
       RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),

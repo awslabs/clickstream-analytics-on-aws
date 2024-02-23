@@ -424,6 +424,14 @@ describe('QuickSight Lambda function', () => {
 
   };
 
+  const oneQuickSightUserEvent = {
+    ...basicEvent,
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      ...commonPropsUserChange,
+    },
+  };
+
   const emptyAppIdEvent = {
     ...basicCloudFormationEvent,
     ResourceProperties: {
@@ -2273,6 +2281,121 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSourcePermissionsCommand, 1);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Create QuickSight dashboard - check permission - One QuickSight user', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).callsFakeOnce(input => {
+      if ( input.Permissions.length === 1
+        && input.Permissions[0].Principal === 'test-principal-arn-change'
+        && input.Permissions[0].Actions[9] === 'quicksight:CancelIngestion'
+      ) {
+        return {
+          Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('data set permission is not the expected one.');
+      }
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).callsFakeOnce(input => {
+      if ( input.GrantPermissions.length === 1
+        && input.GrantPermissions[0].Principal === 'test-principal-arn-change') {
+        return {
+          DataSourceArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/datasource_1',
+          DataSourceId: 'datasource_1',
+          Status: 200,
+        };
+      } else {
+        throw new Error('data source permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(CreateAnalysisCommand).callsFakeOnce(input => {
+      if ( input.Permissions.length === 1
+        && input.Permissions[0].Principal === 'test-principal-arn-change'
+        && input.Permissions[0].Actions[3] === 'quicksight:UpdateAnalysis'
+      ) {
+        return {
+          Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('analysis permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(CreateDashboardCommand).callsFakeOnce(input => {
+      if ( input.Permissions.length === 1
+        && input.Permissions[0].Principal === 'test-principal-arn-change'
+        && input.Permissions[0].Actions[0] === 'quicksight:DescribeDashboard'
+      ) {
+        return {
+          DashboardId: 'dashboard_0',
+          Status: 200,
+        };
+      } else {
+        throw new Error('dashboard permission is not the expected one.');
+      }
+    });
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    const resp = await handler(oneQuickSightUserEvent, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);

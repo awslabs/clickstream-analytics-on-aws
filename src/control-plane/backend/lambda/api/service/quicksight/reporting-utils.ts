@@ -34,7 +34,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -251,8 +251,34 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
 ];
 
-export const createDataSet = async (quickSight: QuickSight, awsAccountId: string,
-  exploreUserArn: string, publishUserArn: string,
+export const attributionVisualColumns: InputColumn[] = [
+  {
+    Name: 'Trigger Count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'Touch Point Name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'Number of Total Conversion',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'Number of Triggers with Conversion',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'Contribution(number/sum...value)',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'Contribution Rate',
+    Type: 'DECIMAL',
+  },
+];
+
+export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, publishUserArn: string,
   dataSourceArn: string,
   props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
@@ -317,22 +343,16 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     logger.info('start to create dataset');
     const datasetPermissionActions = [
       {
-        Principal: exploreUserArn,
+        Principal: publishUserArn,
         Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
       },
     ];
-    if (requestAction === ExploreRequestAction.PUBLISH) {
-      datasetPermissionActions.push({
-        Principal: publishUserArn,
-        Actions: DATASET_READER_PERMISSION_ACTIONS,
-      });
-    }
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
       Name: datasetId,
-      Permissions: datasetPermissionActions,
       ImportMode: props.importMode,
+      Permissions: requestAction === ExploreRequestAction.PUBLISH ? datasetPermissionActions : undefined,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {

@@ -468,6 +468,15 @@ export const FOLDER_OWNER_PERMISSION_ACTIONS = [
   'quicksight:UpdateFolderPermissions',
 ];
 
+export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
+  'quicksight:UpdateDataSourcePermissions',
+  'quicksight:DescribeDataSourcePermissions',
+  'quicksight:PassDataSource',
+  'quicksight:DescribeDataSource',
+  'quicksight:DeleteDataSource',
+  'quicksight:UpdateDataSource',
+];
+
 // redshift table names
 export const REDSHIFT_EVENT_TABLE_NAME = 'event';
 export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';

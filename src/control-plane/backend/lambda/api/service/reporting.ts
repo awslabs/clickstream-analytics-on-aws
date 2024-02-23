@@ -48,13 +48,14 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX, REDSHIFT_EVENT_TABLE_NAME } from '../common/constants-ln';
+import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX, REDSHIFT_EVENT_TABLE_NAME } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
-import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
+import { IPipeline } from '../model/pipeline';
+import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -674,7 +675,6 @@ export class ReportingService {
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        principals.exploreUserArn,
         principals.publishUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
@@ -817,10 +817,6 @@ export class ReportingService {
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: `${resourceName}`,
-      Permissions: [{
-        Principal: principals.exploreUserArn,
-        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-      }],
       Definition: dashboard as AnalysisDefinition,
     });
 
@@ -830,11 +826,11 @@ export class ReportingService {
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
       Name: `${resourceName}`,
-      Permissions: [{
-        Principal: principals.exploreUserArn,
-        Actions: DASHBOARD_ADMIN_PERMISSION_ACTIONS,
-      }],
       Definition: dashboard,
+      Permissions: [{
+        Principal: principals.publishUserArn,
+        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
+      }],
     });
 
     let dashboardEmbedUrl = '';
@@ -844,7 +840,6 @@ export class ReportingService {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
           dashboardCreateParameters.allowedDomain,
-          false,
           dashboardId,
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;
@@ -958,6 +953,8 @@ export class ReportingService {
 
       const deletedDatasets = await _cleanDatasets(quickSight);
 
+      await _cleanUser();
+
       const result = {
         deletedDashBoards,
         deletedAnalyses,
@@ -994,7 +991,6 @@ async function _cleanDatasets(quickSight: QuickSight) {
       && dataSetSummary.CreatedTime !== undefined
       && (new Date().getTime() - dataSetSummary.CreatedTime.getTime()) > 60 * 60 * 1000
     ) {
-
       const dataSetId = dataSetSummary.DataSetId;
       logger.info(`deleting data set: ${ dataSetId }`);
       const deletedRes = await quickSight.deleteDataSet({
@@ -1069,4 +1065,18 @@ async function _cleanedDashboard(quickSight: QuickSight) {
   }
 
   return deletedDashBoards;
+}
+
+async function _cleanUser() {
+  const pipelines = await store.listPipeline('', 'latest', 'asc');
+  if (pipelines.every(p => !_needExploreUserVersion(p))) {
+    await deleteExploreUser();
+  }
+}
+
+function _needExploreUserVersion(pipeline: IPipeline) {
+  const version = pipeline.templateVersion?.split('-')[0] ?? '';
+  const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3'];
+  return oldVersions.includes(version);
+
 }
