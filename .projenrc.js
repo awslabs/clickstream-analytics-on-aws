@@ -248,7 +248,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   majorVersion: 1,
   minMajorVersion: 0,
   packageManager: 'pnpm',
-  projenCommand: 'pnpm projen',
+  projenCommand: 'pnpm dlx projen',
   gitignore: [
     '.idea/',
     '.vscode/',
