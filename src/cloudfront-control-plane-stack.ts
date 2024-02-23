@@ -202,13 +202,16 @@ export class CloudFrontControlPlaneStack extends Stack {
 
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommands: [
+          'npm install -g pnpm --prefix /tmp/node/.npm-global',
+          'export PATH=/tmp/node/.npm-global/bin:$PATH',
           'export APP_PATH=/tmp/app',
           'mkdir $APP_PATH',
-          'cd ./frontend/',
-          'find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\;',
+          'find . \( -type d -name "node_modules" -o -name "cdk.out" -o -name "build" \) -prune -o -type f -exec cp --parents {} $APP_PATH \\;',
           'cd $APP_PATH',
-          'yarn install --loglevel error',
-          'yarn run build --loglevel error',
+          'pnpm install',
+          'pnpm projen',
+          'pnpm nx run-many --target=build',
+          'cd ./frontend',
           'cp -r ./build/* /asset-output/',
         ],
         environment: {
