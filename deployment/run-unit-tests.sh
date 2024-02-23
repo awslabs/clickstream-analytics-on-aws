@@ -21,13 +21,7 @@ echo "pnpm install"
 pnpm install
 
 pnpm projen
-
-# build base lib
-echo "pnpm run build"
-cd src/base-lib
-pnpm install
-pnpm run build
-cd ../..
+pnpm nx run-many --target=build
 
 echo "pnpm run test"
 pnpm run test

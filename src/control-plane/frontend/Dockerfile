@@ -11,9 +11,7 @@ ARG CHUNK_MAX_SIZE=1024000
 RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE}
 RUN npm install -g pnpm
 RUN pnpm projen
-
-WORKDIR /home/node/app/src/base-lib
-RUN pnpm run build
+RUN pnpm nx run-many --target=build
 
 WORKDIR /home/node/app/frontend
 RUN pnpm install

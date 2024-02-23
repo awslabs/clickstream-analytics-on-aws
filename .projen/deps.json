@@ -1,6 +1,16 @@
 {
   "dependencies": [
     {
+      "name": "@nrwl/devkit",
+      "version": "^15",
+      "type": "build"
+    },
+    {
+      "name": "@nrwl/workspace",
+      "version": "^15",
+      "type": "build"
+    },
+    {
       "name": "@types/aws-lambda",
       "version": "^8.10.110",
       "type": "build"
@@ -98,6 +108,11 @@
     {
       "name": "mock-fs",
       "version": "^5.2.0",
+      "type": "build"
+    },
+    {
+      "name": "nx",
+      "version": "^15",
       "type": "build"
     },
     {

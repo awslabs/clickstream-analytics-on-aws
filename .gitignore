@@ -87,4 +87,5 @@ junit.xml
 !/.gitlab/ci-templates/cfn-nag.yml
 !/.gitlab/ci-templates/cfn-lint.yml
 !/pnpm-workspace.yaml
+!/nx.json
 !/.projenrc.js

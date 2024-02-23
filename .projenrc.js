@@ -12,6 +12,7 @@
  */
 
 const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
+const Nx = require('./projenrc/nx');
 const PnpmWorkspace = require('./projenrc/pnpm');
 const version = '1.2.0';
 const cdkVersion = '2.81.0';
@@ -1096,4 +1097,5 @@ project.package.addField('packageManager', `pnpm@${pnpmVersion}`);
 project.npmrc.addConfig('auto-install-peers', 'true');
 
 new PnpmWorkspace(project);
+new Nx(project);
 project.synth();
