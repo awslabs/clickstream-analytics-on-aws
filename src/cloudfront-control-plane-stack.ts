@@ -202,11 +202,12 @@ export class CloudFrontControlPlaneStack extends Stack {
 
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommands: [
+          'apt-get update && apt-get install -y rsync',
           'npm install -g pnpm --prefix /tmp/node/.npm-global',
           'export PATH=/tmp/node/.npm-global/bin:$PATH',
           'export APP_PATH=/tmp/app',
           'mkdir $APP_PATH',
-          'find . \( -type d -name "node_modules" -o -name "cdk.out" -o -name "build" \) -prune -o -type f -exec cp --parents {} $APP_PATH \\;',
+          'rsync -av --progress ./ $APP_PATH --exclude "node_modules" --exclude "cdk.out" --exclude "build"\;',
           'cd $APP_PATH',
           'pnpm install',
           'pnpm projen',
