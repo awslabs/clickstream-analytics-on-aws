@@ -1205,6 +1205,29 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
+              'resource-groups:GetGroup',
+              'resource-groups:DisassociateResource',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':resource-groups:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
               'sns:*',
               'sqs:*',
               'redshift-serverless:*',
@@ -1241,6 +1264,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'servicecatalog:DisassociateResource',
               'servicecatalog:TagResource',
               'servicecatalog:UntagResource',
+              'tag:GetResources',
+              'tag:UntagResources',
             ],
             Effect: 'Allow',
             Resource: '*',
