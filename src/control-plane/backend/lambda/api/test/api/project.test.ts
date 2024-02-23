@@ -630,7 +630,7 @@ describe('Project test', () => {
       success: true,
       message: 'Project deleted.',
     });
-    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 1);
   });
   it('Delete project witch no pipeline', async () => {
     projectExistedMock(ddbMock, true);
@@ -661,7 +661,7 @@ describe('Project test', () => {
       success: true,
       message: 'Project deleted.',
     });
-    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
   });

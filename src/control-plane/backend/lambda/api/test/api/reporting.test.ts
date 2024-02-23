@@ -34,6 +34,7 @@ import {
   DescribeDashboardCommand,
   ResourceStatus,
   DescribeAnalysisCommand,
+  DeleteUserCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
@@ -2122,6 +2123,17 @@ describe('reporting test', () => {
       $metadata: {},
     }));
 
+    quickSightMock.on(DeleteUserCommand).resolves({
+      Status: 200,
+    });
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { templateVersion: 'v1.0.3' },
+        { templateVersion: 'v1.2.0' },
+      ],
+    });
+
     const res = await request(app)
       .post('/api/reporting/clean')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -2191,6 +2203,17 @@ describe('reporting test', () => {
       DataSetId: '_tmp_dddddddddd',
     });
 
+    quickSightMock.on(DeleteUserCommand).resolves({
+      Status: 200,
+    });
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { templateVersion: 'v1.0.3' },
+        { templateVersion: 'v1.2.0' },
+      ],
+    });
+
     const res = await request(app)
       .post('/api/reporting/clean')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -2207,7 +2230,96 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 1);
+  });
 
+  it('clean - include v1.1.3 pipeline', async () => {
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/_tmp_aaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DashboardId: '_tmp_aaaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteDashboardCommand).resolves({
+      Status: 200,
+      DashboardId: '_tmp_aaaaaaa',
+    });
+
+    quickSightMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/_tmp_bbbbbbbb',
+          Name: '_tmp_bbbbbbbb',
+          CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+          AnalysisId: '_tmp_bbbbbbbb',
+          Status: ResourceStatus.UPDATE_SUCCESSFUL,
+        },
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/_tmp_cccccccc',
+          Name: '_tmp_cccccccc',
+          CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+          AnalysisId: '_tmp_cccccccc',
+          Status: ResourceStatus.DELETED,
+        },
+      ],
+    });
+
+    quickSightMock.on(DeleteAnalysisCommand).resolvesOnce({
+      Status: 200,
+      AnalysisId: '_tmp_bbbbbbbb',
+    }).resolvesOnce({
+      Status: 200,
+      AnalysisId: '_tmp_cccccccc',
+    });
+
+    quickSightMock.on(ListDataSetsCommand).resolves({
+      DataSetSummaries: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dataset/dataset-aaaaaaaa',
+        Name: '_tmp_dddddddddd',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DataSetId: '_tmp_dddddddddd',
+      }],
+    });
+
+    quickSightMock.on(DeleteDataSetCommand).resolves({
+      Status: 200,
+      DataSetId: '_tmp_dddddddddd',
+    });
+
+    quickSightMock.on(DeleteUserCommand).resolves({
+      Status: 200,
+    });
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { templateVersion: 'v1.1.3' },
+        { templateVersion: 'v1.2.0' },
+      ],
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/clean')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        region: 'us-east-1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.deletedDashBoards[0]).toEqual('_tmp_aaaaaaaa');
+    expect(res.body.data.deletedAnalyses[0]).toEqual('_tmp_bbbbbbbb');
+    expect(res.body.data.deletedDatasets[0]).toEqual('_tmp_dddddddddd');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
   });
 
   it('common parameter check - invalid parameter', async () => {
