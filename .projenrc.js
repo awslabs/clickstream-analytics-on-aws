@@ -248,7 +248,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   majorVersion: 1,
   minMajorVersion: 0,
   packageManager: 'pnpm',
-  projenCommand: 'pnpm dlx projen',
+  projenCommand: 'pnpm projen',
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -1001,7 +1001,7 @@ gitlabMain.createNestedTemplates({
           'npm install -g pnpm',
           'pnpm install',
           'pnpm projen',
-          'npx projen eslint',
+          'pnpm projen eslint',
           'git add .',
           'git diff --staged --patch --exit-code > .repo.patch || export mutations_happened=true',
           'if [ "$mutations_happened" = "true" ]; then cat .repo.patch && exit 1; fi;',
@@ -1095,5 +1095,4 @@ project.package.addField('packageManager', `pnpm@${pnpmVersion}`);
 project.npmrc.addConfig('auto-install-peers', 'true');
 
 new PnpmWorkspace(project);
-// frontendProject.synth();
 project.synth();
