@@ -13,6 +13,13 @@
 
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import {
+  MULTI_APP_ID_PATTERN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
+  PROJECT_ID_PATTERN,
+  SECRETS_MANAGER_ARN_PATTERN,
+} from '@clickstream/base-lib';
 import { getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
@@ -40,13 +47,6 @@ import {
   listenStackQueueArn,
   stackWorkflowS3Bucket,
 } from '../common/constants';
-import {
-  MULTI_APP_ID_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
-  PROJECT_ID_PATTERN,
-  SECRETS_MANAGER_ARN_PATTERN,
-} from '../common/constants-ln';
 import {
   BuiltInTagKeys,
   ExecutionDetail,

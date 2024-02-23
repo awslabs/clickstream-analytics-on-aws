@@ -598,14 +598,15 @@ project.buildWorkflow.workflow.file?.patch(
   JsonPatch.replace('/on/merge_group', {}),
 );
 
-// project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
-//   name: 'Upgrade frontend dependencies',
-//   run: 'yarn upgrade --cwd frontend',
-// });
-// project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
-//   name: 'Upgrade API dependencies',
-//   run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
-// });
+project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
+  name: 'Upgrade frontend dependencies',
+  run: 'pnpm upgrade --dir frontend',
+});
+project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
+  name: 'Upgrade API dependencies',
+  run: 'cd src/control-plane/backend/lambda/api/ && pnpm dlx projen upgrade && cd ../../../../../',
+});
+
 project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
 project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
