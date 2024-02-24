@@ -515,13 +515,18 @@ const apiProject = new typescript.TypeScriptProject({
     exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
-      paths: {},
+      baseUrl: '.',
+      paths: {
+        '@clickstream/base-lib': ['../../../..//base-lib/src'],
+      },
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
-      paths: {},
+      paths: {
+        '@clickstream/base-lib': ['../../../..//base-lib/src'],
+      },
     },
   },
   packageManager: project.package.packageManager,
