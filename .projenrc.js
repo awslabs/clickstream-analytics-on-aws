@@ -296,6 +296,10 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   jestOptions: {
     jestConfig: {
       setupFiles: ['./test/jestEnv.js'],
+      modulePathIgnorePatterns: [
+        '<rootDir>/cdk.out/',
+        '<rootDir>/deployment/',
+      ],
     },
   },
   tsconfig: {
@@ -684,6 +688,10 @@ gitlabMain.createNestedTemplates({
           'mkdir -p output/',
         ],
         script: [
+          'npm install -g pnpm',
+          'pnpm install',
+          'pnpm projen',
+          'pnpm nx run-many --target=build',
           'npx ts-node scripts/build.ts source-$CI_JOB_ID.zip',
           'mkdir -p build/',
           'unzip output/build_result.zip -d build/',

@@ -125,6 +125,10 @@
     "setupFiles": [
       "./test/jestEnv.js"
     ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/cdk.out/",
+      "<rootDir>/deployment/"
+    ],
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.ts?(x)",
       "<rootDir>/(test|src)/**/*(*.)@(spec|test).ts?(x)"
