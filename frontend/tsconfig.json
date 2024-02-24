@@ -36,6 +36,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "baseUrl": "src",
+    "paths": {},
     "jsx": "react-jsx"
   },
   "include": [

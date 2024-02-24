@@ -27,6 +27,7 @@
     "stripInternal": true,
     "target": "ES2019",
     "emitDecoratorMetadata": true,
+    "baseUrl": ".",
     "paths": {
       "@clickstream/base-lib": [
         "src/base-lib/src"

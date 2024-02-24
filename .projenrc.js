@@ -398,6 +398,7 @@ const frontendTSConfig = {
     module: 'esnext',
     target: 'ESNext',
     baseUrl: 'src',
+    paths: {},
     jsx: 'react-jsx',
     lib: [
       'dom',
@@ -514,11 +515,13 @@ const apiProject = new typescript.TypeScriptProject({
     exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
+      paths: {},
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
+      paths: {},
     },
   },
   packageManager: project.package.packageManager,
