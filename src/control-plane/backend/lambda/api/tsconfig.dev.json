@@ -28,7 +28,7 @@
     "baseUrl": ".",
     "paths": {
       "@clickstream/base-lib": [
-        "../../../..//base-lib/src"
+        "../../../../base-lib/src"
       ]
     }
   },
