@@ -313,6 +313,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
+      baseUrl: '.',
       paths: {
         '@clickstream/base-lib': ['src/base-lib/src'],
       },

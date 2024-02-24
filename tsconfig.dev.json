@@ -29,7 +29,8 @@
       "@clickstream/base-lib": [
         "src/base-lib/src"
       ]
-    }
+    },
+    "baseUrl": "."
   },
   "include": [
     "src/**/*.ts",
