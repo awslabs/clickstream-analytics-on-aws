@@ -17,10 +17,6 @@ build:
     - yarn add typescript @aws-sdk/client-s3@3.405.0 @aws-sdk/client-codebuild@3.405.0 @aws-sdk/client-sts@3.405.0
     - mkdir -p output/
   script:
-    - npm install -g pnpm
-    - pnpm install
-    - pnpm projen
-    - pnpm nx run-many --target=build
     - npx ts-node scripts/build.ts source-$CI_JOB_ID.zip
     - mkdir -p build/
     - unzip output/build_result.zip -d build/
