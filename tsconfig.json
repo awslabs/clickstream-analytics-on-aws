@@ -26,7 +26,12 @@
     "strictPropertyInitialization": true,
     "stripInternal": true,
     "target": "ES2019",
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@clickstream/base-lib": [
+        "src/base-lib/src"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts"

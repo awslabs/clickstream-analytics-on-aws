@@ -305,11 +305,17 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   tsconfig: {
     compilerOptions: {
       emitDecoratorMetadata: true,
+      paths: {
+        '@clickstream/base-lib': ['src/base-lib/src'],
+      },
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
+      paths: {
+        '@clickstream/base-lib': ['src/base-lib/src'],
+      },
     },
   },
   githubOptions: {
