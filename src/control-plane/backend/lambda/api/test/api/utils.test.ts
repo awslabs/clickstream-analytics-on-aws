@@ -12,8 +12,6 @@
  */
 
 import { SecurityGroupRule } from '@aws-sdk/client-ec2';
-import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
-import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import {
   MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
@@ -30,7 +28,9 @@ import {
   CORS_PATTERN,
   STACK_CORS_PATTERN,
   EMAIL_PATTERN,
-} from '../../common/constants-ln';
+} from '@clickstream/base-lib';
+import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
 import { containRule, corsStackInput, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';

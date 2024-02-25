@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '@clickstream/base-lib';
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { PipelineStackType } from '../common/model-ln';
 import { httpsAgent } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, FetchType } from '../common/types';

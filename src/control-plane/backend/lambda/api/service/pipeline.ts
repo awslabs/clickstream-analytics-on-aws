@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '@clickstream/base-lib';
 import { v4 as uuidv4 } from 'uuid';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled, getPipelineStatusType, isEmpty } from '../common/utils';

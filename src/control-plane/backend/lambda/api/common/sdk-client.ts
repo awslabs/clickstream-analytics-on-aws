@@ -15,8 +15,8 @@ import { AccessDeniedException, ListUsersCommand, QuickSight, QuickSightClient, 
 import { RedshiftDataClient, RedshiftDataClientConfig } from '@aws-sdk/client-redshift-data';
 import { STSClient, STSClientConfig } from '@aws-sdk/client-sts';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { REGION_PATTERN } from '@clickstream/base-lib';
 import { awsAccountId, awsRegion } from './constants';
-import { REGION_PATTERN } from './constants-ln';
 import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
 
