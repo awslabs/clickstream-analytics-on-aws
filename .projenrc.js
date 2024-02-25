@@ -249,7 +249,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   majorVersion: 1,
   minMajorVersion: 0,
   packageManager: 'pnpm',
-  projenCommand: 'pnpm dlx projen && pnpm nx run-many --target=build',
+  projenCommand: 'pnpm dlx projen',
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -557,6 +557,10 @@ project.buildWorkflow.preBuildSteps.push({
   with: {
     'registry-type': 'public',
   },
+});
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Run NX Build',
+  run: 'pnpm nx run-many --target=build',
 });
 project.buildWorkflow.addPostBuildSteps({
   name: 'Publish Test Report',
