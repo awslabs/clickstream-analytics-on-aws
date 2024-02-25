@@ -249,7 +249,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   majorVersion: 1,
   minMajorVersion: 0,
   packageManager: 'pnpm',
-  projenCommand: 'pnpm dlx projen',
+  projenCommand: 'pnpm dlx projen && pnpm nx run-many --target=build',
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -305,19 +305,11 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   tsconfig: {
     compilerOptions: {
       emitDecoratorMetadata: true,
-      baseUrl: '.',
-      paths: {
-        '@clickstream/base-lib': ['src/base-lib/src'],
-      },
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
-      baseUrl: '.',
-      paths: {
-        '@clickstream/base-lib': ['src/base-lib/src'],
-      },
     },
   },
   githubOptions: {
@@ -515,19 +507,11 @@ const apiProject = new typescript.TypeScriptProject({
     exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
-      baseUrl: '.',
-      paths: {
-        '@clickstream/base-lib': ['../../../../../base-lib/src'],
-      },
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
-      baseUrl: '.',
-      paths: {
-        '@clickstream/base-lib': ['../../../../../base-lib/src'],
-      },
     },
   },
   packageManager: project.package.packageManager,
