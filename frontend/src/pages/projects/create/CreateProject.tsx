@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@clickstream/base-lib';
 import {
   Alert,
   Box,
@@ -30,7 +31,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH, PROJECT_STAGE_LIST } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { INIT_PROJECT_DATA } from 'ts/init';
 import {
   alertMsg,

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@clickstream/base-lib';
 import {
   AppLayout,
   Container,
@@ -31,7 +32,6 @@ import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {

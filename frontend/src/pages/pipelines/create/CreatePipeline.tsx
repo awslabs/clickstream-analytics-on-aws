@@ -11,6 +11,13 @@
  *  and limitations under the License.
  */
 
+import {
+  CORS_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
+} from '@clickstream/base-lib';
 import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
@@ -65,13 +72,6 @@ import {
   SDK_LIST,
   SinkType,
 } from 'ts/const';
-import {
-  CORS_PATTERN,
-  DOMAIN_NAME_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
-} from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   checkStringValidRegex,

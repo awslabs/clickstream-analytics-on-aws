@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ServerlessRedshiftRPUByRegionMapping } from '@clickstream/base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -25,7 +26,6 @@ import {
   ExecutionType,
   IUserRole,
 } from './const';
-import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 import { IMetadataBuiltInList } from './explore-types';
 
 /**

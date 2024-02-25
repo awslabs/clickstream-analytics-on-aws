@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@clickstream/base-lib';
 import {
   AutosuggestProps,
   Button,
@@ -53,7 +54,6 @@ import {
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   DATA_MODELING_LINK_CN,
   DATA_MODELING_LINK_EN,

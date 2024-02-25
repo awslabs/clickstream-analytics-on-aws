@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@clickstream/base-lib';
 import {
   Alert,
   Button,
@@ -54,7 +55,6 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN,

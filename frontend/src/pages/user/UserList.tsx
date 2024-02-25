@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@clickstream/base-lib';
 import {
   AppLayout,
   Input,
@@ -24,7 +25,6 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole, TIME_FORMAT } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 import UserTable from './UserTable';
 

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@clickstream/base-lib';
 import {
   Badge,
   Box,
@@ -34,7 +35,6 @@ import {
   PROJECT_STAGE_LIST,
   TIME_FORMAT,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { ternary, validateEmails } from 'ts/utils';
 
 interface SplitPanelContentProps {
