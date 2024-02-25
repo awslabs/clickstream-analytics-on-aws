@@ -18,18 +18,18 @@ import { SINK_TYPE_MODE, ECS_INFRA_TYPE_MODE } from '../../common/model';
 
 export function createS3ConditionsV2(scope: Construct, props: {
   sinkType: string;
-  ecsInfraType: string;
+  ecsInfraConditions: any[];
 }) {
   const s3Condition = new CfnCondition(scope, 's3Condition', {
     expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_S3),
   });
-  const ecsInfraConditions = createECSTypeCondition(scope, props.ecsInfraType);
   const s3ConditionAndName: any[] = [];
-  ecsInfraConditions.forEach((ecsInfraCondition) => {
+  props.ecsInfraConditions.forEach((ecsInfraCondition) => {
     s3ConditionAndName.push(
       {
         conditions: [s3Condition, ecsInfraCondition.condition],
         name: `${ecsInfraCondition.name}C`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
       },
     );
   });
@@ -51,32 +51,33 @@ export function createECSTypeCondition(
     {
       condition: ecsEC2Condition,
       name: 'E',
+      ecsInfraType: ECS_INFRA_TYPE_MODE.EC2,
     },
     {
       condition: ecsFargateCondition,
       name: 'F',
+      ecsInfraType: ECS_INFRA_TYPE_MODE.FARGATE,
     },
   ]
   return ecsInfraConditions;
 }
 
 export function createKinesisConditionsV2(
-  scope: Construct,
   props: {
     provisionedStackStream: Stream;
     onDemandStackStream: Stream;
     provisionedStackCondition: CfnCondition;
     onDemandStackCondition: CfnCondition;
   },
-  ecsInfraType: string,
+  ecsInfraConditions: any[],
 ) {
-  const ecsInfraConditions = createECSTypeCondition(scope, ecsInfraType);
   const kinesisConditionsAndProps: any[] = [];
   ecsInfraConditions.forEach((ecsInfraCondition) => {
     kinesisConditionsAndProps.push(
       {
         conditions: [props.onDemandStackCondition, ecsInfraCondition.condition],
         name: `${ecsInfraCondition.name}K1`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           kinesisDataStreamArn: props.onDemandStackStream.streamArn,
         },
@@ -84,6 +85,7 @@ export function createKinesisConditionsV2(
       {
         conditions: [props.provisionedStackCondition, ecsInfraCondition.condition],
         name: `${ecsInfraCondition.name}K2`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           kinesisDataStreamArn: props.provisionedStackStream.streamArn,
         },
@@ -101,7 +103,7 @@ export function createMskConditionsV2(
     kafkaBrokersParam: CfnParameter;
     kafkaTopicParam: CfnParameter;
     sinkType: string;
-    ecsInfraType: string;
+    ecsInfraConditions: any[];
   },
 ) {
   const mskClusterNameCondition = new CfnCondition(
@@ -140,9 +142,8 @@ export function createMskConditionsV2(
   });
 
   const mskConditionServerPopsConfig: any[] = [];
-  const ecsInfraConditions = createECSTypeCondition(scope, props.ecsInfraType);
 
-  ecsInfraConditions.forEach((ecsInfraCondition) => {
+  props.ecsInfraConditions.forEach((ecsInfraCondition) => {
     mskConditionServerPopsConfig.push(
       {
         conditions: [
@@ -152,6 +153,7 @@ export function createMskConditionsV2(
           ecsInfraCondition.condition,
         ],
         name: `${ecsInfraCondition.name}M11`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
           mskClusterName: props.mskClusterNameParam.valueAsString,
@@ -165,6 +167,7 @@ export function createMskConditionsV2(
           mskCondition,
         ],
         name: `${ecsInfraCondition.name}M10`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
           mskClusterName: undefined,
@@ -178,6 +181,7 @@ export function createMskConditionsV2(
           mskCondition,
         ],
         name: `${ecsInfraCondition.name}M01`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           mskSecurityGroupId: undefined,
           mskClusterName: props.mskClusterNameParam.valueAsString,
@@ -191,6 +195,7 @@ export function createMskConditionsV2(
           mskCondition,
         ],
         name: `${ecsInfraCondition.name}M00`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
         serverProps: {
           mskSecurityGroupId: undefined,
           mskClusterName: undefined,

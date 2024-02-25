@@ -41,6 +41,7 @@ import {
   createKinesisConditionsV2,
   createS3ConditionsV2,
   createMskConditionsV2,
+  createECSTypeCondition,
 } from './ingestion-server/server-v2/condition-v2';
 import {
   IngestionServerV2,
@@ -320,10 +321,12 @@ export class IngestionServerStackV2 extends Stack {
 
     const dataBufferPropsAndConditions: any[] = [];
 
+    const ecsInfraConditions = createECSTypeCondition(this, ecsInfraType);
+
     // S3
-    const s3ConditionAndName = createS3ConditionsV2(this, {
+    const s3ConditionsAndProps = createS3ConditionsV2(this, {
       sinkType,
-      ecsInfraType,
+      ecsInfraConditions,
     });
     const s3NestStackProps = {
       ...nestStackCommonProps,
@@ -333,11 +336,14 @@ export class IngestionServerStackV2 extends Stack {
       batchTimeout: s3Params.s3BatchTimeoutParam.valueAsNumber,
     };
 
-    s3ConditionAndName.forEach((s3ConditionAndName) => {
+    s3ConditionsAndProps.forEach((s3ConditionAndProps) => {
       dataBufferPropsAndConditions.push({
-        nestStackProps: s3NestStackProps,
-        conditions: s3ConditionAndName.conditions,
-        conditionName: s3ConditionAndName.name,
+        nestStackProps: {
+          ...s3NestStackProps,
+          ecsInfraType: s3ConditionAndProps.ecsInfraType,
+        },
+        conditions: s3ConditionAndProps.conditions,
+        conditionName: s3ConditionAndProps.name,
       });
     });
 
@@ -347,10 +353,11 @@ export class IngestionServerStackV2 extends Stack {
       kafkaBrokers: kafkaParams.kafkaBrokersParam.valueAsString,
       kafkaTopic: kafkaParams.kafkaTopicParam.valueAsString,
     };
-    const mskConditionsAndProps = createMskConditionsV2(this, { ...kafkaParams, sinkType, ecsInfraType });
+    const mskConditionsAndProps = createMskConditionsV2(this, { ...kafkaParams, sinkType, ecsInfraConditions });
     mskConditionsAndProps.forEach((mskConditionAndProps) => {
       mskNestStackProps = {
         ...mskNestStackProps,
+        ecsInfraType: mskConditionAndProps.ecsInfraType,
         mskClusterName: mskConditionAndProps.serverProps.mskClusterName,
         mskSecurityGroupId: mskConditionAndProps.serverProps.mskSecurityGroupId,
       };
@@ -366,15 +373,16 @@ export class IngestionServerStackV2 extends Stack {
       let kinesisNestStackProps = {
         ...nestStackCommonProps,
       };
-      const kinesisConditionsAndProps = createKinesisConditionsV2(this, this.kinesisNestedStacks, ecsInfraType);
+      const kinesisConditionsAndProps = createKinesisConditionsV2(this.kinesisNestedStacks, ecsInfraConditions);
       kinesisConditionsAndProps.forEach((kinesisConditionAndProps) => {
         kinesisNestStackProps = {
           ...kinesisNestStackProps,
+          ecsInfraType: kinesisConditionAndProps.ecsInfraType,
           kinesisDataStreamArn: kinesisConditionAndProps.serverProps.kinesisDataStreamArn,
         };
         dataBufferPropsAndConditions.push({
           nestStackProps: kinesisNestStackProps,
-          conditions: [kinesisConditionAndProps.condition],
+          conditions: kinesisConditionAndProps.conditions,
           conditionName: kinesisConditionAndProps.name,
         });
       });
