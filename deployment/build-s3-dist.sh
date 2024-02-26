@@ -90,7 +90,8 @@ do_replace()
 
 create_template_json() 
 {
-    do_cmd run pnpm nx build @clickstream/base-lib
+    do_cmd npm install -g pnpm
+    do_cmd pnpm nx run-many --target=build
     # Run 'cdk synth' to generate raw solution outputs
     do_cmd npx cdk synth --output=$staging_dist_dir
 
