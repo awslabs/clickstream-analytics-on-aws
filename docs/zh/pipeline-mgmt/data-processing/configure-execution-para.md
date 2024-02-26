@@ -18,7 +18,7 @@
  
  有关更多信息，请参阅 [基于 Cron 的计划](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html?icmpid=docs_console_unmapped#cron-based)。
 
- ## 配置Spark作业参数
+## 配置Spark作业参数
 
 默认情况下，Clickstream 会智能地根据需要处理的数据集的大小并适当设置EMR作业参数。在大多数情况下，您不需要调整 EMR 作业参数，但如果您想覆盖 EMR 作业参数，您可以将 `spark-config.json` 文件放入S3存储桶以设置您自己的参数。
 

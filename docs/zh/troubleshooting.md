@@ -60,18 +60,6 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
     成功移除这些 CloudFormation 堆栈后，您可以删除 IAM 角色。
 
-[log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
-
-## 问题：无法将数据摄取到 MSK 集群，Ingestion Server日志为“InvalidReplicationFactor (Broker: Invalid replication factor)”
-
-如果发现数据无法通过MSK集群存储到S3中，Ingestion Server (ECS) worker task日志中的报错信息如下：
-
-> Message production error: InvalidReplicationFactor (Broker: Invalid replication factor)
-
-**解决方法：**
-
-这是因为replication factor 大于brokers总数造成的，请编辑 MSK 集群配置，设置 **default.replication.factor** 不大于brokers总数。
-
 ## 问题: 报表堆栈(Clickstream-Reporting-xxx) 部署失败
 
 如果报表堆栈部署失败并有如下所示的错误消息
@@ -83,7 +71,6 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 **解决方法：**
 
 登录解决方案控制台，在管道详情页点击"重试"按钮。
-
 
 ## 问题: Clickstream-DataModelingRedshift-xxxxx 堆栈更新失败，状态显示为 UPDATE_ROLLBACK_FAILED
 
@@ -127,3 +114,47 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 4. 等待堆栈状态变为 **UPDATE_ROLLBACK_COMPLETE**。
 
 5. 从解决方案 Web 控制台中重试升级。
+
+## 问题：无法将数据摄取到 MSK 集群，Ingestion Server日志为“InvalidReplicationFactor (Broker: Invalid replication factor)”
+
+如果发现数据无法通过MSK集群存储到S3中，Ingestion Server (ECS) worker task日志中的报错信息如下：
+
+> Message production error: InvalidReplicationFactor (Broker: Invalid replication factor)
+
+**解决方法：**
+
+这是因为replication factor 大于brokers总数造成的，请编辑 MSK 集群配置，设置 **default.replication.factor** 不大于brokers总数。
+
+## 问题：数据处理作业失败
+
+如果运行在 EMR Serverless 的数据处理作业失败并出现以下错误：
+
+- IOException: No space left on device
+
+    >Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: java.io.IOException: No space left on device Exception in thread "main" org.apache.spark.SparkException:
+
+- ExecutorDeadException
+
+    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: org.apache.spark.ExecutorDeadException: The relative remote executor(Id: 34), which maintains the block data to fetch is dead. org.apache.spark.shuffle.FetchFailedException Caused by: org.apache.spark.SparkException: Job aborted due to stage failure: ShuffleMapStage
+
+- Could not find CoarseGrainedScheduler
+
+    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: org.apache.spark.SparkException: Could not find CoarseGrainedScheduler.
+
+**解决方法：**
+
+您需要调整EMR作业默认配置，请参考[配置执行参数](./pipeline-mgmt/data-processing/configure-execution-para.md#spark)。
+
+## 问题：数据加载工作流由于单个执行历史记录中的事件数量达到 25,000 的限制而失败
+
+这是由要加载的数据量过大或 Redshift 加载量非常高导致的。
+
+**解决方法：**
+
+您可以通过以下方式缓解此错误：
+
+增加 Redshift 的计算资源（例如，Redshift Serverless 的 RPU）或者减少[数据处理间隔][data-processing-param]。然后，[重新启动数据加载工作流][restart-loading-workflow]。
+
+[log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
+[data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#_2
+[restart-loading-workflow]: ./faq.md#_7
