@@ -46,7 +46,7 @@ jobs:
         with:
           registry-type: public
       - name: Run NX Build
-        run: pnpm nx run-many --target=build
+        run: pnpm nx build @clickstream/base-lib
       - name: build
         run: pnpm dlx projen build
       - name: Publish Test Report

@@ -57,7 +57,7 @@ run npm install -g pnpm
 run cd ${SRC_PATH}
 run pnpm install --frozen-lockfile
 run pnpm projen
-run pnpm nx run-many --target=build
+run pnpm nx build @clickstream/base-lib
 
 echo "IS_IN_GCR_PIPELINE: $IS_IN_GCR_PIPELINE"
 

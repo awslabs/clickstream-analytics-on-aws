@@ -18,7 +18,7 @@ jobs:
       - run: |-
           npm install -g pnpm
           pnpm projen
-          pnpm nx run-many --target=build
+          pnpm nx build @clickstream/base-lib
           cd frontend/
           pnpm run format
           pnpm run build

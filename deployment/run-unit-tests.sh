@@ -17,7 +17,7 @@ echo "pnpm install"
 pnpm install
 
 pnpm projen
-pnpm nx run-many --target=build
+pnpm nx build @clickstream/base-lib
 
 echo "pnpm run test"
 pnpm run test

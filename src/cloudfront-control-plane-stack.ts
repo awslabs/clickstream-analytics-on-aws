@@ -210,7 +210,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           'cd $APP_PATH',
           'pnpm install',
           'pnpm projen',
-          'pnpm nx run-many --target=build',
+          'pnpm nx build @clickstream/base-lib',
           'cd ./frontend',
           'cp -r ./build/* /asset-output/',
         ],

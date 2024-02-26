@@ -4,7 +4,7 @@ WORKDIR /home/node/app
 COPY ./ ./
 RUN npm install -g pnpm
 RUN pnpm projen
-RUN pnpm nx run-many --target=build
+RUN pnpm nx build @clickstream/base-lib
 WORKDIR /home/node/app/src/control-plane/backend/lambda/api
 RUN pnpm install && pnpm run compile
 RUN rm -rf node_modules && pnpm install --prod
