@@ -5,9 +5,8 @@ COPY . .
 RUN npm install -g pnpm
 RUN pnpm recursive exec -- rm -rf node_modules
 RUN pnpm install
-RUN pnpm nx build @clickstream/base-lib
-RUN pnpm recursive prune --prod --force
-RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test 
+RUN pnpm nx run-many --target=build --prod
+RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test
 # RUN pnpm projen
 # RUN pnpm nx build @clickstream/base-lib
 # RUN cd src/control-plane/backend/lambda/api && pnpm install && pnpm run compile
