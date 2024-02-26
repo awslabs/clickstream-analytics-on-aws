@@ -562,7 +562,7 @@ project.buildWorkflow.preBuildSteps.push({
   },
 });
 project.buildWorkflow.preBuildSteps.push({
-  name: 'Run NX Build',
+  name: 'Run NX Build Base Library',
   run: 'pnpm nx build @clickstream/base-lib',
 });
 project.buildWorkflow.addPostBuildSteps({
