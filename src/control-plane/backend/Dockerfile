@@ -3,9 +3,7 @@ RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY ./src ./src
 RUN npm install -g pnpm
-RUN pnpm install
-RUN pnpm projen
-RUN pnpm nx build @clickstream/base-lib
+RUN cd src/base-lib && pnpm install && pnpm run build
 RUN cd src/control-plane/backend/lambda/api && pnpm install && pnpm run compile
 RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --production
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
