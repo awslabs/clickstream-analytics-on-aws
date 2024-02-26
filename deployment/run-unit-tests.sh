@@ -14,10 +14,11 @@ rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 
 echo "pnpm install"
+npm install -g pnpm
 pnpm install
 
 pnpm projen
-pnpm nx build @clickstream/base-lib
+pnpm nx run-many --target=build
 
 echo "pnpm run test"
 pnpm run test
