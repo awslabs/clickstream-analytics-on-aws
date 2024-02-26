@@ -21,18 +21,18 @@ If the data pipeline meets the below criteria, serverless Redshift is preferred.
 
 You can open the built-in [observability dashboard][monitoring-dashboard] to view the key metrics of your data pipeline.
 
-The dashboard displays metrics for different components of your data pipeline, including ingest, process, and modeling.
+The dashboard displays metrics for different components of your data pipeline, including data ingestion, processing, and modeling.
 
 - **Data Ingestion - Server**:
     - **Server Request Counts**: The total requests received by the ingestion servers in the given period. You can use it to calculate the request per second (RPS) of the ingestion servers.
     - **Server Response Time**: The average response time in seconds of the ingestion servers in the given period.
     - **Server(ECS) Tasks** The number of tasks/instances running for the ingestion servers.
 - **Data Ingestion - Sink - Kinesis Data Stream** (available when enabling KDS as ingestion sink):
-    - **Kinesis Throttled and Failed Records**: The total putting records of KDS were throttled or failed in the given period. The lower value is better.
-    - **Kinesis to S3 Lambda Error count**: The total error count in a given period when sinking records in KDS to S3. The lower value is better.
-    - **Kinesis to S3 Lambda success rate (%)**: The percentage of success rate of sinking KDS records to S3. The higher value is better.
+    - **Kinesis Throttled and Failed Records**: The total putting records of KDS were throttled or failed in the given period. The lower the value is, the better.
+    - **Kinesis to S3 Lambda Error count**: The total error count in a given period when sinking records in KDS to S3. The lower the value is, the better.
+    - **Kinesis to S3 Lambda success rate (%)**: The percentage of success rate of sinking KDS records to S3. The higher the value is, the better.
 - **Data Processing** (available when enabling data processing):
-    - **Data Processing Job success rate (%)**: The percentage of the success rate of a data processing job in a given period. The higher value is better.
+    - **Data Processing Job success rate (%)**: The percentage of the success rate of a data processing job in a given period. The higher the value is, the better.
     - **Data Processing Row counts**: The chart contains four metrics: 
         - **source count**: The raw request count of the ingestion server received in the batch data processing.
         - **flatted source count**: The SDK sends the multiple clickstream events in a request in batch. It's the total clickstream events in the processed `source requests`.
