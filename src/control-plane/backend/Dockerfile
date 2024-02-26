@@ -1,7 +1,7 @@
 FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
-COPY ./ ./
+COPY ./src ./src
 RUN npm install -g pnpm
 RUN pnpm install
 RUN pnpm projen
