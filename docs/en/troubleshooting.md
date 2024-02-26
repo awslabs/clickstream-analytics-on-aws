@@ -60,36 +60,6 @@ Please create a new IAM role with the identical name mentioned in the above erro
 
     You can delete the IAM role after successfully removing those CloudFormation stacks.
 
-[log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
-
-## Problem: Can not sink data to MSK cluster, got "InvalidReplicationFactor (Broker: Invalid replication factor)" log in Ingestion Server
-
-If you notice that data can not be sunk into S3 through MSK cluster, and the error message in log of Ingestion Server (ECS) worker task is as below:
-
-> Message production error: InvalidReplicationFactor (Broker: Invalid replication factor)
-
-**Resolution:**
-
-This is caused by replication factor larger than available brokers, please edit the MSK cluster configuration, set **default.replication.factor** not larger than the total number of brokers.
-
-## Problem: data processing job failure
-
-If the data processing job implemented by EMR serverless fails with the below errors:
-
-- IOException: No space left on device
-
-    >Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: java.io.IOException: No space left on device Exception in thread "main" org.apache.spark.SparkException:
-
-- ExecutorDeadException
-
-    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: org.apache.spark.ExecutorDeadException: The relative remote executor(Id: 34), which maintains the block data to fetch is dead. org.apache.spark.shuffle.FetchFailedException Caused by: org.apache.spark.SparkException: Job aborted due to stage failure: ShuffleMapStage
-
-- Could not find CoarseGrainedScheduler
-
-    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: org.apache.spark.SparkException: Could not find CoarseGrainedScheduler.
-
-You need to tune the EMR job default configuration, and please refer to the [configure execution parameters](./pipeline-mgmt/data-processing/configure-execution-para.md#config-spark-job-parameters).
-
 ## Problem: Reporting stack(Clickstream-Reporting-xxx) deployment fail
 
 Reporting stack deployment failed with message like 
@@ -104,7 +74,7 @@ Login solution web console and click "Retry" button in pipeline detail informati
 
 ## Problem: Clickstream-DataModelingRedshift-xxxxx stack upgrade failed in UPDATE_ROLLBACK_FAILED
 
-When upgrading from 1.0.x to the latest version, if the CloudFormation stack `Clickstream-DataModelingRedshift-xxxxx` is in the `UPDATE_ROLLBACK_FAILED` state, you need to manually fix it by following the steps below.
+When upgrading from **1.0.x** to the latest version, if the CloudFormation stack `Clickstream-DataModelingRedshift-xxxxx` is in the `UPDATE_ROLLBACK_FAILED` state, you need to manually fix it by following the steps below.
 
 **Resolution:**
 
@@ -144,3 +114,39 @@ When upgrading from 1.0.x to the latest version, if the CloudFormation stack `Cl
 4. Wait until the stack status is **UPDATE_ROLLBACK_COMPLETE**
 
 5. Retry upgrade from the solution web console
+
+## Problem: Can not sink data to MSK cluster, got "InvalidReplicationFactor (Broker: Invalid replication factor)" log in Ingestion Server
+
+If you notice that data can not be sunk into S3 through MSK cluster, and the error message in log of Ingestion Server (ECS) worker task is as below:
+
+> Message production error: InvalidReplicationFactor (Broker: Invalid replication factor)
+
+**Resolution:**
+
+This is caused by replication factor larger than available brokers, please edit the MSK cluster configuration, set **default.replication.factor** not larger than the total number of brokers.
+
+## Problem: data processing job failure
+
+If the data processing job implemented by EMR serverless fails with the below errors:
+
+- IOException: No space left on device
+
+    >Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: java.io.IOException: No space left on device Exception in thread "main" org.apache.spark.SparkException:
+
+- ExecutorDeadException
+
+    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: Caused by: org.apache.spark.ExecutorDeadException: The relative remote executor(Id: 34), which maintains the block data to fetch is dead. org.apache.spark.shuffle.FetchFailedException Caused by: org.apache.spark.SparkException: Job aborted due to stage failure: ShuffleMapStage
+
+- Could not find CoarseGrainedScheduler
+
+    > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: org.apache.spark.SparkException: Could not find CoarseGrainedScheduler.
+
+You need to tune the EMR job default configuration, and please refer to the [configure execution parameters](./pipeline-mgmt/data-processing/configure-execution-para.md#config-spark-job-parameters).
+
+## Problem: data loading workflow failure due to meeting the 25,000 events limit in a single execution history
+
+It's caused by the large volume of data to be loaded or the Redshift load being very high. You could mitigate this error by increasing the compute resources of Redshift (for example, RPUs for Redshift serverless) or reducing [the data processing interval][data-processing-param]. Then [restart the data-loading workflow][restart-loading-workflow].
+
+[log-resource-policy-limit]: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AWS-logs-and-resource-policy.html#AWS-logs-infrastructure-CWL
+[data-processing-param]: ./pipeline-mgmt/data-processing/configure-execution-para.md#parameters
+[restart-loading-workflow]: ./faq.md#how-do-i-resume-a-failed-data-loading-workflow
