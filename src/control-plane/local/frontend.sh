@@ -6,6 +6,9 @@
 userPoolResource=$(aws cloudformation list-stack-resources --stack-name $CONTROL_PLANE_STACK_NAME --query "StackResourceSummaries[?ResourceType=='AWS::Cognito::UserPool']")
 userPoolPhysicalResourceId=$(echo "$userPoolResource" | jq -r '.[].PhysicalResourceId')
 echo "userPoolPhysicalResourceId: $userPoolPhysicalResourceId"
+userPoolClientResource=$(aws cloudformation list-stack-resources --stack-name $CONTROL_PLANE_STACK_NAME --query "StackResourceSummaries[?ResourceType=='AWS::Cognito::UserPoolClient']")
+userPoolClientPhysicalResourceId=$(echo "$userPoolClientResource" | jq -r '.[].PhysicalResourceId')
+echo "userPoolClientPhysicalResourceId: $userPoolClientPhysicalResourceId"
 
 # Get control plane s3 bucket 
 allBuckets=$(aws cloudformation list-stack-resources --stack-name $CONTROL_PLANE_STACK_NAME --query "StackResourceSummaries[?ResourceType=='AWS::S3::Bucket']")
@@ -44,7 +47,7 @@ EOF
 cat > ../../../frontend/public/aws-exports.json <<EOF
 {
     "oidc_provider": "https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId",
-    "oidc_client_id": "75oj7ch4ls3lnhhiglt0bu27k8",
+    "oidc_client_id": "$userPoolClientPhysicalResourceId",
     "oidc_redirect_url": "http://localhost:3000/signin",
     "solution_version": "v1",
     "control_plane_mode": "CLOUDFRONT",
