@@ -101,7 +101,7 @@ const getQuickSightStatus = async () => {
 const getQuickSightUsers = async () => {
   const result: any = await apiRequest('get', `/env/quicksight/users`);
   return result;
-}
+};
 
 const getSSMSecrets = async (params: { region: string }) => {
   const result: any = await apiRequest('get', '/env/ssm/secrets', params);
