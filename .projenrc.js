@@ -467,6 +467,9 @@ frontendProject.package.addField('eslintConfig', {
     'react-app/jest',
   ],
 });
+frontendProject.package.addField('resolutions', {
+  'nth-check': '^2.1.1',
+});
 frontendProject.addFields({ version });
 frontendProject.setScript('start', 'node scripts/start.js');
 frontendProject.setScript('build', 'node scripts/build.js');
