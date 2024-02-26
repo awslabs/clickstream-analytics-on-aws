@@ -8,9 +8,9 @@ An AWS Solution that enables customers to build clickstream analytic system on A
 
 ## Data pipeline
 
-### How do I choose the Redshift type for data modeling?
+### When do I choose Redshift serverless for data modeling?
 
-If the data pipeline meets the below criteria, serverless Redshift is preferred.
+If the data pipeline meets the below criteria, Redshift serverless is preferred.
 
 - The data processing interval is equal to or larger than one hour.
 - The reporting querying and other usage, such as ETL, is intensive for a few hours at most.
