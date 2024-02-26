@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { CfnCondition } from 'aws-cdk-lib';
 import {
   IVpc,
   SubnetSelection,
@@ -19,7 +18,6 @@ import {
   Port,
   SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
-import { IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { ECSFargateCluster } from './private/ecs-fargate-cluster';
 import { ECSEc2Cluster } from './private/ecs-ec2-cluster';
@@ -101,9 +99,6 @@ export interface MskS3SinkConnectorSetting {
 export interface IngestionServerV2Props {
   readonly vpc: IVpc;
   readonly vpcSubnets: SubnetSelection;
-  readonly publicSubnets: string;
-  readonly privateSubnets: string;
-  readonly isPrivateSubnetsCondition: CfnCondition;
   readonly fargateFleetProps: FargateFleetProps;
   readonly ec2FleetProps: Ec2FleetProps;
   readonly serverEndpointPath: string;
@@ -111,23 +106,10 @@ export interface IngestionServerV2Props {
   readonly kafkaSinkConfig?: KafkaSinkConfig;
   readonly s3SinkConfig?: S3SinkConfig;
   readonly kinesisSinkConfig?: KinesisSinkConfig;
-  readonly protocol: string;
-  readonly domainName: string;
-  readonly certificateArn: string;
-  readonly notificationsTopicArn: string;
-  readonly enableApplicationLoadBalancerAccessLog: string;
-  readonly logBucketName: string;
-  readonly logPrefix: string;
-  readonly loadBalancerIpAddressType?: IpAddressType;
-  readonly enableGlobalAccelerator: string;
   readonly devMode: string;
-  readonly authenticationSecretArn: string;
   readonly projectId: string;
-  readonly appIds: string;
-  readonly clickStreamSDK: string;
   readonly workerStopTimeout: number;
 
-  readonly enableAuthentication: string;
   readonly ecsInfraType: string;
   readonly albTargetGroupArn: string;
   readonly ecsSecurityGroupArn: string;

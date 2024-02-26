@@ -128,8 +128,7 @@ export class IngestionCommonResourcesNestedStack extends NestedStack {
         `https://${props.domainName}${props.serverEndpointPath}`,
         `http://${ingestionServerDNS}${props.serverEndpointPath}`).toString(),
       description: 'Server Url',
-    });    
-
+    });
   }
 }
 

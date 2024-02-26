@@ -29,11 +29,10 @@ import {
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
-import { OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_INGESTION_SERVER_DNS_SUFFIX } from './common/constant';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
-import { getALBSubnetsCondtion } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import { createV2StackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
@@ -87,7 +86,6 @@ export interface IngestionServerV2NestStackProps extends StackProps {
   readonly albTargetGroupArn: string;
   readonly loadBalancerFullName: string;
 
-
   // authentication parameters
   readonly enableAuthentication?: string;
   readonly authenticationSecretArn?: string;
@@ -121,8 +119,6 @@ export class IngestionServerV2NestedStack extends NestedStack {
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig } = createCommonResources(this, props);
-
-    const isPrivateSubnetsCondition = getALBSubnetsCondtion(this, props.publicSubnetIds, props.privateSubnetIds);
 
     const ec2FleetCommonProps = {
       workerCpu: 1792,
@@ -172,33 +168,17 @@ export class IngestionServerV2NestedStack extends NestedStack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      privateSubnets: props.privateSubnetIds,
-      publicSubnets: props.publicSubnetIds,
-      isPrivateSubnetsCondition,
       ec2FleetProps,
       fargateFleetProps,
       serverEndpointPath: props.serverEndpointPath,
       serverCorsOrigin: props.serverCorsOrigin,
-      domainName: props.domainName,
-      certificateArn: props.certificateArn,
       s3SinkConfig,
       kinesisSinkConfig,
       kafkaSinkConfig,
-      enableGlobalAccelerator: props.enableGlobalAccelerator,
       devMode: props.devMode,
       projectId: props.projectId,
-      appIds: props.appIds,
-      clickStreamSDK: props.clickStreamSDK,
       workerStopTimeout: props.workerStopTimeout,
-      protocol: props.protocol,
-      enableApplicationLoadBalancerAccessLog: props.enableApplicationLoadBalancerAccessLog || 'No',
-      logBucketName: props.logBucketName || '',
-      logPrefix: props.logPrefix || '',
-
-      notificationsTopicArn: props.notificationsTopicArn || '',
-
-      enableAuthentication: props.enableAuthentication || 'No',
-      authenticationSecretArn: props.authenticationSecretArn || '',
+      
       ecsInfraType: props.ecsInfraType,
       albTargetGroupArn: props.albTargetGroupArn,
       loadBalancerFullName: props.loadBalancerFullName,
@@ -271,6 +251,30 @@ export class IngestionServerStackV2 extends Stack {
     const sinkType = sinkTypeParam.valueAsString;
 
     const ecsInfraType = ecsInfraTypeParam.valueAsString;
+    const vpcId = vpcIdParam.valueAsString;
+    const publicSubnetIds = publicSubnetIdsParam!.valueAsString;
+    const privateSubnetIds = privateSubnetIdsParam.valueAsString;
+    const serverEndpointPath = serverEndpointPathParam.valueAsString;
+    const serverCorsOrigin = serverCorsOriginParam.valueAsString;
+    const protocol = protocolParam.valueAsString;
+    const enableGlobalAccelerator = enableGlobalAcceleratorParam.valueAsString;
+    const devMode = devModeParam.valueAsString;
+    const projectId = projectIdParam.valueAsString;
+    const appIds = appIdsParam.valueAsString;
+    const clickStreamSDK = clickStreamSDKParam.valueAsString;
+    const workerStopTimeout = workerStopTimeoutParam.valueAsNumber;
+    const enableAuthentication = enableAuthenticationParam.valueAsString;
+    const certificateArn = certificateArnParam.valueAsString;
+    const domainName = domainNameParam.valueAsString;
+    const enableApplicationLoadBalancerAccessLog = enableApplicationLoadBalancerAccessLogParam.valueAsString;
+    const logBucketName = logS3BucketParam.valueAsString;
+    const logPrefix = logS3PrefixParam.valueAsString;
+    const authenticationSecretArn = authenticationSecretArnParam.valueAsString;
+    const serverMin = serverMinParam.valueAsNumber;
+    const serverMax = serverMaxParam.valueAsNumber;
+    const warmPoolSize = warmPoolSizeParam.valueAsNumber;
+    const scaleOnCpuUtilizationPercent = scaleOnCpuUtilizationPercentParam.valueAsNumber;
+
 
     if (kinesisParams) {
       this.kinesisNestedStacks = createKinesisNestStack(this, {
@@ -283,49 +287,48 @@ export class IngestionServerStackV2 extends Stack {
     }
 
     const ingestionCommonResourcesNestStack = new IngestionCommonResourcesNestedStack(this, 'IngestionCommonResources', {
-      vpcId: vpcIdParam.valueAsString,
-      privateSubnetIds: privateSubnetIdsParam.valueAsString,
-      publicSubnetIds: publicSubnetIdsParam!.valueAsString,
-      serverEndpointPath: serverEndpointPathParam.valueAsString,
-      protocol: protocolParam.valueAsString,
-      enableAuthentication: enableAuthenticationParam.valueAsString,
-      certificateArn: certificateArnParam.valueAsString,
-      domainName: domainNameParam.valueAsString,
-      enableApplicationLoadBalancerAccessLog: enableApplicationLoadBalancerAccessLogParam.valueAsString,
-      logBucketName: logS3BucketParam.valueAsString,
-      logPrefix: logS3PrefixParam.valueAsString,
-      appIds: appIdsParam.valueAsString,
-      clickStreamSDK: clickStreamSDKParam.valueAsString,
-      authenticationSecretArn: authenticationSecretArnParam.valueAsString,
-      enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
+      vpcId,
+      privateSubnetIds,
+      publicSubnetIds,
+      serverEndpointPath,
+      protocol,
+      enableAuthentication,
+      certificateArn,
+      domainName,
+      enableApplicationLoadBalancerAccessLog,
+      logBucketName,
+      logPrefix,
+      appIds,
+      clickStreamSDK,
+      authenticationSecretArn,
+      enableGlobalAccelerator,
     });
 
     const nestStackCommonProps: IngestionServerV2NestStackProps = {
-      vpcId: vpcIdParam.valueAsString,
-      privateSubnetIds: privateSubnetIdsParam.valueAsString,
-      publicSubnetIds: publicSubnetIdsParam!.valueAsString,
-      serverMin: serverMinParam.valueAsNumber,
-      serverMax: serverMaxParam.valueAsNumber,
-      warmPoolSize: warmPoolSizeParam.valueAsNumber,
-      scaleOnCpuUtilizationPercent:
-      scaleOnCpuUtilizationPercentParam.valueAsNumber,
-      serverEndpointPath: serverEndpointPathParam.valueAsString,
-      serverCorsOrigin: serverCorsOriginParam.valueAsString,
-      domainName: domainNameParam.valueAsString,
-      certificateArn: certificateArnParam.valueAsString,
-      protocol: protocolParam.valueAsString,
-      enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
-      devMode: devModeParam.valueAsString,
-      enableApplicationLoadBalancerAccessLog: enableApplicationLoadBalancerAccessLogParam.valueAsString,
-      projectId: projectIdParam.valueAsString,
-      clickStreamSDK: clickStreamSDKParam.valueAsString,
-      appIds: appIdsParam.valueAsString,
-      workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
-      logBucketName: logS3BucketParam.valueAsString,
-      logPrefix: logS3PrefixParam.valueAsString,
-      enableAuthentication: enableAuthenticationParam.valueAsString,
-      authenticationSecretArn: authenticationSecretArnParam.valueAsString,
-      ecsInfraType: ecsInfraType,
+      vpcId,
+      privateSubnetIds,
+      publicSubnetIds,
+      serverMin,
+      serverMax,
+      warmPoolSize,
+      scaleOnCpuUtilizationPercent,
+      serverEndpointPath,
+      serverCorsOrigin,
+      domainName,
+      certificateArn,
+      protocol,
+      enableGlobalAccelerator,
+      devMode,
+      enableApplicationLoadBalancerAccessLog,
+      projectId,
+      clickStreamSDK,
+      appIds,
+      workerStopTimeout,
+      logBucketName,
+      logPrefix,
+      enableAuthentication,
+      authenticationSecretArn,
+      ecsInfraType,
       ecsSecurityGroupArn: ingestionCommonResourcesNestStack.ecsSecurityGroupArn,
       albTargetGroupArn: ingestionCommonResourcesNestStack.albTargetArn,
       loadBalancerFullName: ingestionCommonResourcesNestStack.loadBalancerFullName,

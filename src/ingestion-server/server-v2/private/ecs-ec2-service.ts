@@ -133,6 +133,17 @@ function createECSService(
   });
   addScalingPolicy(ecsService, ecsAsgSetting);
 
+  const loadBalancer: any[] = [
+    {
+     "ContainerName": "proxy",
+     "ContainerPort": 8088,
+     "TargetGroupArn": props.albTargetGroupArn,
+    }
+   ]
+
+  const cfnEc2Service = ecsService.node.defaultChild as CfnResource;
+  cfnEc2Service.addPropertyOverride('LoadBalancers', loadBalancer);   
+
   Aspects.of(scope).add(new HotfixCapacityProviderDependencies());
 
   if (props.s3SinkConfig) {
