@@ -310,7 +310,7 @@ export class ClickStreamApiConstruct extends Construct {
   private createApiFunction(props: ClickStreamApiProps, lambdaFunctionNetwork: any, role: Role): LambdaFunction {
     const fn = new LambdaFunction(this, 'ApiFunction', {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
-      code: Code.fromDockerBuild(path.join(__dirname, '../../../../'), {
+      code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
         file: './src/control-plane/backend/Dockerfile',
       }),
       handler: 'run.sh',

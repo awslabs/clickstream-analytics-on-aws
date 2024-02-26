@@ -18,7 +18,7 @@ RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node
 
 
 RUN mkdir -p /asset
-RUN cp -r /home/node/app/node_modules /asset/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/node_modules /asset/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/dist /asset/
 RUN cp /home/node/app/src/control-plane/backend/lambda/api/run.sh /asset/run.sh
 USER node
