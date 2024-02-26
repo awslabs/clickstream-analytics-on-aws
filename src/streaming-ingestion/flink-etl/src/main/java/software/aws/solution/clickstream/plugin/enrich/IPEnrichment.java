@@ -45,7 +45,7 @@ public class IPEnrichment implements Enrichment {
     }
 
     public ObjectNode enrich(final ObjectNode geoNode, final Map<String, String> paramMap) {
-        String ip = paramMap.get(PARAM_KEY_IP);
+        String ip = paramMap.get(PARAM_KEY_IP).split(",")[0];
         String locale = paramMap.get(PARAM_KEY_LOCALE);
         try {
 
