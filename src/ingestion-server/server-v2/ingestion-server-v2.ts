@@ -11,27 +11,23 @@
  *  and limitations under the License.
  */
 
-import { CfnCondition, Fn } from 'aws-cdk-lib';
+import { CfnCondition } from 'aws-cdk-lib';
 import {
   IVpc,
   SubnetSelection,
   InstanceType,
   Port,
+  SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
 import { IpAddressType } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { CfnAccelerator, CfnEndpointGroup, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
 import { Construct } from 'constructs';
-import { GlobalAcceleratorV2 } from './private/aga-v2';
-import { ApplicationLoadBalancerV2, PROXY_PORT } from './private/alb-v2';
 import { ECSFargateCluster } from './private/ecs-fargate-cluster';
 import { ECSEc2Cluster } from './private/ecs-ec2-cluster';
 import { deleteECSClusterCustomResource } from '../custom-resource/delete-ecs-cluster';
-import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
 import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../server/ingestion-server';
 import { grantMskReadWrite } from '../server/private/iam';
 import { createMetricsWidgetForKafka } from '../server/private/metircs-kafka';
 import { createMetricsWidgetForServerV2 } from '../server/private/metircs-server';
-import { createALBSecurityGroupV2, createECSSecurityGroup } from '../server/private/sg';
 import { ECS_INFRA_TYPE_MODE } from '../../common/model';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
@@ -133,52 +129,25 @@ export interface IngestionServerV2Props {
 
   readonly enableAuthentication: string;
   readonly ecsInfraType: string;
-}
-
-interface UpdateAlbRulesInput {
-  readonly appIds: string;
-  readonly clickStreamSDK: string;
-  readonly targetGroupArn: string;
-  readonly listenerArn: string;
-  readonly serverEndpointPath: string;
-  readonly protocol: string;
-  readonly enableAuthentication: string;
-  readonly authenticationSecretArn: string;
-  readonly domainName?: string;
+  readonly albTargetGroupArn: string;
+  readonly ecsSecurityGroupArn: string;
+  readonly loadBalancerFullName: string;
 }
 
 export class IngestionServerV2 extends Construct {
-  public albDNS: string;
-  public acceleratorDNS: string;
-  public acceleratorEnableCondition: CfnCondition;
-  public isHttps: CfnCondition;
   constructor(scope: Construct, id: string, props: IngestionServerV2Props) {
     super(scope, id);
-
-    const ecsSecurityGroup = createECSSecurityGroup(scope, props.vpc);
+    const ecsSecurityGroup = SecurityGroup.fromSecurityGroupId(
+      scope,
+      'ecsSecurityGroup',
+      props.ecsSecurityGroupArn,
+    );    
 
     if (props.kafkaSinkConfig?.mskSecurityGroup) {
       const mskSg = props.kafkaSinkConfig?.mskSecurityGroup;
       mskSg.addIngressRule(ecsSecurityGroup, Port.tcpRange(9092, 9198));
       mskSg.addIngressRule(mskSg, Port.tcpRange(9092, 9198));
     }
-
-    const acceleratorEnableCondition = new CfnCondition(
-      scope,
-      'acceleratorEnableCondition',
-      {
-        expression: Fn.conditionAnd(
-          Fn.conditionEquals(props.enableGlobalAccelerator, 'Yes'),
-          Fn.conditionNot(
-            Fn.conditionOr(
-              Fn.conditionEquals(Fn.ref('AWS::Region'), 'cn-north-1'),
-              Fn.conditionEquals(Fn.ref('AWS::Region'), 'cn-northwest-1'),
-            ),
-          ),
-        ),
-      },
-    );
-    this.acceleratorEnableCondition = acceleratorEnableCondition;
 
     let ecsCluster;
     if (props.ecsInfraType === ECS_INFRA_TYPE_MODE.FARGATE) {
@@ -204,61 +173,9 @@ export class IngestionServerV2 extends Construct {
       );
     }
 
-    // ALB
-    const ports = {
-      http: 80,
-      https: 443,
-    };
-    const endpointPath = props.serverEndpointPath;
-
-    const isHttps = new CfnCondition(scope, 'IsHTTPS', {
-      expression: Fn.conditionEquals(props.protocol, 'HTTPS'),
-    });
-
-    this.isHttps = isHttps;
-
-    const albSg = createALBSecurityGroupV2(this, props.vpc, ports, props.enableAuthentication);
-
-    ecsSecurityGroup.addIngressRule(albSg, Port.tcp(PROXY_PORT));
-
-    const albConstructor = new ApplicationLoadBalancerV2(this, 'ALB', {
-      vpc: props.vpc,
-      publicSubnets: props.publicSubnets,
-      privateSubnets: props.privateSubnets,
-      isPrivateSubnetsCondition: props.isPrivateSubnetsCondition,
-      service: ecsCluster.ecsService,
-      sg: albSg,
-      ports,
-      endpointPath,
-      protocol: props.protocol,
-      httpContainerName: ecsCluster.httpContainerName,
-      certificateArn: props.certificateArn || '',
-      domainName: props.domainName || '',
-      enableAccessLog: props.enableApplicationLoadBalancerAccessLog || '',
-      albLogBucketName: props.logBucketName,
-      albLogPrefix: props.logPrefix,
-
-      ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
-      isHttps,
-    });
-
-    this.albDNS = albConstructor.alb.loadBalancerDnsName;
-
-    const aga = new GlobalAcceleratorV2(
-      this,
-      'GlobalAccelerator',
-      {
-        ports,
-        protocol: props.protocol,
-        alb: albConstructor.alb,
-        endpointPath,
-        isHttps,
-      },
-    );
-
     createMetricsWidgetForServerV2(this, {
       projectId: props.projectId,
-      albFullName: albConstructor.alb.loadBalancerFullName,
+      albFullName: props.loadBalancerFullName,
       ecsServiceName: ecsCluster.ecsService.serviceName,
       ecsClusterName: ecsCluster.ecsService.cluster.clusterName,
     });
@@ -272,67 +189,13 @@ export class IngestionServerV2 extends Construct {
       });
     }
 
-    const appIds = props.appIds;
-    const clickStreamSDK = props.clickStreamSDK;
-    const targetGroupArn = albConstructor.targetGroup.targetGroupArn;
-    const listenerArn = albConstructor.listener.listenerArn;
-    const serverEndpointPath = props.serverEndpointPath;
-    const protocol = props.protocol;
-    const domainName = props.domainName;
-    const authenticationSecretArn = props.authenticationSecretArn;
-    const enableAuthentication = props.enableAuthentication;
-
-    updateAlbRules(this, {
-      appIds,
-      clickStreamSDK,
-      targetGroupArn,
-      listenerArn,
-      enableAuthentication,
-      authenticationSecretArn,
-      serverEndpointPath,
-      protocol,
-      domainName,
-    });
-
     deleteECSCluster(
       this,
       ecsCluster.ecsCluster.clusterArn,
       ecsCluster.ecsCluster.clusterName,
       ecsCluster.ecsService.serviceName,
     );
-
-    (aga.accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
-    (aga.agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
-    (aga.endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
-
-    this.acceleratorDNS = aga.accelerator.dnsName;
-    this.acceleratorEnableCondition = acceleratorEnableCondition;
   }
-}
-
-function updateAlbRules(
-  scope: Construct,
-  updateAlbRulesInput: UpdateAlbRulesInput,
-) {
-  const appIds = updateAlbRulesInput.appIds;
-  const clickStreamSDK = updateAlbRulesInput.clickStreamSDK;
-  const targetGroupArn = updateAlbRulesInput.targetGroupArn;
-  const listenerArn = updateAlbRulesInput.listenerArn;
-  const authenticationSecretArn = updateAlbRulesInput.authenticationSecretArn;
-  const endpointPath = updateAlbRulesInput.serverEndpointPath;
-  const domainName = updateAlbRulesInput.domainName;
-  const protocol = updateAlbRulesInput.protocol;
-
-  updateAlbRulesCustomResource(scope, {
-    appIds,
-    clickStreamSDK,
-    targetGroupArn,
-    listenerArn,
-    authenticationSecretArn,
-    endpointPath,
-    domainName,
-    protocol,
-  });
 }
 
 function deleteECSCluster(scope: Construct, ecsClusterArn: string, ecsClusterName: string, ecsServiceName: string) {

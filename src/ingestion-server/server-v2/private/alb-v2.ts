@@ -13,7 +13,7 @@
 
 import { Duration, CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { BaseService } from 'aws-cdk-lib/aws-ecs';
+// import { BaseService } from 'aws-cdk-lib/aws-ecs';
 import {
   ApplicationListener,
   ApplicationProtocol,
@@ -27,6 +27,7 @@ import {
   ApplicationTargetGroup,
   ListenerAction,
   CfnLoadBalancer,
+  TargetType,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
@@ -34,17 +35,18 @@ import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
 
-function createECSTargets(scope : Construct, service: BaseService, proxyContainerName: string) {
+function createECSTargets(scope : Construct, vpc: IVpc) {
   const targetGroup = new ApplicationTargetGroup(scope, 'ECS', {
     protocol: ApplicationProtocol.HTTP,
-    vpc: service.cluster.vpc,
+    vpc: vpc,
     port: PROXY_PORT,
-    targets: [
-      service.loadBalancerTarget({
-        containerName: proxyContainerName,
-        containerPort: PROXY_PORT,
-      }),
-    ],
+    targetType: TargetType.IP,  
+    // targets: [
+    //   service.loadBalancerTarget({
+    //     containerName: proxyContainerName,
+    //     containerPort: PROXY_PORT,
+    //   }),
+    // ],
     healthCheck: {
       enabled: true,
       protocol: Protocol.HTTP,
@@ -67,9 +69,9 @@ export interface ApplicationLoadBalancerProps {
   certificateArn: string;
   domainName: string;
   sg: SecurityGroup;
-  service: BaseService;
+  // service: BaseService;
   endpointPath: string;
-  httpContainerName: string;
+  // httpContainerName: string;
   ipAddressType: IpAddressType;
   protocol: string;
   ports: {
@@ -104,7 +106,7 @@ function createApplicationLoadBalancer(
 ) {
   const httpPort = props.ports.http;
   const httpsPort = props.ports.https;
-  const httpContainerName = props.httpContainerName;
+  // const httpContainerName = props.httpContainerName;
 
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
@@ -163,7 +165,7 @@ function createApplicationLoadBalancer(
   cfnAlb.addPropertyOverride('Subnets',
     Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
 
-  const targetGroup = createECSTargets(scope, props.service, httpContainerName);
+  const targetGroup = createECSTargets(scope, props.vpc);
 
   const httpListener = new ApplicationListener(scope, 'HttpListener', {
     protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended

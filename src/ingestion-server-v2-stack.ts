@@ -29,7 +29,7 @@ import {
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
+import { OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_INGESTION_SERVER_DNS_SUFFIX } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
@@ -52,6 +52,9 @@ import {
 import {
   createCommonResources,
 } from './ingestion-server-stack';
+import {
+  IngestionCommonResourcesNestedStack,
+} from './ingestion-server/common-resources/ingestion-common-resources-nested-stack';
 
 export interface IngestionServerV2NestStackProps extends StackProps {
   readonly vpcId: string;
@@ -80,6 +83,10 @@ export interface IngestionServerV2NestStackProps extends StackProps {
   readonly clickStreamSDK: string;
 
   readonly ecsInfraType: string;
+  readonly ecsSecurityGroupArn: string;
+  readonly albTargetGroupArn: string;
+  readonly loadBalancerFullName: string;
+
 
   // authentication parameters
   readonly enableAuthentication?: string;
@@ -193,32 +200,16 @@ export class IngestionServerV2NestedStack extends NestedStack {
       enableAuthentication: props.enableAuthentication || 'No',
       authenticationSecretArn: props.authenticationSecretArn || '',
       ecsInfraType: props.ecsInfraType,
+      albTargetGroupArn: props.albTargetGroupArn,
+      loadBalancerFullName: props.loadBalancerFullName,
+      ecsSecurityGroupArn: props.ecsSecurityGroupArn,
     };
 
-    const ingestionServer = new IngestionServerV2(
+    new IngestionServerV2(
       this,
       'IngestionServer',
       serverProps,
     );
-
-    const ingestionServerDNS = Fn.conditionIf(
-      ingestionServer.acceleratorEnableCondition.logicalId,
-      ingestionServer.acceleratorDNS,
-      ingestionServer.albDNS).toString();
-
-    new CfnOutput(this, 'ingestionServerDNS', {
-      value: ingestionServerDNS,
-      description: 'Server DNS',
-    });
-
-    const isHttps = ingestionServer.isHttps;
-
-    new CfnOutput(this, 'ingestionServerUrl', {
-      value: Fn.conditionIf(isHttps.logicalId,
-        `https://${props.domainName}${props.serverEndpointPath}`,
-        `http://${ingestionServerDNS}${props.serverEndpointPath}`).toString(),
-      description: 'Server Url',
-    });
   }
 }
 
@@ -291,6 +282,24 @@ export class IngestionServerStackV2 extends Stack {
       });
     }
 
+    const ingestionCommonResourcesNestStack = new IngestionCommonResourcesNestedStack(this, 'IngestionCommonResources', {
+      vpcId: vpcIdParam.valueAsString,
+      privateSubnetIds: privateSubnetIdsParam.valueAsString,
+      publicSubnetIds: publicSubnetIdsParam!.valueAsString,
+      serverEndpointPath: serverEndpointPathParam.valueAsString,
+      protocol: protocolParam.valueAsString,
+      enableAuthentication: enableAuthenticationParam.valueAsString,
+      certificateArn: certificateArnParam.valueAsString,
+      domainName: domainNameParam.valueAsString,
+      enableApplicationLoadBalancerAccessLog: enableApplicationLoadBalancerAccessLogParam.valueAsString,
+      logBucketName: logS3BucketParam.valueAsString,
+      logPrefix: logS3PrefixParam.valueAsString,
+      appIds: appIdsParam.valueAsString,
+      clickStreamSDK: clickStreamSDKParam.valueAsString,
+      authenticationSecretArn: authenticationSecretArnParam.valueAsString,
+      enableGlobalAccelerator: enableGlobalAcceleratorParam.valueAsString,
+    });
+
     const nestStackCommonProps: IngestionServerV2NestStackProps = {
       vpcId: vpcIdParam.valueAsString,
       privateSubnetIds: privateSubnetIdsParam.valueAsString,
@@ -317,6 +326,9 @@ export class IngestionServerStackV2 extends Stack {
       enableAuthentication: enableAuthenticationParam.valueAsString,
       authenticationSecretArn: authenticationSecretArnParam.valueAsString,
       ecsInfraType: ecsInfraType,
+      ecsSecurityGroupArn: ingestionCommonResourcesNestStack.ecsSecurityGroupArn,
+      albTargetGroupArn: ingestionCommonResourcesNestStack.albTargetArn,
+      loadBalancerFullName: ingestionCommonResourcesNestStack.loadBalancerFullName,
     };
 
     const dataBufferPropsAndConditions: any[] = [];
@@ -401,6 +413,19 @@ export class IngestionServerStackV2 extends Stack {
       this.nestedStacks.push(nestedStack);
     }
 
+    const ingestionServerDNS = (ingestionCommonResourcesNestStack.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerDNS').toString();
+    const ingestionServerUrl = (ingestionCommonResourcesNestStack.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
+  
+    new CfnOutput(this, id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX, {
+      value: ingestionServerDNS,
+      description: 'Server DNS',
+    });
+  
+    new CfnOutput(this, id + OUTPUT_INGESTION_SERVER_URL_SUFFIX, {
+      value: ingestionServerUrl,
+      description: 'Server URL',
+    });
+
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
 
@@ -429,21 +454,6 @@ function createNestedStackWithCondition(
   condition;
 
   addCfnNagToIngestionServer(ingestionServer);
-
-  const ingestionServerDNS = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerDNS').toString();
-  const ingestionServerUrl = (ingestionServer.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
-
-  const serverDNSOutput = new CfnOutput(scope, id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX, {
-    value: ingestionServerDNS,
-    description: 'Server DNS',
-  });
-  serverDNSOutput.condition = condition;
-
-  const serverURLOutput = new CfnOutput(scope, id + OUTPUT_INGESTION_SERVER_URL_SUFFIX, {
-    value: ingestionServerUrl,
-    description: 'Server URL',
-  });
-  serverURLOutput.condition = condition;
 
   if (conditionName.endsWith('K1') || conditionName.endsWith('K2')) {
     const kdsOutput = new CfnOutput(scope, id + 'KinesisArn', {

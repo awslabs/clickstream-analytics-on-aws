@@ -124,6 +124,17 @@ function createECSFargateService(
     maxCapacity: props.fargateFleetProps.taskMax,
   });
 
+  const loadBalancer: any[] = [
+    {
+     "ContainerName": "proxy",
+     "ContainerPort": 8088,
+     "TargetGroupArn": props.albTargetGroupArn,
+    }
+   ]
+
+  const cfnFargateService = fargateService.node.defaultChild as CfnResource;
+  cfnFargateService.addPropertyOverride('LoadBalancers', loadBalancer);  
+
   scalableTarget.scaleOnCpuUtilization('CpuScaling', {
     targetUtilizationPercent: props.fargateFleetProps.scaleOnCpuUtilizationPercent || 50,
     scaleInCooldown: Duration.seconds(45),
