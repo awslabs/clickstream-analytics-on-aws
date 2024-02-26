@@ -3,14 +3,18 @@ RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY . .
 RUN npm install -g pnpm
-RUN pnpm projen
+RUN pnpm recursive exec -- rm -rf node_modules
+RUN pnpm install
 RUN pnpm nx build @clickstream/base-lib
-RUN cd src/control-plane/backend/lambda/api && pnpm install && pnpm run compile
-RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --production --force
-RUN ls /home/node/app/src/control-plane/backend/lambda/api/
-RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
-curl -sf https://gobinaries.com/tj/node-prune | sh && \
-node-prune /home/node/app/src/control-plane/backend/lambda/api/node_modules
+RUN pnpm recursive prune --prod --force
+RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test 
+# RUN pnpm projen
+# RUN pnpm nx build @clickstream/base-lib
+# RUN cd src/control-plane/backend/lambda/api && pnpm install && pnpm run compile
+# RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --prod --force
+# RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
+# curl -sf https://gobinaries.com/tj/node-prune | sh && \
+# node-prune /home/node/app/src/control-plane/backend/lambda/api/node_modules
 
 RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
