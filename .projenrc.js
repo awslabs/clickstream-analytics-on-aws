@@ -402,7 +402,7 @@ const frontendTSConfig = {
 
 const frontendProject = new typescript.TypeScriptProject({
   parent: project,
-  name: '@clickstream/portal',
+  name: '@aws/clickstream-web-console',
   outdir: './frontend',
   defaultReleaseBranch: defaultBranch,
   readme: undefined,

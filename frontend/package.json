@@ -1,5 +1,5 @@
 {
-  "name": "@clickstream/portal",
+  "name": "@aws/clickstream-web-console",
   "scripts": {
     "build": "node scripts/build.js",
     "compile": "pnpm dlx projen compile",
