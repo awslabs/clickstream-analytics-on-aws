@@ -523,6 +523,8 @@ const apiProject = new typescript.TypeScriptProject({
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
 apiProject.addFields({ version });
+apiProject.npmrc.addConfig('node-linker', 'hoisted');
+
 
 project.buildWorkflow.buildTask._env = {
   NODE_OPTIONS: '--max_old_space_size=6144',
