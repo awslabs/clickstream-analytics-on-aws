@@ -19,14 +19,14 @@ import {
   SecurityGroup,
 } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
-import { ECSFargateCluster } from './private/ecs-fargate-cluster';
 import { ECSEc2Cluster } from './private/ecs-ec2-cluster';
+import { ECSFargateCluster } from './private/ecs-fargate-cluster';
+import { ECS_INFRA_TYPE_MODE } from '../../common/model';
 import { deleteECSClusterCustomResource } from '../custom-resource/delete-ecs-cluster';
 import { S3SinkConfig, KafkaSinkConfig, KinesisSinkConfig } from '../server/ingestion-server';
 import { grantMskReadWrite } from '../server/private/iam';
 import { createMetricsWidgetForKafka } from '../server/private/metircs-kafka';
 import { createMetricsWidgetForServerV2 } from '../server/private/metircs-server';
-import { ECS_INFRA_TYPE_MODE } from '../../common/model';
 
 export const RESOURCE_ID_PREFIX = 'clickstream-ingestion-service-';
 
@@ -123,7 +123,7 @@ export class IngestionServerV2 extends Construct {
       scope,
       'ecsSecurityGroup',
       props.ecsSecurityGroupArn,
-    );    
+    );
 
     if (props.kafkaSinkConfig?.mskSecurityGroup) {
       const mskSg = props.kafkaSinkConfig?.mskSecurityGroup;
@@ -136,7 +136,7 @@ export class IngestionServerV2 extends Construct {
       ecsCluster = new ECSFargateCluster(this, 'ECSFargateCluster', {
         ...props,
         ecsSecurityGroup,
-      });    
+      });
     } else {
       ecsCluster = new ECSEc2Cluster(this, 'ECSEc2Cluster', {
         ...props,

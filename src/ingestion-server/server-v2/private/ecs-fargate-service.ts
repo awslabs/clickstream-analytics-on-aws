@@ -116,6 +116,7 @@ function createECSFargateService(
     cluster: props.ecsCluster,
     taskDefinition: taskDefinition,
     securityGroups: [props.ecsSecurityGroup],
+    healthCheckGracePeriod: Duration.seconds(60),
     desiredCount: props.fargateFleetProps.taskMin,
   });
 
@@ -126,14 +127,14 @@ function createECSFargateService(
 
   const loadBalancer: any[] = [
     {
-     "ContainerName": "proxy",
-     "ContainerPort": 8088,
-     "TargetGroupArn": props.albTargetGroupArn,
-    }
-   ]
+      ContainerName: 'proxy',
+      ContainerPort: 8088,
+      TargetGroupArn: props.albTargetGroupArn,
+    },
+  ];
 
   const cfnFargateService = fargateService.node.defaultChild as CfnResource;
-  cfnFargateService.addPropertyOverride('LoadBalancers', loadBalancer);  
+  cfnFargateService.addPropertyOverride('LoadBalancers', loadBalancer);
 
   scalableTarget.scaleOnCpuUtilization('CpuScaling', {
     targetUtilizationPercent: props.fargateFleetProps.scaleOnCpuUtilizationPercent || 50,

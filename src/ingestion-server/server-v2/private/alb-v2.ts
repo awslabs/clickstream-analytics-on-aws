@@ -13,24 +13,16 @@
 
 import { Duration, CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-// import { BaseService } from 'aws-cdk-lib/aws-ecs';
 import {
-  // ApplicationListener,
   ApplicationProtocol,
   Protocol,
-  // ListenerCertificate,
   ApplicationLoadBalancer,
-  // ListenerAction,
   IpAddressType,
-  // SslPolicy,
-  // CfnListener,
   ApplicationTargetGroup,
-  // ListenerAction,
   CfnLoadBalancer,
   TargetType,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
-// import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
@@ -40,13 +32,7 @@ function createECSTargets(scope : Construct, vpc: IVpc) {
     protocol: ApplicationProtocol.HTTP,
     vpc: vpc,
     port: PROXY_PORT,
-    targetType: TargetType.IP,  
-    // targets: [
-    //   service.loadBalancerTarget({
-    //     containerName: proxyContainerName,
-    //     containerPort: PROXY_PORT,
-    //   }),
-    // ],
+    targetType: TargetType.IP,
     healthCheck: {
       enabled: true,
       protocol: Protocol.HTTP,

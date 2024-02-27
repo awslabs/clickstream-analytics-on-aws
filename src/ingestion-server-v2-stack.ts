@@ -33,6 +33,9 @@ import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX 
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
+import {
+  IngestionCommonResourcesNestedStack,
+} from './ingestion-server/common-resources/ingestion-common-resources-nested-stack';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import { createV2StackParameters } from './ingestion-server/server/parameter';
 import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
@@ -51,9 +54,6 @@ import {
 import {
   createCommonResources,
 } from './ingestion-server-stack';
-import {
-  IngestionCommonResourcesNestedStack,
-} from './ingestion-server/common-resources/ingestion-common-resources-nested-stack';
 
 export interface IngestionServerV2NestStackProps extends StackProps {
   readonly vpcId: string;
@@ -141,8 +141,8 @@ export class IngestionServerV2NestedStack extends NestedStack {
       taskMin: props.serverMin,
       taskMax: props.serverMax,
       scaleOnCpuUtilizationPercent: props.scaleOnCpuUtilizationPercent,
-    }; 
-    
+    };
+
     const fargateFleetCommonProps = {
       taskCpu: 256,
       taskMemory: 512,
@@ -178,7 +178,7 @@ export class IngestionServerV2NestedStack extends NestedStack {
       devMode: props.devMode,
       projectId: props.projectId,
       workerStopTimeout: props.workerStopTimeout,
-      
+
       ecsInfraType: props.ecsInfraType,
       albTargetGroupArn: props.albTargetGroupArn,
       loadBalancerFullName: props.loadBalancerFullName,
@@ -418,12 +418,12 @@ export class IngestionServerStackV2 extends Stack {
 
     const ingestionServerDNS = (ingestionCommonResourcesNestStack.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerDNS').toString();
     const ingestionServerUrl = (ingestionCommonResourcesNestStack.nestedStackResource as CfnStack).getAtt('Outputs.ingestionServerUrl').toString();
-  
+
     new CfnOutput(this, id + OUTPUT_INGESTION_SERVER_DNS_SUFFIX, {
       value: ingestionServerDNS,
       description: 'Server DNS',
     });
-  
+
     new CfnOutput(this, id + OUTPUT_INGESTION_SERVER_URL_SUFFIX, {
       value: ingestionServerUrl,
       description: 'Server URL',

@@ -33,7 +33,7 @@ export function createS3ConditionsV2(scope: Construct, props: {
       },
     );
   });
-  
+
   return s3ConditionAndName;
 }
 
@@ -58,7 +58,7 @@ export function createECSTypeCondition(
       name: 'F',
       ecsInfraType: ECS_INFRA_TYPE_MODE.FARGATE,
     },
-  ]
+  ];
   return ecsInfraConditions;
 }
 

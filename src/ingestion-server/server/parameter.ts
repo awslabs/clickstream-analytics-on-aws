@@ -48,7 +48,7 @@ export function createStackParameters(scope: Construct, props: {deliverToKinesis
       constraintDescription:
         'NotificationsTopicArn must match pattern (arn:(aws|aws-cn):sns:.*?:[0-9]+:.*)?',
     },
-  );  
+  );
 
   const commonParameters = createCommonParameters(scope);
 
@@ -237,7 +237,7 @@ export function createV2StackParameters(scope: Construct) {
     type: 'String',
     allowedValues: [ECS_INFRA_TYPE_MODE.EC2, ECS_INFRA_TYPE_MODE.FARGATE],
     default: ECS_INFRA_TYPE_MODE.EC2,
-  });  
+  });
 
   const workerStopTimeoutParam = new CfnParameter(scope, 'WorkerStopTimeout', {
     description: 'Worker container stop timeout seconds',

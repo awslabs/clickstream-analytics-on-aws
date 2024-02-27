@@ -15,40 +15,40 @@ import {
   NestedStack,
   NestedStackProps,
   CfnOutput,
+  CfnCondition,
+  Fn,
 } from 'aws-cdk-lib';
-import { Construct, } from 'constructs';
-import { SolutionInfo } from '../../common/solution-info';
+import { Port } from 'aws-cdk-lib/aws-ec2';
 import {
   IpAddressType,
   ApplicationLoadBalancer,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import { Port } from 'aws-cdk-lib/aws-ec2';
-import { getALBSubnetsCondtion } from '../../common/vpc-utils';
-import { createALBSecurityGroupV2, createECSSecurityGroup } from '../server/private/sg';
-import { CfnCondition, Fn } from 'aws-cdk-lib';
-import { getExistVpc } from '../../common/vpc-utils';
-import { ApplicationLoadBalancerV2, PROXY_PORT } from '../server-v2/private/alb-v2';
-import { updateAlbRulesCustomResourceV2 } from '../custom-resource/update-alb-rules-v2';
-import { GlobalAcceleratorV2 } from '../server-v2/private/aga-v2';
 import { CfnAccelerator, CfnEndpointGroup, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
+import { Construct } from 'constructs';
+import { SolutionInfo } from '../../common/solution-info';
+import { getExistVpc, getALBSubnetsCondtion } from '../../common/vpc-utils';
+import { updateAlbRulesCustomResourceV2 } from '../custom-resource/update-alb-rules-v2';
+import { createALBSecurityGroupV2, createECSSecurityGroup } from '../server/private/sg';
+import { GlobalAcceleratorV2 } from '../server-v2/private/aga-v2';
+import { ApplicationLoadBalancerV2, PROXY_PORT } from '../server-v2/private/alb-v2';
 
 export interface IngestionCommonResourcesNestStackProps extends NestedStackProps {
   readonly vpcId: string;
-  readonly publicSubnetIds: string,
+  readonly publicSubnetIds: string;
   readonly privateSubnetIds: string;
-  readonly serverEndpointPath: string,
-  readonly protocol: string,
-  readonly enableAuthentication: string,
-  readonly certificateArn: string,
-  readonly domainName: string,
-  readonly enableApplicationLoadBalancerAccessLog: string,
-  readonly logBucketName: string,
-  readonly logPrefix: string,
-  readonly appIds: string,
-  readonly clickStreamSDK: string,
-  readonly authenticationSecretArn: string,
-  readonly enableGlobalAccelerator: string,
-  readonly loadBalancerIpAddressType?: IpAddressType,
+  readonly serverEndpointPath: string;
+  readonly protocol: string;
+  readonly enableAuthentication: string;
+  readonly certificateArn: string;
+  readonly domainName: string;
+  readonly enableApplicationLoadBalancerAccessLog: string;
+  readonly logBucketName: string;
+  readonly logPrefix: string;
+  readonly appIds: string;
+  readonly clickStreamSDK: string;
+  readonly authenticationSecretArn: string;
+  readonly enableGlobalAccelerator: string;
+  readonly loadBalancerIpAddressType?: IpAddressType;
 }
 
 interface UpdateAlbRulesInput {
@@ -90,7 +90,7 @@ export class IngestionCommonResourcesNestedStack extends NestedStack {
       expression: Fn.conditionEquals(props.protocol, 'HTTPS'),
     });
 
-    const {albConstructor, ecsSecurityGroup} = createApplicationLoadBalancer(this, props, ports, isHttps);
+    const { albConstructor, ecsSecurityGroup } = createApplicationLoadBalancer(this, props, ports, isHttps);
     this.albTargetArn = albConstructor.targetGroup.targetGroupArn;
     this.ecsSecurityGroupArn = ecsSecurityGroup.securityGroupId;
     this.loadBalancerFullName = albConstructor.alb.loadBalancerFullName;
@@ -110,9 +110,9 @@ export class IngestionCommonResourcesNestedStack extends NestedStack {
         ),
       },
     );
-    
+
     const aga = createAccelerator(this, props, acceleratorEnableCondition, ports, isHttps, albConstructor.alb);
-    this.acceleratorDNS = aga.accelerator.dnsName;  
+    this.acceleratorDNS = aga.accelerator.dnsName;
 
     const ingestionServerDNS = Fn.conditionIf(
       acceleratorEnableCondition.logicalId,
@@ -173,7 +173,7 @@ function createApplicationLoadBalancer(
     albLogPrefix: props.logPrefix,
     ipAddressType: props.loadBalancerIpAddressType || IpAddressType.IPV4,
     isHttps,
-  }); 
+  });
 
   updateAlbRules(scope, {
     appIds: props.appIds,
@@ -209,12 +209,12 @@ function createAccelerator(
       endpointPath: props.serverEndpointPath,
       isHttps,
     },
-  ); 
-  
+  );
+
   (aga.accelerator.node.defaultChild as CfnAccelerator).cfnOptions.condition = acceleratorEnableCondition;
   (aga.agListener.node.defaultChild as CfnListener).cfnOptions.condition = acceleratorEnableCondition;
-  (aga.endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition; 
-  return aga; 
+  (aga.endpointGroup.node.defaultChild as CfnEndpointGroup).cfnOptions.condition = acceleratorEnableCondition;
+  return aga;
 }
 
 function updateAlbRules(

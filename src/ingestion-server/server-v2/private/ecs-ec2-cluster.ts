@@ -20,7 +20,6 @@ import {
 } from 'aws-cdk-lib/aws-autoscaling';
 import { ISecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
-import { IRole } from 'aws-cdk-lib/aws-iam';
 import {
   Cluster,
   Ec2Service,
@@ -30,10 +29,11 @@ import {
   AmiHardwareType,
   CfnClusterCapacityProviderAssociations,
 } from 'aws-cdk-lib/aws-ecs';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Construct, IConstruct } from 'constructs';
+import { ECSEc2Service } from './ecs-ec2-service';
 import { createProxyAndWorkerECRImages } from '../../server/private/ecr';
 
-import { ECSEc2Service } from './ecs-ec2-service';
 import { addPoliciesToAsgRole } from '../../server/private/iam';
 import { IngestionServerV2Props, RESOURCE_ID_PREFIX } from '../ingestion-server-v2';
 
@@ -168,11 +168,11 @@ function createECSClusterAndService(
   });
 
   Aspects.of(scope).add(new AddDefaultCapacityProviderStrategyAspect(capacityProvider));
-  return { 
+  return {
     ecsService: ec2Service.ecsService,
     httpContainerName: ec2Service.httpContainerName,
     taskDefinition: ec2Service.taskDefinition,
-    autoScalingGroup, 
+    autoScalingGroup,
     ecsCluster,
   };
 }
