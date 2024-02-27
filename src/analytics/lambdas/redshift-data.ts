@@ -230,7 +230,6 @@ async function readSqlFileFromS3(s3Path: string): Promise<string> {
   return sqlString;
 }
 
-
 export function getRedshiftProps(
   redshiftMode: string,
   databaseName: string,
@@ -259,4 +258,4 @@ export function getRedshiftProps(
     serverlessRedshiftProps,
     provisionedRedshiftProps,
   };
-};
+}

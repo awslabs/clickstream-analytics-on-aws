@@ -46,7 +46,7 @@ import {
   SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
-  IAM_ROLE_PREFIX_PATTERN,
+  IAM_ROLE_PREFIX_PATTERN, DDB_TABLE_ARN_PATTERN,
 } from './constant';
 import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
@@ -663,4 +663,11 @@ export class Parameters {
     };
   }
 
+  public static createClickstreamMetadataDdbArnParameter(scope: Construct) {
+    return new CfnParameter(scope, 'ClickstreamMetadataDdbArn', {
+      description: 'The arn of ClickstreamMetadata Dynamodb table.',
+      type: 'String',
+      allowedPattern: DDB_TABLE_ARN_PATTERN,
+    });
+  }
 }

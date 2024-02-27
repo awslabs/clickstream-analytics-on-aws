@@ -90,6 +90,7 @@ export interface RedshiftAnalyticsStackProps {
       dbUser: string;
     };
   };
+  clickstreamMetadataDdbArn: string;
 }
 
 export interface AthenaAnalyticsStackProps {
@@ -543,6 +544,8 @@ export function createStackParameters(scope: Construct): {
     allowedPattern: DDB_TABLE_ARN_PATTERN,
   });
 
+  const clickstreamMetadataDdbArnParam = Parameters.createClickstreamMetadataDdbArnParameter(scope);
+
   const topFrequentPropertiesLimitParam = new CfnParameter(scope, 'TopFrequentPropertiesLimit', {
     description: 'The number of top property values that get from ods event table.',
     type: 'Number',
@@ -721,6 +724,9 @@ export function createStackParameters(scope: Construct): {
         [dataProcessingCronOrRateExpressionParam.logicalId]: {
           default: 'The schedule expression of data processing',
         },
+        [clickstreamMetadataDdbArnParam.logicalId]: {
+          default: 'Clickstream Metadata DDB table arn',
+        },
       },
     },
   };
@@ -798,6 +804,7 @@ export function createStackParameters(scope: Construct): {
           clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
         },
       },
+      clickstreamMetadataDdbArn: clickstreamMetadataDdbArnParam.valueAsString,
     },
   };
 }

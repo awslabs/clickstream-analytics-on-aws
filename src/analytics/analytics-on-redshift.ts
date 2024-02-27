@@ -41,6 +41,7 @@ import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../c
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
+import { UserSegmentsWorkflow } from "./private/segments/user-segments-workflow";
 
 export interface RedshiftOdsTables {
   readonly event: string;
@@ -64,6 +65,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
+  readonly clickstreamMetadataDdbArn: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -73,6 +75,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
+  readonly userSegmentsWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -358,6 +361,22 @@ export class RedshiftAnalyticsStack extends NestedStack {
       });
     }
 
+    // User segments workflow
+    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'UserSegmentsWorkflow', {
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      clickstreamMetadataDdbArn: props.clickstreamMetadataDdbArn,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+    });
+    this.userSegmentsWorkflowArn = userSegmentsWorkflow.userSegmentsWorkflow.stateMachineArn;
+
     addCfnNag(this);
   }
 }
@@ -386,7 +405,7 @@ function createDDBStatusTable(scope: Construct, tableId: string): ITable {
   });
 
   return itemsTable;
-};
+}
 
 
 function addCfnNag(stack: Stack) {

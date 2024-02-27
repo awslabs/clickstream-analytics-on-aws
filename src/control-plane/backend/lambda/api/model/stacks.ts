@@ -14,59 +14,64 @@
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
-import {
-  analyticsMetadataTable,
-  awsAccountId,
-  awsRegion,
-} from '../common/constants';
+import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName, } from '../common/constants';
 import {
   CORS_PATTERN,
-  DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
+  DOMAIN_NAME_PATTERN,
   KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN, MULTI_SECURITY_GROUP_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  MULTI_EMAIL_PATTERN,
+  MULTI_SECURITY_GROUP_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
-  QUICKSIGHT_NAMESPACE_PATTERN,
-  QUICKSIGHT_USER_NAME_PATTERN,
-  S3_PATH_PLUGIN_FILES_PATTERN,
-  S3_PATH_PLUGIN_JARS_PATTERN,
-  SCHEDULE_EXPRESSION_PATTERN, SECURITY_GROUP_PATTERN,
-  SUBNETS_PATTERN,
-  SUBNETS_THREE_AZ_PATTERN,
-  VPC_ID_PATTERN,
   OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
-  S3_PREFIX_PATTERN,
+  QUICKSIGHT_NAMESPACE_PATTERN,
+  QUICKSIGHT_USER_NAME_PATTERN,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
+  S3_PATH_PLUGIN_FILES_PATTERN,
+  S3_PATH_PLUGIN_JARS_PATTERN,
+  S3_PREFIX_PATTERN,
+  SCHEDULE_EXPRESSION_PATTERN,
+  SECURITY_GROUP_PATTERN,
+  SUBNETS_PATTERN,
+  SUBNETS_THREE_AZ_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
+  VPC_ID_PATTERN,
 } from '../common/constants-ln';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
-import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
+import {
+  validateDataProcessingInterval,
+  validatePattern,
+  validateServerlessRedshiftRPU,
+  validateSinkBatch
+} from '../common/stack-params-valid';
 import {
   BucketPrefix,
   ClickStreamBadRequestError,
   DataCollectionSDK,
   ENetworkType,
   IngestionType,
-  KinesisStreamMode, MetricsLegendPosition,
+  KinesisStreamMode,
+  MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
   ProjectEnvironment,
 } from '../common/types';
 import {
-  getBucketPrefix,
-  getKafkaTopic,
-  getPluginInfo,
-  isEmpty,
-  getValueFromStackOutputSuffix,
-  isEmail,
   corsStackInput,
   getAppRegistryApplicationArn,
-  getSinkType,
+  getBucketPrefix,
   getIamRoleBoundaryArn,
+  getKafkaTopic,
+  getPluginInfo,
+  getSinkType,
+  getValueFromStackOutputSuffix,
+  isEmail,
+  isEmpty,
 } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
@@ -1049,6 +1054,9 @@ export class CDataModelingStack extends JSONObject {
     ClickstreamAnalyticsMetadataDdbArn?: string;
 
   @JSONObject.optional('')
+    ClickstreamMetadataDdbArn?: string;
+
+  @JSONObject.optional('')
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional(undefined)
@@ -1099,6 +1107,7 @@ export class CDataModelingStack extends JSONObject {
         OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
       ),
       ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
+      ClickstreamMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`,
       // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
       IamRoleBoundaryArn: getIamRoleBoundaryArn(),
