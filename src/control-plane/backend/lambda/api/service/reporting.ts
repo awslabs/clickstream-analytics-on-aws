@@ -48,7 +48,7 @@ import {
   encodeQueryValueForSql,
 } from './quicksight/reporting-utils';
 import { SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
-import { awsAccountId, awsRegion } from '../common/constants';
+import { awsAccountId } from '../common/constants';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -833,7 +833,7 @@ export class ReportingService {
     //create QuickSight dashboard
     const embedUserArn = await _getEmbedUserArnFromPipeline(query.projectId);
     let ownerArn = principals.publishUserArn;
-    if (awsRegion.startsWith('cn')) {
+    if (process.env.AWS_REGION?.startsWith('cn')) {
       ownerArn = embedUserArn;
     }
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
@@ -1082,7 +1082,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
 async function _cleanUser() {
   const pipelines = await store.listPipeline('', 'latest', 'asc');
-  if (pipelines.every(p => !_needExploreUserVersion(p)) && !awsRegion.startsWith('cn')) {
+  if (pipelines.every(p => !_needExploreUserVersion(p)) && !process.env.AWS_REGION?.startsWith('cn')) {
     await deleteExploreUser();
   }
 }
