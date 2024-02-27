@@ -39,4 +39,4 @@ export WITH_AUTH_MIDDLEWARE=false
 export WITH_VALIDATE_ROLE=false
 
 # Run the server
-cd ../backend/lambda/api && pnpm start
+cd ../backend/lambda/api && pnpm dev
