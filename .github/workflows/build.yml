@@ -45,6 +45,8 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registry-type: public
+      - name: Install Library
+        run: pnpm install
       - name: Run NX Build Base Library
         run: pnpm nx build @clickstream/base-lib
       - name: build

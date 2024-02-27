@@ -477,6 +477,7 @@ frontendProject.setScript('crabuild', 'node scripts/build.js');
 frontendProject.setScript('lint', 'eslint --ext .js,.ts,.jsx,.tsx src');
 frontendProject.setScript('format', 'npm run lint --fix & prettier --write \'src/**/*.{js,jsx,ts,tsx}\'');
 frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePatterns');
+frontendProject.npmrc.addConfig('node-linker', 'hoisted');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
@@ -561,6 +562,10 @@ project.buildWorkflow.preBuildSteps.push({
   with: {
     'registry-type': 'public',
   },
+});
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Install Library',
+  run: 'pnpm install',
 });
 project.buildWorkflow.preBuildSteps.push({
   name: 'Run NX Build Base Library',
