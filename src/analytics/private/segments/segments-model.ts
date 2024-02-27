@@ -23,6 +23,7 @@ interface Segment {
   lastUpdateBy: string;
   lastUpdateAt: number;
   refreshSchedule: RefreshSchedule;
+  eventBridgeRuleArn?: string;
   criteria: SegmentCriteria;
 }
 
@@ -146,7 +147,7 @@ enum SegmentFilterEventMetricType {
   NUMBER_OF_DISTINCT_EVENT_PARAMETER,
 }
 
-interface SegmentDdbItem extends Segment {
+export interface SegmentDdbItem extends Segment {
   id: string;
   type: string;
   deleted: boolean;
@@ -175,4 +176,9 @@ export enum SegmentJobStatus {
   IN_PROGRESS = 'In Progress',
   COMPLETED = 'Completed',
   FAILED = 'Failed',
+}
+
+export enum SegmentJobTriggerType {
+  Manually,
+  Scheduled
 }

@@ -156,6 +156,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "version": "^3.405.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-iam",
       "version": "^3.405.0",
       "type": "runtime"

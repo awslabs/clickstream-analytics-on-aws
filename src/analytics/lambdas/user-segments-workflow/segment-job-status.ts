@@ -1,7 +1,7 @@
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  Licensed under the Apache License, Version 2.0 (the 'License'). You may not use this file except in compliance
  *  with the License. A copy of the License is located at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -11,15 +11,15 @@
  *  and limitations under the License.
  */
 
-import { describeStatement, getRedshiftClient } from "../redshift-data";
-import { logger } from "../../../common/powertools";
-import { parseDynamoDBTableARN } from "../../../common/utils";
-import { aws_sdk_client_common_config } from "../../../common/sdk-client-config";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { SegmentJobStatus } from "../../private/segments/segments-model";
-import { ExecuteSegmentQueryOutput } from "./execute-segment-query";
-import { StatusString } from "@aws-sdk/client-redshift-data";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { StatusString } from '@aws-sdk/client-redshift-data';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { parseDynamoDBTableARN } from '../../../common/utils';
+import { SegmentJobStatus } from '../../private/segments/segments-model';
+import { describeStatement, getRedshiftClient } from '../redshift-data';
+import { ExecuteSegmentQueryOutput } from './execute-segment-query';
 
 const { ddbRegion, ddbTableName } = parseDynamoDBTableARN(process.env.CLICKSTREAM_METADATA_DDB_ARN!);
 const ddbClient = new DynamoDBClient({
@@ -50,12 +50,16 @@ export const handler = async (event: ExecuteSegmentQueryOutput) => {
           id: event.segmentId,
           type: `SEGMENT_JOB#${event.jobRunId}`,
         },
-        UpdateExpression: 'set jobStatus = :js',
+        UpdateExpression: 'set jobStatus = :js, jobEndTime = :et',
         ExpressionAttributeValues: {
           ':js': jobStatus,
+          ':et': Date.now(),
         },
         ReturnValues: 'ALL_NEW',
       });
+
+      // TODO: add segment result as well as sample data to job status table
+
       await ddbDocClient.send(command);
     }
 

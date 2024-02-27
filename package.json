@@ -64,6 +64,7 @@
     "@aws-sdk/client-ecs": "^3.405.0",
     "@aws-sdk/client-elastic-load-balancing-v2": "^3.405.0",
     "@aws-sdk/client-emr-serverless": "^3.405.0",
+    "@aws-sdk/client-eventbridge": "^3.405.0",
     "@aws-sdk/client-glue": "^3.405.0",
     "@aws-sdk/client-iam": "^3.405.0",
     "@aws-sdk/client-kafka": "^3.405.0",

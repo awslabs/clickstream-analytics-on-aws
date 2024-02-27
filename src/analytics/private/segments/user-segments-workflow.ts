@@ -1,7 +1,7 @@
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  Licensed under the Apache License, Version 2.0 (the 'License'). You may not use this file except in compliance
  *  with the License. A copy of the License is located at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -11,9 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Construct } from 'constructs';
-import { join } from 'path';
-import { Duration } from 'aws-cdk-lib';
+import { Aws, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
@@ -31,12 +29,14 @@ import {
   WaitTime
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import { SolutionNodejsFunction } from "../../../private/function";
-import { createLambdaRole } from "../../../common/lambda";
-import { createLogGroup } from "../../../common/logs";
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from "../model";
-import { REDSHIFT_MODE } from "../../../common/model";
-import { SegmentJobStatus } from "./segments-model";
+import { Construct } from 'constructs';
+import { join } from 'path';
+import { createLambdaRole } from '../../../common/lambda';
+import { createLogGroup } from '../../../common/logs';
+import { REDSHIFT_MODE } from '../../../common/model';
+import { SolutionNodejsFunction } from '../../../private/function';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from '../model';
+import { SegmentJobStatus } from './segments-model';
 
 export interface UserSegmentsWorkflowProps {
   readonly projectId: string;
@@ -52,7 +52,7 @@ export interface UserSegmentsWorkflowProps {
   readonly databaseName: string;
 }
 
-const lambdaRootPath = __dirname + '/../lambdas/user-segments-workflow';
+const lambdaRootPath = __dirname + '/../../lambdas/user-segments-workflow';
 
 export class UserSegmentsWorkflow extends Construct {
   private readonly props: UserSegmentsWorkflowProps;
@@ -68,15 +68,32 @@ export class UserSegmentsWorkflow extends Construct {
   private createWorkflow(props: UserSegmentsWorkflowProps): IStateMachine {
     // Define task for segment job initialization
     const segmentJobInitTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobInit', {
-      lambdaFunction: this.constructNodejsFunction('segment-job-init', [], {
+      lambdaFunction: this.constructNodejsFunction('segment-job-init', [
+        new PolicyStatement({
+          actions: [
+            'dynamodb:GetItem',
+            'dynamodb:PutItem',
+          ],
+          resources: [props.clickstreamMetadataDdbArn],
+        }),
+        new PolicyStatement({
+          actions: ['events:DisableRule'],
+          resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/*`],
+        }),
+      ], {
         CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
-      }),  // TODO: policy statements (DDB)
+      }),
       outputPath: '$.Payload',
     });
 
     // Define task for checking state machine status
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
-      lambdaFunction: this.constructNodejsFunction('state-machine-status', []), // TODO: policy statements (SFN)
+      lambdaFunction: this.constructNodejsFunction('state-machine-status', [
+        new PolicyStatement({
+          actions: ['states:ListExecutions'],
+          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:*`],
+        }),
+      ]),
       payload: TaskInput.fromObject({
         'stateMachineArn.$': '$$.StateMachine.Id',
         'input.$': '$',
@@ -86,7 +103,15 @@ export class UserSegmentsWorkflow extends Construct {
 
     // Define task for segment query execution
     const executeSegmentQueryTask = new LambdaInvoke(this, 'WorkflowTask-ExecuteSegmentQuery', {
-      lambdaFunction: this.constructNodejsFunction('execute-segment-query', [], {
+      lambdaFunction: this.constructNodejsFunction('execute-segment-query', [
+        new PolicyStatement({
+          actions: [
+            'dynamodb:GetItem',
+            'dynamodb:UpdateItem',
+          ],
+          resources: [props.clickstreamMetadataDdbArn],
+        }),
+      ], {
         REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
         REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
         REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
@@ -94,20 +119,38 @@ export class UserSegmentsWorkflow extends Construct {
         REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
-      }), // TODO: policy statements
+      }),
       outputPath: '$.Payload',
     });
 
     // Define task for checking segment job status
     const segmentJobStatusTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobStatus', {
-      lambdaFunction: this.constructNodejsFunction('segment-job-status', [], {
+      lambdaFunction: this.constructNodejsFunction('segment-job-status', [
+        new PolicyStatement({
+          actions: ['dynamodb:UpdateItem'],
+          resources: [props.clickstreamMetadataDdbArn],
+        }),
+      ], {
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
-      }), // TODO: policy statements
+      }),
       outputPath: '$.Payload',
     });
 
+    // Define Succeed and Fail end state
+    const succeedState = new Succeed(this, 'WorkflowEndState-Succeed');
+    const failState = new Fail(this, 'WorkflowEndState-Fail');
+
     // Define choice state for workflow initialization
+    // If refresh schedule has expired, go to end state
+    const segmentJobInitChoice = new Choice(this, 'WorkflowChoice-SegmentJobInit')
+      .when(Condition.booleanEquals('$.scheduleIsExpired', true), succeedState)
+      .otherwise(stateMachineStatusTask);
+
+    // Connect segment job init task to the choice
+    segmentJobInitTask.next(segmentJobInitChoice);
+
+    // Define choice state for checking state machine status
     // If state machine is idle, execute segment query. Otherwise, wait for 1 min and check again
     const stateMachineStatusChoice = new Choice(this, 'WorkflowChoice-StateMachineStatus')
       .when(Condition.stringEquals('$.stateMachineStatus', 'IDLE'), executeSegmentQueryTask)
@@ -115,18 +158,11 @@ export class UserSegmentsWorkflow extends Construct {
         time: WaitTime.duration(Duration.minutes(1))
       }).next(stateMachineStatusTask));
 
-    // Connect segment job init task to checking state machine status task
-    segmentJobInitTask.next(stateMachineStatusTask);
-
     // Connect checking state machine status task to the choice
     stateMachineStatusTask.next(stateMachineStatusChoice);
 
     // Connect segment query execution task to checking job status task
     executeSegmentQueryTask.next(segmentJobStatusTask);
-
-    // Define Succeed and Fail end state
-    const succeedState = new Succeed(this, 'WorkflowEndState-Succeed');
-    const failState = new Fail(this, 'WorkflowEndState-Fail');
 
     // Define choice state for checking job status
     const jobStatusChoice = new Choice(this, 'WorkflowChoice-SegmentJobStatus')

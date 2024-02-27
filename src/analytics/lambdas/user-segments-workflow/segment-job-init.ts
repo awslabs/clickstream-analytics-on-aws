@@ -1,7 +1,7 @@
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  Licensed under the Apache License, Version 2.0 (the 'License'). You may not use this file except in compliance
  *  with the License. A copy of the License is located at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -11,17 +11,19 @@
  *  and limitations under the License.
  */
 
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DisableRuleCommand, EventBridgeClient } from '@aws-sdk/client-eventbridge';
+import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { aws_sdk_client_common_config } from "../../../common/sdk-client-config";
-import { formatDate, parseDynamoDBTableARN } from "../../../common/utils";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, PutCommandInput } from "@aws-sdk/lib-dynamodb";
-import { SegmentJobStatus, SegmentJobStatusItem } from "../../private/segments/segments-model";
-import { logger } from "../../../common/powertools";
+import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { formatDate, parseDynamoDBTableARN } from '../../../common/utils';
+import { SegmentDdbItem, SegmentJobStatus, SegmentJobStatusItem, SegmentJobTriggerType } from '../../private/segments/segments-model';
 
 interface SegmentJobInitEvent {
   segmentId: string;
   appId: string;
+  trigger: SegmentJobTriggerType;
 }
 
 export interface SegmentJobInitOutput {
@@ -37,42 +39,68 @@ const ddbClient = new DynamoDBClient({
 });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-export const handler = async (event: SegmentJobInitEvent) => {
-  const { segmentId } = event;
-  const jobRunId = uuidv4();
-  const item: SegmentJobStatusItem = {
-    id: segmentId,
-    type: `SEGMENT_JOB#${jobRunId}`,
-    jobRunId,
-    segmentId,
-    date: formatDate(new Date()),
-    jobStartTime: Date.now(),
-    jobEndTime: 0,
-    jobStatus: SegmentJobStatus.PENDING,
-    segmentUserNumber: 0,
-    totalUserNumber: 0,
-    segmentSessionNumber: 0,
-    totalSessionNumber: 0,
-    sampleData: []
-  };
+const eventBridgeClient = new EventBridgeClient({
+  ...aws_sdk_client_common_config,
+  region: process.env.AWS_REGION,
+});
 
-  const request: PutCommandInput = {
-    TableName: ddbTableName,
-    Item: item
-  };
+export const handler = async (event: SegmentJobInitEvent) => {
+  const { segmentId, appId, trigger } = event;
 
   try {
-    await ddbDocClient.send(new PutCommand(request));
+    // If the job is triggered by EventBridge, check if the refresh schedule is expired
+    if (trigger === SegmentJobTriggerType.Scheduled) {
+      const response = await ddbDocClient.send(new GetCommand({
+        TableName: ddbTableName,
+        Key: {
+          id: appId,
+          type: `SEGMENT_SETTING#${segmentId}`,
+        },
+      }));
+      const item = response.Item as SegmentDdbItem;
+
+      // If job schedule has expired, disable the EventBridge rule
+      if (new Date() > item.refreshSchedule.expireAfter && item.eventBridgeRuleArn) {
+        const ruleName = item.eventBridgeRuleArn.split(':rule/')[1];
+        await eventBridgeClient.send(new DisableRuleCommand({ Name: ruleName }));
+
+        return {
+          scheduleIsExpired: true
+        };
+      }
+    }
+
+    // Create job run status record in DDB
+    const jobRunId = uuidv4();
+    const item: SegmentJobStatusItem = {
+      id: segmentId,
+      type: `SEGMENT_JOB#${jobRunId}`,
+      jobRunId,
+      segmentId,
+      date: formatDate(new Date()),
+      jobStartTime: Date.now(),
+      jobEndTime: 0,
+      jobStatus: SegmentJobStatus.PENDING,
+      segmentUserNumber: 0,
+      totalUserNumber: 0,
+      segmentSessionNumber: 0,
+      totalSessionNumber: 0,
+      sampleData: []
+    };
+    await ddbDocClient.send(new PutCommand({
+      TableName: ddbTableName,
+      Item: item
+    }));
+
+    const output: SegmentJobInitOutput = {
+      ...event,
+      jobRunId,
+    };
+    return output;
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when put item to DDB for segment job init', err);
+      logger.error('Error when get/put segment setting item for segment job init', err);
     }
     throw err;
   }
-
-  const output: SegmentJobInitOutput = {
-    ...event,
-    jobRunId,
-  };
-  return output;
 };

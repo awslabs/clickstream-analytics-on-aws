@@ -1,7 +1,7 @@
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  Licensed under the Apache License, Version 2.0 (the 'License'). You may not use this file except in compliance
  *  with the License. A copy of the License is located at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
-import { StateMachineStatusOutput } from "./state-machine-status";
-import { executeStatements, getRedshiftClient, getRedshiftProps } from "../redshift-data";
-import { logger } from "../../../common/powertools";
-import { parseDynamoDBTableARN } from "../../../common/utils";
-import { aws_sdk_client_common_config } from "../../../common/sdk-client-config";
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { SegmentJobStatus } from "../../private/segments/segments-model";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { logger } from '../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { parseDynamoDBTableARN } from '../../../common/utils';
+import { SegmentJobStatus } from '../../private/segments/segments-model';
+import { executeStatements, getRedshiftClient, getRedshiftProps } from '../redshift-data';
+import { StateMachineStatusOutput } from './state-machine-status';
 
 export interface ExecuteSegmentQueryOutput {
   appId: string;
@@ -54,7 +54,7 @@ const redshiftClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE!);
 
 export const handler = async (event: StateMachineStatusOutput) => {
   try {
-    // Update segment job status to "In Progress"
+    // Update segment job status to 'In Progress'
     const command = new UpdateCommand({
       TableName: ddbTableName,
       Key: {

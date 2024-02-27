@@ -1,7 +1,7 @@
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  Licensed under the Apache License, Version 2.0 (the 'License'). You may not use this file except in compliance
  *  with the License. A copy of the License is located at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFNClient } from '@aws-sdk/client-sfn';
 import { logger } from '../../../common/powertools';
-import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFNClient } from "@aws-sdk/client-sfn";
-import { aws_sdk_client_common_config } from "../../../common/sdk-client-config";
-import { SegmentJobInitOutput } from "./segment-job-init";
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { SegmentJobInitOutput } from './segment-job-init';
 
 interface StateMachineStatusEvent {
   stateMachineArn: string;
@@ -49,7 +49,7 @@ export const handler = async (event: StateMachineStatusEvent) => {
 
     const output: StateMachineStatusOutput = {
       ...event.input,
-      stateMachineStatus: (response.executions === undefined || response.executions.length < 1) ?
+      stateMachineStatus: (response.executions === undefined || response.executions.length <= 1) ?
         StateMachineStatus.IDLE : StateMachineStatus.BUSY
     };
     return output;
