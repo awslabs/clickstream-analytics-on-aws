@@ -1,7 +1,12 @@
 FROM public.ecr.aws/docker/library/node:18 AS builder
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
-COPY . .
+COPY frontend .
+COPY src .
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY nx.json .
+COPY pnpm-workspace.yaml .
 
 ARG GENERATE_SOURCEMAP=false
 ARG CHUNK_MIN_SIZE=819200
