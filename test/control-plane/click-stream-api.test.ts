@@ -786,6 +786,30 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       PolicyDocument: {
         Statement: [
           {
+            Action: [
+              'logs:CreateLogDelivery',
+              'logs:GetLogDelivery',
+              'logs:UpdateLogDelivery',
+              'logs:DeleteLogDelivery',
+              'logs:ListLogDeliveries',
+              'logs:PutResourcePolicy',
+              'logs:DescribeResourcePolicies',
+              'logs:DescribeLogGroups',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
             Action: 'lambda:InvokeFunction',
             Effect: 'Allow',
             Resource: [
@@ -810,30 +834,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 ],
               },
             ],
-          },
-          {
-            Action: [
-              'logs:CreateLogDelivery',
-              'logs:GetLogDelivery',
-              'logs:UpdateLogDelivery',
-              'logs:DeleteLogDelivery',
-              'logs:ListLogDeliveries',
-              'logs:PutResourcePolicy',
-              'logs:DescribeResourcePolicies',
-              'logs:DescribeLogGroups',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-          {
-            Action: [
-              'xray:PutTraceSegments',
-              'xray:PutTelemetryRecords',
-              'xray:GetSamplingRules',
-              'xray:GetSamplingTargets',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
           },
         ],
         Version: '2012-10-17',
