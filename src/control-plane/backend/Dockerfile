@@ -4,7 +4,7 @@ WORKDIR /home/node/app
 COPY . .
 RUN npm install -g pnpm
 RUN pnpm recursive exec -- rm -rf node_modules
-RUN pnpm install
+RUN pnpm install --prod --force
 RUN pnpm nx run-many --target=build --prod
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test
 # RUN pnpm projen
@@ -20,7 +20,7 @@ RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node/app/src/control-plane/backend/lambda/api/dist/locales/
 
 RUN mkdir -p /asset
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/node_modules /asset/
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/dist /asset/
+COPY --from=deps /home/node/app/src/control-plane/backend/lambda/api/node_modules /asset/
+COPY --from=build -r /home/node/app/src/control-plane/backend/lambda/api/dist /asset/
 RUN cp /home/node/app/src/control-plane/backend/lambda/api/run.sh /asset/run.sh
 USER node
