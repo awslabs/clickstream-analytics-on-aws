@@ -15,6 +15,8 @@ curl -sf https://gobinaries.com/tj/node-prune | sh && \
 node-prune /home/node/app/node_modules
 RUN ls /home/node/app/node_modules
 RUN du -h --max-depth=1 | sort -hr
+RUN rm -fr /home/node/app/node_modules/@clickstream/base-lib/node_modules
+RUN rm -fr /home/node/app/node_modules/.pnpm/aws-cdk-lib@2.128.0_constructs@10.3.0
 
 RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
