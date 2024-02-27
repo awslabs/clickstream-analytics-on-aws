@@ -6,6 +6,21 @@
       "type": "build"
     },
     {
+      "name": "@testing-library/jest-dom",
+      "version": "^5.16.5",
+      "type": "build"
+    },
+    {
+      "name": "@testing-library/react",
+      "version": "^13.4.0",
+      "type": "build"
+    },
+    {
+      "name": "@testing-library/user-event",
+      "version": "^13.5.0",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -20,6 +35,16 @@
       "type": "build"
     },
     {
+      "name": "@types/react-dom",
+      "version": "^18.0.8",
+      "type": "build"
+    },
+    {
+      "name": "@types/react",
+      "version": "^18.0.25",
+      "type": "build"
+    },
+    {
       "name": "@types/uuid",
       "version": "^9.0.0",
       "type": "build"
@@ -27,6 +52,26 @@
     {
       "name": "@typescript-eslint/eslint-plugin",
       "version": "^5.42.0",
+      "type": "build"
+    },
+    {
+      "name": "babel-jest",
+      "version": "^27.4.2",
+      "type": "build"
+    },
+    {
+      "name": "babel-loader",
+      "version": "^8.2.3",
+      "type": "build"
+    },
+    {
+      "name": "babel-plugin-named-asset-import",
+      "version": "^0.3.8",
+      "type": "build"
+    },
+    {
+      "name": "babel-preset-react-app",
+      "version": "^10.0.1",
       "type": "build"
     },
     {
@@ -109,6 +154,16 @@
       "type": "build"
     },
     {
+      "name": "jest-resolve",
+      "version": "^27.4.2",
+      "type": "build"
+    },
+    {
+      "name": "jest-watch-typeahead",
+      "version": "^1.0.0",
+      "type": "build"
+    },
+    {
       "name": "prettier",
       "version": "^2.7.1",
       "type": "build"
@@ -123,6 +178,26 @@
     },
     {
       "name": "typescript",
+      "type": "build"
+    },
+    {
+      "name": "webpack-dev-server",
+      "version": "^4.15.0",
+      "type": "build"
+    },
+    {
+      "name": "webpack-manifest-plugin",
+      "version": "^4.0.2",
+      "type": "build"
+    },
+    {
+      "name": "webpack",
+      "version": "^5.85.0",
+      "type": "build"
+    },
+    {
+      "name": "workbox-webpack-plugin",
+      "version": "^6.4.1",
       "type": "build"
     },
     {
@@ -181,41 +256,6 @@
       "type": "runtime"
     },
     {
-      "name": "@testing-library/jest-dom",
-      "version": "^5.16.5",
-      "type": "runtime"
-    },
-    {
-      "name": "@testing-library/react",
-      "version": "^13.4.0",
-      "type": "runtime"
-    },
-    {
-      "name": "@testing-library/user-event",
-      "version": "^13.5.0",
-      "type": "runtime"
-    },
-    {
-      "name": "@types/jest",
-      "version": "^27.5.2",
-      "type": "runtime"
-    },
-    {
-      "name": "@types/node",
-      "version": "^16.18.36",
-      "type": "runtime"
-    },
-    {
-      "name": "@types/react-dom",
-      "version": "^18.0.8",
-      "type": "runtime"
-    },
-    {
-      "name": "@types/react",
-      "version": "^18.0.25",
-      "type": "runtime"
-    },
-    {
       "name": "amazon-quicksight-embedding-sdk",
       "version": "^2.4.0",
       "type": "runtime"
@@ -223,26 +263,6 @@
     {
       "name": "axios",
       "version": "^1.4.0",
-      "type": "runtime"
-    },
-    {
-      "name": "babel-jest",
-      "version": "^27.4.2",
-      "type": "runtime"
-    },
-    {
-      "name": "babel-loader",
-      "version": "^8.2.3",
-      "type": "runtime"
-    },
-    {
-      "name": "babel-plugin-named-asset-import",
-      "version": "^0.3.8",
-      "type": "runtime"
-    },
-    {
-      "name": "babel-preset-react-app",
-      "version": "^10.0.1",
       "type": "runtime"
     },
     {
@@ -328,26 +348,6 @@
     {
       "name": "identity-obj-proxy",
       "version": "^3.0.0",
-      "type": "runtime"
-    },
-    {
-      "name": "jest-junit",
-      "version": "^15",
-      "type": "runtime"
-    },
-    {
-      "name": "jest-resolve",
-      "version": "^27.4.2",
-      "type": "runtime"
-    },
-    {
-      "name": "jest-watch-typeahead",
-      "version": "^1.0.0",
-      "type": "runtime"
-    },
-    {
-      "name": "jest",
-      "version": "^27.4.3",
       "type": "runtime"
     },
     {
@@ -493,26 +493,6 @@
     {
       "name": "web-vitals",
       "version": "^3.3.2",
-      "type": "runtime"
-    },
-    {
-      "name": "webpack-dev-server",
-      "version": "^4.15.0",
-      "type": "runtime"
-    },
-    {
-      "name": "webpack-manifest-plugin",
-      "version": "^4.0.2",
-      "type": "runtime"
-    },
-    {
-      "name": "webpack",
-      "version": "^5.85.0",
-      "type": "runtime"
-    },
-    {
-      "name": "workbox-webpack-plugin",
-      "version": "^6.4.1",
       "type": "runtime"
     }
   ],

@@ -172,7 +172,7 @@ const devDepsForFrontendProject = [
   '@testing-library/react@^13.4.0',
   '@testing-library/user-event@^13.5.0',
   '@types/jest@^27.5.2',
-  '@types/node@^16.18.36',
+  '@types/node@^18.17.0',
   '@types/react@^18.0.25',
   '@types/react-dom@^18.0.8',
   'babel-jest@^27.4.2',
