@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { XhrHttpHandler } from '@aws-sdk/xhr-http-handler';
-import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Button,

@@ -11,9 +11,6 @@
  *  and limitations under the License.
  */
 
-import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
-import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -23,6 +20,9 @@ import {
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from '@aws/clickstream-base-lib';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
+import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';

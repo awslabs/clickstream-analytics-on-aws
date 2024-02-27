@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_SOLUTION_OPERATOR } from '@aws/clickstream-base-lib';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -18,7 +19,6 @@ import {
   QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DEFAULT_SOLUTION_OPERATOR } from '@aws/clickstream-base-lib';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';

@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import {
   MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
@@ -29,6 +28,7 @@ import {
   STACK_CORS_PATTERN,
   EMAIL_PATTERN,
 } from '@aws/clickstream-base-lib';
+import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';

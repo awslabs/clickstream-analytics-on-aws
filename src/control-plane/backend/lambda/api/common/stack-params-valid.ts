@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { XSS_PATTERN } from '@aws/clickstream-base-lib';
+import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
 import { SOLUTION_COMMON_VPC_ENDPOINTS, SOLUTION_DATA_MODELING_VPC_ENDPOINTS, SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS, SOLUTION_INGESTION_VPC_ENDPOINTS, SOLUTION_VPC_ENDPOINTS } from './constants';
 import { REDSHIFT_MODE } from './model-ln';

@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
 import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
@@ -36,6 +35,7 @@ import {
   REDSHIFT_DB_USER_NAME_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
 } from '@aws/clickstream-base-lib';
+import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {

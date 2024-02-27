@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { REGION_PATTERN } from '@aws/clickstream-base-lib';
 import { AccessDeniedException, ListUsersCommand, QuickSight, QuickSightClient, QuickSightClientConfig } from '@aws-sdk/client-quicksight';
 import { RedshiftDataClient, RedshiftDataClientConfig } from '@aws-sdk/client-redshift-data';
 import { STSClient, STSClientConfig } from '@aws-sdk/client-sts';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { REGION_PATTERN } from '@aws/clickstream-base-lib';
 import { awsAccountId, awsRegion } from './constants';
 import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
