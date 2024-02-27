@@ -6,8 +6,10 @@ RUN npm install -g pnpm
 RUN rm -fr node_modules
 RUN mkdir -p node_modules/@clickstream/base-lib
 RUN cp -r src/base-lib/* node_modules/@clickstream/base-lib/
-RUN pnpm recursive install --filter control-plane-api --prod
+RUN pnpm install
 RUN cd src/control-plane/backend/lambda/api && pnpm run compile
+RUN rm -fr node_modules
+RUN pnpm recursive install --filter control-plane-api --prod
 # RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --prod
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
 curl -sf https://gobinaries.com/tj/node-prune | sh && \
