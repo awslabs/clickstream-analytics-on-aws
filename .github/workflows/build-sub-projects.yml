@@ -17,6 +17,7 @@ jobs:
           node-version: 18.17.0
       - run: |-
           npm install -g pnpm
+          pnpm install
           pnpm projen
           pnpm nx run-many --target=build
           cd frontend/
