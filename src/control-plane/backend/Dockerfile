@@ -7,8 +7,9 @@ RUN pnpm projen
 RUN pnpm nx build @clickstream/base-lib
 # RUN cd src/control-plane/backend/lambda/api && yarn install && yarn compile
 RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --prod --force && pnpm pack
-RUN ls
-RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && tar -xzf control-plane-api-1.2.0.tgz --strip-components=1
+RUN cd src/control-plane/backend/lambda/api && ls
+RUN cd src/control-plane/backend/lambda/api && tar -xzf control-plane-api-1.2.0.tgz --strip-components=1
+RUN cd src/control-plane/backend/lambda/api && ls
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
 curl -sf https://gobinaries.com/tj/node-prune | sh && \
 node-prune /home/node/app/src/control-plane/backend/lambda/api/node_modules
