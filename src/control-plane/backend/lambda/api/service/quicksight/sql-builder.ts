@@ -1403,6 +1403,46 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
   return sql;
 }
 
+
+function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, extParamProps: ComputeMethodProps) {
+
+  let joinTableSQL = '';
+
+  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
+
+    let idSql = _buildIDColumnSql(index, item, extParamProps);
+
+    let groupColSql = '';
+    let groupCol = '';
+    if (sqlParameters.groupCondition !== undefined) {
+      groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
+      groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+    }
+
+    joinTableSQL = joinTableSQL.concat(`
+    ${unionSql}
+    select
+      table_${index}.month
+    , table_${index}.week
+    , table_${index}.day
+    , table_${index}.hour
+    , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
+    , table_${index}.event_timestamp_${index} as event_timestamp
+    ${idSql}
+    ${groupColSql}
+    from table_${index}
+    `);
+
+  }
+
+  return joinTableSQL;
+
+}
+
 function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
@@ -1448,36 +1488,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
       `);
     }
   } else {
-    for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
-      let unionSql = '';
-      if (index > 0) {
-        unionSql = 'union all';
-      }
-
-      let idSql = _buildIDColumnSql(index, item, extParamProps);
-
-      let groupColSql = '';
-      let groupCol = '';
-      if (sqlParameters.groupCondition !== undefined) {
-        groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
-        groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
-      }
-
-      joinTableSQL = joinTableSQL.concat(`
-      ${unionSql}
-      select
-        table_${index}.month
-      , table_${index}.week
-      , table_${index}.day
-      , table_${index}.hour
-      , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
-      , table_${index}.event_timestamp_${index} as event_timestamp
-      ${idSql}
-      ${groupColSql}
-      from table_${index}
-      `);
-
-    }
+    joinTableSQL = _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters, extParamProps);
   }
 
   sql = sql.concat(`
@@ -2929,11 +2940,12 @@ function _getEventConditionProps(sqlParameters: SQLParameters) {
   };
 }
 
-function _getUserConditionProps(sqlParameters: SQLParameters) {
+function _getUserConditionPropsPart1(sqlParameters: SQLParameters) {
 
   let hasNestUserAttribute = false;
   let hasOuterUserAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
+
   if (sqlParameters.eventAndConditions) {
     for (const eventCondition of sqlParameters.eventAndConditions) {
       if (eventCondition.sqlCondition?.conditions !== undefined) {
@@ -2953,6 +2965,24 @@ function _getUserConditionProps(sqlParameters: SQLParameters) {
       }
     }
   }
+
+  return {
+    hasNestUserAttribute,
+    hasOuterUserAttribute,
+    userAttributes,
+  };
+}
+
+function _getUserConditionProps(sqlParameters: SQLParameters) {
+
+  let hasNestUserAttribute = false;
+  let hasOuterUserAttribute = false;
+  const userAttributes: ColumnAttribute[] = [];
+
+  const part1Props = _getUserConditionPropsPart1(sqlParameters);
+  hasNestUserAttribute = hasNestUserAttribute || part1Props.hasNestUserAttribute;
+  hasOuterUserAttribute = hasOuterUserAttribute || part1Props.hasOuterUserAttribute;
+  userAttributes.push(...part1Props.userAttributes);
 
   if (sqlParameters.globalEventCondition?.conditions) {
     const conditionProps = buildConditionProps(sqlParameters.globalEventCondition?.conditions);
