@@ -572,64 +572,36 @@ export class ReportingService {
       const locale = query.locale ?? ExploreLocales.EN_US;
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
-      let result: CreateDashboardResult;
 
-      if (computeMethodProps.isMixedMethod) {
-        const quickSightChartType = query.chartType;
-        const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
-        const visualRelatedParams = await getVisualRelatedDefs({
-          timeScopeType: query.timeScopeType,
-          sheetId,
-          visualId,
-          viewName,
-          lastN: query.lastN,
-          timeUnit: query.timeUnit,
-          timeStart: query.timeStart,
-          timeEnd: query.timeEnd,
-        }, locale);
+      const visualRelatedParams = await getVisualRelatedDefs({
+        timeScopeType: query.timeScopeType,
+        sheetId,
+        visualId,
+        viewName,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        timeStart: query.timeStart,
+        timeEnd: query.timeEnd,
+      }, locale);
 
-        const visualProps = {
-          sheetId: sheetId,
-          name: ExploreVisualName.CHART,
-          visualId: visualId,
-          visual: visualDef,
-          dataSetIdentifierDeclaration: [],
-          filterControl: visualRelatedParams.filterControl,
-          parameterDeclarations: visualRelatedParams.parameterDeclarations,
-          filterGroup: visualRelatedParams.filterGroup,
-        };
+      const tableVisualId = uuidv4();
+      const tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
 
-        const tableVisualId = uuidv4();
-        const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
+      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 
-        visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+      const tableVisualProps = {
+        sheetId: sheetId,
+        name: ExploreVisualName.TABLE,
+        visualId: tableVisualId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: [],
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+      };
 
-        const tableVisualProps = {
-          sheetId: sheetId,
-          name: ExploreVisualName.TABLE,
-          visualId: tableVisualId,
-          visual: tableVisualDef,
-          dataSetIdentifierDeclaration: [],
-        };
-
-        result = await this.createDashboardVisuals(
-          sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
-      } else {
-
-        const tableVisualId = uuidv4();
-        const tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
-
-        const tableVisualProps = {
-          sheetId: sheetId,
-          name: ExploreVisualName.TABLE,
-          visualId: tableVisualId,
-          visual: tableVisualDef,
-          dataSetIdentifierDeclaration: [],
-        };
-
-        result = result = await this.createDashboardVisuals(
-          sheetId, viewName, query, datasetPropsArray, [tableVisualProps]);
-      }
+      const result = await this.createDashboardVisuals(
+        sheetId, viewName, query, datasetPropsArray, [tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
