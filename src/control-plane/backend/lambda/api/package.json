@@ -15,7 +15,8 @@
     "watch": "pnpm dlx projen watch",
     "projen": "pnpm dlx projen",
     "dev": "nodemon --watch 'src' -e ts --exec 'ts-node' ./index.ts",
-    "start": "node dist/index.js"
+    "ncc-build": "tsc && ncc build dist/index.js -o ncc",
+    "start": "pnpm run ncc-build && node ncc/index.js"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.110",

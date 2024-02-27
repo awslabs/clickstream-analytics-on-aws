@@ -31,6 +31,7 @@ jspm_packages/
 .cache
 src/aws-exports.js
 build/
+ncc/
 /test-reports/
 junit.xml
 /coverage/

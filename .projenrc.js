@@ -489,6 +489,7 @@ const apiProject = new typescript.TypeScriptProject({
   gitignore: [
     'src/aws-exports.js',
     'build/',
+    'ncc/',
   ],
   description: 'Backend api service of control plane.',
   version,
@@ -521,7 +522,8 @@ const apiProject = new typescript.TypeScriptProject({
   projenCommand: project.projenCommand,
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
-apiProject.setScript('start', 'node dist/index.js');
+apiProject.setScript('ncc-build', 'tsc && ncc build dist/index.js -o ncc');
+apiProject.setScript('start', 'pnpm run ncc-build && node ncc/index.js');
 apiProject.addFields({ version });
 
 project.buildWorkflow.buildTask._env = {
