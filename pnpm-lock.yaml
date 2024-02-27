@@ -285,7 +285,7 @@ importers:
       '@babel/core':
         specifier: ^7.16.0
         version: 7.23.9
-      '@clickstream/base-lib':
+      '@aws/clickstream-base-lib':
         specifier: workspace:*
         version: link:../src/base-lib
       '@cloudscape-design/collection-hooks':
@@ -676,7 +676,7 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.398.0
         version: 3.515.0(@aws-sdk/client-dynamodb@3.515.0)
-      '@clickstream/base-lib':
+      '@aws/clickstream-base-lib':
         specifier: workspace:*
         version: link:../../../../base-lib
       '@smithy/node-http-handler':

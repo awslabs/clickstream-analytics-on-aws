@@ -28,7 +28,7 @@ import {
   CORS_PATTERN,
   STACK_CORS_PATTERN,
   EMAIL_PATTERN,
-} from '@clickstream/base-lib';
+} from '@aws/clickstream-base-lib';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';

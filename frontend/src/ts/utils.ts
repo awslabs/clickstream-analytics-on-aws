@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ServerlessRedshiftRPUByRegionMapping } from '@clickstream/base-lib';
+import { ServerlessRedshiftRPUByRegionMapping } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,

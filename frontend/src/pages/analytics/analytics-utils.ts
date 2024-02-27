@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@clickstream/base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,

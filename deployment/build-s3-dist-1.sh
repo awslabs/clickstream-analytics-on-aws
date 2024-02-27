@@ -57,7 +57,7 @@ run npm install -g pnpm@8.15.3
 run cd ${SRC_PATH}
 run pnpm install --frozen-lockfile
 run pnpm projen
-run pnpm nx build @clickstream/base-lib
+run pnpm nx build @aws/clickstream-base-lib
 
 echo "IS_IN_GCR_PIPELINE: $IS_IN_GCR_PIPELINE"
 

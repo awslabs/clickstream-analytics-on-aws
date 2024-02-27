@@ -1,5 +1,5 @@
 {
-  "name": "@clickstream/base-lib",
+  "name": "@aws/clickstream-base-lib",
   "description": "Base project for shared library.",
   "scripts": {
     "build": "pnpm dlx projen build",

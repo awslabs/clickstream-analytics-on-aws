@@ -357,7 +357,7 @@ project.addFields({ version });
 
 const baseProject = new typescript.TypeScriptProject({
   parent: project,
-  name: '@clickstream/base-lib',
+  name: '@aws/clickstream-base-lib',
   outdir: './src/base-lib',
   description: 'Base project for shared library.',
   version,
@@ -410,7 +410,7 @@ const frontendProject = new typescript.TypeScriptProject({
   sampleCode: false,
   deps: [
     ...depsForFrontendProject,
-    '@clickstream/base-lib@workspace:*',
+    '@aws/clickstream-base-lib@workspace:*',
   ],
   devDeps: [
     ...devDepsForFrontendProject,
@@ -481,7 +481,7 @@ frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePattern
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
-    '@clickstream/base-lib@workspace:*',
+    '@aws/clickstream-base-lib@workspace:*',
   ],
   devDeps: [
     ...devDepsForApiProject,
@@ -569,7 +569,7 @@ project.buildWorkflow.preBuildSteps.push({
 });
 project.buildWorkflow.preBuildSteps.push({
   name: 'Run NX Build Base Library',
-  run: 'pnpm nx build @clickstream/base-lib',
+  run: 'pnpm nx build @aws/clickstream-base-lib',
 });
 project.buildWorkflow.addPostBuildSteps({
   name: 'Publish Test Report',

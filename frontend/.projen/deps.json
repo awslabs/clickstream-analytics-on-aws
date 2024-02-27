@@ -216,13 +216,13 @@
       "type": "runtime"
     },
     {
-      "name": "@babel/core",
-      "version": "^7.16.0",
+      "name": "@aws/clickstream-base-lib",
+      "version": "workspace:*",
       "type": "runtime"
     },
     {
-      "name": "@clickstream/base-lib",
-      "version": "workspace:*",
+      "name": "@babel/core",
+      "version": "^7.16.0",
       "type": "runtime"
     },
     {

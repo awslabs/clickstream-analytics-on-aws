@@ -18,7 +18,7 @@ import {
   EnableAlarmActionsCommand,
   MetricAlarm,
 } from '@aws-sdk/client-cloudwatch';
-import { ALARM_NAME_PREFIX } from '@clickstream/base-lib';
+import { ALARM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const describeAlarmsByProjectId = async (region: string, projectId: string) => {

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '@clickstream/base-lib';
+import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '@aws/clickstream-base-lib';
 import { CMetadataDisplay } from './display';
 import { PipelineServ } from './pipeline';
 import { ConditionCategory, MetadataValueType } from '../common/explore-types';

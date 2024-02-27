@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from '@clickstream/base-lib';
+import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';

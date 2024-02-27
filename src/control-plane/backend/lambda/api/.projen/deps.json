@@ -241,7 +241,7 @@
       "type": "runtime"
     },
     {
-      "name": "@clickstream/base-lib",
+      "name": "@aws/clickstream-base-lib",
       "version": "workspace:*",
       "type": "runtime"
     },

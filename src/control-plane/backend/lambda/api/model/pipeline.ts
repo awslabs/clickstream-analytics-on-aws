@@ -19,7 +19,7 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
-} from '@clickstream/base-lib';
+} from '@aws/clickstream-base-lib';
 import { getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';

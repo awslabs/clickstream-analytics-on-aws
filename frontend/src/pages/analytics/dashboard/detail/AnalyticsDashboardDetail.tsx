@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@clickstream/base-lib';
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Container,

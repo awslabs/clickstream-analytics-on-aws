@@ -11,7 +11,7 @@ RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${C
 RUN npm install -g pnpm@8.15.3
 RUN pnpm install
 RUN pnpm projen
-RUN pnpm nx build @clickstream/base-lib
+RUN pnpm nx build @aws/clickstream-base-lib
 
 WORKDIR /home/node/app/frontend
 RUN pnpm install

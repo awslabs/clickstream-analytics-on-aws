@@ -19,7 +19,7 @@ import {
   PutCommand,
   QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@clickstream/base-lib';
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';

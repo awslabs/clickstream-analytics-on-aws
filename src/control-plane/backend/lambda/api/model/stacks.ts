@@ -35,7 +35,7 @@ import {
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
-} from '@clickstream/base-lib';
+} from '@aws/clickstream-base-lib';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {

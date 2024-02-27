@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { XSS_PATTERN } from '@clickstream/base-lib';
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 
 export const displayNameRegex = new RegExp(XSS_PATTERN);
 export const descriptionRegex = new RegExp(XSS_PATTERN);

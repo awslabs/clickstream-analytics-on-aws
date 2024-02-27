@@ -48,7 +48,7 @@ jobs:
       - name: Install Library
         run: pnpm install
       - name: Run NX Build Base Library
-        run: pnpm nx build @clickstream/base-lib
+        run: pnpm nx build @aws/clickstream-base-lib
       - name: build
         run: pnpm dlx projen build
       - name: Publish Test Report

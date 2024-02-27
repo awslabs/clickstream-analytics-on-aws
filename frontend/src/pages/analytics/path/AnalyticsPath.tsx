@@ -14,7 +14,7 @@
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
-} from '@clickstream/base-lib';
+} from '@aws/clickstream-base-lib';
 import {
   Button,
   ColumnLayout,

@@ -18,7 +18,7 @@ import {
   QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DEFAULT_SOLUTION_OPERATOR } from '@clickstream/base-lib';
+import { DEFAULT_SOLUTION_OPERATOR } from '@aws/clickstream-base-lib';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';

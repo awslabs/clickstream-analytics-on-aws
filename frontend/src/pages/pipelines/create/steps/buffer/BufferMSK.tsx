@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { XSS_PATTERN } from '@clickstream/base-lib';
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AutosuggestProps,
   Button,
