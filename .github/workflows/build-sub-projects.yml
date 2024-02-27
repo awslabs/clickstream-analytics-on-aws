@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18.17.0
       - run: |-
-          npm install -g pnpm
+          npm install -g pnpm@8.15.3
           pnpm install
           pnpm projen
           pnpm nx run-many --target=build

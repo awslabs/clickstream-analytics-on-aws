@@ -53,7 +53,7 @@ echo "${BUILD_VERSION}" > ${GLOBAL_S3_ASSETS_PATH}/version
 
 title "cdk synth"
 
-run npm install -g pnpm
+run npm install -g pnpm@8.15.3
 run cd ${SRC_PATH}
 run pnpm install --frozen-lockfile
 run pnpm projen

@@ -14,7 +14,7 @@ rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 
 echo "pnpm install"
-npm install -g pnpm
+npm install -g pnpm@8.15.3
 pnpm install
 
 pnpm projen

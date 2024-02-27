@@ -2,7 +2,7 @@ FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY . .
-RUN npm install -g pnpm @vercel/ncc
+RUN npm install -g pnpm@8.15.3 @vercel/ncc@0.38.1
 RUN rm -fr node_modules
 RUN pnpm install && pnpm nx run-many --target=build
 RUN cd src/control-plane/backend/lambda/api && pnpm run ncc-build

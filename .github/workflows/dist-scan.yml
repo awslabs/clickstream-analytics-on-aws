@@ -102,7 +102,7 @@ jobs:
           ./build-open-source-dist.sh $SOLUTION_NAME
       - name: install dependencies
         run: |
-          npm install -g pnpm
+          npm install -g pnpm@8.15.3
           pnpm install --frozen-lockfile
           pnpm projen
           pnpm install --frozen-lockfile --dir frontend

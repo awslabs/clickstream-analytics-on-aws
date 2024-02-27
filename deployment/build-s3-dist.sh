@@ -90,7 +90,7 @@ do_replace()
 
 create_template_json() 
 {
-    do_cmd npm install -g pnpm
+    do_cmd npm install -g pnpm@8.15.3
     do_cmd pnpm nx run-many --target=build
     # Run 'cdk synth' to generate raw solution outputs
     do_cmd npx cdk synth --output=$staging_dist_dir
@@ -300,7 +300,7 @@ echo "--------------------------------------------------------------------------
 # Install the global aws-cdk package
 # Note: do not install using global (-g) option. This makes build-s3-dist.sh difficult
 # for customers and developers to use, as it globally changes their environment.
-do_cmd npm install -g pnpm
+do_cmd npm install -g pnpm@8.15.3
 do_cmd cd $source_dir/
 do_cmd pnpm install --frozen-lockfile
 do_cmd pnpm projen
