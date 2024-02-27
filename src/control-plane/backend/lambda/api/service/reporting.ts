@@ -310,7 +310,7 @@ export class ReportingService {
       const eventAndConditions = query.eventAndConditions as EventAndCondition[];
       let hasComputeOnProperty = false;
       for (const item of eventAndConditions) {
-        if (item.computeMethod !== ExploreComputeMethod.EVENT_CNT && item.computeMethod !== ExploreComputeMethod.USER_ID_CNT) {
+        if (item.computeMethod === ExploreComputeMethod.COUNT_PROPERTY || item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
           hasComputeOnProperty = true;
           break;
         }
