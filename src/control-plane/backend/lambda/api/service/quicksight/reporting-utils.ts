@@ -35,7 +35,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
 import { AttributionSQLParameters } from './sql-builder-attribution';
 import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
@@ -160,6 +160,11 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+}
+
+export type MustacheEventTableAnalysisType = MustacheBaseType & {
+  dateDimFieldId: string;
+  nameDimFieldId: string;
 }
 
 export type MustacheAttributionAnalysisType = MustacheBaseType & {
@@ -903,6 +908,135 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+}
+
+export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
+  const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json'), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    nameDimFieldId: uuidv4(),
+    title: titleProps.tableTitle,
+    subTitle: titleProps.subTitle,
+  };
+
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
+
+  if (hasGrouping) {
+    fieldWellGroupBy.push({
+      CategoricalDimensionField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'custom_attr_id',
+        },
+      },
+    });
+  }
+
+  if (!computeMethodProps.isMixedMethod) {
+    if (computeMethodProps.hasAggregationPropertyMethod) {
+      if (!computeMethodProps.isSameAggregationMethod) {
+        fieldWellGroupBy.push({
+          CategoricalDimensionField: {
+            FieldId: uuidv4(),
+            Column: {
+              DataSetIdentifier: viewName,
+              ColumnName: 'custom_attr_id',
+            },
+          },
+        });
+
+        fieldWellGroupBy.push({
+          NumericalDimensionField: {
+            FieldId: uuidv4(),
+            Column: {
+              DataSetIdentifier: viewName,
+              ColumnName: 'count/aggregation amount',
+            },
+          },
+        });
+
+      } else {
+        fieldWellGroupBy.push({
+          NumericalDimensionField: {
+            FieldId: uuidv4(),
+            Column: {
+              DataSetIdentifier: viewName,
+              ColumnName: 'custom_attr_id',
+            },
+          },
+        });
+      }
+    } else {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+    }
+  } else {
+    if (computeMethodProps.isCountMixedMethod) {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+    } else {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        NumericalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'count/aggregation amount',
+          },
+        },
+      });
+    }
+  }
+  return visual;
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {

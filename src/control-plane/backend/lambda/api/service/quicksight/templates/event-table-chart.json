@@ -1,0 +1,60 @@
+{
+  "TableVisual": {
+      "VisualId":"{{visualId}}",
+        "Title":{
+            "FormatText": {
+                "PlainText": "{{title}}"
+            },
+            "Visibility":"VISIBLE"
+        },
+        "Subtitle":{
+            "FormatText": {
+                "PlainText": "{{subTitle}}"
+            },
+            "Visibility":"VISIBLE"
+        },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "TableAggregatedFieldWells": {
+                  "GroupBy": [
+                        {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              }
+                          }
+                        },
+                        {
+                            "CategoricalDimensionField": {
+                              "FieldId": "{{nameDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_name"
+                              }
+                            }
+                        }
+                  ],
+                  "Values": []
+              }
+          },
+          "SortConfiguration": {
+              "RowSort": [
+              ]
+          },
+          "TableOptions": {
+              "HeaderStyle": {
+                  "TextWrap": "WRAP",
+                  "Height": 25
+              }
+          },
+          "FieldOptions": {
+              "SelectedFieldOptions": [
+              ],
+              "Order": []
+          }
+      },
+      "Actions": []
+  }
+}

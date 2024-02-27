@@ -114,6 +114,16 @@ export interface SQLParameters extends BaseSQLParameters {
   readonly pairEventAndConditions?: PairEventAndCondition[];
 }
 
+export interface EventComputeMethodsProps {
+  readonly hasExtParameter : boolean;
+  readonly hasCounntPropertyMethod : boolean;
+  readonly hasAggregationPropertyMethod : boolean;
+  readonly hasIdCountMethod : boolean;
+  readonly isMixedMethod : boolean;
+  readonly isSameAggregationMethod : boolean;
+  readonly isCountMixedMethod : boolean;
+};
+
 export const BUILTIN_EVENTS = [
   '_session_start',
   '_session_stop',
@@ -505,15 +515,13 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   let baseSQL = _buildEventPropertyAnalysisBaseSql(eventNames, sqlParameters);
 
   let groupColSQL = '';
-  let groupCol = '';
 
   if (sqlParameters.groupCondition !== undefined) {
     const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
-    groupColSQL = `${colName}::varchar as group_col,`;
-    groupCol = `${colName}::varchar,`;
+    groupColSQL = `${colName}::varchar as ${colName},`;
   }
 
-  const computeMethodProps = _getComputeMethodProps(sqlParameters);
+  const computeMethodProps = getComputeMethodProps(sqlParameters);
   if (!computeMethodProps.isMixedMethod) {
     if (computeMethodProps.hasAggregationPropertyMethod) {
 
@@ -532,7 +540,7 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
               custom_attr_id as id
             from join_table
             group by
-            day, event_name, ${groupCol} custom_attr_id
+            day, event_name, ${groupColSQL} custom_attr_id
         `);
       }
     } else {
@@ -545,7 +553,7 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
             custom_attr_id
           from join_table 
           group by
-          day, event_name, ${groupCol} x_id, custom_attr_id
+          day, event_name, ${groupColSQL} x_id, custom_attr_id
       `);
     }
   } else { // mixed method
@@ -1403,7 +1411,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
 
   let joinTableSQL = '';
 
-  const extParamProps = _getComputeMethodProps(sqlParameters);
+  const extParamProps = getComputeMethodProps(sqlParameters);
   if (extParamProps.isMixedMethod || (extParamProps.hasAggregationPropertyMethod && !extParamProps.isSameAggregationMethod)) {
     for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
       let unionSql = '';
@@ -2150,7 +2158,7 @@ export function buildColNameWithPrefix(groupCondition: ColumnAttribute) {
   return `${prefix}${groupCondition.property}`;
 }
 
-function _getComputeMethodProps(sqlParameters: SQLParameters) {
+export function getComputeMethodProps(sqlParameters: SQLParameters): EventComputeMethodsProps {
   let eventAndConditions = sqlParameters.eventAndConditions;
   let hasExtParameter: boolean = false;
   let hasCounntPropertyMethod: boolean = false;
@@ -2177,7 +2185,7 @@ function _getComputeMethodProps(sqlParameters: SQLParameters) {
 
   const isMixedMethod = hasAggregationPropertyMethod && (hasCounntPropertyMethod || hasIdCountMethod);
   const isSameAggregationMethod = !isMixedMethod && aggregationMethodSet.size === 1 && hasAggregationPropertyMethod;
-  const aggregationMethod = isSameAggregationMethod ? Array.from(aggregationMethodSet)[0] : undefined;
+  const isCountMixedMethod = hasCounntPropertyMethod && hasIdCountMethod && !hasAggregationPropertyMethod;
 
   return {
     hasExtParameter,
@@ -2186,7 +2194,7 @@ function _getComputeMethodProps(sqlParameters: SQLParameters) {
     hasIdCountMethod,
     isMixedMethod,
     isSameAggregationMethod,
-    aggregationMethod,
+    isCountMixedMethod,
   };
 }
 
@@ -2199,7 +2207,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
     newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(sqlParameters.groupCondition)}####`;
   }
 
-  const extParamProps = _getComputeMethodProps(sqlParameters);
+  const extParamProps = getComputeMethodProps(sqlParameters);
   const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of sqlParameters.eventAndConditions!.entries()) {
     let extCol = '';
