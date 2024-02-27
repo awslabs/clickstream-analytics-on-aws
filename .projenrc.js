@@ -493,7 +493,7 @@ const apiProject = new typescript.TypeScriptProject({
   ],
   description: 'Backend api service of control plane.',
   version,
-  name: 'control-plane-api',
+  name: '@aws/clickstream-web-console-api',
   license: 'Apache-2.0',
   licensed: true,
   outdir: 'src/control-plane/backend/lambda/api/',

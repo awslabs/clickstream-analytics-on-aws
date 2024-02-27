@@ -1,5 +1,5 @@
 {
-  "name": "control-plane-api",
+  "name": "@aws/clickstream-web-console-api",
   "description": "Backend api service of control plane.",
   "scripts": {
     "build": "pnpm dlx projen build",
