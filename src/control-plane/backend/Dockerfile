@@ -1,13 +1,13 @@
 FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
-COPY frontend .
-COPY src .
-COPY package.json .
-COPY pnpm-lock.yaml .
-COPY nx.json .
-COPY projenrc .
-COPY pnpm-workspace.yaml .
+COPY frontend frontend
+COPY src src
+COPY package.json package.json
+COPY pnpm-lock.yaml pnpm-lock.yaml
+COPY nx.json nx.json
+COPY projenrc projenrc
+COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
 RUN npm install -g pnpm@8.15.3 @vercel/ncc@0.38.1
 RUN rm -fr node_modules
