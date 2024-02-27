@@ -7,14 +7,14 @@ RUN rm -fr node_modules
 RUN pnpm install
 RUN cd src/control-plane/backend/lambda/api && pnpm run compile
 RUN rm -fr node_modules
-RUN pnpm recursive install --filter control-plane-api --prod
+RUN pnpm -F control-plane-api --config.dedupe-peer-dependents=false i --prod
 RUN mkdir -p node_modules/@clickstream/base-lib
 RUN cp -r src/base-lib/* node_modules/@clickstream/base-lib/
-# RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && pnpm install --prod
 RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
 curl -sf https://gobinaries.com/tj/node-prune | sh && \
 node-prune /home/node/app/node_modules
 RUN ls /home/node/app/node_modules
+RUN du -h --max-depth=1 | sort -hr
 
 RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
