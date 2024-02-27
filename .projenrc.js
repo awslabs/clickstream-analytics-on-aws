@@ -477,7 +477,6 @@ frontendProject.setScript('crabuild', 'node scripts/build.js');
 frontendProject.setScript('lint', 'eslint --ext .js,.ts,.jsx,.tsx src');
 frontendProject.setScript('format', 'npm run lint --fix & prettier --write \'src/**/*.{js,jsx,ts,tsx}\'');
 frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePatterns');
-frontendProject.npmrc.addConfig('node-linker', 'hoisted');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
@@ -524,7 +523,6 @@ const apiProject = new typescript.TypeScriptProject({
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
 apiProject.addFields({ version });
-apiProject.npmrc.addConfig('node-linker', 'hoisted');
 
 project.buildWorkflow.buildTask._env = {
   NODE_OPTIONS: '--max_old_space_size=6144',
@@ -1113,7 +1111,6 @@ gitlabMain.createNestedTemplates({
 
 project.package.addField('packageManager', `pnpm@${pnpmVersion}`);
 project.npmrc.addConfig('auto-install-peers', 'true');
-project.npmrc.addConfig('node-linker', 'hoisted');
 
 new PnpmWorkspace(project);
 new Nx(project);
