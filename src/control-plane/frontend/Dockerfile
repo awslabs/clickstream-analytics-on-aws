@@ -6,6 +6,7 @@ COPY src .
 COPY package.json .
 COPY pnpm-lock.yaml .
 COPY nx.json .
+COPY projenrc .
 COPY pnpm-workspace.yaml .
 
 ARG GENERATE_SOURCEMAP=false

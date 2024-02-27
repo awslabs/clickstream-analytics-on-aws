@@ -6,6 +6,7 @@ COPY src .
 COPY package.json .
 COPY pnpm-lock.yaml .
 COPY nx.json .
+COPY projenrc .
 COPY pnpm-workspace.yaml .
 
 RUN npm install -g pnpm@8.15.3 @vercel/ncc@0.38.1
