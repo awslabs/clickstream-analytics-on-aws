@@ -28,7 +28,7 @@ import { createALBSecurityGroupV2, createECSSecurityGroup } from '../server/priv
 import { CfnCondition, Fn } from 'aws-cdk-lib';
 import { getExistVpc } from '../../common/vpc-utils';
 import { ApplicationLoadBalancerV2, PROXY_PORT } from '../server-v2/private/alb-v2';
-import { updateAlbRulesCustomResource } from '../custom-resource/update-alb-rules';
+import { updateAlbRulesCustomResourceV2 } from '../custom-resource/update-alb-rules-v2';
 import { GlobalAcceleratorV2 } from '../server-v2/private/aga-v2';
 import { CfnAccelerator, CfnEndpointGroup, CfnListener } from 'aws-cdk-lib/aws-globalaccelerator';
 
@@ -55,12 +55,13 @@ interface UpdateAlbRulesInput {
   readonly appIds: string;
   readonly clickStreamSDK: string;
   readonly targetGroupArn: string;
-  readonly listenerArn: string;
+  readonly loadBalancerArn: string;
   readonly serverEndpointPath: string;
   readonly protocol: string;
   readonly enableAuthentication: string;
   readonly authenticationSecretArn: string;
-  readonly domainName?: string;
+  readonly domainName: string;
+  readonly certificateArn: string;
 }
 
 export class IngestionCommonResourcesNestedStack extends NestedStack {
@@ -178,12 +179,13 @@ function createApplicationLoadBalancer(
     appIds: props.appIds,
     clickStreamSDK: props.clickStreamSDK,
     targetGroupArn: albConstructor.targetGroup.targetGroupArn,
-    listenerArn: albConstructor.listener.listenerArn,
+    loadBalancerArn: albConstructor.alb.loadBalancerArn,
     serverEndpointPath: props.serverEndpointPath,
     protocol: props.protocol,
     enableAuthentication: props.enableAuthentication,
     authenticationSecretArn: props.authenticationSecretArn,
     domainName: props.domainName,
+    certificateArn: props.certificateArn,
   });
 
   return { albConstructor, ecsSecurityGroup };
@@ -222,21 +224,23 @@ function updateAlbRules(
   const appIds = updateAlbRulesInput.appIds;
   const clickStreamSDK = updateAlbRulesInput.clickStreamSDK;
   const targetGroupArn = updateAlbRulesInput.targetGroupArn;
-  const listenerArn = updateAlbRulesInput.listenerArn;
+  const loadBalancerArn = updateAlbRulesInput.loadBalancerArn;
   const authenticationSecretArn = updateAlbRulesInput.authenticationSecretArn;
   const endpointPath = updateAlbRulesInput.serverEndpointPath;
   const domainName = updateAlbRulesInput.domainName;
   const protocol = updateAlbRulesInput.protocol;
+  const certificateArn = updateAlbRulesInput.certificateArn;
 
-  updateAlbRulesCustomResource(scope, {
+  updateAlbRulesCustomResourceV2(scope, {
     appIds,
     clickStreamSDK,
     targetGroupArn,
-    listenerArn,
+    loadBalancerArn,
     authenticationSecretArn,
     endpointPath,
     domainName,
     protocol,
+    certificateArn,
   });
 }
 
