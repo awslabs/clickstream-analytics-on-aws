@@ -77,7 +77,7 @@ jobs:
       - name: Run cfn-nag scan
         run: |
           set -xeuo pipefail
-          cfn_nag -f -b .cfnnag_global_suppress_list templates/**/*.template.json
+          cfn_nag -f -b .cfnnag_global_suppress_list deployment/global-s3-assets/**/*.template.json
   post-build-scan:
     name: post-build scan
     needs: build-dist
