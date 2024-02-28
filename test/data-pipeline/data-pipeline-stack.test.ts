@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';

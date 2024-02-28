@@ -13,6 +13,7 @@
  */
 
 import { join } from 'path';
+import { ALARM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Stack } from 'aws-cdk-lib';
 import { Dashboard, PeriodOverride } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule } from 'aws-cdk-lib/aws-events';
@@ -24,7 +25,6 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { PARAMETERS_DESCRIPTION } from './settings';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { ALARM_NAME_PREFIX } from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { getShortIdOfStack } from '../common/stack';
 import { SolutionNodejsFunction } from '../private/function';

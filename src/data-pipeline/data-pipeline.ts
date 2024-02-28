@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -31,7 +32,6 @@ import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';

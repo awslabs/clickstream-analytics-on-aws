@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME } from '@aws/clickstream-base-lib';
 import {
   CreateAnalysisCommand,
   CreateDashboardCommand,
@@ -51,7 +52,6 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME } from '../../../../src/common/constant';
 import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
 import { clickstream_lifecycle_daily_view_columns, clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';

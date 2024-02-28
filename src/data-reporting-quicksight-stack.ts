@@ -13,6 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
 import {
   Aspects,
   Aws,
@@ -34,7 +35,6 @@ import {
   ruleRolePolicyWithWildcardResourcesAndHighSPCM,
   ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';

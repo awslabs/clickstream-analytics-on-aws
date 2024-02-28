@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -28,7 +29,6 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../common/constant';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';

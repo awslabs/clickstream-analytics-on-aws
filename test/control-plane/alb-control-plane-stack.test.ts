@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_CONTROL_PLANE_URL } from '@aws/clickstream-base-lib';
 import {
   Aws,
 } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
-import { OUTPUT_CONTROL_PLANE_URL } from '../../src/common/constant';
 import { SolutionInfo } from '../../src/common/solution-info';
 import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-config';
 import { TestApp, removeFolder } from '../common/jest';

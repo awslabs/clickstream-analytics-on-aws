@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { Database, DataFormat, Table } from '@aws-cdk/aws-glue-alpha';
 import { Column, Schema } from '@aws-cdk/aws-glue-alpha/lib/schema';
 import { CfnResource } from 'aws-cdk-lib';
 import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
-import { PARTITION_APP } from '../../common/constant';
 import { ClickstreamSinkTables, SinkTableEnum } from '../data-pipeline';
 import { getEventParameterTableColumns } from '../tables/event-parameter-table';
 import { getEventTableColumns } from '../tables/event-table';

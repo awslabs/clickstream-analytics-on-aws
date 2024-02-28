@@ -11,8 +11,6 @@
  *  and limitations under the License.
  */
 
-import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
 import {
   DOMAIN_NAME_PATTERN,
   PARAMETER_GROUP_LABEL_VPC,
@@ -23,7 +21,9 @@ import {
   PARAMETER_LABEL_CERTIFICATE_ARN,
   PARAMETER_LABEL_DOMAIN_NAME,
   STACK_CORS_PATTERN,
-} from '../../common/constant';
+} from '@aws/clickstream-base-lib';
+import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 import { SINK_TYPE_MODE } from '../../common/model';
 import { Parameters, SubnetParameterType } from '../../common/parameters';

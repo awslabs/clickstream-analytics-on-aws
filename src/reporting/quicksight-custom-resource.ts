@@ -12,24 +12,6 @@
  */
 
 import { join } from 'path';
-import { TimeGranularity } from '@aws-sdk/client-quicksight';
-import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Provider } from 'aws-cdk-lib/custom-resources';
-import { Construct } from 'constructs';
-import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
-import {
-  clickstream_device_view_columns,
-  clickstream_event_parameter_view_columns,
-  clickstream_lifecycle_daily_view_columns,
-  clickstream_lifecycle_weekly_view_columns,
-  clickstream_event_view_columns,
-  clickstream_retention_view_columns,
-  clickstream_session_view_columns,
-  clickstream_user_attr_view_columns,
-  clickstream_user_dim_view_columns,
-} from './private/dataset-col-def';
-import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import {
   CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
   CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
@@ -49,7 +31,25 @@ import {
   CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   CLICKSTREAM_SESSION_VIEW_NAME,
-} from '../common/constant';
+} from '@aws/clickstream-base-lib';
+import { TimeGranularity } from '@aws-sdk/client-quicksight';
+import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Provider } from 'aws-cdk-lib/custom-resources';
+import { Construct } from 'constructs';
+import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
+import {
+  clickstream_device_view_columns,
+  clickstream_event_parameter_view_columns,
+  clickstream_lifecycle_daily_view_columns,
+  clickstream_lifecycle_weekly_view_columns,
+  clickstream_event_view_columns,
+  clickstream_retention_view_columns,
+  clickstream_session_view_columns,
+  clickstream_user_attr_view_columns,
+  clickstream_user_dim_view_columns,
+} from './private/dataset-col-def';
+import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 
 import { SolutionNodejsFunction } from '../private/function';
 

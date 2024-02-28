@@ -12,13 +12,13 @@
  */
 
 
+import { ALBLogServiceAccountMapping } from '@aws/clickstream-base-lib';
 import { Aws, CfnCondition, CfnMapping, CfnResource, Fn } from 'aws-cdk-lib';
 import { ApplicationLoadBalancer } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { AccountPrincipal, PolicyStatement, ServicePrincipal, Effect, AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { IBucket, Bucket, BucketPolicy } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { ALBLogServiceAccountMapping } from './constant';
 import { AuthenticationProps } from './model';
 
 export interface LogProps {
