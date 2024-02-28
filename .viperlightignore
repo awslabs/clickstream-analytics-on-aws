@@ -11,7 +11,8 @@ coverage/
 public/*  # doc build output
 deployment/*
 examples/*
-frontend/*
+frontend/build/*
+src/base-lib/lib/*
 
 # git source and ALB service accounts in docs
 docs/mkdocs.base.yml:35
