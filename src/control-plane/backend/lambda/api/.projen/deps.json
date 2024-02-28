@@ -60,6 +60,11 @@
       "type": "build"
     },
     {
+      "name": "@vercel/ncc",
+      "version": "^0.38.1",
+      "type": "build"
+    },
+    {
       "name": "aws-sdk-client-mock-jest",
       "version": "^3.0.1",
       "type": "build"

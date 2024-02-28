@@ -234,6 +234,7 @@ const devDepsForApiProject = [
   'nodemon@^2.0.20',
   'supertest@^6.3.3',
   'ts-node@^10.9.1',
+  '@vercel/ncc@^0.38.1',
   '@types/express@^4.17.16',
   '@types/lodash@^4.14.202',
   '@types/supertest@^2.0.12',
