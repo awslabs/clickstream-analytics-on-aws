@@ -1351,7 +1351,7 @@ function getLocalDateISOString(date: Date, offsetDay?: number) {
 }
 
 function defaultValueFunc(exceptValue: any, defaultValue: any) {
-  return exceptValue ?? defaultValue;
+  return exceptValue || defaultValue;
 }
 
 export {
