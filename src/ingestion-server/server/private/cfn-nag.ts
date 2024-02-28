@@ -33,7 +33,7 @@ const cfnNagList = [
   ruleForLambdaVPCAndReservedConcurrentExecutions('IngestionServer/clickstream-ingestion-service-ecs-asg/DrainECSHook/Function/Resource',
     'ECSDrainHook'),
   ruleForLambdaVPCAndReservedConcurrentExecutions('IngestionServer/ECSEc2Cluster/clickstream-ingestion-service-ecs-asg/DrainECSHook/Function/Resource',
-    'ECSEc2DrainHook'),    
+    'ECSEc2DrainHook'),
   {
     paths_endswith: [
       'IngestionServer/clickstream-ingestion-service-ecs-asg/LifecycleHookDrainHook/Topic/Resource',
