@@ -110,7 +110,6 @@ async function _handler(
   event: ResourceEvent,
   context: Context,
 ) {
-  console.log('mingtong test: event: ', event);
   const props = event.ResourceProperties as ResourcePropertiesType;
 
   let requestType = event.RequestType;
@@ -192,10 +191,10 @@ async function _handler(
   }
 
   if (requestType !== 'Delete') {
+    // set default rules
     await modifyFallbackRule(listenerArn);
   }
 
-  // set default rules
   if (requestType == 'Delete') {
     logger.info('Delete Listener rules');
     listenerArn = await getListenerArnFromLoadBalancer(loadBalancerArn);
@@ -340,25 +339,25 @@ async function deleteListener(
       logger.info('Deleting old listener: ' + listenerArn);
     });
   }
-  // await waitForListenerDeletion(loadBalancerArn);
+  await waitForListenerDeletion(loadBalancerArn);
 }
 
-// async function waitForListenerDeletion(
-//   loadBalancerArn: string,
-//   maxAttempts = 20, delay = 15000) {
-//   let attempts = 0;
-//   while (attempts < maxAttempts) {
-//     attempts++;
-//     const describeListenersCommand = new DescribeListenersCommand({ LoadBalancerArn: loadBalancerArn });
-//     const oldListenersResponse = await albClient.send(describeListenersCommand);
-//     if (oldListenersResponse && oldListenersResponse.Listeners && oldListenersResponse.Listeners.length > 0) {
-//       console.log('Listener has been successfully deleted.');
-//       return;
-//     }
-//     await new Promise(resolve => setTimeout(resolve, delay));
-//   }
-//   throw new Error(`Listener deletion was not confirmed within the expected time frame, loadBalancerArn: ${loadBalancerArn}`);
-// }
+async function waitForListenerDeletion(
+  loadBalancerArn: string,
+  maxAttempts = 20, delay = 15000) {
+  let attempts = 0;
+  while (attempts < maxAttempts) {
+    attempts++;
+    const describeListenersCommand = new DescribeListenersCommand({ LoadBalancerArn: loadBalancerArn });
+    const oldListenersResponse = await albClient.send(describeListenersCommand);
+    if (oldListenersResponse && oldListenersResponse.Listeners && oldListenersResponse.Listeners.length > 0) {
+      console.log('Listener has been successfully deleted.');
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  throw new Error(`Listener deletion was not confirmed within the expected time frame, loadBalancerArn: ${loadBalancerArn}`);
+}
 
 async function handleUpdateRules(
   inputPros: HandleUpdateInput,

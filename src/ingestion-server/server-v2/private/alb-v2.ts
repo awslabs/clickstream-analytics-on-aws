@@ -88,10 +88,6 @@ function createApplicationLoadBalancer(
   scope: Construct,
   props: ApplicationLoadBalancerProps,
 ) {
-  // const httpPort = props.ports.http;
-  // const httpsPort = props.ports.https;
-  // const httpContainerName = props.httpContainerName;
-
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
     internetFacing: true,
@@ -150,61 +146,6 @@ function createApplicationLoadBalancer(
     Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
 
   const targetGroup = createECSTargets(scope, props.vpc);
-
-  // const httpListener = new ApplicationListener(scope, 'HttpListener', {
-  //   protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-  //   port: httpPort,
-  //   defaultTargetGroups: [targetGroup],
-  //   loadBalancer: alb,
-  // });
-
-  // const cfnListener = httpListener.node.defaultChild as CfnListener;
-  // cfnListener.addPropertyOverride('Protocol',
-  //   Fn.conditionIf(props.isHttps.logicalId, ApplicationProtocol.HTTPS, ApplicationProtocol.HTTP).toString());
-
-  // cfnListener.addPropertyOverride('Port',
-  //   Fn.conditionIf(props.isHttps.logicalId, httpsPort, httpPort).toString());
-
-  // cfnListener.addPropertyOverride('SslPolicy',
-  //   Fn.conditionIf(props.isHttps.logicalId, SslPolicy.TLS12, Fn.ref('AWS::NoValue')));
-
-  // cfnListener.addPropertyOverride('Certificates',
-  //   Fn.conditionIf(props.isHttps.logicalId, [{
-  //     CertificateArn: props.certificateArn,
-  //   }], Fn.ref('AWS::NoValue')));
-
-  // addCfnNagSuppressRules(
-  //   httpListener.node.defaultChild as CfnListener,
-  //   [
-  //     {
-  //       id: 'W56',
-  //       reason:
-  //         'Using HTTP listener is by design',
-  //     },
-  //   ],
-  // );
-
-  // const httpRedirectListener = new ApplicationListener(scope, 'HttpRedirectListener', {
-  //   protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-  //   port: 81,
-  //   defaultAction: ListenerAction.redirect({
-  //     protocol: ApplicationProtocol.HTTPS,
-  //     port: `${httpsPort}`,
-  //   }),
-  //   loadBalancer: alb,
-  // });
-  // (httpRedirectListener.node.defaultChild as CfnListener).cfnOptions.condition = props.isHttps;
-
-  // addCfnNagSuppressRules(
-  //   httpRedirectListener.node.defaultChild as CfnListener,
-  //   [
-  //     {
-  //       id: 'W56',
-  //       reason:
-  //         'Using HTTP listener is by design',
-  //     },
-  //   ],
-  // );
 
   return { alb, targetGroup };
 }

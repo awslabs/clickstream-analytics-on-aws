@@ -93,13 +93,6 @@ function createECSClusterAndService(
     platform: isArm ? Platform.LINUX_ARM64 : Platform.LINUX_AMD64,
   };
 
-  // let notifications = {};
-
-  // if (props.notificationsTopic) {
-  //   notifications = { notifications: [{ topic: props.notificationsTopic }] };
-  // }
-  // TODO: Add notifications mingtong
-
   const autoScalingGroup = new AutoScalingGroup(scope, `${RESOURCE_ID_PREFIX}ecs-asg`, {
     vpc,
     vpcSubnets: props.vpcSubnets,
