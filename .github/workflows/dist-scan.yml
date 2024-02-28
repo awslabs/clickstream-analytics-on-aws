@@ -37,6 +37,8 @@ jobs:
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: |
+            src/**/*
+            frontend/**/*
             deployment/global-s3-assets
             !deployment/global-s3-assets/**/asset.*
   cfn-lint-scan:
