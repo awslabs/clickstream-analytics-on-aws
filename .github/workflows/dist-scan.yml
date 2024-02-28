@@ -56,14 +56,11 @@ jobs:
       - name: Print the Cloud Formation Linter Version & run Linter.
         id: cfn-lint
         run: |
-          pwd
-          ls
-          ls templates
           cfn-lint --version
-          TEMPLATE_ROOT=templates/default
+          TEMPLATE_ROOT=deployment/global-s3-assets/default
           cfn-lint -i W3005 W2001 W3045 W8003 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
           cfn-lint -i W3005 W2001 W3045 W8003 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
-          TEMPLATE_ROOT=templates/cn
+          TEMPLATE_ROOT=deployment/global-s3-assets/cn
           cfn-lint -i W3005 W2001 W3045 W8003 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
   cfn-nag-scan:
     name: cfn-nag scan
@@ -79,7 +76,6 @@ jobs:
           path: templates
       - name: Run cfn-nag scan
         run: |
-          ls
           set -xeuo pipefail
           cfn_nag -f -b .cfnnag_global_suppress_list templates/deployment/global-s3-assets/**/*.template.json
   post-build-scan:
