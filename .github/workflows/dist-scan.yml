@@ -58,9 +58,10 @@ jobs:
         run: |
           pwd
           ls
+          ls template
           echo $TEMPLATE_ROOT
           cfn-lint --version
-          TEMPLATE_ROOT=deployment/global-s3-assets/default
+          TEMPLATE_ROOT=templates/default
           cfn-lint -i W3005 W2001 W3045 W8003 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
           cfn-lint -i W3005 W2001 W3045 W8003 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
           TEMPLATE_ROOT=templates/cn
