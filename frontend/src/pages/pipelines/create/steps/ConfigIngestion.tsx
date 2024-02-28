@@ -321,11 +321,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: t('pipeline:create.networkTypeGeneral'),
                   description: t('pipeline:create.networkTypeGeneralDesc'),
                   value: ENetworkType.General,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
                 {
                   label: t('pipeline:create.networkTypePrivate'),
                   description: t('pipeline:create.networkTypePrivateDesc'),
                   value: ENetworkType.Private,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
               ]}
             />
@@ -401,11 +403,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: 'ECS on Fargate',
                   description: t('pipeline:create.ingestionTypeFargateDesc'),
                   value: EIngestionType.Fargate,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
                 {
                   label: 'ECS on EC2',
                   description: t('pipeline:create.ingestionTypeEC2Desc'),
                   value: EIngestionType.EC2,
+                  disabled: isDisabled(update, pipelineInfo),
                 },
               ]}
             />

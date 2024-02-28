@@ -181,6 +181,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   selectedRedshiftRole: null,
   selectedRedshiftExecutionUnit: null,
 
+  selectedQuickSightUser: null,
   selectedTransformPlugins: [],
   selectedEnrichPlugins: [],
   enableReporting: true,

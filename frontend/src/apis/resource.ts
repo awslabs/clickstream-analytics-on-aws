@@ -98,6 +98,11 @@ const getQuickSightStatus = async () => {
   return result;
 };
 
+const getQuickSightUsers = async () => {
+  const result: any = await apiRequest('get', `/env/quicksight/users`);
+  return result;
+};
+
 const getSSMSecrets = async (params: { region: string }) => {
   const result: any = await apiRequest('get', '/env/ssm/secrets', params);
   return result;
@@ -164,6 +169,7 @@ export {
   getMSKList,
   getQuickSightDetail,
   getQuickSightStatus,
+  getQuickSightUsers,
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
   getRegionList,

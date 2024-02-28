@@ -443,6 +443,8 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<DeleteDashboardCommandOutput|undefined> => {
+  // Delete Folder
+  await deleteFolder(quickSight, accountId, dashboardDef.databaseName, schema);
 
   // Delete Dashboard
   const dashboardId = buildDashBoardId(dashboardDef.databaseName, schema);
@@ -457,36 +459,6 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
-  }
-
-  let deleteFolder: boolean = true;
-  await quickSight.listFolderMembers({
-    AwsAccountId: accountId,
-    FolderId: getQuickSightFolderId(databaseName, schema),
-  }).then(async (data) => {
-    if (data !== undefined && data.FolderMemberList !== undefined) {
-      for (const member of data.FolderMemberList) {
-        if (!member.MemberId?.startsWith(QUICKSIGHT_RESOURCE_NAME_PREFIX)) {
-          deleteFolder = false;
-          continue;
-        }
-        const memberType = getMemberType(member.MemberArn!, member.MemberId);
-        await quickSight.deleteFolderMembership({
-          AwsAccountId: accountId,
-          FolderId: getQuickSightFolderId(databaseName, schema),
-          MemberId: member.MemberId,
-          MemberType: memberType,
-        });
-      }
-    }
-  });
-
-  //delete folder
-  if (deleteFolder) {
-    await quickSight.deleteFolder({
-      AwsAccountId: accountId,
-      FolderId: getQuickSightFolderId(databaseName, schema),
-    });
   }
 
   return result;
@@ -871,6 +843,52 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
 
   } catch (err: any) {
     logger.error(`Create QuickSight dashboard failed due to: ${(err as Error).message}`);
+    throw err;
+  }
+};
+
+const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, schema: string): Promise<void> => {
+  let needDeleteFolder: boolean = true;
+  const res = await quickSight.listFolderMembers({
+    AwsAccountId: awsAccountId,
+    FolderId: getQuickSightFolderId(databaseName, schema),
+  });
+  if (res && res.FolderMemberList) {
+    for (const member of res.FolderMemberList) {
+      if (!member.MemberId?.startsWith(QUICKSIGHT_RESOURCE_NAME_PREFIX)) {
+        needDeleteFolder = false;
+        continue;
+      }
+      await deleteFolderMembership(quickSight, awsAccountId, member.MemberArn!, member.MemberId, databaseName, schema);
+    }
+  }
+
+  //delete folder
+  if (needDeleteFolder) {
+    await quickSight.deleteFolder({
+      AwsAccountId: awsAccountId,
+      FolderId: getQuickSightFolderId(databaseName, schema),
+    });
+  }
+};
+
+const deleteFolderMembership = async (quickSight: QuickSight, awsAccountId: string,
+  memberArn: string, memberId: string,
+  databaseName: string, schema: string): Promise<void> => {
+  try {
+    const memberType = getMemberType(memberArn, memberId);
+    await quickSight.deleteFolderMembership({
+      AwsAccountId: awsAccountId,
+      FolderId: getQuickSightFolderId(databaseName, schema),
+      MemberId: memberId,
+      MemberType: memberType,
+    });
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      logger.info('Folder membership not exist. skip delete operation.');
+      return;
+    }
+    logger.error(`Delete QuickSight folder membership failed due to: ${(err as Error).message}`);
     throw err;
   }
 };
