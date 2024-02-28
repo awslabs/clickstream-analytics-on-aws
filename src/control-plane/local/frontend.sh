@@ -59,7 +59,7 @@ EOF
 
 
 # Run the server
-cd ../../../frontend/ && yarn install && yarn start
+cd ../../../frontend/ && pnpm start
 
 
 

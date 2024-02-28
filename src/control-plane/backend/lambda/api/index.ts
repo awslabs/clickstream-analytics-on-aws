@@ -27,7 +27,7 @@ import { router_project } from './router/project';
 import { router_reporting } from './router/reporting';
 import { router_user } from './router/user';
 
-const app = express();
+const app: express.Express = express();
 app.disable('x-powered-by');
 const port = process.env.PORT || 8080;
 

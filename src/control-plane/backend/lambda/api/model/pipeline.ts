@@ -11,6 +11,13 @@
  *  and limitations under the License.
  */
 
+import {
+  MULTI_APP_ID_PATTERN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
+  PROJECT_ID_PATTERN,
+  SECRETS_MANAGER_ARN_PATTERN,
+} from '@aws/clickstream-base-lib';
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
@@ -40,13 +47,6 @@ import {
   listenStackQueueArn,
   stackWorkflowS3Bucket,
 } from '../common/constants';
-import {
-  MULTI_APP_ID_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
-  PROJECT_ID_PATTERN,
-  SECRETS_MANAGER_ARN_PATTERN,
-} from '../common/constants-ln';
 import {
   BuiltInTagKeys,
   ExecutionDetail,

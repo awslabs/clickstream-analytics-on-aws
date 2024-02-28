@@ -18,7 +18,7 @@ import { isProjectId, isRequestIdExisted, isXSSRequest, validate } from '../comm
 import { AttributionAnalysisService } from '../service/attribution';
 import { ReportingService } from '../service/reporting';
 
-const router_reporting = express.Router();
+const router_reporting: express.Router = express.Router();
 const reportingServ: ReportingService = new ReportingService();
 const attributionAnalysisService: AttributionAnalysisService = new AttributionAnalysisService();
 

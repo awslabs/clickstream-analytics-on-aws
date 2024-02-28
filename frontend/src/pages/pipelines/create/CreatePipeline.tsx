@@ -11,7 +11,14 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Wizard } from '@cloudscape-design/components';
+import {
+  CORS_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
+} from '@aws/clickstream-base-lib';
+import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -65,13 +72,6 @@ import {
   SDK_LIST,
   SinkType,
 } from 'ts/const';
-import {
-  CORS_PATTERN,
-  DOMAIN_NAME_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
-} from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   checkStringValidRegex,
@@ -2563,7 +2563,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
         pipelineInfo.region
       ).filter(
-        (type) =>
+        (type: SelectProps.Option) =>
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];

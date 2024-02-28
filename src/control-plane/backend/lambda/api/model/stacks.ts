@@ -11,14 +11,6 @@
  *  and limitations under the License.
  */
 
-import { Parameter } from '@aws-sdk/client-cloudformation';
-import { JSONObject } from 'ts-json-object';
-import { CPipelineResources, IPipeline } from './pipeline';
-import {
-  analyticsMetadataTable,
-  awsAccountId,
-  awsRegion,
-} from '../common/constants';
 import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
@@ -42,7 +34,15 @@ import {
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
-} from '../common/constants-ln';
+} from '@aws/clickstream-base-lib';
+import { Parameter } from '@aws-sdk/client-cloudformation';
+import { JSONObject } from 'ts-json-object';
+import { CPipelineResources, IPipeline } from './pipeline';
+import {
+  analyticsMetadataTable,
+  awsAccountId,
+  awsRegion,
+} from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
 import {

@@ -99,7 +99,8 @@ import {
   mergeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '../../common/constants-ln';
+// eslint-disable-next-line import/order
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '@aws/clickstream-base-lib';
 import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { ENetworkType, IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';

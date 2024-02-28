@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Input,
@@ -24,7 +25,6 @@ import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole, TIME_FORMAT } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 import UserTable from './UserTable';
 
@@ -51,14 +51,14 @@ const UserList: React.FC = () => {
     },
   ];
   const getRolesLabel = (roles: IUserRole[]) => {
-    const roleLabels = [];
+    const roleLabels: string[] = [];
     for (const role of roles) {
       roleLabels.push(getRoleName(role));
     }
     return roleLabels.join(',');
   };
 
-  const getRoleName = (role: IUserRole) => {
+  const getRoleName = (role: IUserRole): string => {
     switch (role) {
       case IUserRole.ADMIN:
         return t('user:options.admin');

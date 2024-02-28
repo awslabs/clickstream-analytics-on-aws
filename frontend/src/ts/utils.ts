@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ServerlessRedshiftRPUByRegionMapping } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -25,7 +26,6 @@ import {
   ExecutionType,
   IUserRole,
 } from './const';
-import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 import { IMetadataBuiltInList } from './explore-types';
 
 /**
@@ -62,7 +62,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
     ServerlessRedshiftRPUByRegionMapping as RPURegionListType
   )[region];
   if (region && minMaxObject && minMaxObject.min > 0) {
-    const options = [];
+    const options: SelectProps.Option[] = [];
     for (let i = minMaxObject.min; i <= minMaxObject.max; i += STEP) {
       options.push({ label: i.toString(), value: i.toString() });
     }

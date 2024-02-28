@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -26,7 +27,6 @@ import {
 import i18n from 'i18n';
 import moment from 'moment';
 import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
-import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from 'ts/constant-ln';
 import {
   ConditionCategory,
   ExploreAnalyticsOperators,
