@@ -3535,6 +3535,73 @@ describe('Pipeline test', () => {
       error: 'Error',
     });
   });
+  it('Update pipeline add reporting', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        reporting: undefined,
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      expect(
+        input.TransactItems[0].Put.Item.workflow.M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.End.BOOL === true,
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        reporting: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.reporting,
+        },
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
   it('Update pipeline when QuickSight user already existed', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);

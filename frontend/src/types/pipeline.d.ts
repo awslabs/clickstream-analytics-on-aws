@@ -153,6 +153,7 @@ declare global {
     reporting: {
       quickSight: {
         accountName: string;
+        user?: string;
       };
     };
     status?: {
@@ -219,6 +220,8 @@ declare global {
     enableReporting: boolean;
     arnAccountId: string;
     enableAuthentication: boolean;
+
+    selectedQuickSightUser: SelectProps.Option | null;
 
     redshiftType: string; // 'provisioned' | 'serverless';
     redshiftServerlessVPC: SelectProps.Option | null;

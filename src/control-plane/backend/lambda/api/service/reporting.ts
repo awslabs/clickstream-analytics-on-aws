@@ -821,6 +821,11 @@ export class ReportingService {
     });
 
     //create QuickSight dashboard
+    const embedUserArn = await _getEmbedUserArnFromPipeline(query.projectId);
+    let ownerArn = principals.publishUserArn;
+    if (process.env.AWS_REGION?.startsWith('cn')) {
+      ownerArn = embedUserArn;
+    }
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newDashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
@@ -828,7 +833,7 @@ export class ReportingService {
       Name: `${resourceName}`,
       Definition: dashboard,
       Permissions: [{
-        Principal: principals.publishUserArn,
+        Principal: ownerArn,
         Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
       }],
     });
@@ -839,6 +844,7 @@ export class ReportingService {
       if (dashboardSuccess) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
+          ownerArn,
           dashboardCreateParameters.allowedDomain,
           dashboardId,
         );
@@ -1069,7 +1075,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
 async function _cleanUser() {
   const pipelines = await store.listPipeline('', 'latest', 'asc');
-  if (pipelines.every(p => !_needExploreUserVersion(p))) {
+  if (pipelines.every(p => !_needExploreUserVersion(p)) && !process.env.AWS_REGION?.startsWith('cn')) {
     await deleteExploreUser();
   }
 }
@@ -1079,4 +1085,13 @@ function _needExploreUserVersion(pipeline: IPipeline) {
   const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3'];
   return oldVersions.includes(version);
 
+}
+
+async function _getEmbedUserArnFromPipeline(projectId: string) {
+  let embedUserArn = '';
+  const pipelines = await store.listPipeline(projectId, 'latest', 'asc');
+  if (pipelines.length > 0) {
+    embedUserArn = pipelines[0].reporting?.quickSight?.user ?? '';
+  }
+  return embedUserArn;
 }

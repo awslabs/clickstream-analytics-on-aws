@@ -40,7 +40,7 @@ import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataCli
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_TOKEN, tokenMock } from './ddb-mock';
+import { MOCK_TOKEN, quickSightUserMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
@@ -108,10 +108,10 @@ describe('reporting test', () => {
     quickSightMock.reset();
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
+    quickSightUserMock(ddbMock, false);
   });
 
   it('funnel bar visual - preview', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -167,7 +167,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -190,7 +190,6 @@ describe('reporting test', () => {
   });
 
   it('funnel visual - preview', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -247,7 +246,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -271,8 +270,6 @@ describe('reporting test', () => {
   });
 
   it('funnel visual - preview - resources create failed', async () => {
-    tokenMock(ddbMock, false);
-
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -339,7 +336,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -354,8 +351,6 @@ describe('reporting test', () => {
   });
 
   it('funnel visual - publish', async () => {
-    tokenMock(ddbMock, false);
-
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
     });
@@ -410,7 +405,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -431,7 +426,6 @@ describe('reporting test', () => {
   });
 
   it('funnel visual - XSS check', async () => {
-    tokenMock(ddbMock, false);
     const res = await request(app)
       .post('/api/reporting/funnel')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -464,7 +458,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -477,7 +471,6 @@ describe('reporting test', () => {
   });
 
   it('event visual - preview', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -534,7 +527,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -557,8 +550,6 @@ describe('reporting test', () => {
   });
 
   it('event visual - preview - twice request with group condition', async () => {
-    tokenMock(ddbMock, false);
-
     quickSightMock.on(CreateDataSetCommand).callsFake(input => {
       expect(
         input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
@@ -630,7 +621,7 @@ describe('reporting test', () => {
       },
       dashboardCreateParameters: {
         region: 'us-east-1',
-        allowDomain: 'https://example.com',
+        allowedDomain: 'https://example.com',
         quickSight: {
           dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
         },
@@ -656,7 +647,6 @@ describe('reporting test', () => {
   });
 
   it('event visual - publish', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
     });
@@ -712,7 +702,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -732,7 +722,6 @@ describe('reporting test', () => {
   });
 
   it('path visual - preview', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -788,7 +777,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -815,7 +804,6 @@ describe('reporting test', () => {
   });
 
   it('path visual - publish', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
@@ -877,7 +865,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -904,7 +892,6 @@ describe('reporting test', () => {
   });
 
   it('retention visual - publish', async () => {
-    tokenMock(ddbMock, false);
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
@@ -965,7 +952,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1071,7 +1058,6 @@ describe('reporting test', () => {
   });
 
   it('clean - ThrottlingException', async () => {
-
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
@@ -1343,7 +1329,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1387,7 +1373,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1430,7 +1416,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1473,7 +1459,7 @@ describe('reporting test', () => {
       groupColumn: 'week',
       dashboardCreateParameters: {
         region: 'us-east-1',
-        allowDomain: 'https://example.com',
+        allowedDomain: 'https://example.com',
         quickSight: {
           dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
         },
@@ -1587,7 +1573,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1633,7 +1619,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1677,7 +1663,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1720,7 +1706,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1756,7 +1742,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1801,7 +1787,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1845,7 +1831,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1890,7 +1876,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1933,7 +1919,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -1980,7 +1966,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -2029,7 +2015,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -2076,7 +2062,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -2129,7 +2115,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -2180,7 +2166,7 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
+          allowedDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -2210,6 +2196,101 @@ describe('reporting test', () => {
 
   });
 
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+});
+
+describe('reporting test in China region', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+    cloudFormationMock.reset();
+    quickSightMock.reset();
+    redshiftClientMock.reset();
+    tokenMock(ddbMock, false);
+    quickSightUserMock(ddbMock, true);
+  });
+
+  it('funnel bar visual - preview', async () => {
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws-cn:quicksight:cn-north-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws-cn:quicksight:cn-north-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws-cn:quicksight:cn-north-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://cn-north-1.quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
+
+    process.env.AWS_REGION = 'cn-north-1';
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.BAR,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_ID_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'cn-north-1',
+          allowedDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws-cn:quicksight:cn-north-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws-cn:quicksight:cn-north-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisArn).toEqual('arn:aws-cn:quicksight:cn-north-1:11111111:analysis/analysisaaaaaaaa');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://cn-north-1.quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
+    process.env.AWS_REGION = undefined;
+  });
 
   afterAll((done) => {
     server.close();

@@ -123,6 +123,33 @@ function tokenMock(ddbMock: AwsClientStub<DynamoDBDocumentClient>, existed: bool
   });
 }
 
+function quickSightUserMock(ddbMock: AwsClientStub<DynamoDBDocumentClient>, inGCR: boolean): any {
+  if (inGCR) {
+    return ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          id: MOCK_PROJECT_ID,
+          region: 'cn-north-1',
+          reporting: {
+            quickSight: {
+              user: 'arn:aws-cn:quicksight:cn-north-1:55555555555555:user/default/user1',
+            },
+          },
+        },
+      ],
+    });
+  } else {
+    return ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          id: MOCK_PROJECT_ID,
+          region: 'us-east-1',
+        },
+      ],
+    });
+  }
+}
+
 function tokenMockTwice(ddbMock: AwsClientStub<DynamoDBDocumentClient>): any {
   return ddbMock.on(PutCommand).callsFakeOnce(input => {
     if (
@@ -960,4 +987,5 @@ export {
   metadataEventExistedMock,
   metadataEventAttributeExistedMock,
   metadataUserAttributeExistedMock,
+  quickSightUserMock,
 };

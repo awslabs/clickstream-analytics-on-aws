@@ -137,6 +137,12 @@ router_env.get(
   });
 
 router_env.get(
+  '/quicksight/users',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return environmentServ.quickSightListUsers(req, res, next);
+  });
+
+router_env.get(
   '/quicksight/describe',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeAccountSubscription(req, res, next);

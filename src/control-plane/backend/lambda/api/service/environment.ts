@@ -26,6 +26,7 @@ import { listRoles } from '../store/aws/iam';
 import { listMSKCluster } from '../store/aws/kafka';
 import {
   describeClickstreamAccountSubscription,
+  listUsers,
   quickSightIsSubscribed,
 } from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
@@ -177,6 +178,15 @@ export class EnvironmentServ {
   public async quickSightIsSubscribed(_req: any, res: any, next: any) {
     try {
       const result = await quickSightIsSubscribed();
+      return res.json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async quickSightListUsers(_req: any, res: any, next: any) {
+    try {
+      const result = await listUsers();
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);
