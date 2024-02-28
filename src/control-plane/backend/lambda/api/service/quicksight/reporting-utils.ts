@@ -1377,7 +1377,7 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
 
 export function encodeQueryValueForSql(params: SQLParameters) {
   if (params.eventAndConditions !== undefined) {
-    for (const item of (params.eventAndConditions as EventAndCondition[])) {
+    for (const item of (params.eventAndConditions)) {
       _encodeFilterValue(item.sqlCondition?.conditions);
       item.eventName = _encodeSqlSpecialChars(item.eventName);
     }
@@ -1386,7 +1386,7 @@ export function encodeQueryValueForSql(params: SQLParameters) {
   _encodeFilterValue(params.globalEventCondition?.conditions);
 
   if (params.pairEventAndConditions !== undefined) {
-    for (const item of (params.pairEventAndConditions as PairEventAndCondition[])) {
+    for (const item of (params.pairEventAndConditions)) {
       _encodeFilterValue(item.startEvent.sqlCondition?.conditions);
       _encodeFilterValue(item.backEvent.sqlCondition?.conditions);
 
@@ -1398,7 +1398,7 @@ export function encodeQueryValueForSql(params: SQLParameters) {
 
 export function encodeAttributionQueryValueForSql(params: AttributionSQLParameters) {
   if (params.eventAndConditions !== undefined) {
-    for (const item of (params.eventAndConditions as AttributionTouchPoint[])) {
+    for (const item of (params.eventAndConditions)) {
       _encodeFilterValue(item.sqlCondition?.conditions);
       item.eventName = _encodeSqlSpecialChars(item.eventName);
     }
@@ -1430,7 +1430,7 @@ function _encodeSqlSpecialChars(input: string): string {
     "'": "''",
   };
 
-  const encodedString = input.replace(/[\']/g, (match) => sqlSpecialChars[match]);
+  const encodedString = input.replace(/\'/g, (match) => sqlSpecialChars[match]);
 
   return encodedString;
 }

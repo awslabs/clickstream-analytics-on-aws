@@ -48,6 +48,7 @@ import {
 } from 'aws-cdk-lib';
 
 import { Construct, IConstruct } from 'constructs';
+import { PARAMETER_GROUP_LABEL_IAM_ROLE, PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN, PARAMETER_LABEL_IAM_ROLE_PREFIX } from './constant';
 import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
 export enum SubnetParameterType {
@@ -643,23 +644,39 @@ export class Parameters {
     });
   }
 
-  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct) {
+  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct, paramGroups?: any[], paramLabels?: any) {
+    const groups: any[] = paramGroups ?? [];
+    const labels: any = paramLabels ?? {};
+
     const iamRolePrefixParam = new CfnParameter(scope, 'IamRolePrefix', {
       description: 'The prefix of all IAM Roles.',
       type: 'String',
       allowedPattern: IAM_ROLE_PREFIX_PATTERN,
       default: '',
     });
+    labels[iamRolePrefixParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_PREFIX,
+    };
 
     const iamRoleBoundaryArnParam = new CfnParameter(scope, 'IamRoleBoundaryArn', {
-      description: 'The arn of all IAM Roles.',
+      description: 'Set permissions boundaries for IAM Roles.',
       type: 'String',
       default: '',
+    });
+    labels[iamRoleBoundaryArnParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+    };
+
+    groups.push({
+      Label: { default: PARAMETER_GROUP_LABEL_IAM_ROLE },
+      Parameters: [iamRolePrefixParam.logicalId, iamRoleBoundaryArnParam.logicalId],
     });
 
     return {
       iamRolePrefixParam,
       iamRoleBoundaryArnParam,
+      paramLabels: labels,
+      paramGroups: groups,
     };
   }
 
