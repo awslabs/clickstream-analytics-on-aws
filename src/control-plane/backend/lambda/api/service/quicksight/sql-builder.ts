@@ -122,6 +122,7 @@ export interface EventComputeMethodsProps {
   readonly isMixedMethod : boolean;
   readonly isSameAggregationMethod : boolean;
   readonly isCountMixedMethod : boolean;
+  readonly aggregationMethodName? : string;
 };
 
 export const BUILTIN_EVENTS = [
@@ -2196,6 +2197,7 @@ export function getComputeMethodProps(sqlParameters: SQLParameters): EventComput
 
   const isMixedMethod = hasAggregationPropertyMethod && (hasCounntPropertyMethod || hasIdCountMethod);
   const isSameAggregationMethod = !isMixedMethod && aggregationMethodSet.size === 1 && hasAggregationPropertyMethod;
+  const aggregationMethodName = isSameAggregationMethod ? aggregationMethodSet.values().next().value : undefined;
   const isCountMixedMethod = hasCounntPropertyMethod && hasIdCountMethod && !hasAggregationPropertyMethod;
 
   return {
@@ -2206,6 +2208,7 @@ export function getComputeMethodProps(sqlParameters: SQLParameters): EventComput
     isMixedMethod,
     isSameAggregationMethod,
     isCountMixedMethod,
+    aggregationMethodName,
   };
 }
 

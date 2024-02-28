@@ -14,7 +14,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -47,6 +47,7 @@ import {
   checkRetentionAnalysisParameter,
   encodeQueryValueForSql,
   getEventNormalTableVisualDef,
+  getEventPropertyCountPivotTableVisualDef,
 } from './quicksight/reporting-utils';
 import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -569,6 +570,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
+      let result: CreateDashboardResult;
       const locale = query.locale ?? ExploreLocales.EN_US;
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
@@ -585,9 +587,18 @@ export class ReportingService {
       }, locale);
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
+      let tableVisualDef: Visual;
+      if (computeMethodProps.isSameAggregationMethod) {
+        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn
+          , hasGrouping, computeMethodProps.aggregationMethodName!);
+      } else if (
+        (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
+        ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
 
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
+      } else {
+        tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
+      }
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -600,7 +611,7 @@ export class ReportingService {
         filterGroup: visualRelatedParams.filterGroup,
       };
 
-      const result = await this.createDashboardVisuals(
+      result = await this.createDashboardVisuals(
         sheetId, viewName, query, datasetPropsArray, [tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {

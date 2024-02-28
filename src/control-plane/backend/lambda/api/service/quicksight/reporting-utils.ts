@@ -29,6 +29,7 @@ import {
   ColumnConfiguration,
   SheetDefinition,
   GeoSpatialDataRole,
+  SimpleNumericalAggregationFunction,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -908,6 +909,55 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+}
+
+export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean, aggregationMthod?: string) : Visual {
+
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    catDimFieldId: uuidv4(),
+    catMeasureFieldId: uuidv4(),
+    dateGranularity: groupColumn,
+    title: titleProps.tableTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
+  };
+
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+  if (aggregationMthod !== undefined) {
+    const values = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Values!;
+    values[0] = {
+      NumericalMeasureField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'id',
+        },
+        AggregationFunction: {
+          SimpleNumericalAggregation: aggregationMthod.toUpperCase() as SimpleNumericalAggregationFunction,
+        },
+      },
+    };
+
+  } else {
+    const rows = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
+    rows.push({
+      CategoricalDimensionField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'custom_attr_id',
+        },
+      },
+    });
+  }
+
+  return visual;
 }
 
 export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
