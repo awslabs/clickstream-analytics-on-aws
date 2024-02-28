@@ -368,6 +368,8 @@ export class CPipeline {
     // update workflow
     this.stackManager.updateWorkflowParameters(editParameters);
     this.stackManager.updateWorkflowAction(editStacks);
+    // enable reporting
+    await this._updateReporting(oldPipeline);
     // update tags
     this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
     if (this._editStackTags(oldPipeline)) {
@@ -384,6 +386,19 @@ export class CPipeline {
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     this.pipeline.workflow = this.stackManager.getWorkflow();
     await store.updatePipeline(this.pipeline, oldPipeline);
+  }
+
+  private async _updateReporting(oldPipeline: IPipeline) {
+    if (oldPipeline.reporting?.quickSight?.accountName === this.pipeline.reporting?.quickSight?.accountName) {
+      return;
+    }
+    if (this.pipeline.reporting?.quickSight?.accountName) {
+      const reportingState = await this.getReportingState();
+      if (!reportingState) {
+        return;
+      }
+      this.stackManager.updateWorkflowReporting(reportingState);
+    }
   }
 
   private async _getEditStacksAndParameters(oldPipeline: IPipeline):

@@ -29,6 +29,7 @@ import {
   checkServicesAvailable,
   getCertificates,
   getMSKList,
+  getQuickSightUsers,
   getRedshiftCluster,
   getS3BucketList,
   getSSMSecrets,
@@ -2611,9 +2612,34 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       (type) => type.value === reverseRedshiftDataRange.unit
     )[0];
   };
+
+  const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {
+    if (!pipelineInfo.reporting?.quickSight.user) {
+      return;
+    }
+    try {
+      const { success, data }: ApiResponse<any[]> = await getQuickSightUsers();
+      if (success) {
+        const selectUser = data.filter(
+          (element) => element.Arn === pipelineInfo.reporting.quickSight.user
+        )[0];
+        pipelineInfo.selectedQuickSightUser = {
+          label: selectUser.UserName,
+          value: selectUser.Arn,
+          description: selectUser.Email,
+          labelTag: selectUser.Role,
+          disabled: selectUser.Role !== 'ADMIN',
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const setUpdateReport = async (pipelineInfo: IExtPipeline) => {
     if (!pipelineInfo.enableReporting) {
       return;
+    } else {
+      await setUpdateQuickSightUser(pipelineInfo);
     }
   };
   const getDefaultExtPipeline = (data: IExtPipeline): IExtPipeline => {

@@ -39,7 +39,7 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
   PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
-import { isDisabled } from 'ts/utils';
+import { isReportingDisabled } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -168,11 +168,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 <FormField>
                   <Toggle
                     controlId="test-quicksight-id"
-                    disabled={
-                      isDisabled(update, pipelineInfo) ??
-                      (!pipelineInfo.serviceStatus?.QUICK_SIGHT ||
-                        !pipelineInfo.enableRedshift)
-                    }
+                    disabled={isReportingDisabled(update, pipelineInfo)}
                     onChange={({ detail }) =>
                       changeEnableReporting(detail.checked)
                     }

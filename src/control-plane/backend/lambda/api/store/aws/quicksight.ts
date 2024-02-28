@@ -528,7 +528,7 @@ export const listDashboardIdsInFolder = async (
       });
       nextToken = resp.NextToken;
     } while (nextToken);
-    return dashboardIds;
+    return Array.from(new Set(dashboardIds));
   } catch (err) {
     logger.error('List Dashboard Ids In Folder Error.', { err });
     throw err;
