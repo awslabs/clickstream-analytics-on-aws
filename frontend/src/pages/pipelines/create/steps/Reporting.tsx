@@ -125,6 +125,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
           value: element.Arn,
           description: element.Email,
           labelTag: element.Role,
+          disabled: element.Role !== 'ADMIN',
         }));
         setQuickSightUserOptions(userOptions);
         setLoadingUsers(false);

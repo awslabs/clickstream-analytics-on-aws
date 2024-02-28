@@ -51,7 +51,7 @@
     "stackRollbackFailed": "Some stacks are ROLLBACK_FAILED and can not be updated.",
     "transformPluginEmptyError": "Please select transform plugin when use Third-party SDK.",
     "tagsKeyValueEmpty": "Please input key and value.",
-    "quickSightUserEmptyError": "Please select a QuickSight user"
+    "quickSightUserEmptyError": "Please select a QuickSight admin user"
   },
   "create": {
     "basicInfo": "Basic configuration",

@@ -649,7 +649,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       return false;
     }
 
-    if (!pipelineInfo.selectedQuickSightUser) {
+    if (pipelineInfo.enableReporting && !pipelineInfo.selectedQuickSightUser) {
       setQuickSightUserEmptyError(true);
       return false;
     }
