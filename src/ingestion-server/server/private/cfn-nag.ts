@@ -22,6 +22,7 @@ const cfnNagList = [
       'IngestionServer/clickstream-ingestion-service-ecs-asg/DrainECSHook/Function/ServiceRole/DefaultPolicy/Resource',
       'IngestionServer/clickstream-ingestion-service-ecs-task-def/ExecutionRole/DefaultPolicy/Resource',
       'IngestionServer/ECSFargateCluster/ecs-fargate-service/clickstream-ingestion-service-ecs-fargate-task-def/ExecutionRole/DefaultPolicy/Resource',
+      'IngestionServer/ECSEc2Cluster/clickstream-ingestion-service-ecs-service/clickstream-ingestion-service-ecs-task-def/ExecutionRole/DefaultPolicy/Resource',
     ],
     rules_to_suppress: [
       ruleToSuppressRolePolicyWithWildcardResources('CDK built-in Lambda', ''),
@@ -50,4 +51,8 @@ export function addCfnNagToIngestionServer(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'updateAlbRulesCustomResourceProvider', 'updateAlbRulesCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'deleteECSClusterCustomResourceProvider', 'deleteECSClusterCustomResourceProvider', '');
   addCfnNagToStack(stack, cfnNagList);
+}
+
+export function addCfnNagToIngestionCommonResourcesStack(stack: Stack) {
+  addCfnNagForCustomResourceProvider(stack, 'updateAlbRulesCustomResourceProvider', 'updateAlbRulesCustomResourceProvider', '');
 }

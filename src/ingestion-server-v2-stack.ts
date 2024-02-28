@@ -38,7 +38,7 @@ import {
 } from './ingestion-server/common-resources/ingestion-common-resources-nested-stack';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';
 import { createV2StackParameters } from './ingestion-server/server/parameter';
-import { addCfnNagToIngestionServer } from './ingestion-server/server/private/cfn-nag';
+import { addCfnNagToIngestionServer, addCfnNagToIngestionCommonResourcesStack } from './ingestion-server/server/private/cfn-nag';
 import {
   createKinesisConditionsV2,
   createS3ConditionsV2,
@@ -303,6 +303,8 @@ export class IngestionServerStackV2 extends Stack {
       authenticationSecretArn,
       enableGlobalAccelerator,
     });
+
+    addCfnNagToIngestionCommonResourcesStack(ingestionCommonResourcesNestStack);
 
     const nestStackCommonProps: IngestionServerV2NestStackProps = {
       vpcId,
