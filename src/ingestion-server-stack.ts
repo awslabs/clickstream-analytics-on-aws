@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '@aws/clickstream-base-lib';
 import {
   CfnCondition,
   CfnOutput,
@@ -33,7 +34,6 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from './common/constant';
 import { SINK_TYPE_MODE } from './common/model';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';

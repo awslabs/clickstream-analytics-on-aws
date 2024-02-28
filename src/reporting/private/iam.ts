@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export function createRoleForQuicksightCustomResourceLambda(

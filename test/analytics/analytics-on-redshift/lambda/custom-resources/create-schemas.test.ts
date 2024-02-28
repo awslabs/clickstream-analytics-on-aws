@@ -18,6 +18,7 @@ process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
 import { readFileSync } from 'fs';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -31,7 +32,6 @@ import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../.
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 

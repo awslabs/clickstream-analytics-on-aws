@@ -12,6 +12,7 @@
  */
 
 import path from 'path';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
 import {
   Duration,
   Stack,
@@ -37,7 +38,6 @@ import {
   ruleToSuppressRolePolicyWithWildcardResources,
   ruleToSuppressRolePolicyWithWildcardAction,
 } from './common/cfn-nag';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';

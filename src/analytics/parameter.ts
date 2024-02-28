@@ -12,6 +12,14 @@
  */
 
 import { join } from 'path';
+import {
+  PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
+  S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
+  DDB_TABLE_ARN_PATTERN,
+  TABLE_NAME_EVENT,
+  TABLE_NAME_EVENT_PARAMETER,
+  TABLE_NAME_USER,
+} from '@aws/clickstream-base-lib';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -20,14 +28,6 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { GetResourcePrefixPropertiesType } from './lambdas/custom-resource/get-source-prefix';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import {
-  PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
-  DDB_TABLE_ARN_PATTERN,
-  TABLE_NAME_EVENT,
-  TABLE_NAME_EVENT_PARAMETER,
-  TABLE_NAME_USER,
-} from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';

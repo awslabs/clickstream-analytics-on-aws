@@ -110,6 +110,9 @@ importers:
       '@aws-sdk/util-dynamodb':
         specifier: ^3.398.0
         version: 3.515.0(@aws-sdk/client-dynamodb@3.515.0)
+      '@aws/clickstream-base-lib':
+        specifier: workspace:*
+        version: link:src/base-lib
       '@smithy/node-http-handler':
         specifier: ^2.0.7
         version: 2.3.1
