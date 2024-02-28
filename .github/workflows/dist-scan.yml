@@ -58,7 +58,7 @@ jobs:
         run: |
           pwd
           ls
-          ls template
+          ls templates
           echo $TEMPLATE_ROOT
           cfn-lint --version
           TEMPLATE_ROOT=templates/default
