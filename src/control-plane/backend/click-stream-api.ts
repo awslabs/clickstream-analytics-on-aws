@@ -12,6 +12,7 @@
  */
 
 import path from 'path';
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
   CfnResource,
   Duration,
@@ -51,7 +52,6 @@ import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
 import { StackWorkflowStateMachine } from './stack-workflow-state-machine-construct';
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';

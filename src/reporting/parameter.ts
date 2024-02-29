@@ -11,8 +11,6 @@
  *  and limitations under the License.
  */
 
-import { CfnParameter } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
 import {
   QUICKSIGHT_USER_NAME_PATTERN,
   QUICKSIGHT_NAMESPACE_PATTERN,
@@ -22,7 +20,9 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   QUICKSIGHT_USER_ARN_PATTERN,
-} from '../common/constant';
+} from '@aws/clickstream-base-lib';
+import { CfnParameter } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 import { Parameters } from '../common/parameters';
 
 export function createStackParametersQuickSight(scope: Construct, paramGroups?: any[], paramLabels?: any) {

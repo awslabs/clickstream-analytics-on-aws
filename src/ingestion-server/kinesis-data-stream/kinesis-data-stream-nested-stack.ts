@@ -12,6 +12,10 @@
  */
 
 import {
+  KDS_ON_DEMAND_MODE,
+  KDS_PROVISIONED_MODE,
+} from '@aws/clickstream-base-lib';
+import {
   CfnCondition,
   CfnParameter,
   CfnStack,
@@ -33,10 +37,6 @@ import {
   addCfnNagToStack,
   ruleRolePolicyWithWildcardResources,
 } from '../../common/cfn-nag';
-import {
-  KDS_ON_DEMAND_MODE,
-  KDS_PROVISIONED_MODE,
-} from '../../common/constant';
 import { SINK_TYPE_MODE } from '../../common/model';
 
 import { SolutionInfo } from '../../common/solution-info';

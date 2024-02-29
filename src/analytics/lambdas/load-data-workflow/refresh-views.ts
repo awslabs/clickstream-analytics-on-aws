@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME } from '@aws/clickstream-base-lib';
 import { Context } from 'aws-lambda';
 
 import { checkLoadStatus } from './check-load-status';
-import { CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';

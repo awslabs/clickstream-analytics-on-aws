@@ -495,6 +495,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'cloudformation:DeleteStack',
               'cloudformation:DescribeStacks',
               'cloudformation:UpdateTerminationProtection',
+              'cloudformation:ContinueUpdateRollback',
+              'cloudformation:RollbackStack',
             ],
             Effect: 'Allow',
             Resource: {
@@ -2180,6 +2182,8 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'cloudformation:DeleteStack',
               'cloudformation:DescribeStacks',
               'cloudformation:UpdateTerminationProtection',
+              'cloudformation:ContinueUpdateRollback',
+              'cloudformation:RollbackStack',
             ],
             Effect: 'Allow',
             Resource: {

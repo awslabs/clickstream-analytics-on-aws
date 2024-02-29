@@ -13,6 +13,7 @@
 
 import { readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
+import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '@aws/clickstream-base-lib';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
@@ -23,7 +24,6 @@ import { Construct } from 'constructs';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
 import { createSQLExecutionStepFunctions } from './sql-exectution-stepfuncs';
-import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';

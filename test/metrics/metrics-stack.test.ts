@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { EMAIL_PATTERN } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { EMAIL_PATTERN } from '../../src/common/constant';
 import { PARAMETERS_DESCRIPTION } from '../../src/metrics/settings';
 import { MetricsStack } from '../../src/metrics-stack';
 

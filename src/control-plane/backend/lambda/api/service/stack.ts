@@ -178,6 +178,35 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getUpdateWorkflow(this.execWorkflow.Workflow, stackDetails, editStacks);
   }
 
+  public updateWorkflowReporting(reportingState: WorkflowState): void {
+    this._updateWorkflowReporting(this.execWorkflow?.Workflow as WorkflowState, reportingState);
+    this._updateWorkflowReporting(this.workflow?.Workflow as WorkflowState, reportingState);
+  }
+
+  public _updateWorkflowReporting(workflow: WorkflowState, reportingState: WorkflowState): void {
+    const dataProcessingBranch = this._findBranch(workflow, PipelineStackType.DATA_PROCESSING);
+    if (dataProcessingBranch && PipelineStackType.DATA_MODELING_REDSHIFT in dataProcessingBranch.States) {
+      dataProcessingBranch.States[PipelineStackType.REPORTING] = reportingState;
+      dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
+      delete dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
+    }
+  }
+
+  private _findBranch(state: WorkflowState, startAt: string): WorkflowParallelBranch | undefined {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      const targetBranch = state.Branches?.find((b) => b.StartAt === startAt);
+      if (targetBranch) {
+        return targetBranch;
+      }
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          return this._findBranch(branch.States[key], startAt);
+        }
+      }
+    }
+    return undefined;
+  }
+
   public async execute(workflow: WorkflowTemplate | undefined, executionName: string): Promise<string> {
     if (workflow === undefined) {
       throw new Error('Pipeline workflow is empty.');

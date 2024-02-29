@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
   Stack,
   NestedStack,
@@ -37,7 +38,6 @@ import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role'
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';

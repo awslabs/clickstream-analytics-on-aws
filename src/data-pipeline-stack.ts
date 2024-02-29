@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Architecture } from '@aws-sdk/client-emr-serverless';
 import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
@@ -27,7 +28,6 @@ import {
   ruleRolePolicyWithWildcardResources,
   ruleRolePolicyWithWildcardResourcesAndHighSPCM,
 } from './common/cfn-nag';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';

@@ -1402,12 +1402,12 @@ describe('Account Env test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
-    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
+    expect(res.body.data).toContainEqual({ service: 'quicksight', available: true });
     expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: true });
     expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: true });
     expect(res.body.data).toContainEqual({ service: 'athena', available: true });
     expect(res.body.data).toContainEqual({ service: 'msk', available: true });
-    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeTypeCommand, 5);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeTypeCommand, 6);
   });
   it('Get Host Zones', async () => {
     route53Client.on(ListHostedZonesCommand).resolves({

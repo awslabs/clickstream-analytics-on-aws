@@ -46,6 +46,9 @@ const promisePool = pLimit(3);
 
 export const registerClickstreamUser = async () => {
   try {
+    if (awsRegion.startsWith('cn')) {
+      return;
+    }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
     await registerUser(identityRegion, {
       IdentityType: IdentityType.IAM,
@@ -82,8 +85,25 @@ const registerUser = async (
   }
 };
 
+export const listUsers = async () => {
+  try {
+    const identityRegion = await sdkClient.QuickSightIdentityRegion();
+    const res = await sdkClient.QuickSight({ region: identityRegion }).listUsers({
+      AwsAccountId: awsAccountId,
+      Namespace: QUICKSIGHT_NAMESPACE,
+    });
+    return res.UserList;
+  } catch (err) {
+    logger.error('List Users Error.', { err });
+    throw err;
+  }
+};
+
 export const deleteClickstreamUser = async () => {
   try {
+    if (awsRegion.startsWith('cn')) {
+      return;
+    }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
     const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
     await sdkClient.QuickSight({ region: identityRegion }).deleteUser({
@@ -120,6 +140,7 @@ export const deleteExploreUser = async () => {
 
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
+  userArn: string,
   allowedDomain: string,
   dashboardId?: string,
   sheetId?: string,
@@ -130,9 +151,13 @@ export const generateEmbedUrlForRegisteredUser = async (
       region: region,
     });
     const arns = await getClickstreamUserArn();
+    let embedUserArn = arns.publishUserArn;
+    if (region.startsWith('cn')) {
+      embedUserArn = userArn;
+    }
     let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
       AwsAccountId: awsAccountId,
-      UserArn: arns.publishUserArn,
+      UserArn: embedUserArn,
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
@@ -503,7 +528,7 @@ export const listDashboardIdsInFolder = async (
       });
       nextToken = resp.NextToken;
     } while (nextToken);
-    return dashboardIds;
+    return Array.from(new Set(dashboardIds));
   } catch (err) {
     logger.error('List Dashboard Ids In Folder Error.', { err });
     throw err;

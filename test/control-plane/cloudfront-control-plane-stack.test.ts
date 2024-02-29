@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
 import { TestApp, removeFolder } from '../common/jest';
 import { CFN_FN } from '../constants';
 import { findFirstResourceByKeyPrefix } from '../utils';
@@ -650,7 +650,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
                   {
                     Ref: 'AWS::Partition',
                   },
-                  '.amazon.com;',
+                  '.amazon.com cn-north-1.quicksight.amazonaws.cn cn-northwest-1.quicksight.amazonaws.cn;',
                 ],
               ],
             },

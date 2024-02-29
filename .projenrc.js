@@ -281,6 +281,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     ...commonDeps,
     'cdk-nag@^2.20.6',
     'cdk-bootstrapless-synthesizer@^2.2.11',
+    '@aws/clickstream-base-lib@workspace:*',
     ...cdkAlphaModules,
     ...depsForApiProject,
     ...awsSDKServicesDeps,
@@ -332,6 +333,9 @@ const project = new awscdk.AwsCdkTypeScriptApp({
       schedule: javascript.UpgradeDependenciesSchedule.WEEKLY,
     },
   },
+});
+
+project.preCompileTask.exec('pnpm nx build @aws/clickstream-base-lib', {
 });
 
 project.eslint?.addRules({

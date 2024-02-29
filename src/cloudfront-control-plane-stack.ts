@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from '@aws/clickstream-base-lib';
 import { Aspects, Aws, CfnCondition, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
@@ -38,7 +39,6 @@ import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
 import { RoleNamePrefixAspect, RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardAction, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
-import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { createLambdaRole } from './common/lambda';
 import { Parameters } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
@@ -177,6 +177,8 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     const frameCSPUrl = [
       `*.quicksight.${Aws.PARTITION}.amazon.com`,
+      'cn-north-1.quicksight.amazonaws.cn',
+      'cn-northwest-1.quicksight.amazonaws.cn',
     ].join(' ');
 
     if (createCognitoUserPool) {
