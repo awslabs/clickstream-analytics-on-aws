@@ -6,7 +6,6 @@ COPY src src
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY nx.json nx.json
-COPY .projenrc.js .projenrc.js
 COPY projenrc projenrc
 COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
