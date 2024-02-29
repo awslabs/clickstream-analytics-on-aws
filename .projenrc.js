@@ -358,7 +358,9 @@ project.eslint?.addRules({
   ],
 });
 project.addFields({ version });
-
+project.package.addField('resolutions', {
+  'nth-check': '^2.1.1',
+});
 
 const baseProject = new typescript.TypeScriptProject({
   parent: project,
@@ -471,9 +473,6 @@ frontendProject.package.addField('eslintConfig', {
     'react-app',
     'react-app/jest',
   ],
-});
-frontendProject.package.addField('resolutions', {
-  'nth-check': '^2.1.1',
 });
 frontendProject.addFields({ version });
 frontendProject.setScript('start', 'node scripts/start.js');
