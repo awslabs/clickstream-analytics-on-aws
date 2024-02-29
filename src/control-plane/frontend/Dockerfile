@@ -6,6 +6,7 @@ COPY src src
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml
 COPY nx.json nx.json
+COPY .projenrc.js .projenrc.js
 COPY projenrc projenrc
 COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
@@ -25,7 +26,7 @@ RUN pnpm run crabuild
 
 FROM public.ecr.aws/docker/library/nginx:1.22
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.6.1	/lambda-adapter /opt/extensions/lambda-adapter
-COPY --from=builder /home/node/app/build/ /usr/share/nginx/public/
+COPY --from=builder /home/node/app/frontend/build/ /usr/share/nginx/public/
 COPY src/control-plane/frontend/config/ /etc/nginx/
 USER nginx
 CMD ["nginx", "-g", "daemon off;"]
