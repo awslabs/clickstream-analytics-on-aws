@@ -289,6 +289,7 @@ export const QUICKSIGHT_USER_ARN_PATTERN =
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
 export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';
 export const PARAMETER_GROUP_LABEL_OIDC = 'OpenID Connector Information';
+export const PARAMETER_GROUP_LABEL_IAM_ROLE = 'IAM Role Information';
 export const PARAMETER_LABEL_VPCID = 'VPC ID';
 export const PARAMETER_LABEL_PUBLIC_SUBNETS = 'Public Subnet IDs';
 export const PARAMETER_LABEL_PRIVATE_SUBNETS = 'Private Subnet IDs';
@@ -301,6 +302,8 @@ export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
 export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
   'OpenID Connector Jwks Uri Suffix';
+export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix';
+export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN';
 
 export const KDS_ON_DEMAND_MODE = 'ON_DEMAND';
 export const KDS_PROVISIONED_MODE = 'PROVISIONED';

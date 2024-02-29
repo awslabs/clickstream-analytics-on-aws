@@ -42,13 +42,15 @@ import {
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
   IAM_ROLE_PREFIX_PATTERN,
+  PARAMETER_GROUP_LABEL_IAM_ROLE,
+  PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+  PARAMETER_LABEL_IAM_ROLE_PREFIX,
 } from '@aws/clickstream-base-lib';
 import {
   CfnParameter, CfnRule, Fn,
 } from 'aws-cdk-lib';
 
 import { Construct, IConstruct } from 'constructs';
-import { PARAMETER_GROUP_LABEL_IAM_ROLE, PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN, PARAMETER_LABEL_IAM_ROLE_PREFIX } from './constant';
 import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
 export enum SubnetParameterType {
