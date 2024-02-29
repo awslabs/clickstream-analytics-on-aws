@@ -636,7 +636,7 @@ project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
 project.github.actions.set('actions/upload-artifact', 'actions/upload-artifact@v4');
 project.github.actions.set('actions/download-artifact', 'actions/download-artifact@v4');
 project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
-project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v5');
+project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v6');
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',
