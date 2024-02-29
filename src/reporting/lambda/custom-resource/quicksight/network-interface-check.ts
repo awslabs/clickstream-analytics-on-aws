@@ -48,17 +48,24 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 };
 
 const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId: string, awsAccountId: string): Promise<boolean> => {
-  const vpcConnection = await quickSightClient.describeVPCConnection({
-    VPCConnectionId: vpcConnectionId,
-    AwsAccountId: awsAccountId,
-  });
 
-  if (vpcConnection.VPCConnection !== undefined) {
-    logger.info(`vpc connection status: ${vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
-    if (vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
-      return false;
+  try {
+    const vpcConnection = await quickSightClient.describeVPCConnection({
+      VPCConnectionId: vpcConnectionId,
+      AwsAccountId: awsAccountId,
+    });
+
+    if (vpcConnection.VPCConnection !== undefined) {
+      logger.info(`vpc connection status: ${vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
+      if (vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
+        return false;
+      }
     }
+  } catch (error) {
+    logger.warn('hit unexpected error, skip checking vpc connection', { error });
+    return true;
   }
+
   return true;
 };
 
@@ -74,27 +81,32 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
 
   let isNetworkInterfaceReady: boolean = false;
   let checkCnt = 0;
-  while (!isNetworkInterfaceReady && checkCnt <= 1200) {
-    await sleep(500);
-    checkCnt += 1;
 
-    const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
-      NetworkInterfaceIds: networkInterfaceIds,
-    });
+  try {
+    while (!isNetworkInterfaceReady && checkCnt <= 1200) {
+      await sleep(500);
+      checkCnt += 1;
 
-    let ready = true;
-    if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
-      for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
-        logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
-        if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
-          ready = false;
+      const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
+        NetworkInterfaceIds: networkInterfaceIds,
+      });
+
+      let ready = true;
+      if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
+        for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
+          logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
+          if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
+            ready = false;
+          }
         }
       }
+
+      const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
+
+      isNetworkInterfaceReady = ready && vpcConnectionReady;
     }
-
-    const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
-
-    isNetworkInterfaceReady = ready && vpcConnectionReady;
+  } catch (error) {
+    logger.warn('hit unexpected error, skip waiting for network interface ready', { error });
   }
 
   //force wait 1 minute after vpc connection is available
