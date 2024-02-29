@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN } from '../../src/common/constant';
 import { REDSHIFT_MODE } from '../../src/common/model';
 import { SolutionInfo } from '../../src/common/solution-info';
 import { SINK_STREAM_NAME_PREFIX } from '../../src/streaming-ingestion/private/constant';

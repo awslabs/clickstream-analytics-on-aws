@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { AddTagsToStreamCommand, CreateStreamCommand, DecreaseStreamRetentionPeriodCommand, DeleteStreamCommand, DescribeStreamCommand, DescribeStreamSummaryCommand, EncryptionType, IncreaseStreamRetentionPeriodCommand, KinesisClient, ListTagsForStreamCommand, RemoveTagsFromStreamCommand, StartStreamEncryptionCommand, StreamStatus, UpdateStreamModeCommand } from '@aws-sdk/client-kinesis';
+import {
+  AddTagsToStreamCommand, CreateStreamCommand, DecreaseStreamRetentionPeriodCommand, DeleteStreamCommand,
+  DescribeStreamCommand, DescribeStreamSummaryCommand, EncryptionType, IncreaseStreamRetentionPeriodCommand,
+  KinesisClient, ListTagsForStreamCommand, RemoveTagsFromStreamCommand, StartStreamEncryptionCommand, StreamStatus,
+  UpdateStreamModeCommand,
+} from '@aws-sdk/client-kinesis';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { CdkCustomResourceCallback, CdkCustomResourceResponse, CloudFormationCustomResourceDeleteEvent, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
