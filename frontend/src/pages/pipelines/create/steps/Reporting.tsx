@@ -237,7 +237,8 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                         </Alert>
                       )}
 
-                      {pipelineInfo.enableReporting &&
+                      {pipelineInfo.region.startsWith('cn') &&
+                        pipelineInfo.enableReporting &&
                         quickSightEnabled &&
                         quickSightEnterprise && (
                           <>
