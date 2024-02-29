@@ -101,6 +101,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',
     type: 'String',
+    default: 'dev',
     allowedPattern: REDSHIFT_DB_NAME_PATTERN,
     constraintDescription: `Redshift database name must match ${REDSHIFT_DB_NAME_PATTERN}`,
   });
