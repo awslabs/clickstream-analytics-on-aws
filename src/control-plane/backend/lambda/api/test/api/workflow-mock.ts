@@ -157,7 +157,7 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'S3BatchMaxBytes',
-      ParameterValue: '1000000',
+      ParameterValue: '10000000',
     },
     {
       ParameterKey: 'S3BatchTimeout',

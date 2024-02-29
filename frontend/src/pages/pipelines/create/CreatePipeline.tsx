@@ -646,7 +646,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       return false;
     }
 
-    if (pipelineInfo.enableReporting && !pipelineInfo.selectedQuickSightUser) {
+    if (
+      pipelineInfo.region.startsWith('cn') &&
+      pipelineInfo.enableReporting &&
+      !pipelineInfo.selectedQuickSightUser
+    ) {
       setQuickSightUserEmptyError(true);
       return false;
     }
