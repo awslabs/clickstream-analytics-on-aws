@@ -118,8 +118,8 @@ interface IngestionServerLoadBalancerProps {
 
 interface IngestionServerSinkS3Props {
   readonly sinkBucket: S3Bucket;
-  readonly s3BatchMaxBytes?: number;
-  readonly s3BatchTimeout?: number;
+  readonly s3BufferSize?: number;
+  readonly s3BufferInterval?: number;
 }
 
 interface IngestionServerSinkKafkaProps {

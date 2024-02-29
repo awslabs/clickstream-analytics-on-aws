@@ -128,8 +128,8 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      s3BatchMaxBytes: 1000000,
-      s3BatchTimeout: 60,
+      s3BufferSize: 10,
+      s3BufferInterval: 60,
     },
     loadBalancer: {
       ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
@@ -155,8 +155,8 @@ export const S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      s3BatchMaxBytes: 1000000,
-      s3BatchTimeout: 60,
+      s3BufferSize: 10,
+      s3BufferInterval: 60,
     },
     loadBalancer: {
       ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
@@ -294,8 +294,8 @@ export const S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: 'EXAMPLE_PREFIX_ERROR',
       },
-      s3BatchMaxBytes: 1000000,
-      s3BatchTimeout: 60,
+      s3BufferSize: 10,
+      s3BufferInterval: 60,
     },
     loadBalancer: {
       ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
@@ -342,8 +342,8 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET_NEW',
         prefix: '',
       },
-      s3BatchMaxBytes: 1000000,
-      s3BatchTimeout: 60,
+      s3BufferSize: 10,
+      s3BufferInterval: 60,
     },
     loadBalancer: {
       ...BASE_PIPELINE_ATTRIBUTES.ingestionServer.loadBalancer,
