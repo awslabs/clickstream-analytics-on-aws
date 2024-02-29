@@ -396,10 +396,10 @@ async function getFixedResponseAndDefaultActionRules(listenerArn: string) {
   const allAlbRulesResponse = await albClient.send(describeRulesCommand);
   const allAlbRules: Rule[] = allAlbRulesResponse.Rules?.filter(rule => !rule.IsDefault) || [];
   const fixedResponseRules = allAlbRules.filter(rule =>
-    parseInt(rule.Priority!) === 1 || parseInt(rule.Priority!) === 3,
+    parseInt(rule.Priority!) === 1,
   );
   const defaultActionRules = allAlbRules.filter(rule =>
-    parseInt(rule.Priority!) === 2,
+    parseInt(rule.Priority!) === 2 || parseInt(rule.Priority!) === 3,
   );
 
   return { fixedResponseRules, defaultActionRules };

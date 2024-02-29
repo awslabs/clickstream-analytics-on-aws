@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { Aspects, CfnResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
@@ -29,7 +30,6 @@ import { Construct, IConstruct } from 'constructs';
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
-import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 
 
 export interface ServiceProps extends ECSClusterProps {

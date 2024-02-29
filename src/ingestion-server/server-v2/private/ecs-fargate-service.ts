@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import {
   Cluster,
@@ -24,7 +25,6 @@ import { Construct } from 'constructs';
 import { ECSFargateClusterProps, ECSFargateServiceResult } from './ecs-fargate-cluster';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX, DefaultFleetProps } from '../../server/ingestion-server';
-import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 
 export interface FargateServiceProps extends ECSFargateClusterProps {
   ecsCluster: Cluster;
