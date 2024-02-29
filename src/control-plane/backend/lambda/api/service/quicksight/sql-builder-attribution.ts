@@ -15,6 +15,7 @@ import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
 import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
+import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
   targetEventAndCondition: AttributionTouchPoint;
@@ -763,39 +764,39 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
   if (sqlParameters.eventAndConditions) {
-    const eventCondition = buildEventConditionPropsFromEvents(sqlParameters.eventAndConditions as AttributionTouchPoint[]);
-    hasEventAttribute = hasEventAttribute || eventCondition.hasEventAttribute;
+    const eventCondition = buildEventConditionPropsFromEvents(sqlParameters.eventAndConditions);
+    hasEventAttribute = defaultValueFunc(hasEventAttribute, eventCondition.hasEventAttribute);
     eventAttributes.push(...eventCondition.eventAttributes);
 
-    hasEventNonNestAttribute = hasEventNonNestAttribute || eventCondition.hasEventNonNestAttribute;
+    hasEventNonNestAttribute = defaultValueFunc(hasEventNonNestAttribute, eventCondition.hasEventNonNestAttribute);
     eventNonNestAttributes.push(...eventCondition.eventNonNestAttributes);
   }
 
   if (sqlParameters.targetEventAndCondition?.sqlCondition?.conditions) {
     const allAttribute = buildConditionProps(sqlParameters.targetEventAndCondition?.sqlCondition?.conditions);
-    hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+    hasEventAttribute = defaultValueFunc(hasEventAttribute, allAttribute.hasEventAttribute);
     eventAttributes.push(...allAttribute.eventAttributes);
 
-    hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+    hasEventNonNestAttribute = defaultValueFunc(hasEventNonNestAttribute, allAttribute.hasEventNonNestAttribute);
     eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
   }
 
   if (sqlParameters.targetEventAndCondition?.groupColumn) {
     const groupColumnProps = buildColumnConditionProps(sqlParameters.targetEventAndCondition?.groupColumn);
 
-    hasEventAttribute = hasEventAttribute || groupColumnProps.hasEventAttribute;
+    hasEventAttribute = defaultValueFunc(hasEventAttribute, groupColumnProps.hasEventAttribute);
     eventAttributes.push(...groupColumnProps.eventAttributes);
 
-    hasEventNonNestAttribute = hasEventNonNestAttribute || groupColumnProps.hasEventNonNestAttribute;
+    hasEventNonNestAttribute = defaultValueFunc(hasEventNonNestAttribute, groupColumnProps.hasEventNonNestAttribute);
     eventNonNestAttributes.push(...groupColumnProps.eventNonNestAttributes);
   }
 
   if (sqlParameters.globalEventCondition?.conditions) {
     const allAttribute = buildConditionProps(sqlParameters.globalEventCondition?.conditions);
-    hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+    hasEventAttribute = defaultValueFunc(hasEventAttribute, allAttribute.hasEventAttribute);
     eventAttributes.push(...allAttribute.eventAttributes);
 
-    hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+    hasEventNonNestAttribute = defaultValueFunc(hasEventNonNestAttribute, allAttribute.hasEventNonNestAttribute);
     eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
   }
 

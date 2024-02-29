@@ -1350,6 +1350,10 @@ function getLocalDateISOString(date: Date, offsetDay?: number) {
   return date.toISOString().split('T')[0];
 }
 
+function defaultValueFunc(exceptValue: any, defaultValue: any) {
+  return exceptValue || defaultValue;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1410,4 +1414,5 @@ export {
   rawToAttribute,
   getLocalDateISOString,
   getSinkType,
+  defaultValueFunc,
 };

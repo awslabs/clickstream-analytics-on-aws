@@ -88,7 +88,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     const {
       iamRolePrefixParam,
       iamRoleBoundaryArnParam,
-    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     let vpc:IVpc|undefined = undefined;
 

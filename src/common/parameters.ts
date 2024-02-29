@@ -42,6 +42,9 @@ import {
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
   IAM_ROLE_PREFIX_PATTERN,
+  PARAMETER_GROUP_LABEL_IAM_ROLE,
+  PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+  PARAMETER_LABEL_IAM_ROLE_PREFIX,
 } from '@aws/clickstream-base-lib';
 import {
   CfnParameter, CfnRule, Fn,
@@ -643,23 +646,39 @@ export class Parameters {
     });
   }
 
-  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct) {
+  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct, paramGroups?: any[], paramLabels?: any) {
+    const groups: any[] = paramGroups ?? [];
+    const labels: any = paramLabels ?? {};
+
     const iamRolePrefixParam = new CfnParameter(scope, 'IamRolePrefix', {
       description: 'The prefix of all IAM Roles.',
       type: 'String',
       allowedPattern: IAM_ROLE_PREFIX_PATTERN,
       default: '',
     });
+    labels[iamRolePrefixParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_PREFIX,
+    };
 
     const iamRoleBoundaryArnParam = new CfnParameter(scope, 'IamRoleBoundaryArn', {
-      description: 'The arn of all IAM Roles.',
+      description: 'Set permissions boundaries for IAM Roles.',
       type: 'String',
       default: '',
+    });
+    labels[iamRoleBoundaryArnParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+    };
+
+    groups.push({
+      Label: { default: PARAMETER_GROUP_LABEL_IAM_ROLE },
+      Parameters: [iamRolePrefixParam.logicalId, iamRoleBoundaryArnParam.logicalId],
     });
 
     return {
       iamRolePrefixParam,
       iamRoleBoundaryArnParam,
+      paramLabels: labels,
+      paramGroups: groups,
     };
   }
 
