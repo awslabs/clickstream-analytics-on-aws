@@ -158,6 +158,7 @@ async function handleUpdate(
       inputPros.endpointPath,
       inputPros.hostHeader,
       inputPros.oldEndpointPath,
+      inputPros.oldHostHeader,
       inputPros.protocol,
     );
   }
@@ -172,6 +173,7 @@ async function updateEndpointPathAndHostHeader(
   endpointPath: string,
   hostHeader: string,
   oldEndpointPath: string,
+  oldHostHeader: string,
   protocol: string,
 ) {
   const allExistingPathPatternRules = await getExistingRulesByEndpointPath(listenerArn, oldEndpointPath);
@@ -186,6 +188,22 @@ async function updateEndpointPathAndHostHeader(
       ],
     });
     await albClient.send(modifyCommand);
+  }
+
+  if (hostHeader !== oldHostHeader) {
+    const pingPathRule = await getExistingRulesByEndpointPath(listenerArn, process.env.PING_PATH!);
+    if (!pingPathRule) return;
+    for (const rule of pingPathRule) {
+      if (!rule.Conditions) continue;
+      const modifyCommand = new ModifyRuleCommand({
+        RuleArn: rule.RuleArn,
+        Conditions: [
+          ...generateBaseForwardConditions(protocol, process.env.PING_PATH!, hostHeader),
+          ...rule.Conditions.filter((condition) => condition.Field !== 'path-pattern' && condition.Field !== 'host-header'),
+        ],
+      });
+      await albClient.send(modifyCommand);
+    }
   }
 }
 
@@ -378,11 +396,12 @@ async function getFixedResponseAndDefaultActionRules(listenerArn: string) {
   const allAlbRulesResponse = await albClient.send(describeRulesCommand);
   const allAlbRules: Rule[] = allAlbRulesResponse.Rules?.filter(rule => !rule.IsDefault) || [];
   const fixedResponseRules = allAlbRules.filter(rule =>
-    parseInt(rule.Priority!) === 1,
+    parseInt(rule.Priority!) === 1 || parseInt(rule.Priority!) === 3,
   );
   const defaultActionRules = allAlbRules.filter(rule =>
     parseInt(rule.Priority!) === 2,
   );
+
   return { fixedResponseRules, defaultActionRules };
 }
 
@@ -410,7 +429,6 @@ async function createAppIdRules(
 ) {
   const allExistingAppIdRules = await getAllExistingAppIdRules(listenerArn);
 
-  const baseForwardConditions = generateBaseForwardConditions(protocol, endpointPath, domainName);
   const forwardActions = await generateForwardActions(authenticationSecretArn, targetGroupArn);
   const allPriorities = allExistingAppIdRules.map(rule => parseInt(rule.Priority!));
   const existingAppIds = getAllExistingAppIds(allExistingAppIdRules);
@@ -419,18 +437,32 @@ async function createAppIdRules(
     if (existingAppIds.includes(appId)) {
       continue; // skip to the next iteration of the loop
     }
-    const priority = createPriority(allPriorities);
     const appIdConditions = generateAppIdCondition(appId);
+
+    let priority = createPriority(allPriorities);
+    const baseForwardConditions = generateBaseForwardConditions(protocol, endpointPath, domainName);
     //@ts-ignore
-    appIdConditions.push(...baseForwardConditions);
+    baseForwardConditions.push(...appIdConditions);
     // Create a rule just contains mustConditions
     const createRuleCommand = new CreateRuleCommand({
       ListenerArn: listenerArn,
       Actions: forwardActions,
-      Conditions: appIdConditions,
+      Conditions: baseForwardConditions,
       Priority: priority,
     });
     await albClient.send(createRuleCommand);
+
+    priority = createPriority(allPriorities);
+    const pingPathRuleConditions = generateBaseForwardConditions(protocol, process.env.PING_PATH!, domainName);
+    //@ts-ignore
+    pingPathRuleConditions.push(...appIdConditions);
+    const createPingPathRuleCommand = new CreateRuleCommand({
+      ListenerArn: listenerArn,
+      Actions: forwardActions,
+      Conditions: pingPathRuleConditions,
+      Priority: priority,
+    });
+    await albClient.send(createPingPathRuleCommand);
   }
 }
 
@@ -467,7 +499,7 @@ async function getAllExistingAppIdRules(listenerArn: string) {
   const allAlbRulesResponse = await albClient.send(describeRulesCommand);
   const allAlbRules: Rule[] = allAlbRulesResponse.Rules?.filter(rule => !rule.IsDefault) || [];
   const allExistingAppIdRules = allAlbRules.filter(rule =>
-    parseInt(rule.Priority!) > 3,
+    parseInt(rule.Priority!) > 4,
   );
   return allExistingAppIdRules;
 }
@@ -506,6 +538,15 @@ async function createDefaultForwardRule(
     Priority: 2,
   });
   await albClient.send(createForwardRuleCommand);
+
+  const pingPathRuleConditions = generateBaseForwardConditions(protocol, process.env.PING_PATH!, domainName);
+  const createPingPathRuleCommand = new CreateRuleCommand({
+    ListenerArn: listenerArn,
+    Actions: defaultForwardActions,
+    Conditions: pingPathRuleConditions,
+    Priority: 3,
+  });
+  await albClient.send(createPingPathRuleCommand);
 }
 
 async function generateForwardActions(
@@ -584,7 +625,7 @@ async function createAuthLogindRule(authenticationSecretArn: string, listenerArn
     ListenerArn: listenerArn,
     Actions: authLoginActions,
     Conditions: authLoginCondition,
-    Priority: 3,
+    Priority: 4,
   });
   await albClient.send(createAuthLoginRuleCommand);
 }
@@ -643,7 +684,7 @@ async function getOidcInfo(authenticationSecretArn: string) {
 }
 
 function createPriority(allPriorities: Array<number>) {
-  let priority = 4;
+  let priority = 5;
   while (allPriorities.includes(priority)) {
     priority++;
   }

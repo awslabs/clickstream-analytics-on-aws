@@ -372,6 +372,8 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFI
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN = 'FlinkAppArn';
 export const OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON = 'SinkKinesisJson';
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH = 'FlinkAppIdStreamConfigS3Path';
+// Ingestion server
+export const INGESTION_SERVER_PING_PATH = '/ping';
 
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';

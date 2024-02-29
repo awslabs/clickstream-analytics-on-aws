@@ -29,6 +29,7 @@ import { Construct, IConstruct } from 'constructs';
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 
 
 export interface ServiceProps extends ECSClusterProps {
@@ -78,6 +79,7 @@ export function createECSService(
     environment: {
       NGINX_WORKER_CONNECTIONS: `${workerConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
+      PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
     logging: LogDriver.awsLogs({

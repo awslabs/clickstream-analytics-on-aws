@@ -20,6 +20,7 @@ import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { SolutionNodejsFunction } from '../../private/function';
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 
 export interface UpdateAlbRulesCustomResourceProps {
   appIds: string;
@@ -114,6 +115,9 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(5),
+    environment: {
+      PING_PATH: INGESTION_SERVER_PING_PATH
+    },    
     logConf: {
       retention: RetentionDays.ONE_WEEK,
     },

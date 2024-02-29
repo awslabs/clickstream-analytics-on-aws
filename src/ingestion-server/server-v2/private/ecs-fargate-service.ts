@@ -24,6 +24,7 @@ import { Construct } from 'constructs';
 import { ECSFargateClusterProps, ECSFargateServiceResult } from './ecs-fargate-cluster';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX, DefaultFleetProps } from '../../server/ingestion-server';
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 
 export interface FargateServiceProps extends ECSFargateClusterProps {
   ecsCluster: Cluster;
@@ -90,6 +91,7 @@ function createECSFargateService(
     environment: {
       NGINX_WORKER_CONNECTIONS: `${props.fleetProps.proxyMaxConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
+      PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
     logging: LogDriver.awsLogs({
