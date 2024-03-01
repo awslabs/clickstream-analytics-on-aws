@@ -24,6 +24,7 @@ export function uploadBuiltInJarsAndRemoteFiles(
   shadowJar: boolean,
   destinationBucket: IBucket,
   destinationKeyPrefix: string,
+  buildImage: string = 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
   additionalBuildArgument: string = '',
   remoteFiles: string[] = ['https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz'],
 ) {
@@ -47,7 +48,7 @@ export function uploadBuiltInJarsAndRemoteFiles(
 
   let bundling: BundlingOptions = {
     user: 'gradle',
-    image: DockerImage.fromRegistry('public.ecr.aws/docker/library/gradle:7.6-jdk17'),
+    image: DockerImage.fromRegistry(buildImage),
     command: ['sh', '-c', shellCommands.join(' && ')],
   };
 
