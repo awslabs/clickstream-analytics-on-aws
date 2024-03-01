@@ -12,7 +12,7 @@
  */
 
 import { EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
-import { QuickSight } from '@aws-sdk/client-quicksight';
+import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
@@ -61,12 +61,16 @@ const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId:
         return false;
       }
     }
-  } catch (error) {
-    logger.warn('hit unexpected error, skip checking vpc connection', { error });
-    return true;
-  }
 
-  return true;
+    return true;
+  } catch (error) {
+    if (error instanceof ResourceNotFoundException) {
+      logger.warn('hit unexpected error, skip checking vpc connection', { error });
+      return true;
+    } else {
+      throw error;
+    }
+  }
 };
 
 const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
@@ -82,16 +86,16 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
   let isNetworkInterfaceReady: boolean = false;
   let checkCnt = 0;
 
-  try {
-    while (!isNetworkInterfaceReady && checkCnt <= 1200) {
-      await sleep(500);
-      checkCnt += 1;
+  while (!isNetworkInterfaceReady && checkCnt <= 1200) {
+    await sleep(500);
+    checkCnt += 1;
 
+    let ready = true;
+    try {
       const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
         NetworkInterfaceIds: networkInterfaceIds,
       });
 
-      let ready = true;
       if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
         for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
           logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
@@ -100,17 +104,21 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
           }
         }
       }
-
-      const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
-
-      isNetworkInterfaceReady = ready && vpcConnectionReady;
+    } catch (error) {
+      if ((error as any).Code.includes('InvalidNetworkInterface')) {
+        logger.warn('hit unexpected error, skip error and keep waiting', (error as any).Code );
+        ready = false;
+      } else {
+        throw error;
+      }
     }
-  } catch (error) {
-    logger.warn('hit unexpected error, skip waiting for network interface ready', { error });
+
+    const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
+
+    isNetworkInterfaceReady = ready && vpcConnectionReady;
   }
 
   //force wait 1 minute after vpc connection is available
-
   if (process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING !== 'true') {
     logger.info('force wait 1 minute after vpc connection is available');
     await sleep(60000);

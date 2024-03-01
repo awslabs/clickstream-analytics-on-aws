@@ -191,4 +191,50 @@ describe('QuickSight Lambda function', () => {
 
   });
 
+
+  test('NetworkInterface in changing', async () => {
+
+    ec2ClientMock.on(DescribeNetworkInterfacesCommand).rejectsOnce(
+      {
+        $fault: 'client',
+        $metadata: {
+          httpStatusCode: 400,
+          requestId: 'b752a585-9b40-4747-8ae6-1ffee99f49f2',
+          extendedRequestId: undefined,
+          cfId: undefined,
+          attempts: 1,
+          totalRetryDelay: 0,
+        },
+        Code: 'InvalidNetworkInterfaceID.NotFound',
+      },
+    ).resolvesOnce({
+      NetworkInterfaces: [
+        {
+          NetworkInterfaceId: 'eni-test11111',
+          Status: NetworkInterfaceStatus.in_use,
+        },
+        {
+          NetworkInterfaceId: 'eni-test11112',
+          Status: NetworkInterfaceStatus.in_use,
+        },
+        {
+          NetworkInterfaceId: 'eni-test11113',
+          Status: NetworkInterfaceStatus.in_use,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(DescribeVPCConnectionCommand).resolves({
+      VPCConnection: {
+        AvailabilityStatus: 'AVAILABLE',
+      },
+    });
+
+    const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
+    expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 2);
+    expect(resp.Data?.isReady).toBeDefined();
+    expect(resp.Data?.isReady).toEqual(true);
+
+  });
+
 });
