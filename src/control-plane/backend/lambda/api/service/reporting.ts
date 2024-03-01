@@ -14,7 +14,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -46,8 +46,10 @@ import {
   checkPathAnalysisParameter,
   checkRetentionAnalysisParameter,
   encodeQueryValueForSql,
+  getEventNormalTableVisualDef,
+  getEventPropertyCountPivotTableVisualDef,
 } from './quicksight/reporting-utils';
-import { SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
+import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
@@ -298,8 +300,6 @@ export class ReportingService {
 
   async createEventVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create event analysis visuals', { request: req.body });
-
       const query = req.body;
       const checkResult = checkEventAnalysisParameter(query);
       if (!checkResult.success) {
@@ -308,11 +308,122 @@ export class ReportingService {
       }
 
       encodeQueryValueForSql(query as SQLParameters);
+      const eventAndConditions = query.eventAndConditions as EventAndCondition[];
+      let hasComputeOnProperty = false;
+      for (const item of eventAndConditions) {
+        if (item.computeMethod === ExploreComputeMethod.COUNT_PROPERTY || item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
+          hasComputeOnProperty = true;
+          break;
+        }
+      }
+
+      if (hasComputeOnProperty) {
+        return await this.createEventVisualOnEventProperty(req, res, next);
+      } else {
+        return await this.createEventVisualOnEvent(req, res, next);
+      }
+
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, hasGrouping: boolean) {
+    const projectedColumns = ['event_date', 'event_name'];
+    const datasetColumns: InputColumn[] = [
+      {
+        Name: 'event_date',
+        Type: 'DATETIME',
+      },
+      {
+        Name: 'event_name',
+        Type: 'STRING',
+      },
+    ];
+
+    if (hasGrouping) {
+      datasetColumns.push({
+        Name: 'group_col',
+        Type: 'STRING',
+      });
+
+      projectedColumns.push('group_col');
+    }
+
+    if (!computeMethodProps.isMixedMethod) {
+      if (computeMethodProps.hasAggregationPropertyMethod) {
+        if (!computeMethodProps.isSameAggregationMethod) {
+          datasetColumns.push({
+            Name: 'custom_attr_id',
+            Type: 'STRING',
+          });
+          projectedColumns.push('custom_attr_id');
+          datasetColumns.push({
+            Name: 'count/aggregation amount',
+            Type: 'DECIMAL',
+          });
+          projectedColumns.push('count/aggregation amount');
+        } else {
+          datasetColumns.push({
+            Name: 'custom_attr_id',
+            Type: 'STRING',
+          });
+          projectedColumns.push('custom_attr_id');
+        }
+      } else {
+        datasetColumns.push({
+          Name: 'id',
+          Type: 'STRING',
+        });
+        projectedColumns.push('id');
+        datasetColumns.push({
+          Name: 'custom_attr_id',
+          Type: 'STRING',
+        });
+        projectedColumns.push('custom_attr_id');
+      }
+    } else {
+      if (computeMethodProps.isCountMixedMethod) {
+        datasetColumns.push({
+          Name: 'id',
+          Type: 'STRING',
+        });
+        projectedColumns.push('id');
+        datasetColumns.push({
+          Name: 'custom_attr_id',
+          Type: 'STRING',
+        });
+        projectedColumns.push('custom_attr_id');
+      } else {
+        datasetColumns.push({
+          Name: 'custom_attr_id',
+          Type: 'STRING',
+        });
+        projectedColumns.push('custom_attr_id');
+        datasetColumns.push({
+          Name: 'count/aggregation amount',
+          Type: 'DECIMAL',
+        });
+        projectedColumns.push('count/aggregation amount');
+      }
+    }
+
+    return {
+      projectedColumns,
+      datasetColumns,
+    };
+  }
+
+  async createEventVisualOnEvent(req: any, res: any, next: any) {
+    try {
+      logger.info('start to create event analysis visuals', { request: req.body });
+
+      const query = req.body;
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
-      const sql = buildEventAnalysisView({
+      const sqlParameters = {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -328,7 +439,9 @@ export class ReportingService {
         groupColumn: query.groupColumn,
         groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
-      });
+      };
+
+      const sql = buildEventAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition !== undefined;
@@ -349,7 +462,7 @@ export class ReportingService {
         columns: datasetColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
-        projectedColumns,
+        projectedColumns: projectedColumns,
       });
 
       let sheetId;
@@ -404,6 +517,102 @@ export class ReportingService {
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
+      return res.status(201).json(new ApiSuccess(result));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  async createEventVisualOnEventProperty(req: any, res: any, next: any) {
+    try {
+      logger.info('start to create event analysis visuals', { request: req.body });
+
+      const query = req.body;
+      //construct parameters to build sql
+      const viewName = getTempResourceName(query.viewName, query.action);
+
+      const sqlParameters = {
+        ...query,
+        schemaName: query.appId,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+      };
+
+      const sql = buildEventPropertyAnalysisView(sqlParameters);
+
+      logger.debug(`event analysis sql: ${sql}`);
+
+      const computeMethodProps = getComputeMethodProps(sqlParameters);
+
+      const hasGrouping = query.groupCondition !== undefined;
+      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, hasGrouping);
+
+      const datasetPropsArray: DataSetProps[] = [];
+      datasetPropsArray.push({
+        tableName: viewName,
+        columns: projectedColumnsAndDatasetColumns.datasetColumns,
+        importMode: 'DIRECT_QUERY',
+        customSql: sql,
+        projectedColumns: projectedColumnsAndDatasetColumns.projectedColumns,
+      });
+
+      let sheetId;
+      if (!query.dashboardId) {
+        sheetId = uuidv4();
+      } else {
+        if (!query.sheetId) {
+          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
+        }
+        sheetId = query.sheetId;
+      }
+
+      let result: CreateDashboardResult;
+      const locale = query.locale ?? ExploreLocales.EN_US;
+      const visualId = uuidv4();
+      const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
+
+      const visualRelatedParams = await getVisualRelatedDefs({
+        timeScopeType: query.timeScopeType,
+        sheetId,
+        visualId,
+        viewName,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        timeStart: query.timeStart,
+        timeEnd: query.timeEnd,
+      }, locale);
+
+      const tableVisualId = uuidv4();
+      let tableVisualDef: Visual;
+      if (computeMethodProps.isSameAggregationMethod) {
+        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn
+          , hasGrouping, computeMethodProps.aggregationMethodName!);
+      } else if (
+        (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
+        ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
+
+        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
+      } else {
+        tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
+      }
+
+      const tableVisualProps = {
+        sheetId: sheetId,
+        name: ExploreVisualName.TABLE,
+        visualId: tableVisualId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: [],
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+      };
+
+      result = await this.createDashboardVisuals(
+        sheetId, viewName, query, datasetPropsArray, [tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
