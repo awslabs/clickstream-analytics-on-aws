@@ -88,4 +88,19 @@ class IPEnrichmentTest extends BaseSparkTest {
         String expectedJson = this.resourceFileAsString("/expected/ip_enrich_data_v2.json");
         Assertions.assertEquals(expectedJson, transformedDataset.first().prettyJson());
     }
+
+    @Test
+    public void empty_ip_enrich_for_data_v2() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.IPEnrichmentTest.empty_ip_enrich_for_data_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/transformed_data_v2_empty_ip.json")).getPath());
+        Dataset<Row> transformedDataset = ipEnrichment.transform(dataset);
+        System.out.println(transformedDataset.first().prettyJson());
+
+        String expectedJson = this.resourceFileAsString("/expected/empty_ip_enrich_data_v2.json");
+        Assertions.assertEquals(expectedJson, transformedDataset.first().prettyJson());
+    }    
 }
