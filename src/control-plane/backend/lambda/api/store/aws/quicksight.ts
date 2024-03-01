@@ -30,7 +30,7 @@ import {
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
@@ -38,14 +38,17 @@ import { IDashboard } from '../../model/project';
 import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
-const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
 const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
+const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
 
 const sdkClient: SDKClient = new SDKClient();
 const promisePool = pLimit(3);
 
 export const registerClickstreamUser = async () => {
   try {
+    if (awsRegion.startsWith('cn')) {
+      return;
+    }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
     await registerUser(identityRegion, {
       IdentityType: IdentityType.IAM,
@@ -55,15 +58,6 @@ export const registerClickstreamUser = async () => {
       Namespace: QUICKSIGHT_NAMESPACE,
       UserRole: UserRole.ADMIN,
       SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
-    });
-    await registerUser(identityRegion, {
-      IdentityType: IdentityType.IAM,
-      AwsAccountId: awsAccountId,
-      Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
-      IamArn: QuickSightEmbedRoleArn,
-      Namespace: QUICKSIGHT_NAMESPACE,
-      UserRole: UserRole.ADMIN,
-      SessionName: QUICKSIGHT_EXPLORE_USER_NAME,
     });
     const clickstreamUserArn = await getClickstreamUserArn();
     return clickstreamUserArn;
@@ -91,8 +85,25 @@ const registerUser = async (
   }
 };
 
+export const listUsers = async () => {
+  try {
+    const identityRegion = await sdkClient.QuickSightIdentityRegion();
+    const res = await sdkClient.QuickSight({ region: identityRegion }).listUsers({
+      AwsAccountId: awsAccountId,
+      Namespace: QUICKSIGHT_NAMESPACE,
+    });
+    return res.UserList;
+  } catch (err) {
+    logger.error('List Users Error.', { err });
+    throw err;
+  }
+};
+
 export const deleteClickstreamUser = async () => {
   try {
+    if (awsRegion.startsWith('cn')) {
+      return;
+    }
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
     const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
     await sdkClient.QuickSight({ region: identityRegion }).deleteUser({
@@ -100,12 +111,28 @@ export const deleteClickstreamUser = async () => {
       Namespace: QUICKSIGHT_NAMESPACE,
       UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`,
     });
+  } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return;
+    }
+    logger.error('Delete Clickstream User Error.', { err });
+    throw err;
+  }
+};
+
+export const deleteExploreUser = async () => {
+  try {
+    const identityRegion = await sdkClient.QuickSightIdentityRegion();
+    const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
     await sdkClient.QuickSight({ region: identityRegion }).deleteUser({
       AwsAccountId: awsAccountId,
       Namespace: QUICKSIGHT_NAMESPACE,
       UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`,
     });
   } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return;
+    }
     logger.error('Delete Clickstream User Error.', { err });
     throw err;
   }
@@ -113,8 +140,8 @@ export const deleteClickstreamUser = async () => {
 
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
+  userArn: string,
   allowedDomain: string,
-  publish: boolean,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -124,9 +151,13 @@ export const generateEmbedUrlForRegisteredUser = async (
       region: region,
     });
     const arns = await getClickstreamUserArn();
+    let embedUserArn = arns.publishUserArn;
+    if (region.startsWith('cn')) {
+      embedUserArn = userArn;
+    }
     let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
       AwsAccountId: awsAccountId,
-      UserArn: publish ? arns.publishUserArn : arns.exploreUserArn,
+      UserArn: embedUserArn,
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
@@ -238,9 +269,7 @@ export const describeClickstreamAccountSubscription = async () => {
 };
 
 export interface QuickSightUserArns {
-  exploreUserArn: string;
   publishUserArn: string;
-  exploreUserName: string;
   publishUserName: string;
 }
 
@@ -248,11 +277,9 @@ export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const exploreUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
   const publishUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
-  const exploreUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
   const publishUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
-  return { exploreUserArn, publishUserArn, exploreUserName, publishUserName };
+  return { publishUserArn, publishUserName };
 };
 
 export const waitDashboardSuccess = async (region: string, dashboardId: string) => {
@@ -501,7 +528,7 @@ export const listDashboardIdsInFolder = async (
       });
       nextToken = resp.NextToken;
     } while (nextToken);
-    return dashboardIds;
+    return Array.from(new Set(dashboardIds));
   } catch (err) {
     logger.error('List Dashboard Ids In Folder Error.', { err });
     throw err;
@@ -581,10 +608,6 @@ export const checkFolder = async (
         Permissions: [
           {
             Principal: principals.publishUserArn,
-            Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
-          },
-          {
-            Principal: principals.exploreUserArn,
             Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
           },
         ],

@@ -131,8 +131,8 @@ export class ProjectServ {
       }
       const embed = await generateEmbedUrlForRegisteredUser(
         pipeline.region,
+        pipeline.reporting?.quickSight?.user ?? '',
         allowedDomain,
-        true,
         dashboardId,
       );
       if (embed && embed.EmbedUrl) {
@@ -197,8 +197,8 @@ export class ProjectServ {
       }
       const embed = await generateEmbedUrlForRegisteredUser(
         latestPipeline.region,
+        latestPipeline.reporting?.quickSight?.user ?? '',
         allowedDomain,
-        true,
       );
       return res.json(new ApiSuccess(embed));
     } catch (error) {

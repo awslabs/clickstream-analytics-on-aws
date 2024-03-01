@@ -667,7 +667,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
                   {
                     Ref: 'AWS::Partition',
                   },
-                  '.amazon.com;',
+                  '.amazon.com cn-north-1.quicksight.amazonaws.cn cn-northwest-1.quicksight.amazonaws.cn;',
                 ],
               ],
             },

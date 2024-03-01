@@ -296,8 +296,29 @@ export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return (
     update &&
     (pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-      pipelineInfo?.status?.status === EPipelineStatus.Active)
+      pipelineInfo?.status?.status === EPipelineStatus.Active ||
+      pipelineInfo?.status?.status === EPipelineStatus.Warning)
   );
+};
+
+export const isReportingDisabled = (
+  update?: boolean,
+  pipelineInfo?: IExtPipeline
+) => {
+  if (!update) {
+    return false;
+  } else {
+    return (
+      pipelineInfo?.enableReporting ||
+      !pipelineInfo?.serviceStatus?.QUICK_SIGHT ||
+      !pipelineInfo.enableRedshift ||
+      !(
+        pipelineInfo?.status?.status === EPipelineStatus.Failed ||
+        pipelineInfo?.status?.status === EPipelineStatus.Active ||
+        pipelineInfo?.status?.status === EPipelineStatus.Warning
+      )
+    );
+  }
 };
 
 // Validate subnets cross N AZs

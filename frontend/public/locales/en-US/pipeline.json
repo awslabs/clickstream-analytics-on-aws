@@ -50,7 +50,8 @@
     "emailInvalid": "Email invalid.",
     "stackRollbackFailed": "Some stacks are ROLLBACK_FAILED and can not be updated.",
     "transformPluginEmptyError": "Please select transform plugin when use Third-party SDK.",
-    "tagsKeyValueEmpty": "Please input key and value."
+    "tagsKeyValueEmpty": "Please input key and value.",
+    "quickSightUserEmptyError": "Please select a QuickSight admin user"
   },
   "create": {
     "basicInfo": "Basic configuration",
@@ -217,6 +218,8 @@
     "quickSightNotEnterpriseDesc": "The solution dashboard need the QuickSight Enterprise, you can upgrade edition in QuickSight Management Console.",
     "quickSightSubscription": "Subscription",
     "quickSIghtPlaceholder": "Select a quicksight user",
+    "quickSightUser": "QuickSight user",
+    "quickSightUserDesc": "Select a QuickSight user for the solution to create datasets and analyses.",
     "ingestSettings": "Ingestion setting",
     "clusterSize": "Cluster Size",
     "topic": "Topic",

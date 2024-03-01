@@ -268,8 +268,8 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.optional(30000000)
   @JSONObject.gte(1000000)
   @JSONObject.lte(50000000)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:number) => {
+    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value * 1000 * 1000 : undefined;
   })
     S3BatchMaxBytes?: number;
 
@@ -429,8 +429,8 @@ export class CIngestionServerStack extends JSONObject {
       // S3 sink
       S3DataBucket: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
       S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
-      S3BatchMaxBytes: pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes,
-      S3BatchTimeout: pipeline.ingestionServer.sinkS3?.s3BatchTimeout,
+      S3BatchMaxBytes: pipeline.ingestionServer.sinkS3?.s3BufferSize,
+      S3BatchTimeout: pipeline.ingestionServer.sinkS3?.s3BufferInterval,
       // Kafka sink
       MskClusterName: pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
       MskSecurityGroupId: pipeline.ingestionServer.sinkKafka?.securityGroupId,
@@ -1193,7 +1193,7 @@ export class CReportingStack extends JSONObject {
       QuickSightUserParam: resources.quickSightUser?.publishUserName,
       QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
       QuickSightPrincipalParam: resources.quickSightUser?.publishUserArn,
-      QuickSightOwnerPrincipalParam: resources.quickSightUser?.exploreUserArn,
+      QuickSightOwnerPrincipalParam: resources.quickSightUser?.publishUserArn,
       RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),

@@ -50,7 +50,8 @@
     "emailInvalid": "电子邮件无效。",
     "stackRollbackFailed": "某些堆栈处于 ROLLBACK_FAILED 状态，无法更新。",
     "transformPluginEmptyError": "使用第三方 SDK 时需选择转换插件。",
-    "tagsKeyValueEmpty": "标签键和值不能为空。"
+    "tagsKeyValueEmpty": "标签键和值不能为空。",
+    "quickSightUserEmptyError": "请选择QuickSight管理员用户"
   },
   "create": {
     "basicInfo": "基本配置",
@@ -217,6 +218,8 @@
     "quickSightNotEnterpriseDesc": "解决方案控制面板需要 QuickSight Enterprise，你可以在 QuickSight 管理控制台中升级版本。",
     "quickSightSubscription": "订阅",
     "quickSIghtPlaceholder": "选择 quicksight 用户",
+    "quickSightUser": "QuickSight 用户",
+    "quickSightUserDesc": "为解决方案选择一个QuickSight管理员用户以创建数据集和分析。",
     "ingestSettings": "摄取设置",
     "clusterSize": "集群大小",
     "topic": "主题",

@@ -98,9 +98,6 @@ export const pingServiceResource = async (region: string, service: string) => {
       break;
   };
   if (!resourceName) return false;
-  if (service === 'quicksight' && region.startsWith('cn-')) {
-    return false;
-  }
   const resource = await describeType(region, resourceName);
   return resource?.Arn ? true : false;
 };

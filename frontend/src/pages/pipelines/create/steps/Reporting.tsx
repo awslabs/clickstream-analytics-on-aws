@@ -13,15 +13,22 @@
 
 import {
   Alert,
+  Button,
   Container,
   FormField,
   Header,
   Link,
+  Select,
+  SelectProps,
   SpaceBetween,
   Spinner,
   Toggle,
 } from '@cloudscape-design/components';
-import { getQuickSightDetail, getQuickSightStatus } from 'apis/resource';
+import {
+  getQuickSightDetail,
+  getQuickSightStatus,
+  getQuickSightUsers,
+} from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
@@ -32,15 +39,17 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
   PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
-import { isDisabled } from 'ts/utils';
+import { isReportingDisabled } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
+  quickSightUserEmptyError: boolean;
   changeEnableReporting: (enable: boolean) => void;
   changeQuickSightDisabled: (disabled: boolean) => void;
   changeQuickSightAccountName: (accountName: string) => void;
   changeLoadingQuickSight?: (loading: boolean) => void;
+  changeQuickSightSelectedUser: (user: SelectProps.Option) => void;
 }
 
 const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
@@ -48,14 +57,19 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const {
     update,
     pipelineInfo,
+    quickSightUserEmptyError,
     changeEnableReporting,
     changeQuickSightDisabled,
     changeQuickSightAccountName,
     changeLoadingQuickSight,
+    changeQuickSightSelectedUser,
   } = props;
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingQuickSight, setLoadingQuickSight] = useState(false);
   const [quickSightEnabled, setQuickSightEnabled] = useState(false);
   const [quickSightEnterprise, setQuickSightEnterprise] = useState(false);
+  const [quickSightUserOptions, setQuickSightUserOptions] =
+    useState<SelectProps.Options>([]);
 
   // get quicksight details
   const getTheQuickSightDetail = async () => {
@@ -92,11 +106,32 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
         await getQuickSightStatus();
       if (success && data) {
         getTheQuickSightDetail();
+        getQuickSightUserList();
       } else {
         setLoadingQuickSight(false);
       }
     } catch (error) {
       setLoadingQuickSight(false);
+    }
+  };
+  // get quicksight users
+  const getQuickSightUserList = async () => {
+    setLoadingUsers(true);
+    try {
+      const { success, data }: ApiResponse<any[]> = await getQuickSightUsers();
+      if (success) {
+        const userOptions: SelectProps.Options = data.map((element) => ({
+          label: element.UserName,
+          value: element.Arn,
+          description: element.Email,
+          labelTag: element.Role,
+          disabled: element.Role !== 'ADMIN',
+        }));
+        setQuickSightUserOptions(userOptions);
+        setLoadingUsers(false);
+      }
+    } catch (error) {
+      setLoadingUsers(false);
     }
   };
 
@@ -133,11 +168,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                 <FormField>
                   <Toggle
                     controlId="test-quicksight-id"
-                    disabled={
-                      isDisabled(update, pipelineInfo) ??
-                      (!pipelineInfo.serviceStatus?.QUICK_SIGHT ||
-                        !pipelineInfo.enableRedshift)
-                    }
+                    disabled={isReportingDisabled(update, pipelineInfo)}
                     onChange={({ detail }) =>
                       changeEnableReporting(detail.checked)
                     }
@@ -205,6 +236,59 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                           {t('pipeline:create.quickSightNotEnterpriseDesc')}
                         </Alert>
                       )}
+
+                      {pipelineInfo.region.startsWith('cn') &&
+                        pipelineInfo.enableReporting &&
+                        quickSightEnabled &&
+                        quickSightEnterprise && (
+                          <>
+                            <FormField
+                              label={t('pipeline:create.quickSightUser')}
+                              description={t(
+                                'pipeline:create.quickSightUserDesc'
+                              )}
+                              errorText={
+                                quickSightUserEmptyError
+                                  ? t('pipeline:valid.quickSightUserEmptyError')
+                                  : ''
+                              }
+                            >
+                              <div className="flex">
+                                <div className="flex-1">
+                                  <Select
+                                    statusType={
+                                      loadingUsers ? 'loading' : 'finished'
+                                    }
+                                    placeholder={
+                                      t(
+                                        'pipeline:create.quickSIghtPlaceholder'
+                                      ) || ''
+                                    }
+                                    selectedOption={
+                                      pipelineInfo.selectedQuickSightUser
+                                    }
+                                    onChange={({ detail }) =>
+                                      changeQuickSightSelectedUser(
+                                        detail.selectedOption
+                                      )
+                                    }
+                                    options={quickSightUserOptions}
+                                    filteringType="auto"
+                                  />
+                                </div>
+                                <div className="ml-10">
+                                  <Button
+                                    loading={loadingUsers}
+                                    onClick={() => {
+                                      getQuickSightUserList();
+                                    }}
+                                    iconName="refresh"
+                                  />
+                                </div>
+                              </div>
+                            </FormField>
+                          </>
+                        )}
                     </>
                   ))}
               </SpaceBetween>

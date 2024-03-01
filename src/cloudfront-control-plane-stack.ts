@@ -172,6 +172,8 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     const frameCSPUrl = [
       `*.quicksight.${Aws.PARTITION}.amazon.com`,
+      'cn-north-1.quicksight.amazonaws.cn',
+      'cn-northwest-1.quicksight.amazonaws.cn',
     ].join(' ');
 
     if (createCognitoUserPool) {
