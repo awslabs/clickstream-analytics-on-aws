@@ -13,7 +13,7 @@
 
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
-import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreAggregationMethod, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -24,17 +24,33 @@ export interface Condition {
   readonly dataType: MetadataValueType;
 }
 
+export interface EventExtParameter {
+  readonly targetProperty: ColumnAttribute;
+  readonly aggregationMethod?: ExploreAggregationMethod;
+}
+
 export interface EventAndCondition {
   eventName: string;
   readonly sqlCondition?: SQLCondition;
   readonly retentionJoinColumn?: RetentionJoinColumn;
   readonly computeMethod?: ExploreComputeMethod;
+  readonly eventExtParameter?: EventExtParameter;
 }
 
 export interface SQLCondition {
   readonly conditions: Condition[];
   readonly conditionOperator?: 'and' | 'or' ;
 }
+
+export interface ComputeMethodProps {
+  readonly hasExtParameter: boolean;
+  readonly hasCounntPropertyMethod: boolean;
+  readonly hasAggregationPropertyMethod: boolean;
+  readonly hasIdCountMethod: boolean;
+  readonly isMixedMethod: boolean;
+  readonly isSameAggregationMethod: boolean;
+  readonly aggregationMethod?: ExploreAggregationMethod;
+};
 
 export interface PathAnalysisParameter {
   readonly platform?: MetadataPlatform;
@@ -89,7 +105,18 @@ export interface SQLParameters {
   readonly groupCondition?: GroupingCondition;
 }
 
-export const builtInEvents = [
+export interface EventComputeMethodsProps {
+  readonly hasExtParameter : boolean;
+  readonly hasCounntPropertyMethod : boolean;
+  readonly hasAggregationPropertyMethod : boolean;
+  readonly hasIdCountMethod : boolean;
+  readonly isMixedMethod : boolean;
+  readonly isSameAggregationMethod : boolean;
+  readonly isCountMixedMethod : boolean;
+  readonly aggregationMethodName? : string;
+};
+
+export const BUILTIN_EVENTS = [
   '_session_start',
   '_session_stop',
   '_screen_view',
@@ -524,6 +551,72 @@ export function buildConditionProps(conditions: Condition[]) {
     hasEventNonNestAttribute,
     eventNonNestAttributes,
   };
+}
+
+export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : string {
+
+  let resultSql = '';
+  const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
+
+  let baseSQL = _buildEventPropertyAnalysisBaseSql(eventNames, sqlParameters);
+
+  let groupColSQL = '';
+
+  if (sqlParameters.groupCondition !== undefined) {
+    const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
+    groupColSQL = `${colName}::varchar as ${colName},`;
+  }
+
+  const computeMethodProps = getComputeMethodProps(sqlParameters);
+  if (!computeMethodProps.isMixedMethod) {
+    if (computeMethodProps.hasAggregationPropertyMethod) {
+
+      if (!computeMethodProps.isSameAggregationMethod) {
+        resultSql = resultSql.concat(`
+          select 
+            *
+          from join_table
+        `);
+      } else {
+        resultSql = resultSql.concat(`
+            select 
+              day::date as event_date, 
+              event_name, 
+              ${groupColSQL}
+              custom_attr_id as id
+            from join_table
+            group by
+            day, event_name, ${groupColSQL} custom_attr_id
+        `);
+      }
+    } else {
+      resultSql = resultSql.concat(`
+          select 
+            day::date as event_date, 
+            event_name, 
+            ${groupColSQL}
+            x_id as id,
+            custom_attr_id
+          from join_table 
+          group by
+          day, event_name, ${groupColSQL} x_id, custom_attr_id
+      `);
+    }
+  } else { // mixed method
+    resultSql = resultSql.concat(`
+        select 
+          *
+        from join_table
+    `);
+  }
+
+  let sql = `
+   ${baseSQL}
+   ${resultSql}
+   `;
+  return format(sql, {
+    language: 'postgresql',
+  });
 }
 
 export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
@@ -1261,6 +1354,198 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
+
+function _buildIDColumnSql(index: number, eventAndCondition: EventAndCondition, extParamProps: ComputeMethodProps) {
+  let idSql = '';
+  if (extParamProps.hasAggregationPropertyMethod) {
+    idSql = `
+    , table_${index}.event_id_${index} as x_id
+    , table_${index}.custom_attr_${index} as custom_attr_id
+    `;
+  } else {
+    if (extParamProps.hasCounntPropertyMethod) {
+
+      if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+        idSql = `
+        , null as x_id
+        , table_${index}.event_id_${index} as custom_attr_id
+        `;
+      } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+        idSql = `
+        , null as x_id
+        , table_${index}.user_pseudo_id_${index} as custom_attr_id
+        `;
+      } else {
+        idSql = `
+        , table_${index}.custom_attr_${index} as x_id
+        , table_${index}.event_id_${index} as custom_attr_id
+        `;
+      }
+    } else {
+      if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+        idSql = `, table_${index}.event_id_${index} as x_id`;
+      } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+        idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
+      }
+    }
+  }
+
+  return idSql;
+}
+
+
+function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCondition) {
+  let idSql = '';
+
+  if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    idSql = `
+    , table_${index}.event_id_${index} as x_id
+    , table_${index}.custom_attr_${index} as custom_attr_id 
+    `;
+  } else if (eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+    idSql = `
+    , table_${index}.user_pseudo_id_${index} as x_id
+    , table_${index}.custom_attr_${index} as custom_attr_id 
+    `;
+  } else {
+    idSql = `
+    , table_${index}.event_id_${index} as x_id
+    , table_${index}.custom_attr_${index} as custom_attr_id
+    `;
+  }
+  return idSql;
+}
+
+function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string, dateGroupCol: string) {
+  let sql = '';
+
+  if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
+      || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+    sql = `
+      ${dateGroupCol} as event_date,
+      event_name,
+      ${groupCol === '' ? '' : groupCol+','}
+      null as custom_attr_id,
+      count(distinct x_id) as "count/aggregation amount"
+    `;
+  } else if (eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
+    sql = `
+      ${dateGroupCol} as event_date,
+      event_name,
+      ${groupCol === '' ? '' : groupCol+','}
+      custom_attr_id,
+      count(1) as "count/aggregation amount"
+    `;
+  } else {
+    sql = `
+      ${dateGroupCol} as event_date,
+      event_name,
+      ${groupCol === '' ? '' : groupCol+','}
+      null as custom_attr_id,
+      ${eventAndCondition.eventExtParameter?.aggregationMethod}(custom_attr_id) as "count/aggregation amount"
+    `;
+  }
+
+  return sql;
+}
+
+
+function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, extParamProps: ComputeMethodProps) {
+
+  let joinTableSQL = '';
+
+  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+    let unionSql = '';
+    if (index > 0) {
+      unionSql = 'union all';
+    }
+
+    let idSql = _buildIDColumnSql(index, item, extParamProps);
+
+    let groupColSql = '';
+    let groupCol = '';
+    if (sqlParameters.groupCondition !== undefined) {
+      groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
+      groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+    }
+
+    joinTableSQL = joinTableSQL.concat(`
+    ${unionSql}
+    select
+      table_${index}.month
+    , table_${index}.week
+    , table_${index}.day
+    , table_${index}.hour
+    , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
+    , table_${index}.event_timestamp_${index} as event_timestamp
+    ${idSql}
+    ${groupColSql}
+    from table_${index}
+    `);
+
+  }
+
+  return joinTableSQL;
+
+}
+
+function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
+
+  let sql = _buildCommonPartSql(eventNames, sqlParameters);
+  const buildResult = _buildEventCondition(sqlParameters, sql);
+  sql = buildResult.sql;
+
+  let joinTableSQL = '';
+
+  const extParamProps = getComputeMethodProps(sqlParameters);
+  if (extParamProps.isMixedMethod || (extParamProps.hasAggregationPropertyMethod && !extParamProps.isSameAggregationMethod)) {
+    for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+      let unionSql = '';
+      if (index > 0) {
+        unionSql = 'union all';
+      }
+
+      let groupColSql = '';
+      let groupCol = '';
+      if (sqlParameters.groupCondition !== undefined) {
+        groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
+        groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+      }
+
+      const idSql = _buildIDColumnSqlMixedMode(index, item);
+
+      joinTableSQL = joinTableSQL.concat(`
+      ${unionSql}
+      select 
+        ${_buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn!)}
+        from(
+          select
+            table_${index}.month
+          , table_${index}.week
+          , table_${index}.day
+          , table_${index}.hour
+          , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
+          , table_${index}.event_timestamp_${index} as event_timestamp
+          ${idSql}
+          ${groupColSql}
+          from table_${index}
+        ) as union_table_${index}
+        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ,custom_attr_id
+      `);
+    }
+  } else {
+    joinTableSQL = _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters, extParamProps);
+  }
+
+  sql = sql.concat(`
+    join_table as (
+      ${joinTableSQL}
+    )`,
+  );
+
+  return sql;
+};
+
 function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean = false) {
   let sql = 'union_base_data as (';
   for (const [index, eventCondition] of sqlParameters.eventAndConditions!.entries()) {
@@ -1931,6 +2216,48 @@ function _getColNameWithPrefix(groupCondition: GroupingCondition) {
   return `${prefix}${groupCondition.property}`;
 }
 
+export function getComputeMethodProps(sqlParameters: SQLParameters): EventComputeMethodsProps {
+  let eventAndConditions = sqlParameters.eventAndConditions;
+  let hasExtParameter: boolean = false;
+  let hasCounntPropertyMethod: boolean = false;
+  let hasAggregationPropertyMethod: boolean = false;
+  let hasIdCountMethod: boolean = false;
+  const aggregationMethodSet: Set<ExploreAggregationMethod> = new Set();
+  for (const item of eventAndConditions!) {
+    if (item.eventExtParameter !== undefined) {
+      hasExtParameter = true;
+    }
+    if (item.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
+      hasCounntPropertyMethod = true;
+    }
+
+    if (item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
+      hasAggregationPropertyMethod = true;
+      aggregationMethodSet.add(item.eventExtParameter!.aggregationMethod!);
+    }
+
+    if (item.computeMethod === ExploreComputeMethod.EVENT_CNT || item.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+      hasIdCountMethod = true;
+    }
+  }
+
+  const isMixedMethod = hasAggregationPropertyMethod && (hasCounntPropertyMethod || hasIdCountMethod);
+  const isSameAggregationMethod = !isMixedMethod && aggregationMethodSet.size === 1 && hasAggregationPropertyMethod;
+  const aggregationMethodName = isSameAggregationMethod ? aggregationMethodSet.values().next().value : undefined;
+  const isCountMixedMethod = hasCounntPropertyMethod && hasIdCountMethod && !hasAggregationPropertyMethod;
+
+  return {
+    hasExtParameter,
+    hasCounntPropertyMethod,
+    hasAggregationPropertyMethod,
+    hasIdCountMethod,
+    isMixedMethod,
+    isSameAggregationMethod,
+    isCountMixedMethod,
+    aggregationMethodName,
+  };
+}
+
 function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
   let sql = baseSQL;
   let groupCol = '';
@@ -1939,14 +2266,26 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
     groupCol = `,${_getColNameWithPrefix(sqlParameters.groupCondition)}`;
     newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(sqlParameters.groupCondition)}####`;
   }
+
+  const extParamProps = getComputeMethodProps(sqlParameters);
   const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of sqlParameters.eventAndConditions!.entries()) {
+    let extCol = '';
+    if (extParamProps.hasExtParameter) {
+      if (event.eventExtParameter !== undefined) {
+        extCol = `,${buildColNameWithPrefix(event.eventExtParameter.targetProperty)} as custom_attr_${index}`;
+      } else {
+        extCol = `,null as custom_attr_${index}`;
+      }
+    }
+
     computedMethodList.push(sqlParameters.eventAndConditions![index].computeMethod ?? ExploreComputeMethod.EVENT_CNT);
     let tableColumns = `
        month
       ,week
       ,day
       ,hour
+      ${extCol}
       ,${newColumnTemplate.replace(/####/g, `_${index}`)}
     `;
 
@@ -2559,7 +2898,7 @@ function _getGroupingConditionProps(groupCondition: GroupingCondition) {
 }
 
 
-function _getEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
+export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
 
   let hasEventAttribute = false;
   const eventAttributes: ColumnAttribute[] = [];
@@ -2568,13 +2907,19 @@ function _getEventConditionPropsFromEvents(eventAndConditions: EventAndCondition
 
   for (const eventCondition of eventAndConditions) {
     if (eventCondition.sqlCondition?.conditions !== undefined) {
-      const allAttribute = _getConditionProps(eventCondition.sqlCondition?.conditions);
+      const allAttribute = buildConditionProps(eventCondition.sqlCondition?.conditions);
       hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
       eventAttributes.push(...allAttribute.eventAttributes);
 
       hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
       eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
     }
+
+    const extAttributeProps = buildColumnConditionProps(eventCondition.eventExtParameter?.targetProperty);
+    hasEventAttribute = hasEventAttribute || extAttributeProps.hasEventAttribute;
+    eventAttributes.push(...extAttributeProps.eventAttributes);
+    hasEventNonNestAttribute = hasEventNonNestAttribute || extAttributeProps.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...extAttributeProps.eventNonNestAttributes);
   }
 
   return {
@@ -2644,22 +2989,49 @@ function _getEventConditionProps(sqlParameters: SQLParameters) {
   };
 }
 
-function _getUserConditionProps(sqlParameters: SQLParameters) {
+function _getUserConditionPropsPart1(sqlParameters: SQLParameters) {
 
   let hasNestUserAttribute = false;
   let hasOuterUserAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
+
   if (sqlParameters.eventAndConditions) {
     for (const eventCondition of sqlParameters.eventAndConditions) {
       if (eventCondition.sqlCondition?.conditions !== undefined) {
-        const conditionProps = _getConditionProps(eventCondition.sqlCondition?.conditions);
+        const conditionProps = buildConditionProps(eventCondition.sqlCondition.conditions);
         hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
         hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
         userAttributes.push(...conditionProps.userAttributes);
         userAttributes.push(...conditionProps.userOuterAttributes);
       }
+
+      if (eventCondition.eventExtParameter?.targetProperty !== undefined) {
+        const extAttributeProps = buildColumnConditionProps(eventCondition.eventExtParameter.targetProperty);
+        hasNestUserAttribute = hasNestUserAttribute || extAttributeProps.hasUserAttribute;
+        hasOuterUserAttribute = hasOuterUserAttribute || extAttributeProps.hasUserOuterAttribute;
+        userAttributes.push(...extAttributeProps.userAttributes);
+        userAttributes.push(...extAttributeProps.userOuterAttributes);
+      }
     }
   }
+
+  return {
+    hasNestUserAttribute,
+    hasOuterUserAttribute,
+    userAttributes,
+  };
+}
+
+function _getUserConditionProps(sqlParameters: SQLParameters) {
+
+  let hasNestUserAttribute = false;
+  let hasOuterUserAttribute = false;
+  const userAttributes: ColumnAttribute[] = [];
+
+  const part1Props = _getUserConditionPropsPart1(sqlParameters);
+  hasNestUserAttribute = hasNestUserAttribute || part1Props.hasNestUserAttribute;
+  hasOuterUserAttribute = hasOuterUserAttribute || part1Props.hasOuterUserAttribute;
+  userAttributes.push(...part1Props.userAttributes);
 
   if (sqlParameters.globalEventCondition?.conditions) {
     const conditionProps = _getConditionProps(sqlParameters.globalEventCondition?.conditions);
