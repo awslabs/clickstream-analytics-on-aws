@@ -99,6 +99,7 @@ export class StreamingIngestionStack extends Stack {
       true,
       dataBucket,
       appPrefix,
+      'public.ecr.aws/docker/library/gradle:7.6-jdk11',
     );
 
     // create managed flink application
