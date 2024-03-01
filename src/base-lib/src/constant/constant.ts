@@ -265,6 +265,9 @@ export const SECRETS_MANAGER_ARN_PATTERN =
 export const DDB_TABLE_ARN_PATTERN =
   '^arn:aws(-cn|-us-gov)?:dynamodb:[a-z0-9-]+:[0-9]{12}:table\/[a-zA-Z0-9_.-]+$';
 export const SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:servicecatalog:[a-z0-9-]+:[0-9]{12}:\/applications\/[a-zA-Z0-9_.-]+';
+export const S3_BUCKET_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:s3:::[a-z0-9\\.\\-]{3,63}';
+export const KINESIS_DATA_STREAM_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kinesis:[a-z0-9-]+:[0-9]{12}:stream/[a-zA-Z0-9_.-]{1,128}$';
+export const KMS_KEY_ARN_PATTERN = '^arn:aws(-cn|-us-gov)?:kms:[a-z0-9-]+:[0-9]{12}:key/([a-zA-Z0-9-_]+)$';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
@@ -365,6 +368,10 @@ export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
   'RedshiftBIUsername';
 
 export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX = 'SQLExecutionStateMachineArn';
+
+export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN = 'FlinkAppArn';
+export const OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON = 'SinkKinesisJson';
+export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH = 'FlinkAppIdStreamConfigS3Path';
 
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';

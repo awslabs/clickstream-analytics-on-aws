@@ -18,7 +18,6 @@ import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition, getOrCreateNoNamespaceIdCondition, getOrCreateWithNamespaceIdCondition } from './condition';
 import { AssociateIAMRoleToRedshift, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { SolutionNodejsFunction } from '../../private/function';
@@ -52,7 +51,6 @@ export class RedshiftAssociateIAMRole extends Construct {
       ),
       handler: 'handler',
       memorySize: 256,
-      reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(5),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
@@ -94,7 +92,7 @@ export class RedshiftAssociateIAMRole extends Construct {
     });
 
     if (props.serverlessRedshift) {
-      this.createServerlessPolicy(props.serverlessRedshift, scope, fn);
+      this.createServerlessPolicy(props.serverlessRedshift, fn);
     } else {
       this.cr.node.addDependency(new Policy(scope, 'ProvisionedRedshiftIAMPolicy', {
         roles: [fn.role!],
@@ -128,29 +126,21 @@ export class RedshiftAssociateIAMRole extends Construct {
     }
   }
 
-  private createServerlessPolicy(serverlessRedshift: ExistingRedshiftServerlessProps, scope: Construct, fn: SolutionNodejsFunction) {
+  private createServerlessPolicy(serverlessRedshift: ExistingRedshiftServerlessProps, fn: SolutionNodejsFunction) {
     if (serverlessRedshift.workgroupId && Token.isUnresolved(serverlessRedshift.workgroupId) &&
       !serverlessRedshift.createdInStack) {
-      const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(scope, serverlessRedshift.workgroupId);
-      this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
-        fn.role!, noWorkgroupIdCondition);
-
-      const withWorkgroupIdCondition = getOrCreateWithWorkgroupIdCondition(scope, serverlessRedshift.workgroupId);
-      this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessSingleWorkgroupPolicy', serverlessRedshift.workgroupId,
-        fn.role!, withWorkgroupIdCondition);
+      // we can not make the CR depends on two conditional resources, have to use wildcard for this uncertain dependencies
+      this.cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
+        fn.role!));
     } else {
       this.cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
         serverlessRedshift.workgroupId ?? '*', fn.role!));
     }
     if (serverlessRedshift.namespaceId && Token.isUnresolved(serverlessRedshift.namespaceId) &&
       !serverlessRedshift.createdInStack) {
-      const noNamespaceIdCondition = getOrCreateNoNamespaceIdCondition(scope, serverlessRedshift.namespaceId);
-      this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
-        fn.role!, noNamespaceIdCondition);
-
-      const withNamespaceIdCondition = getOrCreateWithNamespaceIdCondition(scope, serverlessRedshift.namespaceId);
-      this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessSingleNamespacePolicy',
-        serverlessRedshift.namespaceId, fn.role!, withNamespaceIdCondition);
+      // we can not make the CR depends on two conditional resources, have to use wildcard for this uncertain dependencies
+      this.cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
+        fn.role!));
     } else {
       this.cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
         serverlessRedshift.namespaceId ?? '*', fn.role!));

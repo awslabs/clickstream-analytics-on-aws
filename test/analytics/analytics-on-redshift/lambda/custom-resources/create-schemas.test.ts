@@ -17,7 +17,6 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { readFileSync } from 'fs';
 import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
@@ -34,6 +33,7 @@ import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/m
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
+import { loadSQLFromFS } from '../../../../fs-utils';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
@@ -148,14 +148,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
-      ...(schemaDefs.reduce((acc: { [key: string]: string }, item, _index) => {
-        acc[`/opt/${item.sqlFile}`] = testSqlContent(rootPath + item.sqlFile);
-        return acc;
-      }, {} as { [key: string]: string })),
-      ...(reportingViewsDef.reduce((acc, item, _index) => {
-        acc[`/opt/dashboard/${item.viewName}.sql`] = testSqlContent(`${rootPath}dashboard/${item.viewName}.sql`);
-        return acc;
-      }, {} as { [key: string]: string })),
+      ...loadSQLFromFS(schemaDefs, rootPath),
+      ...loadSQLFromFS(reportingViewsDef.map(i => { return { sqlFile: i.viewName + '.sql' }; }), rootPath, 'dashboard/'),
       ...defs,
     });
   });
@@ -493,9 +487,3 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
 
 });
-
-
-const testSqlContent = (filePath: string) => {
-  const sqlTemplate = readFileSync(filePath, 'utf8');
-  return sqlTemplate;
-};
