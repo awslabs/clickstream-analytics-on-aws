@@ -38,6 +38,10 @@ const loadStatusEvent: CheckLoadStatusEvent = {
       }],
     },
   },
+  waitTimeInfo: {
+    waitTime: 10,
+    loopCount: 1,
+  },
 };
 
 
@@ -58,6 +62,10 @@ const loadStatusEvent2: CheckLoadStatusEvent = {
       }],
     },
   },
+  waitTimeInfo: {
+    waitTime: 10,
+    loopCount: 1,
+  },
 };
 
 
@@ -77,6 +85,10 @@ const loadStatusEvent3: CheckLoadStatusEvent = {
         },
       }],
     },
+  },
+  waitTimeInfo: {
+    waitTime: 10,
+    loopCount: 1,
   },
 };
 
@@ -135,6 +147,10 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     expect(resp).toEqual({
       detail: expect.objectContaining({
         status: StatusString.STARTED,
+      }),
+      waitTimeInfo: expect.objectContaining({
+        waitTime: 10,
+        loopCount: 2,
       }),
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {

@@ -248,8 +248,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
       const initWaitTimeInfo = new Pass(this, `${odsTableName} - Init wait time info`, {
         parameters: {
-          'waitTime': 10,
-          'loopCount': 0,
+          waitTime: 10,
+          loopCount: 0,
         },
         resultPath: '$.waitTimeInfo',
       });
