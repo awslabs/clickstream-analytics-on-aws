@@ -94,12 +94,14 @@ export class StreamingIngestionStack extends Stack {
       deployment,
     } = uploadBuiltInJarsAndRemoteFiles(
       this,
-      path.resolve(__dirname, 'streaming-ingestion', 'flink-etl'),
-      'flink-etl',
-      true,
-      dataBucket,
-      appPrefix,
-      'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+      {
+        sourcePath: path.resolve(__dirname, 'streaming-ingestion', 'flink-etl'),
+        jarName: 'flink-etl',
+        shadowJar: true,
+        destinationBucket: dataBucket,
+        destinationKeyPrefix: appPrefix,
+        buildImage: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+      },
     );
 
     // create managed flink application

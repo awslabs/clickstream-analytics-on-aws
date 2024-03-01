@@ -17,30 +17,35 @@ import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 import { SolutionInfo } from './solution-info';
 
+export interface BuildJarProps {
+  readonly sourcePath: string;
+  readonly jarName: string;
+  readonly shadowJar: boolean;
+  readonly destinationBucket: IBucket;
+  readonly destinationKeyPrefix: string;
+  readonly buildImage?: string;
+  readonly additionalBuildArgument?: string;
+  readonly remoteFiles?: string[];
+}
+
 export function uploadBuiltInJarsAndRemoteFiles(
   scope: Construct,
-  sourcePath: string,
-  jarName: string,
-  shadowJar: boolean,
-  destinationBucket: IBucket,
-  destinationKeyPrefix: string,
-  buildImage: string = 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
-  additionalBuildArgument: string = '',
-  remoteFiles: string[] = ['https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz'],
+  props: BuildJarProps,
 ) {
   const version = SolutionInfo.SOLUTION_VERSION_SHORT;
-  let jarFile = `${jarName}-${version}.jar`;
-  if (shadowJar) {
-    jarFile = `${jarName}-${version}-all.jar`;
+  let jarFile = `${props.jarName}-${version}.jar`;
+  if (props.shadowJar) {
+    jarFile = `${props.jarName}-${version}-all.jar`;
   }
   const shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
     'cd /tmp/',
-    `gradle clean build -PprojectVersion=${version} -x test -x coverageCheck ${additionalBuildArgument}`,
+    `gradle clean build -PprojectVersion=${version} -x test -x coverageCheck ${props.additionalBuildArgument ?? ''}`,
     `cp ./build/libs/${jarFile} /asset-output/`,
     'cd /asset-output/',
   ];
+  const remoteFiles = props.remoteFiles ?? ['https://cdn.jsdelivr.net/npm/geolite2-city@1.0.0/GeoLite2-City.mmdb.gz'];
   remoteFiles.forEach((url) => {
     const filename = extractFilenameFromUrl(url);
     if (filename.endsWith('.gz')) {shellCommands.push(`wget -O - ${url} | gunzip -c > ${filename.replace(/\.gz$/, '')}`);} else {shellCommands.push(`wget ${url}`);}
@@ -48,28 +53,28 @@ export function uploadBuiltInJarsAndRemoteFiles(
 
   let bundling: BundlingOptions = {
     user: 'gradle',
-    image: DockerImage.fromRegistry(buildImage),
+    image: DockerImage.fromRegistry(props.buildImage ?? 'public.ecr.aws/docker/library/gradle:7.6-jdk17'),
     command: ['sh', '-c', shellCommands.join(' && ')],
   };
 
   const deployment = new BucketDeployment(scope, 'JarsAndFiles', {
     sources: [
-      Source.asset(sourcePath, {
+      Source.asset(props.sourcePath, {
         assetHashType: AssetHashType.SOURCE,
         bundling,
       }),
     ],
-    destinationBucket,
-    destinationKeyPrefix,
-    memoryLimit: 1024, // Increase the memory limit to 1 gibibytes
-    ephemeralStorageSize: Size.gibibytes(1), // Increase the ephemeral storage size to 1 gibibytes
+    destinationBucket: props.destinationBucket,
+    destinationKeyPrefix: props.destinationKeyPrefix,
+    memoryLimit: 1024, // Increase the memory limit to 1 gigabytes
+    ephemeralStorageSize: Size.gibibytes(1), // Increase the ephemeral storage size to 1 gigabytes
   });
 
-  const entryPointJar = `s3://${destinationBucket.bucketName}/${destinationKeyPrefix}/${jarFile}`;
+  const entryPointJar = `s3://${props.destinationBucket.bucketName}/${props.destinationKeyPrefix}/${jarFile}`;
   const remoteFileKeys = remoteFiles.map((url) => {
     let filename = extractFilenameFromUrl(url);
     if (filename.endsWith('.gz')) {filename = filename.replace(/\.gz$/, '');}
-    return `s3://${destinationBucket.bucketName}/${destinationKeyPrefix}/${filename}`;
+    return `s3://${props.destinationBucket.bucketName}/${props.destinationKeyPrefix}/${filename}`;
   });
 
   return {

@@ -111,11 +111,13 @@ export class DataPipelineConstruct extends Construct {
       files: builtInFiles,
     } = uploadBuiltInJarsAndRemoteFiles(
       scope,
-      path.resolve(__dirname, 'spark-etl'),
-      'spark-etl',
-      false,
-      this.props.pipelineS3Bucket,
-      pluginPrefix,
+      {
+        sourcePath: path.resolve(__dirname, 'spark-etl'),
+        jarName: 'spark-etl',
+        shadowJar: false,
+        destinationBucket: this.props.pipelineS3Bucket,
+        destinationKeyPrefix: pluginPrefix,
+      },
     );
 
     const s3PathPluginJars = [builtInJars];
