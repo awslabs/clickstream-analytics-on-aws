@@ -78,6 +78,16 @@ router_pipeline.get(
     return pipelineServ.details(req, res, next);
   });
 
+router_pipeline.get(
+  '/:id/extend',
+  validate([
+    query('pid').custom(isProjectExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return pipelineServ.extend(req, res, next);
+  });
+
+
 router_pipeline.put(
   '/:id',
   validate([

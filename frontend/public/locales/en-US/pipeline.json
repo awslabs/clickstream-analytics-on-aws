@@ -391,7 +391,8 @@
     "alarmDescription": "Description",
     "tags": "Tags",
     "bufferSize": "Buffer size",
-    "bufferInterval": "Buffer interval"
+    "bufferInterval": "Buffer interval",
+    "analyticSchemaStatus": "Redshift Schemas Status"
   },
   "list": {
     "id": "Pipeline ID",

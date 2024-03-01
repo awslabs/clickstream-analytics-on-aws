@@ -19,7 +19,7 @@ import {
   SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
-import { getPipelineDetail } from 'apis/pipeline';
+import { getPipelineDetail, getPipelineExtend } from 'apis/pipeline';
 import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -43,6 +43,8 @@ const PipelineDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
   const [projectPipeline, setProjectPipeline] = useState<IExtPipeline>();
+  const [projectPipelineExtend, setProjectPipelineExtend] =
+    useState<IPipelineExtend>();
   const [loadingPipeline, setLoadingPipeline] = useState(false);
 
   const { activeTab } = location.state || {};
@@ -68,6 +70,20 @@ const PipelineDetail: React.FC = () => {
     }
   };
 
+  const getProjectPipelineExtend = async () => {
+    try {
+      const { success, data }: ApiResponse<IPipelineExtend> =
+        await getPipelineExtend({
+          projectId: defaultStr(pid),
+        });
+      if (success) {
+        setProjectPipelineExtend(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const getProjectDetailById = async () => {
     setLoadingData(true);
     try {
@@ -77,6 +93,7 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectInfo(data);
         getProjectPipelineDetail('false');
+        getProjectPipelineExtend();
       }
     } catch (error) {
       setLoadingData(false);
@@ -100,6 +117,7 @@ const PipelineDetail: React.FC = () => {
 
   useEffect(() => {
     getProjectPipelineDetail('false');
+    getProjectPipelineExtend();
     getProjectDetailById();
   }, []);
 
@@ -123,6 +141,7 @@ const PipelineDetail: React.FC = () => {
                 loadingRefresh={loadingPipeline}
                 reloadPipeline={(refresh: string) => {
                   getProjectPipelineDetail(refresh);
+                  getProjectPipelineExtend();
                 }}
               />
               <Container disableContentPaddings>
@@ -146,7 +165,11 @@ const PipelineDetail: React.FC = () => {
                       id: 'processing',
                       content: (
                         <div className="pd-20">
-                          <Processing pipelineInfo={projectPipeline} />
+                          <Processing
+                            pipelineInfo={projectPipeline}
+                            pipelineExtend={projectPipelineExtend}
+                            displayPipelineExtend={true}
+                          />
                         </div>
                       ),
                     },

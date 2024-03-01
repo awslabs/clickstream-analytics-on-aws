@@ -147,6 +147,13 @@ export const buildReshiftLink = (
   return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };
 
+export const buildSFNExecutionLink = (region: string, executionArn: string) => {
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/states/home?region=${region}#/v2/executions/details/${executionArn}`;
+  }
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/states/home?region=${region}#/v2/executions/details/${executionArn}`;
+};
+
 export const buildQuickSightDashboardLink = (
   region: string,
   dashboardId: string
