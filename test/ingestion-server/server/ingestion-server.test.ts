@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
@@ -597,7 +598,7 @@ test('S3 bucket policy is configured to allow ALB to write files when Alb access
   expect(hasAccountRoot).toBeTruthy();
 });
 
-test('server EndpointPath and CorsOrigin can be configured', () => {
+test('server EndpointPath and CorsOrigin can be configured, heartbeat is configured, ', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {
     withMskConfig: true,
@@ -622,6 +623,11 @@ test('server EndpointPath and CorsOrigin can be configured', () => {
     Value: 'a.test.com,b.test.net',
   };
 
+  const evn3 = {
+    Name: 'PING_ENDPOINT_PATH',
+    Value: INGESTION_SERVER_PING_PATH,
+  };
+
   const hasPath =
     proxy.Environment.filter(
       (e: any) => e.Name == env1.Name && e.Value == env1.Value,
@@ -632,8 +638,14 @@ test('server EndpointPath and CorsOrigin can be configured', () => {
       (e: any) => e.Name == env2.Name && e.Value == env2.Value,
     ).length == 1;
 
+  const hasPingPath =
+    proxy.Environment.filter(
+      (e: any) => e.Name == evn3.Name && e.Value == evn3.Value,
+    ).length == 1;
+
   expect(hasPath).toBeTruthy();
   expect(hasCorsOrigin).toBeTruthy();
+  expect(hasPingPath).toBeTruthy();
 });
 
 test('ECS::ClusterCapacityProviderAssociations has DefaultCapacityProviderStrategy', () => {
