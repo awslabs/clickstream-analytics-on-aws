@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -214,20 +215,27 @@ public class Cleaner {
     }
 
     private Dataset<Row> filter(final Dataset<Row> dataset) {
-        Dataset<Row> freshDataset = filterByDataFreshness(dataset);
-        log.info(new ETLMetric(freshDataset, "after filterByDataFreshness").toString());
+        Dataset<Row> freshDataset = filterByDataFreshnessAndFuture(dataset);
+        log.info(new ETLMetric(freshDataset, "after filterByDataFreshnessAndFuture").toString());
 
         Dataset<Row> filteredDataset = filterByAppIds(freshDataset);
         log.info(new ETLMetric(filteredDataset, "after filterByAppIds").toString());
         return filteredDataset;
     }
 
-    private Dataset<Row> filterByDataFreshness(final Dataset<Row> dataset) {
+    private Dataset<Row> filterByDataFreshnessAndFuture(final Dataset<Row> dataset) {
         long dataFreshnessInHour = Long.parseLong(System.getProperty(DATA_FRESHNESS_HOUR_PROP, "72"));
         log.info("dataFreshnessInHour:" + dataFreshnessInHour);
         return dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
+
+            if (eventTimestamp > Instant.now().toEpochMilli()) {
+                String eventId = row.getStruct(row.fieldIndex("data")).getAs("event_id");
+                log.warn("eventTimestamp is in the future, eventTimestamp:" + eventTimestamp + ", eventId:" + eventId);
+                return false;
+            }
+
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;
         });
     }
