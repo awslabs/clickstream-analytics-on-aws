@@ -2424,6 +2424,7 @@ describe('reporting test', () => {
 
     expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
       {
+        dbName: 'project01_wvzh',
         schemaName: 'app1',
         computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
@@ -2619,6 +2620,7 @@ describe('reporting test', () => {
 
     expect(buildRetentionAnalysisView).toHaveBeenCalledWith(
       {
+        dbName: 'project01_wvzh',
         schemaName: 'app1',
         computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,

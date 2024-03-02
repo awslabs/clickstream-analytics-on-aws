@@ -1118,7 +1118,7 @@ export class CReportingStack extends JSONObject {
   @JSONObject.required
     QuickSightOwnerPrincipalParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('dev')
     RedshiftDBParam?: string;
 
   @JSONObject.required
@@ -1194,7 +1194,6 @@ export class CReportingStack extends JSONObject {
       QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
       QuickSightPrincipalParam: resources.quickSightUser?.publishUserArn,
       QuickSightOwnerPrincipalParam: resources.quickSightUser?.publishUserArn,
-      RedshiftDBParam: pipeline.projectId,
       RedShiftDBSchemaParam: resources.appIds?.join(','),
       QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
       RedshiftParameterKeyParam: getValueFromStackOutputSuffix(

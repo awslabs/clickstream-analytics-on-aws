@@ -65,6 +65,7 @@ describe('QuickSight Lambda function', () => {
 
   beforeEach(() => {
     ec2ClientMock.reset();
+    quickSightClientMock.reset();
   });
 
   test('NetworkInterface check custom resource test - create', async () => {
@@ -186,6 +187,39 @@ describe('QuickSight Lambda function', () => {
 
     const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
     expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 3);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeVPCConnectionCommand, 3);
+    expect(resp.Data?.isReady).toBeDefined();
+    expect(resp.Data?.isReady).toEqual(true);
+
+  });
+
+
+  test('NetworkInterface in changing', async () => {
+
+    ec2ClientMock.on(DescribeNetworkInterfacesCommand).rejectsOnce(
+      {
+        $fault: 'client',
+        $metadata: {
+          httpStatusCode: 400,
+          requestId: 'b752a585-9b40-4747-8ae6-1ffee99f49f2',
+          extendedRequestId: undefined,
+          cfId: undefined,
+          attempts: 1,
+          totalRetryDelay: 0,
+        },
+        Code: 'InvalidNetworkInterfaceID.NotFound',
+      },
+    );
+
+    quickSightClientMock.on(DescribeVPCConnectionCommand).resolves({
+      VPCConnection: {
+        AvailabilityStatus: 'AVAILABLE',
+      },
+    });
+
+    const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
+    expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeVPCConnectionCommand, 0);
     expect(resp.Data?.isReady).toBeDefined();
     expect(resp.Data?.isReady).toEqual(true);
 
