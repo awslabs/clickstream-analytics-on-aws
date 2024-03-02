@@ -65,7 +65,7 @@ const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId:
     return true;
   } catch (error) {
     if (error instanceof ResourceNotFoundException) {
-      logger.warn('hit unexpected error, skip checking vpc connection', { error });
+      logger.warn('hit unexpected error, skip checking vpc connection');
       return true;
     } else {
       throw error;
@@ -86,12 +86,13 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
   let isNetworkInterfaceReady: boolean = false;
   let checkCnt = 0;
 
-  while (!isNetworkInterfaceReady && checkCnt <= 1200) {
-    await sleep(500);
-    checkCnt += 1;
+  try {
+    while (!isNetworkInterfaceReady && checkCnt <= 1200) {
+      await sleep(500);
+      checkCnt += 1;
 
-    let ready = true;
-    try {
+      let ready = true;
+
       const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
         NetworkInterfaceIds: networkInterfaceIds,
       });
@@ -104,18 +105,19 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
           }
         }
       }
-    } catch (error) {
-      if ((error as any).Code.includes('InvalidNetworkInterface')) {
-        logger.warn('hit unexpected error, skip error and keep waiting', (error as any).Code );
-        ready = false;
-      } else {
-        throw error;
-      }
+
+      const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
+      logger.info(`vpc connection ready: ${vpcConnectionReady}`);
+      isNetworkInterfaceReady = ready && vpcConnectionReady;
     }
-
-    const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
-
-    isNetworkInterfaceReady = ready && vpcConnectionReady;
+  } catch (error) {
+    const err = (error as any);
+    if (err.Code !== undefined && err.Code.includes('InvalidNetworkInterface')) {
+      logger.warn('hit unexpected error, skip waiting', (error as any).Code );
+      isNetworkInterfaceReady = true;
+    } else {
+      throw error;
+    }
   }
 
   //force wait 1 minute after vpc connection is available
