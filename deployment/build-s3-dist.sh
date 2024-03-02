@@ -176,6 +176,9 @@ update_dict() {
 # SOLUTION_NAME='AWS Security Hub Automated Response & Remediation'
 # SOLUTION_TRADEMARKEDNAME='aws-security-hub-automated-response-and-remediation'
 # SOLUTION_VERSION='v1.1.1' # optional
+
+solution_name="$2"
+
 if [[ -e './solution_config' ]]; then
     source ./solution_config
 else
@@ -190,19 +193,8 @@ else
     export SOLUTION_ID
 fi
 
-if [[ -z $SOLUTION_NAME ]]; then
-    echo "SOLUTION_NAME is missing from ../solution_config"
-    exit 1
-else
-    export SOLUTION_NAME
-fi
-
-if [[ -z $SOLUTION_TRADEMARKEDNAME ]]; then
-    echo "SOLUTION_TRADEMARKEDNAME is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_TRADEMARKEDNAME
-fi
+export SOLUTION_NAME="$solution_name"
+export SOLUTION_TRADEMARKEDNAME="$solution_name"
 
 if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
     echo "SOLUTION_ECR_BUILD_VERSION is missing from ../solution_config"
