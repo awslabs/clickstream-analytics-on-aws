@@ -12,7 +12,7 @@
  */
 
 import { DescribeNetworkInterfacesCommandOutput, EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
-import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { QuickSight } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
@@ -49,28 +49,19 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
 const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId: string, awsAccountId: string): Promise<boolean> => {
 
-  try {
-    const vpcConnection = await quickSightClient.describeVPCConnection({
-      VPCConnectionId: vpcConnectionId,
-      AwsAccountId: awsAccountId,
-    });
+  const vpcConnection = await quickSightClient.describeVPCConnection({
+    VPCConnectionId: vpcConnectionId,
+    AwsAccountId: awsAccountId,
+  });
 
-    if (vpcConnection.VPCConnection !== undefined) {
-      logger.info(`vpc connection status: ${vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
-      if (vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
-        return false;
-      }
-    }
-
-    return true;
-  } catch (error) {
-    if (error instanceof ResourceNotFoundException) {
-      logger.warn('hit unexpected error, skip checking vpc connection');
-      return true;
-    } else {
-      throw error;
+  if (vpcConnection.VPCConnection !== undefined) {
+    logger.info(`vpc connection status: ${vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
+    if (vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
+      return false;
     }
   }
+
+  return true;
 };
 
 function _checkStatus(networkInterfacesDescribeResult: DescribeNetworkInterfacesCommandOutput): boolean {

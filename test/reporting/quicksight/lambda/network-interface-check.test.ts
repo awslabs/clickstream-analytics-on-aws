@@ -12,7 +12,7 @@
  */
 
 import { DescribeNetworkInterfacesCommand, EC2Client, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
-import { DescribeVPCConnectionCommand, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { DescribeVPCConnectionCommand, QuickSight } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/network-interface-check';
@@ -187,6 +187,7 @@ describe('QuickSight Lambda function', () => {
 
     const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
     expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 3);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeVPCConnectionCommand, 3);
     expect(resp.Data?.isReady).toBeDefined();
     expect(resp.Data?.isReady).toEqual(true);
 
@@ -219,42 +220,6 @@ describe('QuickSight Lambda function', () => {
     const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
     expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeVPCConnectionCommand, 0);
-    expect(resp.Data?.isReady).toBeDefined();
-    expect(resp.Data?.isReady).toEqual(true);
-
-  });
-
-
-  test('vpc connection not exist', async () => {
-
-    ec2ClientMock.on(DescribeNetworkInterfacesCommand).resolves({
-      NetworkInterfaces: [
-        {
-          NetworkInterfaceId: 'eni-test11111',
-          Status: NetworkInterfaceStatus.in_use,
-        },
-        {
-          NetworkInterfaceId: 'eni-test11112',
-          Status: NetworkInterfaceStatus.in_use,
-        },
-        {
-          NetworkInterfaceId: 'eni-test11113',
-          Status: NetworkInterfaceStatus.in_use,
-        },
-      ],
-    });
-
-    quickSightClientMock.on(DescribeVPCConnectionCommand).rejects(
-      new ResourceNotFoundException({
-        $metadata: {
-        },
-        message: 'ResourceNotFoundException',
-      }),
-    );
-
-    const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
-    expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeVPCConnectionCommand, 1);
     expect(resp.Data?.isReady).toBeDefined();
     expect(resp.Data?.isReady).toEqual(true);
 
