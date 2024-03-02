@@ -20851,6 +20851,7 @@ describe('SQL Builder test', () => {
 
   test('count on property', () => {
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -20946,7 +20947,7 @@ describe('SQL Builder test', () => {
                   'YYYY-MM-DD HH24'
                 ) || '00:00' as hour
               from
-                shop.event as event
+                shop.shop.event as event
               where
                 event.event_date >= date '2023-10-01'
                 and event.event_date <= date '2025-10-10'
@@ -20957,7 +20958,7 @@ describe('SQL Builder test', () => {
                 user_pseudo_id,
                 user_id
               from
-                shop.user_m_view
+                shop.shop.user_m_view
               group by
                 user_pseudo_id,
                 user_id
@@ -21080,6 +21081,7 @@ describe('SQL Builder test', () => {
 
   test('sum on property', () => {
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -21172,7 +21174,7 @@ describe('SQL Builder test', () => {
               'YYYY-MM-DD HH24'
             ) || '00:00' as hour
           from
-            shop.event as event
+            shop.shop.event as event
           where
             event.event_date >= date '2023-10-01'
             and event.event_date <= date '2025-10-10'
@@ -21183,7 +21185,7 @@ describe('SQL Builder test', () => {
             user_pseudo_id,
             user_id
           from
-            shop.user_m_view
+            shop.shop.user_m_view
           group by
             user_pseudo_id,
             user_id
@@ -21206,7 +21208,7 @@ describe('SQL Builder test', () => {
             ) as _session_duration
           from
             event_base
-            join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+            join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
             and event_base.event_id = event_param.event_id
           group by
             event_base.event_id
@@ -21326,6 +21328,7 @@ describe('SQL Builder test', () => {
 
   test('aggregate on property with different compute method', () => {
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -21418,7 +21421,7 @@ describe('SQL Builder test', () => {
                 'YYYY-MM-DD HH24'
               ) || '00:00' as hour
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -21429,7 +21432,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.user_m_view
+              shop.shop.user_m_view
             group by
               user_pseudo_id,
               user_id
@@ -21452,7 +21455,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -21603,6 +21606,7 @@ describe('SQL Builder test', () => {
   test('mix count and sum computed method', () => {
 
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -21695,7 +21699,7 @@ describe('SQL Builder test', () => {
                 'YYYY-MM-DD HH24'
               ) || '00:00' as hour
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -21706,7 +21710,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.user_m_view
+              shop.shop.user_m_view
             group by
               user_pseudo_id,
               user_id
@@ -21729,7 +21733,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -21880,6 +21884,7 @@ describe('SQL Builder test', () => {
   test('mix id count and property count method', () => {
 
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -21961,7 +21966,7 @@ describe('SQL Builder test', () => {
                     'YYYY-MM-DD HH24'
                   ) || '00:00' as hour
                 from
-                  shop.event as event
+                  shop.shop.event as event
                 where
                   event.event_date >= date '2023-10-01'
                   and event.event_date <= date '2025-10-10'
@@ -21972,7 +21977,7 @@ describe('SQL Builder test', () => {
                   user_pseudo_id,
                   user_id
                 from
-                  shop.user_m_view
+                  shop.shop.user_m_view
                 group by
                   user_pseudo_id,
                   user_id
@@ -22096,6 +22101,7 @@ describe('SQL Builder test', () => {
   test('mix all computed method', () => {
 
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -22185,7 +22191,7 @@ describe('SQL Builder test', () => {
                 'YYYY-MM-DD HH24'
               ) || '00:00' as hour
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -22196,7 +22202,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.user_m_view
+              shop.shop.user_m_view
             group by
               user_pseudo_id,
               user_id
@@ -22219,7 +22225,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -22413,6 +22419,7 @@ describe('SQL Builder test', () => {
   test('mix all computed method with different aggregation method', () => {
 
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -22510,7 +22517,7 @@ describe('SQL Builder test', () => {
                 'YYYY-MM-DD HH24'
               ) || '00:00' as hour
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -22521,7 +22528,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.user_m_view
+              shop.shop.user_m_view
             group by
               user_pseudo_id,
               user_id
@@ -22544,7 +22551,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -22737,6 +22744,7 @@ describe('SQL Builder test', () => {
   test('mix all computed method with different aggregation method with group condition', () => {
 
     const sql = buildEventPropertyAnalysisView({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -22841,7 +22849,7 @@ describe('SQL Builder test', () => {
                 'YYYY-MM-DD HH24'
               ) || '00:00' as hour
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -22852,7 +22860,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.user_m_view
+              shop.shop.user_m_view
             group by
               user_pseudo_id,
               user_id
@@ -22875,7 +22883,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id

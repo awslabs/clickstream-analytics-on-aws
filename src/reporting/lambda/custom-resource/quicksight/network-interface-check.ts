@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
+import { DescribeNetworkInterfacesCommandOutput, EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
@@ -73,6 +73,20 @@ const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId:
   }
 };
 
+function _checkStatus(networkInterfacesDescribeResult: DescribeNetworkInterfacesCommandOutput): boolean {
+  let ready = true;
+  if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
+    for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
+      logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
+      if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
+        ready = false;
+      }
+    }
+  }
+
+  return ready;
+}
+
 const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
   props: NetworkInterfaceCheckCustomResourceLambdaPropsType): Promise<CdkCustomResourceResponse> => {
 
@@ -97,14 +111,7 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
         NetworkInterfaceIds: networkInterfaceIds,
       });
 
-      if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
-        for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
-          logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
-          if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
-            ready = false;
-          }
-        }
-      }
+      ready = _checkStatus(networkInterfacesDescribeResult);
 
       const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
       logger.info(`vpc connection ready: ${vpcConnectionReady}`);

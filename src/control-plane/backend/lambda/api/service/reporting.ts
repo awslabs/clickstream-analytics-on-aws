@@ -572,7 +572,8 @@ export class ReportingService {
       }, locale);
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
+      const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
+        viewName, titleProps, query.groupColumn, hasGrouping);
 
       const tableVisualProps = {
         sheetId: sheetId,
