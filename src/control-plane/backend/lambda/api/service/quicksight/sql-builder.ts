@@ -90,6 +90,7 @@ export interface EventNameAndConditionsSQL {
 }
 
 export interface BaseSQLParameters {
+  readonly dbName: string;
   readonly schemaName: string;
   readonly computeMethod: ExploreComputeMethod;
   readonly globalEventCondition?: SQLCondition;
@@ -1766,7 +1767,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
     eventAttributes.push(...eventConditionProps.eventAttributes);
     const eventCommonColumnsSql = buildCommonColumnsSql(eventAttributes, 'event_param_key', 'event_param_{{}}_value');
     eventColList = eventCommonColumnsSql.columns;
-    eventJoinTable = buildEventJoinTable(sqlParameters.schemaName, eventCommonColumnsSql.columnsSql);
+    eventJoinTable = buildEventJoinTable(sqlParameters.dbName + '.' + sqlParameters.schemaName, eventCommonColumnsSql.columnsSql);
   }
 
   const userConditionProps = _getUserConditionProps(sqlParameters);
@@ -1865,7 +1866,7 @@ function _buildNodePathSQL(sqlParameters: SQLParameters, nodeType: ExplorePathNo
       base_data.event_id,
       max(event_param.event_param_string_value) as node
     from base_data
-    join ${sqlParameters.schemaName}.${EVENT_PARAMETER_TABLE} as event_param
+    join ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_PARAMETER_TABLE} as event_param
     on base_data.event_timestamp = event_param.event_timestamp and base_data.event_id = event_param.event_id
     where 
       event_param.event_param_key = '${nodeType}'
@@ -1988,14 +1989,14 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
         'YYYY-MM-DD HH24'
         ) || '00:00' as hour
       from
-          ${sqlParameters.schemaName}.${EVENT_TABLE} as event
+          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
       where
           ${eventDateSQL}
           ${eventNameClause}
     ) as l
     join 
     (
-      select user_pseudo_id, user_id from ${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id
+      select user_pseudo_id, user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id
     ) as r on l.user_pseudo_id= r.user_pseudo_id
   `;
 }
@@ -2038,7 +2039,7 @@ function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams:
       _channel
       ${nestParamSql}
     from
-        ${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
+    ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
   `;
 }
 

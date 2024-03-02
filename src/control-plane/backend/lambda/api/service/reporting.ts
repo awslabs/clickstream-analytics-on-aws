@@ -48,6 +48,7 @@ import {
   encodeQueryValueForSql,
   getEventNormalTableVisualDef,
   getEventPropertyCountPivotTableVisualDef,
+  DashboardTitleProps,
 } from './quicksight/reporting-utils';
 import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -84,44 +85,19 @@ export class ReportingService {
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-      const sql = buildFunnelView({
+      const sqlParameters = {
+        ...query,
         schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        eventAndConditions: query.eventAndConditions,
-        timeScopeType: query.timeScopeType,
+        dbName: query.projectId,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        groupCondition: query.groupCondition,
-        globalEventCondition: query.globalEventCondition,
-      }, query.chartType === QuickSightChartType.BAR);
+      };
+      const sql = buildFunnelView(sqlParameters, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
-      const sqlTable = buildFunnelTableView({
-        schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        eventAndConditions: query.eventAndConditions,
-        timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        groupCondition: query.groupCondition,
-        globalEventCondition: query.globalEventCondition,
-      });
+      const sqlTable = buildFunnelTableView(sqlParameters);
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
 
@@ -424,21 +400,11 @@ export class ReportingService {
       const viewName = getTempResourceName(query.viewName, query.action);
 
       const sqlParameters = {
+        ...query,
         schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        eventAndConditions: query.eventAndConditions,
-        timeScopeType: query.timeScopeType,
+        dbName: query.projectId,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        groupCondition: query.groupCondition,
-        globalEventCondition: query.globalEventCondition,
       };
 
       const sql = buildEventAnalysisView(sqlParameters);
@@ -527,6 +493,25 @@ export class ReportingService {
     }
   };
 
+  async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
+    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, hasGrouping: boolean) {
+
+    let tableVisualDef: Visual;
+    if (computeMethodProps.isSameAggregationMethod) {
+      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
+        , hasGrouping, computeMethodProps.aggregationMethodName);
+    } else if (
+      (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
+      ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
+
+      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, hasGrouping);
+    } else {
+      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
+    }
+
+    return tableVisualDef;
+  }
+
   async createEventVisualOnEventProperty(req: any, res: any, next: any) {
     try {
       logger.info('start to create event analysis visuals', { request: req.body });
@@ -587,18 +572,8 @@ export class ReportingService {
       }, locale);
 
       const tableVisualId = uuidv4();
-      let tableVisualDef: Visual;
-      if (computeMethodProps.isSameAggregationMethod) {
-        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn
-          , hasGrouping, computeMethodProps.aggregationMethodName!);
-      } else if (
-        (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
-        ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
-
-        tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
-      } else {
-        tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, hasGrouping);
-      }
+      const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
+        viewName, titleProps, query.groupColumn, hasGrouping);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -626,6 +601,7 @@ export class ReportingService {
   private _buildSqlForPathAnalysis(query: any) {
     if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
       return buildEventPathAnalysisView({
+        dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -653,6 +629,7 @@ export class ReportingService {
     }
 
     return buildNodePathAnalysisView({
+      dbName: query.projectId,
       schemaName: query.appId,
       computeMethod: query.computeMethod,
       specifyJoinColumn: query.specifyJoinColumn,
@@ -775,6 +752,7 @@ export class ReportingService {
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
+        dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,

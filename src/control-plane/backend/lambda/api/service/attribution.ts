@@ -72,6 +72,7 @@ export class AttributionAnalysisService {
     const sql = buildSQLForSinglePointModel({
       ...query,
       schemaName: query.appId,
+      dbName: query.projectId,
     } as AttributionSQLParameters);
 
     logger.debug(`sql of single point model: ${sql}`);
@@ -83,6 +84,7 @@ export class AttributionAnalysisService {
     const sql = buildSQLForLinearModel({
       ...query,
       schemaName: query.appId,
+      dbName: query.projectId,
     } as AttributionSQLParameters);
     logger.debug(`sql of linear model: ${sql}`);
 
@@ -93,6 +95,7 @@ export class AttributionAnalysisService {
     const sql = buildSQLForPositionModel({
       ...query,
       schemaName: query.appId,
+      dbName: query.projectId,
     } as AttributionSQLParameters);
     logger.debug(`sql of position based model: ${sql}`);
 
