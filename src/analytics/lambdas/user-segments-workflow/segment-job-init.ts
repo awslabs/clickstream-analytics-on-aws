@@ -30,6 +30,7 @@ export interface SegmentJobInitOutput {
   segmentId: string;
   appId: string;
   jobRunId: string;
+  scheduleIsExpired: boolean;
 }
 
 const { ddbRegion, ddbTableName } = parseDynamoDBTableARN(process.env.CLICKSTREAM_METADATA_DDB_ARN!);
@@ -49,7 +50,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
 
   try {
     // If the job is triggered by EventBridge, check if the refresh schedule is expired
-    if (trigger === SegmentJobTriggerType.Scheduled) {
+    if (trigger === SegmentJobTriggerType.SCHEDULED) {
       const response = await ddbDocClient.send(new GetCommand({
         TableName: ddbTableName,
         Key: {
@@ -60,7 +61,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
       const item = response.Item as SegmentDdbItem;
 
       // If job schedule has expired, disable the EventBridge rule
-      if (new Date() > item.refreshSchedule.expireAfter && item.eventBridgeRuleArn) {
+      if (Date.now() > item.refreshSchedule.expireAfter && item.eventBridgeRuleArn) {
         const ruleName = item.eventBridgeRuleArn.split(':rule/')[1];
         await eventBridgeClient.send(new DisableRuleCommand({ Name: ruleName }));
 
@@ -89,12 +90,13 @@ export const handler = async (event: SegmentJobInitEvent) => {
     };
     await ddbDocClient.send(new PutCommand({
       TableName: ddbTableName,
-      Item: item
+      Item: item,
     }));
 
     const output: SegmentJobInitOutput = {
       ...event,
       jobRunId,
+      scheduleIsExpired: false,
     };
     return output;
   } catch (err) {

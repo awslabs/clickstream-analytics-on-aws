@@ -74,4 +74,4 @@ echo "Concatenated tags: $tag_string"
 
 echo "Final command: npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
 
-bash -c "npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string --parameters ClickstreamMetadataDdbArn="arn:aws:dynamodb:us-east-1:012870276471:table/cloudfront-s3-control-plane-stack-global-ClickStreamApiClickstreamMetadataEC136DD8-YJ30PM1NHOIT" $tag_string --require-approval never"
+bash -c "npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $tag_string --require-approval never"

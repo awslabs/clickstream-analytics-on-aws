@@ -34,7 +34,7 @@ interface RefreshSchedule {
   weeklyDay?: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday';
   monthlyDay?: number;
   cronExpression?: string;
-  expireAfter: Date;
+  expireAfter: number;  // timestamp
 }
 
 type FilterOperator = 'and' | 'or';
@@ -46,8 +46,8 @@ interface SegmentCriteria {
 
 interface SegmentFilterGroup {
   description?: string;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   relativeDateRange?: string; // TODO: expression
   filters: SegmentFilter[];
   operator: FilterOperator;
@@ -179,6 +179,6 @@ export enum SegmentJobStatus {
 }
 
 export enum SegmentJobTriggerType {
-  Manually,
-  Scheduled
+  MANUALLY = 'Manually',
+  SCHEDULED = 'Scheduled',
 }
