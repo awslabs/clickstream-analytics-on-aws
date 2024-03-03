@@ -13,6 +13,7 @@
 
 import { Aws, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -50,6 +51,8 @@ export interface UserSegmentsWorkflowProps {
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
+  readonly pipelineS3Bucket: string;
+  readonly segmentsS3Prefix: string;
 }
 
 const lambdaRootPath = __dirname + '/../../lambdas/user-segments-workflow';
@@ -102,40 +105,46 @@ export class UserSegmentsWorkflow extends Construct {
     });
 
     // Define task for segment query execution
-    const executeSegmentQueryTask = new LambdaInvoke(this, 'WorkflowTask-ExecuteSegmentQuery', {
-      lambdaFunction: this.constructNodejsFunction('execute-segment-query', [
-        new PolicyStatement({
-          actions: [
-            'dynamodb:GetItem',
-            'dynamodb:UpdateItem',
-          ],
-          resources: [props.clickstreamMetadataDdbArn],
-        }),
-      ], {
-        REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
-        REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
-        REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
-        REDSHIFT_DATABASE: props.databaseName,
-        REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
-        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+    const executeSegmentQueryFunc = this.constructNodejsFunction('execute-segment-query', [
+      new PolicyStatement({
+        actions: [
+          'dynamodb:GetItem',
+          'dynamodb:UpdateItem',
+        ],
+        resources: [props.clickstreamMetadataDdbArn],
       }),
+    ], {
+      REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
+      REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
+      REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
+      REDSHIFT_DATABASE: props.databaseName,
+      REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
+      REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+    });
+    const executeSegmentQueryTask = new LambdaInvoke(this, 'WorkflowTask-ExecuteSegmentQuery', {
+      lambdaFunction: executeSegmentQueryFunc,
       outputPath: '$.Payload',
     });
+    props.dataAPIRole.grantAssumeRole(executeSegmentQueryFunc.grantPrincipal);
 
     // Define task for checking segment job status
-    const segmentJobStatusTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobStatus', {
-      lambdaFunction: this.constructNodejsFunction('segment-job-status', [
-        new PolicyStatement({
-          actions: ['dynamodb:UpdateItem'],
-          resources: [props.clickstreamMetadataDdbArn],
-        }),
-      ], {
-        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+    const segmentJobStatusFunc = this.constructNodejsFunction('segment-job-status', [
+      new PolicyStatement({
+        actions: ['dynamodb:UpdateItem'],
+        resources: [props.clickstreamMetadataDdbArn],
       }),
+    ], {
+      REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+      SEGMENTS_S3_PREFIX: props.segmentsS3Prefix,
+    });
+    const segmentJobStatusTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobStatus', {
+      lambdaFunction: segmentJobStatusFunc,
       outputPath: '$.Payload',
     });
+    props.dataAPIRole.grantAssumeRole(segmentJobStatusFunc.grantPrincipal);
+    Bucket.fromBucketName(this, 'PipelineS3Bucket', props.pipelineS3Bucket).grantRead(segmentJobStatusFunc, `${props.segmentsS3Prefix}*`);
 
     // Define Succeed and Fail end state
     const succeedState = new Succeed(this, 'WorkflowEndState-Succeed');
@@ -189,7 +198,7 @@ export class UserSegmentsWorkflow extends Construct {
   }
 
   private constructNodejsFunction(name: string, policyStatements: PolicyStatement[], env: any = {}): IFunction {
-    const func = new SolutionNodejsFunction(this, `WorkflowLambda-${name}`, {
+    return new SolutionNodejsFunction(this, `WorkflowLambda-${name}`, {
       entry: join(lambdaRootPath, `${name}.ts`),
       handler: 'handler',
       memorySize: 1024,
@@ -204,8 +213,5 @@ export class UserSegmentsWorkflow extends Construct {
       environment: env,
       applicationLogLevel: 'WARN',
     });
-    this.props.dataAPIRole.grantAssumeRole(func.grantPrincipal);
-
-    return func;
   }
 }

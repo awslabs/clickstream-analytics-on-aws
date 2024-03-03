@@ -58,7 +58,7 @@ export const handler = async (event: ExecuteSegmentQueryOutput) => {
         ReturnValues: 'ALL_NEW',
       });
 
-      // TODO: add segment result as well as sample data to job status table
+      // TODO: retrieve segment result including sample data from S3, update result to job status table
 
       await ddbDocClient.send(command);
     }

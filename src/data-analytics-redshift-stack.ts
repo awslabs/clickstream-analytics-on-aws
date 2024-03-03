@@ -138,6 +138,7 @@ export function createRedshiftAnalyticsStack(
     workflowBucketInfo,
     mvRefreshInterval: props.redshift.mvRefreshInterval,
     clickstreamMetadataDdbArn: props.clickstreamMetadataDdbArn,
+    segmentsS3Prefix: props.segmentsS3Prefix,
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
       topFrequentPropertiesLimit: props.scanMetadataConfiguration.topFrequentPropertiesLimit,

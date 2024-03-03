@@ -888,6 +888,13 @@ export class CDataModelingStack extends JSONObject {
     PipelineS3Prefix?: string;
 
   @JSONObject.required
+  @JSONObject.custom((_stack: any, key: string, value: string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
+    SegmentsS3Prefix?: string;
+
+  @JSONObject.required
     LoadWorkflowBucket?: string;
 
   @JSONObject.required
@@ -1095,6 +1102,7 @@ export class CDataModelingStack extends JSONObject {
 
       PipelineS3Bucket: pipeline.dataProcessing?.pipelineBucket.name ?? pipeline.bucket.name,
       PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
+      SegmentsS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.SEGMENTS, pipeline.bucket.prefix),
 
       LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
       LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOAD_WORKFLOW, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
@@ -1108,7 +1116,6 @@ export class CDataModelingStack extends JSONObject {
       ),
       ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
       ClickstreamMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`,
-      // Service Catalog AppRegistry
       AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
       IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });

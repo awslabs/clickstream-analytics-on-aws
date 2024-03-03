@@ -66,6 +66,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
   readonly clickstreamMetadataDdbArn: string;
+  readonly segmentsS3Prefix: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -374,6 +375,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
+      pipelineS3Bucket: props.scanMetadataWorkflowData.pipelineS3Bucket,
+      segmentsS3Prefix: props.segmentsS3Prefix,
     });
     this.userSegmentsWorkflowArn = userSegmentsWorkflow.userSegmentsWorkflow.stateMachineArn;
 
