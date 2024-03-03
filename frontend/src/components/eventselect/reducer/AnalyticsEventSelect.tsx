@@ -39,7 +39,7 @@ interface EventsSelectProps {
   eventOptionList: CategoryItemType[];
   defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
-  enableChangeMultiSelect: boolean;
+  enableChangeMultiSelect: string;
   enableChangeRelation: boolean;
   builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];

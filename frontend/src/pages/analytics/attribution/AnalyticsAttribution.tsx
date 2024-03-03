@@ -555,7 +555,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
-                  enableChangeMultiSelect={true}
+                  enableChangeMultiSelect={'attribution'}
                   isMultiSelect={true}
                   disableAddEvent={true}
                 />
@@ -630,7 +630,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={false}
-                  enableChangeMultiSelect={false}
+                  enableChangeMultiSelect={''}
                 />
               </SpaceBetween>
             </SpaceBetween>

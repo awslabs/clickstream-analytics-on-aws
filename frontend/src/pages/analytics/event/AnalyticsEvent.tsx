@@ -35,6 +35,7 @@ import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
   INIT_SEGMENTATION_DATA,
 } from 'components/eventselect/AnalyticsType';
 import AnalyticsEventSelect from 'components/eventselect/reducer/AnalyticsEventSelect';
@@ -132,7 +133,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
 
-  const defaultComputeMethodOption: SelectProps.Option = {
+  const defaultComputeMethodOption: IAnalyticsItem = {
     value: ExploreComputeMethod.EVENT_CNT,
     label: t('analytics:options.eventNumber') ?? 'Event number',
   };
@@ -437,7 +438,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 metadataUserAttributes={metadataUserAttributes}
                 enableChangeRelation={true}
                 isMultiSelect={true}
-                enableChangeMultiSelect={false}
+                enableChangeMultiSelect={'event'}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">

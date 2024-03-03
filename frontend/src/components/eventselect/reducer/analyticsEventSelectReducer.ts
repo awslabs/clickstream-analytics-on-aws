@@ -15,6 +15,7 @@ import { SelectProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import {
   getAttributionMethodOptions,
+  getEventMethodOptions,
   parametersConvertToCategoryItemType,
 } from 'pages/analytics/analytics-utils';
 import { IMetadataBuiltInList } from 'ts/explore-types';
@@ -93,7 +94,7 @@ export type ChangeCurCalcMethodOption = {
 
 export type ChangeCurCategoryOption = {
   type: 'changeCurCategoryOption';
-  enableChangeMultiSelect?: boolean;
+  enableChangeMultiSelect?: string;
   eventIndex: number;
   categoryOption: IAnalyticsItem | null;
   builtInMetadata?: IMetadataBuiltInList;
@@ -209,8 +210,15 @@ export const analyticsEventSelectReducer = (
       );
       newState[action.eventIndex].selectedEventOption = action.categoryOption;
       newState[action.eventIndex].conditionOptions = parameterOption;
-      if (action.enableChangeMultiSelect) {
+      if (action.enableChangeMultiSelect === 'attribution') {
         const calculateMethodOptions = getAttributionMethodOptions(
+          action.metadataUserAttributes,
+          eventParameters
+        );
+        newState[action.eventIndex].calculateMethodOptions =
+          calculateMethodOptions;
+      } else if (action.enableChangeMultiSelect === 'event') {
+        const calculateMethodOptions = getEventMethodOptions(
           action.metadataUserAttributes,
           eventParameters
         );

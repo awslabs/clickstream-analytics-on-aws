@@ -596,7 +596,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   metadataUserAttributes={metadataUserAttributes}
                   isMultiSelect={false}
                   enableChangeRelation={true}
-                  enableChangeMultiSelect={false}
+                  enableChangeMultiSelect={''}
                 />
               </div>
             </SpaceBetween>
