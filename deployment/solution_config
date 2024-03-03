@@ -1,6 +1,4 @@
 SOLUTION_ID='SO0219'
-SOLUTION_NAME='clickstream-analytics-on-aws'
-SOLUTION_TRADEMARKEDNAME='clickstream-analytics-on-aws'
 
 SOLUTION_ECR_ACCOUNT=366590864501
 SOLUTION_ECR_REPO_NAME='clickstream-analytics-on-aws'
