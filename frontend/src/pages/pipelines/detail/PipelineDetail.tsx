@@ -64,6 +64,9 @@ const PipelineDetail: React.FC = () => {
         setProjectPipeline(data);
         setLoadingData(false);
         setLoadingPipeline(false);
+        if (data.dataModeling.redshift) {
+          getProjectPipelineExtend();
+        }
       }
     } catch (error) {
       setLoadingPipeline(false);
@@ -93,7 +96,6 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectInfo(data);
         getProjectPipelineDetail('false');
-        getProjectPipelineExtend();
       }
     } catch (error) {
       setLoadingData(false);
@@ -117,7 +119,6 @@ const PipelineDetail: React.FC = () => {
 
   useEffect(() => {
     getProjectPipelineDetail('false');
-    getProjectPipelineExtend();
     getProjectDetailById();
   }, []);
 
@@ -141,7 +142,6 @@ const PipelineDetail: React.FC = () => {
                 loadingRefresh={loadingPipeline}
                 reloadPipeline={(refresh: string) => {
                   getProjectPipelineDetail(refresh);
-                  getProjectPipelineExtend();
                 }}
               />
               <Container disableContentPaddings>
