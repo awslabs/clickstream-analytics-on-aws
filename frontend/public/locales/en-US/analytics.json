@@ -314,5 +314,27 @@
     "attributionSetConversionGoalInfo": "Conversion goal typically represent events that can embody a specific business objective. Common events include purchases, successful payments, registrations, and so on.",
     "attributionSetConversionWindowInfo": "Only events that occur within the conversion window, close to the time of the target conversion events, will be included in the analysis.",
     "attributionSelectTouchpointEventInfo": "Events to be included in the attribution analysis, e.g., click events for promotion spot, landing page visits."
+  },
+  "segment": {
+    "comp": {
+      "title": "Create Segment",
+      "desc": "Create a segment by selecting the users that shared the same attributes of behaviors within a period of time.",
+      "userSegmentSettings": "User segment settings",
+      "segmentName": "Segment name",
+      "segmentNameDesc": "Provide a name for the segment",
+      "segmentNamePlaceholder": "Input segment name",
+      "segmentDescription": "Description",
+      "segmentDescriptionDesc": "Provide a useful description for the segment",
+      "segmentDescriptionPlaceholder": "Input segment description",
+      "refreshMethod": "Refresh method",
+      "refreshMethodDesc": "Specify how you want to update the segment. For auto-refresh, please specify a schedule.",
+      "refreshMethodManual": "Manual",
+      "refreshMethodAuto": "Automatic",
+      "expirationSettings": "Expiration settings",
+      "expirationSettingsDesc": "Segment will become automatic refresh after the expiration date, Setting an expiration date for a segment avoid unnecessary cost when an segment is not being used. You can always update it back to Automatic refresh method.",
+      "filterGroup": "Filter group",
+      "filterGroupDesc": "Users who meet the following conditions will be included in the segment.",
+      "provideDesc": "Provide a short description"
+    }
   }
 }
