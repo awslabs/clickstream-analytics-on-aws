@@ -115,6 +115,24 @@ export class PipelineServ {
     }
   };
 
+  public async extend(req: any, res: any, next: any) {
+    try {
+      const { pid } = req.query;
+      const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const latestPipeline = latestPipelines[0];
+      const pipeline = new CPipeline(latestPipeline);
+      const createApplicationSchemasStatus = await pipeline.getCreateApplicationSchemasStatus();
+      return res.json(new ApiSuccess({
+        createApplicationSchemasStatus,
+      }));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async getPipelineByProjectId(projectId: string) {
     const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
     if (latestPipelines.length === 0) {

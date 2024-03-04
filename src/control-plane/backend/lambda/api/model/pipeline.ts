@@ -64,7 +64,18 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, getStackTags, getStateMachineExecutionName, getUpdateTags, isEmpty } from '../common/utils';
+import {
+  getPipelineStatusType,
+  getStackName,
+  getStackOutputFromPipelineStatus,
+  getStackPrefix,
+  getStackTags,
+  getStateMachineExecutionName,
+  getUpdateTags,
+  isEmpty,
+  mergeIntoPipelineTags,
+  mergeIntoStackTags,
+} from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -72,6 +83,8 @@ import { listMSKClusterBrokers } from '../store/aws/kafka';
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
+import { getExecutionDetail, listExecutions } from '../store/aws/sfn';
+import { createTopicAndSubscribeSQSQueue } from '../store/aws/sns';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -1103,4 +1116,68 @@ export class CPipeline {
       solutionVersion: FULL_SOLUTION_VERSION,
     };
   };
+
+  public async getCreateApplicationSchemasStatus() {
+    const apps = await store.listApplication(this.pipeline.projectId, 'asc');
+    const appIds = apps.map(a => a.appId);
+    const schemasStatus: CreateApplicationSchemasStatus[] = [];
+    for (let appId of appIds) {
+      schemasStatus.push({
+        appId: appId,
+        status: undefined,
+      });
+    }
+    const createApplicationSchemasStateMachine = getStackOutputFromPipelineStatus(
+      this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails,
+      PipelineStackType.DATA_MODELING_REDSHIFT,
+      OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX);
+    if (!createApplicationSchemasStateMachine) {
+      return schemasStatus;
+    }
+    const executions = await listExecutions(this.pipeline.region, createApplicationSchemasStateMachine);
+    const editedAppIds: string[] = [];
+    for (let execution of executions) {
+      const nameStr = execution.name?.split('-');
+      let appId = '';
+      if (nameStr && nameStr.length === 3 && nameStr[1].length === 19) {
+        appId = nameStr[0];
+      } else if (execution.executionArn) {
+        const executionDetail = await getExecutionDetail(this.pipeline.region, execution.executionArn);
+        appId = this._getAppIdFromInputStr(executionDetail?.input);
+      }
+      const status = schemasStatus.find(s => s.appId === appId);
+      if (appId && status && !editedAppIds.includes(appId)) {
+        status.status = execution.status;
+        status.executionArn = execution.executionArn;
+        editedAppIds.push(appId);
+      }
+      if (editedAppIds.length === appIds.length) {
+        break;
+      }
+    }
+    return schemasStatus;
+  };
+
+  private _getAppIdFromInputStr(input?: string): string {
+    try {
+      if (!input) {
+        return '';
+      }
+      const inputJson = JSON.parse(input);
+      const sqls = inputJson.sqls;
+      if (sqls && sqls.length > 0) {
+        const sql = sqls[0];
+        const paths = sql.split('/sqls/');
+        if (paths.length === 2) {
+          const appStr = paths[1].split('-');
+          if (appStr.length === 2) {
+            return appStr[0];
+          }
+        }
+      }
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
 }

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '@aws/clickstream-base-lib';
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
@@ -41,7 +42,8 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
-import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { DescribeExecutionCommand, ExecutionStatus, ListExecutionsCommand, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { CreateTopicCommand, SNSClient, TagResourceCommand as SNSTagResourceCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -2117,6 +2119,101 @@ describe('Pipeline test', () => {
     expect(res.body).toEqual({
       success: false,
       message: 'Pipeline not found',
+    });
+  });
+  it('Get pipeline extend information', async () => {
+    projectExistedMock(ddbMock, true);
+    const stackDetails = [
+      stackDetailsWithOutputs[0],
+      stackDetailsWithOutputs[1],
+      stackDetailsWithOutputs[2],
+      {
+        ...stackDetailsWithOutputs[3],
+        outputs: [
+          {
+            OutputKey: `xxxxxxxx-xxxx-${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`,
+            OutputValue: 'mock-data-modeling-redshift-sql-execution-state-machine-arn',
+          },
+        ],
+      },
+      stackDetailsWithOutputs[4],
+      stackDetailsWithOutputs[5],
+    ];
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: stackDetails,
+      }],
+    }).resolves({
+      Items: [
+        { appId: 'Application01' },
+        { appId: 'Application02' },
+        { appId: 'Application03' },
+      ],
+    });
+    sfnMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        {
+          name: 'Application01-20240301T071531482Z-55',
+          status: ExecutionStatus.SUCCEEDED,
+          startDate: new Date(),
+          executionArn: 'mockExecutionArn1',
+          stateMachineArn: 'mockStateMachineArn',
+        },
+        {
+          name: 'Application01-20240301T071531482Z-55',
+          status: ExecutionStatus.FAILED,
+          startDate: new Date(),
+          executionArn: 'mockExecutionArn2',
+          stateMachineArn: 'mockStateMachineArn',
+        },
+        {
+          name: '12345678-1234-1234-1234-123456789012',
+          status: ExecutionStatus.ABORTED,
+          startDate: new Date(),
+          executionArn: 'mockExecutionArn3',
+          stateMachineArn: 'mockStateMachineArn',
+        },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'arn:aws:states:ap-southeast-1:123456789012:execution:ForceExecutionName:12345678-1234-1234-1234-123456789012',
+      name: '12345678-1234-1234-1234-123456789012',
+      status: ExecutionStatus.FAILED,
+      startDate: new Date(),
+      input: JSON.stringify({
+        sqls: [
+          's3://EXAMPLE_BUCKET/clickstream/new1203_mggt/data/load-workflow/tmp/new1203_mggt/sqls/Application03-20240301T071531482Z/0.sql',
+        ],
+      }),
+    });
+    const res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}/extend?pid=${MOCK_PROJECT_ID}`);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    expect(sfnMock).toHaveReceivedCommandTimes(ListExecutionsCommand, 1);
+    expect(sfnMock).toHaveReceivedCommandTimes(DescribeExecutionCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: {
+        createApplicationSchemasStatus: [
+          {
+            appId: 'Application01',
+            executionArn: 'mockExecutionArn1',
+            status: 'SUCCEEDED',
+          },
+          {
+            appId: 'Application02',
+          },
+          {
+            appId: 'Application03',
+            executionArn: 'mockExecutionArn3',
+            status: 'ABORTED',
+          },
+        ],
+      },
+      message: '',
+      success: true,
     });
   });
   it('Get pipeline list', async () => {

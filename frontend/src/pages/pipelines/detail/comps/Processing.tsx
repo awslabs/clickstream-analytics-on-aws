@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
 import {
   buildReshiftLink,
+  buildSFNExecutionLink,
   buildSecurityGroupLink,
   buildSubnetLink,
   buildVPCLink,
@@ -30,10 +31,12 @@ import {
 import { defaultStr, getLocaleLngDescription, ternary } from 'ts/utils';
 
 interface TabContentProps {
+  displayPipelineExtend: boolean;
   pipelineInfo?: IExtPipeline;
+  pipelineExtend?: IPipelineExtend;
 }
 const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
-  const { pipelineInfo } = props;
+  const { pipelineInfo, pipelineExtend, displayPipelineExtend } = props;
   const { t } = useTranslation();
 
   const buildRedshiftDisplay = (pipelineInfo?: IExtPipeline) => {
@@ -264,6 +267,38 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     return false;
   };
 
+  const appSchemasStatus = (status?: string) => {
+    switch (status) {
+      case 'ABORTED':
+        return <StatusIndicator type="stopped">{status}</StatusIndicator>;
+      case 'FAILED':
+      case 'TIMED_OUT':
+        return <StatusIndicator type="error">{status}</StatusIndicator>;
+      case 'PENDING_REDRIVE':
+        return <StatusIndicator type="pending">{status}</StatusIndicator>;
+      case 'RUNNING':
+        return <StatusIndicator type="in-progress">{status}</StatusIndicator>;
+      case 'SUCCEEDED':
+        return <StatusIndicator type="success">{status}</StatusIndicator>;
+      default:
+        return <StatusIndicator type="pending">{status}</StatusIndicator>;
+    }
+  };
+
+  const appSchemasExecution = (appId: string, executionArn?: string) => {
+    return (
+      <Link
+        external
+        href={buildSFNExecutionLink(
+          defaultStr(pipelineInfo?.region),
+          defaultStr(executionArn)
+        )}
+      >
+        {appId}
+      </Link>
+    );
+  };
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
@@ -454,6 +489,28 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                     {t('pipeline:detail.dataRange')}
                   </Box>
                   <div>{getRedshiftDataRangeDisplay()}</div>
+                </div>
+
+                <div>
+                  <Box variant="awsui-key-label">
+                    {t('pipeline:detail.analyticSchemaStatus')}
+                  </Box>
+                  <div>
+                    {displayPipelineExtend &&
+                      pipelineExtend?.createApplicationSchemasStatus.map(
+                        (element) => {
+                          return (
+                            <div key={element.appId}>
+                              {appSchemasExecution(
+                                element.appId,
+                                element.executionArn
+                              )}
+                              :{appSchemasStatus(element.status)}
+                            </div>
+                          );
+                        }
+                      )}
+                  </div>
                 </div>
               </>
             )}
