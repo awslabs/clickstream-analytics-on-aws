@@ -82,6 +82,14 @@ const upgradePipeline = async (params: { id: string; pid: string }) => {
   return result;
 };
 
+const getPipelineExtend = async (params: { projectId: string }) => {
+  const result: any = await apiRequest(
+    'get',
+    `/pipeline/${params.projectId}/extend?pid=${params.projectId}`
+  );
+  return result;
+};
+
 export {
   createProjectPipeline,
   updateProjectPipeline,
@@ -91,4 +99,5 @@ export {
   getPipelineList,
   retryPipeline,
   upgradePipeline,
+  getPipelineExtend,
 };

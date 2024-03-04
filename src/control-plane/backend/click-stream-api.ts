@@ -451,6 +451,7 @@ export class ClickStreamApiConstruct extends Construct {
           'iam:GetContextKeysForCustomPolicy',
           'iam:SimulateCustomPolicy',
           'states:DescribeExecution',
+          'states:ListExecutions',
           'acm:ListCertificates',
           'cloudformation:DescribeStacks',
           'cloudformation:DescribeType',
