@@ -120,11 +120,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -133,7 +128,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -146,7 +141,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -159,7 +154,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -310,11 +305,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -323,7 +313,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -336,7 +326,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -349,7 +339,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -500,11 +490,6 @@ describe('SQL Builder test', () => {
         ) as event_base
       where
         1 = 1
-        and (
-          (event_name = 'view_item')
-          or (event_name = 'add_to_cart')
-          or (event_name = 'purchase')
-        )
     ),
     table_0 as (
       select
@@ -513,7 +498,7 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_date as event_date_0,
-        event_name as event_name_0,
+        '1_' || event_name as event_name_0,
         event_timestamp as event_timestamp_0,
         event_id as event_id_0,
         user_id as user_id_0,
@@ -526,7 +511,7 @@ describe('SQL Builder test', () => {
     table_1 as (
       select
         event_date as event_date_1,
-        event_name as event_name_1,
+        '2_' || event_name as event_name_1,
         event_timestamp as event_timestamp_1,
         event_id as event_id_1,
         user_id as user_id_1,
@@ -539,7 +524,7 @@ describe('SQL Builder test', () => {
     table_2 as (
       select
         event_date as event_date_2,
-        event_name as event_name_2,
+        '3_' || event_name as event_name_2,
         event_timestamp as event_timestamp_2,
         event_id as event_id_2,
         user_id as user_id_2,
@@ -701,11 +686,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -714,7 +694,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -727,7 +707,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -740,7 +720,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -939,29 +919,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -970,7 +927,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -979,11 +936,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -992,11 +956,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -1191,30 +1162,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (
-              event_name = '_first_open'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (
-              event_name = '_scroll'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = '_user_engagement')
-            or (event_name = '_app_end')
-          )
       ),
       table_0 as (
         select
@@ -1223,7 +1170,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -1232,11 +1179,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = '_first_open'
+          and (
+            platform='Android'
+            and (
+              device_screen_heightisnull
+              ordevice_screen_height<>1400
+            )
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -1245,11 +1199,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = '_scroll'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -1262,7 +1223,7 @@ describe('SQL Builder test', () => {
       table_3 as (
         select
           event_date as event_date_3,
-          event_name as event_name_3,
+          '4_' || event_name as event_name_3,
           event_timestamp as event_timestamp_3,
           event_id as event_id_3,
           user_id as user_id_3,
@@ -5283,26 +5244,6 @@ describe('SQL Builder test', () => {
               or device_screen_height <> 1400
             )
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _session_duration > 200
-                and _user_first_touch_timestamp > 1686532526770
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                _session_duration > 200
-                and geo_city = 'Shanghai'
-              )
-            )
-            or (
-              event_name = 'purchase'
-              and (device_mobile_brand_name = 'Samsung')
-            )
-          )
       ),
       table_0 as (
         select
@@ -5311,7 +5252,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -5320,11 +5261,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _session_duration > 200
+            and _user_first_touch_timestamp > 1686532526770
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -5333,11 +5278,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            _session_duration > 200
+            and geo_city = 'Shanghai'
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -5346,6 +5295,7 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (device_mobile_brand_name = 'Samsung')
       ),
       join_table as (
         select
@@ -5665,28 +5615,6 @@ describe('SQL Builder test', () => {
               or device_screen_height <> 1400
             )
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _session_duration > 200
-                and _session_duration >= 250
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp is not null
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                _session_duration > 200
-                and geo_city = 'Shanghai'
-              )
-            )
-            or (
-              event_name = 'purchase'
-              and (device_mobile_brand_name = 'Samsung')
-            )
-          )
       ),
       table_0 as (
         select
@@ -5695,7 +5623,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -5704,11 +5632,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _session_duration > 200
+            and _session_duration >= 250
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp is not null
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -5717,11 +5651,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            _session_duration > 200
+            and geo_city = 'Shanghai'
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -5730,6 +5668,7 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (device_mobile_brand_name = 'Samsung')
       ),
       join_table as (
         select
@@ -6034,27 +5973,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -6063,7 +5981,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -6072,11 +5990,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -6089,7 +6013,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -6098,6 +6022,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -6449,27 +6379,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -6478,7 +6387,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -6487,11 +6396,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -6504,7 +6419,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -6513,6 +6428,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -10042,17 +9963,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10061,7 +9971,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10071,11 +9981,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10089,7 +10003,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -10383,17 +10297,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10402,7 +10305,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10412,11 +10315,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10430,7 +10337,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -10725,17 +10632,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10745,7 +10641,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(geo_country::varchar, 'null') as geo_country_0,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10754,11 +10650,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10771,7 +10671,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -13499,27 +13399,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -13528,7 +13407,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -13538,11 +13417,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -13556,7 +13441,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -13566,6 +13451,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -13935,26 +13826,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -13963,7 +13834,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -13972,11 +13843,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -13989,7 +13865,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -13998,6 +13874,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -14308,26 +14190,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -14336,7 +14198,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -14346,11 +14208,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -14364,7 +14231,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -14374,6 +14241,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -14688,26 +14561,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -14717,7 +14570,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(category::varchar, 'null') as category,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -14726,11 +14579,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -14743,7 +14601,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -14752,6 +14610,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -16858,26 +16722,6 @@ describe('SQL Builder test', () => {
           ) as event_join_table on event_base.event_id = event_join_table.event_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _session_duration > 200
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -16886,7 +16730,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -16895,11 +16739,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _session_duration > 200
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -16908,11 +16756,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -17764,11 +17619,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -17777,7 +17627,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -17790,7 +17640,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -17803,7 +17653,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -17998,11 +17848,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18011,7 +17856,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18024,7 +17869,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18037,7 +17882,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -18240,11 +18085,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18254,7 +18094,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(geo_country::varchar, 'null') as geo_country_0,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18267,7 +18107,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18280,7 +18120,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -18485,11 +18325,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18498,7 +18333,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18512,7 +18347,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18526,7 +18361,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
