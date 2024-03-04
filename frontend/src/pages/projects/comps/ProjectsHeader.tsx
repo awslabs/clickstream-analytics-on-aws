@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { IProject } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -45,7 +46,7 @@ const ProjectsHeader: React.FC<ProjectsHeaderProps> = (
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteProject({
-        id: project?.id || '',
+        projectId: project?.id || '',
       });
       if (resData.success) {
         refreshPage();

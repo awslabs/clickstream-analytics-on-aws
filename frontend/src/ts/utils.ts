@@ -12,6 +12,13 @@
  */
 
 import {
+  ServerlessRedshiftRPUByRegionMapping,
+  IUser,
+  UserRole,
+  IPipeline,
+  PipelineStatusType,
+} from '@aws/clickstream-base-lib';
+import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
@@ -19,13 +26,8 @@ import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
-import {
-  CLICK_STREAM_USER_DATA,
-  EPipelineStatus,
-  ExecutionType,
-  IUserRole,
-} from './const';
-import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
+import { ICronFixed, IExtPipeline, IInterval } from 'types/pipeline';
+import { CLICK_STREAM_USER_DATA, ExecutionType } from './const';
 import { IMetadataBuiltInList } from './explore-types';
 
 /**
@@ -62,7 +64,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
     ServerlessRedshiftRPUByRegionMapping as RPURegionListType
   )[region];
   if (region && minMaxObject && minMaxObject.min > 0) {
-    const options = [];
+    const options: SelectProps.Option[] = [];
     for (let i = minMaxObject.min; i <= minMaxObject.max; i += STEP) {
       options.push({ label: i.toString(), value: i.toString() });
     }
@@ -295,8 +297,8 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return (
     update &&
-    (pipelineInfo?.statusType === EPipelineStatus.Failed ||
-      pipelineInfo?.statusType === EPipelineStatus.Active)
+    (pipelineInfo?.statusType === PipelineStatusType.FAILED ||
+      pipelineInfo?.statusType === PipelineStatusType.ACTIVE)
   );
 };
 
@@ -376,6 +378,17 @@ export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
 
 export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
   if (expectValue || expectValue === 0) {
+    return expectValue;
+  } else {
+    return defaultValue;
+  }
+};
+
+export const defaultNumber = (
+  expectValue: number | undefined,
+  defaultValue: number
+) => {
+  if (expectValue) {
     return expectValue;
   } else {
     return defaultValue;
@@ -463,28 +476,28 @@ export const getIntersectArrays = (a: any[], b: any[]) => {
   return [...new Set(a)].filter((x) => new Set(b).has(x));
 };
 
-export const isAdminRole = (roles: IUserRole[] | undefined) => {
+export const isAdminRole = (roles: UserRole[] | undefined) => {
   if (!roles) {
     return false;
   }
-  return roles.some((role) => role === IUserRole.ADMIN);
+  return roles.some((role) => role === UserRole.ADMIN);
 };
 
-export const isAnalystRole = (roles: IUserRole[] | undefined) => {
+export const isAnalystRole = (roles: UserRole[] | undefined) => {
   if (!roles) {
     return false;
   }
   return roles.some(
-    (role) => role === IUserRole.ANALYST || role === IUserRole.ANALYST_READER
+    (role) => role === UserRole.ANALYST || role === UserRole.ANALYST_READER
   );
 };
 
-export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
+export const isAnalystAuthorRole = (roles: UserRole[] | undefined) => {
   if (!roles) {
     return false;
   }
   return roles.some(
-    (role) => role === IUserRole.ANALYST || role === IUserRole.ADMIN
+    (role) => role === UserRole.ANALYST || role === UserRole.ADMIN
   );
 };
 

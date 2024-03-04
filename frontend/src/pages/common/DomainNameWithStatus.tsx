@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DomainAvailableResponse, FetchType } from '@aws/clickstream-base-lib';
 import {
   StatusIndicator,
   Spinner,
@@ -42,15 +43,15 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
   const [showText, setShowText] = useState('');
 
   useEffect(() => {
-    let requestType: StatusWithType = '';
+    let requestType: FetchType;
     if (type === 'domain') {
-      requestType = 'PipelineDomain';
+      requestType = FetchType.PIPELINE_DOMAIN;
       setShowText(customDomain || dns || '');
     } else if (type === 'dns') {
-      requestType = 'PipelineDNS';
+      requestType = FetchType.PIPELINE_DNS;
       setShowText(dns || '');
     } else {
-      requestType = 'PipelineEndpoint';
+      requestType = FetchType.PIPELINE_ENDPOINT;
       setShowText(endpoint || '');
     }
     if (requestType && pipelineId) {
@@ -58,9 +59,8 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
       fetchStatusWithType({
         type: requestType,
         projectId: projectId,
-        pipelineId: pipelineId,
       })
-        .then((response: ApiResponse<StatusWithTypeResponse>) => {
+        .then((response: ApiResponse<DomainAvailableResponse>) => {
           setLoadingData(false);
           if (response.data.ok) {
             setDomainResolved(true);

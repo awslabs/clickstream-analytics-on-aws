@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -26,7 +27,6 @@ import { createAnalyticsDashboard } from 'apis/analytics';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 import { v4 as uuidv4 } from 'uuid';
 

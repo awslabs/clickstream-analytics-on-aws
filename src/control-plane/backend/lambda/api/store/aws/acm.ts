@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IACMCertificate } from '@aws/clickstream-base-lib';
 import {
   ACMClient,
   paginateListCertificates,
@@ -18,12 +19,10 @@ import {
   CertificateSummary,
   KeyAlgorithm,
 } from '@aws-sdk/client-acm';
-
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { Certificate } from '../../common/types';
 
 export const ListCertificates = async (region: string) => {
-  const certificates: Certificate[] = [];
+  const certificates: IACMCertificate[] = [];
   const acmClient = new ACMClient({
     ...aws_sdk_client_common_config,
     region,
@@ -48,9 +47,9 @@ export const ListCertificates = async (region: string) => {
   for (let cert of records) {
     if (cert.CertificateArn) {
       certificates.push({
-        arn: cert.CertificateArn,
-        domain: cert.DomainName ?? '',
-        status: cert.Status ?? '',
+        Arn: cert.CertificateArn,
+        Domain: cert.DomainName ?? '',
+        Status: cert.Status,
       });
     }
   }

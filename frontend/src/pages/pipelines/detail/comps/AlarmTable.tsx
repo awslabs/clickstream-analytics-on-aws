@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IAlarm } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -22,7 +23,7 @@ import {
   StatusIndicatorProps,
   Table,
 } from '@cloudscape-design/components';
-import { disableAlarms, enableAlarms, getAlarmList } from 'apis/resource';
+import { updateAlarms, getAlarmList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { buildAlarmsLink } from 'ts/url';
@@ -57,7 +58,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
     try {
       const { success, data }: ApiResponse<ResponseTableData<IAlarm>> =
         await getAlarmList({
-          pid: projectId,
+          projectId: projectId,
           pageNumber: currentPage,
           pageSize: pageSize,
         });
@@ -77,9 +78,10 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
       const alarmNames = item
         ? [item?.AlarmName]
         : selectedItems.map((item) => item.AlarmName);
-      const resData: ApiResponse<null> = await enableAlarms({
+      const resData: ApiResponse<null> = await updateAlarms({
         region,
         alarmNames,
+        enabled: true,
       });
       if (resData.success) {
         setSelectedItems([]);
@@ -97,9 +99,10 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
       const alarmNames = item
         ? [item?.AlarmName]
         : selectedItems.map((item) => item.AlarmName);
-      const resData: ApiResponse<null> = await disableAlarms({
+      const resData: ApiResponse<null> = await updateAlarms({
         region,
         alarmNames,
+        enabled: false,
       });
       if (resData.success) {
         setSelectedItems([]);

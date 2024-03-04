@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IUser, UserRole } from '@aws/clickstream-base-lib';
 import { Alert } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
 import Loading from 'components/common/Loading';
@@ -39,8 +40,11 @@ import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { IUserRole } from 'ts/const';
-import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  defaultStr,
+  getIntersectArrays,
+  getUserInfoFromLocalStorage,
+} from 'ts/utils';
 import Home from './pages/home/Home';
 
 interface LoginCallbackProps {
@@ -48,7 +52,7 @@ interface LoginCallbackProps {
 }
 
 const BASE_URL = '/';
-const ANALYTICS_ROLE = [IUserRole.ANALYST, IUserRole.ANALYST_READER];
+const ANALYTICS_ROLE = [UserRole.ANALYST, UserRole.ANALYST_READER];
 const LoginCallback: React.FC<LoginCallbackProps> = (
   props: LoginCallbackProps
 ) => {
@@ -73,9 +77,9 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
     }
     setNoUserEmailError(false);
     try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email ?? ''
-      );
+      const { success, data }: ApiResponse<IUser> = await getUserDetails({
+        id: defaultStr(auth.user?.profile.email),
+      });
       if (
         success &&
         getIntersectArrays(ANALYTICS_ROLE, data.roles).length > 0
@@ -134,7 +138,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <Home />
               </RoleRoute>
@@ -146,7 +150,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <Projects />
               </RoleRoute>
@@ -158,7 +162,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <AlarmsList />
               </RoleRoute>
@@ -167,7 +171,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
           <Route
             path="/user"
             element={
-              <RoleRoute layout="common" auth={auth} roles={[IUserRole.ADMIN]}>
+              <RoleRoute layout="common" auth={auth} roles={[UserRole.ADMIN]}>
                 <UserList />
               </RoleRoute>
             }
@@ -178,7 +182,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <ProjectDetail />
               </RoleRoute>
@@ -190,7 +194,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <PipelineDetail />
               </RoleRoute>
@@ -202,7 +206,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <CreatePipeline update />
               </RoleRoute>
@@ -214,7 +218,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <CreatePipeline />
               </RoleRoute>
@@ -226,7 +230,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <CreatePipeline />
               </RoleRoute>
@@ -238,7 +242,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <CreateApplication />
               </RoleRoute>
@@ -250,7 +254,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <PluginList />
               </RoleRoute>
@@ -262,7 +266,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <CreatePlugin />
               </RoleRoute>
@@ -274,7 +278,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="common"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
+                roles={[UserRole.ADMIN, UserRole.OPERATOR]}
               >
                 <ApplicationDetail />
               </RoleRoute>
@@ -287,9 +291,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="none"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsHome auth={auth} />
@@ -303,9 +307,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="analytics"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsDataManagement />
@@ -319,9 +323,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="analytics"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsRealtime />
@@ -335,9 +339,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="analytics"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsExplore />
@@ -350,7 +354,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[UserRole.ADMIN, UserRole.ANALYST]}
               >
                 <AnalyticsAnalyzes />
               </RoleRoute>
@@ -363,9 +367,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="analytics"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsDashboard />
@@ -379,9 +383,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="analytics"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsDashboardDetail />
@@ -395,9 +399,9 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 layout="none"
                 auth={auth}
                 roles={[
-                  IUserRole.ADMIN,
-                  IUserRole.ANALYST,
-                  IUserRole.ANALYST_READER,
+                  UserRole.ADMIN,
+                  UserRole.ANALYST,
+                  UserRole.ANALYST_READER,
                 ]}
               >
                 <AnalyticsDashboardFullWindow />

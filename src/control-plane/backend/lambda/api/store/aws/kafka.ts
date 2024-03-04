@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { IMSKCluster } from '@aws/clickstream-base-lib';
 import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, paginateListNodes, NodeInfo, ClientAuthentication } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { MSKCluster } from '../../common/types';
 
 export const listMSKCluster = async (region: string, vpcId: string) => {
   const kafkaClient = new KafkaClient({
@@ -26,9 +26,9 @@ export const listMSKCluster = async (region: string, vpcId: string) => {
     records.push(...page.ClusterInfoList as Cluster[]);
   }
 
-  const clusters: MSKCluster[] = [];
+  const clusters: IMSKCluster[] = [];
   for (let cluster of records) {
-    let mskCluster: MSKCluster | undefined;
+    let mskCluster: IMSKCluster | undefined;
     if (cluster.ClusterType === ClusterType.PROVISIONED) {
       mskCluster = await _provisionedMSKCluster(cluster, region, vpcId);
     } else {
@@ -48,13 +48,13 @@ async function _serverlessMSKCluster(cluster: Cluster, region: string, vpcId: st
       if (subnet.VpcId === vpcId) {
         const authentication: string[] = _getAuthenticationMethods(cluster.Serverless.ClientAuthentication);
         return {
-          name: cluster.ClusterName?? '',
-          arn: cluster.ClusterArn ?? '',
-          type: cluster.ClusterType ?? '',
-          state: cluster.State ?? '',
-          authentication: authentication,
-          securityGroupId: securityGroupIds[0],
-          clientBroker: '',
+          ClusterName: cluster.ClusterName?? '',
+          ClusterArn: cluster.ClusterArn ?? '',
+          ClusterType: cluster.ClusterType ?? '',
+          State: cluster.State ?? '',
+          Authentication: authentication,
+          SecurityGroupId: securityGroupIds[0],
+          ClientBroker: '',
         };
       }
     }
@@ -70,13 +70,13 @@ async function _provisionedMSKCluster(cluster: Cluster, region: string, vpcId: s
     const authentication: string[] = _getAuthenticationMethods(cluster.Provisioned?.ClientAuthentication);
     if (subnet.VpcId === vpcId) {
       return {
-        name: cluster.ClusterName?? '',
-        arn: cluster.ClusterArn ?? '',
-        type: cluster.ClusterType ?? '',
-        state: cluster.State ?? '',
-        authentication: authentication,
-        securityGroupId: securityGroups[0],
-        clientBroker: cluster.Provisioned?.EncryptionInfo?.EncryptionInTransit?.ClientBroker ?? '',
+        ClusterName: cluster.ClusterName?? '',
+        ClusterArn: cluster.ClusterArn ?? '',
+        ClusterType: cluster.ClusterType ?? '',
+        State: cluster.State ?? '',
+        Authentication: authentication,
+        SecurityGroupId: securityGroups[0],
+        ClientBroker: cluster.Provisioned?.EncryptionInfo?.EncryptionInTransit?.ClientBroker ?? '',
       };
     }
   }

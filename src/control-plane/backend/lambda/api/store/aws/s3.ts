@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IBucket } from '@aws/clickstream-base-lib';
 import {
   S3Client,
   ListBucketsCommand,
@@ -22,7 +23,6 @@ import pLimit from 'p-limit';
 import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { ClickStreamBucket } from '../../common/types';
 
 const promisePool = pLimit(20);
 
@@ -32,7 +32,7 @@ export const listBuckets = async (region: string) => {
   });
   const params: ListBucketsCommand = new ListBucketsCommand({});
   const result = await s3Client.send(params);
-  const buckets: ClickStreamBucket[] = [];
+  const buckets: IBucket[] = [];
   if (result.Buckets) {
     const input = [];
     for (let bucket of result.Buckets) {
@@ -43,8 +43,8 @@ export const listBuckets = async (region: string) => {
             Bucket: bucketName,
           })).then(res => {
             buckets.push({
-              name: bucketName,
-              location: res.LocationConstraint ?? 'us-east-1',
+              Name: bucketName,
+              Location: res.LocationConstraint ?? 'us-east-1',
             });
           }).catch(_ => {
             return;
@@ -56,11 +56,10 @@ export const listBuckets = async (region: string) => {
   }
   if (region) {
     return buckets.filter((obj) => {
-      return obj.location === region;
+      return obj.Location === region;
     });
   }
-
-  return buckets;
+  return buckets.sort((a, b) => a.Name.localeCompare(b.Name));
 };
 
 export async function getS3Object(region: string, bucket: string, key: string): Promise<any> {

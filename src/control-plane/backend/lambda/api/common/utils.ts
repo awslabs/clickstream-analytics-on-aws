@@ -11,6 +11,23 @@
  *  and limitations under the License.
  */
 
+import {
+  ALBLogServiceAccountMapping,
+  CORS_ORIGIN_DOMAIN_PATTERN,
+  EMAIL_PATTERN,
+  IngestionType,
+  IP_PATTERN,
+  ITag,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  PipelineSinkType,
+  PipelineStackType,
+  PipelineStatusDetail,
+  PipelineStatusType,
+  ServerlessRedshiftRPUByRegionMapping,
+  SERVICE_CATALOG_SUPPORTED_REGIONS,
+  SubnetType,
+  UserRole,
+} from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
@@ -18,23 +35,14 @@ import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
-import {
-  ALBLogServiceAccountMapping,
-  CORS_ORIGIN_DOMAIN_PATTERN,
-  EMAIL_PATTERN,
-  IP_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
-  ServerlessRedshiftRPUByRegionMapping,
-  SERVICE_CATALOG_SUPPORTED_REGIONS,
-} from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, RPURange, RPURegionMappingObject, ReportingDashboardOutput } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
-import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
-import { IUserSettings } from '../model/user';
+import { CPipelineResources, RawPipeline } from '../model/pipeline';
+import { RawUserSettings } from '../model/user';
 import { UserService } from '../service/user';
 
 const userService: UserService = new UserService();
@@ -195,8 +203,8 @@ async function getRoleFromToken(decodedToken: any) {
   return mapToRoles(userSettings, oidcRoles);
 }
 
-function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
-  const userRoles: IUserRole[] = [];
+function mapToRoles(userSettings: RawUserSettings, oidcRoles: string[]) {
+  const userRoles: UserRole[] = [];
   if (isEmpty(oidcRoles)) {
     return userRoles;
   }
@@ -206,16 +214,16 @@ function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
   const analystReaderRoleNames = userSettings.analystReaderRoleNames.split(',').map(role => role.trim());
 
   if (oidcRoles.some(role => adminRoleNames.includes(role))) {
-    userRoles.push(IUserRole.ADMIN);
+    userRoles.push(UserRole.ADMIN);
   }
   if (oidcRoles.some(role => operatorRoleNames.includes(role))) {
-    userRoles.push(IUserRole.OPERATOR);
+    userRoles.push(UserRole.OPERATOR);
   }
   if (oidcRoles.some(role => analystRoleNames.includes(role))) {
-    userRoles.push(IUserRole.ANALYST);
+    userRoles.push(UserRole.ANALYST);
   }
   if (oidcRoles.some(role => analystReaderRoleNames.includes(role))) {
-    userRoles.push(IUserRole.ANALYST_READER);
+    userRoles.push(UserRole.ANALYST_READER);
   }
   return userRoles;
 }
@@ -262,7 +270,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   return names.get(key) ?? '';
 }
 
-function getSinkType(pipeline: IPipeline): string | undefined {
+function getSinkType(pipeline: RawPipeline): string | undefined {
   if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
     switch (pipeline?.ingestionServer.sinkType) {
       case PipelineSinkType.S3:
@@ -285,7 +293,7 @@ function replaceTemplateVersion(templateUrl: string, version: string): string {
   return `${urlPrefix.join('/')}/${version}/${urlSuffix.join('/')}`;
 };
 
-function getKafkaTopic(pipeline: IPipeline): string {
+function getKafkaTopic(pipeline: RawPipeline): string {
   let kafkaTopic = pipeline.projectId;
   if (!isEmpty(pipeline.ingestionServer.sinkKafka?.topic)) {
     kafkaTopic = pipeline.ingestionServer.sinkKafka?.topic ?? pipeline.projectId;
@@ -293,7 +301,7 @@ function getKafkaTopic(pipeline: IPipeline): string {
   return kafkaTopic;
 }
 
-function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
+function getPluginInfo(pipeline: RawPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
   let s3PathPluginFiles: string[] = [];
@@ -338,7 +346,7 @@ function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: str
   return { classNames, pluginJars, pluginFiles };
 }
 
-function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
+function _getTransformerPluginInfo(pipeline: RawPipeline, resources: CPipelineResources) {
   let transformerClassNames: string[] = [];
   let transformerPluginJars: string[] = [];
   let transformerPluginFiles: string[] = [];
@@ -586,20 +594,22 @@ function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
   return azArray;
 }
 
-function paginateData(data: any[], pagination: boolean, pageSize: number, pageNumber: number) {
+function paginateData(data: any[], pagination: boolean, pageSize?: number, pageNumber?: number) {
+  const pSize = pageSize ?? 10;
+  let pNum = pageNumber ?? 1;
   const totalCount = data.length;
   if (pagination) {
     if (totalCount) {
-      pageNumber = Math.min(Math.ceil(totalCount / pageSize), pageNumber);
-      const startIndex = pageSize * (pageNumber - 1);
-      const endIndex = Math.min(pageSize * pageNumber, totalCount);
+      pNum = Math.min(Math.ceil(totalCount / pSize), pNum);
+      const startIndex = pSize * (pNum - 1);
+      const endIndex = Math.min(pSize * pNum, totalCount);
       return data?.slice(startIndex, endIndex);
     }
   }
   return data;
 }
 
-function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineStackType, suffix: string) {
+function getValueFromStackOutputSuffix(pipeline: RawPipeline, stackType: PipelineStackType, suffix: string) {
   const stackName = getStackName(pipeline.pipelineId, stackType, pipeline.ingestionServer.sinkType);
   return `#.${stackName}.${suffix}`;
 }
@@ -1057,7 +1067,7 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+function getAppRegistryApplicationArn(pipeline: RawPipeline): string {
   return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
@@ -1071,7 +1081,7 @@ function getIamRoleBoundaryArn(): string | undefined {
   }
 }
 
-function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
+function pipelineAnalysisStudioEnabled(pipeline: RawPipeline): boolean {
   const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
   const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
   if (
@@ -1085,7 +1095,7 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   return false;
 };
 
-function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
+function getStackVersion(pipeline: RawPipeline, stackType: PipelineStackType): string | undefined {
   if (pipeline.stackDetails) {
     for (let stackDetail of pipeline.stackDetails) {
       if (stackDetail.stackType === stackType) {
@@ -1114,7 +1124,7 @@ function isFinallyPipelineStatus(statusType: PipelineStatusType | undefined) {
   return finallyPipelineStatus.includes(statusType);
 }
 
-function getStackTags(pipeline: IPipeline) {
+function getStackTags(pipeline: RawPipeline) {
   const stackTags: Tag[] = [];
   if (pipeline.tags) {
     for (let tag of pipeline.tags) {
@@ -1127,7 +1137,7 @@ function getStackTags(pipeline: IPipeline) {
   return stackTags;
 };
 
-function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
+function getUpdateTags(newPipeline: RawPipeline, oldPipeline: RawPipeline) {
   const updateTags: ITag[] = [];
   if (oldPipeline.tags) {
     for (let tag of oldPipeline.tags) {
@@ -1213,7 +1223,7 @@ function getStateMachineExecutionName(pipelineId: string) {
   return `main-${pipelineId}-${new Date().getTime()}`;
 }
 
-function getPipelineStatusType(pipeline: IPipeline): PipelineStatusType {
+function getPipelineStatusType(pipeline: RawPipeline): PipelineStatusType {
   return _getPipelineStatus(pipeline);
 }
 
@@ -1244,7 +1254,7 @@ function getPipelineLastActionFromStacksStatus(stackStatusDetails: PipelineStatu
   return lastAction;
 }
 
-function _getPipelineStatus(pipeline: IPipeline) {
+function _getPipelineStatus(pipeline: RawPipeline) {
   let status: PipelineStatusType = PipelineStatusType.ACTIVE;
   let lastAction = pipeline.lastAction;
   if (!lastAction || lastAction === '') {
@@ -1290,7 +1300,7 @@ function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
   return status;
 }
 
-function _getPipelineStatusFromStacks(pipeline: IPipeline) {
+function _getPipelineStatusFromStacks(pipeline: RawPipeline) {
   let status = 'COMPLETE';
   const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
   if (!stackDetails || stackDetails.length === 0) {
@@ -1332,7 +1342,7 @@ function _getRunningStatus(lastAction: string) {
   return status;
 };
 
-function getMetadataVersionType(pipeline: IPipeline) {
+function getMetadataVersionType(pipeline: RawPipeline) {
   const version = pipeline.templateVersion?.split('-')[0] ?? '';
   const unSupportVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'];
   const oldVersions = ['v1.1.0', 'v1.1.1'];

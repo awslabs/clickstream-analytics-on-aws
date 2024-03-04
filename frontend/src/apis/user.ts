@@ -11,49 +11,46 @@
  *  and limitations under the License.
  */
 
+import {
+  CreateUserRequest,
+  DeleteUserRequest,
+  GetUserRequest,
+  UpdateUserRequest,
+  UpdateUserSettingsRequest,
+} from '@aws/clickstream-base-lib';
 import { apiRequest } from 'ts/request';
 
 export const getAllUsers = async () => {
-  const result: any = await apiRequest('get', '/user');
+  const result: any = await apiRequest('get', '/users');
   return result;
 };
 
-export const addUser = async (user: IUser) => {
-  const result: any = await apiRequest('post', `/user`, user);
+export const addUser = async (data: CreateUserRequest) => {
+  const result: any = await apiRequest('post', '/user', data);
   return result;
 };
 
-export const updateUser = async (user: IUser) => {
-  const result: any = await apiRequest(
-    'put',
-    `/user/${encodeURIComponent(user.id)}`,
-    user
-  );
+export const updateUser = async (data: UpdateUserRequest) => {
+  const result: any = await apiRequest('put', '/user', data);
   return result;
 };
 
-export const deleteUser = async (uid: string) => {
-  const result: any = await apiRequest(
-    'delete',
-    `/user/${encodeURIComponent(uid)}`
-  );
+export const deleteUser = async (data: DeleteUserRequest) => {
+  const result: any = await apiRequest('delete', '/user', { data });
   return result;
 };
 
-export const getUserDetails = async (uid: string) => {
-  const result: any = await apiRequest(
-    'get',
-    `/user/details?id=${encodeURIComponent(uid)}`
-  );
+export const getUserDetails = async (param: GetUserRequest) => {
+  const result: any = await apiRequest('get', '/user/details', param);
   return result;
 };
 
 export const getUserSettings = async () => {
-  const result: any = await apiRequest('get', `/user/settings`);
+  const result: any = await apiRequest('get', '/user/settings');
   return result;
 };
 
-export const updateUserSettings = async (userSettings: IUserSettings) => {
-  const result: any = await apiRequest('post', `/user/settings`, userSettings);
+export const updateUserSettings = async (data: UpdateUserSettingsRequest) => {
+  const result: any = await apiRequest('post', '/user/settings', data);
   return result;
 };

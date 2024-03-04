@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { ISSMSecret } from '@aws/clickstream-base-lib';
 import { SecretsManagerClient, GetSecretValueCommand, SecretListEntry, paginateListSecrets } from '@aws-sdk/client-secrets-manager';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { SSMSecret } from '../../common/types';
 
 export const listSecrets = async (region: string) => {
   const secretsManagerClient = new SecretsManagerClient({
@@ -25,11 +25,11 @@ export const listSecrets = async (region: string) => {
     // page contains a single paginated output.
     results.push(...page.SecretList as SecretListEntry[]);
   }
-  const secrets: SSMSecret[] = [];
+  const secrets: ISSMSecret[] = [];
   for (let secret of results) {
     secrets.push({
-      name: secret.Name ?? '',
-      arn: secret.ARN ?? '',
+      Name: secret.Name ?? '',
+      Arn: secret.ARN ?? '',
     });
   }
   return secrets;

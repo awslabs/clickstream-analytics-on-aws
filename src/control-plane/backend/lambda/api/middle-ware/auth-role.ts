@@ -11,45 +11,48 @@
  *  and limitations under the License.
  */
 
+import { UserRole } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import { logger } from '../common/powertools';
-import { ApiFail, IUserRole } from '../common/types';
+import { ApiFail } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest, getUidFromTokenPayload } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 
-const routerRoles: Map<string, IUserRole[]> = new Map();
+const routerRoles: Map<string, UserRole[]> = new Map();
 routerRoles.set('GET /api/user/details', []);
-routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('GET /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('POST /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('PUT /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('DELETE /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/pipeline/:id', [UserRole.ADMIN, UserRole.OPERATOR, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('GET /api/app', [UserRole.ADMIN, UserRole.OPERATOR, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('GET /api/projects', [UserRole.ADMIN, UserRole.OPERATOR, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/app/:aid/dashboards', [UserRole.ADMIN, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/app/:aid/dashboard/*', [UserRole.ADMIN, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('POST /api/project/:pid/app/:aid/dashboard/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('PUT /api/project/:pid/app/:aid/dashboard/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('DELETE /api/project/:pid/app/:aid/dashboard/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('GET /api/project/:pid/analyzes', [UserRole.ADMIN, UserRole.ANALYST]);
 
-routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('ALL /api/app/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('ALL /api/pipeline/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('ALL /api/plugin/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('ALL /api/project/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('GET /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('POST /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('PUT /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('DELETE /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
-routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
+routerRoles.set('ALL /api/env/*', [UserRole.ADMIN, UserRole.OPERATOR]);
+routerRoles.set('ALL /api/app/*', [UserRole.ADMIN, UserRole.OPERATOR]);
+routerRoles.set('ALL /api/pipeline/*', [UserRole.ADMIN, UserRole.OPERATOR]);
+routerRoles.set('ALL /api/plugin/*', [UserRole.ADMIN, UserRole.OPERATOR]);
+routerRoles.set('ALL /api/project/*', [UserRole.ADMIN, UserRole.OPERATOR]);
+routerRoles.set('GET /api/metadata/*', [UserRole.ADMIN, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('POST /api/metadata/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('PUT /api/metadata/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('DELETE /api/metadata/*', [UserRole.ADMIN, UserRole.ANALYST]);
+routerRoles.set('ALL /api/reporting/*', [UserRole.ADMIN, UserRole.ANALYST, UserRole.ANALYST_READER]);
+routerRoles.set('ALL /api/user/*', [UserRole.ADMIN]);
+routerRoles.set('GET /api/users', [UserRole.ADMIN]);
 
 
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
 const HTTP_METHODS_PATTERN = '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)';
 const ROUTER_PARAMETER_PATTERN = '([A-Za-z0-9_]+)';
 
-function matchRouter(requestKey: string): IUserRole[] | undefined {
+function matchRouter(requestKey: string): UserRole[] | undefined {
   let accessRoles = routerRoles.get(requestKey);
   if (!accessRoles) {
     for (let [route, roles] of routerRoles) {
@@ -85,7 +88,7 @@ export async function authRole(req: express.Request, res: express.Response, next
     }
 
     const user = await store.getUser(uid);
-    let userRoles: IUserRole[] = [];
+    let userRoles: UserRole[] = [];
     if (user && user.roles) {
       userRoles = user.roles;
     } else {
@@ -94,6 +97,7 @@ export async function authRole(req: express.Request, res: express.Response, next
 
     const requestKey = `${req.method} ${req.path}`;
     const accessRoles = matchRouter(requestKey);
+
     if (!accessRoles) {
       logger.warn('No access roles found.');
       return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
@@ -107,7 +111,7 @@ export async function authRole(req: express.Request, res: express.Response, next
   return next();
 }
 
-function checkUserRoles(userRoles: IUserRole[], accessRoles: IUserRole[]) {
+function checkUserRoles(userRoles: UserRole[], accessRoles: UserRole[]) {
   if (accessRoles.length === 0) {
     return true;
   }

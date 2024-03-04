@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IRole } from '@aws/clickstream-base-lib';
 import {
   IAMClient,
   paginateListRoles,
@@ -20,7 +21,7 @@ import {
 } from '@aws-sdk/client-iam';
 import { awsRegion } from '../../common/constants';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { AssumeRoleType, IamRole } from '../../common/types';
+import { AssumeRoleType } from '../../common/types';
 
 export const listRoles = async (type: AssumeRoleType, key?: string) => {
   const iamClient = new IAMClient({
@@ -30,13 +31,13 @@ export const listRoles = async (type: AssumeRoleType, key?: string) => {
   for await (const page of paginateListRoles({ client: iamClient }, {})) {
     records.push(...page.Roles as Role[]);
   }
-  const roles: IamRole[] = [];
+  const roles: IRole[] = [];
   for (let record of records) {
     if (_isEligibleRule(record, type, key)) {
       roles.push({
-        name: record.RoleName ?? '',
-        id: record.RoleId ?? '',
-        arn: record.Arn ?? '',
+        Name: record.RoleName ?? '',
+        Id: record.RoleId ?? '',
+        Arn: record.Arn ?? '',
       });
     }
   }

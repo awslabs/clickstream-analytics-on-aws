@@ -11,24 +11,29 @@
  *  and limitations under the License.
  */
 
+import { CreateUserRequest, CreateUserResponse, DeleteUserRequest, GetUserRequest, GetUserResponse, GetUserSettingsResponse, IUser, ListUsersRequest, ListUsersResponse, UpdateUserRequest, UpdateUserSettingsRequest } from '@aws/clickstream-base-lib';
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
 import { SolutionInfo } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
-import { IUser, IUserSettings } from '../model/user';
+import { getRoleFromToken, getTokenFromRequest, paginateData } from '../common/utils';
+import { CUser, getUserFromRaw } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
+const cUser = new CUser();
 
 export class UserService {
-  public async list(_req: any, res: any, next: any) {
+  public async list(req: any, res: any, next: any) {
     try {
-      const result = await store.listUser();
-      return res.json(new ApiSuccess({
-        totalCount: result.length,
-        items: result,
-      }));
+      const request: ListUsersRequest = req.query;
+      const raws = await cUser.list();
+      const users = getUserFromRaw(raws);
+      const response: ListUsersResponse = {
+        totalCount: users.length,
+        items: paginateData(users, true, request.pageSize ?? 10, request.pageNumber ?? 1),
+      };
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -36,14 +41,19 @@ export class UserService {
 
   public async add(req: any, res: any, next: any) {
     try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const user: IUser = req.body;
-      const ddbUser = await store.getUser(user.id);
+      const request: CreateUserRequest = req.body;
+      const iUser: IUser = {
+        ...request,
+        createAt: Date.now(),
+        operator: res.get('X-Click-Stream-Operator'),
+      };
+      const ddbUser = await cUser.get(iUser.id);
       if (ddbUser) {
         return res.status(400).json(new ApiFail('User already existed.'));
       }
-      const id = await store.addUser(user);
-      return res.status(201).json(new ApiSuccess({ id }, 'User created.'));
+      const id = await cUser.create(iUser);
+      const response: CreateUserResponse = { id };
+      return res.status(201).json(new ApiSuccess(response, 'User created.'));
     } catch (error) {
       next(error);
     }
@@ -51,39 +61,32 @@ export class UserService {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { id } = req.query;
-      if (!id) {
-        const noIdentityUser: IUser = {
-          id: id,
-          type: 'USER',
-          prefix: 'USER',
-          name: id,
-          roles: [],
-          createAt: Date.now(),
-          updateAt: Date.now(),
-          operator: 'FromToken',
-          deleted: false,
-        };
-        return res.json(new ApiSuccess(noIdentityUser));
+      const request: GetUserRequest = req.query;
+      let response: GetUserResponse = {
+        id: '',
+        name: '',
+        roles: [],
+        createAt: Date.now(),
+        operator: 'FromToken',
+      };
+      if (!request.id || request.id.trim() === '') {
+        return res.json(new ApiSuccess(response));
       }
-      const ddbUser = await store.getUser(id);
+      const ddbUser = await cUser.get(request.id);
       if (ddbUser) {
-        return res.json(new ApiSuccess(ddbUser));
+        response = getUserFromRaw([ddbUser])[0];
+        return res.json(new ApiSuccess(response));
       } else {
         const decodedToken = getTokenFromRequest(req);
         const rolesInToken = await getRoleFromToken(decodedToken);
-        const tokenUser: IUser = {
-          id: id,
-          type: 'USER',
-          prefix: 'USER',
-          name: id,
+        response = {
+          id: request.id,
+          name: request.id,
           roles: rolesInToken,
           createAt: Date.now(),
-          updateAt: Date.now(),
           operator: 'FromToken',
-          deleted: false,
         };
-        return res.json(new ApiSuccess(tokenUser));
+        return res.json(new ApiSuccess(response));
       }
     } catch (error) {
       next(error);
@@ -92,12 +95,16 @@ export class UserService {
 
   public async update(req: any, res: any, next: any) {
     try {
-      if (req.body.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
+      const request: UpdateUserRequest = req.body;
+      if (request.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
         return res.status(400).json(new ApiFail('This user was created by solution and not allowed to be modified.'));
       }
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const user: IUser = req.body as IUser;
-      await store.updateUser(user);
+      const iUser: IUser = {
+        ...request,
+        createAt: Date.now(),
+        operator: res.get('X-Click-Stream-Operator'),
+      };
+      await cUser.update(iUser);
       return res.status(201).json(new ApiSuccess(null, 'User updated.'));
     } catch (error) {
       next(error);
@@ -106,13 +113,15 @@ export class UserService {
 
   public async delete(req: any, res: any, next: any) {
     try {
-      const { id } = req.params;
-      const operator = res.get('X-Click-Stream-Operator');
-      const user = await store.getUser(id);
+      const request: DeleteUserRequest = req.body;
+      const user = await cUser.get(request.id);
+      if (!user) {
+        return res.status(404).json(new ApiFail('User does not exist.'));
+      }
       if (user?.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
         return res.status(400).json(new ApiFail('This user was created by solution and not allowed to be deleted.'));
       }
-      await store.deleteUser(id, operator);
+      await cUser.delete(request.id, res.get('X-Click-Stream-Operator'));
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
     } catch (error) {
       next(error);
@@ -133,8 +142,8 @@ export class UserService {
 
   public async getSettings(_req: any, res: any, next: any) {
     try {
-      const userSettings = await this.getUserSettingsFromDDB();
-      return res.status(200).json(new ApiSuccess(userSettings));
+      const response: GetUserSettingsResponse = await this.getUserSettingsFromDDB();
+      return res.status(200).json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -142,8 +151,8 @@ export class UserService {
 
   public async updateSettings(req: any, res: any, next: any) {
     try {
-      const userSettings: IUserSettings = req.body as IUserSettings;
-      await store.updateUserSettings(userSettings);
+      const request: UpdateUserSettingsRequest = req.body;
+      await store.updateUserSettings(request);
       return res.status(200).json(new ApiSuccess(null, 'User settings updated.'));
     } catch (error) {
       next(error);

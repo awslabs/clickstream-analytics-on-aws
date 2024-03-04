@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { GetProjectResponse, IProject } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   ContentLayout,
@@ -21,7 +22,7 @@ import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import RegisterApp from './comp/RegisterApp';
@@ -53,9 +54,10 @@ const CreateApplication = () => {
   const getProjectDetailById = async (projectId: string) => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: projectId,
-      });
+      const { success, data }: ApiResponse<GetProjectResponse> =
+        await getProjectDetail({
+          projectId,
+        });
       if (success) {
         setProjectInfo(data);
         setLoadingData(false);

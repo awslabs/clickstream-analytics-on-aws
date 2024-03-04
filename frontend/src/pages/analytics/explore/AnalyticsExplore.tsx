@@ -54,6 +54,7 @@ import AnalyticsEvent from '../event/AnalyticsEvent';
 import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
 import AnalyticsPath from '../path/AnalyticsPath';
 import AnalyticsRetention from '../retention/AnalyticsRetention';
+import { IPipeline } from '@aws/clickstream-base-lib';
 
 const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();

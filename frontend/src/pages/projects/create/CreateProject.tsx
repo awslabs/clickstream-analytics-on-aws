@@ -12,6 +12,13 @@
  */
 
 import {
+  XSS_PATTERN,
+  CreateProjectResponse,
+  IProject,
+  ProjectEnvironment,
+  VerificationProjectResponse,
+} from '@aws/clickstream-base-lib';
+import {
   Alert,
   Box,
   Button,
@@ -30,7 +37,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH, PROJECT_STAGE_LIST } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { INIT_PROJECT_DATA } from 'ts/init';
 import {
   alertMsg,
@@ -85,8 +91,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = defaultStr(selectedEnv?.value);
-      const { success, data }: ApiResponse<ResponseCreate> =
+      const { success, data }: ApiResponse<CreateProjectResponse> =
         await createProject(curProject);
       if (success && data.id) {
         navigate(`/project/detail/${data.id}`);
@@ -100,8 +105,8 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const validateProjectIdExists = async () => {
     setValidating(true);
     try {
-      const { success, data }: ApiResponse<ResponseVerify> =
-        await verificationProjectId({ id: curProject.id });
+      const { success, data }: ApiResponse<VerificationProjectResponse> =
+        await verificationProjectId({ projectId: curProject.id });
       if (success && data.exist) {
         alertMsg(t('project:valid.projectIdExisting'), 'error');
         setValidating(false);
@@ -351,7 +356,9 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   setCurProject((prev) => {
                     return {
                       ...prev,
-                      environment: defaultStr(e.detail.selectedOption.value),
+                      environment: defaultStr(
+                        e.detail.selectedOption.value
+                      ) as ProjectEnvironment,
                     };
                   });
                 }}

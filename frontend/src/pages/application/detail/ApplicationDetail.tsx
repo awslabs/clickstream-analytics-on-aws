@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { GetProjectResponse, IProject } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Box,
@@ -67,9 +68,10 @@ const ApplicationDetail: React.FC = () => {
   const getProjectDetailById = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: defaultStr(pid),
-      });
+      const { success, data }: ApiResponse<GetProjectResponse> =
+        await getProjectDetail({
+          projectId: defaultStr(pid),
+        });
       if (success) {
         setProjectInfo(data);
         setLoadingData(false);

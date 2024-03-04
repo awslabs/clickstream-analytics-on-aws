@@ -11,7 +11,32 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Wizard } from '@cloudscape-design/components';
+import {
+  CORS_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
+  ListACMCertificatesResponse,
+  ListBucketsResponse,
+  ListMSKClustersResponse,
+  ListRedshiftClustersResponse,
+  ListSSMSecretsResponse,
+  ListSecurityGroupsResponse,
+  ListSubnetsResponse,
+  ListVpcResponse,
+  IServiceAvailable,
+  ListPluginsResponse,
+  ServicesAvailableResponse,
+  PipelineServerProtocol,
+  ENetworkType,
+  PipelineSinkType,
+  IngestionType,
+  ITag,
+  MSKClusterProps,
+  KinesisStreamMode,
+} from '@aws/clickstream-base-lib';
+import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -44,8 +69,6 @@ import {
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
   DEFAULT_TRANSFORM_SDK_IDS,
-  EIngestionType,
-  ENetworkType,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -59,23 +82,15 @@ import {
   MIN_KDS_SINK_INTERVAL,
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
-  ProtocalType,
   REDSHIFT_UNIT_LIST,
   ResourceCreateMethod,
   SDK_LIST,
-  SinkType,
 } from 'ts/const';
-import {
-  CORS_PATTERN,
-  DOMAIN_NAME_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
-} from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   checkStringValidRegex,
   defaultGenericsValue,
+  defaultNumber,
   defaultStr,
   extractAccountIdFromArn,
   generateCronDateRange,
@@ -90,6 +105,7 @@ import {
   validatePublicSubnetInSameAZWithPrivateSubnets,
   validateSubnetCrossInAZs,
 } from 'ts/utils';
+import { IExtPipeline } from 'types/pipeline';
 import BasicInformation from './steps/BasicInformation';
 import ConfigIngestion from './steps/ConfigIngestion';
 import DataProcessing from './steps/DataProcessing';
@@ -216,7 +232,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               value: projectId,
               existing: true,
             },
-          ],
+          ] as ITag[], // Update the type of tags to ITag[]
         }
   );
 
@@ -233,7 +249,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setSDKEmptyError(true);
       return false;
     }
-    if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name) {
+    if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket?.name) {
       setAssetsBucketEmptyError(true);
       return false;
     }
@@ -319,15 +335,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const validateIngestionSSL = () => {
     // Validate HTTPs with SSL Certificate
     if (
-      pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
+      pipelineInfo.ingestionServer.loadBalancer.protocol ===
+      PipelineServerProtocol.HTTPS
     ) {
-      if (!pipelineInfo.ingestionServer.domain.domainName.trim()) {
+      if (!pipelineInfo.ingestionServer.domain?.domainName.trim()) {
         setDomainNameEmptyError(true);
         return false;
       }
       if (
         !checkStringValidRegex(
-          pipelineInfo.ingestionServer.domain.domainName,
+          pipelineInfo.ingestionServer.domain?.domainName,
           new RegExp(DOMAIN_NAME_PATTERN)
         )
       ) {
@@ -341,7 +358,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol ===
-        ProtocalType.HTTP &&
+        PipelineServerProtocol.HTTP &&
       !acknowledgedHTTPSecurity
     ) {
       return false;
@@ -358,11 +375,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   };
 
   const validateIngestionSinkS3 = () => {
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
+    if (pipelineInfo.ingestionServer.sinkType === PipelineSinkType.S3) {
       // check buffer size
       if (
-        pipelineInfo.ingestionServer.sinkS3.s3BufferSize > 50 ||
-        pipelineInfo.ingestionServer.sinkS3.s3BufferSize < 1
+        !pipelineInfo.ingestionServer.sinkS3?.s3BufferSize ||
+        pipelineInfo.ingestionServer.sinkS3?.s3BufferSize > 50 ||
+        pipelineInfo.ingestionServer.sinkS3?.s3BufferSize < 1
       ) {
         setBufferS3SizeFormatError(true);
         return false;
@@ -370,8 +388,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
       // check buffer interval
       if (
-        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval > 3600 ||
-        pipelineInfo.ingestionServer.sinkS3.s3BufferInterval < 60
+        !pipelineInfo.ingestionServer.sinkS3?.s3BufferInterval ||
+        pipelineInfo.ingestionServer.sinkS3?.s3BufferInterval > 3600 ||
+        pipelineInfo.ingestionServer.sinkS3?.s3BufferInterval < 60
       ) {
         setBufferS3IntervalFormatError(true);
         return false;
@@ -384,7 +403,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     sinkIntervalNum: number,
     sinkBatchSize: number
   ) => {
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
+    if (pipelineInfo.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
       // check provisioned mode
       if (!pipelineInfo.seledtedKDKProvisionType?.value) {
         setBufferKDSModeEmptyError(true);
@@ -396,8 +415,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         KDSProvisionType.PROVISIONED
       ) {
         if (
-          pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount > 10000 ||
-          pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount < 1
+          !pipelineInfo.ingestionServer.sinkKinesis?.kinesisShardCount ||
+          pipelineInfo.ingestionServer.sinkKinesis?.kinesisShardCount > 10000 ||
+          pipelineInfo.ingestionServer.sinkKinesis?.kinesisShardCount < 1
         ) {
           setBufferKDSShardNumFormatError(true);
           return false;
@@ -425,7 +445,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const validIngestionMSKKafka = () => {
     if (!pipelineInfo.kafkaSelfHost) {
-      if (!pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn) {
+      if (!pipelineInfo.ingestionServer.sinkKafka?.mskCluster?.arn) {
         setMskEmptyError(true);
         return false;
       }
@@ -449,14 +469,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       }
 
       // Check security group
-      if (!pipelineInfo.ingestionServer.sinkKafka.securityGroupId) {
+      if (!pipelineInfo.ingestionServer.sinkKafka?.securityGroupId) {
         setKafkaSGEmptyError(true);
         return false;
       }
     }
 
     // check topic format if not empty
-    if (pipelineInfo.ingestionServer.sinkKafka.topic) {
+    if (pipelineInfo.ingestionServer.sinkKafka?.topic) {
       if (
         !checkStringValidRegex(
           pipelineInfo.ingestionServer.sinkKafka.topic,
@@ -528,10 +548,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
 
     const sinkIntervalNum =
-      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
-    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch?.size;
+      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds ?? 300;
+    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch?.size ?? 10000;
 
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.MSK) {
+    if (pipelineInfo.ingestionServer?.sinkType === PipelineSinkType.KAFKA) {
       // check msk select when not self hosted
       if (!validIngestionMSKKafka()) {
         return false;
@@ -685,41 +705,25 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     // Set MSK Disable and Apache Kafka connector Disabled
     if (mskAvailable) {
       setPipelineInfo((prev) => {
-        return {
-          ...prev,
-          kafkaSelfHost: false, // Change to MSK as default
-          enableDataProcessing: true, // enable data processing
-          ingestionServer: {
-            ...prev.ingestionServer,
-            sinkKafka: {
-              ...prev.ingestionServer.sinkKafka,
-              kafkaConnector: {
-                enable: true,
-              },
-            },
-          },
-        };
+        prev.kafkaSelfHost = false; // Change to MSK as default
+        prev.enableDataProcessing = true; // enable data processing
+        if (prev.ingestionServer.sinkKafka) {
+          prev.ingestionServer.sinkKafka.kafkaConnector.enable = true; // enable kafka connector
+        }
+        return prev;
       });
     } else {
       setPipelineInfo((prev) => {
-        return {
-          ...prev,
-          kafkaSelfHost: true, // Change to self hosted as default
-          enableDataProcessing: ternary(
-            pipelineInfo.ingestionServer.sinkType === SinkType.MSK,
-            false,
-            true
-          ), // disabled all data processing when sink type is MSK and MSK not available
-          ingestionServer: {
-            ...prev.ingestionServer,
-            sinkKafka: {
-              ...prev.ingestionServer.sinkKafka,
-              kafkaConnector: {
-                enable: false,
-              },
-            },
-          },
-        };
+        prev.kafkaSelfHost = true; // Change to self hosted as default
+        prev.enableDataProcessing = ternary(
+          prev.ingestionServer.sinkType === PipelineSinkType.KAFKA,
+          false,
+          true
+        ); // disabled all data processing when sink type is MSK and MSK not available
+        if (prev.ingestionServer.sinkKafka) {
+          prev.ingestionServer.sinkKafka.kafkaConnector.enable = false; // disable kafka connector
+        }
+        return prev;
       });
     }
   };
@@ -763,7 +767,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   };
 
   const findServiceAvailability = (
-    data: ServiceAvailableResponse[],
+    data: IServiceAvailable[],
     serviceName: string
   ) => {
     return (
@@ -783,8 +787,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setUnSupportedServices('');
       try {
         setLoadingServiceAvailable(true);
-        const { success, data }: ApiResponse<ServiceAvailableResponse[]> =
-          await checkServicesAvailable({ region });
+        const { success, data }: ApiResponse<ServicesAvailableResponse> =
+          await checkServicesAvailable({
+            region,
+            services:
+              'emr-serverless,msk,quicksight,redshift-serverless,global-accelerator',
+          });
         if (success && data) {
           // Set Service available
           const agaAvailable = findServiceAvailability(
@@ -910,7 +918,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
 
     // set sink batch to null when sink type is S3
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
+    if (pipelineInfo.ingestionServer.sinkType === PipelineSinkType.S3) {
       createPipelineObj.ingestionServer.sinkBatch = null;
     }
 
@@ -1012,44 +1020,35 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     if (pipelineInfo.region) {
       if (!update) {
         setPipelineInfo((prev) => {
-          return {
-            ...prev,
-            // Below to set resources to empty by regions
-            selectedVPC: null,
-            selectedS3Bucket: null,
-            selectedPublicSubnet: [],
-            selectedPrivateSubnet: [],
-            selectedSecret: null, // clear secret
-            selectedCertificate: null, // clear certificates
-            showServiceStatus: false,
-            redshiftBaseCapacity: null,
-            redshiftServerlessSG: [],
-            redshiftServerlessVPC: null,
-            redshiftServerlessSubnets: [],
-            ingestionServer: {
-              ...prev.ingestionServer,
-              sinkS3: {
-                // set sink s3 to null
-                ...prev.ingestionServer.sinkS3,
-                sinkBucket: {
-                  name: '',
-                  prefix: '',
-                },
-              },
-              domain: {
-                ...prev.ingestionServer.domain,
-                certificateArn: '', // set certificate arn to empty
-              },
-              loadBalancer: {
-                ...prev.ingestionServer.loadBalancer,
-                authenticationSecretArn: '', // set secret value to null
-                logS3Bucket: {
-                  ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                  name: '',
-                },
-              },
-            },
-          };
+          // Below to set resources to empty by regions
+          prev.selectedVPC = null;
+          prev.selectedS3Bucket = null;
+          prev.selectedPublicSubnet = [];
+          prev.selectedPrivateSubnet = [];
+          prev.selectedSecret = null; // clear secret
+          prev.selectedCertificate = null; // clear certificates
+          prev.showServiceStatus = false;
+          prev.redshiftBaseCapacity = null;
+          prev.redshiftServerlessSG = [];
+          prev.redshiftServerlessVPC = null;
+          prev.redshiftServerlessSubnets = [];
+          if (prev.ingestionServer.sinkS3) {
+            prev.ingestionServer.sinkS3.sinkBucket = {
+              name: '',
+              prefix: '',
+            };
+          }
+          if (prev.ingestionServer.loadBalancer) {
+            prev.ingestionServer.loadBalancer.authenticationSecretArn = ''; // set secret value to null
+            prev.ingestionServer.loadBalancer.logS3Bucket = {
+              name: '',
+              prefix: '',
+            };
+          }
+          if (prev.ingestionServer.domain) {
+            prev.ingestionServer.domain.certificateArn = ''; // set certificate arn to empty
+          }
+          return prev;
         });
       }
       validServiceAvailable(pipelineInfo.region);
@@ -1135,30 +1134,23 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeVPC={(vpc) => {
                 setVPCEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedVPC: vpc,
-                    selectedMSK: null, // set selected msk to null,
-                    ingestionServer: {
-                      // set msk value to null
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        mskCluster: {
-                          name: '',
-                          arn: '',
-                        },
-                      },
-                    },
-                    selectedPublicSubnet: [], // set public subnets to empty
-                    selectedPrivateSubnet: [], // set private subnets to empty
-                    network: {
-                      ...prev.network,
-                      vpcId: defaultStr(vpc.value),
-                      publicSubnetIds: [], // clear public subnets value
-                      privateSubnetIds: [], // clear private subnets value
-                    },
+                  prev.selectedVPC = vpc;
+                  prev.selectedMSK = null; // set selected msk to null
+                  prev.selectedPublicSubnet = []; // set public subnets to empty
+                  prev.selectedPrivateSubnet = []; // set public subnets to empty
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.mskCluster = {
+                      name: '',
+                      arn: '',
+                    } as MSKClusterProps;
+                  }
+                  prev.network = {
+                    ...prev.network,
+                    vpcId: defaultStr(vpc.value),
+                    publicSubnetIds: [], // clear public subnets value
+                    privateSubnetIds: [], // clear private subnets value
                   };
+                  return prev;
                 });
               }}
               changeSDK={(sdk) => {
@@ -1175,53 +1167,37 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeS3Bucket={(bucket) => {
                 setAssetsBucketEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedS3Bucket: bucket,
-                    bucket: {
-                      ...prev.bucket,
-                      name: defaultStr(bucket.value),
-                    },
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      loadBalancer: {
-                        ...prev.ingestionServer.loadBalancer,
-                        logS3Bucket: {
-                          ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                          name: defaultStr(bucket.value),
-                        },
-                      },
-                      sinkKinesis: {
-                        ...prev.ingestionServer.sinkKinesis,
-                        sinkBucket: {
-                          ...prev.ingestionServer.sinkKinesis.sinkBucket,
-                          name: defaultStr(bucket.value),
-                        },
-                      },
-                      sinkS3: {
-                        ...prev.ingestionServer.sinkS3,
-                        sinkBucket: {
-                          ...prev.ingestionServer.sinkS3.sinkBucket,
-                          name: defaultStr(bucket.value),
-                        },
-                      },
-                    },
-                    dataProcessing: {
-                      ...prev.dataProcessing,
-                      sourceS3Bucket: {
-                        ...prev.dataProcessing.sourceS3Bucket,
-                        name: defaultStr(bucket.value),
-                      },
-                      sinkS3Bucket: {
-                        ...prev.dataProcessing.sinkS3Bucket,
-                        name: defaultStr(bucket.value),
-                      },
-                      pipelineBucket: {
-                        ...prev.dataProcessing.pipelineBucket,
-                        name: defaultStr(bucket.value),
-                      },
-                    },
-                  };
+                  prev.selectedS3Bucket = bucket;
+                  prev.bucket.name = defaultStr(bucket.value);
+                  if (prev.ingestionServer.loadBalancer.logS3Bucket) {
+                    prev.ingestionServer.loadBalancer.logS3Bucket.name =
+                      defaultStr(bucket.value);
+                  }
+                  if (prev.ingestionServer.sinkKinesis) {
+                    prev.ingestionServer.sinkKinesis.sinkBucket.name =
+                      defaultStr(bucket.value);
+                  }
+                  if (prev.ingestionServer.sinkS3) {
+                    prev.ingestionServer.sinkS3.sinkBucket.name = defaultStr(
+                      bucket.value
+                    );
+                  }
+                  if (prev.dataProcessing?.sourceS3Bucket) {
+                    prev.dataProcessing.sourceS3Bucket.name = defaultStr(
+                      bucket.value
+                    );
+                  }
+                  if (prev.dataProcessing?.sinkS3Bucket) {
+                    prev.dataProcessing.sinkS3Bucket.name = defaultStr(
+                      bucket.value
+                    );
+                  }
+                  if (prev.dataProcessing?.pipelineBucket) {
+                    prev.dataProcessing.pipelineBucket.name = defaultStr(
+                      bucket.value
+                    );
+                  }
+                  return prev;
                 });
               }}
               changeTags={(tags) => {
@@ -1315,7 +1291,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     ...prev,
                     ingestionServer: {
                       ...prev.ingestionServer,
-                      ingestionType: type,
+                      ingestionType: type as IngestionType,
                     },
                   };
                 });
@@ -1369,16 +1345,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setDomainNameEmptyError(false);
                 setDomainNameFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      domain: {
-                        ...prev.ingestionServer.domain,
-                        domainName: name,
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.domain) {
+                    prev.ingestionServer.domain.domainName = name;
+                  }
+                  return prev;
                 });
               }}
               changeEnableALBAccessLog={(enable) => {
@@ -1422,7 +1392,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setDomainNameEmptyError(false);
                 setDomainNameFormatError(false);
                 setCertificateEmptyError(false);
-                if (protocal === ProtocalType.HTTP) {
+                if (protocal === PipelineServerProtocol.HTTP) {
                   setAcknowledgedHTTPSecurity(false);
                 }
                 setPipelineInfo((prev) => {
@@ -1432,7 +1402,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       loadBalancer: {
                         ...prev.ingestionServer.loadBalancer,
-                        protocol: protocal,
+                        protocol: protocal as PipelineServerProtocol,
                       },
                     },
                   };
@@ -1473,17 +1443,12 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeCertificate={(cert) => {
                 setCertificateEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedCertificate: cert,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      domain: {
-                        ...prev.ingestionServer.domain,
-                        certificateArn: defaultStr(cert.value),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.domain) {
+                    prev.ingestionServer.domain.certificateArn = defaultStr(
+                      cert.value
+                    );
+                  }
+                  return prev;
                 });
               }}
               changeSSMSecret={(secret) => {
@@ -1505,11 +1470,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeBufferType={(type) => {
                 let sinkInterval = '';
                 let sinkBatchSize = '';
-                if (type === SinkType.KDS) {
+                if (type === PipelineSinkType.KINESIS) {
                   sinkInterval = DEFAULT_KDS_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_KDS_BATCH_SIZE;
                 }
-                if (type === SinkType.MSK) {
+                if (type === PipelineSinkType.KAFKA) {
                   sinkInterval = DEFAULT_MSK_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_MSK_BATCH_SIZE;
                 }
@@ -1526,16 +1491,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setSinkIntervalError(false);
                 setSinkBatchSizeError(false);
 
-                if (type === SinkType.MSK) {
+                if (type === PipelineSinkType.KAFKA) {
                   if (
-                    !pipelineInfo.ingestionServer.sinkKafka.kafkaConnector
+                    !pipelineInfo.ingestionServer.sinkKafka?.kafkaConnector
                       .enable
                   ) {
                     tmpEnableProcessing = false;
                     tmpEnableQuickSight = false;
                   }
                 }
-
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
@@ -1543,7 +1507,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     enableReporting: tmpEnableQuickSight,
                     ingestionServer: {
                       ...prev.ingestionServer,
-                      sinkType: type,
+                      sinkType: type as PipelineSinkType,
                       sinkBatch: {
                         intervalSeconds: parseInt(sinkInterval),
                         size: parseInt(sinkBatchSize),
@@ -1555,61 +1519,39 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeSinkMaxInterval={(interval) => {
                 setSinkIntervalError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkBatch: {
-                        ...prev.ingestionServer.sinkBatch,
-                        intervalSeconds: parseInt(interval),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkBatch) {
+                    prev.ingestionServer.sinkBatch.intervalSeconds =
+                      parseInt(interval);
+                  }
+                  return prev;
                 });
               }}
               changeSinkBatchSize={(size) => {
                 setSinkBatchSizeError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkBatch: {
-                        ...prev.ingestionServer.sinkBatch,
-                        size: parseInt(size),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkBatch) {
+                    prev.ingestionServer.sinkBatch.size = parseInt(size);
+                  }
+                  return prev;
                 });
               }}
               changeS3BufferSize={(size) => {
                 setBufferS3SizeFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkS3: {
-                        ...prev.ingestionServer.sinkS3,
-                        s3BufferSize: parseInt(size),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkS3) {
+                    prev.ingestionServer.sinkS3.s3BufferSize = parseInt(size);
+                  }
+                  return prev;
                 });
               }}
               changeBufferInterval={(interval) => {
                 setBufferS3IntervalFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkS3: {
-                        ...prev.ingestionServer.sinkS3,
-                        s3BufferInterval: parseInt(interval),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkS3) {
+                    prev.ingestionServer.sinkS3.s3BufferInterval =
+                      parseInt(interval);
+                  }
+                  return prev;
                 });
               }}
               changeCreateMSKMethod={(type) => {
@@ -1623,97 +1565,68 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeSelectedMSK={(mskOption, mskCluster) => {
                 setMskEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedMSK: mskOption,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        securityGroupId: mskCluster?.securityGroupId || '',
-                        mskCluster: {
-                          name: mskCluster?.name || '',
-                          arn: mskCluster?.arn || '',
-                        },
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.securityGroupId = defaultStr(
+                      mskCluster?.SecurityGroupId
+                    );
+                    prev.ingestionServer.sinkKafka.mskCluster = {
+                      name: defaultStr(mskCluster?.ClusterName),
+                      arn: defaultStr(mskCluster?.ClusterArn),
+                    };
+                  }
+                  return prev;
                 });
               }}
               changeSecurityGroup={(sg) => {
                 setKafkaSGEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedSelfHostedMSKSG: sg,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        securityGroupId: defaultStr(sg.value),
-                      },
-                    },
-                  };
+                  prev.selectedSelfHostedMSKSG = sg;
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.securityGroupId = defaultStr(
+                      sg.value
+                    );
+                  }
+                  return prev;
                 });
               }}
               changeMSKTopic={(topic) => {
                 setTopicFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        topic: topic,
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.topic = topic;
+                  }
+                  return prev;
                 });
               }}
               changeEnableKafkaConnector={(enable) => {
                 // if enable, set data processing enable
                 if (enable) {
                   setPipelineInfo((prev) => {
-                    return {
-                      ...prev,
-                      enableDataProcessing: ternary(
-                        prev.serviceStatus.EMR_SERVERLESS,
-                        true,
-                        false
-                      ),
-                      enableReporting: ternary(
-                        prev.serviceStatus.QUICK_SIGHT,
-                        true,
-                        false
-                      ),
-                      ingestionServer: {
-                        ...prev.ingestionServer,
-                        sinkKafka: {
-                          ...prev.ingestionServer.sinkKafka,
-                          kafkaConnector: {
-                            enable: true,
-                          },
-                        },
-                      },
-                    };
+                    prev.enableDataProcessing = ternary(
+                      prev.serviceStatus.EMR_SERVERLESS,
+                      true,
+                      false
+                    );
+                    prev.enableReporting = ternary(
+                      prev.serviceStatus.QUICK_SIGHT,
+                      true,
+                      false
+                    );
+                    if (prev.ingestionServer.sinkKafka) {
+                      prev.ingestionServer.sinkKafka.kafkaConnector.enable =
+                        true;
+                    }
+                    return prev;
                   });
                 } else {
                   setPipelineInfo((prev) => {
-                    return {
-                      ...prev,
-                      enableDataProcessing: false,
-                      enableReporting: false,
-                      ingestionServer: {
-                        ...prev.ingestionServer,
-                        sinkKafka: {
-                          ...prev.ingestionServer.sinkKafka,
-                          kafkaConnector: {
-                            enable: false,
-                          },
-                        },
-                      },
-                    };
+                    prev.enableDataProcessing = false;
+                    prev.enableReporting = false;
+                    if (prev.ingestionServer.sinkKafka) {
+                      prev.ingestionServer.sinkKafka.kafkaConnector.enable =
+                        false;
+                    }
+                    return prev;
                   });
                 }
               }}
@@ -1729,63 +1642,40 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 setBrokerLinkEmptyError(false);
                 setBrokerLinkFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    kafkaBrokers: brokers,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        brokers: brokers.split(','),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.brokers = brokers.split(',');
+                  }
+                  return prev;
                 });
               }}
               changeKafkaTopic={(topic) => {
                 setTopicFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKafka: {
-                        ...prev.ingestionServer.sinkKafka,
-                        topic: topic,
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkKafka) {
+                    prev.ingestionServer.sinkKafka.topic = topic;
+                  }
+                  return prev;
                 });
               }}
               changeKDSProvisionType={(type) => {
                 setBufferKDSModeEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    seledtedKDKProvisionType: type,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKinesis: {
-                        ...prev.ingestionServer.sinkKinesis,
-                        kinesisStreamMode: defaultStr(type.value),
-                      },
-                    },
-                  };
+                  prev.seledtedKDKProvisionType = type;
+                  if (prev.ingestionServer.sinkKinesis) {
+                    prev.ingestionServer.sinkKinesis.kinesisStreamMode =
+                      defaultStr(type.value) as KinesisStreamMode;
+                  }
+                  return prev;
                 });
               }}
               changeKDSShardNumber={(num) => {
                 setBufferKDSShardNumFormatError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkKinesis: {
-                        ...prev.ingestionServer.sinkKinesis,
-                        kinesisShardCount: parseInt(num),
-                      },
-                    },
-                  };
+                  if (prev.ingestionServer.sinkKinesis) {
+                    prev.ingestionServer.sinkKinesis.kinesisShardCount =
+                      parseInt(num);
+                  }
+                  return prev;
                 });
               }}
             />
@@ -1944,23 +1834,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeSelectedRedshift={(cluster) => {
                 setRedshiftProvisionedClusterEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedRedshiftCluster: cluster,
-                    arnAccountId: extractAccountIdFromArn(
-                      defaultStr(cluster.description)
-                    ),
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        provisioned: {
-                          ...prev.dataModeling.redshift.provisioned,
-                          clusterIdentifier: defaultStr(cluster.value),
-                        },
-                      },
-                    },
-                  };
+                  prev.selectedRedshiftCluster = cluster;
+                  prev.arnAccountId = extractAccountIdFromArn(
+                    defaultStr(cluster.description)
+                  );
+                  if (prev.dataModeling?.redshift?.provisioned) {
+                    prev.dataModeling.redshift.provisioned.clusterIdentifier =
+                      defaultStr(cluster.value);
+                  }
+                  return prev;
                 });
               }}
               changeSelectedRedshiftRole={(role) => {
@@ -2009,114 +1891,68 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               changeDBUser={(user) => {
                 setRedshiftProvisionedDBUserEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        provisioned: {
-                          ...prev.dataModeling.redshift.provisioned,
-                          dbUser: user,
-                        },
-                      },
-                    },
-                  };
+                  if (prev.dataModeling?.redshift?.provisioned) {
+                    prev.dataModeling.redshift.provisioned.dbUser = user;
+                  }
+                  return prev;
                 });
               }}
               changeBaseCapacity={(capacity) => {
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftBaseCapacity: capacity,
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        newServerless: {
-                          ...prev.dataModeling.redshift.newServerless,
-                          baseCapacity: parseInt(
-                            defaultStr(capacity?.value, '0')
-                          ),
-                        },
-                      },
-                    },
-                  };
+                  prev.redshiftBaseCapacity = capacity;
+                  if (prev.dataModeling?.redshift?.newServerless) {
+                    prev.dataModeling.redshift.newServerless.baseCapacity =
+                      parseInt(defaultStr(capacity?.value, '0'));
+                  }
+                  return prev;
                 });
               }}
               changeServerlessRedshiftVPC={(vpc) => {
                 setRedshiftServerlessVpcEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftServerlessVPC: vpc,
-                    redshiftServerlessSG: [], // set selected security groups to empty
-                    redshiftServerlessSubnets: [], // set selected subnets to empty
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        newServerless: {
-                          ...prev.dataModeling.redshift.newServerless,
-                          network: {
-                            ...prev.dataModeling.redshift.newServerless.network,
-                            vpcId: defaultStr(vpc.value),
-                            securityGroups: [], // set security group value to empty
-                            subnetIds: [], // set subnets value to empty
-                          },
-                        },
-                      },
-                    },
-                  };
+                  prev.redshiftServerlessVPC = vpc;
+                  prev.redshiftServerlessSG = []; // set selected security groups to empty
+                  prev.redshiftServerlessSubnets = []; // set selected subnets to empty
+                  if (prev.dataModeling?.redshift?.newServerless) {
+                    prev.dataModeling.redshift.newServerless.network = {
+                      ...prev.dataModeling?.redshift?.newServerless?.network,
+                      vpcId: defaultStr(vpc.value),
+                      securityGroups: [], // set security group value to empty
+                      subnetIds: [], // set subnets value to empty
+                    };
+                  }
+                  return prev;
                 });
               }}
               changeSecurityGroup={(sg) => {
                 setRedshiftServerlessSGEmptyError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftServerlessSG: sg,
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        newServerless: {
-                          ...prev.dataModeling.redshift.newServerless,
-                          network: {
-                            ...prev.dataModeling.redshift.newServerless.network,
-                            securityGroups: sg.map((element) =>
-                              defaultStr(element.value)
-                            ),
-                          },
-                        },
-                      },
-                    },
-                  };
+                  prev.redshiftServerlessSG = sg;
+                  if (prev.dataModeling?.redshift?.newServerless) {
+                    prev.dataModeling.redshift.newServerless.network = {
+                      ...prev.dataModeling?.redshift?.newServerless?.network,
+                      securityGroups: sg.map((element) =>
+                        defaultStr(element.value)
+                      ),
+                    };
+                  }
+                  return prev;
                 });
               }}
               changeReshiftSubnets={(subnets) => {
                 setRedshiftServerlessSubnetEmptyError(false);
                 setRedshiftServerlessSubnetInvalidError(false);
                 setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftServerlessSubnets: subnets,
-                    dataModeling: {
-                      ...prev.dataModeling,
-                      redshift: {
-                        ...prev.dataModeling.redshift,
-                        newServerless: {
-                          ...prev.dataModeling.redshift.newServerless,
-                          network: {
-                            ...prev.dataModeling.redshift.newServerless.network,
-                            subnetIds: subnets.map((element) =>
-                              defaultStr(element.value)
-                            ),
-                          },
-                        },
-                      },
-                    },
-                  };
+                  prev.redshiftServerlessSubnets = subnets;
+                  if (prev.dataModeling?.redshift?.newServerless) {
+                    prev.dataModeling.redshift.newServerless.network = {
+                      ...prev.dataModeling?.redshift?.newServerless?.network,
+                      subnetIds: subnets.map((element) =>
+                        defaultStr(element.value)
+                      ),
+                    };
+                  }
+                  return prev;
                 });
               }}
               changeDataLoadCronExp={(cron) => {
@@ -2214,17 +2050,17 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateVpc = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: pipelineInfo.region,
       });
       if (success) {
         const selectVpc = data.filter(
-          (element) => element.id === pipelineInfo.network.vpcId
+          (element) => element.VpcId === pipelineInfo.network.vpcId
         )[0];
         pipelineInfo.selectedVPC = {
-          label: `${selectVpc.name}(${selectVpc.id})`,
-          value: selectVpc.id,
-          description: selectVpc.cidr,
+          label: `${selectVpc.Name}(${selectVpc.VpcId})`,
+          value: selectVpc.VpcId,
+          description: selectVpc.CidrBlock,
         };
       }
     } catch (error) {
@@ -2238,15 +2074,17 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateS3Bucket = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<S3Response[]> =
-        await getS3BucketList(pipelineInfo.region);
+      const { success, data }: ApiResponse<ListBucketsResponse> =
+        await getS3BucketList({
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectedS3Bucket = data.filter(
-          (element) => element.name === pipelineInfo.bucket.name
+          (element) => element.Name === pipelineInfo.bucket.name
         )[0];
         pipelineInfo.selectedS3Bucket = {
-          label: selectedS3Bucket.name,
-          value: selectedS3Bucket.name,
+          label: selectedS3Bucket.Name,
+          value: selectedS3Bucket.Name,
         };
       }
     } catch (error) {
@@ -2255,27 +2093,27 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateSubnetList = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.network.vpcId,
         });
       if (success) {
         const publicSubnets = data.filter((element) =>
-          pipelineInfo.network.publicSubnetIds.includes(element.id)
+          pipelineInfo.network.publicSubnetIds.includes(element.SubnetId)
         );
         const privateSubnets = data.filter((element) =>
-          pipelineInfo.network.privateSubnetIds.includes(element.id)
+          pipelineInfo.network.privateSubnetIds.includes(element.SubnetId)
         );
         pipelineInfo.selectedPublicSubnet = publicSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
         pipelineInfo.selectedPrivateSubnet = privateSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
       }
     } catch (error) {
@@ -2284,19 +2122,19 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateCetificate = async (pipelineInfo: IExtPipeline) => {
     try {
-      if (!pipelineInfo.ingestionServer.domain.certificateArn) {
+      if (!pipelineInfo.ingestionServer.domain?.certificateArn) {
         return;
       }
-      const { success, data }: ApiResponse<CetificateResponse[]> =
+      const { success, data }: ApiResponse<ListACMCertificatesResponse> =
         await getCertificates({ region: pipelineInfo.region });
       if (success) {
         const selectCert = data.filter(
           (element) =>
-            element.arn === pipelineInfo.ingestionServer.domain.certificateArn
+            element.Arn === pipelineInfo.ingestionServer.domain?.certificateArn
         )[0];
         pipelineInfo.selectedCertificate = {
-          label: selectCert.domain,
-          value: selectCert.arn,
+          label: selectCert.Domain,
+          value: selectCert.Arn,
         };
       }
     } catch (error) {
@@ -2314,17 +2152,19 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (!enableAuthentication) {
         return;
       }
-      const { success, data }: ApiResponse<SSMSecretRepoose[]> =
-        await getSSMSecrets({ region: pipelineInfo.region });
+      const { success, data }: ApiResponse<ListSSMSecretsResponse> =
+        await getSSMSecrets({
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectSecret = data.filter(
           (element) =>
-            element.arn ===
+            element.Arn ===
             pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn
         )[0];
         pipelineInfo.selectedSecret = {
-          label: selectSecret.name,
-          value: selectSecret.arn,
+          label: selectSecret.Name,
+          value: selectSecret.Arn,
         };
       }
     } catch (error) {
@@ -2337,22 +2177,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         return;
       }
       pipelineInfo.mskCreateMethod = ResourceCreateMethod.EXISTING;
-      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
-        vpcId: pipelineInfo.network.vpcId,
-        region: pipelineInfo.region,
-      });
+      const { success, data }: ApiResponse<ListMSKClustersResponse> =
+        await getMSKList({
+          vpcId: pipelineInfo.network.vpcId,
+          region: pipelineInfo.region,
+        });
       if (success) {
         const selectMsk = data.filter(
           (element) =>
-            element.arn ===
+            element.ClusterArn ===
             pipelineInfo.ingestionServer?.sinkKafka?.mskCluster?.arn
         )[0];
         pipelineInfo.selectedMSK = {
-          label: selectMsk.name,
-          value: selectMsk.arn,
-          description: `Authentication: ${selectMsk.authentication.join(',')}`,
-          labelTag: selectMsk.type,
-          iconAlt: selectMsk.arn,
+          label: selectMsk.ClusterName,
+          value: selectMsk.ClusterArn,
+          description: `Authentication: ${selectMsk.Authentication.join(',')}`,
+          labelTag: selectMsk.ClusterType,
+          iconAlt: selectMsk.ClusterArn,
         };
       }
     } catch (error) {
@@ -2365,9 +2206,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         return;
       }
       pipelineInfo.mskCreateMethod = ResourceCreateMethod.CREATE;
-      pipelineInfo.kafkaBrokers =
-        pipelineInfo.ingestionServer.sinkKafka.brokers.join(',');
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      pipelineInfo.kafkaBrokers = defaultStr(
+        pipelineInfo.ingestionServer.sinkKafka?.brokers.join(',')
+      );
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.network.vpcId,
@@ -2375,13 +2217,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       if (success) {
         const selectSG = data.filter(
           (element) =>
-            element.id ===
-            pipelineInfo.ingestionServer.sinkKafka.securityGroupId
+            element.GroupId ===
+            pipelineInfo.ingestionServer.sinkKafka?.securityGroupId
         )[0];
         pipelineInfo.selectedSelfHostedMSKSG = {
-          label: `${selectSG.name}(${selectSG.id})`,
-          value: selectSG.id,
-          description: selectSG.description,
+          label: `${selectSG.GroupName}(${selectSG.GroupId})`,
+          value: selectSG.GroupId,
+          description: selectSG.Description,
         };
       }
     } catch (error) {
@@ -2394,25 +2236,26 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
     pipelineInfo.seledtedKDKProvisionType = KDS_TYPE.filter(
       (kds) =>
-        kds.value === pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode
+        kds.value ===
+        pipelineInfo.ingestionServer.sinkKinesis?.kinesisStreamMode
     )[0];
   };
   const setUpdateListPlugins = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+      const { success, data }: ApiResponse<ListPluginsResponse> =
         await getPluginList({
           pageNumber: 1,
           pageSize: 1000,
         });
       if (success) {
         pipelineInfo.selectedTransformPlugins = data.items.filter(
-          (item) => item.id === pipelineInfo.dataProcessing.transformPlugin.id
+          (item) => item.id === pipelineInfo.dataProcessing?.transformPlugin?.id
         );
-        const enrichPluginIds = pipelineInfo.dataProcessing.enrichPlugin.map(
+        const enrichPluginIds = pipelineInfo.dataProcessing?.enrichPlugin?.map(
           (item) => item.id
         );
         pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
-          enrichPluginIds.includes(defaultStr(item.id))
+          enrichPluginIds?.includes(defaultStr(item.id))
         );
       }
     } catch (error) {
@@ -2421,19 +2264,19 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateNewServerlessVpc = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: pipelineInfo.region,
       });
       if (success) {
         const selectVpc = data.filter(
           (element) =>
-            element.id ===
-            pipelineInfo.dataModeling.redshift.newServerless.network.vpcId
+            element.VpcId ===
+            pipelineInfo.dataModeling?.redshift?.newServerless?.network.vpcId
         )[0];
         pipelineInfo.redshiftServerlessVPC = {
-          label: `${selectVpc.name}(${selectVpc.id})`,
-          value: selectVpc.id,
-          description: selectVpc.cidr,
+          label: `${selectVpc.Name}(${selectVpc.VpcId})`,
+          value: selectVpc.VpcId,
+          description: selectVpc.CidrBlock,
         };
       }
     } catch (error) {
@@ -2442,21 +2285,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   };
   const setUpdateNewServerlessSG = async (pipelineInfo: IExtPipeline) => {
     try {
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
-          vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
+          vpcId: defaultStr(
+            pipelineInfo.dataModeling?.redshift?.newServerless?.network.vpcId
+          ),
         });
       if (success) {
         const selectSGs = data.filter((element) =>
-          pipelineInfo.dataModeling.redshift.newServerless.network.securityGroups.includes(
-            element.id
+          pipelineInfo.dataModeling?.redshift?.newServerless?.network.securityGroups.includes(
+            element.GroupId
           )
         );
         pipelineInfo.redshiftServerlessSG = selectSGs.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.description,
+          label: `${element.GroupName}(${element.GroupId})`,
+          value: element.GroupId,
+          description: element.Description,
         }));
       }
     } catch (error) {
@@ -2468,22 +2313,22 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId: pipelineInfo.dataModeling.redshift.newServerless.network.vpcId,
         });
       if (success) {
         const selectSubnets = data.filter((element) =>
-          pipelineInfo.dataModeling.redshift.newServerless.network.subnetIds.includes(
-            element.id
+          pipelineInfo.dataModeling?.redshift?.newServerless?.network.subnetIds.includes(
+            element.SubnetId
           )
         );
         pipelineInfo.redshiftServerlessSubnets = selectSubnets.map(
           (element) => ({
-            label: `${element.name}(${element.id})`,
-            value: element.id,
-            description: `${element.availabilityZone}:${element.cidr}(${element.type})`,
+            label: `${element.Name}(${element.SubnetId})`,
+            value: element.SubnetId,
+            description: `${element.AvailabilityZone}:${element.CidrBlock}(${element.Type})`,
           })
         );
       }
@@ -2498,21 +2343,21 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     try {
-      const { success, data }: ApiResponse<RedshiftResponse[]> =
+      const { success, data }: ApiResponse<ListRedshiftClustersResponse> =
         await getRedshiftCluster({
           region: pipelineInfo.region,
         });
       if (success) {
         const selectCluster = data.filter(
           (element) =>
-            element.name ===
-            pipelineInfo.dataModeling.redshift.provisioned.clusterIdentifier
+            element.Name ===
+            pipelineInfo.dataModeling?.redshift?.provisioned?.clusterIdentifier
         )[0];
         pipelineInfo.selectedRedshiftCluster = {
-          label: selectCluster.name,
-          value: selectCluster.name,
-          description: selectCluster.endpoint.Address,
-          labelTag: selectCluster.status,
+          label: selectCluster.Name,
+          value: selectCluster.Name,
+          description: selectCluster.Endpoint.Address,
+          labelTag: selectCluster.Status,
         };
       }
     } catch (error) {
@@ -2525,7 +2370,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       return;
     }
     const reverseScheduleExpression = reverseCronDateRange(
-      pipelineInfo.dataProcessing.scheduleExpression
+      defaultStr(pipelineInfo.dataProcessing?.scheduleExpression)
     );
     pipelineInfo.selectedExcutionType = EXECUTION_TYPE_LIST.filter(
       (type) => type.value === reverseScheduleExpression.type
@@ -2540,7 +2385,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
 
     const reverseFreshness = reverseFreshnessInHour(
-      pipelineInfo.dataProcessing.dataFreshnessInHour
+      defaultNumber(pipelineInfo.dataProcessing?.dataFreshnessInHour, 72)
     );
     pipelineInfo.eventFreshValue = reverseFreshness.value;
     pipelineInfo.selectedEventFreshUnit = {
@@ -2555,7 +2400,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     );
 
     pipelineInfo.redshiftType = !isEmpty(
-      pipelineInfo.dataModeling.redshift.newServerless
+      pipelineInfo.dataModeling?.redshift?.newServerless
     )
       ? 'serverless'
       : 'provisioned';
@@ -2563,9 +2408,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
         pipelineInfo.region
       ).filter(
-        (type) =>
+        (type: SelectProps.Option) =>
           type.value ===
-          pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
+          pipelineInfo.dataModeling?.redshift?.newServerless?.baseCapacity.toString()
       )[0];
       await setUpdateNewServerlessVpc(pipelineInfo);
       await setUpdateNewServerlessSG(pipelineInfo);
@@ -2575,7 +2420,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     }
 
     const reverseRedshiftDataRange = reverseRedshiftInterval(
-      pipelineInfo.dataModeling.redshift.dataRange
+      defaultNumber(pipelineInfo.dataModeling?.redshift?.dataRange, 0)
     );
     pipelineInfo.redshiftExecutionValue = reverseRedshiftDataRange.value;
     pipelineInfo.selectedRedshiftExecutionUnit = REDSHIFT_UNIT_LIST.filter(
@@ -2591,8 +2436,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     const res: IExtPipeline = {
       ...INIT_EXT_PIPELINE_DATA,
       id: defaultStr(data.id),
-      type: defaultStr(data.type),
-      prefix: defaultStr(data.prefix),
       projectId: defaultStr(data.projectId),
       pipelineId: defaultStr(data.pipelineId),
       region: defaultStr(data.region),
@@ -2617,8 +2460,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       ingestionServer: {
         ingestionType: defaultStr(
           data.ingestionServer.ingestionType,
-          EIngestionType.EC2
-        ) as EIngestionType,
+          IngestionType.EC2
+        ) as IngestionType,
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,
@@ -2638,9 +2481,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           ),
         },
         domain: {
-          domainName: defaultStr(data.ingestionServer.domain.domainName),
+          domainName: defaultStr(data.ingestionServer.domain?.domainName),
           certificateArn: defaultStr(
-            data.ingestionServer.domain.certificateArn
+            data.ingestionServer.domain?.certificateArn
           ),
         },
         loadBalancer: {
@@ -2653,8 +2496,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           ),
           protocol: defaultStr(
             data.ingestionServer.loadBalancer.protocol,
-            ProtocalType.HTTPS
-          ),
+            PipelineServerProtocol.HTTPS
+          ) as PipelineServerProtocol,
           enableGlobalAccelerator: defaultGenericsValue(
             data.ingestionServer.loadBalancer.enableGlobalAccelerator,
             false
@@ -2669,23 +2512,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           ),
           logS3Bucket: {
             name: defaultStr(
-              data.ingestionServer.loadBalancer.logS3Bucket.name
+              data.ingestionServer.loadBalancer.logS3Bucket?.name
             ),
             prefix: defaultStr(
-              data.ingestionServer.loadBalancer.logS3Bucket.prefix
+              data.ingestionServer.loadBalancer.logS3Bucket?.prefix
             ),
           },
           notificationsTopicArn: defaultStr(
             data.ingestionServer.loadBalancer.notificationsTopicArn
           ),
         },
-        sinkType: defaultStr(data.ingestionServer.sinkType, SinkType.MSK),
+        sinkType: defaultStr(
+          data.ingestionServer.sinkType,
+          PipelineSinkType.KAFKA
+        ) as PipelineSinkType,
         sinkBatch: {
-          size: defaultGenericsValue(
-            data.ingestionServer.sinkBatch?.size,
-            50000
-          ),
-          intervalSeconds: defaultGenericsValue(
+          size: defaultNumber(data.ingestionServer.sinkBatch?.size, 50000),
+          intervalSeconds: defaultNumber(
             data.ingestionServer.sinkBatch?.intervalSeconds,
             3000
           ),
@@ -2695,20 +2538,17 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
             name: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.name),
             prefix: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.prefix),
           },
-          s3BufferSize: defaultGenericsValue(
+          s3BufferSize: defaultNumber(
             data.ingestionServer.sinkS3?.s3BufferSize,
             10
           ),
-          s3BufferInterval: defaultGenericsValue(
+          s3BufferInterval: defaultNumber(
             data.ingestionServer.sinkS3?.s3BufferInterval,
             300
           ),
         },
         sinkKafka: {
-          brokers: defaultGenericsValue(
-            data.ingestionServer.sinkKafka?.brokers,
-            []
-          ),
+          brokers: data.ingestionServer.sinkKafka?.brokers ?? [],
           topic: defaultStr(data.ingestionServer.sinkKafka?.topic),
           securityGroupId: defaultStr(
             data.ingestionServer.sinkKafka?.securityGroupId
@@ -2725,8 +2565,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         sinkKinesis: {
           kinesisStreamMode: defaultStr(
             data.ingestionServer.sinkKinesis?.kinesisStreamMode
-          ),
-          kinesisShardCount: defaultGenericsValue(
+          ) as KinesisStreamMode,
+          kinesisShardCount: defaultNumber(
             data.ingestionServer.sinkKinesis?.kinesisShardCount,
             2
           ),
@@ -2739,7 +2579,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
       },
       dataProcessing: {
-        dataFreshnessInHour: defaultGenericsValue(
+        dataFreshnessInHour: defaultNumber(
           data.dataProcessing?.dataFreshnessInHour,
           72
         ),
@@ -2756,7 +2596,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           name: defaultStr(data.dataProcessing?.pipelineBucket?.name),
           prefix: defaultStr(data.dataProcessing?.pipelineBucket?.prefix),
         },
-        transformPlugin: defaultStr(data.dataProcessing?.transformPlugin),
+        transformPlugin: data.dataProcessing?.transformPlugin,
         enrichPlugin: defaultGenericsValue(
           data.dataProcessing?.enrichPlugin,
           []
@@ -2765,24 +2605,18 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       dataModeling: {
         athena: data.dataModeling?.athena ?? false,
         redshift: {
-          dataRange: defaultGenericsValue(
-            data.dataModeling?.redshift?.dataRange,
-            0
-          ),
-          provisioned: data.dataModeling?.redshift?.provisioned ?? null,
-          newServerless: data.dataModeling?.redshift?.newServerless ?? null,
+          dataRange: defaultNumber(data.dataModeling?.redshift?.dataRange, 0),
+          provisioned: data.dataModeling?.redshift?.provisioned,
+          newServerless: data.dataModeling?.redshift?.newServerless,
         },
       },
       statusType: data.statusType,
       stackDetails: defaultGenericsValue(data.stackDetails, []),
       executionDetail: data.executionDetail,
-      workflow: data.workflow,
       version: defaultStr(data.version),
       versionTag: defaultStr(data.versionTag),
-      createAt: defaultGenericsValue(data.createAt, 0),
-      updateAt: defaultGenericsValue(data.updateAt, 0),
-      operator: defaultStr(data.operator),
-      deleted: defaultGenericsValue(data.deleted, false),
+      createAt: defaultNumber(data.createAt, 0),
+      updateAt: defaultNumber(data.updateAt, 0),
     };
     res.enableDataProcessing = !isEmpty(data.dataProcessing);
     res.enableReporting = !isEmpty(data.reporting);

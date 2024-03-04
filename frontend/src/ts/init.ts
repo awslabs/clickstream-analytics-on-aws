@@ -12,30 +12,37 @@
  */
 
 import {
-  EIngestionType,
   ENetworkType,
-  ProtocalType,
-  ResourceCreateMethod,
-  SinkType,
-} from './const';
+  IProject,
+  IUser,
+  IngestionType,
+  KinesisStreamMode,
+  PipelineServerProtocol,
+  PipelineSinkType,
+  ProjectEnvironment,
+} from '@aws/clickstream-base-lib';
+import { IExtPipeline } from 'types/pipeline';
+import { ResourceCreateMethod } from './const';
 
-export const INIT_PROJECT_DATA = {
+export const INIT_PROJECT_DATA: IProject = {
   id: 'my_project_id',
   name: '',
   description: '',
   emails: '',
-  platform: '',
   region: '',
-  environment: '',
+  environment: ProjectEnvironment.DEV,
+  pipelineId: '',
+  pipelineVersion: '',
+  applications: [],
+  analysisStudioEnabled: false,
+  createAt: 0,
+  updateAt: 0,
 };
 
 export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   id: '',
-  type: '',
-  prefix: '',
   projectId: '',
   pipelineId: '',
-  appIds: [],
   region: '',
   dataCollectionSDK: '',
   tags: [],
@@ -50,7 +57,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     prefix: '',
   },
   ingestionServer: {
-    ingestionType: EIngestionType.EC2,
+    ingestionType: IngestionType.EC2,
     size: {
       serverMin: 2,
       serverMax: 4,
@@ -64,7 +71,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     loadBalancer: {
       serverEndpointPath: '/collect',
       serverCorsOrigin: '',
-      protocol: ProtocalType.HTTPS,
+      protocol: PipelineServerProtocol.HTTPS,
       enableGlobalAccelerator: false,
       enableApplicationLoadBalancerAccessLog: false,
       authenticationSecretArn: '',
@@ -74,7 +81,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       },
       notificationsTopicArn: '',
     },
-    sinkType: SinkType.KDS,
+    sinkType: PipelineSinkType.KINESIS,
     sinkBatch: {
       size: 10000,
       intervalSeconds: 300,
@@ -100,7 +107,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       },
     },
     sinkKinesis: {
-      kinesisStreamMode: '',
+      kinesisStreamMode: KinesisStreamMode.PROVISIONED,
       kinesisShardCount: 2,
       sinkBucket: {
         name: '',
@@ -123,7 +130,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       name: '',
       prefix: '',
     },
-    transformPlugin: '',
+    transformPlugin: undefined,
     enrichPlugin: [],
   },
   dataModeling: {
@@ -149,6 +156,10 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
       accountName: '',
     },
   },
+  version: '',
+  versionTag: 'latest',
+  createAt: 0,
+  updateAt: 0,
 
   selectedRegion: null,
   selectedVPC: null,
@@ -209,12 +220,8 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
 
 export const INIT_USER_DATA: IUser = {
   id: '',
-  type: 'USER',
-  prefix: 'USER',
   name: '',
   roles: [],
   createAt: 0,
-  updateAt: 0,
   operator: '',
-  deleted: false,
 };

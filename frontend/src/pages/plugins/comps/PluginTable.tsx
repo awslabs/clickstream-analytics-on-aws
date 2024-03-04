@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IPlugin, ListPluginsResponse } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -112,7 +113,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const listPlugins = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
+      const { success, data }: ApiResponse<ListPluginsResponse> =
         await getPluginList({
           pageNumber: currentPage,
           pageSize: PAGE_SIZE,
@@ -151,7 +152,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deletePlugin({
-        id: defaultStr(selectedItems[0]?.id),
+        pluginId: defaultStr(selectedItems[0]?.id),
       });
       if (resData.success) {
         setSelectedItems([]);

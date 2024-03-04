@@ -13,14 +13,16 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamProjectId, validate } from '../common/request-valid';
+import { DashboardServ } from '../service/dashboard';
 import { ProjectServ } from '../service/project';
 
-const router_project = express.Router();
+const router_project: express.Router = express.Router();
 const projectServ: ProjectServ = new ProjectServ();
+const dashboardServ: DashboardServ = new DashboardServ();
 
 router_project.get(
-  '/:projectId/:appId/dashboard',
+  '/project/:projectId/app/:appId/dashboards',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -34,17 +36,17 @@ router_project.get(
       })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.listDashboards(req, res, next);
+    return dashboardServ.listDashboards(req, res, next);
   });
 
 router_project.get(
-  '/:projectId/:appId/dashboard/:dashboardId',
+  '/project/:projectId/app/:appId/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.getDashboard(req, res, next);
+    return dashboardServ.getDashboard(req, res, next);
   });
 
 router_project.post(
-  '/:projectId/:appId/dashboard',
+  '/project/:projectId/app/:appId/dashboard',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('name').isLength({ max: 255 }),
@@ -53,24 +55,24 @@ router_project.post(
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.createDashboard(req, res, next);
+    return dashboardServ.createDashboard(req, res, next);
   });
 
 router_project.delete(
-  '/:projectId/:appId/dashboard/:dashboardId',
+  '/project/:projectId/app/:appId/dashboard/:dashboardId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.deleteDashboard(req, res, next);
+    return dashboardServ.deleteDashboard(req, res, next);
   });
 
 
 router_project.get(
-  '/:projectId/analyzes',
+  '/project/:projectId/analyzes',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return projectServ.getAnalyzes(req, res, next);
+    return dashboardServ.getAnalyzes(req, res, next);
   });
 
 router_project.get(
-  '',
+  '/projects',
   validate([
     query().custom((value: any, { req }: any) => defaultPageValueValid(value, {
       req,
@@ -88,7 +90,7 @@ router_project.get(
   });
 
 router_project.post(
-  '',
+  '/project',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('emails').custom(isEmails),
@@ -99,18 +101,18 @@ router_project.post(
     return projectServ.create(req, res, next);
   });
 
-router_project.get('/:id',
+router_project.get('/project/:projectId',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.details(req, res, next);
   });
 
 router_project.put(
-  '/:id',
+  '/project/:projectId',
   validate([
     body().custom(isValidEmpty),
     body('id')
       .custom(isProjectExisted)
-      .custom((value, { req }) => validMatchParamId(value, {
+      .custom((value, { req }) => validMatchParamProjectId(value, {
         req,
         location: 'body',
         path: '',
@@ -121,16 +123,16 @@ router_project.put(
   });
 
 router_project.delete(
-  '/:id',
+  '/project/:projectId',
   validate([
-    param('id').custom(isProjectExisted),
+    param('projectId').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.delete(req, res, next);
   });
 
 
-router_project.get('/verification/:id',
+router_project.get('/project/:projectId/verification',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return projectServ.verification(req, res, next);
   });

@@ -22,11 +22,11 @@ import {
   PARAMETER_LABEL_VPCID,
   PARAMETER_LABEL_CERTIFICATE_ARN,
   PARAMETER_LABEL_DOMAIN_NAME,
+  STACK_CORS_PATTERN,
 } from '../../common/constant';
 
 import { SINK_TYPE_MODE } from '../../common/model';
 import { Parameters, SubnetParameterType } from '../../common/parameters';
-import { STACK_CORS_PATTERN } from '../../control-plane/backend/lambda/api/common/constants-ln';
 
 export function createStackParameters(scope: Construct, props: {deliverToKinesis: boolean; deliverToKafka: boolean; deliverToS3: boolean}) {
 

@@ -13,24 +13,6 @@
 
 export {};
 declare global {
-  interface IPlugin {
-    id?: string;
-    name: string;
-    description: { [key: string]: string };
-    pluginType: string;
-    mainFunction: string;
-    jarFile: string;
-    dependencyFiles: string[];
-    prefix?: string;
-    operator?: string;
-    deleted?: boolean;
-    builtIn?: boolean;
-    status?: string;
-    bindCount?: number;
-    createAt?: number;
-    updateAt?: string;
-  }
-
   interface IPluginFile {
     name: string;
     loaded: number;

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ProjectEnvironment, UserRole } from '@aws/clickstream-base-lib';
 import { DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand, TagResourceCommand as EventTagResourceCommand } from '@aws-sdk/client-cloudwatch-events';
 import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
@@ -34,7 +35,6 @@ import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand, TagRes
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
-import { IUserRole, ProjectEnvironment } from '../../common/types';
 import dictionary from '../../config/dictionary.json';
 import { IPipeline } from '../../model/pipeline';
 
@@ -67,7 +67,7 @@ export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-1
 export const AllowIAMUserPutObjectPolicyInCnNorth1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 
-function userMock(ddbMock: any, userId: string, roles: IUserRole[], existed?: boolean): any {
+function userMock(ddbMock: any, userId: string, roles: UserRole[], existed?: boolean): any {
   if (!existed) {
     return ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,

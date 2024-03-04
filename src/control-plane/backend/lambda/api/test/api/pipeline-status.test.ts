@@ -31,8 +31,8 @@ const BASE_STATUS_PIPELINE: IPipeline = {
         name: 'EXAMPLE_BUCKET',
         prefix: '',
       },
-      s3BatchMaxBytes: 1000000,
-      s3BatchTimeout: 60,
+      s3BufferSize: 1000000,
+      s3BufferInterval: 60,
     },
   },
 };

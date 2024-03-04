@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, CreateFolderCommand, CreateFolderMembershipCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardCommand, DescribeDashboardDefinitionCommand, DescribeFolderCommand, ListFolderMembersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import {
   DeleteCommand,
@@ -23,7 +24,6 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from '../../common/constants-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -49,7 +49,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     quickSightMock.on(CreateFolderMembershipCommand).resolves({});
     const res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'd11',
@@ -89,7 +89,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(CreateDashboardCommand).resolves({});
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     const res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'd11',
@@ -115,7 +115,7 @@ describe('Analytics dashboard test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     let res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: `${'a'.repeat(256)}`,
@@ -132,7 +132,7 @@ describe('Analytics dashboard test', () => {
     expect(res.body.message).toEqual('Parameter verification failed.');
 
     res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .post(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         name: 'name1',
@@ -206,7 +206,7 @@ describe('Analytics dashboard test', () => {
       },
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboards`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -305,7 +305,7 @@ describe('Analytics dashboard test', () => {
       },
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/app1/dashboard`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/app/app1/dashboards`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -374,7 +374,7 @@ describe('Analytics dashboard test', () => {
       },
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -432,7 +432,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(DeleteDataSetCommand).resolves({});
 
     const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .delete(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
@@ -467,7 +467,7 @@ describe('Analytics dashboard test', () => {
     quickSightMock.on(DeleteDataSetCommand).resolves({});
 
     const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .delete(`/api/project/${MOCK_PROJECT_ID}/app/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 0);

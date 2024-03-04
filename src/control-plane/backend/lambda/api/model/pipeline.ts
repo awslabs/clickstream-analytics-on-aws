@@ -11,12 +11,35 @@
  *  and limitations under the License.
  */
 
+import {
+  DataModeling,
+  DataProcessing,
+  ExecutionDetail,
+  IPipeline,
+  ITag,
+  IngestionServer,
+  IngestionType,
+  MULTI_APP_ID_PATTERN,
+  NetworkProps,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
+  PROJECT_ID_PATTERN,
+  PipelineServerProtocol,
+  PipelineSinkType,
+  PipelineStackType,
+  PipelineStatus,
+  PipelineStatusDetail,
+  PipelineStatusType,
+  Reporting,
+  S3Bucket,
+  SECRETS_MANAGER_ARN_PATTERN,
+} from '@aws/clickstream-base-lib';
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
-import { IPlugin } from './plugin';
-import { IProject } from './project';
+import { RawPlugin } from './plugin';
+import { RawProject } from './project';
 import {
   CAppRegistryStack,
   CAthenaStack,
@@ -41,18 +64,7 @@ import {
   stackWorkflowS3Bucket,
 } from '../common/constants';
 import {
-  MULTI_APP_ID_PATTERN,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
-  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
-  PROJECT_ID_PATTERN,
-  SECRETS_MANAGER_ARN_PATTERN,
-} from '../common/constants-ln';
-import {
   BuiltInTagKeys,
-  ExecutionDetail,
-  PipelineStackType,
-  PipelineStatusDetail,
-  PipelineStatusType,
 } from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
@@ -63,14 +75,6 @@ import {
 } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
-  ENetworkType,
-  IngestionServerSinkBatchProps,
-  IngestionServerSizeProps,
-  IngestionType,
-  KinesisStreamMode,
-  PipelineServerProtocol,
-  PipelineSinkType,
-  PipelineStatus,
   RedshiftInfo,
   StackUpdateParameter,
   WorkflowParallelBranch,
@@ -105,140 +109,7 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 
-interface IngestionServerLoadBalancerProps {
-  readonly serverEndpointPath: string;
-  readonly serverCorsOrigin: string;
-  readonly protocol: PipelineServerProtocol;
-  readonly notificationsTopicArn?: string;
-  readonly enableGlobalAccelerator: boolean;
-  readonly enableApplicationLoadBalancerAccessLog: boolean;
-  readonly logS3Bucket?: S3Bucket;
-  readonly authenticationSecretArn?: string;
-}
-
-interface IngestionServerSinkS3Props {
-  readonly sinkBucket: S3Bucket;
-  readonly s3BatchMaxBytes?: number;
-  readonly s3BatchTimeout?: number;
-}
-
-interface IngestionServerSinkKafkaProps {
-  readonly topic: string;
-  readonly brokers: string[];
-  readonly securityGroupId: string;
-  readonly mskCluster?: MSKClusterProps;
-  readonly kafkaConnector: KafkaS3Connector;
-}
-
-interface IngestionServerSinkKinesisProps {
-  readonly kinesisStreamMode: KinesisStreamMode;
-  readonly kinesisShardCount?: number;
-  readonly kinesisDataRetentionHours?: number;
-  readonly sinkBucket: S3Bucket;
-}
-
-interface IngestionServerDomainProps {
-  readonly domainName: string;
-  readonly certificateArn: string;
-}
-
-interface NetworkProps {
-  readonly vpcId: string;
-  readonly publicSubnetIds: string[];
-  privateSubnetIds: string[];
-  readonly type?: ENetworkType;
-}
-
-interface RedshiftNetworkProps {
-  readonly vpcId: string;
-  readonly securityGroups: string[];
-  readonly subnetIds: string[];
-}
-
-interface IngestionServer {
-  readonly ingestionType?: IngestionType;
-  readonly size: IngestionServerSizeProps;
-  readonly domain?: IngestionServerDomainProps;
-  readonly loadBalancer: IngestionServerLoadBalancerProps;
-  readonly sinkType: PipelineSinkType;
-  readonly sinkBatch?: IngestionServerSinkBatchProps;
-  readonly sinkS3?: IngestionServerSinkS3Props;
-  readonly sinkKafka?: IngestionServerSinkKafkaProps;
-  readonly sinkKinesis?: IngestionServerSinkKinesisProps;
-}
-
-export interface DataProcessing {
-  readonly dataFreshnessInHour: number;
-  readonly scheduleExpression: string;
-  readonly sourceS3Bucket: S3Bucket;
-  readonly sinkS3Bucket: S3Bucket;
-  readonly pipelineBucket: S3Bucket;
-  readonly outputFormat?: 'parquet' | 'json';
-  readonly transformPlugin?: string;
-  readonly enrichPlugin?: string[];
-}
-
-export interface KafkaS3Connector {
-  readonly enable: boolean;
-  readonly sinkBucket?: S3Bucket;
-  readonly maxWorkerCount?: number;
-  readonly minWorkerCount?: number;
-  readonly workerMcuCount?: number;
-  readonly pluginUrl?: string;
-  readonly customConnectorConfiguration?: string;
-}
-
-export interface DataModeling {
-  readonly ods?: {
-    readonly bucket: S3Bucket;
-    readonly fileSuffix: string;
-  };
-  readonly redshift?: {
-    readonly dataRange: string;
-    readonly newServerless?: {
-      readonly baseCapacity: number;
-      readonly network: RedshiftNetworkProps;
-    };
-    readonly existingServerless?: {
-      readonly workgroupName: string;
-      readonly iamRoleArn: string;
-    };
-    readonly provisioned?: {
-      readonly clusterIdentifier: string;
-      readonly dbUser: string;
-    };
-  };
-  readonly athena: boolean;
-  readonly loadWorkflow?: {
-    readonly bucket?: S3Bucket;
-    readonly maxFilesLimit?: number;
-  };
-}
-
-export interface Reporting {
-  readonly quickSight?: {
-    readonly accountName: string;
-    readonly namespace?: string;
-    readonly vpcConnection?: string;
-  };
-}
-
-export interface ITag {
-  readonly key: string;
-  readonly value: string;
-}
-
-interface S3Bucket {
-  readonly name: string;
-  readonly prefix: string;
-}
-
-interface MSKClusterProps {
-  readonly name: string;
-  readonly arn: string;
-}
-
-export interface IPipeline {
+export interface RawPipeline {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
@@ -274,10 +145,10 @@ export interface IPipeline {
 }
 
 export interface CPipelineResources {
-  project?: IProject;
+  project?: RawProject;
   mskBrokers?: string[];
   appIds?: string[];
-  plugins?: IPlugin[];
+  plugins?: RawPlugin[];
   redshift?: RedshiftInfo;
   solution?: IDictionary;
   templates?: IDictionary;
@@ -285,14 +156,74 @@ export interface CPipelineResources {
   quickSightUser?: QuickSightUserArns;
 }
 
+export function getPipelineFromRaw(raw: RawPipeline[]): IPipeline[] {
+  return raw.map((item: RawPipeline) => {
+    return {
+      id: item.id,
+      projectId: item.projectId,
+      pipelineId: item.pipelineId,
+      region: item.region,
+      dataCollectionSDK: item.dataCollectionSDK,
+      tags: item.tags,
+      network: item.network,
+      bucket: item.bucket,
+      ingestionServer: item.ingestionServer,
+      dataProcessing: item.dataProcessing,
+      dataModeling: item.dataModeling,
+      reporting: item.reporting,
+      lastAction: item.lastAction,
+      status: item.status,
+      templateVersion: item.templateVersion,
+      statusType: item.statusType,
+      stackDetails: item.stackDetails,
+      executionDetail: item.executionDetail,
+      version: item.version,
+      versionTag: item.versionTag,
+      createAt: item.createAt,
+      updateAt: item.updateAt,
+    } as IPipeline;
+  });
+}
+
+export function getRawPipeline(pipeline: IPipeline, operator?: string): RawPipeline {
+  return {
+    id: pipeline.projectId,
+    type: `PIPELINE#${pipeline.pipelineId}#latest`,
+    prefix: 'PIPELINE',
+    projectId: pipeline.projectId,
+    pipelineId: pipeline.pipelineId,
+    region: pipeline.region,
+    dataCollectionSDK: pipeline.dataCollectionSDK,
+    tags: pipeline.tags,
+    network: pipeline.network,
+    bucket: pipeline.bucket,
+    ingestionServer: pipeline.ingestionServer,
+    dataProcessing: pipeline.dataProcessing,
+    dataModeling: pipeline.dataModeling,
+    reporting: pipeline.reporting,
+    lastAction: pipeline.lastAction,
+    status: pipeline.status,
+    templateVersion: pipeline.templateVersion,
+    statusType: pipeline.statusType,
+    stackDetails: pipeline.stackDetails,
+    executionDetail: pipeline.executionDetail,
+    version: pipeline.version,
+    versionTag: pipeline.versionTag,
+    createAt: Date.now(),
+    updateAt: Date.now(),
+    operator: operator ?? '',
+    deleted: false,
+  };
+}
+
 export class CPipeline {
-  private pipeline: IPipeline;
+  private pipeline: RawPipeline;
   private stackManager: StackManager;
   private resources?: CPipelineResources;
   private validateNetworkOnce: boolean;
   private stackTags?: Tag[];
 
-  constructor(pipeline: IPipeline) {
+  constructor(pipeline: RawPipeline) {
     this.pipeline = pipeline;
     this.stackManager = new StackManager(pipeline);
     this.validateNetworkOnce = false;
@@ -353,7 +284,7 @@ export class CPipeline {
     }
   }
 
-  public async update(oldPipeline: IPipeline): Promise<void> {
+  public async update(oldPipeline: RawPipeline): Promise<void> {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
@@ -385,7 +316,7 @@ export class CPipeline {
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
-  private async _getEditStacksAndParameters(oldPipeline: IPipeline):
+  private async _getEditStacksAndParameters(oldPipeline: RawPipeline):
   Promise<{ editStacks: string[]; editParameters: StackUpdateParameter[] }> {
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
@@ -434,7 +365,7 @@ export class CPipeline {
     };
   }
 
-  private _editStackTags(oldPipeline: IPipeline): boolean {
+  private _editStackTags(oldPipeline: RawPipeline): boolean {
     const newStackTags = [...this.pipeline.tags];
     const oldStackTags = [...oldPipeline.tags];
     newStackTags.sort((a, b) => a.key.localeCompare(b.key));
@@ -443,7 +374,7 @@ export class CPipeline {
     return !isEmpty(diffTags.edited) || !isEmpty(diffTags.added) || !isEmpty(diffTags.removed);
   }
 
-  public async upgrade(oldPipeline: IPipeline): Promise<void> {
+  public async upgrade(oldPipeline: RawPipeline): Promise<void> {
     // create rule to listen CFN stack
     await this._createRules();
     this.pipeline.lastAction = 'Upgrade';
@@ -714,7 +645,7 @@ export class CPipeline {
     }
   }
 
-  private async _getProject(pipeline: IPipeline) {
+  private async _getProject(pipeline: RawPipeline) {
     const project = await store.getProject(pipeline.projectId);
     if (!project) {
       throw new ClickStreamBadRequestError('Project no found. Please check and try again.');
@@ -722,7 +653,7 @@ export class CPipeline {
     return project;
   }
 
-  private async _getAppIds(pipeline: IPipeline) {
+  private async _getAppIds(pipeline: RawPipeline) {
     const apps = await store.listApplication(pipeline.projectId, 'asc');
     const appIds = apps.map(a => a.appId);
     if (!isEmpty(appIds)) {

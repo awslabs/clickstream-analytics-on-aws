@@ -11,172 +11,123 @@
  *  and limitations under the License.
  */
 
+import {
+  DomainAvailableRequest,
+  ListACMCertificatesRequest,
+  ListAlarmsRequest,
+  ListBucketsRequest,
+  ListMSKClustersRequest,
+  ListRedshiftClustersRequest,
+  ListRedshiftServerlessWorkGroupsRequest,
+  ListRolesRequest,
+  ListSSMSecretsRequest,
+  ListSecurityGroupsRequest,
+  ListSubnetsRequest,
+  ListVpcRequest,
+  ServicesAvailableRequest,
+  UpdateAlarmsRequest,
+} from '@aws/clickstream-base-lib';
 import { apiRequest } from 'ts/request';
 
-const fetchStatusWithType = async (params: {
-  type: StatusWithType;
-  projectId?: string;
-  pipelineId?: string;
-}) => {
-  const result: any = await apiRequest('post', `/env/fetch`, params);
+export const getRegionList = async () => {
+  const result: any = apiRequest('get', '/env/regions');
   return result;
 };
 
-const getRegionList = async () => {
-  const result: any = await apiRequest('get', `/env/regions`);
+export const getVPCList = async (params: ListVpcRequest) => {
+  const result: any = await apiRequest('get', '/env/vpcs', params);
   return result;
 };
 
-const getVPCList = async (params: { region?: string }) => {
-  const result: any = await apiRequest('get', `/env/vpc`, params);
-  return result;
-};
-
-const get3AZVPCList = async (params: { region?: string }) => {
-  const result: any = await apiRequest('get', `/env/vpc3az`, params);
-  return result;
-};
-
-const getSubnetList = async (params: { region: string; vpcId: string }) => {
-  const result: any = await apiRequest('get', `/env/vpc/subnet`, params);
-  return result;
-};
-
-const getHostedZoneList = async () => {
-  const result: any = await apiRequest('get', `/env/route53/hostedzones`);
-  return result;
-};
-
-const getS3BucketList = async (region?: string) => {
-  const result: any = await apiRequest('get', `/env/s3/buckets`, {
-    region: region,
-  });
-  return result;
-};
-
-const getMSKList = async (params: { vpcId: string; region?: string }) => {
-  const result: any = await apiRequest('get', `/env/msk/clusters`, params);
-  return result;
-};
-
-const getRedshiftCluster = async (params: { region?: string }) => {
-  const result: any = await apiRequest('get', `/env/redshift/clusters`, params);
-  return result;
-};
-
-const getRedshiftServerlessWorkgroup = async (params: { region?: string }) => {
+export const getSubnetList = async (params: ListSubnetsRequest) => {
   const result: any = await apiRequest(
     'get',
-    `/env/redshift-serverless/workgroups`,
+    `/env/vpc/${params.vpcId}/subnets`,
+    { region: params.region, subnetType: params.subnetType }
+  );
+  return result;
+};
+
+export const getSecurityGroups = async (params: ListSecurityGroupsRequest) => {
+  const result: any = await apiRequest(
+    'get',
+    `/env/vpc/${params.vpcId}/securityGroups`,
+    { region: params.region }
+  );
+  return result;
+};
+
+export const getS3BucketList = async (params: ListBucketsRequest) => {
+  const result: any = await apiRequest('get', '/env/buckets', params);
+  return result;
+};
+
+export const getMSKList = async (params: ListMSKClustersRequest) => {
+  const result: any = await apiRequest('get', '/env/MSKClusters', params);
+  return result;
+};
+
+export const getRedshiftCluster = async (
+  params: ListRedshiftClustersRequest
+) => {
+  const result: any = await apiRequest('get', '/env/redshiftClusters', params);
+  return result;
+};
+
+export const getRedshiftServerlessWorkgroup = async (
+  params: ListRedshiftServerlessWorkGroupsRequest
+) => {
+  const result: any = await apiRequest(
+    'get',
+    '/env/redshiftServerlessWorkGroups',
     params
   );
   return result;
 };
 
-const getServiceRoles = async (params: { service?: string }) => {
-  const result: any = await apiRequest('get', `/env/iam/roles`, params);
+export const getServiceRoles = async (params: ListRolesRequest) => {
+  const result: any = await apiRequest('get', '/env/IAMRoles', params);
   return result;
 };
 
-const getServiceRolesByAccount = async (params: { account?: string }) => {
-  const result: any = await apiRequest('get', `/env/iam/roles`, params);
+export const getCertificates = async (params: ListACMCertificatesRequest) => {
+  const result: any = await apiRequest('get', '/env/ACMCertificates', params);
   return result;
 };
 
-const getCertificates = async (params: { region: string }) => {
-  const result: any = await apiRequest('get', `/env/acm/certificates`, params);
+export const describeQuickSightSubscription = async () => {
+  const result: any = await apiRequest('get', '/env/quickSightSubscription');
   return result;
 };
 
-const getQuickSightDetail = async () => {
-  const result: any = await apiRequest('get', `/env/quicksight/describe`);
+export const getSSMSecrets = async (params: ListSSMSecretsRequest) => {
+  const result: any = await apiRequest('get', '/env/SSMSecrets', params);
   return result;
 };
 
-const getQuickSightStatus = async () => {
-  const result: any = await apiRequest('get', `/env/quicksight/ping`);
+export const getSTSUploadRole = async () => {
+  const result: any = await apiRequest('get', '/env/uploadRole');
   return result;
 };
 
-const getSSMSecrets = async (params: { region: string }) => {
-  const result: any = await apiRequest('get', '/env/ssm/secrets', params);
+export const getAlarmList = async (params: ListAlarmsRequest) => {
+  const result: any = await apiRequest('get', '/env/alarms', params);
   return result;
 };
 
-const getSecurityGroups = async (params: { region: string; vpcId: string }) => {
-  const result: any = await apiRequest(
-    'get',
-    '/env/vpc/securitygroups',
-    params
-  );
+export const updateAlarms = async (data: UpdateAlarmsRequest) => {
+  const result: any = await apiRequest('put', '/env/alarm', data);
   return result;
 };
 
-const getSTSUploadRole = async () => {
-  const result: any = await apiRequest('get', '/env/sts/assume_upload_role');
+export const checkServicesAvailable = async (
+  params: ServicesAvailableRequest
+) => {
+  const result: any = await apiRequest('get', '/env/servicesAvailable', params);
   return result;
 };
 
-const getAlarmList = async (params: {
-  pid: string;
-  pageNumber: number;
-  pageSize: number;
-}) => {
-  const result: any = await apiRequest('get', '/env/cloudwatch/alarms', params);
+export const fetchStatusWithType = async (params: DomainAvailableRequest) => {
+  const result: any = await apiRequest('get', '/env/domainAvailable', params);
   return result;
-};
-
-const disableAlarms = async (data: {
-  region: string;
-  alarmNames: string[];
-}) => {
-  const result: any = await apiRequest(
-    'post',
-    `/env/cloudwatch/alarms/disable`,
-    data
-  );
-  return result;
-};
-
-const enableAlarms = async (data: { region: string; alarmNames: string[] }) => {
-  const result: any = await apiRequest(
-    'post',
-    `/env/cloudwatch/alarms/enable`,
-    data
-  );
-  return result;
-};
-
-const checkServicesAvailable = async (params: { region: string }) => {
-  const result: any = await apiRequest(
-    'get',
-    `/env/ping?region=${params.region}&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator`,
-    ``
-  );
-  return result;
-};
-
-export {
-  fetchStatusWithType,
-  get3AZVPCList,
-  getCertificates,
-  getHostedZoneList,
-  getMSKList,
-  getQuickSightDetail,
-  getQuickSightStatus,
-  getRedshiftCluster,
-  getRedshiftServerlessWorkgroup,
-  getRegionList,
-  getS3BucketList,
-  getSSMSecrets,
-  getSecurityGroups,
-  getServiceRoles,
-  getServiceRolesByAccount,
-  getSubnetList,
-  getVPCList,
-  getSTSUploadRole,
-  getAlarmList,
-  disableAlarms,
-  enableAlarms,
-  checkServicesAvailable,
 };

@@ -12,6 +12,11 @@
  */
 
 import {
+  ListBucketsResponse,
+  ListRegionsResponse,
+  ListVpcResponse,
+} from '@aws/clickstream-base-lib';
+import {
   Alert,
   AutosuggestProps,
   Button,
@@ -78,27 +83,20 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   const [s3BucketOptionList, setS3BucketOptionList] =
     useState<AutosuggestProps.Options>([]);
 
-  const sortRegions = (data: RegionResponse[]) => {
-    return data.sort((a, b) => a.id.localeCompare(b.id));
-  };
-
   // get all region list
   const getAllRegionList = async () => {
     setLoadingRegion(true);
     try {
-      const { success, data }: ApiResponse<RegionResponse[]> =
+      const { success, data }: ApiResponse<ListRegionsResponse> =
         await getRegionList();
       if (success) {
-        const sortedRegions = sortRegions(data);
-        const regionOptions: SelectProps.Options = sortedRegions.map(
-          (element) => ({
-            label: AWS_REGION_MAP[element.id]?.RegionName
-              ? t(AWS_REGION_MAP[element.id].RegionName) || ''
-              : '-',
-            labelTag: element.id,
-            value: element.id,
-          })
-        );
+        const regionOptions: SelectProps.Options = data.map((element) => ({
+          label: AWS_REGION_MAP[element.RegionName]?.RegionName
+            ? t(AWS_REGION_MAP[element.RegionName].RegionName) || ''
+            : '-',
+          labelTag: element.RegionName,
+          value: element.RegionName,
+        }));
         setRegionOptionList(regionOptions);
         setLoadingRegion(false);
       }
@@ -112,14 +110,14 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     setLoadingVPC(true);
     setVPCOptionList([]);
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: region,
       });
       if (success) {
         const vpcOptions: SelectProps.Options = data.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.cidr,
+          label: `${element.Name}(${element.VpcId})`,
+          value: element.VpcId,
+          description: element.CidrBlock,
         }));
         setVPCOptionList(vpcOptions);
         setLoadingVPC(false);
@@ -134,12 +132,14 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     setLoadingBucket(true);
     setS3BucketOptionList([]);
     try {
-      const { success, data }: ApiResponse<S3Response[]> =
-        await getS3BucketList(region);
+      const { success, data }: ApiResponse<ListBucketsResponse> =
+        await getS3BucketList({
+          region,
+        });
       if (success) {
         const s3Options: AutosuggestProps.Options = data.map((element) => ({
-          label: `${element.name}`,
-          value: `${element.name}`,
+          label: `${element.Name}`,
+          value: `${element.Name}`,
         }));
         setS3BucketOptionList(s3Options);
         setLoadingBucket(false);

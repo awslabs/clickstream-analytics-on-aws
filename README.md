@@ -48,7 +48,8 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 - Configure [credential of aws cli][configure-aws-cli]
 - Install Node.js LTS version 18.17.0 or later
 - Install Docker Engine
-- Install the dependencies of the solution by executing the command `yarn install --check-files && npx projen`
+- Install pnpm `npm install -g pnpm@8.15.3`
+- Install the dependencies of the solution by executing the command `pnpm install && pnpm projen`
 - Initialize the CDK toolkit stack into AWS environment (only for deploying via [AWS CDK][aws-cdk] for the first time), and run `npx cdk bootstrap`
 
 #### Deploy the web console
@@ -77,7 +78,7 @@ bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
 ## Test
 
 ```shell
-yarn test
+pnpm test
 ```
 
 ## Local development for web console
@@ -156,12 +157,12 @@ Upon successfully cloning the repository into your local development environment
 │   ├── scripts
 │   ├── src
 │   ├── tsconfig.json
-│   └── yarn.lock
 ├── package.json
 ├── sonar-project.properties
 ├── src                                [all backend source code]
 │   ├── alb-control-plane-stack.ts
 │   ├── analytics
+│   ├── base-lib
 │   ├── cloudfront-control-plane-stack.ts
 │   ├── common
 │   ├── control-plane
@@ -191,7 +192,6 @@ Upon successfully cloning the repository into your local development environment
 │   └── utils.ts
 ├── tsconfig.dev.json
 ├── tsconfig.json
-└── yarn.lock
 ```
 
 [android-sdk]: https://github.com/awslabs/clickstream-android

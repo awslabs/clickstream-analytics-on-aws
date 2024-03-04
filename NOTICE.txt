@@ -71,9 +71,11 @@ uuid under the MIT
 @aws-sdk/lib-storage under the Apache-2.0
 @aws-sdk/xhr-http-handler under the Apache-2.0
 @babel/core under the MIT
+@aws/clickstream-base-lib under the Apache-2.0
 @cloudscape-design/components under the Apache-2.0
 @cloudscape-design/design-tokens under the Apache-2.0
 @cloudscape-design/global-styles under the Apache-2.0
+@cloudscape-design/collection-hooks under the Apache-2.0
 @pmmmwh/react-refresh-webpack-plugin under the MIT
 @svgr/webpack under the MIT
 @testing-library/jest-dom under the MIT

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IPlugin } from '@aws/clickstream-base-lib';
 import {
   Box,
   ColumnLayout,

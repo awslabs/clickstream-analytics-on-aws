@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ALARM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   CloudWatchClient,
   paginateDescribeAlarms,
@@ -18,7 +19,6 @@ import {
   EnableAlarmActionsCommand,
   MetricAlarm,
 } from '@aws-sdk/client-cloudwatch';
-import { ALARM_NAME_PREFIX } from '../../common/constants-ln';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const describeAlarmsByProjectId = async (region: string, projectId: string) => {

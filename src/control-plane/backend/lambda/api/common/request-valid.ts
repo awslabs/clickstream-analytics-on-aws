@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
-import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
@@ -47,6 +47,13 @@ export const isValidEmpty: CustomValidator = value => {
 
 export const validMatchParamId: CustomValidator = (value, { req }) => {
   if (value !== req.params?.id) {
+    throw new Error('ID in path does not match ID in body.');
+  }
+  return true;
+};
+
+export const validMatchParamProjectId: CustomValidator = (value, { req }) => {
+  if (value !== req.params?.projectId) {
     throw new Error('ID in path does not match ID in body.');
   }
   return true;

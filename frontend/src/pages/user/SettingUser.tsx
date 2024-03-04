@@ -12,6 +12,10 @@
  */
 
 import {
+  GetUserSettingsResponse,
+  IUserSettings,
+} from '@aws/clickstream-base-lib';
+import {
   Box,
   Button,
   FormField,
@@ -50,7 +54,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
   const getSettingUser = async () => {
     setLoadingCreate(true);
     try {
-      const { success, data }: ApiResponse<IUserSettings> =
+      const { success, data }: ApiResponse<GetUserSettingsResponse> =
         await getUserSettings();
       if (success) {
         setCurUserSetting(data);

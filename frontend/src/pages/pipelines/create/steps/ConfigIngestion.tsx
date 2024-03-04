@@ -12,6 +12,14 @@
  */
 
 import {
+  XSS_PATTERN,
+  ListACMCertificatesResponse,
+  ListSSMSecretsResponse,
+  ListSubnetsResponse,
+  IMSKCluster,
+  SubnetType,
+} from '@aws/clickstream-base-lib';
+import {
   Alert,
   Button,
   Checkbox,
@@ -54,7 +62,6 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN,
@@ -95,7 +102,7 @@ interface ConfigIngestionProps {
   changeCreateMSKMethod: (type: string) => void;
   changeSelectedMSK: (
     mskOption: SelectProps.Option,
-    mskCluster: MSKResponse
+    mskCluster: IMSKCluster
   ) => void;
   changeSecurityGroup: (sg: SelectProps.Option) => void;
   changeMSKTopic: (topic: string) => void;
@@ -212,27 +219,29 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const getSubnetListByRegionAndVPC = async (region: string, vpcId: string) => {
     setLoadingSubnet(true);
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: region,
           vpcId: vpcId,
         });
       if (success) {
         const publicSubnets = data.filter(
-          (element) => element.type === 'public'
+          (element) => element.Type === SubnetType.PUBLIC
         );
         const privateSubnets = data.filter(
-          (element) => element.type === 'private' || element.type === 'isolated'
+          (element) =>
+            element.Type === SubnetType.PRIVATE ||
+            element.Type === SubnetType.ISOLATED
         );
         const publicSubnetOptions = publicSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
         const privateSubnetOptions = privateSubnets.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}`,
         }));
         setPublicSubnetOptionList(publicSubnetOptions);
         setPrivateSubnetOptionList(privateSubnetOptions);
@@ -247,13 +256,13 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const getCertificateListByRegion = async () => {
     setLoadingCertificate(true);
     try {
-      const { success, data }: ApiResponse<CetificateResponse[]> =
+      const { success, data }: ApiResponse<ListACMCertificatesResponse> =
         await getCertificates({ region: pipelineInfo.region });
       if (success) {
         const certificateOptions: SelectProps.Options = data.map((element) => ({
-          label: element.domain,
-          value: element.arn,
-          disabled: element.status !== 'ISSUED',
+          label: element.Domain,
+          value: element.Arn,
+          disabled: element.Status !== 'ISSUED',
         }));
         setCertificateOptionList(certificateOptions);
         setLoadingCertificate(false);
@@ -267,12 +276,14 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const getSSMSecretListByRegion = async () => {
     setLoadingSecret(true);
     try {
-      const { success, data }: ApiResponse<SSMSecretRepoose[]> =
-        await getSSMSecrets({ region: pipelineInfo.region });
+      const { success, data }: ApiResponse<ListSSMSecretsResponse> =
+        await getSSMSecrets({
+          region: pipelineInfo.region,
+        });
       if (success) {
         const secretOptions: SelectProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.arn,
+          label: element.Name,
+          value: element.Arn,
         }));
         setSsmSecretOptionList(secretOptions);
         setLoadingSecret(false);

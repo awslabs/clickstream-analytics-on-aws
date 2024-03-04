@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { UserRole } from '@aws/clickstream-base-lib';
 import AnalyticsLayout from 'components/layouts/AnalyticsLayout';
 import CommonLayout from 'components/layouts/CommonLayout';
 import { UserContext } from 'context/UserContext';
 import AccessDenied from 'pages/error-page/AccessDenied';
 import { ReactElement, useContext } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
-import { IUserRole } from 'ts/const';
 import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
 import Loading from './Loading';
 
@@ -30,7 +30,7 @@ const RoleRoute = ({
   auth: AuthContextProps;
   layout: 'common' | 'analytics' | 'none';
   children: ReactElement;
-  roles: Array<IUserRole>;
+  roles: Array<UserRole>;
 }) => {
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 

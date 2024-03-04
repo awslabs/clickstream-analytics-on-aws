@@ -13,16 +13,16 @@
 
 import express from 'express';
 import { body, header, query, param } from 'express-validator';
-import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { defaultOrderValueValid, defaultPageValueValid, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { ApplicationServ } from '../service/application';
 
-const router_app = express.Router();
+const router_app: express.Router = express.Router();
 const appServ: ApplicationServ = new ApplicationServ();
 
 router_app.get(
-  '',
+  '/project/:projectId/apps',
   validate([
-    query('pid').custom(isProjectExisted),
+    param('projectId').custom(isProjectExisted),
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
       location: 'body',
@@ -39,10 +39,10 @@ router_app.get(
   });
 
 router_app.post(
-  '',
+  '/project/:projectId/app',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId')
+    param('projectId')
       .custom(isProjectExisted),
     body('appId')
       .custom(isValidAppId),
@@ -53,24 +53,18 @@ router_app.post(
   });
 
 router_app.get(
-  '/:id',
+  '/project/:projectId/app/:appId',
   validate([
-    query('pid').custom(isProjectExisted),
+    param('projectId').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.details(req, res, next);
   });
 
 router_app.delete(
-  '/:id',
+  '/project/:projectId/app/:appId',
   validate([
-    param('id').custom((value, { req }) => isApplicationExisted(value, {
-      req,
-      location: 'query',
-      path: 'pid',
-    })),
-    query('pid')
-      .custom(isProjectExisted),
+    param('projectId').custom(isProjectExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return appServ.delete(req, res, next);

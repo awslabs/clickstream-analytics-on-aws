@@ -1,36 +1,80 @@
 {
-  "name": "portal",
-  "version": "0.1.0",
-  "private": true,
-  "license": "Apache-2.0",
-  "description": "frontend",
-  "author": {
-    "name": "Amazon Web Services",
-    "url": "https://aws.amazon.com/solutions"
+  "name": "@aws/clickstream-web-console",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "compile": "pnpm dlx projen compile",
+    "default": "pnpm dlx projen default",
+    "package": "pnpm dlx projen package",
+    "post-compile": "pnpm dlx projen post-compile",
+    "post-upgrade": "pnpm dlx projen post-upgrade",
+    "pre-compile": "pnpm dlx projen pre-compile",
+    "test": "node scripts/test.js --transformIgnorePatterns",
+    "test:watch": "pnpm dlx projen test:watch",
+    "upgrade": "pnpm dlx projen upgrade",
+    "watch": "pnpm dlx projen watch",
+    "projen": "pnpm dlx projen",
+    "start": "node scripts/start.js",
+    "crabuild": "node scripts/build.js",
+    "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
+    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "babel-jest": "^27.4.2",
+    "babel-loader": "^8.2.3",
+    "babel-plugin-named-asset-import": "^0.3.8",
+    "babel-preset-react-app": "^10.0.1",
+    "constructs": "^10.0.0",
+    "esbuild": "^0.17.12",
+    "esbuild-plugin-inline-image": "^0.0.9",
+    "esbuild-plugin-sass": "^1.0.1",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-config-standard-with-typescript": "^23.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.4.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.31.10",
+    "eslint-webpack-plugin": "^3.1.1",
+    "html-minifier": "^4.0.0",
+    "jest": "^27.5.1",
+    "jest-junit": "^15",
+    "jest-resolve": "^27.4.2",
+    "jest-watch-typeahead": "^1.0.0",
+    "prettier": "^2.7.1",
+    "projen": "^0.79.27",
+    "ts-jest": "^29.1.2",
+    "typescript": "^4.8.4",
+    "webpack": "^5.85.0",
+    "webpack-dev-server": "^4.15.0",
+    "webpack-manifest-plugin": "^4.0.2",
+    "workbox-webpack-plugin": "^6.4.1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.353.0",
     "@aws-sdk/lib-storage": "^3.353.0",
     "@aws-sdk/xhr-http-handler": "^3.353.0",
+    "@aws/clickstream-base-lib": "workspace:*",
     "@babel/core": "^7.16.0",
+    "@cloudscape-design/collection-hooks": "^1.0.7",
     "@cloudscape-design/components": "^3.0.294",
     "@cloudscape-design/design-tokens": "^3.0.22",
     "@cloudscape-design/global-styles": "^1.0.7",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@svgr/webpack": "^5.5.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.36",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
     "amazon-quicksight-embedding-sdk": "^2.4.0",
     "axios": "^1.4.0",
-    "babel-jest": "^27.4.2",
-    "babel-loader": "^8.2.3",
-    "babel-plugin-named-asset-import": "^0.3.8",
-    "babel-preset-react-app": "^10.0.1",
     "bfj": "^7.0.2",
     "browserslist": "^4.21.7",
     "camelcase": "^6.2.1",
@@ -48,10 +92,6 @@
     "i18next-browser-languagedetector": "^7.0.1",
     "i18next-http-backend": "^2.1.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^27.4.3",
-    "jest-junit": "^15",
-    "jest-resolve": "^27.4.2",
-    "jest-watch-typeahead": "^1.0.0",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.4.5",
     "moment": "^2.29.4",
@@ -80,67 +120,36 @@
     "tailwindcss": "^3.3.2",
     "terser-webpack-plugin": "^5.2.5",
     "uuid": "^9.0.0",
-    "web-vitals": "^3.3.2",
-    "webpack": "^5.85.0",
-    "webpack-dev-server": "^4.15.0",
-    "webpack-manifest-plugin": "^4.0.2",
-    "workbox-webpack-plugin": "^6.4.1"
+    "web-vitals": "^3.3.2"
   },
-  "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "crabuild": "node scripts/build.js",
-    "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
-    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
-    "test": "node scripts/test.js --transformIgnorePatterns"
+  "engines": {
+    "node": ">= 18.17.0"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@types/lodash": "^4.14.191",
-    "@types/uuid": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "esbuild": "^0.17.12",
-    "esbuild-plugin-inline-image": "^0.0.9",
-    "esbuild-plugin-sass": "^1.0.1",
-    "eslint": "^8.26.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-react-app": "^7.0.1",
-    "eslint-config-standard-with-typescript": "^23.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.4.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-react": "^7.31.10",
-    "eslint-webpack-plugin": "^3.1.1",
-    "html-minifier": "^4.0.0",
-    "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
-  },
+  "main": "lib/index.js",
+  "license": "Apache-2.0",
+  "version": "1.2.0",
   "jest": {
     "roots": [
       "<rootDir>/src"
     ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts"
+    "testEnvironment": "jsdom",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
     ],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}",
+      "<rootDir>/src/**/__tests__/**/*.ts?(x)",
+      "<rootDir>/(test|src)/**/*(*.)@(spec|test).ts?(x)"
+    ],
+    "setupFiles": [
+      "react-app-polyfill/jsdom"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
+    ],
+    "clearMocks": true,
     "collectCoverage": true,
     "coverageReporters": [
       "json",
@@ -153,52 +162,11 @@
     "coveragePathIgnorePatterns": [
       "/node_modules/"
     ],
-    "setupFiles": [
-      "react-app-polyfill/jsdom"
+    "testPathIgnorePatterns": [
+      "/node_modules/"
     ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jsdom",
-    "transform": {
-      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "modulePaths": [
-      "/Users/haiyunc/Documents/MyWork/web-analytics/codes/frontend/clickstream-analytics-on-aws/frontend/src"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
-    },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node"
-    ],
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
-    ],
-    "moduleDirectories": [
-      "node_modules",
-      "src"
+    "watchPathIgnorePatterns": [
+      "/node_modules/"
     ],
     "reporters": [
       "default",
@@ -209,14 +177,41 @@
         }
       ]
     ],
-    "resetMocks": true
+    "transform": {
+      "^.+\\.[t]sx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.dev.json"
+        }
+      ]
+    }
   },
-  "resolutions": {
-    "nth-check": "^2.1.1"
+  "types": "lib/index.d.ts",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "babel": {
     "presets": [
       "react-app"
     ]
-  }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "resolutions": {
+    "nth-check": "^2.1.1"
+  },
+  "//": "~~ Generated by projen. To modify, edit .projenrc.js and run \"pnpm dlx projen\"."
 }

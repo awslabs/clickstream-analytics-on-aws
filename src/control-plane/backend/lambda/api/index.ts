@@ -27,7 +27,7 @@ import { router_project } from './router/project';
 import { router_reporting } from './router/reporting';
 import { router_user } from './router/user';
 
-const app = express();
+const app: express.Express = express();
 app.disable('x-powered-by');
 const port = process.env.PORT || 8080;
 
@@ -49,14 +49,14 @@ app.get(process.env.HEALTH_CHECK_PATH ?? '/', async (_req: express.Request, res:
 });
 
 // routers
-app.use('/api/env', router_env);
-app.use('/api/project', router_project);
-app.use('/api/app', router_app);
+app.use('/api', router_env);
+app.use('/api', router_project);
+app.use('/api', router_app);
 app.use('/api/pipeline', router_pipeline);
-app.use('/api/plugin', router_plugin);
+app.use('/api', router_plugin);
 app.use('/api/metadata', router_metadata);
 app.use('/api/reporting', router_reporting);
-app.use('/api/user', router_user);
+app.use('/api', router_user);
 
 // Implement the “catch-all” errorHandler function
 app.use(errorHandler);

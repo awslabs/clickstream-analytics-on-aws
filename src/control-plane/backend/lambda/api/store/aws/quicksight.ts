@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, CreateDashboardRequest, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, IDashboard, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   IdentityType,
   UserRole,
@@ -29,13 +30,11 @@ import {
   ResourceExistsException,
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
+import { v4 as uuidv4 } from 'uuid';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
-import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
-import { IDashboard } from '../../model/project';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
@@ -176,29 +175,6 @@ export const generateEmbedUrlForRegisteredUser = async (
   }
 };
 
-// Determine if QuickSight has already subscribed
-export const quickSightIsSubscribed = async () => {
-  try {
-    const identityRegion = await sdkClient.QuickSightIdentityRegion();
-    const quickSight = sdkClient.QuickSight({
-      region: identityRegion,
-    });
-    const response = await quickSight.describeAccountSubscription({
-      AwsAccountId: awsAccountId,
-    });
-    if (response.AccountInfo?.AccountSubscriptionStatus?.startsWith('UNSUBSCRIBED')) {
-      return false;
-    }
-  } catch (err) {
-    if (err instanceof ResourceNotFoundException) {
-      return false;
-    }
-    logger.error('Describe Account Subscription Error.', { err });
-    throw err;
-  }
-  return true;
-};
-
 export const quickSightIsEnterprise = async () => {
   try {
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
@@ -215,28 +191,26 @@ export const quickSightIsEnterprise = async () => {
   }
 };
 
-export const describeClickstreamAccountSubscription = async () => {
+export const describeAccountSubscription = async () => {
   try {
     const identityRegion = await sdkClient.QuickSightIdentityRegion();
     const quickSight = sdkClient.QuickSight({
       region: identityRegion,
     });
-    const response = await quickSight.describeAccountSubscription({
+    const resp = await quickSight.describeAccountSubscription({
       AwsAccountId: awsAccountId,
     });
-    if (response.AccountInfo?.AccountSubscriptionStatus === 'UNSUBSCRIBED') {
-      return undefined;
+    if (!resp.AccountInfo) {
+      return {
+        AccountSubscriptionStatus: 'UNSUBSCRIBED',
+      };
     }
-    return {
-      accountName: response.AccountInfo?.AccountName,
-      edition: response.AccountInfo?.Edition,
-      notificationEmail: response.AccountInfo?.NotificationEmail,
-      authenticationType: response.AccountInfo?.AuthenticationType,
-      accountSubscriptionStatus: response.AccountInfo?.AccountSubscriptionStatus,
-    } as QuickSightAccountInfo;
+    return resp.AccountInfo;
   } catch (err) {
     if (err instanceof ResourceNotFoundException) {
-      return undefined;
+      return {
+        AccountSubscriptionStatus: 'UNSUBSCRIBED',
+      };
     }
     logger.error('Describe Account Subscription Error.', { err });
     throw err;
@@ -290,20 +264,21 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string) 
 };
 
 export const createPublishDashboard = async (
-  dashboard: IDashboard,
+  request: CreateDashboardRequest,
   defaultDataSourceArn: string,
 ): Promise<any> => {
   try {
+    const dashboardId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(/-/g, '')}`;
     const principals = await getClickstreamUserArn();
     const quickSight = sdkClient.QuickSight({
-      region: dashboard.region,
+      region: request.region,
     });
     // Create dataset in QuickSight
-    const datasetId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
+    const datasetId = dashboardId.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
     const datasetInput: CreateDataSetCommandInput = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `dataset-${dashboard.name}-default`,
+      Name: `dataset-${request.name}-default`,
       Permissions: [{
         Principal: principals.publishUserArn,
         Actions: DATASET_ADMIN_PERMISSION_ACTIONS,
@@ -314,7 +289,7 @@ export const createPublishDashboard = async (
           CustomSql: {
             DataSourceArn: defaultDataSourceArn,
             Name: 'event',
-            SqlQuery: `select * from ${dashboard.appId}.event`,
+            SqlQuery: `select * from ${request.appId}.event`,
             Columns: [
               {
                 Name: 'event_date',
@@ -336,7 +311,7 @@ export const createPublishDashboard = async (
     const dataset = await quickSight.createDataSet(datasetInput);
     // Create dashboard in QuickSight
     const sheets: SheetDefinition[] = [];
-    for (let sheet of dashboard.sheets) {
+    for (let sheet of request.sheets) {
       const sheetDefinition: SheetDefinition = {
         SheetId: sheet.id,
         Name: sheet.name,
@@ -357,10 +332,10 @@ export const createPublishDashboard = async (
     };
     const dashboardInput: CreateDashboardCommandInput = {
       AwsAccountId: awsAccountId,
-      DashboardId: dashboard.id,
-      Name: dashboard.name,
+      DashboardId: dashboardId,
+      Name: request.name,
       Definition: dashboardDefinition,
-      VersionDescription: dashboard.description,
+      VersionDescription: request.description,
       Permissions: [
         {
           Principal: principals.publishUserArn,
@@ -369,11 +344,11 @@ export const createPublishDashboard = async (
       ],
     };
     await quickSight.createDashboard(dashboardInput);
-    const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
+    const analysisId = dashboardId.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
     const analysisInput: CreateAnalysisCommandInput = {
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: dashboard.name,
+      Name: request.name,
       Definition: dashboardDefinition as AnalysisDefinition,
       Permissions: [
         {
@@ -385,17 +360,46 @@ export const createPublishDashboard = async (
     await quickSight.createAnalysis(analysisInput);
     await quickSight.createFolderMembership({
       AwsAccountId: awsAccountId,
-      FolderId: getQuickSightFolderId(dashboard.projectId, dashboard.appId),
-      MemberId: dashboard.id,
+      FolderId: getQuickSightFolderId(request.projectId, request.appId),
+      MemberId: dashboardId,
       MemberType: MemberType.DASHBOARD,
     });
+    return dashboardId;
   } catch (err) {
     logger.error('Create Publish Dashboard Error.', { err });
     throw err;
   }
 };
 
-export const deleteDatasetOfPublishDashboard = async (
+export const deletePublishDashboard = async (
+  region: string,
+  dashboardId: string,
+) => {
+  try {
+    const quickSight = sdkClient.QuickSight({
+      region: region,
+    });
+    await deleteDatasetOfPublishDashboard(region, dashboardId);
+    await quickSight.deleteDashboard({
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboardId,
+    });
+    await quickSight.deleteAnalysis({
+      AwsAccountId: awsAccountId,
+      AnalysisId: dashboardId.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
+    });
+  } catch (err) {
+    //dashboard can be delete by other interface/op, catch this exception to allow clear data in ddb.
+    if (err instanceof ResourceNotFoundException) {
+      logger.warn(`Dashboard ${dashboardId} not exist.`);
+      return;
+    }
+    logger.error('Delete Publish Dashboard Error.', { err });
+    throw err;
+  }
+};
+
+const deleteDatasetOfPublishDashboard = async (
   region: string,
   dashboardId: string,
 ) => {

@@ -12,15 +12,15 @@
  */
 
 import express from 'express';
-import { body, header, query, param } from 'express-validator';
+import { body, header, param, query } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { PluginServ } from '../service/plugin';
 
-const router_plugin = express.Router();
+const router_plugin: express.Router = express.Router();
 const pluginServ: PluginServ = new PluginServ();
 
 router_plugin.get(
-  '',
+  '/plugins',
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -38,7 +38,7 @@ router_plugin.get(
   });
 
 router_plugin.post(
-  '',
+  '/plugin',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('jarFile').custom(isValidEmpty).custom(isAllowFilesSuffix),
@@ -51,9 +51,9 @@ router_plugin.post(
   });
 
 router_plugin.delete(
-  '/:id',
+  '/plugin/:pluginId',
   validate([
-    param('id').custom(isPluginIdValid),
+    param('pluginId').custom(isPluginIdValid),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return pluginServ.delete(req, res, next);

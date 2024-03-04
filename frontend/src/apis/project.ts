@@ -11,40 +11,48 @@
  *  and limitations under the License.
  */
 
+import {
+  CreateProjectRequest,
+  DeleteProjectRequest,
+  GetProjectRequest,
+  ListProjectsRequest,
+  UpdateProjectRequest,
+  VerificationProjectRequest,
+} from '@aws/clickstream-base-lib';
 import { apiRequest } from 'ts/request';
 
-const getProjectList = async (params: {
-  pageNumber: number;
-  pageSize: number;
-}) => {
-  const result: any = await apiRequest('get', '/project', params);
+const getProjectList = async (params: ListProjectsRequest) => {
+  const result: any = await apiRequest('get', '/projects', params);
   return result;
 };
 
-const createProject = async (params: IProject) => {
+const createProject = async (params: CreateProjectRequest) => {
   const result: any = await apiRequest('post', '/project', params);
   return result;
 };
 
-const updateProject = async (params: IProject) => {
+const updateProject = async (params: UpdateProjectRequest) => {
   const result: any = await apiRequest('put', `/project/${params.id}`, params);
   return result;
 };
 
-const getProjectDetail = async (params: { id: string }) => {
-  const result: any = await apiRequest('get', `/project/${params.id}`);
+const getProjectDetail = async (params: GetProjectRequest) => {
+  const result: any = await apiRequest('get', `/project/${params.projectId}`);
   return result;
 };
 
-const deleteProject = async (params: { id: string }) => {
-  const result: any = await apiRequest('delete', `/project/${params.id}`);
+const deleteProject = async (params: DeleteProjectRequest) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/project/${params.projectId}`
+  );
   return result;
 };
 
-const verificationProjectId = async (params: { id: string }) => {
+const verificationProjectId = async (params: VerificationProjectRequest) => {
   const result: any = await apiRequest(
     'get',
-    `/project/verification/${params.id}`
+    `/project/${params.projectId}/verification`
   );
   return result;
 };

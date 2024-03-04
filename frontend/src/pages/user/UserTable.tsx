@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN, IUser, UserRole } from '@aws/clickstream-base-lib';
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Box, SpaceBetween } from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
@@ -23,8 +24,6 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
-import { IUserRole } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { UserTableHeader } from './UserTableHeader';
 
 interface UserTableProps {
@@ -149,7 +148,7 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     if (column.id === 'roles') {
       newItem = {
         ...currentItem,
-        [column.id]: value.map((option: any) => option.value) as IUserRole[],
+        [column.id]: value.map((option: any) => option.value) as UserRole[],
       };
     }
     await fetchUpdateFunc(newItem);

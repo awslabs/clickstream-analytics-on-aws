@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { FetchType } from '@aws/clickstream-base-lib';
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
 import { CloudFormationClient, DescribeTypeCommand } from '@aws-sdk/client-cloudformation';
 import {
@@ -36,9 +37,8 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
-import { Route53Client, ListHostedZonesCommand } from '@aws-sdk/client-route-53';
 import { S3Client, ListBucketsCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
-import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import fetch, { Response } from 'node-fetch';
@@ -46,7 +46,6 @@ import request from 'supertest';
 import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
-
 
 jest.mock('node-fetch');
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -56,7 +55,6 @@ const kafkaClient = mockClient(KafkaClient);
 const redshiftClient = mockClient(RedshiftClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const quickSightClient = mockClient(QuickSightClient);
-const route53Client = mockClient(Route53Client);
 const iamClient = mockClient(IAMClient);
 const acmClient = mockClient(ACMClient);
 const cloudWatchClient = mockClient(CloudWatchClient);
@@ -71,7 +69,6 @@ describe('Account Env test', () => {
     redshiftClient.reset();
     redshiftServerlessClient.reset();
     quickSightClient.reset();
-    route53Client.reset();
     iamClient.reset();
     acmClient.reset();
     cloudWatchClient.reset();
@@ -92,7 +89,7 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'us-east-1',
+          RegionName: 'us-east-1',
         },
       ],
     });
@@ -119,7 +116,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc');
+    let res = await request(app).get('/api/env/vpcs');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -127,16 +124,16 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'vpc-0ba32b04ccc029088',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
-          cidr: '10.255.0.0/16',
-          isDefault: false,
+          VpcId: 'vpc-0ba32b04ccc029088',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
+          CidrBlock: '10.255.0.0/16',
+          IsDefault: false,
         },
         {
-          id: 'vpc-0927cf9b0c5521882',
-          name: '',
-          cidr: '172.31.0.0/16',
-          isDefault: true,
+          VpcId: 'vpc-0927cf9b0c5521882',
+          Name: '',
+          CidrBlock: '172.31.0.0/16',
+          IsDefault: true,
         },
       ],
     });
@@ -163,7 +160,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc?region=us-east-1');
+    let res = await request(app).get('/api/env/vpcs?region=us-east-1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -171,16 +168,16 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'vpc-0ba32b04ccc029088',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
-          cidr: '10.255.0.0/16',
-          isDefault: false,
+          VpcId: 'vpc-0ba32b04ccc029088',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC',
+          CidrBlock: '10.255.0.0/16',
+          IsDefault: false,
         },
         {
-          id: 'vpc-0927cf9b0c5521882',
-          name: '',
-          cidr: '172.31.0.0/16',
-          isDefault: true,
+          VpcId: 'vpc-0927cf9b0c5521882',
+          Name: '',
+          CidrBlock: '172.31.0.0/16',
+          IsDefault: true,
         },
       ],
     });
@@ -195,7 +192,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/securitygroups?vpcId=vpc-0ba32b04ccc029088');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/securityGroups');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -203,9 +200,9 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'sg-043f6a0f412c93545',
-          name: 'msk',
-          description: 'msk',
+          GroupId: 'sg-043f6a0f412c93545',
+          GroupName: 'msk',
+          Description: 'msk',
         },
       ],
     });
@@ -251,7 +248,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?vpcId=vpc-0ba32b04ccc029088');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -259,42 +256,18 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'public',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'igw-xxxx',
-              },
-            ],
-          },
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          Type: 'public',
         },
         {
-          id: 'subnet-09ae522e85bbee5c5',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
-          cidr: '10.255.1.0/24',
-          availabilityZone: 'us-east-1b',
-          type: 'public',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'igw-xxxx',
-              },
-            ],
-          },
+          SubnetId: 'subnet-09ae522e85bbee5c5',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
+          CidrBlock: '10.255.1.0/24',
+          AvailabilityZone: 'us-east-1b',
+          Type: 'public',
         },
       ],
     });
@@ -340,7 +313,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets?region=us-east-1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -348,42 +321,18 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'isolated',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'local',
-              },
-            ],
-          },
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          Type: 'isolated',
         },
         {
-          id: 'subnet-09ae522e85bbee5c5',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
-          cidr: '10.255.1.0/24',
-          availabilityZone: 'us-east-1b',
-          type: 'isolated',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'local',
-              },
-            ],
-          },
+          SubnetId: 'subnet-09ae522e85bbee5c5',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
+          CidrBlock: '10.255.1.0/24',
+          AvailabilityZone: 'us-east-1b',
+          Type: 'isolated',
         },
       ],
     });
@@ -417,7 +366,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets?region=us-east-1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -425,23 +374,11 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'public',
-          routeTable: {
-            Associations: [
-              {
-                SubnetId: 'subnet-0b9fa05e061084b37',
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'igw-xxxx',
-              },
-            ],
-          },
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          Type: 'public',
         },
       ],
     });
@@ -475,7 +412,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088&subnetType=public');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets?region=us-east-1&subnetType=public');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -483,23 +420,11 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'public',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'igw-xxxx',
-              },
-            ],
-          },
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          Type: 'public',
         },
       ],
     });
@@ -548,7 +473,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088&subnetType=private');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets?region=us-east-1&subnetType=private');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -556,44 +481,18 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'private',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                DestinationCidrBlock: '0.0.0.0/0',
-                NatGatewayId: 'local',
-              },
-            ],
-          },
+          SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
+          CidrBlock: '10.255.0.0/24',
+          AvailabilityZone: 'us-east-1a',
+          Type: 'private',
         },
         {
-          availabilityZone: 'us-east-1b',
-          cidr: '10.255.0.0/24',
-          id: 'subnet-0b9fa05e061084b38',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/privateSubnet1',
-          type: 'private',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                DestinationCidrBlock: '0.0.0.0/0',
-                NatGatewayId: 'local',
-              },
-            ],
-          },
+          AvailabilityZone: 'us-east-1b',
+          CidrBlock: '10.255.0.0/24',
+          SubnetId: 'subnet-0b9fa05e061084b38',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/privateSubnet1',
+          Type: 'private',
         },
       ],
     });
@@ -627,7 +526,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/vpc/subnet?region=us-east-1&vpcId=vpc-0ba32b04ccc029088&subnetType=isolated');
+    let res = await request(app).get('/api/env/vpc/vpc-0ba32b04ccc029088/subnets?region=us-east-1&subnetType=isolated');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -635,67 +534,11 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'subnet-0b9fa05e061084b37',
-          name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
-          cidr: '10.255.0.0/24',
-          availabilityZone: 'us-east-1a',
-          type: 'isolated',
-          routeTable: {
-            Associations: [
-              {
-                Main: true,
-              },
-            ],
-            Routes: [
-              {
-                GatewayId: 'local',
-              },
-            ],
-          },
-        },
-      ],
-    });
-  });
-  it('Get subnet with no vpc', async () => {
-    ec2ClientMock.on(DescribeSubnetsCommand).resolves({
-      Subnets: [
-        {
           SubnetId: 'subnet-0b9fa05e061084b37',
+          Name: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/isolatedSubnet1',
           CidrBlock: '10.255.0.0/24',
           AvailabilityZone: 'us-east-1a',
-          MapPublicIpOnLaunch: false,
-          Tags: [
-            {
-              Key: 'Name',
-              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet1',
-            },
-          ],
-        },
-        {
-          SubnetId: 'subnet-09ae522e85bbee5c5',
-          CidrBlock: '10.255.1.0/24',
-          AvailabilityZone: 'us-east-1b',
-          MapPublicIpOnLaunch: false,
-          Tags: [
-            {
-              Key: 'Name',
-              Value: 'public-new-vpc-control-plane-stack/Clickstream Analytics on AWSVpc/DefaultVPC/publicSubnet2',
-            },
-          ],
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/vpc/subnet');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'query',
-          msg: 'Value is empty.',
-          param: 'vpcId',
+          Type: 'isolated',
         },
       ],
     });
@@ -718,7 +561,7 @@ describe('Account Env test', () => {
       .resolves({
         LocationConstraint: 'us-east-2',
       });
-    const res = await request(app).get('/api/env/s3/buckets');
+    const res = await request(app).get('/api/env/buckets');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -726,12 +569,12 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'sagemaker-us-*****-east-1',
-          location: 'us-east-1',
+          Name: 'sagemaker-us-*****-east-1',
+          Location: 'us-east-1',
         },
         {
-          name: 'ssm-onboarding-bucket-*****-us-east-2',
-          location: 'us-east-2',
+          Name: 'ssm-onboarding-bucket-*****-us-east-2',
+          Location: 'us-east-2',
         },
       ],
     });
@@ -754,7 +597,7 @@ describe('Account Env test', () => {
       .resolves({
         LocationConstraint: 'us-east-2',
       });
-    const res = await request(app).get('/api/env/s3/buckets?region=us-east-1');
+    const res = await request(app).get('/api/env/buckets?region=us-east-1');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -762,8 +605,8 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'sagemaker-us-*****-east-1',
-          location: 'us-east-1',
+          Name: 'sagemaker-us-*****-east-1',
+          Location: 'us-east-1',
         },
       ],
     });
@@ -813,7 +656,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/msk/clusters?vpcId=vpc-111');
+    let res = await request(app).get('/api/env/MSKClusters?vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -821,13 +664,13 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'demo-cluster-1',
-          authentication: ['IAM', 'Unauthenticated'],
-          arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
-          type: 'PROVISIONED',
-          state: 'ACTIVE',
-          securityGroupId: 'sg-111',
-          clientBroker: 'TLS_PLAINTEXT',
+          ClusterName: 'demo-cluster-1',
+          Authentication: ['IAM', 'Unauthenticated'],
+          ClusterArn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterType: 'PROVISIONED',
+          State: 'ACTIVE',
+          SecurityGroupId: 'sg-111',
+          ClientBroker: 'TLS_PLAINTEXT',
         },
       ],
     });
@@ -868,7 +711,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/msk/clusters?vpcId=vpc-111');
+    let res = await request(app).get('/api/env/MSKClusters?vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -876,13 +719,13 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'demo-cluster-1',
-          authentication: [],
-          arn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
-          type: 'SERVERLESS',
-          state: 'ACTIVE',
-          securityGroupId: 'sg-111',
-          clientBroker: '',
+          ClusterName: 'demo-cluster-1',
+          Authentication: [],
+          ClusterArn: 'arn:aws:kafka:us-east-1:111122223333:cluster/demo-cluster-1/0adf12f7-12f2-4b05-8690-b2ccfc3bedd3-20',
+          ClusterType: 'SERVERLESS',
+          State: 'ACTIVE',
+          SecurityGroupId: 'sg-111',
+          ClientBroker: '',
         },
       ],
     });
@@ -898,7 +741,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/msk/clusters');
+    let res = await request(app).get('/api/env/MSKClusters');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -940,7 +783,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/redshift/clusters?vpcId=vpc-111');
+    let res = await request(app).get('/api/env/redshiftClusters?vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -948,22 +791,22 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          clusterSubnetGroupName: '',
-          name: 'redshift-cluster-1',
-          nodeType: 'dc2.large',
-          endpoint: {
+          ClusterSubnetGroupName: '',
+          Name: 'redshift-cluster-1',
+          NodeType: 'dc2.large',
+          Endpoint: {
             Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5439,
           },
-          publiclyAccessible: false,
-          masterUsername: 'click1',
-          status: 'available',
-          vpcId: 'vpc-111',
-          vpcSecurityGroups: [],
+          PubliclyAccessible: false,
+          MasterUsername: 'click1',
+          Status: 'available',
+          VpcId: 'vpc-111',
+          VpcSecurityGroupIds: [],
         },
       ],
     });
-    res = await request(app).get('/api/env/redshift/clusters');
+    res = await request(app).get('/api/env/redshiftClusters');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -971,32 +814,32 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          clusterSubnetGroupName: '',
-          name: 'redshift-cluster-1',
-          nodeType: 'dc2.large',
-          endpoint: {
+          ClusterSubnetGroupName: '',
+          Name: 'redshift-cluster-1',
+          NodeType: 'dc2.large',
+          Endpoint: {
             Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5439,
           },
-          publiclyAccessible: false,
-          masterUsername: 'click1',
-          status: 'available',
-          vpcId: 'vpc-111',
-          vpcSecurityGroups: [],
+          PubliclyAccessible: false,
+          MasterUsername: 'click1',
+          Status: 'available',
+          VpcId: 'vpc-111',
+          VpcSecurityGroupIds: [],
         },
         {
-          clusterSubnetGroupName: '',
-          name: 'redshift-cluster-2',
-          nodeType: 'dc2.large',
-          endpoint: {
+          ClusterSubnetGroupName: '',
+          Name: 'redshift-cluster-2',
+          NodeType: 'dc2.large',
+          Endpoint: {
             Address: 'redshift-cluster-2.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5438,
           },
-          publiclyAccessible: false,
-          masterUsername: 'click2',
-          status: 'available',
-          vpcId: 'vpc-222',
-          vpcSecurityGroups: [],
+          PubliclyAccessible: false,
+          MasterUsername: 'click2',
+          Status: 'available',
+          VpcId: 'vpc-222',
+          VpcSecurityGroupIds: [],
         },
       ],
     });
@@ -1017,7 +860,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/redshift/clusters?region=us-east-1&vpcId=vpc-111');
+    let res = await request(app).get('/api/env/redshiftClusters?region=us-east-1&vpcId=vpc-111');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1025,18 +868,18 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          clusterSubnetGroupName: '',
-          name: 'redshift-cluster-1',
-          nodeType: 'dc2.large',
-          endpoint: {
+          ClusterSubnetGroupName: '',
+          Name: 'redshift-cluster-1',
+          NodeType: 'dc2.large',
+          Endpoint: {
             Address: 'redshift-cluster-1.cyivjhsbgo3m.us-east-1.redshift.amazonaws.com',
             Port: 5439,
           },
-          publiclyAccessible: false,
-          masterUsername: 'click',
-          status: 'available',
-          vpcId: 'vpc-111',
-          vpcSecurityGroups: [],
+          PubliclyAccessible: false,
+          MasterUsername: 'click',
+          Status: 'available',
+          VpcId: 'vpc-111',
+          VpcSecurityGroupIds: [],
 
         },
       ],
@@ -1063,7 +906,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/redshift-serverless/workgroups');
+    let res = await request(app).get('/api/env/redshiftServerlessWorkGroups');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1071,11 +914,11 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          id: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
-          arn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
-          name: 'test',
-          namespace: 'test-ns',
-          status: 'AVAILABLE',
+          Id: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          Arn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
+          Name: 'test',
+          Namespace: 'test-ns',
+          Status: 'AVAILABLE',
         },
       ],
     });
@@ -1090,18 +933,18 @@ describe('Account Env test', () => {
         AccountSubscriptionStatus: 'ACCOUNT_CREATED',
       },
     });
-    const res = await request(app).get('/api/env/quicksight/describe');
+    const res = await request(app).get('/api/env/quickSightSubscription');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
       data: {
-        accountName: 'Clickstream-xsxs',
-        accountSubscriptionStatus: 'ACCOUNT_CREATED',
-        authenticationType: 'IDENTITY_POOL',
-        edition: 'ENTERPRISE',
-        notificationEmail: 'fake@example.com',
+        AccountName: 'Clickstream-xsxs',
+        AccountSubscriptionStatus: 'ACCOUNT_CREATED',
+        AuthenticationType: 'IDENTITY_POOL',
+        Edition: 'ENTERPRISE',
+        NotificationEmail: 'fake@example.com',
       },
     });
   });
@@ -1115,18 +958,18 @@ describe('Account Env test', () => {
         AccountSubscriptionStatus: 'ACCOUNT_CREATED',
       },
     });
-    const res = await request(app).get('/api/env/quicksight/describe');
+    const res = await request(app).get('/api/env/quickSightSubscription');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
       data: {
-        accountName: 'xxxx-xsxs',
-        accountSubscriptionStatus: 'ACCOUNT_CREATED',
-        authenticationType: 'IDENTITY_POOL',
-        edition: 'ENTERPRISE',
-        notificationEmail: 'fake@example.com',
+        AccountName: 'xxxx-xsxs',
+        AccountSubscriptionStatus: 'ACCOUNT_CREATED',
+        AuthenticationType: 'IDENTITY_POOL',
+        Edition: 'ENTERPRISE',
+        NotificationEmail: 'fake@example.com',
       },
     });
   });
@@ -1141,13 +984,15 @@ describe('Account Env test', () => {
       ],
     });
     quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({});
-    const res = await request(app).get('/api/env/quicksight/ping');
+    const res = await request(app).get('/api/env/quickSightSubscription');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
-      data: true,
+      data: {
+        AccountSubscriptionStatus: 'UNSUBSCRIBED',
+      },
     });
   });
   it('Ping QuickSight with ResourceNotFoundException', async () => {
@@ -1171,14 +1016,16 @@ describe('Account Env test', () => {
       message: 'ResourceNotFoundException',
     });
     quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockError);
-    const res = await request(app).get('/api/env/quicksight/ping');
+    const res = await request(app).get('/api/env/quickSightSubscription');
     expect(quickSightClient).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
       message: '',
-      data: false,
+      data: {
+        AccountSubscriptionStatus: 'UNSUBSCRIBED',
+      },
     });
   });
   it('Get All IAM roles', async () => {
@@ -1205,7 +1052,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/iam/roles');
+    let res = await request(app).get('/api/env/IAMRoles');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1213,14 +1060,14 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
-          id: 'AROAY6VU67QTP62MJAQ3O',
-          arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          Name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          Id: 'AROAY6VU67QTP62MJAQ3O',
+          Arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
         },
         {
-          name: 'arole',
-          id: 'AROAY6VU67QTN6EXB2YM5',
-          arn: 'arn:aws:iam::111122223333:role/arole',
+          Name: 'arole',
+          Id: 'AROAY6VU67QTN6EXB2YM5',
+          Arn: 'arn:aws:iam::111122223333:role/arole',
         },
       ],
     });
@@ -1249,7 +1096,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/iam/roles?service=apigateway');
+    let res = await request(app).get('/api/env/IAMRoles?service=apigateway');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1257,9 +1104,9 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
-          id: 'AROAY6VU67QTP62MJAQ3O',
-          arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          Name: 'test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
+          Id: 'AROAY6VU67QTP62MJAQ3O',
+          Arn: 'arn:aws:iam::111122223333:role/test3-ClickStreamApiCloudWatchRole5F1F73C6-B0T7G7QTWEGB',
         },
       ],
     });
@@ -1288,7 +1135,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/iam/roles?account=123');
+    let res = await request(app).get('/api/env/IAMRoles?account=123');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1296,9 +1143,9 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          name: 'arole',
-          id: 'AROAY6VU67QTN6EXB2YM5',
-          arn: 'arn:aws:iam::123:role/arole',
+          Name: 'arole',
+          Id: 'AROAY6VU67QTN6EXB2YM5',
+          Arn: 'arn:aws:iam::123:role/arole',
         },
       ],
     });
@@ -1345,7 +1192,7 @@ describe('Account Env test', () => {
     }).resolvesOnce({});
 
     const res = await request(app).get(
-      '/api/env/ping?region=ap-northeast-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
+      '/api/env/servicesAvailable?region=ap-northeast-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
@@ -1398,7 +1245,7 @@ describe('Account Env test', () => {
     }).resolvesOnce({});
 
     const res = await request(app).get(
-      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
+      '/api/env/servicesAvailable?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
@@ -1408,30 +1255,6 @@ describe('Account Env test', () => {
     expect(res.body.data).toContainEqual({ service: 'athena', available: true });
     expect(res.body.data).toContainEqual({ service: 'msk', available: true });
     expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeTypeCommand, 5);
-  });
-  it('Get Host Zones', async () => {
-    route53Client.on(ListHostedZonesCommand).resolves({
-      HostedZones: [
-        {
-          Id: '/hostedzone/Z000000000000000000E',
-          Name: 'fake.example.com.',
-          CallerReference: '',
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/route53/hostedzones');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          id: 'Z000000000000000000E',
-          name: 'fake.example.com.',
-        },
-      ],
-    });
   });
   it('Get ACM Certificates', async () => {
     acmClient.on(ListCertificatesCommand).resolves({
@@ -1479,7 +1302,7 @@ describe('Account Env test', () => {
         },
       ],
     });
-    let res = await request(app).get('/api/env/acm/certificates?region=ap-southeast-1');
+    let res = await request(app).get('/api/env/ACMCertificates?region=ap-southeast-1');
     expect(acmClient).toHaveReceivedCommandTimes(ListCertificatesCommand, 1);
     expect(acmClient).toHaveReceivedCommandWith(ListCertificatesCommand, {
       CertificateStatuses: [CertificateStatus.ISSUED],
@@ -1502,14 +1325,14 @@ describe('Account Env test', () => {
       message: '',
       data: [
         {
-          arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
-          domain: 'example0.com',
-          status: 'ISSUED',
+          Arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+          Domain: 'example0.com',
+          Status: 'ISSUED',
         },
         {
-          arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/7215dafa-2014-40d8-804b-c89ac8f136b4',
-          domain: 'example1.com',
-          status: 'ISSUED',
+          Arn: 'arn:aws:acm:ap-southeast-1:555555555555:certificate/7215dafa-2014-40d8-804b-c89ac8f136b4',
+          Domain: 'example1.com',
+          Status: 'ISSUED',
         },
       ],
     });
@@ -1542,7 +1365,7 @@ describe('Account Env test', () => {
         Items: [{ region: 'us-east-1' }],
       });
     projectExistedMock(ddbMock, true);
-    const res = await request(app).get(`/api/env/cloudwatch/alarms?pid=${MOCK_PROJECT_ID}`);
+    const res = await request(app).get(`/api/env/alarms?projectId=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1598,7 +1421,7 @@ describe('Account Env test', () => {
         Items: [],
       });
     projectExistedMock(ddbMock, true);
-    const res = await request(app).get(`/api/env/cloudwatch/alarms?pid=${MOCK_PROJECT_ID}`);
+    const res = await request(app).get(`/api/env/alarms?projectId=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1615,15 +1438,17 @@ describe('Account Env test', () => {
     cloudWatchClient.on(DisableAlarmActionsCommand).resolves({});
     projectExistedMock(ddbMock, true);
     const res = await request(app)
-      .post('/api/env/cloudwatch/alarms/disable')
+      .put('/api/env/alarm')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         region: 'us-east-1',
         alarmNames: [],
+        enabled: false,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
+      data: 'Alarms disabled.',
       success: true,
       message: '',
     });
@@ -1632,15 +1457,17 @@ describe('Account Env test', () => {
     cloudWatchClient.on(EnableAlarmActionsCommand).resolves({});
     projectExistedMock(ddbMock, true);
     const res = await request(app)
-      .post('/api/env/cloudwatch/alarms/enable')
+      .put('/api/env/alarm')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         region: 'us-east-1',
         alarmNames: [],
+        enabled: true,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
+      data: 'Alarms enabled.',
       success: true,
       message: '',
     });
@@ -1729,11 +1556,8 @@ describe('Fetch test', () => {
     fn.mockResolvedValue(JSON.stringify(SDKInfo));
     mockFetch.mockResolvedValue({ ok: true, status: 200, text: fn } as Response);
     const res = await request(app)
-      .post('/api/env/fetch')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        type: 'AndroidSDK',
-      });
+      .get(`/api/env/domainAvailable?type=${FetchType.ANDROIDSDK}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1748,18 +1572,17 @@ describe('Fetch test', () => {
   });
 
   it('Fetch Pipeline', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
+      ],
     });
     const fn = jest.fn() as jest.MockedFunction<any>;
     fn.mockResolvedValue('OK');
     mockFetch.mockResolvedValue({ ok: true, status: 200, text: fn } as Response);
     const resPipelineEndpoint = await request(app)
-      .post('/api/env/fetch')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        type: 'PipelineEndpoint',
-      });
+      .get(`/api/env/domainAvailable?type=${FetchType.PIPELINE_ENDPOINT}&projectId=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(mockFetch.mock.calls.length).toBe(1);
     expect(mockFetch.mock.calls[0]).toEqual(['http://xxx/xxx', { method: 'GET' }]);
     expect(resPipelineEndpoint.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1774,11 +1597,8 @@ describe('Fetch test', () => {
       },
     });
     const resPipelineDNS = await request(app)
-      .post('/api/env/fetch')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        type: 'PipelineDNS',
-      });
+      .get(`/api/env/domainAvailable?type=${FetchType.PIPELINE_DNS}&projectId=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(mockFetch.mock.calls.length).toBe(2);
     expect(mockFetch.mock.calls[1]).toEqual(['http://yyy/yyy', { method: 'GET' }]);
     expect(resPipelineDNS.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -1793,11 +1613,8 @@ describe('Fetch test', () => {
       },
     });
     const resPipelineDomain = await request(app)
-      .post('/api/env/fetch')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        type: 'PipelineDomain',
-      });
+      .get(`/api/env/domainAvailable?type=${FetchType.PIPELINE_DOMAIN}&projectId=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(mockFetch.mock.calls.length).toBe(3);
     expect(mockFetch.mock.calls[2]).toEqual(['https://fake.example.com', { method: 'GET' }]);
     expect(resPipelineDomain.headers['content-type']).toEqual('application/json; charset=utf-8');

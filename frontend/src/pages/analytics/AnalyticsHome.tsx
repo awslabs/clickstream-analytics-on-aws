@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IProject } from '@aws/clickstream-base-lib';
 import { Alert, AppLayout } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';

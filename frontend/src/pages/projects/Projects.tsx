@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IProject } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Box,

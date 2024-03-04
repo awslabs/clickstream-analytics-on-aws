@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DescribeQuickSightSubscriptionResponse } from '@aws/clickstream-base-lib';
 import {
   Alert,
   Container,
@@ -21,7 +22,7 @@ import {
   Spinner,
   Toggle,
 } from '@cloudscape-design/components';
-import { getQuickSightDetail, getQuickSightStatus } from 'apis/resource';
+import { describeQuickSightSubscription } from 'apis/resource';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
@@ -32,7 +33,7 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
   PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
-import { isDisabled } from 'ts/utils';
+import { defaultStr, isDisabled } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -57,45 +58,37 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
   const [quickSightEnabled, setQuickSightEnabled] = useState(false);
   const [quickSightEnterprise, setQuickSightEnterprise] = useState(false);
 
-  // get quicksight details
-  const getTheQuickSightDetail = async () => {
+  const getQuickSightDetail = async () => {
+    setLoadingQuickSight(true);
     try {
-      const { success, data }: ApiResponse<QuickSightDetailResponse> =
-        await getQuickSightDetail();
+      const {
+        success,
+        data,
+      }: ApiResponse<DescribeQuickSightSubscriptionResponse> =
+        await describeQuickSightSubscription();
       setLoadingQuickSight(false);
       if (
         success &&
         data &&
-        data.accountSubscriptionStatus === 'ACCOUNT_CREATED'
+        data.AccountSubscriptionStatus === 'ACCOUNT_CREATED'
       ) {
         setQuickSightEnabled(true);
         changeQuickSightDisabled(false);
-        changeQuickSightAccountName(data.accountName);
+        changeQuickSightAccountName(defaultStr(data.AccountName));
       } else {
-        changeEnableReporting(false);
+        changeEnableReporting(true);
         setQuickSightEnabled(false);
         changeQuickSightDisabled(true);
       }
-      if (success && data && data.edition.includes('ENTERPRISE')) {
+      if (success && data && data.Edition?.includes('ENTERPRISE')) {
         setQuickSightEnterprise(true);
-      }
-    } catch (error) {
-      setLoadingQuickSight(false);
-    }
-  };
-
-  // get quicksight status
-  const checkTheQuickSightStatus = async () => {
-    setLoadingQuickSight(true);
-    try {
-      const { success, data }: ApiResponse<boolean> =
-        await getQuickSightStatus();
-      if (success && data) {
-        getTheQuickSightDetail();
+        changeQuickSightDisabled(false);
       } else {
-        setLoadingQuickSight(false);
+        setQuickSightEnterprise(false);
+        changeQuickSightDisabled(true);
       }
     } catch (error) {
+      changeQuickSightAccountName('');
       setLoadingQuickSight(false);
     }
   };
@@ -108,7 +101,7 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
 
   useEffect(() => {
     if (pipelineInfo.enableDataProcessing && pipelineInfo.enableReporting) {
-      checkTheQuickSightStatus();
+      getQuickSightDetail();
     }
   }, [pipelineInfo.enableReporting]);
 

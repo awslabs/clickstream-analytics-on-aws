@@ -12,9 +12,12 @@
  */
 
 const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
+const Nx = require('./projenrc/nx');
+const PnpmWorkspace = require('./projenrc/pnpm');
 const version = '1.2.0';
 const cdkVersion = '2.81.0';
 const minNodeVersion = '18.17.0';
+const pnpmVersion = '8.15.3';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
@@ -45,6 +48,7 @@ const commonDevDeps = [
   '@types/mock-fs@^4.13.1',
   '@types/node-fetch@^2.6.4',
   '@types/jsonpath-plus@^5.0.2',
+  '@types/jsonwebtoken@^9.0.0',
 ];
 
 const smithyPackagesVersion = '2.0.7';
@@ -91,7 +95,6 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-quicksight',
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
-  '@aws-sdk/client-route-53',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
@@ -101,6 +104,108 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-cloudwatch-events',
   '@aws-sdk/lib-dynamodb',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
+
+const depsForFrontendProject = [
+  '@aws-sdk/client-s3@^3.353.0',
+  '@aws-sdk/lib-storage@^3.353.0',
+  '@aws-sdk/xhr-http-handler@^3.353.0',
+  '@babel/core@^7.16.0',
+  '@cloudscape-design/components@^3.0.294',
+  '@cloudscape-design/design-tokens@^3.0.22',
+  '@cloudscape-design/global-styles@^1.0.7',
+  '@cloudscape-design/collection-hooks@^1.0.7',
+  '@pmmmwh/react-refresh-webpack-plugin@^0.5.3',
+  '@svgr/webpack@^5.5.0',
+  'amazon-quicksight-embedding-sdk@^2.4.0',
+  'axios@^1.4.0',
+  'bfj@^7.0.2',
+  'browserslist@^4.21.7',
+  'camelcase@^6.2.1',
+  'case-sensitive-paths-webpack-plugin@^2.4.0',
+  'classnames@^2.3.2',
+  'css-loader@^6.5.1',
+  'css-minimizer-webpack-plugin@^3.2.0',
+  'dotenv@^10.0.0',
+  'dotenv-expand@^5.1.0',
+  'file-loader@^6.2.0',
+  'fs-extra@^10.0.0',
+  'html-webpack-plugin@^5.5.0',
+  'http-proxy-middleware@^2.0.6',
+  'i18next@^22.4.6',
+  'i18next-browser-languagedetector@^7.0.1',
+  'i18next-http-backend@^2.1.1',
+  'identity-obj-proxy@^3.0.0',
+  'lodash@^4.17.21',
+  'mini-css-extract-plugin@^2.4.5',
+  'moment@^2.29.4',
+  'oidc-client-ts@^2.2.2',
+  'postcss@^8.4.31',
+  'postcss-flexbugs-fixes@^5.0.2',
+  'postcss-loader@^6.2.1',
+  'postcss-normalize@^10.0.1',
+  'postcss-preset-env@^7.0.1',
+  'prompts@^2.4.2',
+  'react@^18.2.0',
+  'react-app-polyfill@^3.0.0',
+  'react-dev-utils@^12.0.1',
+  'react-dom@^18.2.0',
+  'react-i18next@^12.1.1',
+  'react-oidc-context@^2.2.2',
+  'react-refresh@^0.11.0',
+  'react-router-dom@^6.4.3',
+  'resolve@^1.20.0',
+  'resolve-url-loader@^5.0.0',
+  'sass@^1.71.0',
+  'sass-loader@^12.3.0',
+  'semver@^7.3.5',
+  'source-map-loader@^3.0.0',
+  'style-loader@^3.3.1',
+  'tailwindcss@^3.3.2',
+  'terser-webpack-plugin@^5.2.5',
+  'uuid@^9.0.0',
+  'web-vitals@^3.3.2',
+];
+
+const devDepsForFrontendProject = [
+  '@testing-library/jest-dom@^5.16.5',
+  '@testing-library/react@^13.4.0',
+  '@testing-library/user-event@^13.5.0',
+  '@types/jest@^27.5.2',
+  '@types/node@^18.17.0',
+  '@types/react@^18.0.25',
+  '@types/react-dom@^18.0.8',
+  'babel-jest@^27.4.2',
+  'babel-loader@^8.2.3',
+  'babel-plugin-named-asset-import@^0.3.8',
+  'babel-preset-react-app@^10.0.1',
+  'jest@^27.4.3',
+  'jest-junit@^15',
+  'jest-resolve@^27.4.2',
+  'jest-watch-typeahead@^1.0.0',
+  'webpack@^5.85.0',
+  'webpack-dev-server@^4.15.0',
+  'webpack-manifest-plugin@^4.0.2',
+  'workbox-webpack-plugin@^6.4.1',
+  '@babel/plugin-proposal-private-property-in-object@^7.21.11',
+  '@types/lodash@^4.14.191',
+  '@types/uuid@^9.0.0',
+  '@typescript-eslint/eslint-plugin@^5.42.0',
+  'esbuild@^0.17.12',
+  'esbuild-plugin-inline-image@^0.0.9',
+  'esbuild-plugin-sass@^1.0.1',
+  'eslint@^8.26.0',
+  'eslint-config-prettier@^8.5.0',
+  'eslint-config-react-app@^7.0.1',
+  'eslint-config-standard-with-typescript@^23.0.0',
+  'eslint-plugin-import@^2.26.0',
+  'eslint-plugin-n@^15.4.0',
+  'eslint-plugin-promise@^6.1.1',
+  'eslint-plugin-react@^7.31.10',
+  'eslint-webpack-plugin@^3.1.1',
+  'html-minifier@^4.0.0',
+  'prettier@^2.7.1',
+  'typescript@^4.8.4',
+];
 
 const depsForApiProject = [
   ...commonDeps,
@@ -128,9 +233,11 @@ const devDepsForApiProject = [
   'nodemon@^2.0.20',
   'supertest@^6.3.3',
   'ts-node@^10.9.1',
+  '@vercel/ncc@^0.38.1',
   '@types/express@^4.17.16',
   '@types/lodash@^4.14.202',
   '@types/supertest@^2.0.12',
+  '@types/jsonwebtoken@^9.0.0',
 ];
 const defaultBranch = 'main';
 const project = new awscdk.AwsCdkTypeScriptApp({
@@ -141,6 +248,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   description: 'Clickstream Analytics on AWS',
   majorVersion: 1,
   minMajorVersion: 0,
+  packageManager: 'pnpm',
+  projenCommand: 'pnpm dlx projen',
   gitignore: [
     '.idea/',
     '.vscode/',
@@ -187,6 +296,10 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   jestOptions: {
     jestConfig: {
       setupFiles: ['./test/jestEnv.js'],
+      modulePathIgnorePatterns: [
+        '<rootDir>/cdk.out/',
+        '<rootDir>/deployment/',
+      ],
     },
   },
   tsconfig: {
@@ -241,9 +354,140 @@ project.eslint?.addRules({
 });
 project.addFields({ version });
 
+const depsForBaseProject = [
+  '@aws-sdk/client-cloudformation',
+  '@aws-sdk/client-sfn',
+].map(dep => `${dep}@^${awsSDKServicesVersion}`);
+const baseProject = new typescript.TypeScriptProject({
+  parent: project,
+  name: '@aws/clickstream-base-lib',
+  outdir: './src/base-lib',
+  description: 'Base project for shared library.',
+  version,
+  license: 'Apache-2.0',
+  licensed: true,
+  defaultReleaseBranch: defaultBranch,
+  readme: undefined,
+  eslint: false,
+  sampleCode: false,
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
+  deps: [
+    ...depsForBaseProject,
+  ],
+});
+baseProject.addFields({ version });
+
+const frontendTSConfig = {
+  include: ['src'],
+  compilerOptions: {
+    moduleResolution: 'node',
+    alwaysStrict: false,
+    declaration: false,
+    noImplicitAny: false,
+    noUnusedParameters: false,
+    allowJs: true,
+    skipLibCheck: true,
+    allowSyntheticDefaultImports: true,
+    forceConsistentCasingInFileNames: true,
+    isolatedModules: true,
+    noImplicitReturns: false,
+    noEmit: true,
+    module: 'esnext',
+    target: 'ESNext',
+    baseUrl: 'src',
+    paths: {},
+    jsx: 'react-jsx',
+    lib: [
+      'dom',
+      'dom.iterable',
+      'esnext',
+    ],
+  },
+};
+
+const frontendProject = new typescript.TypeScriptProject({
+  parent: project,
+  name: '@aws/clickstream-web-console',
+  outdir: './frontend',
+  defaultReleaseBranch: defaultBranch,
+  readme: undefined,
+  eslint: false,
+  sampleCode: false,
+  deps: [
+    ...depsForFrontendProject,
+    '@aws/clickstream-base-lib@workspace:*',
+  ],
+  devDeps: [
+    ...devDepsForFrontendProject,
+  ],
+  gitignore: [
+    'aws-exports.json',
+    'src/setupProxy.js',
+    'build/',
+  ],
+  tsconfig: {
+    ...frontendTSConfig,
+  },
+  minNodeVersion,
+  jestOptions: {
+    jestConfig: {
+      roots: ['<rootDir>/src'],
+      testEnvironment: 'jsdom',
+      moduleDirectories: ['node_modules', 'src'],
+      testMatch: [
+        '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+        '<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}',
+      ],
+      setupFiles: [
+        'react-app-polyfill/jsdom',
+      ],
+      setupFilesAfterEnv: [
+        '<rootDir>/src/setupTests.ts',
+      ],
+    },
+  },
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
+});
+frontendProject.package.addField('browserslist', {
+  production: [
+    '>0.2%',
+    'not dead',
+    'not op_mini all',
+  ],
+  development: [
+    'last 1 chrome version',
+    'last 1 firefox version',
+    'last 1 safari version',
+  ],
+});
+frontendProject.package.addField('babel', {
+  presets: [
+    'react-app',
+  ],
+});
+frontendProject.package.addField('eslintConfig', {
+  extends: [
+    'react-app',
+    'react-app/jest',
+  ],
+});
+frontendProject.package.addField('resolutions', {
+  'nth-check': '^2.1.1',
+});
+frontendProject.addFields({ version });
+frontendProject.setScript('start', 'node scripts/start.js');
+frontendProject.setScript('build', 'node scripts/build.js');
+frontendProject.setScript('crabuild', 'node scripts/build.js');
+frontendProject.setScript('lint', 'eslint --ext .js,.ts,.jsx,.tsx src');
+frontendProject.setScript('format', 'npm run lint --fix & prettier --write \'src/**/*.{js,jsx,ts,tsx}\'');
+frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePatterns');
+
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
+    '@aws/clickstream-base-lib@workspace:*',
   ],
   devDeps: [
     ...devDepsForApiProject,
@@ -251,10 +495,11 @@ const apiProject = new typescript.TypeScriptProject({
   gitignore: [
     'src/aws-exports.js',
     'build/',
+    'ncc/',
   ],
   description: 'Backend api service of control plane.',
   version,
-  name: 'control-plane-api',
+  name: '@aws/clickstream-web-console-api',
   license: 'Apache-2.0',
   licensed: true,
   outdir: 'src/control-plane/backend/lambda/api/',
@@ -279,9 +524,12 @@ const apiProject = new typescript.TypeScriptProject({
       emitDecoratorMetadata: true,
     },
   },
+  packageManager: project.package.packageManager,
+  projenCommand: project.projenCommand,
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
-apiProject.setScript('start', 'node dist/index.js');
+apiProject.setScript('ncc-build', 'tsc && ncc build dist/index.js -o ncc');
+apiProject.setScript('start', 'pnpm run ncc-build && node ncc/index.js');
 apiProject.addFields({ version });
 
 project.buildWorkflow.buildTask._env = {
@@ -320,6 +568,14 @@ project.buildWorkflow.preBuildSteps.push({
   with: {
     'registry-type': 'public',
   },
+});
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Install Library',
+  run: 'pnpm install',
+});
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Run NX Build Base Library',
+  run: 'pnpm nx build @aws/clickstream-base-lib',
 });
 project.buildWorkflow.addPostBuildSteps({
   name: 'Publish Test Report',
@@ -369,12 +625,13 @@ project.buildWorkflow.workflow.file?.patch(
 
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade frontend dependencies',
-  run: 'yarn upgrade --cwd frontend',
+  run: 'pnpm upgrade --dir frontend',
 });
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade API dependencies',
-  run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
+  run: 'cd src/control-plane/backend/lambda/api/ && pnpm dlx projen upgrade && cd ../../../../../',
 });
+
 project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
 project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
@@ -481,9 +738,10 @@ gitlabMain.createNestedTemplates({
           'cd $CI_PROJECT_DIR/frontend',
         ],
         script: [
-          'yarn install',
-          'yarn run build',
-          'yarn run test',
+          'npm install -g pnpm@8.15.3',
+          'pnpm install',
+          'pnpm run build',
+          'pnpm run test',
         ],
         artifacts: {
           paths: [
@@ -766,9 +1024,10 @@ gitlabMain.createNestedTemplates({
           },
         ],
         script: [
-          'yarn install --check-files',
-          'npx projen',
-          'npx projen eslint',
+          'npm install -g pnpm@8.15.3',
+          'pnpm install',
+          'pnpm projen',
+          'pnpm projen eslint',
           'git add .',
           'git diff --staged --patch --exit-code > .repo.patch || export mutations_happened=true',
           'if [ "$mutations_happened" = "true" ]; then cat .repo.patch && exit 1; fi;',
@@ -858,4 +1117,9 @@ gitlabMain.createNestedTemplates({
   },
 });
 
+project.package.addField('packageManager', `pnpm@${pnpmVersion}`);
+project.npmrc.addConfig('auto-install-peers', 'true');
+
+new PnpmWorkspace(project);
+new Nx(project);
 project.synth();

@@ -252,7 +252,7 @@ describe('Plugin test', () => {
       ],
     });
     let res = await request(app)
-      .get('/api/plugin');
+      .get('/api/plugins');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -262,8 +262,6 @@ describe('Plugin test', () => {
         items: [
           {
             id: 'BUILT-IN-1',
-            type: 'PLUGIN#BUILT-IN-1',
-            prefix: 'PLUGIN',
             name: 'Transformer',
             description: {
               'en-US': 'Convert the data format reported by SDK into the data format in the data warehouse',
@@ -272,18 +270,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.TransformerV2',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Transform',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-2',
-            type: 'PLUGIN#BUILT-IN-2',
-            prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: {
               'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
@@ -292,18 +284,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-3',
-            type: 'PLUGIN#BUILT-IN-3',
-            prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: {
               'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
@@ -312,18 +298,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-4',
-            type: 'PLUGIN#BUILT-IN-4',
-            prefix: 'PLUGIN',
             name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
@@ -332,13 +312,9 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Transform',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           { name: 'plugin-01' },
           { name: 'plugin-02' },
@@ -353,7 +329,7 @@ describe('Plugin test', () => {
     // Mock DynamoDB error
     ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
-      .get('/api/plugin');
+      .get('/api/plugins');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
 
@@ -375,7 +351,7 @@ describe('Plugin test', () => {
       ],
     });
     const res = await request(app)
-      .get('/api/plugin?pageNumber=2&pageSize=2');
+      .get('/api/plugins?pageNumber=2&pageSize=2');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -385,8 +361,6 @@ describe('Plugin test', () => {
         items: [
           {
             id: 'BUILT-IN-3',
-            type: 'PLUGIN#BUILT-IN-3',
-            prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: {
               'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
@@ -395,18 +369,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-4',
-            type: 'PLUGIN#BUILT-IN-4',
-            prefix: 'PLUGIN',
             name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
@@ -415,13 +383,9 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Transform',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
         ],
         totalCount: 9,
@@ -437,7 +401,7 @@ describe('Plugin test', () => {
       ],
     });
     const res = await request(app)
-      .get('/api/plugin?type=Enrich');
+      .get('/api/plugins?type=Enrich');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -447,8 +411,6 @@ describe('Plugin test', () => {
         items: [
           {
             id: 'BUILT-IN-2',
-            type: 'PLUGIN#BUILT-IN-2',
-            prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: {
               'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
@@ -457,18 +419,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-3',
-            type: 'PLUGIN#BUILT-IN-3',
-            prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: {
               'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
@@ -477,13 +433,9 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           { name: 'plugin-02', pluginType: 'Enrich' },
           { name: 'plugin-03', pluginType: 'Enrich' },
@@ -502,7 +454,7 @@ describe('Plugin test', () => {
       ],
     });
     const res = await request(app)
-      .get('/api/plugin?order=desc');
+      .get('/api/plugins?order=desc');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -512,8 +464,6 @@ describe('Plugin test', () => {
         items: [
           {
             id: 'BUILT-IN-1',
-            type: 'PLUGIN#BUILT-IN-1',
-            prefix: 'PLUGIN',
             name: 'Transformer',
             description: {
               'en-US': 'Convert the data format reported by SDK into the data format in the data warehouse',
@@ -522,18 +472,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.TransformerV2',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Transform',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-2',
-            type: 'PLUGIN#BUILT-IN-2',
-            prefix: 'PLUGIN',
             name: 'UAEnrichment',
             description: {
               'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
@@ -542,18 +486,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-3',
-            type: 'PLUGIN#BUILT-IN-3',
-            prefix: 'PLUGIN',
             name: 'IPEnrichment',
             description: {
               'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
@@ -562,18 +500,12 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Enrich',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           {
             id: 'BUILT-IN-4',
-            type: 'PLUGIN#BUILT-IN-4',
-            prefix: 'PLUGIN',
             name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
@@ -582,13 +514,9 @@ describe('Plugin test', () => {
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
             jarFile: '',
-            bindCount: 0,
             pluginType: 'Transform',
             dependencyFiles: [],
-            operator: '',
-            deleted: false,
             createAt: 1667355960000,
-            updateAt: 1667355960000,
           },
           { name: 'plugin-01' },
           { name: 'plugin-02' },
@@ -638,7 +566,7 @@ describe('Plugin test', () => {
         {
           location: 'params',
           msg: 'Plugin resource does not exist.',
-          param: 'id',
+          param: 'pluginId',
           value: MOCK_PLUGIN_ID,
         },
       ],

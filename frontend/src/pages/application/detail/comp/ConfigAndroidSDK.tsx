@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DomainAvailableResponse, FetchType } from '@aws/clickstream-base-lib';
 import {
   Button,
   ExpandableSection,
@@ -70,9 +71,9 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
   const getAndroidMavenVersion = async () => {
     try {
       setLoadingSdkVersion(true);
-      const { data }: ApiResponse<StatusWithTypeResponse> =
+      const { data }: ApiResponse<DomainAvailableResponse> =
         await fetchStatusWithType({
-          type: 'AndroidSDK',
+          type: FetchType.ANDROIDSDK,
         });
       setLoadingSdkVersion(false);
       if (data.ok) {

@@ -12,6 +12,12 @@
  */
 
 import {
+  XSS_PATTERN,
+  ListMSKClustersResponse,
+  ListSecurityGroupsResponse,
+  IMSKCluster,
+} from '@aws/clickstream-base-lib';
+import {
   AutosuggestProps,
   Button,
   Container,
@@ -31,7 +37,6 @@ import {
   ResourceCreateMethod,
   SUPPORT_SELF_HOSTED_KAFKA,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { checkDisable, defaultStr, isDisabled, ternary } from 'ts/utils';
 import MSKRequirements from './MSKRequirements';
 
@@ -40,7 +45,7 @@ interface BufferMSKProps {
   pipelineInfo: IExtPipeline;
   changeSelfHosted: (selfHosted: boolean) => void;
   changeCreateMSKMethod: (type: string) => void;
-  changeSelectedMSK: (msk: SelectProps.Option, mskCluster: MSKResponse) => void;
+  changeSelectedMSK: (msk: SelectProps.Option, mskCluster: IMSKCluster) => void;
   changeMSKTopic: (topic: string) => void;
   changeKafkaBrokers: (brokers: string) => void;
   changeKafkaTopic: (topic: string) => void;
@@ -74,7 +79,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const [mskOptionList, setMSKOptionList] = useState<AutosuggestProps.Options>(
     []
   );
-  const [mskClusterList, setMSKClusterList] = useState<MSKResponse[]>([]);
+  const [mskClusterList, setMSKClusterList] = useState<IMSKCluster[]>([]);
   const [vpcSGOptionList, setVpcSGOptionList] = useState<SelectProps.Options>(
     []
   );
@@ -83,23 +88,24 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const getAllMSKClusterList = async () => {
     setLoadingMSK(true);
     try {
-      const { success, data }: ApiResponse<MSKResponse[]> = await getMSKList({
-        vpcId: pipelineInfo.network.vpcId,
-        region: pipelineInfo.region,
-      });
+      const { success, data }: ApiResponse<ListMSKClustersResponse> =
+        await getMSKList({
+          vpcId: pipelineInfo.network.vpcId,
+          region: pipelineInfo.region,
+        });
       if (success) {
         const mskOptions: AutosuggestProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.arn,
-          description: `Authentication: ${element.authentication.join(
+          label: element.ClusterName,
+          value: element.ClusterArn,
+          description: `Authentication: ${element.Authentication.join(
             ','
-          )} Client Broker Communication: ${element.clientBroker}`,
-          labelTag: element.type,
-          iconAlt: element.arn,
+          )} Client Broker Communication: ${element.ClientBroker}`,
+          labelTag: element.ClusterType,
+          iconAlt: element.ClusterArn,
           disabled:
-            element.type === 'SERVERLESS' ||
-            element.authentication.indexOf('Unauthenticated') === -1 ||
-            element.clientBroker.indexOf('PLAINTEXT') === -1,
+            element.ClusterType === 'SERVERLESS' ||
+            element.Authentication.indexOf('Unauthenticated') === -1 ||
+            element.ClientBroker.indexOf('PLAINTEXT') === -1,
         }));
         setMSKClusterList(data);
         setMSKOptionList(mskOptions);
@@ -114,16 +120,16 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
   const getSecurityGroupByVPC = async () => {
     setLoadingSG(true);
     try {
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId: defaultStr(pipelineInfo.selectedVPC?.value, ''),
         });
       if (success) {
         const sgOptions: SelectProps.Options = data.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.description,
+          label: `${element.GroupName}(${element.GroupId})`,
+          value: element.GroupId,
+          description: element.Description,
         }));
         setVpcSGOptionList(sgOptions);
       }
@@ -197,10 +203,10 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                                 )}
                                 selectedOption={pipelineInfo.selectedMSK}
                                 onChange={({ detail }) => {
-                                  const clusters: MSKResponse[] =
+                                  const clusters: IMSKCluster[] =
                                     mskClusterList.filter(
                                       (cluster) =>
-                                        cluster.arn ===
+                                        cluster.ClusterArn ===
                                         detail.selectedOption.value
                                     );
                                   changeSelectedMSK(
@@ -396,9 +402,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         statusType={ternary(loadingMSK, 'loading', 'finished')}
                         selectedOption={pipelineInfo.selectedMSK}
                         onChange={({ detail }) => {
-                          const clusters: MSKResponse[] = mskClusterList.filter(
+                          const clusters: IMSKCluster[] = mskClusterList.filter(
                             (cluster) =>
-                              cluster.arn === detail.selectedOption.value
+                              cluster.ClusterArn === detail.selectedOption.value
                           );
                           changeSelectedMSK(detail.selectedOption, clusters[0]);
                         }}

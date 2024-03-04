@@ -11,12 +11,14 @@
  *  and limitations under the License.
  */
 
+import { IRedshiftCluster, IRedshiftServerlessWorkGroup } from '@aws/clickstream-base-lib';
 import {
   RedshiftClient,
   paginateDescribeClusters,
   paginateDescribeClusterSubnetGroups,
   ClusterSubnetGroup,
   Cluster,
+  VpcSecurityGroupMembership,
 } from '@aws-sdk/client-redshift';
 import {
   RedshiftServerlessClient,
@@ -26,7 +28,7 @@ import {
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { RedshiftCluster, RedshiftInfo, RedshiftWorkgroup } from '../../common/types';
+import { RedshiftInfo } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId?: string, clusterIdentifier?: string) => {
   const redshiftClient = new RedshiftClient({
@@ -40,19 +42,26 @@ export const describeRedshiftClusters = async (region: string, vpcId?: string, c
     records.push(...page.Clusters as Cluster[]);
   }
 
-  const clusters: RedshiftCluster[] = [];
+  const clusters: IRedshiftCluster[] = [];
   for (let cluster of records) {
     if (!vpcId || cluster.VpcId === vpcId) {
+      const vpcSecurityGroupIds: string[] = [];
+      cluster.VpcSecurityGroups?.forEach((sg: VpcSecurityGroupMembership) => {
+        vpcSecurityGroupIds.push(sg.VpcSecurityGroupId!);
+      });
       clusters.push({
-        name: cluster.ClusterIdentifier ?? '',
-        nodeType: cluster.NodeType ?? '',
-        endpoint: cluster.Endpoint,
-        status: cluster.ClusterStatus ?? '',
-        masterUsername: cluster.MasterUsername ?? '',
-        publiclyAccessible: cluster.PubliclyAccessible ?? false,
-        vpcSecurityGroups: cluster.VpcSecurityGroups ?? [],
-        clusterSubnetGroupName: cluster.ClusterSubnetGroupName ?? '',
-        vpcId: cluster.VpcId ?? '',
+        Name: cluster.ClusterIdentifier ?? '',
+        NodeType: cluster.NodeType ?? '',
+        Endpoint: {
+          Address: cluster.Endpoint?.Address ?? '',
+          Port: cluster.Endpoint?.Port ?? 5439,
+        },
+        Status: cluster.ClusterStatus ?? '',
+        MasterUsername: cluster.MasterUsername ?? '',
+        PubliclyAccessible: cluster.PubliclyAccessible ?? false,
+        VpcSecurityGroupIds: vpcSecurityGroupIds,
+        ClusterSubnetGroupName: cluster.ClusterSubnetGroupName ?? '',
+        VpcId: cluster.VpcId ?? '',
       });
     }
   }
@@ -105,24 +114,18 @@ export const getRedshiftInfo = async (region: string, workgroupName?: string, cl
     const clusters = await describeRedshiftClusters(region, undefined, clusterIdentifier);
     if (clusters && clusters.length === 1) {
       const cluster = clusters[0];
-      let vpcSecurityGroups: string[] = [];
-      if (cluster && cluster.vpcSecurityGroups) {
-        for (let sg of cluster.vpcSecurityGroups) {
-          vpcSecurityGroups.push(sg.VpcSecurityGroupId!);
-        }
-      }
-      const subnetIds = await getSubnetsByClusterSubnetGroup(region, cluster.clusterSubnetGroupName);
+      const subnetIds = await getSubnetsByClusterSubnetGroup(region, cluster.ClusterSubnetGroupName);
       const redshiftInfo: RedshiftInfo = {
         endpoint: {
-          address: cluster.endpoint?.Address ?? '',
-          port: cluster.endpoint?.Port ?? 5439,
+          address: cluster.Endpoint?.Address ?? '',
+          port: cluster.Endpoint?.Port ?? 5439,
         },
         network: {
-          vpcId: cluster.vpcId,
-          securityGroups: vpcSecurityGroups,
+          vpcId: cluster.VpcId,
+          securityGroups: cluster.VpcSecurityGroupIds,
           subnetIds: subnetIds,
         },
-        publiclyAccessible: cluster.publiclyAccessible,
+        publiclyAccessible: cluster.PubliclyAccessible,
       };
       return redshiftInfo;
     }
@@ -141,17 +144,17 @@ export const listRedshiftServerlessWorkgroups = async (region: string) => {
   for await (const page of paginateListWorkgroups({ client: redshiftServerlessClient }, {})) {
     records.push(...page.workgroups as Workgroup[]);
   }
-  const workgroups: RedshiftWorkgroup[] = [];
+  const workGroups: IRedshiftServerlessWorkGroup[] = [];
   for (let workgroup of records) {
-    workgroups.push({
-      id: workgroup.workgroupId ?? '',
-      arn: workgroup.workgroupArn ?? '',
-      name: workgroup.workgroupName ?? '',
-      namespace: workgroup.namespaceName ?? '',
-      status: workgroup.status ?? '',
+    workGroups.push({
+      Id: workgroup.workgroupId ?? '',
+      Arn: workgroup.workgroupArn ?? '',
+      Name: workgroup.workgroupName ?? '',
+      Namespace: workgroup.namespaceName ?? '',
+      Status: workgroup.status ?? '',
     });
   }
-  return workgroups;
+  return workGroups;
 };
 
 export const describeClusterSubnetGroups = async (region: string, clusterSubnetGroupName: string) => {

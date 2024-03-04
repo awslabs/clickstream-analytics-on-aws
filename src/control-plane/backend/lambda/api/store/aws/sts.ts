@@ -26,5 +26,9 @@ export const AssumeUploadRole = async (sessionName: string) => {
     DurationSeconds: 900,
   });
   const data = await client.send(command);
-  return data.Credentials!;
+  return {
+    AccessKeyId: data.Credentials!.AccessKeyId,
+    SecretAccessKey: data.Credentials!.SecretAccessKey,
+    SessionToken: data.Credentials!.SessionToken,
+  };
 };

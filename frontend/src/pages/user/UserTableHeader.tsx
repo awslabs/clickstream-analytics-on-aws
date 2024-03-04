@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { IUser } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -46,7 +47,9 @@ export function UserTableHeader({
   const confirmDeleteUser = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deleteUser(defaultStr(user?.id));
+      const resData: ApiResponse<null> = await deleteUser({
+        id: defaultStr(user?.id),
+      });
       if (resData.success) {
         refreshPage();
         setLoadingDelete(false);

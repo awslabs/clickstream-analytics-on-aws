@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IUser, UserRole } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -24,7 +25,6 @@ import {
 import { addUser } from 'apis/user';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 
 interface CreateUserProps {
@@ -40,14 +40,10 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const [visible, setVisible] = useState(openModel);
   const defaultUser: IUser = {
     id: '',
-    type: 'USER',
-    prefix: 'USER',
     name: '',
     roles: [],
     createAt: 0,
-    updateAt: 0,
     operator: '',
-    deleted: false,
   };
   const [curUser, setCurUser] = useState<IUser>(defaultUser);
 
@@ -56,14 +52,14 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
     useState<SelectProps.Options>([]);
 
   const roleOptions: SelectProps.Options = [
-    { value: IUserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
+    { value: UserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
     {
-      value: IUserRole.OPERATOR,
+      value: UserRole.OPERATOR,
       label: defaultStr(t('user:options.operator')),
     },
-    { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
+    { value: UserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
     {
-      value: IUserRole.ANALYST_READER,
+      value: UserRole.ANALYST_READER,
       label: defaultStr(t('user:options.analystReader')),
     },
   ];
@@ -77,9 +73,11 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const confirmCreateUser = async () => {
     setLoadingCreate(true);
     try {
-      const { success, data }: ApiResponse<ResponseCreate> = await addUser(
-        curUser
-      );
+      const { success, data }: ApiResponse<ResponseCreate> = await addUser({
+        id: curUser.id,
+        name: defaultStr(curUser.name),
+        roles: curUser.roles,
+      });
       if (success && data.id) {
         closeModel();
         refreshPage();
@@ -170,7 +168,7 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
                 ...prev,
                 roles: detail.selectedOptions.map(
                   (option) => option.value
-                ) as IUserRole[],
+                ) as UserRole[],
               };
             });
           }}

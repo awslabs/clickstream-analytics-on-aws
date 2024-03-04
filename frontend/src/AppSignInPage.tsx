@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { IUser } from '@aws/clickstream-base-lib';
 import { Button } from '@cloudscape-design/components';
 import AppRouter from 'AppRouter';
 import { getUserDetails } from 'apis/user';
@@ -31,9 +32,9 @@ const SignedInPage: React.FC = () => {
       return;
     }
     try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email
-      );
+      const { success, data }: ApiResponse<IUser> = await getUserDetails({
+        id: auth.user?.profile.email,
+      });
       if (success) {
         window.localStorage.setItem(
           CLICK_STREAM_USER_DATA,

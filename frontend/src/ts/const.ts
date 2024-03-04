@@ -74,17 +74,6 @@ export enum ALARM_DISPLAY_STATUS {
   NO_PIPELINE = -1,
 }
 
-export enum EPipelineStatus {
-  Active = 'Active',
-  Failed = 'Failed',
-  Warning = 'Warning',
-  Creating = 'Creating',
-  Updating = 'Updating',
-  Deleting = 'Deleting',
-  Deleted = 'Deleted',
-  Pending = 'Pending',
-}
-
 export const PROJECT_STAGE_LIST = [
   { label: 'Dev', value: ProjectStage.DEV },
   { label: 'Test', value: ProjectStage.TEST },
@@ -152,17 +141,6 @@ export const YES_NO_LIST = [
 ];
 
 export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
-export enum SinkType {
-  S3 = 's3',
-  MSK = 'kafka',
-  KDS = 'kinesis',
-}
-
-export enum ProtocalType {
-  HTTP = 'HTTP',
-  HTTPS = 'HTTPS',
-}
 
 export enum KDSProvisionType {
   ON_DEMAND = 'ON_DEMAND',
@@ -406,13 +384,6 @@ export const CLOUDFORMATION_STATUS_MAP: any = {
 
 export const ANALYTICS_INFO_KEY = 'Analytics-Project-App-Info';
 
-export enum IUserRole {
-  ADMIN = 'Admin',
-  OPERATOR = 'Operator',
-  ANALYST = 'Analyst',
-  ANALYST_READER = 'AnalystReader',
-}
-
 export const EVENT_DISPLAY_PREFIX = 'EVENT#';
 export const EVENT_PARAMETER_DISPLAY_PREFIX = 'EVENT_PARAMETER#';
 export const USER_ATTRIBUTE_DISPLAY_PREFIX = 'USER_ATTRIBUTE#';
@@ -423,13 +394,3 @@ export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);
 export const PERCENTAGE_REGEX = new RegExp(
   `${'^$|^(100|[1-9]?\\d)$|^(100|[1-9]?\\d)\\.\\d{1,2}$'}`
 );
-
-export enum EIngestionType {
-  Fargate = 'Fargate',
-  EC2 = 'EC2',
-}
-
-export enum ENetworkType {
-  General = 'General',
-  Private = 'Private',
-}

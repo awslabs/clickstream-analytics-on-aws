@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN, IUser, UserRole } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Input,
@@ -23,15 +24,14 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole, TIME_FORMAT } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
+import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import UserTable from './UserTable';
 
 interface IUserTableItem {
   id: string;
   name: string;
-  roles: IUserRole[];
+  roles: UserRole[];
   createAt: string;
 }
 
@@ -39,34 +39,34 @@ const UserList: React.FC = () => {
   const { t } = useTranslation();
 
   const roleOptions: SelectProps.Options = [
-    { value: IUserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
+    { value: UserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
     {
-      value: IUserRole.OPERATOR,
+      value: UserRole.OPERATOR,
       label: defaultStr(t('user:options.operator')),
     },
-    { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
+    { value: UserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
     {
-      value: IUserRole.ANALYST_READER,
+      value: UserRole.ANALYST_READER,
       label: defaultStr(t('user:options.analystReader')),
     },
   ];
-  const getRolesLabel = (roles: IUserRole[]) => {
-    const roleLabels = [];
+  const getRolesLabel = (roles: UserRole[]) => {
+    const roleLabels: string[] = [];
     for (const role of roles) {
       roleLabels.push(getRoleName(role));
     }
     return roleLabels.join(',');
   };
 
-  const getRoleName = (role: IUserRole) => {
+  const getRoleName = (role: UserRole): string => {
     switch (role) {
-      case IUserRole.ADMIN:
+      case UserRole.ADMIN:
         return t('user:options.admin');
-      case IUserRole.OPERATOR:
+      case UserRole.OPERATOR:
         return t('user:options.operator');
-      case IUserRole.ANALYST:
+      case UserRole.ANALYST:
         return t('user:options.analyst');
-      case IUserRole.ANALYST_READER:
+      case UserRole.ANALYST_READER:
         return t('user:options.analystReader');
       default:
         return '';
@@ -106,7 +106,7 @@ const UserList: React.FC = () => {
       for (const v of currentValue) {
         options.push({
           value: v.value,
-          label: getRoleName(v.value as IUserRole),
+          label: getRoleName(v.value as UserRole),
         });
       }
     }
@@ -221,7 +221,13 @@ const UserList: React.FC = () => {
 
   const updateUserInfo = async (newItem: IUser) => {
     try {
-      const { success, message }: ApiResponse<null> = await updateUser(newItem);
+      const { success, message }: ApiResponse<null> = await updateUser({
+        id: newItem.id,
+        name: defaultStr(newItem.name),
+        roles: newItem.roles,
+        createAt: new Date().getTime(),
+        operator: '',
+      });
       if (!success) {
         throw new Error(message);
       }

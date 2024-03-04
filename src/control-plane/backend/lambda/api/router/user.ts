@@ -12,21 +12,21 @@
  */
 
 import express from 'express';
-import { body, header, param } from 'express-validator';
+import { body, header } from 'express-validator';
 import { isEmail, isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { UserService } from '../service/user';
 
-const router_user = express.Router();
+const router_user: express.Router = express.Router();
 const userServ: UserService = new UserService();
 
 router_user.get(
-  '',
+  '/users',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.list(req, res, next);
   });
 
 router_user.post(
-  '',
+  '/user',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').custom(isEmail),
@@ -38,13 +38,29 @@ router_user.post(
   });
 
 router_user.get(
-  '/details',
+  '/user/settings',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return userServ.getSettings(req, res, next);
+  });
+
+router_user.post(
+  '/user/settings',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return userServ.updateSettings(req, res, next);
+  });
+
+router_user.get(
+  '/user/details',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.details(req, res, next);
   });
 
 router_user.put(
-  '/:id',
+  '/user',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').custom(isEmail).custom(isUserValid),
@@ -56,29 +72,14 @@ router_user.put(
   });
 
 router_user.delete(
-  '/:id',
+  '/user',
   validate([
-    param('id').custom(isEmail).custom(isUserValid),
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('id').custom(isEmail).custom(isUserValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.delete(req, res, next);
-  });
-
-router_user.get(
-  '/settings',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return userServ.getSettings(req, res, next);
-  });
-
-router_user.post(
-  '/settings',
-  validate([
-    body().custom(isXSSRequest),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return userServ.updateSettings(req, res, next);
   });
 
 export {

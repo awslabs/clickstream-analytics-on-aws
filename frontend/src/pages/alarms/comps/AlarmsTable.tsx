@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IProject } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -90,7 +91,7 @@ const AlarmTableTable: React.FC = () => {
           return {
             params: { project: item },
             promise: getAlarmList({
-              pid: item.id,
+              projectId: item.id,
               pageNumber: 1,
               pageSize: 100,
             }),

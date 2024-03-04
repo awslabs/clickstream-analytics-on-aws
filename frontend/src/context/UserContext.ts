@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IUser } from '@aws/clickstream-base-lib';
 import { createContext } from 'react';
 import { INIT_USER_DATA } from 'ts/init';
 export const UserContext = createContext<IUser | undefined>(INIT_USER_DATA);

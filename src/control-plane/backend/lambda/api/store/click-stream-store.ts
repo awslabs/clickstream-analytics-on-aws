@@ -11,52 +11,52 @@
  *  and limitations under the License.
  */
 
-import { IApplication } from '../model/application';
+import { RawApplication } from '../model/application';
 import { IDictionary } from '../model/dictionary';
-import { IPipeline } from '../model/pipeline';
-import { IPlugin } from '../model/plugin';
-import { IProject } from '../model/project';
-import { IUser, IUserSettings } from '../model/user';
+import { RawPipeline } from '../model/pipeline';
+import { RawPlugin } from '../model/plugin';
+import { RawProject } from '../model/project';
+import { RawUser, RawUserSettings } from '../model/user';
 
 export interface ClickStreamStore {
-  createProject: (project: IProject) => Promise<string>;
-  getProject: (id: string) => Promise<IProject | undefined>;
-  updateProject: (project: IProject) => Promise<void>;
-  listProjects: (order: string) => Promise<IProject[]>;
+  createProject: (project: RawProject) => Promise<string>;
+  getProject: (id: string) => Promise<RawProject | undefined>;
+  updateProject: (project: RawProject) => Promise<void>;
+  listProjects: (order: string) => Promise<RawProject[]>;
   deleteProject: (id: string, operator: string) => Promise<void>;
   isProjectExisted: (projectId: string) => Promise<boolean>;
 
-  addApplication: (app: IApplication) => Promise<string>;
-  getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
-  updateApplication: (app: IApplication) => Promise<void>;
-  listApplication: (projectId: string, order: string) => Promise<IApplication[]>;
-  listAllApplication: () => Promise<IApplication[]>;
+  addApplication: (app: RawApplication) => Promise<string>;
+  getApplication: (projectId: string, appId: string) => Promise<RawApplication | undefined>;
+  updateApplication: (app: RawApplication) => Promise<void>;
+  listApplication: (projectId: string, order: string) => Promise<RawApplication[]>;
+  listAllApplication: () => Promise<RawApplication[]>;
   deleteApplication: (projectId: string, appId: string, operator: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 
-  addPipeline: (pipeline: IPipeline) => Promise<string>;
-  getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<IPipeline | undefined>;
-  updatePipeline: (pipeline: IPipeline, curPipeline: IPipeline) => Promise<void>;
-  updatePipelineAtCurrentVersion: (pipeline: IPipeline) => Promise<void>;
-  listPipeline: (projectId: string, version: string, order: string) => Promise<IPipeline[]>;
+  addPipeline: (pipeline: RawPipeline) => Promise<string>;
+  getPipeline: (projectId: string, pipelineId: string, version?: string | undefined) => Promise<RawPipeline | undefined>;
+  updatePipeline: (pipeline: RawPipeline, curPipeline: RawPipeline) => Promise<void>;
+  updatePipelineAtCurrentVersion: (pipeline: RawPipeline) => Promise<void>;
+  listPipeline: (projectId: string, version: string, order: string) => Promise<RawPipeline[]>;
   deletePipeline: (projectId: string, pipelineId: string, operator: string) => Promise<void>;
   isPipelineExisted: (projectId: string, pipelineId: string) => Promise<boolean>;
 
-  addPlugin: (plugin: IPlugin) => Promise<string>;
-  getPlugin: (pluginId: string) => Promise<IPlugin | undefined>;
-  updatePlugin: (plugin: IPlugin) => Promise<void>;
-  listPlugin: (pluginType: string, order: string) => Promise<IPlugin[]>;
+  addPlugin: (plugin: RawPlugin) => Promise<string>;
+  getPlugin: (pluginId: string) => Promise<RawPlugin | undefined>;
+  updatePlugin: (plugin: RawPlugin) => Promise<void>;
+  listPlugin: (pluginType?: string, order?: string) => Promise<RawPlugin[]>;
   deletePlugin: (pluginId: string, operator: string) => Promise<void>;
   isPluginExisted: (pluginId: string) => Promise<boolean>;
   bindPlugins: (pluginIds: string[], count: number) => Promise<void>;
 
-  addUser: (user: IUser) => Promise<string>;
-  getUser: (uid: string) => Promise<IUser | undefined>;
-  updateUser: (user: IUser) => Promise<void>;
-  listUser: () => Promise<IUser[]>;
+  addUser: (user: RawUser) => Promise<string>;
+  getUser: (uid: string) => Promise<RawUser | undefined>;
+  updateUser: (user: RawUser) => Promise<void>;
+  listUser: () => Promise<RawUser[]>;
   deleteUser: (uid: string, operator: string) => Promise<void>;
-  getUserSettings: () => Promise<IUserSettings | undefined>;
-  updateUserSettings: (settings: IUserSettings) => Promise<void>;
+  getUserSettings: () => Promise<RawUserSettings | undefined>;
+  updateUserSettings: (settings: RawUserSettings) => Promise<void>;
 
   getDictionary: (name: string) => Promise<IDictionary | undefined>;
   updateDictionary: (dictionary: IDictionary) => Promise<void>;

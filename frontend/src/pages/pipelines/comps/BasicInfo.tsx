@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IPipeline, PipelineStatusType } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -26,7 +27,7 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
+import { SDK_LIST, TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 import { alertMsg, defaultStr } from 'ts/utils';
 
@@ -148,8 +149,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     reloadPipeline(refresh);
                   }}
                 />
-                {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
-                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === PipelineStatusType.FAILED ||
+                  pipelineInfo?.statusType === PipelineStatusType.WARNING) && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}
@@ -161,9 +162,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.retry')}
                   </Button>
                 )}
-                {(pipelineInfo?.statusType === EPipelineStatus.Active ||
-                  pipelineInfo?.statusType === EPipelineStatus.Failed ||
-                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === PipelineStatusType.ACTIVE ||
+                  pipelineInfo?.statusType === PipelineStatusType.FAILED ||
+                  pipelineInfo?.statusType === PipelineStatusType.WARNING) && (
                   <Button
                     href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
                     iconName="edit"
@@ -172,7 +173,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.edit')}
                   </Button>
                 )}
-                {pipelineInfo?.statusType === EPipelineStatus.Active && (
+                {pipelineInfo?.statusType === PipelineStatusType.ACTIVE && (
                   <Button
                     iconName="upload-download"
                     disabled={
@@ -282,7 +283,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <div>{moment(pipelineInfo?.createAt).format(TIME_FORMAT)}</div>
               </div>
             )}
-            {pipelineInfo?.pipelineId && pipelineInfo?.updateAt && (
+            {pipelineInfo?.pipelineId && pipelineInfo?.updateAt !== 0 && (
               <div>
                 <Box variant="awsui-key-label">
                   {t('pipeline:detail.updateTime')}

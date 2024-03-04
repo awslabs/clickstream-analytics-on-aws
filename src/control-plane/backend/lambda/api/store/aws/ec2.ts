@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IRegion, ISecurityGroup, IVpc, SubnetType } from '@aws/clickstream-base-lib';
 import {
   EC2Client,
   paginateDescribeVpcs,
@@ -25,7 +26,6 @@ import {
   Subnet,
   RouteTable, DescribeRegionsCommand,
   DescribeAvailabilityZonesCommand,
-  Region,
   paginateDescribeNatGateways,
   NatGateway,
 } from '@aws-sdk/client-ec2';
@@ -34,7 +34,7 @@ import { SecurityGroupRule } from '@aws-sdk/client-ec2/dist-types/models/models_
 import { SecurityGroup } from '@aws-sdk/client-ec2/dist-types/models/models_4';
 import { PIPELINE_SUPPORTED_REGIONS } from '../../common/constants';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { ClickStreamVpc, ClickStreamSubnet, ClickStreamRegion, ClickStreamSecurityGroup, SubnetType } from '../../common/types';
+import { ClickStreamSubnet } from '../../common/types';
 import { getSubnetRouteTable, getSubnetType, getValueFromTags, isEmpty } from '../../common/utils';
 
 export const describeVpcs = async (region: string, vpcId?: string) => {
@@ -52,42 +52,14 @@ export const describeVpcs = async (region: string, vpcId?: string) => {
   })) {
     records.push(...page.Vpcs as Vpc[]);
   }
-  const vpcs: ClickStreamVpc[] = [];
+  const vpcs: IVpc[] = [];
   for (let vpc of records) {
-    vpcs.push({
-      id: vpc.VpcId ?? '',
-      name: getValueFromTags('Name', vpc.Tags!),
-      cidr: vpc.CidrBlock ?? '',
-      isDefault: vpc.IsDefault ?? false,
-    });
-  }
-  return vpcs;
-};
-
-export const describeVpcs3AZ = async (region: string) => {
-  const ec2Client = new EC2Client({
-    ...aws_sdk_client_common_config,
-    region,
-  });
-  const records: Vpc[] = [];
-  for await (const page of paginateDescribeVpcs({ client: ec2Client }, {})) {
-    records.push(...page.Vpcs as Vpc[]);
-  }
-  const vpcs: ClickStreamVpc[] = [];
-  for (let vpc of records) {
-    const subnets = await describeSubnets(region, vpc.VpcId!);
-    const azSet = new Set();
-    for (let subnet of subnets) {
-      if (subnet.AvailabilityZone) {
-        azSet.add(subnet.AvailabilityZone);
-      }
-    }
-    if (azSet.size >= 3) {
+    if (vpc.VpcId) {
       vpcs.push({
-        id: vpc.VpcId ?? '',
-        name: getValueFromTags('Name', vpc.Tags!),
-        cidr: vpc.CidrBlock ?? '',
-        isDefault: vpc.IsDefault ?? false,
+        VpcId: vpc.VpcId,
+        Name: getValueFromTags('Name', vpc.Tags!),
+        CidrBlock: vpc.CidrBlock ?? '',
+        IsDefault: vpc.IsDefault ?? false,
       });
     }
   }
@@ -151,19 +123,19 @@ export const describeSubnetsWithType = async (region: string, vpcId: string, typ
     // Find the routeTable of subnet
     const routeTable = getSubnetRouteTable(routeTables, subnetId);
     const subnetType = getSubnetType(routeTable);
-    const clickStreamSubnet = {
+    const clickStreamSubnet: ClickStreamSubnet = {
       id: subnetId,
       name: getValueFromTags('Name', subnet.Tags!),
       cidr: subnet.CidrBlock ?? '',
       availabilityZone: subnet.AvailabilityZone ?? '',
       type: subnetType,
-      routeTable,
+      routeTable: routeTable,
     };
     if (type === SubnetType.ALL || type === subnetType) {
       result.push(clickStreamSubnet);
     }
   }
-  return result;
+  return result.sort((a, b) => a.name.localeCompare(b.name));
 };
 
 export const getSubnet = async (region: string, subnetId: string) => {
@@ -185,18 +157,21 @@ export const listRegions = async () => {
   const ec2Client = new EC2Client({
     ...aws_sdk_client_common_config,
   });
-
+  const regions: IRegion[] = [];
   const params: DescribeRegionsCommand = new DescribeRegionsCommand({});
-  const queryResponse = await ec2Client.send(params);
-  const regions: ClickStreamRegion[] = [];
-  for (let region of queryResponse.Regions as Region[]) {
-    if (region.RegionName && PIPELINE_SUPPORTED_REGIONS.includes(region.RegionName)) {
-      regions.push({
-        id: region.RegionName,
-      });
-    }
-  }
-  return regions;
+  const records = (await ec2Client.send(params)).Regions ?? [];
+  records.forEach(
+    region => {
+      if (region.RegionName && PIPELINE_SUPPORTED_REGIONS.includes(region.RegionName)) {
+        regions.push({
+          Endpoint: region.Endpoint,
+          RegionName: region.RegionName,
+          OptInStatus: region.OptInStatus,
+        });
+      }
+    },
+  );
+  return regions.sort((a, b) => a.RegionName.localeCompare(b.RegionName));
 };
 
 export const listAvailabilityZones = async (region: string) => {
@@ -211,15 +186,15 @@ export const listAvailabilityZones = async (region: string) => {
 
 export const describeVpcSecurityGroups = async (region: string, vpcId: string) => {
   const records = await describeSecurityGroups(region, vpcId);
-  const securityGroups: ClickStreamSecurityGroup[] = [];
+  const securityGroups: ISecurityGroup[] = [];
   for (let sg of records) {
     securityGroups.push({
-      id: sg.GroupId ?? '',
-      name: sg.GroupName ?? '',
-      description: sg.Description ?? '',
+      GroupId: sg.GroupId ?? '',
+      GroupName: sg.GroupName ?? '',
+      Description: sg.Description ?? '',
     });
   }
-  return securityGroups;
+  return securityGroups.sort((a, b) => a.GroupName.localeCompare(b.GroupName));
 };
 
 export const describeSecurityGroups = async (region: string, vpcId: string) => {

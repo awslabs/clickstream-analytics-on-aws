@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { PipelineStatusDetail, PipelineStatusType } from '@aws/clickstream-base-lib';
 import {
   Link,
   Popover,
@@ -22,9 +23,10 @@ import {
 import { getPipelineDetail } from 'apis/pipeline';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CLOUDFORMATION_STATUS_MAP, EPipelineStatus } from 'ts/const';
+import { CLOUDFORMATION_STATUS_MAP } from 'ts/const';
 import { buildCloudFormationStackLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
+import { IExtPipeline } from 'types/pipeline';
 
 const CHECK_TIME_INTERVAL = 5000;
 
@@ -32,7 +34,7 @@ interface PipelineStatusProps {
   projectId?: string;
   pipelineId?: string;
   status?: string;
-  updatePipelineStatus?: (status: EPipelineStatus) => void;
+  updatePipelineStatus?: (status: PipelineStatusType) => void;
 }
 const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
@@ -44,7 +46,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   const [updatedStatus, setUpdatedStatus] = useState(status);
   const [pipelineRegion, setPipelineRegion] = useState('');
   const [pipelineTemplateVersion, setPipelineTemplateVersion] = useState('');
-  const [stackStatusList, setStackStatusList] = useState<IStackStatus[]>([]);
+  const [stackStatusList, setStackStatusList] = useState<PipelineStatusDetail[]>([]);
   const [displayStatus, setDisplayStatus] = useState('');
   const [indicatorType, setIndicatorType] =
     useState<StatusIndicatorProps.Type>('loading');
@@ -52,30 +54,30 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     let tmpDisplayStatus = '';
     let tmpIndicatorType: StatusIndicatorProps.Type;
     if (
-      updatedStatus === EPipelineStatus.Creating ||
-      updatedStatus === EPipelineStatus.Updating ||
-      updatedStatus === EPipelineStatus.Deleting
+      updatedStatus === PipelineStatusType.CREATING ||
+      updatedStatus === PipelineStatusType.UPDATING ||
+      updatedStatus === PipelineStatusType.DELETING
     ) {
       tmpIndicatorType = 'loading';
-      if (updatedStatus === EPipelineStatus.Creating) {
+      if (updatedStatus === PipelineStatusType.CREATING) {
         tmpDisplayStatus = 'status.creating';
       }
-      if (updatedStatus === EPipelineStatus.Updating) {
+      if (updatedStatus === PipelineStatusType.UPDATING) {
         tmpDisplayStatus = 'status.updating';
       }
-      if (updatedStatus === EPipelineStatus.Deleting) {
+      if (updatedStatus === PipelineStatusType.DELETING) {
         tmpDisplayStatus = 'status.deleting';
       }
-    } else if (updatedStatus === EPipelineStatus.Failed) {
+    } else if (updatedStatus === PipelineStatusType.FAILED) {
       tmpIndicatorType = 'error';
       tmpDisplayStatus = 'status.failed';
-    } else if (updatedStatus === EPipelineStatus.Active) {
+    } else if (updatedStatus === PipelineStatusType.ACTIVE) {
       tmpIndicatorType = 'success';
       tmpDisplayStatus = 'status.active';
-    } else if (updatedStatus === EPipelineStatus.Warning) {
+    } else if (updatedStatus === PipelineStatusType.WARNING) {
       tmpIndicatorType = 'warning';
       tmpDisplayStatus = 'status.warning';
-    } else if (updatedStatus === EPipelineStatus.Deleted) {
+    } else if (updatedStatus === PipelineStatusType.DELETED) {
       tmpIndicatorType = 'stopped';
       tmpDisplayStatus = 'status.deleted';
     } else {
@@ -101,9 +103,9 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
         setPipelineTemplateVersion(data.templateVersion ?? '');
         setStackStatusList(data.stackDetails ?? []);
         if (
-          data.statusType === EPipelineStatus.Active ||
-          data.statusType === EPipelineStatus.Failed ||
-          data.statusType === EPipelineStatus.Warning
+          data.statusType === PipelineStatusType.ACTIVE ||
+          data.statusType === PipelineStatusType.FAILED ||
+          data.statusType === PipelineStatusType.WARNING
         ) {
           window.clearInterval(intervalId);
           // update pipeline status
@@ -141,9 +143,9 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     if (
       pipelineTemplateVersion !== '' &&
       pipelineTemplateVersion !== stackVersion &&
-      updatedStatus !== EPipelineStatus.Creating &&
-      updatedStatus !== EPipelineStatus.Updating &&
-      updatedStatus !== EPipelineStatus.Deleting
+      updatedStatus !== PipelineStatusType.CREATING &&
+      updatedStatus !== PipelineStatusType.UPDATING &&
+      updatedStatus !== PipelineStatusType.DELETING
     ) {
       stackIndicatorType = 'warning';
     } else {
@@ -169,7 +171,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                   <StatusIndicator
                     type={getStackStatusIndicatorType(
                       element.stackTemplateVersion,
-                      element.stackStatus
+                      defaultStr(element.stackStatus)
                     )}
                   >
                     <b>{element.stackType}</b>(

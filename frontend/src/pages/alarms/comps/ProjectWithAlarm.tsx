@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IAlarm } from '@aws/clickstream-base-lib';
 import {
   Alert,
   Button,

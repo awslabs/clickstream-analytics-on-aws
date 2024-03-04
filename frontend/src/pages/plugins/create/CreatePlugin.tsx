@@ -11,6 +11,12 @@
  *  and limitations under the License.
  */
 
+import {
+  XSS_PATTERN,
+  CredentialsResponse,
+  IPlugin,
+  PluginType,
+} from '@aws/clickstream-base-lib';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { XhrHttpHandler } from '@aws-sdk/xhr-http-handler';
@@ -41,7 +47,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH, PLUGIN_TYPE_LIST } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   alertMsg,
   validatePluginMainFunction,
@@ -79,15 +84,18 @@ function Content() {
   const [s3Client, setS3Client] = useState<any>();
   const [curDescription, setCurDescription] = useState<string>('');
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
+    id: '',
     name: '',
     description: {
       'en-US': '',
       'zh-CN': '',
     },
-    pluginType: '',
+    pluginType: PluginType.ENRICH,
     mainFunction: '',
     jarFile: '',
     dependencyFiles: [],
+    builtIn: false,
+    createAt: new Date().getTime(),
   });
 
   const splitFileNameWithSuffix = (str: string, substring: string) => {
@@ -149,10 +157,16 @@ function Content() {
       return;
     }
     setLoadingCreate(true);
-    curPlugin.dependencyFiles = dependenciesS3FileKeys;
     try {
       const { success, data }: ApiResponse<ResponseCreate> = await createPlugin(
-        curPlugin
+        {
+          name: curPlugin.name,
+          description: curPlugin.description,
+          pluginType: curPlugin.pluginType,
+          mainFunction: curPlugin.mainFunction,
+          jarFile: curPlugin.jarFile,
+          dependencyFiles: dependenciesS3FileKeys,
+        }
       );
       if (success && data.id) {
         navigate(`/plugins`);
@@ -164,7 +178,7 @@ function Content() {
   };
 
   const initS3ClientWithSTS = async () => {
-    const { success, data }: ApiResponse<UploadTokenResponse> =
+    const { success, data }: ApiResponse<CredentialsResponse> =
       await getSTSUploadRole();
     if (success && data) {
       const s3 = new S3Client({
@@ -424,7 +438,8 @@ function Content() {
                     setCurPlugin((prev) => {
                       return {
                         ...prev,
-                        pluginType: detail.value || '',
+                        pluginType:
+                          (detail.value as PluginType) || PluginType.ENRICH,
                       };
                     });
                   }}

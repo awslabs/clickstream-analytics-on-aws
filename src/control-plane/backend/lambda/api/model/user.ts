@@ -11,15 +11,20 @@
  *  and limitations under the License.
  */
 
-import { IUserRole } from '../common/types';
+import { IUser, UserRole } from '@aws/clickstream-base-lib';
+import { logger } from '../common/powertools';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
-export interface IUser {
+const store: ClickStreamStore = new DynamoDbStore();
+
+export interface RawUser {
   readonly id: string;
   readonly type: string;
   readonly prefix: string;
 
   readonly name?: string;
-  readonly roles: IUserRole[];
+  readonly roles: UserRole[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -27,10 +32,87 @@ export interface IUser {
   readonly deleted: boolean;
 }
 
-export interface IUserSettings {
+export interface RawUserSettings {
   readonly roleJsonPath: string;
   readonly adminRoleNames: string;
   readonly operatorRoleNames: string;
   readonly analystRoleNames: string;
   readonly analystReaderRoleNames: string;
+}
+
+export function getUserFromRaw(raw: RawUser[]): IUser[] {
+  return raw.map((item: RawUser) => {
+    return {
+      id: item.id,
+      name: item.name,
+      roles: item.roles,
+      createAt: item.createAt,
+      operator: item.operator,
+    } as IUser;
+  });
+}
+
+export function getRawUser(user: IUser): RawUser {
+  return {
+    id: user.id,
+    type: 'USER',
+    prefix: 'USER',
+    name: user.name ?? '',
+    roles: user.roles ?? [],
+    createAt: Date.now(),
+    updateAt: Date.now(),
+    operator: user.operator ?? '',
+    deleted: false,
+  };
+}
+
+export class CUser {
+
+  public async list(): Promise<RawUser[]> {
+    try {
+      return await store.listUser();
+    } catch (error) {
+      logger.error('Failed to list user.', { error });
+      throw error;
+    }
+  }
+
+  public async get(id: string): Promise<RawUser | undefined> {
+    try {
+      return await store.getUser(id);
+    } catch (error) {
+      logger.error('Failed to get user.', { error });
+      throw error;
+    }
+  }
+
+  public async create(user: IUser): Promise<string> {
+    try {
+      await store.addUser(getRawUser(user));
+      return user.id;
+    } catch (error) {
+      logger.error('Failed to create user.', { error });
+      throw error;
+    }
+  }
+
+  public async update(user: IUser): Promise<string> {
+    try {
+      await store.updateUser(getRawUser(user));
+      return user.id;
+    } catch (error) {
+      logger.error('Failed to update user.', { error });
+      throw error;
+    }
+  }
+
+  public async delete(userId: string, operator: string): Promise<boolean> {
+    try {
+      await store.deleteUser(userId, operator);
+      return true;
+    } catch (error) {
+      logger.error('Failed to delete user.', { error });
+      throw error;
+    }
+  };
 }

@@ -265,10 +265,10 @@ describe('App test', () => {
               },
               sinkS3: {
                 M: {
-                  s3BatchMaxBytes: {
+                  s3BufferSize: {
                     N: '1000000',
                   },
-                  s3BatchTimeout: {
+                  s3BufferInterval: {
                     N: '60',
                   },
                   sinkBucket: {
@@ -541,10 +541,10 @@ describe('App test', () => {
           },
           sinkS3: {
             M: {
-              s3BatchMaxBytes: {
+              s3BufferSize: {
                 N: '1000000',
               },
-              s3BatchTimeout: {
+              s3BufferInterval: {
                 N: '60',
               },
               sinkBucket: {

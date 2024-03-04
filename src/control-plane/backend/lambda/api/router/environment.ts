@@ -13,20 +13,20 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultAssumeRoleTypeValid, defaultPageValueValid, defaultRegionValueValid, defaultSubnetTypeValid, isRequestIdExisted, isValidEmpty, validate } from '../common/request-valid';
+import { defaultPageValueValid, defaultRegionValueValid, defaultSubnetTypeValid, isRequestIdExisted, isValidEmpty, validate } from '../common/request-valid';
 import { EnvironmentServ } from '../service/environment';
 
-const router_env = express.Router();
+const router_env: express.Router = express.Router();
 const environmentServ: EnvironmentServ = new EnvironmentServ();
 
 router_env.get(
-  '/regions',
+  '/env/regions',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRegions(req, res, next);
   });
 
 router_env.get(
-  '/vpc',
+  '/env/vpcs',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -39,22 +39,8 @@ router_env.get(
   });
 
 router_env.get(
-  '/vpc3az',
+  '/env/vpc/:vpcId/subnets',
   validate([
-    query().custom((value, { req }) => defaultRegionValueValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.describeVpcs3AZ(req, res, next);
-  });
-
-router_env.get(
-  '/vpc/subnet',
-  validate([
-    query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
       location: 'body',
@@ -71,9 +57,8 @@ router_env.get(
   });
 
 router_env.get(
-  '/vpc/securitygroups',
+  '/env/vpc/:vpcId/securityGroups',
   validate([
-    query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
       location: 'body',
@@ -85,13 +70,13 @@ router_env.get(
   });
 
 router_env.get(
-  '/s3/buckets',
+  '/env/buckets',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listBuckets(req, res, next);
   });
 
 router_env.get(
-  '/msk/clusters',
+  '/env/MSKClusters',
   validate([
     query('vpcId').custom(isValidEmpty),
     query().custom((value, { req }) => defaultRegionValueValid(value, {
@@ -105,7 +90,7 @@ router_env.get(
   });
 
 router_env.get(
-  '/redshift/clusters',
+  '/env/redshiftClusters',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -118,7 +103,7 @@ router_env.get(
   });
 
 router_env.get(
-  '/redshift-serverless/workgroups',
+  '/env/redshiftServerlessWorkGroups',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -127,42 +112,23 @@ router_env.get(
     })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.listRedshiftServerlessWorkgroups(req, res, next);
+    return environmentServ.listRedshiftServerlessWorkGroups(req, res, next);
   });
 
 router_env.get(
-  '/quicksight/ping',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.quickSightIsSubscribed(req, res, next);
-  });
-
-router_env.get(
-  '/quicksight/describe',
+  '/env/quickSightSubscription',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.describeAccountSubscription(req, res, next);
   });
 
 router_env.get(
-  '/iam/roles',
-  validate([
-    query().custom((value, { req }) => defaultAssumeRoleTypeValid(value, {
-      req,
-      location: 'body',
-      path: '',
-    })),
-  ]),
+  '/env/IAMRoles',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.listRoles(req, res, next);
   });
 
 router_env.get(
-  '/route53/hostedzones',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.listHostedZones(req, res, next);
-  });
-
-router_env.get(
-  '/acm/certificates',
+  '/env/ACMCertificates',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -175,7 +141,7 @@ router_env.get(
   });
 
 router_env.get(
-  '/ssm/secrets',
+  '/env/SSMSecrets',
   validate([
     query().custom((value, { req }) => defaultRegionValueValid(value, {
       req,
@@ -188,7 +154,7 @@ router_env.get(
   });
 
 router_env.get(
-  '/sts/assume_upload_role',
+  '/env/uploadRole',
   validate([
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
@@ -197,7 +163,7 @@ router_env.get(
   });
 
 router_env.get(
-  '/cloudwatch/alarms',
+  '/env/alarms',
   validate([
     query().custom((value, { req }) => defaultPageValueValid(value, {
       req,
@@ -214,32 +180,24 @@ router_env.get(
     return environmentServ.alarms(req, res, next);
   });
 
-router_env.post(
-  '/cloudwatch/alarms/disable',
+router_env.put(
+  '/env/alarm',
   validate([
     body('region').custom(isValidEmpty),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.alarmsDisable(req, res, next);
-  });
-
-router_env.post(
-  '/cloudwatch/alarms/enable',
-  validate([
-    body('region').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.alarmsEnable(req, res, next);
+    return environmentServ.alarmsUpdate(req, res, next);
   });
 
 router_env.get(
-  '/ping',
+  '/env/servicesAvailable',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.servicesPing(req, res, next);
   });
 
-router_env.post(
-  '/fetch',
+router_env.get(
+  '/env/domainAvailable',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.fetch(req, res, next);
   });

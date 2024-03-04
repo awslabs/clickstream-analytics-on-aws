@@ -191,10 +191,8 @@ describe('Project test', () => {
         platform: 'Web',
         createAt: 1675321494735,
         emails: 'u1@example.com,u2@example.com,u3@example.com',
-        tableName: 't1',
         type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         region: 'us-east-1',
-        status: 'UNKNOW',
         description: 'Description of Project-01',
         id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
       },
@@ -209,16 +207,10 @@ describe('Project test', () => {
       data: {
         environment: 'Dev',
         updateAt: 1675321494735,
-        operator: '',
         name: 'Project-01',
-        deleted: false,
-        platform: 'Web',
         createAt: 1675321494735,
         emails: 'u1@example.com,u2@example.com,u3@example.com',
-        tableName: 't1',
-        type: 'METADATA#a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
         region: 'us-east-1',
-        status: 'UNKNOW',
         description: 'Description of Project-01',
         id: 'a806ebb1-6f35-4132-b5c9-efa7e7e9033c',
       },
@@ -275,7 +267,65 @@ describe('Project test', () => {
       ],
     });
     let res = await request(app)
-      .get('/api/project');
+      .get('/api/projects');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          { name: 'Project-01', id: '1' },
+          { name: 'Project-02', id: '2' },
+          { name: 'Project-03', id: '3' },
+          { name: 'Project-04', id: '4' },
+          { name: 'Project-05', id: '5' },
+        ],
+        totalCount: 5,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .get('/api/projects');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Get project list patch details', async () => {
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+        { name: 'Project-03', id: '3' },
+        { name: 'Project-04', id: '4' },
+        { name: 'Project-05', id: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { pipelineId: 'pipeline-01', projectId: '1' },
+        { pipelineId: 'pipeline-02', projectId: '2' },
+        { pipelineId: 'pipeline-03', projectId: '3' },
+        { pipelineId: 'pipeline-04', projectId: '4' },
+        { pipelineId: 'pipeline-05', projectId: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { name: 'App-01', projectId: '1' },
+        { name: 'App-02', projectId: '2' },
+        { name: 'App-03', projectId: '3' },
+        { name: 'App-04', projectId: '4' },
+        { name: 'App-05', projectId: '5' },
+      ],
+    });
+    const res = await request(app)
+      .get('/api/projects?details=true');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -291,19 +341,6 @@ describe('Project test', () => {
         ],
         totalCount: 5,
       },
-    });
-
-    // Mock DynamoDB error
-    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
-      .get('/api/project');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Unexpected error occurred at server.',
-      error: 'Error',
     });
   });
   it('Get project list with page', async () => {
@@ -341,7 +378,7 @@ describe('Project test', () => {
       ],
     });
     const res = await request(app)
-      .get('/api/project?pageNumber=2&pageSize=2');
+      .get('/api/projects?pageNumber=2&pageSize=2');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -349,8 +386,8 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-03', id: '3' },
+          { name: 'Project-04', id: '4' },
         ],
         totalCount: 5,
       },
@@ -487,6 +524,12 @@ describe('Project test', () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
     createSNSTopicMock(snsMock);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
     ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     }).resolvesOnce({
@@ -506,8 +549,8 @@ describe('Project test', () => {
       success: true,
       message: 'Project deleted.',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 4);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
   });
   it('Delete project and it status is failed', async () => {
@@ -701,7 +744,7 @@ describe('Project test', () => {
         {
           location: 'params',
           msg: 'Project resource does not exist.',
-          param: 'id',
+          param: 'projectId',
           value: MOCK_PROJECT_ID,
         },
       ],
@@ -710,7 +753,7 @@ describe('Project test', () => {
   it('Verification project id existed', async () => {
     projectExistedMock(ddbMock, true);
     const res = await request(app)
-      .get(`/api/project/verification/${MOCK_PROJECT_ID}`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/verification`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -722,7 +765,7 @@ describe('Project test', () => {
   it('Verification project with mock error', async () => {
     ddbMock.on(GetCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
-      .get('/api/project/verification/t1');
+      .get('/api/project/t1/verification');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
 

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { GetProjectResponse, IProject } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Container,
@@ -28,6 +29,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
+import { IExtPipeline } from 'types/pipeline';
 import Alarms from './comps/Alarms';
 import Ingestion from './comps/Ingestion';
 import Monitoring from './comps/Monitoring';
@@ -71,9 +73,10 @@ const PipelineDetail: React.FC = () => {
   const getProjectDetailById = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: defaultStr(pid),
-      });
+      const { success, data }: ApiResponse<GetProjectResponse> =
+        await getProjectDetail({
+          projectId: defaultStr(pid),
+        });
       if (success) {
         setProjectInfo(data);
         getProjectPipelineDetail('false');

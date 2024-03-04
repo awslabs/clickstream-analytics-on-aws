@@ -1,20 +1,25 @@
 FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
-COPY ./src ./src
-RUN cd src/control-plane/backend/lambda/api && yarn install && yarn compile
-RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && yarn install --production
-RUN rm -rf /home/node/app/src/control-plane/backend/lambda/api/dist/test && \
-curl -sf https://gobinaries.com/tj/node-prune | sh && \
-node-prune /home/node/app/src/control-plane/backend/lambda/api/node_modules
+COPY frontend frontend
+COPY src src
+COPY package.json package.json
+COPY pnpm-lock.yaml pnpm-lock.yaml
+COPY nx.json nx.json
+COPY projenrc projenrc
+COPY pnpm-workspace.yaml pnpm-workspace.yaml
 
-RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node/app/src/control-plane/backend/lambda/api/dist/locales/
+RUN npm install -g pnpm@8.15.3 @vercel/ncc@0.38.1
+RUN rm -fr node_modules
+RUN pnpm install && pnpm nx run-many --target=build
+RUN cd src/control-plane/backend/lambda/api && pnpm run ncc-build
 
+RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/ncc/quicksight/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/ncc/quicksight/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/ncc/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node/app/src/control-plane/backend/lambda/api/ncc/locales/
 
 RUN mkdir -p /asset
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/node_modules /asset/
-RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/dist /asset/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/ncc /asset/
 RUN cp /home/node/app/src/control-plane/backend/lambda/api/run.sh /asset/run.sh
 USER node

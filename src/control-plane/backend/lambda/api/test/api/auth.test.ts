@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { UserRole } from '@aws/clickstream-base-lib';
 import { DescribeRegionsCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { GenerateEmbedUrlForRegisteredUserCommand, ListUsersCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
 import {
@@ -25,7 +26,6 @@ import request from 'supertest';
 import 'aws-sdk-client-mock-jest';
 import { MOCK_USER_ID, userMock } from './ddb-mock';
 import { amznRequestContextHeader } from '../../common/constants';
-import { IUserRole } from '../../common/types';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -49,13 +49,13 @@ describe('OIDC Auth test', () => {
 
   it('status 401 when no auth token provided.', async () => {
     const res = await request(app)
-      .get('/api/user');
+      .get('/api/users');
     expect(res.statusCode).toBe(401);
   });
 
   it('status 403 when error auth token.', async () => {
     const res = await request(app)
-      .get('/api/user')
+      .get('/api/users')
       .set('Authorization', 'Bearer xxx');
     expect(res.statusCode).toBe(403);
   });
@@ -77,21 +77,21 @@ describe('Validate role middleware test', () => {
 
   it('status 401 when no token in request.', async () => {
     const res = await request(app)
-      .get('/api/user');
+      .get('/api/users');
     expect(res.statusCode).toBe(401);
     expect(res.body.message).toEqual('No token found.');
   });
 
   it('Validate right role with operator in request context.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], true);
     ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{
         id: 'fake@example.com',
-        roles: [IUserRole.ADMIN],
+        roles: [UserRole.ADMIN],
       }],
     });
     const res = await request(app)
-      .get('/api/user')
+      .get('/api/users')
       .set(amznRequestContextHeader, context);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
@@ -101,9 +101,9 @@ describe('Validate role middleware test', () => {
   });
 
   it('Validate with operator 403.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.OPERATOR], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.OPERATOR], true);
     const res = await request(app)
-      .get('/api/user')
+      .get('/api/users')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(403);
     expect(res.body.success).toEqual(false);
@@ -114,7 +114,7 @@ describe('Validate role middleware test', () => {
 
   it('User not in DDB and no group in token.', async () => {
     ddbMock.on(GetCommand).resolves({});
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], false);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_no_group);
@@ -127,12 +127,12 @@ describe('Validate role middleware test', () => {
 
   it('User not in DDB but group in token.', async () => {
     ddbMock.on(GetCommand).resolves({});
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], false);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.roles).toEqual([IUserRole.OPERATOR]);
+    expect(res.body.data.roles).toEqual([UserRole.OPERATOR]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 4);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
@@ -140,7 +140,7 @@ describe('Validate role middleware test', () => {
 
   it('User not in DDB and error group in token.', async () => {
     ddbMock.on(GetCommand).resolves({});
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], false);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_error_group);
@@ -153,7 +153,7 @@ describe('Validate role middleware test', () => {
 
   it('Get User settings with current user not in DDB and error group in token.', async () => {
     ddbMock.on(GetCommand).resolves({});
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], false);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], false);
     const res = await request(app)
       .get('/api/user/settings')
       .set(amznRequestContextHeader, context_error_group);
@@ -166,7 +166,7 @@ describe('Validate role middleware test', () => {
 
   it('Get User settings with current user in DDB and error group in token.', async () => {
     ddbMock.on(GetCommand).resolves({});
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], true);
     const res = await request(app)
       .get('/api/user/settings')
       .set(amznRequestContextHeader, context_error_group);
@@ -184,36 +184,36 @@ describe('Validate role middleware test', () => {
   });
 
   it('User in DDB and no group in token.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], true);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_no_group);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.roles).toEqual([IUserRole.ADMIN]);
+    expect(res.body.data.roles).toEqual([UserRole.ADMIN]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   it('User role is analyst in DDB and operator role map from token.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ANALYST], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ANALYST], true);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.roles).toEqual([IUserRole.ANALYST]);
+    expect(res.body.data.roles).toEqual([UserRole.ANALYST]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   it('User in DDB and group in token.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], true);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.roles).toEqual([IUserRole.ADMIN]);
+    expect(res.body.data.roles).toEqual([UserRole.ADMIN]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
@@ -237,7 +237,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Admin.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ADMIN], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ADMIN], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -252,15 +252,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -270,11 +270,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/env/regions').set(amznRequestContextHeader, context)).statusCode).toBe(200);
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -282,7 +282,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Operator.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.OPERATOR], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.OPERATOR], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -297,15 +297,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -316,11 +316,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);
@@ -328,7 +328,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Operator & Analyst.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.OPERATOR, IUserRole.ANALYST], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.OPERATOR, UserRole.ANALYST], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -343,15 +343,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -362,11 +362,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -374,7 +374,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Operator & Analyst Reader.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.OPERATOR, IUserRole.ANALYST_READER], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.OPERATOR, UserRole.ANALYST_READER], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -389,15 +389,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -408,11 +408,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -420,7 +420,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Analyst.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ANALYST], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ANALYST], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -435,15 +435,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
@@ -454,11 +454,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -466,7 +466,7 @@ describe('Route role test', () => {
   });
 
   it('Validate all routers for Analyst Reader.', async () => {
-    userMock(ddbMock, 'fake@example.com', [IUserRole.ANALYST_READER], true);
+    userMock(ddbMock, 'fake@example.com', [UserRole.ANALYST_READER], true);
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
       Regions: [
         { RegionName: 'us-east-1' },
@@ -481,15 +481,15 @@ describe('Route role test', () => {
     quickSightClient.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
-    expect((await request(app).get('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/projects').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/project').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).post('/api/project/1/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/project/1/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/2/dashboards').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/project/1/app/2/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/project/1/app/2/dashboard/3').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
@@ -500,11 +500,11 @@ describe('Route role test', () => {
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -532,26 +532,25 @@ describe('Route role test', () => {
     expect((await request(app).put('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).delete('/api/project/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/project/1/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/project/1/dashboard/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).post('/api/project/1/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/project/1/dashboard/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/app/dashboard/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).post('/api/project/1/app/dashboard').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/project/1/app/dashboard/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/project/1/analyzes').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/pipeline').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).delete('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/env/quicksight/embedUrl').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/env/regions').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/metadata/event/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).put('/api/metadata/display').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/users').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/user/details').set(amznRequestContextHeader, context)).statusCode).toBe(200);
-    expect((await request(app).put('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).delete('/api/user/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/user/details?id=').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).put('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).delete('/api/user').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/funnel').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);

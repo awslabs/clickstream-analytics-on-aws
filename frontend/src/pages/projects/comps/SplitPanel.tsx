@@ -12,6 +12,11 @@
  */
 
 import {
+  XSS_PATTERN,
+  IProject,
+  ProjectEnvironment,
+} from '@aws/clickstream-base-lib';
+import {
   Badge,
   Box,
   Button,
@@ -34,7 +39,6 @@ import {
   PROJECT_STAGE_LIST,
   TIME_FORMAT,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { ternary, validateEmails } from 'ts/utils';
 
 interface SplitPanelContentProps {
@@ -68,7 +72,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   const [prevDesc, setPrevDesc] = useState(project.description);
   const [prevEnvOption, setPrevEnvOption] = useState<SelectProps.Option>(
     PROJECT_STAGE_LIST.find(
-      (element) => element.value === project.environment
+      (element) => element.value === project.environment.toString()
     ) || PROJECT_STAGE_LIST[0]
   );
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -81,7 +85,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
   const [emailsInvalidError, setEmailsInvalidError] = useState(false);
   const [selectedEnv, setSelectedEnv] = useState<SelectProps.Option>(
     PROJECT_STAGE_LIST.find(
-      (element) => element.value === project.environment
+      (element) => element.value === project.environment.toString()
     ) || PROJECT_STAGE_LIST[0]
   );
 
@@ -97,7 +101,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     if (type === 'env') {
       setPrevEnvOption(
         PROJECT_STAGE_LIST.find(
-          (element) => element.value === newProject.environment
+          (element) => element.value === newProject.environment.toString()
         ) || PROJECT_STAGE_LIST[0]
       );
       setIsEditingEvn(false);
@@ -120,7 +124,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     }
 
     if (type === 'env') {
-      newProject.environment = selectedEnv.value || '';
+      newProject.environment = selectedEnv.value as ProjectEnvironment;
       setLoadingUpdateEnv(true);
     }
 
@@ -303,7 +307,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                 <Badge>
                   {project.environment
                     ? PROJECT_STAGE_LIST.find(
-                        (ele) => ele.value === project.environment
+                        (ele) => ele.value === project.environment.toString()
                       )?.label
                     : t('project:create.unspecified')}
                 </Badge>
@@ -311,7 +315,8 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                   onClick={() => {
                     setSelectedEnv(
                       PROJECT_STAGE_LIST.find(
-                        (element) => element.value === project.environment
+                        (element) =>
+                          element.value === project.environment.toString()
                       ) || PROJECT_STAGE_LIST[0]
                     );
                     setIsEditingEvn(true);
@@ -331,7 +336,8 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                       setNewProject((prev) => {
                         return {
                           ...prev,
-                          environment: e.detail.selectedOption.value || '',
+                          environment: e.detail.selectedOption
+                            .value as ProjectEnvironment,
                         };
                       });
                     }}

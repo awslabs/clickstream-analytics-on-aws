@@ -11,28 +11,32 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '../common/constants-ln';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN, ListApplicationsRequest, ListApplicationsResponse, IApplication, CreateApplicationRequest, GetApplicationRequest } from '@aws/clickstream-base-lib';
+import { PipelineServ } from './pipeline';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getPipelineStatusType, isEmpty, paginateData } from '../common/utils';
-import { IApplication } from '../model/application';
+import { CApplication, getApplicationFromRaw } from '../model/application';
 import { CPipeline } from '../model/pipeline';
-import { ClickStreamStore } from '../store/click-stream-store';
-import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+// import { CPipeline } from '../model/pipeline';
 
-const store: ClickStreamStore = new DynamoDbStore();
+const cApplication = new CApplication();
+// const cPipeline = new CPipeline();
+const pipelineServ: PipelineServ = new PipelineServ();
 
 export class ApplicationServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { order, pid, pageNumber, pageSize } = req.query;
-      const result = await store.listApplication(pid, order);
-      return res.json(new ApiSuccess({
+      const request: ListApplicationsRequest = req.query;
+      const raws = await cApplication.list(request.projectId, request.order ?? 'asc');
+      const result = getApplicationFromRaw(raws);
+      const response: ListApplicationsResponse = {
         totalCount: result.length,
-        items: paginateData(result, true, pageSize, pageNumber),
-      }));
+        items: paginateData(result, true, request.pageSize ?? 10, request.pageNumber ?? 1),
+      };
+      return res.json(new ApiSuccess(response));
     } catch (error) {
       next(error);
     }
@@ -40,30 +44,33 @@ export class ApplicationServ {
 
   public async add(req: any, res: any, next: any) {
     try {
-      const { projectId, appId } = req.body;
-      req.body.id = projectId;
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      let app: IApplication = req.body;
-      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
+      const request: CreateApplicationRequest = req.body;
+      const iApp: IApplication = {
+        ...request,
+        id: request.projectId,
+        createAt: Date.now(),
+        updateAt: Date.now(),
+      };
+
+      const pipeline = await pipelineServ.getPipelineByProjectId(request.projectId);
+      if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const latestPipeline = latestPipelines[0];
       // Check pipeline status
-      const statusType = getPipelineStatusType(latestPipeline);
+      const statusType = getPipelineStatusType(pipeline);
       if (statusType === PipelineStatusType.CREATING ||
         statusType === PipelineStatusType.DELETING ||
         statusType === PipelineStatusType.UPDATING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
-      const apps = await store.listApplication(latestPipeline.projectId, 'asc');
+      const apps = await cApplication.list(request.projectId, 'asc');
       const appIds: string[] = apps.map(a => a.appId);
-      appIds.push(appId);
+      appIds.push(request.appId);
       validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
-      const pipeline = new CPipeline(latestPipeline);
-      await pipeline.updateApp(appIds);
-      const id = await store.addApplication(app);
+      const cPipeline = new CPipeline(pipeline);
+      await cPipeline.updateApp(appIds);
+      const id = await cApplication.create(iApp, res.get('X-Click-Stream-Operator'));
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -72,19 +79,19 @@ export class ApplicationServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { id } = req.params;
-      const { pid } = req.query;
-      const result = await store.getApplication(pid, id);
+      const request: GetApplicationRequest = req.params;
+      const result = await cApplication.retrieve(request.projectId, request.appId);
       if (!result) {
-        logger.warn(`No Application with ID ${id} found in the databases while trying to retrieve a Application`);
+        logger.warn(`No Application with ID ${request.appId} found in the databases while trying to retrieve a Application`);
         return res.status(404).json(new ApiFail('Application not found'));
       }
-      const latestPipelines = await store.listPipeline(result.id, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
-        return res.status(404).json(new ApiFail('Pipeline info no found'));
+
+      const pipeline = await pipelineServ.getPipelineByProjectId(request.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const pipeline = new CPipeline(latestPipelines[0]);
-      const outputs = pipeline.getStackOutputBySuffixes(
+      const cPipeline = new CPipeline(pipeline);
+      const outputs = cPipeline.getStackOutputBySuffixes(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_URL_SUFFIX,
@@ -101,13 +108,13 @@ export class ApplicationServ {
         iosAppStoreId: result.iosAppStoreId,
         createAt: result.createAt,
         pipeline: {
-          id: latestPipelines[0].pipelineId,
-          statusType: getPipelineStatusType(latestPipelines[0]),
-          executionDetail: latestPipelines[0].executionDetail ?? latestPipelines[0].status?.executionDetail,
-          stackDetails: latestPipelines[0].stackDetails ?? latestPipelines[0].status?.stackDetails,
+          id: pipeline.pipelineId,
+          statusType: getPipelineStatusType(pipeline),
+          executionDetail: pipeline.executionDetail ?? pipeline.status?.executionDetail,
+          stackDetails: pipeline.stackDetails ?? pipeline.status?.stackDetails,
           endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
-          customDomain: latestPipelines[0].ingestionServer.domain?.domainName ?? '',
+          customDomain: pipeline.ingestionServer.domain?.domainName ?? '',
         },
       }));
     } catch (error) {
@@ -124,7 +131,7 @@ export class ApplicationServ {
       if (latestPipelines.length === 0) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const latestPipeline = latestPipelines[0];
+      const latestPipeline = pipeline;
       // Check pipeline status
       const statusType = getPipelineStatusType(latestPipeline);
       if (statusType === PipelineStatusType.CREATING ||

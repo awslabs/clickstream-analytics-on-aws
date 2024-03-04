@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   Button,
   Container,
@@ -32,7 +33,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { defaultStr, validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {

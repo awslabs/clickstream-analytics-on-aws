@@ -12,6 +12,17 @@
  */
 
 import {
+  XSS_PATTERN,
+  ListRedshiftClustersResponse,
+  ListRedshiftServerlessWorkGroupsResponse,
+  ListRolesResponse,
+  ListSecurityGroupsResponse,
+  ListSubnetsResponse,
+  ListVpcResponse,
+  IRedshiftCluster,
+  IPlugin,
+} from '@aws/clickstream-base-lib';
+import {
   AutosuggestProps,
   Button,
   Checkbox,
@@ -31,7 +42,7 @@ import {
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
   getSecurityGroups,
-  getServiceRolesByAccount,
+  getServiceRoles,
   getSubnetList,
   getVPCList,
 } from 'apis/resource';
@@ -53,7 +64,6 @@ import {
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   DATA_MODELING_LINK_CN,
   DATA_MODELING_LINK_EN,
@@ -184,7 +194,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     useState<AutosuggestProps.Options>([]);
 
   const [provisionedRedshiftClusterList, setProvisionedRedshiftClusterList] =
-    useState<RedshiftResponse[]>([]);
+    useState<IRedshiftCluster[]>([]);
 
   const [redshiftRoleOptions, setRedshiftRoleOptions] =
     useState<SelectProps.Options>([]);
@@ -208,17 +218,20 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const getServerlessRedshiftClusterList = async () => {
     setLoadingRedshift(true);
     try {
-      const { success, data }: ApiResponse<RedshiftServerlessResponse[]> =
+      const {
+        success,
+        data,
+      }: ApiResponse<ListRedshiftServerlessWorkGroupsResponse> =
         await getRedshiftServerlessWorkgroup({
           region: pipelineInfo.region,
         });
       if (success) {
         const serverlessOptions: AutosuggestProps.Options = data.map(
           (element) => ({
-            label: element.name,
-            value: element.name,
-            description: element.arn,
-            labelTag: element.status,
+            label: element.Name,
+            value: element.Name,
+            description: element.Arn,
+            labelTag: element.Status,
           })
         );
         setRedshiftOptionList(serverlessOptions);
@@ -233,17 +246,17 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const getProvisionedRedshiftClusterList = async () => {
     setLoadingRedshift(true);
     try {
-      const { success, data }: ApiResponse<RedshiftResponse[]> =
+      const { success, data }: ApiResponse<ListRedshiftClustersResponse> =
         await getRedshiftCluster({
           region: pipelineInfo.region,
         });
       if (success) {
         const provisionedOptions: AutosuggestProps.Options = data.map(
           (element) => ({
-            label: element.name,
-            value: element.name,
-            description: element.endpoint.Address,
-            labelTag: element.status,
+            label: element.Name,
+            value: element.Name,
+            description: element.Endpoint.Address,
+            labelTag: element.Status,
           })
         );
         setProvisionedRedshiftClusterList(data);
@@ -259,14 +272,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const getServerlessRoles = async () => {
     setLoadingRoles(true);
     try {
-      const { success, data }: ApiResponse<IAMRoleResponse[]> =
-        await getServiceRolesByAccount({ account: pipelineInfo.arnAccountId });
+      const { success, data }: ApiResponse<ListRolesResponse> =
+        await getServiceRoles({
+          account: pipelineInfo.arnAccountId,
+        });
       if (success) {
         const mskOptions: SelectProps.Options = data.map((element) => ({
-          label: element.name,
-          value: element.arn,
+          label: element.Name,
+          value: element.Arn,
           iconName: 'settings',
-          description: element.id,
+          description: element.Id,
         }));
         setRedshiftRoleOptions(mskOptions);
         setLoadingRoles(false);
@@ -280,14 +295,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const getVPCListByRegion = async () => {
     setLoading3AZVpc(true);
     try {
-      const { success, data }: ApiResponse<VPCResponse[]> = await getVPCList({
+      const { success, data }: ApiResponse<ListVpcResponse> = await getVPCList({
         region: pipelineInfo.region,
       });
       if (success) {
         const vpcOptions: SelectProps.Options = data.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.cidr,
+          label: `${element.Name}(${element.VpcId})`,
+          value: element.VpcId,
+          description: element.CidrBlock,
         }));
         setThreeAZVPCOptionList(vpcOptions);
         setLoading3AZVpc(false);
@@ -302,16 +317,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     setLoadingSG(true);
     setVpcSGOptionList([]);
     try {
-      const { success, data }: ApiResponse<SecurityGroupResponse[]> =
+      const { success, data }: ApiResponse<ListSecurityGroupsResponse> =
         await getSecurityGroups({
           region: pipelineInfo.region,
           vpcId: vpcId,
         });
       if (success) {
         const sgOptions: SelectProps.Options = data.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: element.description,
+          label: `${element.GroupName}(${element.GroupId})`,
+          value: element.GroupId,
+          description: element.Description,
         }));
         setVpcSGOptionList(sgOptions);
       }
@@ -326,16 +341,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     setLoadingSubnets(true);
     setVpcThreeAZSubnetsOptionList([]);
     try {
-      const { success, data }: ApiResponse<SubnetResponse[]> =
+      const { success, data }: ApiResponse<ListSubnetsResponse> =
         await getSubnetList({
           region: pipelineInfo.region,
           vpcId: vpcId,
         });
       if (success && data) {
         const privateSubnetOptions = data.map((element) => ({
-          label: `${element.name}(${element.id})`,
-          value: element.id,
-          description: `${element.availabilityZone}:${element.cidr}(${element.type})`,
+          label: `${element.Name}(${element.SubnetId})`,
+          value: element.SubnetId,
+          description: `${element.AvailabilityZone}:${element.CidrBlock}(${element.Type})`,
         }));
         setVpcThreeAZSubnetsOptionList(privateSubnetOptions);
       }
@@ -951,12 +966,12 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           selectedOption={pipelineInfo.selectedRedshiftCluster}
                           onChange={({ detail }) => {
                             changeSelectedRedshift(detail.selectedOption);
-                            const clusters: RedshiftResponse[] =
+                            const clusters: IRedshiftCluster[] =
                               provisionedRedshiftClusterList.filter(
                                 (cluster) =>
-                                  cluster.name === detail.selectedOption.value
+                                  cluster.Name === detail.selectedOption.value
                               );
-                            changeDBUser(clusters[0].masterUsername);
+                            changeDBUser(clusters[0].MasterUsername);
                           }}
                           options={provisionedRedshiftOptionList}
                           filteringType="auto"
