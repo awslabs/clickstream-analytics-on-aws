@@ -47,6 +47,12 @@ type CheckLoadStatusEventDetail = ManifestBody & {
 
 export interface CheckLoadStatusEvent {
   detail: CheckLoadStatusEventDetail;
+  waitTimeInfo: WaitTimeInfo;
+}
+
+interface WaitTimeInfo {
+  waitTime: number;
+  loopCount: number;
 }
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -117,6 +123,8 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
       };
     }
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
+    // set next wait time
+    const waitTimeInfo = calculateWaitTime(event.waitTimeInfo.waitTime, event.waitTimeInfo.loopCount);
     return {
       detail: {
         id: queryId,
@@ -126,6 +134,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         jobList: jobList,
         retryCount,
       },
+      waitTimeInfo,
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -194,3 +203,15 @@ export const delFinishedJobInDynamodb = async (tableName: string, s3Uri: string)
   const response = await ddbClient.send(new DeleteCommand(params));
   return response;
 };
+
+function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
+  let newWaitTime = waitTime;
+  if (loopCount < 5) {
+    newWaitTime = waitTime;
+  } else {
+    const additionalTime = (loopCount - 4) * 10;
+    newWaitTime = waitTime + additionalTime;
+  }
+  loopCount++;
+  return { waitTime: Math.min(newWaitTime, maxWaitTime), loopCount };
+}
