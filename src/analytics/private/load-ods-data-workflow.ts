@@ -226,6 +226,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         lambdaFunction: createCheckLoadJobStatusFn,
         payload: TaskInput.fromObject({
           'detail.$': '$.detail',
+          'waitTimeInfo.$': '$.waitTimeInfo',
         }),
         outputPath: '$.Payload',
       });
@@ -242,7 +243,15 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
            *  You can also implement with the path stored in the state like:
            *  sfn.WaitTime.secondsPath('$.waitSeconds')
            */
-        time: WaitTime.duration(Duration.seconds(120)),
+        time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
+      });
+
+      const initWaitTimeInfo = new Pass(this, `${odsTableName} - Init wait time info`, {
+        parameters: {
+          waitTime: 10,
+          loopCount: 0,
+        },
+        resultPath: '$.waitTimeInfo',
       });
 
       const jobFailed = new Fail(this, `${odsTableName} - Job fails`, {
@@ -262,6 +271,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
       // Create sub chain
       const subDefinition = submitJob
+        .next(initWaitTimeInfo)
         .next(waitX)
         .next(checkJobStatus)
         .next(new Choice(this, `${odsTableName} - Check if job completes`)
