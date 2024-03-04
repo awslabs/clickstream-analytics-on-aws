@@ -1,0 +1,52 @@
+{
+  "Fn::Join": [
+    "",
+    [
+      "{\"StartAt\":\"event_parameter - Create job manifest\",\"States\":{\"event_parameter - Create job manifest\":{\"Next\":\"event_parameter - Check if job exists\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataCreateLoadManifesteventparameterFn6A20DF85",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"execution_id.$\":\"$$.Execution.Id\"}}},\"event_parameter - Has more work\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.hasMoreWork\",\"BooleanEquals\":true,\"Next\":\"event_parameter - Create job manifest\"}],\"Default\":\"event_parameter - Job Completed\"},\"event_parameter - Check more work\":{\"Next\":\"event_parameter - Has more work\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataHasMoreWorkeventparameterFnF447F419",
+          "Arn"
+        ]
+      },
+      "\",\"Payload.$\":\"$\"}},\"event_parameter - Wait and check again\":{\"Type\":\"Wait\",\"Seconds\":120,\"Next\":\"event_parameter - Check more work\"},\"event_parameter - Check if job exists\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.manifestList\",\"IsPresent\":false,\"Next\":\"event_parameter - Wait and check again\"},{\"Variable\":\"$.count\",\"NumericGreaterThan\":0,\"Next\":\"event_parameter - Do load job\"}],\"Default\":\"event_parameter - Wait and check again\"},\"event_parameter - Do load job\":{\"Type\":\"Map\",\"Next\":\"event_parameter - Check more work\",\"ItemsPath\":\"$.manifestList\",\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"event_parameter - Submit job\",\"States\":{\"event_parameter - Submit job\":{\"Next\":\"event_parameter - Init wait time info\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataLoadManifesteventparameterFnE955E4BC",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"detail\":{\"execution_id.$\":\"$$.Execution.Id\",\"appId.$\":\"$.appId\",\"manifestFileName.$\":\"$.manifestFileName\",\"jobList.$\":\"$.jobList\",\"retryCount.$\":\"$.retryCount\"}}}},\"event_parameter - Set parameters\":{\"Type\":\"Pass\",\"OutputPath\":\"$.detail\",\"Next\":\"event_parameter - Submit job\"},\"event_parameter - Wait and Retry\":{\"Type\":\"Wait\",\"Seconds\":120,\"Next\":\"event_parameter - Set parameters\"},\"event_parameter - Check if job completes\":{\"Type\":\"Choice\",\"Choices\":[{\"And\":[{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FAILED\"},{\"Variable\":\"$.detail.retry\",\"BooleanEquals\":false}],\"Next\":\"event_parameter - Job fails\"},{\"And\":[{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FAILED\"},{\"Variable\":\"$.detail.retry\",\"BooleanEquals\":true}],\"Next\":\"event_parameter - Wait and Retry\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"ABORTED\",\"Next\":\"event_parameter - Job fails\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FINISHED\",\"Next\":\"event_parameter - Job completes\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"NO_JOBS\",\"Next\":\"event_parameter - Job completes\"}],\"Default\":\"event_parameter - Wait seconds\"},\"event_parameter - Check job status\":{\"Next\":\"event_parameter - Check if job completes\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataCheckLoadJobStatuseventparameterFn56CE28B0",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"detail.$\":\"$.detail\",\"waitTimeInfo.$\":\"$.waitTimeInfo\"}}},\"event_parameter - Wait seconds\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"event_parameter - Check job status\"},\"event_parameter - Init wait time info\":{\"Type\":\"Pass\",\"ResultPath\":\"$.waitTimeInfo\",\"Parameters\":{\"waitTime\":10,\"loopCount\":0},\"Next\":\"event_parameter - Wait seconds\"},\"event_parameter - Job fails\":{\"Type\":\"Fail\",\"Error\":\"DescribeJob returned FAILED\",\"Cause\":\"LoadManifest Job Failed\"},\"event_parameter - Job completes\":{\"Type\":\"Pass\",\"End\":true}}},\"MaxConcurrency\":1},\"event_parameter - Job Completed\":{\"Type\":\"Succeed\"}}}"
+    ]
+  ]
+}

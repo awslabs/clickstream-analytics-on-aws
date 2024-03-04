@@ -1,0 +1,52 @@
+{
+  "Fn::Join": [
+    "",
+    [
+      "{\"StartAt\":\"item - Create job manifest\",\"States\":{\"item - Create job manifest\":{\"Next\":\"item - Check if job exists\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataCreateLoadManifestitemFnA83E3890",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"execution_id.$\":\"$$.Execution.Id\"}}},\"item - Has more work\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.hasMoreWork\",\"BooleanEquals\":true,\"Next\":\"item - Create job manifest\"}],\"Default\":\"item - Job Completed\"},\"item - Check more work\":{\"Next\":\"item - Has more work\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataHasMoreWorkitemFn8C1996D2",
+          "Arn"
+        ]
+      },
+      "\",\"Payload.$\":\"$\"}},\"item - Wait and check again\":{\"Type\":\"Wait\",\"Seconds\":120,\"Next\":\"item - Check more work\"},\"item - Check if job exists\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.manifestList\",\"IsPresent\":false,\"Next\":\"item - Wait and check again\"},{\"Variable\":\"$.count\",\"NumericGreaterThan\":0,\"Next\":\"item - Do load job\"}],\"Default\":\"item - Wait and check again\"},\"item - Do load job\":{\"Type\":\"Map\",\"Next\":\"item - Check more work\",\"ItemsPath\":\"$.manifestList\",\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"item - Submit job\",\"States\":{\"item - Submit job\":{\"Next\":\"item - Init wait time info\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataLoadManifestitemFn276B6120",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"detail\":{\"execution_id.$\":\"$$.Execution.Id\",\"appId.$\":\"$.appId\",\"manifestFileName.$\":\"$.manifestFileName\",\"jobList.$\":\"$.jobList\",\"retryCount.$\":\"$.retryCount\"}}}},\"item - Set parameters\":{\"Type\":\"Pass\",\"OutputPath\":\"$.detail\",\"Next\":\"item - Submit job\"},\"item - Wait and Retry\":{\"Type\":\"Wait\",\"Seconds\":120,\"Next\":\"item - Set parameters\"},\"item - Check if job completes\":{\"Type\":\"Choice\",\"Choices\":[{\"And\":[{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FAILED\"},{\"Variable\":\"$.detail.retry\",\"BooleanEquals\":false}],\"Next\":\"item - Job fails\"},{\"And\":[{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FAILED\"},{\"Variable\":\"$.detail.retry\",\"BooleanEquals\":true}],\"Next\":\"item - Wait and Retry\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"ABORTED\",\"Next\":\"item - Job fails\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"FINISHED\",\"Next\":\"item - Job completes\"},{\"Variable\":\"$.detail.status\",\"StringEquals\":\"NO_JOBS\",\"Next\":\"item - Job completes\"}],\"Default\":\"item - Wait seconds\"},\"item - Check job status\":{\"Next\":\"item - Check if job completes\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "LoadDataCheckLoadJobStatusitemFn5687AA47",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"detail.$\":\"$.detail\",\"waitTimeInfo.$\":\"$.waitTimeInfo\"}}},\"item - Wait seconds\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"item - Check job status\"},\"item - Init wait time info\":{\"Type\":\"Pass\",\"ResultPath\":\"$.waitTimeInfo\",\"Parameters\":{\"waitTime\":10,\"loopCount\":0},\"Next\":\"item - Wait seconds\"},\"item - Job fails\":{\"Type\":\"Fail\",\"Error\":\"DescribeJob returned FAILED\",\"Cause\":\"LoadManifest Job Failed\"},\"item - Job completes\":{\"Type\":\"Pass\",\"End\":true}}},\"MaxConcurrency\":1},\"item - Job Completed\":{\"Type\":\"Succeed\"}}}"
+    ]
+  ]
+}

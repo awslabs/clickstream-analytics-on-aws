@@ -19,7 +19,7 @@ import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { RetentionDays, LogGroup } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
   Condition, Pass, Fail, DefinitionBody, Parallel, IntegrationPattern,
@@ -117,7 +117,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
   }
 
-
   /**
    * Create a lambda function to put ODS event source to dynamodb.
    * @param taskTable The table for recording tasks
@@ -177,15 +176,139 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     });
 
     //
-    // function:  createLoadRedshiftTableWorkflow
+    // Refresh materialized views
     //
-    const createLoadRedshiftTableWorkflow = (odsTableName: string) => {
+    const refreshViewsFn = this.refreshViewsFn(props, copyRole);
+    const refreshViewsStep = new LambdaInvoke(this, `${this.node.id} - Refresh materialized views`, {
+      lambdaFunction: refreshViewsFn,
+      resultSelector: {
+        'Payload.$': '$.Payload',
+      },
+      resultPath: '$.refreshViewsOut',
+    });
+    refreshViewsStep.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
 
-      const createLoadManifestFn = this.createLoadManifestFn(ddbTable, odsTableName, props);
+    //
+    // Next state machines
+    //
+    let nexTaskExecChain;
+    for (const nexTask of props.nextStateStateMachines) {
+      const taskName = nexTask.name;
+      const stateMachine = nexTask.stateMachine;
+      const input = nexTask.input;
+      const integrationPattern = nexTask.integrationPattern?? IntegrationPattern.REQUEST_RESPONSE;
+      const resultPath = `$.${nexTask.resultPath ?? taskName.replace(/ /g, '')}`;
+      const nexTaskExec = new StepFunctionsStartExecution(this, `${this.node.id} - ${taskName}`, {
+        stateMachine,
+        integrationPattern,
+        input,
+        resultSelector: {
+          'ExecutionArn.$': '$.ExecutionArn',
+        },
+        resultPath,
+      });
+      if (!nexTaskExecChain) {
+        nexTaskExecChain = nexTaskExec;
+      } else {
+        nexTaskExecChain = nexTaskExecChain.next(nexTaskExec);
+      }
+    }
+
+    const allCompleted = new Succeed(this, `${this.node.id} - All Completed`);
+    if (nexTaskExecChain) {
+      nexTaskExecChain.next(allCompleted);
+    } else {
+      nexTaskExecChain = allCompleted;
+    }
+
+    //
+    // Main workflow
+    //
+    const logGroup = createLogGroup(this,
+      {
+        prefix: `/aws/vendedlogs/states/Clickstream/LoadData-${this.node.id}`,
+      },
+    );
+
+    let parallelLoadDataToTables = new Parallel(this, `${this.node.id} - Load data to tables`);
+    const subWorkflow = this.createSubWorkflow(ddbTable, props, copyRole, logGroup);
+    for (const odsTable of Object.keys(props.tablesOdsSource)) {
+      // const subWorkflow = this.createSubWorkflow(ddbTable, odsTable, props, copyRole, logGroup);
+      const subExecution = new StepFunctionsStartExecution(this, `${this.node.id} - ${odsTable}`, {
+        stateMachine: subWorkflow,
+        input: TaskInput.fromObject({
+          'inputOdsTableName': odsTable,
+        }),
+        resultSelector: {
+          'ExecutionArn.$': '$.ExecutionArn',
+        },
+        resultPath: `$.inputOdsTableName`,
+      });
+      parallelLoadDataToTables = parallelLoadDataToTables.branch(subExecution);
+    }
+
+    const loadCompleted = new Pass(this, `${this.node.id} - Load Data To Redshift Completed`, {
+      // change the input from array to object
+      parameters: { 'parallelLoadData.$': '$$' },
+    });
+
+    const parallelLoadBranch = parallelLoadDataToTables.next(loadCompleted);
+
+    const ignoreRunFlow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
+
+    const skipRunningWorkflowChoice = new Choice(this, `${this.node.id} - Skip Running Workflow`)
+      .when(Condition.booleanEquals('$.SkipRunningWorkflow', true), ignoreRunFlow)
+      .otherwise(parallelLoadBranch.next(refreshViewsStep).next(nexTaskExecChain));
+
+    const definition = checkSkippingRunningWorkflow.next(skipRunningWorkflowChoice);
+
+    // Create state machine
+    const loadDataStateMachine = new StateMachine(this, 'LoadDataStateMachine', {
+      definitionBody: DefinitionBody.fromChainable(definition),
+      logs: {
+        destination: logGroup,
+        level: LogLevel.ALL,
+      },
+      tracingEnabled: true,
+    });
+
+    skipRunningWorkflowFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
+      statements: [
+        new PolicyStatement({
+          actions: [
+            'states:ListExecutions',
+          ],
+          resources: [
+            loadDataStateMachine.stateMachineArn,
+          ],
+        }),
+      ],
+    }));
+
+    return loadDataStateMachine;
+  }
+
+  private createSubWorkflow(
+    ddbTable: ITable,
+    // odsTableName: string,
+    props: LoadOdsDataToRedshiftWorkflowProps,
+    copyRole: IRole,
+    logGroup: LogGroup,
+  ): IStateMachine {
+
+    const createLoadRedshiftTableSubWorkflow = () => {
+
+      const createLoadManifestFn = this.createLoadManifestFn(ddbTable, props);
       const getJobList = new LambdaInvoke(this, `${odsTableName} - Create job manifest`, {
         lambdaFunction: createLoadManifestFn,
         payload: TaskInput.fromObject({
           'execution_id.$': '$$.Execution.Id',
+          'odsTableName': '$.inputOdsTableName',
         }),
         outputPath: '$.Payload',
       });
@@ -329,115 +452,22 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       return doWorkflow;
     };
 
-    //
-    // Refresh materialized views
-    //
+    const subWorkflowDefinition = createLoadRedshiftTableSubWorkflow();
 
-    const refreshViewsFn = this.refreshViewsFn(props, copyRole);
-    const refreshViewsStep = new LambdaInvoke(this, `${this.node.id} - Refresh materialized views`, {
-      lambdaFunction: refreshViewsFn,
-      resultSelector: {
-        'Payload.$': '$.Payload',
-      },
-      resultPath: '$.refreshViewsOut',
-    });
-    refreshViewsStep.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
-
-    //
-    // Next state machines
-    //
-
-    let nexTaskExecChain;
-    for (const nexTask of props.nextStateStateMachines) {
-      const taskName = nexTask.name;
-      const stateMachine = nexTask.stateMachine;
-      const input = nexTask.input;
-      const integrationPattern = nexTask.integrationPattern?? IntegrationPattern.REQUEST_RESPONSE;
-      const resultPath = `$.${nexTask.resultPath ?? taskName.replace(/ /g, '')}`;
-      const nexTaskExec = new StepFunctionsStartExecution(this, `${this.node.id} - ${taskName}`, {
-        stateMachine,
-        integrationPattern,
-        input,
-        resultSelector: {
-          'ExecutionArn.$': '$.ExecutionArn',
-        },
-        resultPath,
-      });
-      if (!nexTaskExecChain) {
-        nexTaskExecChain = nexTaskExec;
-      } else {
-        nexTaskExecChain = nexTaskExecChain.next(nexTaskExec);
-      }
-    }
-
-    const allCompleted = new Succeed(this, `${this.node.id} - All Completed`);
-    if (nexTaskExecChain) {
-      nexTaskExecChain.next(allCompleted);
-    } else {
-      nexTaskExecChain = allCompleted;
-    }
-
-    //
-    // Main workflow
-    //
-
-    let parallelLoadDataToTables = new Parallel(this, `${this.node.id} - Load data to tables`);
-    for (const odsTable of Object.keys(props.tablesOdsSource)) {
-      const loadOneTableWorkflow = createLoadRedshiftTableWorkflow(odsTable);
-      parallelLoadDataToTables = parallelLoadDataToTables.branch(loadOneTableWorkflow);
-    }
-
-    const loadCompleted = new Pass(this, `${this.node.id} - Load Data To Redshift Completed`, {
-      // change the input from array to object
-      parameters: { 'parallelLoadData.$': '$$' },
-    });
-
-    const parallelLoadBranch = parallelLoadDataToTables.next(loadCompleted);
-
-    const ignoreRunFlow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
-
-    const skipRunningWorkflowChoice = new Choice(this, `${this.node.id} - Skip Running Workflow`)
-      .when(Condition.booleanEquals('$.SkipRunningWorkflow', true), ignoreRunFlow)
-      .otherwise(parallelLoadBranch.next(refreshViewsStep).next(nexTaskExecChain));
-
-    const definition = checkSkippingRunningWorkflow.next(skipRunningWorkflowChoice);
-
-    // Create state machine
-    const loadDataStateMachine = new StateMachine(this, 'LoadDataStateMachine', {
-      definitionBody: DefinitionBody.fromChainable(definition),
+    // Create sub state machine
+    const subLoadDataStateMachine = new StateMachine(this, `${odsTableName} - SubLoadDataStateMachine`, {
+      definitionBody: DefinitionBody.fromChainable(subWorkflowDefinition),
       logs: {
-        destination: createLogGroup(this,
-          {
-            prefix: `/aws/vendedlogs/states/Clickstream/LoadData-${this.node.id}`,
-          },
-        ),
+        destination: logGroup,
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
     });
 
-    skipRunningWorkflowFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
-      statements: [
-        new PolicyStatement({
-          actions: [
-            'states:ListExecutions',
-          ],
-          resources: [
-            loadDataStateMachine.stateMachineArn,
-          ],
-        }),
-      ],
-    }));
-
-    return loadDataStateMachine;
+    return subLoadDataStateMachine;
   }
 
-  private createLoadManifestFn(ddbTable: ITable, odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+  private createLoadManifestFn(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
     const odsSource = (props.tablesOdsSource as any)[odsTableName];
     const loadDataConfig = props.loadDataConfig;
     const resourceId = `CreateLoadManifest-${odsTableName}`;
@@ -462,13 +492,13 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       environment: {
         PROJECT_ID: props.projectId,
         MANIFEST_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
-        MANIFEST_BUCKET_PREFIX: props.workflowBucketInfo.prefix + odsTableName + '/',
+        // MANIFEST_BUCKET_PREFIX: props.workflowBucketInfo.prefix + odsTableName + '/',
         ODS_EVENT_BUCKET: odsSource.s3Bucket.bucketName,
         ODS_EVENT_BUCKET_PREFIX: odsSource.prefix,
         QUERY_RESULT_LIMIT: loadDataConfig.maxFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        REDSHIFT_ODS_TABLE_NAME: odsTableName,
+        // REDSHIFT_ODS_TABLE_NAME: odsTableName,
       },
       applicationLogLevel: 'WARN',
     });
