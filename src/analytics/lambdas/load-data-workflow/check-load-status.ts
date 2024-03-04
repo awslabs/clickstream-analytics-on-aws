@@ -205,13 +205,10 @@ export const delFinishedJobInDynamodb = async (tableName: string, s3Uri: string)
 };
 
 function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
-  let newWaitTime = waitTime;
-  if (loopCount < 5) {
-    newWaitTime = waitTime;
-  } else {
+  if (loopCount > 4) {
     const additionalTime = (loopCount - 4) * 10;
-    newWaitTime = waitTime + additionalTime;
+    waitTime += additionalTime;
   }
   loopCount++;
-  return { waitTime: Math.min(newWaitTime, maxWaitTime), loopCount };
+  return { waitTime: Math.min(waitTime, maxWaitTime), loopCount };
 }
