@@ -480,7 +480,7 @@ export function buildBaseDataForAttribution(eventNames: string[], params: Attrib
     eventAttributes.push(...eventConditionProps.eventAttributes);
     const eventCommonColumnsSql = buildCommonColumnsSql(eventAttributes, 'event_param_key', 'event_param_{{}}_value');
     eventColList = eventCommonColumnsSql.columns;
-    eventJoinTable = buildEventJoinTable(params.schemaName, eventCommonColumnsSql.columnsSql);
+    eventJoinTable = buildEventJoinTable(params.dbName + '.' + params.schemaName, eventCommonColumnsSql.columnsSql);
   }
 
   const userConditionProps = _getUserConditionProps(params);
@@ -836,7 +836,7 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: Attrib
       user_pseudo_id,
       user_id
     from
-        ${sqlParameters.schemaName}.${EVENT_TABLE} as event
+      ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
     where
         ${eventDateSQL}
         ${eventNameClause}
@@ -955,6 +955,6 @@ function _buildBaseUserDataTableSql(sqlParameters: AttributionSQLParameters, has
       _channel
       ${nestParamSql}
     from
-        ${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
+      ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
   `;
 }

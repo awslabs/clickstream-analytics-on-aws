@@ -54,4 +54,12 @@ process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
 
+// streaming ingestion
+process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'
+process.env.S3_BUCKET = 'test-pipe-line-bucket';
+process.env.S3_PREFIX = 'pipeline-prefix/';
+
 process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING = 'true'
+
+// env variables for ingestion stack
+process.env.PING_PATH = '/ping'

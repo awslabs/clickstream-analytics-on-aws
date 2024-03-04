@@ -787,40 +787,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     });
   });
 
-  test('Should has Resource RedshiftServerlessSingleWorkgroupPolicy', () => {
-    const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-    nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'redshift-serverless:GetWorkgroup',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  RefAnyValue,
-                  ':redshift-serverless:',
-                  RefAnyValue,
-                  ':',
-                  RefAnyValue,
-                  ':workgroup/',
-                  RefAnyValue,
-                ],
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: Match.anyValue(),
-      Roles: [
-        RefAnyValue,
-      ],
-    });
-  });
-
 });
 
 describe('DataAnalyticsRedshiftStack lambda function test', () => {
@@ -1251,39 +1217,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     });
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleWorkgroupPolicy', () => {
-    existingServerlessTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'redshift-serverless:GetWorkgroup',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  RefAnyValue,
-                  ':redshift-serverless:',
-                  RefAnyValue,
-                  ':',
-                  RefAnyValue,
-                  ':workgroup/',
-                  RefAnyValue,
-                ],
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: Match.anyValue(),
-      Roles: [
-        RefAnyValue,
-      ],
-    });
-  });
-
   test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessAllNamespacePolicy', () => {
     existingServerlessTemplate.hasResourceProperties('AWS::IAM::Policy', {
       PolicyDocument: {
@@ -1305,42 +1238,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                   ':',
                   RefAnyValue,
                   ':namespace/*',
-                ],
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: Match.anyValue(),
-      Roles: [
-        RefAnyValue,
-      ],
-    });
-  });
-
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleNamespacePolicy', () => {
-    existingServerlessTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'redshift-serverless:GetNamespace',
-              'redshift-serverless:UpdateNamespace',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  RefAnyValue,
-                  ':redshift-serverless:',
-                  RefAnyValue,
-                  ':',
-                  RefAnyValue,
-                  ':namespace/',
-                  RefAnyValue,
                 ],
               ],
             },
@@ -2735,41 +2632,6 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
     });
   });
 
-  test('Check lambda LoadODSEventToRedshiftWorkflowAssociateIAMRoleToRedshiftFn', () => {
-    const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-    nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
-      Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
-        S3Key: Match.anyValue(),
-      },
-      Role: {
-        'Fn::GetAtt': [
-          Match.anyValue(),
-          'Arn',
-        ],
-      },
-      Environment: {
-        Variables: {
-          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-          LOG_LEVEL: 'WARN',
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-        },
-      },
-      Handler: 'index.handler',
-      MemorySize: Match.anyValue(),
-      ReservedConcurrentExecutions: 1,
-      Runtime: Match.anyValue(),
-      Timeout: 300,
-      LoggingConfig: {
-        ApplicationLogLevel: 'INFO',
-        LogFormat: 'JSON',
-      },
-    });
-  });
 });
 
 describe('DataAnalyticsRedshiftStack tests', () => {

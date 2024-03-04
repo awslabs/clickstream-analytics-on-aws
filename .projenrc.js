@@ -22,6 +22,7 @@ const pnpmVersion = '8.15.3';
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
   '@aws-cdk/aws-servicecatalogappregistry-alpha',
+  '@aws-cdk/aws-kinesisanalytics-flink-alpha',
 ].map(m => `${m}@^${cdkVersion}-alpha.0`);
 
 const commonDeps = [
@@ -56,12 +57,12 @@ const smithyPackagesDeps = [
   '@smithy/node-http-handler',
   '@smithy/util-stream-node',
 ].map(dep => `${dep}@^${smithyPackagesVersion}`);
-const awsSDKPackagesVersion = '3.398.0';
+const awsSDKPackagesVersion = '3.523.0';
 const awsSDKPackagesDeps = [
   '@aws-sdk/types',
   '@aws-sdk/credential-providers',
 ].map(dep => `${dep}@^${awsSDKPackagesVersion}`);
-const awsSDKServicesVersion = '3.405.0';
+const awsSDKServicesVersion = '3.523.0';
 const awsSDKServicesDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
@@ -79,6 +80,7 @@ const awsSDKServicesDeps = [
   '@aws-sdk/client-ecs',
   '@aws-sdk/client-emr-serverless',
   '@aws-sdk/client-sfn',
+  '@aws-sdk/client-kinesis',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const awsSDKPackagesDepsForApiProject = [
@@ -636,7 +638,7 @@ project.github.actions.set('actions/setup-python', 'actions/setup-python@v5');
 project.github.actions.set('actions/upload-artifact', 'actions/upload-artifact@v4');
 project.github.actions.set('actions/download-artifact', 'actions/download-artifact@v4');
 project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
-project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v5');
+project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v6');
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import {
   Cluster,
@@ -90,6 +91,7 @@ function createECSFargateService(
     environment: {
       NGINX_WORKER_CONNECTIONS: `${props.fleetProps.proxyMaxConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
+      PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
     logging: LogDriver.awsLogs({

@@ -64,11 +64,15 @@ export interface NewRedshiftServerlessProps extends RedshiftServerlessProps {
   readonly securityGroupIds: string;
   readonly baseCapacity: number;
 }
-export interface ExistingRedshiftServerlessProps extends RedshiftServerlessProps {
+
+export interface BasicRedshiftServerlessProps extends RedshiftServerlessProps {
   readonly workgroupId?: string;
   readonly namespaceId?: string;
-  readonly dataAPIRoleArn: string;
   readonly createdInStack: boolean;
+}
+
+export interface ExistingRedshiftServerlessProps extends BasicRedshiftServerlessProps {
+  readonly dataAPIRoleArn: string;
 }
 
 export interface ProvisionedRedshiftProps extends RedshiftProps {
@@ -77,7 +81,7 @@ export interface ProvisionedRedshiftProps extends RedshiftProps {
 }
 
 export type ExistingRedshiftServerlessCustomProps = Omit<ExistingRedshiftServerlessProps, 'createdInStack'>;
-interface CustomProperties {
+export interface CustomProperties {
   readonly serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
 }

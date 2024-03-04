@@ -22,6 +22,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('last touch model - event count', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -214,7 +215,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -228,7 +229,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2025-10-10'
@@ -254,7 +255,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -515,6 +516,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('first touch model - sum value', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.SESSION,
@@ -712,7 +714,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -726,7 +728,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date_trunc('month', current_date - interval '23 months')
           and event.event_date <= CURRENT_DATE
@@ -759,7 +761,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_id
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -1020,6 +1022,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('last touch model - no condition', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -1056,7 +1059,7 @@ describe('Attribution SQL Builder test', () => {
               user_pseudo_id,
               user_id
             from
-              shop.event as event
+              shop.shop.event as event
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2025-10-10'
@@ -1262,6 +1265,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('linear model - event count', () => {
     const sql = buildSQLForLinearModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -1455,7 +1459,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -1469,7 +1473,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date '2023-09-30'
           and event.event_date <= date '2025-10-10'
@@ -1495,7 +1499,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -1749,6 +1753,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('linear model - sum value', () => {
     const sql = buildSQLForLinearModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.SESSION,
@@ -1946,7 +1951,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -1960,7 +1965,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2025-10-10'
@@ -1993,7 +1998,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_id
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -2254,6 +2259,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('position model - sum value', () => {
     const sql = buildSQLForPositionModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -2420,7 +2426,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -2434,7 +2440,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date_trunc('month', current_date - interval '19 months')
           and event.event_date <= CURRENT_DATE
@@ -2460,7 +2466,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -2726,6 +2732,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('position model - event value', () => {
     const sql = buildSQLForPositionModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -2893,7 +2900,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -2907,7 +2914,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= DATEADD(
             DAY,
@@ -2937,7 +2944,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -3192,6 +3199,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('position model - more events', () => {
     const sql = buildSQLForPositionModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -3365,7 +3373,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -3379,7 +3387,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= DATEADD(
             DAY,
@@ -3415,7 +3423,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -3698,6 +3706,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('last touch model - event count - relative data range', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -3891,7 +3900,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -3905,7 +3914,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= DATEADD (
             DAY,
@@ -3935,7 +3944,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -4189,6 +4198,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('last touch model - event count - custom touch point name', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       touchPointNames: ['1_test_name', ''],
       computeMethod: ExploreComputeMethod.EVENT_CNT,
@@ -4383,7 +4393,7 @@ describe('Attribution SQL Builder test', () => {
             user_properties.value.float_value::double precision as user_param_float_value,
             user_properties.value.double_value::double precision as user_param_double_value
           from
-            shop.user_m_view u,
+            shop.shop.user_m_view u,
             u.user_properties as user_properties
         ),
         event_base as (
@@ -4397,7 +4407,7 @@ describe('Attribution SQL Builder test', () => {
             user_pseudo_id,
             user_id
           from
-            shop.event as event
+            shop.shop.event as event
           where
             event.event_date >= DATEADD (
               DAY,
@@ -4427,7 +4437,7 @@ describe('Attribution SQL Builder test', () => {
                 ) as _session_duration
               from
                 event_base
-                join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+                join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
                 and event_base.event_id = event_param.event_id
               group by
                 event_base.event_id
@@ -4682,6 +4692,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('position model - more events - partial touch point names', () => {
     const sql = buildSQLForPositionModel({
+      dbName: 'shop',
       schemaName: 'shop',
       touchPointNames: ['1_test_name', '2_test_name'],
       computeMethod: ExploreComputeMethod.EVENT_CNT,
@@ -4856,7 +4867,7 @@ describe('Attribution SQL Builder test', () => {
             user_properties.value.float_value::double precision as user_param_float_value,
             user_properties.value.double_value::double precision as user_param_double_value
           from
-            shop.user_m_view u,
+            shop.shop.user_m_view u,
             u.user_properties as user_properties
         ),
         event_base as (
@@ -4870,7 +4881,7 @@ describe('Attribution SQL Builder test', () => {
             user_pseudo_id,
             user_id
           from
-            shop.event as event
+            shop.shop.event as event
           where
             event.event_date >= DATEADD (
               DAY,
@@ -4906,7 +4917,7 @@ describe('Attribution SQL Builder test', () => {
                 ) as _session_duration
               from
                 event_base
-                join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+                join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
                 and event_base.event_id = event_param.event_id
               group by
                 event_base.event_id
@@ -5189,6 +5200,7 @@ describe('Attribution SQL Builder test', () => {
 
   test('special char \'', () => {
     const sql = buildSQLForSinglePointModel({
+      dbName: 'shop',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -5381,7 +5393,7 @@ describe('Attribution SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          shop.user_m_view u,
+          shop.shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -5395,7 +5407,7 @@ describe('Attribution SQL Builder test', () => {
           user_pseudo_id,
           user_id
         from
-          shop.event as event
+          shop.shop.event as event
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2025-10-10'
@@ -5421,7 +5433,7 @@ describe('Attribution SQL Builder test', () => {
               ) as _session_duration
             from
               event_base
-              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id

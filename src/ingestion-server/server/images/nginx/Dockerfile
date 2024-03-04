@@ -3,6 +3,7 @@ FROM --platform=$PLATFORM_ARG public.ecr.aws/docker/library/nginx:1.24
 
 # default nginx path
 ENV SERVER_ENDPOINT_PATH='/collect'
+ENV PING_ENDPOINT_PATH='/ping'
 ENV SERVER_CORS_ORIGIN='*'
 ENV NGINX_WORKER_CONNECTIONS='1024'
 

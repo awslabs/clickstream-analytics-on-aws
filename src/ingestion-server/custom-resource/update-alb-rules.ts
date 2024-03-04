@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { CustomResource, Duration, CfnResource, CfnCondition, Fn } from 'aws-cdk-lib';
 import { PolicyStatement, Policy, CfnPolicy } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -114,6 +115,9 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, input
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(5),
+    environment: {
+      PING_PATH: INGESTION_SERVER_PING_PATH,
+    },
     logConf: {
       retention: RetentionDays.ONE_WEEK,
     },

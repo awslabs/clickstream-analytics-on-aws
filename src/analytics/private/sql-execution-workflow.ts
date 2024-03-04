@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { CfnResource, Duration } from 'aws-cdk-lib';
+import { CfnResource, Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -124,6 +124,7 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     timeout: Duration.minutes(15),
     logConf: {
       retention: RetentionDays.ONE_WEEK,
+      removalPolicy: RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
     },
     environment: {
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,

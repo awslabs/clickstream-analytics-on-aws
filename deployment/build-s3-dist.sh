@@ -1,13 +1,17 @@
 #!/bin/bash
-#
-# This script packages your project into a solution distributable that can be
-# used as an input to the solution builder validation pipeline.
-#
-# Important notes and prereq's:
-#   1. The initialize-repo.sh script must have been run in order for this script to
-#      function properly.
-#   2. This script should be run from the repo's /deployment folder.
-#
+######################################################################################################################
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.                                                #
+#                                                                                                                    #
+#  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance    #
+#  with the License. A copy of the License is located at                                                             #
+#                                                                                                                    #
+#      http://www.apache.org/licenses/LICENSE-2.0                                                                    #
+#                                                                                                                    #
+#  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES #
+#  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions    #
+#  and limitations under the License.                                                                                #
+######################################################################################################################
+
 # This script will perform the following tasks:
 #   1. Remove any old dist files from previous runs.
 #   2. Install dependencies for the cdk-solution-helper; responsible for
@@ -16,15 +20,16 @@
 #   4. Run the cdk-solution-helper on template outputs and organize
 #      those outputs into the /global-s3-assets folder.
 #   5. Organize source code artifacts into the /regional-s3-assets folder.
-#   6. Remove any temporary files used for staging.
+#   6. Remove any temporary files generated from build
+#
+# This script should be run from the repo's deployment directory
+# cd deployment
+# ./build-s3-dist.sh template-bucket-name solution-name version-code 
 #
 # Parameters:
-#  - source-bucket-base-name: Name for the S3 bucket location where the template will source the Lambda
-#    code from. The template will append '-[region_name]' to this bucket name.
-#    For example: ./build-s3-dist.sh solutions v1.0.0
-#    The template will then expect the source code to be located in the solutions-[region_name] bucket
 #  - solution-name: name of the solution for consistency
 #  - version-code: version of the package
+
 #-----------------------
 # Formatting
 bold=$(tput bold)
@@ -164,18 +169,28 @@ update_dict() {
 }
 
 #------------------------------------------------------------------------------
+# Validate command line parameters
+#------------------------------------------------------------------------------
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+    usage
+    exit 1
+fi
+
+export SOLUTION_BUCKET="$1"
+solution_name="$2"
+export SOLUTION_NAME="$solution_name"
+export SOLUTION_TRADEMARKEDNAME="$solution_name"
+export VERSION="$3"
+
+#------------------------------------------------------------------------------
 # INITIALIZATION
 #------------------------------------------------------------------------------
 # solution_config must exist in the deployment folder (same folder as this 
-# file) . It is the definitive source for solution ID, name, and trademarked 
-# name.
+# file) . It is the definitive source for solution ID.
 #
 # Example:
 #
 # SOLUTION_ID='SO0111'
-# SOLUTION_NAME='AWS Security Hub Automated Response & Remediation'
-# SOLUTION_TRADEMARKEDNAME='aws-security-hub-automated-response-and-remediation'
-# SOLUTION_VERSION='v1.1.1' # optional
 if [[ -e './solution_config' ]]; then
     source ./solution_config
 else
@@ -188,20 +203,6 @@ if [[ -z $SOLUTION_ID ]]; then
     exit 1
 else
     export SOLUTION_ID
-fi
-
-if [[ -z $SOLUTION_NAME ]]; then
-    echo "SOLUTION_NAME is missing from ../solution_config"
-    exit 1
-else
-    export SOLUTION_NAME
-fi
-
-if [[ -z $SOLUTION_TRADEMARKEDNAME ]]; then
-    echo "SOLUTION_TRADEMARKEDNAME is missing from ../solution_config"
-    exit 1
-else 
-    export SOLUTION_TRADEMARKEDNAME
 fi
 
 if [[ -z $SOLUTION_ECR_BUILD_VERSION ]]; then
@@ -232,28 +233,12 @@ else
     export SOLUTION_CN_TEMPLATES
 fi
 
-#------------------------------------------------------------------------------
-# Validate command line parameters
-#------------------------------------------------------------------------------
+
 # Validate command line input - must provide bucket
 [[ -z $1 ]] && { usage; exit 1; } || { SOLUTION_BUCKET=$1; }
 
 # Environmental variables for use in CDK
 export DIST_OUTPUT_BUCKET=$SOLUTION_BUCKET
-
-# Version from the command line is definitive. Otherwise, use, in order of precedence:
-# - SOLUTION_VERSION from solution_config
-# - version.txt
-#
-# Note: Solutions Pipeline sends bucket, name, version. Command line expects bucket, version
-# if there is a 3rd parm then version is $3, else $2
-#
-# If confused, use build-s3-dist.sh <bucket> <version>
-if [ ! -z $3 ]; then
-    export VERSION="$3"
-else
-    export VERSION=$(git describe --tags || echo v0.0.0)
-fi
 
 update_dict $SOLUTION_NAME/$VERSION ''
 

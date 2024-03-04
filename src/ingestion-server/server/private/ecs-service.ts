@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { Aspects, CfnResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
@@ -78,6 +79,7 @@ export function createECSService(
     environment: {
       NGINX_WORKER_CONNECTIONS: `${workerConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
+      PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
     logging: LogDriver.awsLogs({
