@@ -1,5 +1,5 @@
 CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
-BACKUP NO
+BACKUP YES
 AUTO REFRESH NO
 AS
 select 
