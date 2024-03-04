@@ -984,7 +984,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     const datasetId = identifier.id;
 
     const mustacheParam: MustacheParamType = {
-      schema: commonParams.schema,
+      schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
