@@ -77,6 +77,13 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter redshiftDefaultDBParam', () => {
+    template.hasParameter('RedshiftDefaultDBParam', {
+      Type: 'String',
+      Default: 'dev',
+    });
+  });
+
   test('Should has Parameter redshiftPortParam', () => {
     template.hasParameter('RedshiftPortParam', {
       Type: 'Number',
@@ -832,7 +839,7 @@ describe('DataReportingQuickSightStack resource test', () => {
     DataSourceParameters: {
       RedshiftParameters: {
         Database: {
-          Ref: 'RedshiftDBParam',
+          Ref: 'RedshiftDefaultDBParam',
         },
         Host: {
           Ref: 'RedshiftEndpointParam',

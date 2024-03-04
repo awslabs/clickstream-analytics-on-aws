@@ -138,7 +138,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
       dataSourceParameters: {
         redshiftParameters: {
-          database: stackParams.redshiftDBParam.valueAsString,
+          database: stackParams.redshiftDefaultDBParam.valueAsString,
           host: stackParams.redshiftEndpointParam.valueAsString,
           port: stackParams.redshiftPortParam.valueAsNumber,
         },

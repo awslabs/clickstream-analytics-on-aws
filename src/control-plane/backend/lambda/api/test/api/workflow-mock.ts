@@ -903,7 +903,7 @@ const BASE_REPORTING_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftDBParam',
-    ParameterValue: 'dev',
+    ParameterValue: 'project_8888_8888',
   },
   {
     ParameterKey: 'RedShiftDBSchemaParam',
@@ -959,7 +959,7 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftDBParam',
-    ParameterValue: 'dev',
+    ParameterValue: 'project_8888_8888',
   },
   {
     ParameterKey: 'RedShiftDBSchemaParam',
