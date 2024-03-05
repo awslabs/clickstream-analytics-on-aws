@@ -187,9 +187,9 @@ export class ReportingService {
 
     const maxIndex = query.eventAndConditions.length - 1;
     for (const [index, item] of query.eventAndConditions.entries()) {
-      projectedColumns.push(`${item.eventName}`);
+      projectedColumns.push(`${index+1}_${item.eventName}`);
       tableViewCols.push({
-        Name: item.eventName,
+        Name: `${index+1}_${item.eventName}`,
         Type: 'DECIMAL',
       });
 
@@ -203,9 +203,9 @@ export class ReportingService {
           Type: 'DECIMAL',
         });
       }
-      projectedColumns.push(`${item.eventName}_rate`);
+      projectedColumns.push(`${index+1}_${item.eventName}_rate`);
       tableViewCols.push({
-        Name: `${item.eventName}_rate`,
+        Name: `${index+1}_${item.eventName}_rate`,
         Type: 'DECIMAL',
       });
 
