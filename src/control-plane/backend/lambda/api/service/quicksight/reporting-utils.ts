@@ -1393,7 +1393,7 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  checkChain.DuplicatedEvent().NodesLimit();
+  checkChain.NodesLimit();
 
   return checkChain.status;
 }
