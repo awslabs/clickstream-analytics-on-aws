@@ -421,7 +421,6 @@ export class CPipeline {
     const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
     const editStacks: string[] = [];
     const editParameters: StackUpdateParameter[] = [];
-    console.log('editedParameters:', editedParameters);
     for (let key of editKeys) {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
