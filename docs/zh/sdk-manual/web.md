@@ -120,7 +120,7 @@ ClickstreamAnalytics.setUserAttributes({
 });
 ```
 
-当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 API `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 !!! info "重要提示"
 
@@ -239,7 +239,7 @@ ClickstreamAnalytics.updateConfigure({
 
 您可以按照以下步骤查看事件原始 json 并调试您的事件。
 
-1. 使用 `ClickstreamAnalytics.init()` api 并在调试模式下将 `isLogEvents` 属性设置为 true。
+1. 使用 `ClickstreamAnalytics.init()` API 并在调试模式下将 `isLogEvents` 属性设置为 true。
 2. 集成 SDK 并在浏览器中启动 Web 应用程序，然后打开检查页面并切换到控制台选项卡。
 3. 在 Filter 中输入 `EventRecorder`，您将看到 Clickstream Web SDK 记录的所有事件的 json 内容。
 
@@ -306,7 +306,7 @@ Clickstream Web SDK 支持以下数据类型：
 | _user_engagement   | 当用户离开当前页面，并且该页面处于焦点超过一秒时，[了解更多](#_18)                                                   | 1 ._engagement_time_msec<br>                                                                                                                                                                      |
 | _app_start         | 每次浏览器从不可见到进入可见状态时                                                                       | 1. _is_first_time（当应用程序启动后第一个`_app_start`事件时，值为`true`）                                                                                                                                            |
 | _app_end           | 每次浏览器从可见到进入不可见状态时                                                                       |                                                                                                                                                                                                   |
-| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` api 时                                         |                                                                                                                                                                                                   |
+| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` API 时                                         |                                                                                                                                                                                                   |
 | _scroll            | 用户第一次到达每个页面的底部时（即当 90% 的垂直深度变得可见时）                                                      | 1. _engagement_time_msec                                                                                                                                                                          |
 | _search            | 每次用户执行站点搜索时，根据 URL 查询参数的存在来判断，默认情况下，我们在查询参数中检测 `q`, `s`, `search`, `query` 和 `keyword`。 | 1. _search_key (搜索参数名称)<br>2. _search_term (搜索内容)                                                                                                                                                 |
 | _click             | 每次用户单击将其带离当前域名（或配置的域名列表）的链接时                                                            | 1. _link_classes（标签 `<a>`中`class`里的内容）<br>2. _link_domain（标签 `<a>`中`herf`里的域名）<br>3. _link_id（标签 `<a>`中`id`里的内容）<br>4. _link_url（标签 `<a>`中`herf`里的内容）<br>5. _outbound（如果该域不在配置的域名列表中，则属性值为“true”） |
@@ -321,7 +321,7 @@ Clickstream Web SDK 支持以下数据类型：
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如：dc7a7a18-20230905-131926703
 2. _session_duration：我们通过减去当前事件创建时间戳和会话的`_session_start_timestamp`来计算会话持续时间，该属性将添加到会话期间的每个事件中。
 3. _session_number：当前浏览器中session的自增数，初始值为1
-4. 会话超时时间：默认为30分钟，可以通过[configuration](#_7) api自定义。
+4. 会话超时时间：默认为 30 分钟，可以通过[configuration](#_7) API 自定义。
 
 ### 页面浏览定义
 

@@ -143,7 +143,7 @@ ClickstreamUserAttribute clickstreamUserAttribute = ClickstreamUserAttribute.bui
 ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -191,7 +191,7 @@ By default, SDK will automatically track the preset `_screen_view` event when Ac
 You can manually record screen view events whether automatic screen view tracking is enabled, add the following code to record a screen view event with two attributes.
 
 - `SCREEN_NAME` Required. Your screen's name.
-- `SCREEN_UNIQUE_ID` Optional. Set the hashcode of your Fragment or View. If you do not set, SDK will set a default value based on the current Activity's hashcode.
+- `SCREEN_UNIQUE_ID` Optional. Set the hashcode of your Fragment or View. If you do not set, SDK will set a default value based on the current Activity's hashCode.
 
 ```
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
@@ -273,7 +273,7 @@ Here is an explanation of each method.
 
 You can follow the steps below to view the event raw JSON and debug your events.
 
-1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` api and set the `withLogEvents()` method with true in debug mode, for example:
+1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` API and set the `withLogEvents()` method with true in debug mode, for example:
     ```java
     import software.aws.solution.clickstream.ClickstreamAnalytics;
     
@@ -374,7 +374,7 @@ The `_session_start` event triggered when the app open for the first time, or th
 1. _session_id: We calculate the session id by concatenating the last 8 characters of uniqueId and the current millisecond, for example: dc7a7a18-20230905-131926703.
 2. _session_duration : We calculate the session duration by minus the current event create timestamp and the session's `_session_start_timestamp`, this attribute will be added in every event during the session.
 3. _session_number : The auto increment number of session in current device, the initial value is 1
-4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) api.
+4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) API.
 
 ### Screen view definition
 

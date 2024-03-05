@@ -231,7 +231,7 @@ Please add the global attribute after the SDK initialization is completed, the g
     [ClickstreamObjc addUserAttributes:userAttributes];
     ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -514,7 +514,7 @@ The `_session_start` event triggered when the app open for the first time, or th
 1. _session_id: We calculate the session id by concatenating the last 8 characters of uniqueId and the current millisecond, for example: dc7a7a18-20230905-131926703.
 2. _session_duration : We calculate the session duration by minus the current event create timestamp and the session's `_session_start_timestamp`, this attribute will be added in every event during the session.
 3. _session_number : The auto increment number of session in current device, the initial value is 1
-4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) api.
+4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) API.
 
 ### Screen view definition
 

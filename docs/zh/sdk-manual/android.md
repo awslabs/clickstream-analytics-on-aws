@@ -145,7 +145,7 @@ ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
 当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
-api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+API `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 !!! info "重要提示"
 
@@ -189,12 +189,12 @@ ClickstreamAnalytics.recordEvent(event);
 
 默认情况下当 Activity 回调 `onResume` 方法时 SDK 会自动记录预置的 `_screen_view` 事件。
 
-当然无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`  事件。
+无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`  事件。
 
 - `SCREEN_NAME` 必需字段，屏幕的名称
-- `SCREEN_UNIQUE_ID` 可选字段，获取您需要记录的 Fragment 或者 View 的哈希码。如果您不设置 SDK 将会获取当前 Activity 的 hashcode 作为默认值。
+- `SCREEN_UNIQUE_ID` 可选字段，获取您需要记录的 Fragment 或者 View 的哈希码。如果您不设置 SDK 将会获取当前 Activity 的 hashCode 作为默认值。
 
-```
+```java
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
 
 ClickstreamEvent event = ClickstreamEvent.builder()
@@ -381,7 +381,7 @@ Clickstream Android SDK 支持以下数据类型：
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如: dc7a7a18-20230905-131926703
 2. _session_duration： 我们通过 `_session_start_timestamp` 减去当前事件创建时间戳来计算会话持续时间，该属性将添加到会话期间的每个事件中。
 3. _session_number：当前设备的会话数的自动递增值，初始值为1
-4. Session timeout duration：默认为30分钟，可以通过[更新配置](#sdk_1) api来自定义。
+4. Session timeout duration：默认为 30 分钟，可以通过[更新配置](#sdk_1) API 来自定义。
 
 ### 屏幕浏览定义
 

@@ -109,7 +109,7 @@ analytics.setUserAttributes({
 ```
 
 Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's
-attribute again, of course you can use the same api `analytics.setUserAttributes()` to update the current user's
+attribute again, of course you can use the same API `analytics.setUserAttributes()` to update the current user's
 attribute when it changes.
 
 #### Record event with items
@@ -223,7 +223,7 @@ analytics.enable();
 
 You can follow the steps below to view the event raw JSON and debug your events.
 
-1. Using `analytics.updateConfigure()` api and set the `isLogEvents` attributes with true in debug mode, for example:
+1. Using `analytics.updateConfigure()` API and set the `isLogEvents` attributes with true in debug mode, for example:
     ```dart
     // log the event in debug mode.
     analytics.updateConfigure(isLogEvents: true);
