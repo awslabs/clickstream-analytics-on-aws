@@ -12,7 +12,6 @@
  */
 
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-import { _buildCommonPartSql } from '../../service/quicksight/sql-builder';
 import { buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from '../../service/quicksight/sql-builder-attribution';
 
 describe('Attribution SQL Builder test', () => {

@@ -1486,7 +1486,7 @@ function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, e
 
 function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
-  let sql = _buildCommonPartSql(eventNames, sqlParameters);
+  let sql = _buildCommonPartSql(eventNames, sqlParameters, false, false, true);
   const buildResult = _buildEventCondition(sqlParameters, sql);
   sql = buildResult.sql;
 
