@@ -245,13 +245,13 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   }
   let resultCntSQL ='';
 
-  const maxIndex = eventNames.length - 1;
-  for (const [index, _item] of eventNames.entries()) {
-    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_${index})  as ${eventNames[index]} \n`);
+  const maxIndex = sqlParameters.eventAndConditions!.length - 1;
+  for (const [index, item] of sqlParameters.eventAndConditions!.entries()) {
+    resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_${index})  as "${index+1}_${item.eventName}" \n`);
     if (index === 0) {
       resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  NULLIF(count(distinct ${prefix}_0), 0) ):: decimal(20, 4)  as total_conversion_rate \n`);
     } else {
-      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  NULLIF(count(distinct ${prefix}_${index-1}), 0) ):: decimal(20, 4)  as ${eventNames[index]}_rate \n`);
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  NULLIF(count(distinct ${prefix}_${index-1}), 0) ):: decimal(20, 4)  as "${index+1}_${item.eventName}_rate" \n`);
     }
   }
 
@@ -266,7 +266,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
       ${appendGroupingCol ? `, ${colNameWithPrefix}` : ''}
     order by 
       ${sqlParameters.groupColumn}
-      ,${eventNames[0]} desc
+      ,"1_${eventNames[0]}" desc
   `);
 
   return format(sql, {
@@ -275,12 +275,12 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
 };
 
 
-function _buildFunnelChartViewNestCaseWhenSql(prefix: string, cnt: number, isNameCol: boolean) : string {
+function _buildFunnelChartViewNestCaseWhenSql(prefix: string, cnt: number, isNameCol?: boolean) : string {
 
   let sql = '';
   if (isNameCol) {
     for (let i = 0; i < cnt; i++) {
-      sql += `when seq = ${i} then '${i+1}_' || event_name_${i} \n`;
+      sql += `when seq = ${i} then event_name_${i} \n`;
     }
   } else {
     for (let i = 0; i < cnt; i++) {
@@ -301,7 +301,7 @@ function _buildFunnelChartViewGroupingNestCaseWhenSql(cnt: number, groupColNameW
   return sql;
 }
 
-function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, index: number, isNameCol: boolean) : string {
+function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, index: number, isNameCol?: boolean) : string {
   let sql = ' when ';
   for (let i = 1; i < eventCount; i++) {
     if (i < index) {
@@ -1075,7 +1075,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
-function _buildTableListColumnSql(sqlParameters: SQLParameters, eventNames: string[], groupCondition: GroupingCondition|undefined) {
+function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: GroupingCondition|undefined) {
 
   let firstTableColumns = '';
   let sql = '';
@@ -1105,7 +1105,7 @@ function _buildTableListColumnSql(sqlParameters: SQLParameters, eventNames: stri
     `;
   }
 
-  for (const [index, event] of eventNames.entries()) {
+  for (const [index, event] of sqlParameters.eventAndConditions!.entries()) {
 
     let filterSql = '';
     filterSql = buildConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
@@ -1118,7 +1118,7 @@ function _buildTableListColumnSql(sqlParameters: SQLParameters, eventNames: stri
       select 
         ${ index === 0 ? firstTableColumns : newColumnTemplate.replace(/####/g, `_${index}`).replace(/%%%%/g, `'${index+1}_' || `)}
       from base_data base
-      where event_name = '${event}'
+      where event_name = '${event.eventName}'
       ${filterSql}
     ),
     `);
@@ -1131,7 +1131,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters, false, false, true);
 
-  sql = sql.concat(_buildTableListColumnSql(sqlParameters, eventNames, groupCondition));
+  sql = sql.concat(_buildTableListColumnSql(sqlParameters, groupCondition));
 
   let joinConditionSQL = '';
   let joinColumnsSQL = '';
