@@ -3421,7 +3421,7 @@
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nx">userAge</span><span class="o">:</span><span class="w"> </span><span class="kt">22</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">});</span>
 </span></code></pre></div>
-<p>Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api <code>ClickstreamAnalytics.setUserAttributes()</code> to update the current user's attribute when it changes.</p>
+<p>Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same API <code>ClickstreamAnalytics.setUserAttributes()</code> to update the current user's attribute when it changes.</p>
 <div class="admonition info">
 <p class="admonition-title">Important</p>
 <p>If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstream SDK for the first time to ensure that subsequent events contains user attributes.</p>
@@ -3450,7 +3450,8 @@
 <p>For logging more attribute in an item, please refer to <a href="#item-attributes">item attributes</a>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Important</p>
-<p>Only pipelines from version 1.1+ can handle items with custom attribute.</p>
+<p>Only pipelines from version 1.1+ can handle items with custom attribute.
+ITEM_ID is required attribute, if not set the item will be discarded.</p>
 </div>
 <h4 id="send-event-immediate-in-batch-mode">Send event immediate in batch mode</h4>
 <p>When you are in batch mode, you can still send an event immediately by setting the <code>isImmediate</code> attribute to <code>true</code>, as the following code.</p>
@@ -3603,7 +3604,7 @@
 <h4 id="debug-events">Debug events</h4>
 <p>You can follow the steps below to view the event raw json and debug your events.</p>
 <ol>
-<li>Using <code>ClickstreamAnalytics.init()</code> api and set the <code>isLogEvents</code> attribute to true in debug mode.</li>
+<li>Using <code>ClickstreamAnalytics.init()</code> API and set the <code>isLogEvents</code> attribute to true in debug mode.</li>
 <li>Integrate the SDK and launch your web application in a browser, then open the Inspection page and switch to console tab.</li>
 <li>Input <code>EventRecorder</code> to Filter, and you will see the json content of all events recorded by Clickstream Web SDK.</li>
 </ol>
@@ -3820,7 +3821,7 @@
 </tr>
 <tr>
 <td>_profile_set</td>
-<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> api called</td>
+<td>when the <code>addUserAttributes()</code> or <code>setUserId()</code> API called</td>
 <td></td>
 </tr>
 <tr>
@@ -3859,7 +3860,7 @@
 <p>_session_number : The auto increment number of session in current browser, the initial value is 1</p>
 </li>
 <li>
-<p>Session timeout duration: By default is 30 minutes, which can be customized through the <a href="#other-configurations">configuration</a> api.</p>
+<p>Session timeout duration: By default is 30 minutes, which can be customized through the <a href="#other-configurations">configuration</a> API.</p>
 </li>
 </ol>
 <h3 id="page-view-definition">Page view definition</h3>
@@ -3875,6 +3876,7 @@
 <li>_previous_timestamp: The timestamp of the previous <code>_page_view</code> event.</li>
 <li>_engagement_time_msec: The previous page last engagement milliseconds.</li>
 </ol>
+<p>When the page goes to invisible for more than 30 minutes and then opened again, a new session will be generated, the previous page url will be cleared, and a new page view event will be sent.</p>
 <h3 id="user-engagement-definition">User engagement definition</h3>
 <p>In Clickstream Web SDK, we define the <code>_user_engagement</code> as an event that records the page browsing time, and we only send this event when user leave the page and the page has focus for at least one second.</p>
 <p>We define that users leave the page in the following situations.</p>
@@ -4217,7 +4219,7 @@
 <tr>
 <td>id</td>
 <td>string</td>
-<td>False</td>
+<td>True</td>
 <td>The id of the item</td>
 </tr>
 <tr>
