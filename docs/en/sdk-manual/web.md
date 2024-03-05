@@ -155,6 +155,7 @@ For logging more attribute in an item, please refer to [item attributes](#item-a
 !!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
+    ITEM_ID is required attribute, if not set the item will be discarded.
 
 #### Send event immediate in batch mode
 
@@ -337,6 +338,8 @@ This event listens for `pushState`, `popState` in history, and `replaceState` of
 2. _previous_timestamp: The timestamp of the previous `_page_view` event.
 3. _engagement_time_msec: The previous page last engagement milliseconds.
 
+When the page goes to invisible for more than 30 minutes and then opened again, a new session will be generated, the previous page url will be cleared, and a new page view event will be sent.
+
 ### User engagement definition
 
 In Clickstream Web SDK, we define the `_user_engagement` as an event that records the page browsing time, and we only send this event when user leave the page and the page has focus for at least one second.
@@ -467,7 +470,7 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 | Attribute name | Data type | Required | Description                   |
 |----------------|-----------|----------|-------------------------------|
-| id             | string    | False    | The id of the item            |
+| id             | string    | True     | The id of the item            |
 | name           | string    | False    | The name of the item          |
 | brand          | string    | False    | The brand of the item         |
 | currency       | string    | False    | The currency of the item      |

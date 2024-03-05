@@ -141,6 +141,7 @@ For logging more attribute in an item, please refer to [item attributes](android
 !!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
+    item id is required attribute, if not set the item will be discarded.
 
 #### Other configurations
 

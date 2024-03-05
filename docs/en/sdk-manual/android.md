@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.10.0'
+    implementation 'software.aws.solution:clickstream:0.11.1'
 }
 ```
 
@@ -182,6 +182,28 @@ For logging more attribute in an item, please refer to [item attributes](#item-a
 !!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
+    ITEM_ID is required attribute, if not set the item will be discarded.
+
+#### Record screen view events manually
+
+By default, SDK will automatically track the preset `_screen_view` event when Activity triggers `onResume`.
+
+You can manually record screen view events whether automatic screen view tracking is enabled, add the following code to record a screen view event with two attributes.
+
+- `SCREEN_NAME` Required. Your screen's name.
+- `SCREEN_UNIQUE_ID` Optional. Set the hashcode of your Fragment or View. If you do not set, SDK will set a default value based on the current Activity's hashcode.
+
+```
+import software.aws.solution.clickstream.ClickstreamAnalytcs;
+
+ClickstreamEvent event = ClickstreamEvent.builder()
+     .name(ClickstreamAnalytics.Event.SCREEN_VIEW)
+     .add(ClickstreamAnalytics.Attr.SCREEN_NAME, "HomeFragment")
+     .add(ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID, String.valueOf(HomeFragment.hashCode()))
+     .build();
+
+ClickstreamAnalytics.recordEvent(event);
+```
 
 #### Send event immediately
 
@@ -359,9 +381,8 @@ The `_session_start` event triggered when the app open for the first time, or th
 In Clickstream Android SDK, we define the `_screen_view` as an event that records a user's browsing path of screen, when a screen transition started, the `_screen_view` event will be recorded when meet any of the following conditions:
 
 1. No screen was previously set.
-2. The new screen name differs from the previous screen title.
-3. The new screen id differ from the previous screen id.
-4. The new screen unique id differ from the previous screen unique id.
+2. The new screen name differs from the previous screen name.
+3. The new screen unique id differ from the previous screen unique id.
 
 This event listens for Activity's `onResume` lifecycle method to judgment the screen transition. In order to track screen browsing path, we use `_previous_screen_name` , `_previous_screen_id` and `_previous_screen_unique_id` to link the previous screen. In addition, there are some other attributes in screen view event.
 
@@ -369,6 +390,8 @@ This event listens for Activity's `onResume` lifecycle method to judgment the sc
 2. _entrances: The first screen view event in a session is 1, others is 0.
 3. _previous_timestamp: The timestamp of the previous `_screen_view` event.
 4. _engagement_time_msec: The previous page last engagement milliseconds.
+
+When the app goes to the background for more than 30 minutes and then opened again, a new session will be generated, the previous screen information will be cleared, and a new screen view event will be sent.
 
 ### User engagement definition
 
@@ -501,7 +524,7 @@ All user attributes will be stored in `user` object, and all custom and global a
 
 | Attribute name | Data type | Required | Description                   |
 |----------------|-----------|----------|-------------------------------|
-| id             | string    | False    | The id of the item            |
+| id             | string    | True     | The id of the item            |
 | name           | string    | False    | The name of the item          |
 | brand          | string    | False    | The brand of the item         |
 | currency       | string    | False    | The currency of the item      |

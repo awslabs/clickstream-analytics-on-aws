@@ -337,6 +337,8 @@ Clickstream Web SDK 支持以下数据类型：
 2. _previous_timestamp：上一个 `_page_view ` 事件的时间戳。
 3. _engagement_time_msec：上个页面最后一次用户参与时长的毫秒数。
 
+当页面进入不可见状态超过 30 分钟再打开时，将生成新的会话并清除之前的页面url，然后发送新的 `_page_view` 事件。
+
 ### 用户参与度定义
 
 在 Clickstream Web SDK 中，我们将 _user_engagement 定义为记录用户浏览页面时长的事件，该事件仅在用户离开当前页面且在该页面停留至少一秒时发送。
@@ -469,7 +471,7 @@ Clickstream Web SDK 支持以下数据类型：
 
 | 属性名           | 数据类型     | 是否必需 | 描述        |
 |---------------|----------|------|-----------|
-| id            | string   | 否    | item的id   |
+| id            | string   | 是    | item的id   |
 | name          | string   | 否    | item的名称   |
 | brand         | string   | 否    | item的品牌   |
 | currency      | string   | 否    | item的货币   |

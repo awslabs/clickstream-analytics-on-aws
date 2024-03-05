@@ -19,7 +19,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.10.0'
+    implementation 'software.aws.solution:clickstream:0.11.1'
 }
 ```
 
@@ -183,6 +183,28 @@ ClickstreamAnalytics.recordEvent(event);
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+    ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
+
+#### 手动记录 Screen View 事件
+
+默认情况下当 Activity 回调 `onResume` 方法时 SDK 会自动记录预置的 `_screen_view` 事件。
+
+当然无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`  事件。
+
+- `SCREEN_NAME` 必需字段，屏幕的名称
+- `SCREEN_UNIQUE_ID` 可选字段，获取您需要记录的 Fragment 或者 View 的哈希码。如果您不设置 SDK 将会获取当前 Activity 的 hashcode 作为默认值。
+
+```
+import software.aws.solution.clickstream.ClickstreamAnalytcs;
+
+ClickstreamEvent event = ClickstreamEvent.builder()
+     .name(ClickstreamAnalytics.Event.SCREEN_VIEW)
+     .add(ClickstreamAnalytics.Attr.SCREEN_NAME, "HomeFragment")
+     .add(ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID, String.valueOf(HomeFragment.hashCode()))
+     .build();
+
+ClickstreamAnalytics.recordEvent(event);
+```
 
 #### 实时发送事件
 
@@ -278,8 +300,7 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 如果你想使用自定义DNS进行网络请求，你可以创建你的 `CustomOkhttpDns`并继承`okhttp3.Dns`
 ，然后配置 `.withCustomDns(CustomOkhttpDns.getInstance())`
-使其工作，您可以参考 [示例代码](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516)
-。
+使其工作，您可以参考 [示例代码](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516) 。
 
 ## 数据格式定义
 
@@ -297,9 +318,7 @@ Clickstream Android SDK 支持以下数据类型：
 
 ### 命名规则
 
-1.
-事件名称和属性名称不能以数字开头，只能包含大写字母、小写字母、数字和下划线。如果事件名称无效，将抛出 `IllegalArgumentException`
-。如果属性名称或用户属性名称无效，将丢弃该属性并记录错误。
+1. 事件名称和属性名称不能以数字开头，只能包含大写字母、小写字母、数字和下划线。如果事件名称无效，将抛出 `IllegalArgumentException`。如果属性名称或用户属性名称无效，将丢弃该属性并记录错误。
 
 2. 不要在事件名称或属性名称前使用 `_` 作为前缀，因为 `_` 前缀保留给解决方案使用。
 
@@ -369,17 +388,18 @@ Clickstream Android SDK 支持以下数据类型：
 在Clickstream Android SDK中，我们将 `_screen_view` 定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
 
 1. 之前没有设置过屏幕。
-2. 新的屏幕类名与之前的屏幕类名不同。
-3. 新的屏幕的路径与之前的屏幕的路径不同。
-4. 新的屏幕唯一id与之前的屏幕唯一id不同。
+2. 新的屏幕名称与之前的屏幕名称不同。
+3. 新的屏幕唯一id与之前的屏幕唯一id不同。
 
 该事件监听Activity的 `onResume` 生命周期方法来判断屏幕切换。 为了跟踪屏幕浏览路径，我们使用 `_previous_screen_name`
 、 `_previous_screen_id` 和 `_previous_screen_unique_id` 来关联前一个屏幕。 此外，屏幕浏览事件中还有一些其他属性。
 
 1. _screen_unique_id：我们通过获取当前屏幕的哈希值来计算屏幕唯一id，例如："126861252"。
 2. _entrances： 会话中的第一个屏幕浏览事件该值为 1，其他则为 0
-3. _previous_timestamp: 上一个 `screen_view` 事件的时间戳。
+3. _previous_timestamp: 上一个 `_screen_view` 事件的时间戳。
 4. _engagement_time_msec: 上个屏幕最后一次用户参与事件时长的毫秒数。
+
+当应用进入后台超过 30 分钟后再次打开之前页面时，会生成新的会话并清除之前的屏幕信息，然后发送新的 `_screen_view` 事件。
 
 ### 用户参与度定义
 
@@ -511,7 +531,7 @@ Clickstream Android SDK 支持以下数据类型：
 
 | 属性名           | 数据类型     | 是否必需 | 描述        |
 |---------------|----------|------|-----------|
-| id            | string   | 否    | item的id   |
+| id            | string   | 是    | item的id   |
 | name          | string   | 否    | item的名称   |
 | brand         | string   | 否    | item的品牌   |
 | currency      | string   | 否    | item的货币   |
