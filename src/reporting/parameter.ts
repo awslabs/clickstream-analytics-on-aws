@@ -120,7 +120,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   };
 
   const redShiftDBSchemaParam = new CfnParameter(scope, 'RedShiftDBSchemaParam', {
-    description: 'Comma delimited Redshift database schema name list ',
+    description: 'Comma delimited Redshift database schema name list',
     type: 'String',
     allowedPattern: MULTI_APP_ID_PATTERN,
     constraintDescription: `Redshift database schema name must match ${MULTI_APP_ID_PATTERN}`,
@@ -170,8 +170,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     Label: { default: 'Redshift Information' },
     Parameters: [
       redshiftEndpointParam.logicalId,
+      redshiftDefaultDBParam.logicalId,
       redshiftDBParam.logicalId,
-      redShiftDBSchemaParam.logicalId,
       redShiftDBSchemaParam.logicalId,
       redshiftPortParam.logicalId,
       redshiftParameterKeyParam.logicalId,
