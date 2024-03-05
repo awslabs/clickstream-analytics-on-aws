@@ -13,6 +13,7 @@
 
 import {
   AppLayout,
+  Button,
   Container,
   ContentLayout,
   Header,
@@ -139,6 +140,18 @@ const AnalyticsAnalyzes: React.FC = () => {
                           });
                         }}
                       />
+                    }
+                    actions={
+                      <SpaceBetween size="xs" direction="horizontal">
+                        <Button
+                          href={`/analytics/${projectId}/app/${appId}/analyzes/full`}
+                          iconAlign="right"
+                          iconName="external"
+                          target="_blank"
+                        >
+                          {t('common:button.fullWindowView')}
+                        </Button>
+                      </SpaceBetween>
                     }
                   >
                     {t('analytics:analyzes.title')}
