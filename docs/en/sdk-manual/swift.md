@@ -231,7 +231,7 @@ Please add the global attribute after the SDK initialization is completed, the g
     [ClickstreamObjc addUserAttributes:userAttributes];
     ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -245,7 +245,7 @@ You can add the following code to log an event with an item.
 
     ```swift
     import Clickstream
-
+    
     let attributes: ClickstreamAttribute = [
         ClickstreamAnalytics.Item.ITEM_ID: "123",
         ClickstreamAnalytics.Item.CURRENCY: "USD",
@@ -287,9 +287,42 @@ For logging more attribute in an item, please refer to [item attributes](#item-a
 !!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
+    ITEM_ID is required attribute, if not set the item will be discarded.
 
+#### Record screen view events manually
+
+By default, SDK will automatically track the preset `_screen_view` event when ViewController triggers `viewDidAppear`.
+
+You can manually record screen view events whether automatic screen view tracking is enabled, add the following code to record a screen view event with two attributes.
+
+- `SCREEN_NAME` Required. Your screen's name.
+- `SCREEN_UNIQUE_ID` Optional. Set the unique value of your ViewController or UIView. If you do not set, SDK will set a default value based on the current ViewController's hashValue.
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+    
+    ClickstreamAnalytics.recordEvent(ClickstreamAnalytics.EventName.SCREEN_VIEW, [
+        ClickstreamAnalytics.Attr.SCREEN_NAME: "HomeView",
+        ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID: "your screen uniqueId"
+    ])
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    @import Clickstream;
+    
+    NSDictionary *attributes = @{
+        Attr.SCREEN_NAME: @"HomeView",
+        Attr.SCREEN_UNIQUE_ID: @"your screen uniqueId"
+    };
+    [ClickstreamObjc recordEvent:EventName.SCREEN_VIEW :attributes];
+    ```
 
 #### Send event immediately
+
 === "Swift"
 
     ```swift
@@ -308,7 +341,7 @@ For logging more attribute in an item, please refer to [item attributes](#item-a
 
 #### Disable SDK
 
-You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and sending of any events. Of course you can enable the SDK when you need to continue logging events.
+You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and sending of any events. Of course, you can enable the SDK when you need to continue logging events.
 
 === "Swift"
 
@@ -409,13 +442,13 @@ You can follow the steps below to view the event raw JSON and debug your events.
 
 Clickstream Swift SDK supports the following data types:
 
-| Data type | Range                                                 | Sample        |
-|-----------|-------------------------------------------------------|---------------|
-| Int       | -2147483648 ~ 2147483647                                | 12            |
+| Data type | Range                                                  | Sample        |
+|-----------|--------------------------------------------------------|---------------|
+| Int       | -2147483648 ~ 2147483647                               | 12            |
 | Int64     | -9,223,372,036,854,775,808 ~ 9,223,372,036,854,775,807 | 26854775808   |
-| Double    | -2.22E-308 ~ 1.79E+308                                  | 3.14          |
-| Boolean   | true, false                                           | true          |
-| String    | max support 1024 characters                           | "clickstream" |
+| Double    | -2.22E-308 ~ 1.79E+308                                 | 3.14          |
+| Boolean   | true, false                                            | true          |
+| String    | max support 1024 characters                            | "clickstream" |
 
 ### Naming rules
 
@@ -436,7 +469,7 @@ In order to improve the efficiency of querying and analysis, we need to limit ev
 | Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
 | Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
 | Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event                | under 50 attributes        | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
 | User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
 | Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
 | User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
@@ -481,7 +514,7 @@ The `_session_start` event triggered when the app open for the first time, or th
 1. _session_id: We calculate the session id by concatenating the last 8 characters of uniqueId and the current millisecond, for example: dc7a7a18-20230905-131926703.
 2. _session_duration : We calculate the session duration by minus the current event create timestamp and the session's `_session_start_timestamp`, this attribute will be added in every event during the session.
 3. _session_number : The auto increment number of session in current device, the initial value is 1
-4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) api.
+4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration update](#configuration-update) API.
 
 ### Screen view definition
 
@@ -498,6 +531,8 @@ This event listens for UIViewController's `onViewDidAppear` lifecycle method to 
 2. _entrances: The first screen view event in a session is 1, others is 0.
 3. _previous_timestamp: The timestamp of the previous `_screen_view` event.
 4. _engagement_time_msec: The previous page last engagement milliseconds.
+
+When the app goes to the background for more than 30 minutes and then opened again, a new session will be generated, the previous screen information will be cleared, and a new screen view event will be sent.
 
 ### User engagement definition
 
@@ -631,7 +666,7 @@ All user attributes will be included in `user` object, and all custom and global
 
 | Attribute name | Data type | Required | Description                   |
 |----------------|-----------|----------|-------------------------------|
-| id             | string    | False    | The id of the item            |
+| id             | string    | True     | The id of the item            |
 | name           | string    | False    | The name of the item          |
 | brand          | string    | False    | The brand of the item         |
 | currency       | string    | False    | The currency of the item      |

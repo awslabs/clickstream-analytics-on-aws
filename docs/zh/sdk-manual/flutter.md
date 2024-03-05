@@ -105,7 +105,7 @@ analytics.setUserAttributes({
 ```
 
 当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
-api `analytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+API `analytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 #### 记录带有 Item 的事件
 
@@ -135,6 +135,7 @@ analytics.record(
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+    ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
 
 #### 其他配置项
 
