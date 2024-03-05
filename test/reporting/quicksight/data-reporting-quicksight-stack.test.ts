@@ -84,6 +84,13 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter redShiftDBSchemaParam', () => {
+    template.hasParameter('RedShiftDBSchemaParam', {
+      Description: 'Comma delimited Redshift database schema name list',
+      Type: 'String',
+    });
+  });
+
   test('Should has Parameter redshiftPortParam', () => {
     template.hasParameter('RedshiftPortParam', {
       Type: 'Number',
