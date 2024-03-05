@@ -3402,7 +3402,7 @@
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nx">userAge</span><span class="o">:</span><span class="w"> </span><span class="kt">22</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">});</span>
 </span></code></pre></div>
-<p>当前登录用户的属性会缓存在 <code>localStorage</code> 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api <code>ClickstreamAnalytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
+<p>当前登录用户的属性会缓存在 <code>localStorage</code> 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 API <code>ClickstreamAnalytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
 <div class="admonition info">
 <p class="admonition-title">重要提示</p>
 <p>如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。</p>
@@ -3584,7 +3584,7 @@
 <h4 id="_10">调试事件</h4>
 <p>您可以按照以下步骤查看事件原始 json 并调试您的事件。</p>
 <ol>
-<li>使用 <code>ClickstreamAnalytics.init()</code> api 并在调试模式下将 <code>isLogEvents</code> 属性设置为 true。</li>
+<li>使用 <code>ClickstreamAnalytics.init()</code> API 并在调试模式下将 <code>isLogEvents</code> 属性设置为 true。</li>
 <li>集成 SDK 并在浏览器中启动 Web 应用程序，然后打开检查页面并切换到控制台选项卡。</li>
 <li>在 Filter 中输入 <code>EventRecorder</code>，您将看到 Clickstream Web SDK 记录的所有事件的 json 内容。</li>
 </ol>
@@ -3801,7 +3801,7 @@
 </tr>
 <tr>
 <td>_profile_set</td>
-<td>当调用 <code>addUserAttributes()</code> 或 <code>setUserId()</code> api 时</td>
+<td>当调用 <code>addUserAttributes()</code> 或 <code>setUserId()</code> API 时</td>
 <td></td>
 </tr>
 <tr>
@@ -3833,7 +3833,7 @@
 <li>_session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如：dc7a7a18-20230905-131926703</li>
 <li>_session_duration：我们通过减去当前事件创建时间戳和会话的<code>_session_start_timestamp</code>来计算会话持续时间，该属性将添加到会话期间的每个事件中。</li>
 <li>_session_number：当前浏览器中session的自增数，初始值为1</li>
-<li>会话超时时间：默认为30分钟，可以通过<a href="#_7">configuration</a> api自定义。</li>
+<li>会话超时时间：默认为 30 分钟，可以通过<a href="#_7">configuration</a> API 自定义。</li>
 </ol>
 <h3 id="_18">页面浏览定义</h3>
 <p>在 Clickstream Web SDK 中，我们将<code>_page_view</code>（页面浏览）定义为记录用户浏览页面路径的事件，当页面切换开始时，满足以下任何条件时将记录<code>_page_view</code>事件：</p>
@@ -3848,6 +3848,7 @@
 <li>_previous_timestamp：上一个 <code>_page_view</code> 事件的时间戳。</li>
 <li>_engagement_time_msec：上个页面最后一次用户参与时长的毫秒数。</li>
 </ol>
+<p>当页面进入不可见状态超过 30 分钟再打开时，将生成新的会话并清除之前的页面url，然后发送新的 <code>_page_view</code> 事件。</p>
 <h3 id="_19">用户参与度定义</h3>
 <p>在 Clickstream Web SDK 中，我们将 _user_engagement 定义为记录用户浏览页面时长的事件，该事件仅在用户离开当前页面且在该页面停留至少一秒时发送。</p>
 <p>我们定义用户在以下情况下离开页面。</p>
@@ -4187,7 +4188,7 @@
 <tr>
 <td>id</td>
 <td>string</td>
-<td>否</td>
+<td>是</td>
 <td>item的id</td>
 </tr>
 <tr>
