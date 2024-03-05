@@ -649,7 +649,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
         FieldId: fieldId,
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: eventName,
+          ColumnName: `${index+1}_${eventName}`,
         },
       },
     });
@@ -669,7 +669,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
         FieldId: fieldIdRate,
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: `${eventName}_rate`,
+          ColumnName: `${index+1}_${eventName}_rate`,
         },
         FormatConfiguration: {
           FormatConfiguration: {
@@ -1363,7 +1363,7 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  checkChain.DuplicatedEvent().NodesLimit();
+  checkChain.NodesLimit();
 
   return checkChain.status;
 }
