@@ -107,4 +107,19 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
   },
+  {
+    sqlFile: 'event-v2.sql',
+  },
+  {
+    sqlFile: 'item-v2.sql',
+  },
+  {
+    sqlFile: 'session.sql',
+  },
+  {
+    sqlFile: 'user-v2.sql',
+  },
+  {
+    sqlFile: 'user-m-view-v2.sql',
+  },
 ];
