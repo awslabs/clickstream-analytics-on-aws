@@ -96,26 +96,28 @@ export function createRedshiftAnalyticsStack(
 ) {
 
   const tablesOdsSource: TablesODSSource = {
-    event: {
+    [TABLE_NAME_EVENT]: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    event_parameter: {
+    [TABLE_NAME_EVENT_PARAMETER]: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_PARAMETER + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    user: {
+    [TABLE_NAME_USER]: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    item: {
+    [TABLE_NAME_ITEM]: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
+    s3Bucket: props.dataSourceConfiguration.bucket,
+    commonPrefix: props.dataSourceConfiguration.prefix,
   };
 
   const workflowBucketInfo: WorkflowBucketInfo = {

@@ -67,6 +67,7 @@ async function _handler(event: CheckLoadStatusEvent, context: Context) {
   const appId = event.detail.appId;
   const dynamodbTableName = DYNAMODB_TABLE_NAME!;
   const manifestFileName = event.detail.manifestFileName;
+  const odsTableName = event.odsTableName;
   let jobList = event.detail.jobList;
   logger.debug(`query_id:${queryId}`);
   // There is a loading job need to check result.

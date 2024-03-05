@@ -51,6 +51,7 @@ type LoadManifestEventDetail = ManifestBody & {
 
 export interface LoadManifestEvent {
   detail: LoadManifestEventDetail;
+  odsTableName: string;
 }
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -81,6 +82,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   const retryCount = event.detail.retryCount;
   let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
+  const odsTableName = event.odsTableName;
   const jobList = event.detail.jobList;
   logger.info('Event details', { details: event.detail });
   // The appId will be used as the schema of Redshift, '.' and '-' are not supported.
@@ -97,7 +99,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   );
 
   for (const entry of jobList.entries) {
-    await updateItem(DYNAMODB_TABLE_NAME, entry.url, JobStatus.JOB_PROCESSING);
+    await updateItem(odsTableName, DYNAMODB_TABLE_NAME, entry.url, JobStatus.JOB_PROCESSING);
   }
 
   const schema = appId;
@@ -111,8 +113,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
    * WHERE c.relname='ods_events' and n.nspname NOT IN ('pg_catalog', 'information_schema') ORDER BY schema_name, table_name;
    */
   // Governs automatic computation and refresh of optimizer statistics at the end of a successful COPY command.
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
-  const sqlStatement = `COPY ${schema}.${REDSHIFT_ODS_TABLE_NAME} FROM '${manifestFileName}' `
+  const sqlStatement = `COPY ${schema}.${odsTableName} FROM '${manifestFileName}' `
     + `IAM_ROLE '${REDSHIFT_ROLE_ARN}' `
     + 'STATUPDATE ON '
     + 'FORMAT AS PARQUET SERIALIZETOJSON '
@@ -155,10 +156,13 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
  * @returns The response of update item.
  */
 export const updateItem = async (
-  tableName: string, s3Uri: string, jobStatus: string) => {
+  odsTableName: string,
+  tableName: string, 
+  s3Uri: string, 
+  jobStatus: string
+) => {
 
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
-  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+  const qJobStatus = composeJobStatus(jobStatus, odsTableName);
 
   logger.info(`updateItem: s3Uri:${s3Uri} set jobStatus=${qJobStatus}`);
 
