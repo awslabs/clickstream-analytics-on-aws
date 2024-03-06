@@ -83,7 +83,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const odsTableName = event.odsTableName;
-  logger.debug(`################ mingtong test, odsTableName: ${odsTableName}`);
+  logger.debug(`odsTableName: ${odsTableName}`);
   const jobList = event.detail.jobList;
   logger.info('Event details', { details: event.detail });
   // The appId will be used as the schema of Redshift, '.' and '-' are not supported.

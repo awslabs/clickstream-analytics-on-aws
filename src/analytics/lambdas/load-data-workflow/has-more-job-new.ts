@@ -30,7 +30,7 @@ export const handler = async (_: any, context: Context) => {
   const tableName = DYNAMODB_TABLE_NAME;
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
   const odsTableName = _.odsTableName;
-  logger.info(`mingtong ################ odsTableName: ${odsTableName}`);
+  logger.debug(`odsTableName: ${odsTableName}`);
 
   const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}${odsTableName}/`;
 
