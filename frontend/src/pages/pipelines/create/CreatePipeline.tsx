@@ -180,6 +180,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   ] = useState(false);
 
   const [
+    dataProcessorIntervalCronInvalidError,
+    setDataProcessorIntervalCronInvalidError,
+  ] = useState(false);
+
+  const [
     dataProcessorIntervalInvalidError,
     setDataProcessorIntervalInvalidError,
   ] = useState(false);
@@ -554,6 +559,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       info.selectedExcutionUnit?.value === 'minute'
     ) {
       setDataProcessorIntervalInvalidError(true);
+      return false;
+    }
+    if (
+      info.selectedExcutionType?.value === ExecutionType.CRON_EXPRESS &&
+      info.exeCronExp.split(' ').length !== 6
+    ) {
+      setDataProcessorIntervalCronInvalidError(true);
       return false;
     }
     return true;
@@ -1790,6 +1802,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               update={update}
               pipelineInfo={pipelineInfo}
               transformPluginEmptyError={transformPluginEmptyError}
+              dataProcessorIntervalCronInvalidError={
+                dataProcessorIntervalCronInvalidError
+              }
               dataProcessorIntervalInvalidError={
                 dataProcessorIntervalInvalidError
               }
@@ -1846,6 +1861,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeExecutionCronExp={(cron) => {
+                setDataProcessorIntervalCronInvalidError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
