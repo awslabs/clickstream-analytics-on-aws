@@ -373,6 +373,7 @@ export enum BucketPrefix {
   DATA_PIPELINE_TEMP = 'data-pipeline-temp',
   LOAD_WORKFLOW = 'load-workflow',
   KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
+  SEGMENTS = 'segments',
 }
 
 export enum MetricsLegendPosition {

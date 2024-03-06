@@ -90,6 +90,8 @@ export interface RedshiftAnalyticsStackProps {
       dbUser: string;
     };
   };
+  clickstreamMetadataDdbArn: string;
+  segmentsS3Prefix: string;
 }
 
 export interface AthenaAnalyticsStackProps {
@@ -261,6 +263,11 @@ export function createStackParameters(scope: Construct): {
     default: 'pipeline-temp/',
   });
 
+  const segmentsS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'SegmentsS3Prefix', {
+    description: 'Segments S3 prefix',
+    default: 'segments/',
+  });
+
   new CfnRule(scope, 'S3BucketReadinessRule', {
     assertions: [
       {
@@ -284,9 +291,12 @@ export function createStackParameters(scope: Construct): {
             Fn.conditionNot(
               Fn.conditionEquals(pipelineS3PrefixParam.valueAsString, ''),
             ),
+            Fn.conditionNot(
+              Fn.conditionEquals(segmentsS3PrefixParam.valueAsString, ''),
+            ),
           ),
         assertDescription:
-          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
+          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket, LoadWorkflowBucketPrefix, pipelineS3Bucket, pipelineS3Prefix and segmentsS3Prefix cannot be empty.',
       },
     ],
   }).overrideLogicalId('S3BucketReadinessRule');
@@ -543,6 +553,8 @@ export function createStackParameters(scope: Construct): {
     allowedPattern: DDB_TABLE_ARN_PATTERN,
   });
 
+  const clickstreamMetadataDdbArnParam = Parameters.createClickstreamMetadataDdbArnParameter(scope);
+
   const topFrequentPropertiesLimitParam = new CfnParameter(scope, 'TopFrequentPropertiesLimit', {
     description: 'The number of top property values that get from ods event table.',
     type: 'Number',
@@ -709,6 +721,9 @@ export function createStackParameters(scope: Construct): {
         [loadWorkflowBucketPrefixParam.logicalId]: {
           default: 'S3 prefix for load workflow data',
         },
+        [segmentsS3PrefixParam.logicalId]: {
+          default: 'S3 prefix for segments output',
+        },
         ...redshiftCommonParamsLabels,
         ...redshiftServerlessParamsLabels,
         ...existingRedshiftServerlessParamsLabels,
@@ -720,6 +735,9 @@ export function createStackParameters(scope: Construct): {
 
         [dataProcessingCronOrRateExpressionParam.logicalId]: {
           default: 'The schedule expression of data processing',
+        },
+        [clickstreamMetadataDdbArnParam.logicalId]: {
+          default: 'Clickstream Metadata DDB table arn',
         },
       },
     },
@@ -798,6 +816,8 @@ export function createStackParameters(scope: Construct): {
           clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
         },
       },
+      clickstreamMetadataDdbArn: clickstreamMetadataDdbArnParam.valueAsString,
+      segmentsS3Prefix: segmentsS3PrefixParam.valueAsString,
     },
   };
 }

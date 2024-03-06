@@ -53,6 +53,9 @@ importers:
       '@aws-sdk/client-emr-serverless':
         specifier: ^3.523.0
         version: 3.529.1
+      '@aws-sdk/client-eventbridge':
+        specifier: ^3.523.0
+        version: 3.525.0
       '@aws-sdk/client-glue':
         specifier: ^3.523.0
         version: 3.529.1
@@ -640,6 +643,9 @@ importers:
       '@aws-sdk/client-ec2':
         specifier: ^3.523.0
         version: 3.529.1
+      '@aws-sdk/client-eventbridge':
+        specifier: ^3.523.0
+        version: 3.525.0
       '@aws-sdk/client-iam':
         specifier: ^3.523.0
         version: 3.529.1
@@ -1420,6 +1426,56 @@ packages:
 
   /@aws-sdk/client-elastic-load-balancing-v2@3.529.1:
     resolution: {integrity: sha512-gPuFam7FSi0QB22dVEcScUkk7WHv5Lzg2luYJw4fHPZg/ij71olmOpun2EXA/oRia8r+qfiEEKZjKPaECcl1Hw==}
+  /@aws-sdk/client-eventbridge@3.525.0:
+    resolution: {integrity: sha512-yBDjS410rMiHv05YX7ap1E9wWnMo9fSTx8jDdzpOxS0c58QUgcSnANm5UA09aAE0doQDNYC6aPTu22tP7HSMdw==}
+    engines: {node: '>=14.0.0'}
+    dependencies:
+      '@aws-crypto/sha256-browser': 3.0.0
+      '@aws-crypto/sha256-js': 3.0.0
+      '@aws-sdk/client-sts': 3.525.0(@aws-sdk/credential-provider-node@3.525.0)
+      '@aws-sdk/core': 3.525.0
+      '@aws-sdk/credential-provider-node': 3.525.0
+      '@aws-sdk/middleware-host-header': 3.523.0
+      '@aws-sdk/middleware-logger': 3.523.0
+      '@aws-sdk/middleware-recursion-detection': 3.523.0
+      '@aws-sdk/middleware-signing': 3.523.0
+      '@aws-sdk/middleware-user-agent': 3.525.0
+      '@aws-sdk/region-config-resolver': 3.525.0
+      '@aws-sdk/signature-v4-multi-region': 3.525.0
+      '@aws-sdk/types': 3.523.0
+      '@aws-sdk/util-endpoints': 3.525.0
+      '@aws-sdk/util-user-agent-browser': 3.523.0
+      '@aws-sdk/util-user-agent-node': 3.525.0
+      '@smithy/config-resolver': 2.1.4
+      '@smithy/fetch-http-handler': 2.4.3
+      '@smithy/hash-node': 2.1.3
+      '@smithy/invalid-dependency': 2.1.3
+      '@smithy/middleware-content-length': 2.1.3
+      '@smithy/middleware-endpoint': 2.4.4
+      '@smithy/middleware-retry': 2.1.4
+      '@smithy/middleware-serde': 2.1.3
+      '@smithy/middleware-stack': 2.1.3
+      '@smithy/node-config-provider': 2.2.4
+      '@smithy/node-http-handler': 2.4.1
+      '@smithy/protocol-http': 3.2.1
+      '@smithy/smithy-client': 2.4.2
+      '@smithy/types': 2.10.1
+      '@smithy/url-parser': 2.1.3
+      '@smithy/util-base64': 2.1.1
+      '@smithy/util-body-length-browser': 2.1.1
+      '@smithy/util-body-length-node': 2.2.1
+      '@smithy/util-defaults-mode-browser': 2.1.4
+      '@smithy/util-defaults-mode-node': 2.2.3
+      '@smithy/util-endpoints': 1.1.4
+      '@smithy/util-retry': 2.1.3
+      '@smithy/util-utf8': 2.1.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - aws-crt
+    dev: false
+
+  /@aws-sdk/client-glue@3.525.0:
+    resolution: {integrity: sha512-5ttklGtXaRoiQJ/1nCIbPnyy/oW7UsoBnTJmuWs15mYp5iLV3RiL81fSSj91wk2ElhA5UNQgd6vsvN7gUASUgw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
@@ -9860,7 +9916,7 @@ packages:
       debug: 4.3.4
       enhanced-resolve: 5.15.0
       eslint: 8.57.0
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.21.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.21.0)(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       eslint-plugin-import: 2.29.1(@typescript-eslint/parser@6.21.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.2
@@ -11815,7 +11871,6 @@ packages:
       - supports-color
       - ts-node
     dev: true
-
   /jest-config@27.5.1(ts-node@10.9.2):
     resolution: {integrity: sha512-5sAsjm6tGdsVbW9ahcChPAFCk4IlkQUknH5AvKjuLTSlcO/wCZKyFdn7Rg0EkC+OGgWODEy2hDpWB1PgzH0JNA==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}

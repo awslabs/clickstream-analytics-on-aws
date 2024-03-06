@@ -202,6 +202,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-glue",
       "version": "^3.523.0",
       "type": "runtime"

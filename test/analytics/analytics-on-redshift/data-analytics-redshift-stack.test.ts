@@ -12,29 +12,39 @@
  */
 
 import {
-  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
-  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
+  OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
 } from '@aws/clickstream-base-lib';
-import {
-  Logger,
-} from '@aws-lambda-powertools/logger';
+import { Logger } from '@aws-lambda-powertools/logger';
 import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
-import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
+import { BuiltInTagKeys, MetricsNamespace, REDSHIFT_MODE } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
 import { getExistVpc } from '../../../src/common/vpc-utils';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
-import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition, findConditionByName, JoinAnyValue, RefGetAtt } from '../../utils';
+import {
+  findConditionByName,
+  findFirstResourceByKeyPrefix,
+  findResourceByCondition,
+  getParameter,
+  JoinAnyValue,
+  RefAnyValue,
+  RefGetAtt,
+} from '../../utils';
 
 const logger = new Logger();
 
@@ -239,7 +249,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
   test('Should has Rules S3BucketReadinessRule', () => {
     const rule = template.toJSON().Rules.S3BucketReadinessRule;
     expect(rule.Assertions[0].Assert[CFN_FN.AND].length).toEqual(6);
-    const paramList = ['ODSEventBucket', 'ODSEventPrefix', 'LoadWorkflowBucket', 'LoadWorkflowBucketPrefix', 'PipelineS3Bucket', 'PipelineS3Prefix'];
+    const paramList = ['ODSEventBucket', 'ODSEventPrefix', 'LoadWorkflowBucket', 'LoadWorkflowBucketPrefix', 'PipelineS3Bucket', 'PipelineS3Prefix', 'SegmentsS3Prefix'];
     let paramCount = 0;
     for (const element of rule.Assertions[0].Assert[CFN_FN.AND]) {
       paramList.forEach(p => {
@@ -346,7 +356,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(35);
+    expect(paramCount).toEqual(37);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -468,8 +478,10 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
       'ClickstreamAnalyticsMetadataDdbArn',
+      'ClickstreamMetadataDdbArn',
       'PipelineS3Bucket',
       'PipelineS3Prefix',
+      'SegmentsS3Prefix',
       'TopFrequentPropertiesLimit',
       'ScanWorkflowMinInterval',
       'ClearExpiredEventsScheduleExpression',
@@ -642,6 +654,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      segmentsS3Prefix: 'segmentsS3Prefix',
     };
     let error = false;
     try {
@@ -696,6 +710,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      segmentsS3Prefix: 'segmentsS3Prefix',
     };
     let error = false;
     try {
@@ -737,6 +753,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      segmentsS3Prefix: 'segmentsS3Prefix',
     };
 
     const nestedStack = new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
@@ -2764,6 +2782,15 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     });
     stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
       Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+      Condition: 'redshiftProvisioned',
+    });
+    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+      Condition: 'existingRedshiftServerless',
     });
   });
 
