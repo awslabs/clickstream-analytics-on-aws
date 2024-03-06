@@ -183,6 +183,7 @@ ClickstreamAnalytics.recordEvent(event);
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+    
     ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
 
 #### 手动记录 Screen View 事件
@@ -419,7 +420,6 @@ Clickstream Android SDK 支持以下数据类型：
 
 ```json
 {
-  "hashCode": "80452b0",
   "unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
   "event_type": "add_to_cart",
   "event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
@@ -477,7 +477,6 @@ Clickstream Android SDK 支持以下数据类型：
 
 | 属性名              | 数据类型    | 描述                               | 如何生成                                                                                                                                   | 用途和目的                    |
 |------------------|---------|----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| hashCode         | String  | 事件对象的哈希值                         | 通过`Integer.toHexString(AnalyticsEvent.hashCode())`生成                                                                                   | 区分不同的事件                  |
 | app_id           | String  | 您应用的app id                       | app id 是在您将应用程序注册到数据管道时由点击流解决方案生成的                                                                                                     | 区分不同app的事件               |
 | unique_id        | String  | 用户唯一id                           | 在 SDK 首次初始化期间由  `UUID.randomUUID().toString()` 生成<br/>如果用户注销然后登录新用户，它将被更改。 当用户在同一设备中重新登录到以前的用户时，unique_id 将重置为之前的 unique_id            | 唯一id来标识不同的用户并关联登录和未登录的行为 |
 | device_id        | String  | 设备唯一id                           | 通过`Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID)`生成, <br>如果 Android ID 为 null 或“”，我们将使用 UUID 代替。 | 区分不同设备                   |
