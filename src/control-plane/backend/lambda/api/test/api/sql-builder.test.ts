@@ -120,11 +120,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -133,7 +128,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -146,7 +141,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -159,7 +154,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -191,25 +186,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
     `.trim().replace(/ /g, ''));
 
   });
@@ -310,11 +305,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -323,7 +313,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -336,7 +326,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -349,7 +339,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -381,25 +371,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct event_id_0) as view_item,
+      count(distinct event_id_0) as "1_view_item",
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct event_id_1) as add_to_cart,
+      count(distinct event_id_1) as "2_add_to_cart",
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct event_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct event_id_2) as "3_purchase",
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
       `.trim().replace(/ /g, ''),
     );
 
@@ -500,11 +490,6 @@ describe('SQL Builder test', () => {
         ) as event_base
       where
         1 = 1
-        and (
-          (event_name = 'view_item')
-          or (event_name = 'add_to_cart')
-          or (event_name = 'purchase')
-        )
     ),
     table_0 as (
       select
@@ -513,7 +498,7 @@ describe('SQL Builder test', () => {
         day,
         hour,
         event_date as event_date_0,
-        event_name as event_name_0,
+        '1_' || event_name as event_name_0,
         event_timestamp as event_timestamp_0,
         event_id as event_id_0,
         user_id as user_id_0,
@@ -526,7 +511,7 @@ describe('SQL Builder test', () => {
     table_1 as (
       select
         event_date as event_date_1,
-        event_name as event_name_1,
+        '2_' || event_name as event_name_1,
         event_timestamp as event_timestamp_1,
         event_id as event_id_1,
         user_id as user_id_1,
@@ -539,7 +524,7 @@ describe('SQL Builder test', () => {
     table_2 as (
       select
         event_date as event_date_2,
-        event_name as event_name_2,
+        '3_' || event_name as event_name_2,
         event_timestamp as event_timestamp_2,
         event_id as event_id_2,
         user_id as user_id_2,
@@ -583,25 +568,25 @@ describe('SQL Builder test', () => {
     )
   select
     DAY,
-    count(distinct event_id_0) as view_item,
+    count(distinct event_id_0) as "1_view_item",
     (
       count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
     )::decimal(20, 4) as total_conversion_rate,
-    count(distinct event_id_1) as add_to_cart,
+    count(distinct event_id_1) as "2_add_to_cart",
     (
       count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-    )::decimal(20, 4) as add_to_cart_rate,
-    count(distinct event_id_2) as purchase,
+    )::decimal(20, 4) as "2_add_to_cart_rate",
+    count(distinct event_id_2) as "3_purchase",
     (
       count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-    )::decimal(20, 4) as purchase_rate
+    )::decimal(20, 4) as "3_purchase_rate"
   from
     join_table
   group by
     DAY
   order by
     DAY,
-    view_item desc
+    "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -701,11 +686,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = 'view_item')
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -714,7 +694,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -727,7 +707,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -740,7 +720,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -784,25 +764,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct event_id_0) as view_item,
+      count(distinct event_id_0) as "1_view_item",
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct event_id_1) as add_to_cart,
+      count(distinct event_id_1) as "2_add_to_cart",
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct event_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct event_id_2) as "3_purchase",
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -939,29 +919,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -970,7 +927,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -979,11 +936,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -992,11 +956,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -1028,25 +999,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -1191,30 +1162,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (
-              event_name = '_first_open'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (
-              event_name = '_scroll'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = '_user_engagement')
-            or (event_name = '_app_end')
-          )
       ),
       table_0 as (
         select
@@ -1223,7 +1170,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -1232,11 +1179,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = '_first_open'
+          and (
+            platform='Android'
+            and (
+              device_screen_heightisnull
+              ordevice_screen_height<>1400
+            )
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -1245,11 +1199,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = '_scroll'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -1262,7 +1223,7 @@ describe('SQL Builder test', () => {
       table_3 as (
         select
           event_date as event_date_3,
-          event_name as event_name_3,
+          '4_' || event_name as event_name_3,
           event_timestamp as event_timestamp_3,
           event_id as event_id_3,
           user_id as user_id_3,
@@ -1355,31 +1316,31 @@ describe('SQL Builder test', () => {
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null
             and user_pseudo_id_3 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
-              when seq = 3 then '4_' || event_name_3
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
+              when seq = 3 then event_name_3
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null
             and user_pseudo_id_3 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null
             and user_pseudo_id_3 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null
             and user_pseudo_id_3 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name
@@ -5283,26 +5244,6 @@ describe('SQL Builder test', () => {
               or device_screen_height <> 1400
             )
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _session_duration > 200
-                and _user_first_touch_timestamp > 1686532526770
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                _session_duration > 200
-                and geo_city = 'Shanghai'
-              )
-            )
-            or (
-              event_name = 'purchase'
-              and (device_mobile_brand_name = 'Samsung')
-            )
-          )
       ),
       table_0 as (
         select
@@ -5311,7 +5252,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -5320,11 +5261,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _session_duration > 200
+            and _user_first_touch_timestamp > 1686532526770
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -5333,11 +5278,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            _session_duration > 200
+            and geo_city = 'Shanghai'
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -5346,6 +5295,7 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (device_mobile_brand_name = 'Samsung')
       ),
       join_table as (
         select
@@ -5369,25 +5319,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -5665,28 +5615,6 @@ describe('SQL Builder test', () => {
               or device_screen_height <> 1400
             )
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _session_duration > 200
-                and _session_duration >= 250
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp is not null
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                _session_duration > 200
-                and geo_city = 'Shanghai'
-              )
-            )
-            or (
-              event_name = 'purchase'
-              and (device_mobile_brand_name = 'Samsung')
-            )
-          )
       ),
       table_0 as (
         select
@@ -5695,7 +5623,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -5704,11 +5632,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _session_duration > 200
+            and _session_duration >= 250
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp is not null
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -5717,11 +5651,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            _session_duration > 200
+            and geo_city = 'Shanghai'
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -5730,6 +5668,7 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (device_mobile_brand_name = 'Samsung')
       ),
       join_table as (
         select
@@ -5753,25 +5692,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -6034,27 +5973,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -6063,7 +5981,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -6072,11 +5990,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -6089,7 +6013,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -6098,6 +6022,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -6158,20 +6088,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name
@@ -6449,27 +6379,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -6478,7 +6387,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -6487,11 +6396,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -6504,7 +6419,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -6513,6 +6428,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -6536,25 +6457,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -10042,17 +9963,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10061,7 +9971,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10071,11 +9981,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10089,7 +10003,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -10175,20 +10089,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,
@@ -10383,17 +10297,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10402,7 +10305,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10412,11 +10315,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10430,7 +10337,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -10516,20 +10423,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,
@@ -10725,17 +10632,6 @@ describe('SQL Builder test', () => {
           ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -10745,7 +10641,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(geo_country::varchar, 'null') as geo_country_0,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -10754,11 +10650,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -10771,7 +10671,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -10852,20 +10752,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,
@@ -13499,27 +13399,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -13528,7 +13407,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -13538,11 +13417,17 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -13556,7 +13441,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -13566,6 +13451,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -13630,20 +13521,482 @@ describe('SQL Builder test', () => {
           case
             when event_id_1 is not null
             and event_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when event_id_1 is not null
             and event_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when event_id_1 is null
             and event_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
+              else null
+            end
+          end as event_name,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              when seq = 2 then geo_country_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              when seq = 1 then geo_country_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then geo_country_0
+              else null
+            end
+          end as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+      )
+    select
+      day::date as event_date,
+      event_name,
+      event_id,
+      group_col
+    from
+      final_table
+    where
+      event_name is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('buildFunnelView - same event with different filter', () => {
+
+    const sql = buildFunnelView({
+      dbName: 'shop',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      groupCondition: {
+        category: ConditionCategory.GEO,
+        property: 'country',
+        dataType: MetadataValueType.STRING,
+      },
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.OTHER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.GEO,
+            property: 'country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526780],
+            dataType: MetadataValueType.INTEGER,
+          },
+        ],
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['iOS'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    }, true);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      user_base as (
+        select
+          COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+          user_id as user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          shop.shop.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_timestamp,
+          platform,
+          geo_country,
+          COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+          r.user_id,
+          month,
+          week,
+          day,
+          hour
+        from
+          (
+            select
+              event_date,
+              event_name::varchar as event_name,
+              event_id::varchar as event_id,
+              event_timestamp::bigint as event_timestamp,
+              platform::varchar as platform,
+              geo.country::varchar as geo_country,
+              user_pseudo_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
+      ),
+      base_data as (
+        select
+          _user_first_touch_timestamp,
+          _session_duration,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration
+            from
+              event_base
+              join shop.shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                  else null
+                end
+              ) as _user_first_touch_timestamp
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          '1_' || event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0,
+          COALESCE(geo_country::varchar, 'null') as geo_country_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          '2_' || event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1,
+          COALESCE(geo_country::varchar, 'null') as geo_country_1
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (
+            platform = 'iOS'
+            and geo_country = 'China'
+          )
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          '3_' || event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2,
+          COALESCE(geo_country::varchar, 'null') as geo_country_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_1.geo_country_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2,
+          table_2.geo_country_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0.geo_country_0 = table_1.geo_country_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * cast(1000 as bigint)
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_1.geo_country_1 = table_2.geo_country_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * cast(1000 as bigint)
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          event_id_0,
+          event_id_1,
+          event_id_2,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              when seq = 2 then event_id_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              when seq = 1 then event_id_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_id_0
+              else null
+            end
+          end as event_id,
+          case
+            when event_id_1 is not null
+            and event_id_2 is not null then case
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
+              else null
+            end
+            when event_id_1 is not null
+            and event_id_2 is null then case
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              else null
+            end
+            when event_id_1 is null
+            and event_id_2 is null then case
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,
@@ -13935,26 +14288,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -13963,7 +14296,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -13972,11 +14305,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -13989,7 +14327,286 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * cast(1000 as bigint)
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * cast(1000 as bigint)
+      )
+    select
+      DAY,
+      count(distinct user_pseudo_id_0) as "1_view_item",
+      (
+        count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
+      )::decimal(20, 4) as total_conversion_rate,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
+      (
+        count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
+      (
+        count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
+      )::decimal(20, 4) as "3_purchase_rate"
+    from
+      join_table
+    group by
+      DAY
+    order by
+      DAY,
+      "1_view_item" desc
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+
+  test('buildFunnelTableView - same event with different filter', () => {
+
+    const sql = buildFunnelTableView({
+      dbName: 'shop',
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526780],
+            dataType: MetadataValueType.INTEGER,
+          },
+        ],
+      },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'view_item',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['iOS'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'purchase',
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      user_base as (
+        select
+          COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+          user_id as user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          shop.shop.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_timestamp,
+          platform,
+          COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+          r.user_id,
+          month,
+          week,
+          day,
+          hour
+        from
+          (
+            select
+              event_date,
+              event_name::varchar as event_name,
+              event_id::varchar as event_id,
+              event_timestamp::bigint as event_timestamp,
+              platform::varchar as platform,
+              user_pseudo_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
+      ),
+      base_data as (
+        select
+          _user_first_touch_timestamp,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                  else null
+                end
+              ) as _user_first_touch_timestamp
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          '1_' || event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (platform = 'Android')
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          '2_' || event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+          and (platform = 'iOS')
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -14021,25 +14638,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_view_item",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_view_item_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -14308,26 +14925,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -14336,7 +14933,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -14346,11 +14943,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -14364,7 +14966,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -14374,6 +14976,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -14400,18 +15008,18 @@ describe('SQL Builder test', () => {
     select
       DAY,
       category as category,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
@@ -14419,7 +15027,7 @@ describe('SQL Builder test', () => {
       category
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -14688,26 +15296,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526770
             and _user_first_touch_timestamp > 1686532526780
           )
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _user_first_touch_timestamp > 1686532526770
-                and _user_first_touch_timestamp > 1686532526780
-              )
-            )
-            or (event_name = 'add_to_cart')
-            or (
-              event_name = 'purchase'
-              and (
-                platform = 'Android'
-                and geo_country = 'China'
-                and _user_first_touch_timestamp > 1686532526770
-                and _session_duration > 200
-              )
-            )
-          )
       ),
       table_0 as (
         select
@@ -14717,7 +15305,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(category::varchar, 'null') as category,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -14726,11 +15314,16 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -14743,7 +15336,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -14752,6 +15345,12 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'purchase'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
       ),
       join_table as (
         select
@@ -14776,18 +15375,18 @@ describe('SQL Builder test', () => {
     select
       DAY,
       category as category,
-      count(distinct user_pseudo_id_0) as view_item,
+      count(distinct user_pseudo_id_0) as "1_view_item",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as add_to_cart,
+      count(distinct user_pseudo_id_1) as "2_add_to_cart",
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as add_to_cart_rate,
-      count(distinct user_pseudo_id_2) as purchase,
+      )::decimal(20, 4) as "2_add_to_cart_rate",
+      count(distinct user_pseudo_id_2) as "3_purchase",
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as purchase_rate
+      )::decimal(20, 4) as "3_purchase_rate"
     from
       join_table
     group by
@@ -14795,7 +15394,7 @@ describe('SQL Builder test', () => {
       category
     order by
       DAY,
-      view_item desc
+      "1_view_item" desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -16858,26 +17457,6 @@ describe('SQL Builder test', () => {
           ) as event_join_table on event_base.event_id = event_join_table.event_id
         where
           1 = 1
-          and (
-            (
-              event_name = 'view_item'
-              and (
-                platform = 'Android'
-                and _session_duration > 200
-              )
-            )
-            or (
-              event_name = 'add_to_cart'
-              and (
-                platform = 'Android'
-                and (
-                  device_screen_height is null 
-                  or device_screen_height <> 1400
-                )
-              )
-            )
-            or (event_name = 'purchase')
-          )
       ),
       table_0 as (
         select
@@ -16886,7 +17465,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -16895,11 +17474,15 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'view_item'
+          and (
+            platform = 'Android'
+            and _session_duration > 200
+          )
       ),
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -16908,11 +17491,18 @@ describe('SQL Builder test', () => {
           base_data base
         where
           event_name = 'add_to_cart'
+          and (
+            platform = 'Android'
+            and (
+              device_screen_height is null 
+              or device_screen_height <> 1400
+            )
+          )
       ),
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -16981,20 +17571,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name
@@ -17764,11 +18354,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -17777,7 +18362,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -17790,7 +18375,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -17803,7 +18388,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -17872,20 +18457,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name
@@ -17998,11 +18583,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18011,7 +18591,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18024,7 +18604,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18037,7 +18617,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -18106,20 +18686,20 @@ describe('SQL Builder test', () => {
           case
             when event_id_1 is not null
             and event_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when event_id_1 is not null
             and event_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when event_id_1 is null
             and event_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name
@@ -18240,11 +18820,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18254,7 +18829,7 @@ describe('SQL Builder test', () => {
           hour,
           COALESCE(geo_country::varchar, 'null') as geo_country_0,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18267,7 +18842,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18280,7 +18855,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -18349,20 +18924,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,
@@ -18485,11 +19060,6 @@ describe('SQL Builder test', () => {
           ) as event_base
         where
           1 = 1
-          and (
-            (event_name = '_first_open')
-            or (event_name = '_scroll')
-            or (event_name = '_user_engagement')
-          )
       ),
       table_0 as (
         select
@@ -18498,7 +19068,7 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_date as event_date_0,
-          event_name as event_name_0,
+          '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
           user_id as user_id_0,
@@ -18512,7 +19082,7 @@ describe('SQL Builder test', () => {
       table_1 as (
         select
           event_date as event_date_1,
-          event_name as event_name_1,
+          '2_' || event_name as event_name_1,
           event_timestamp as event_timestamp_1,
           event_id as event_id_1,
           user_id as user_id_1,
@@ -18526,7 +19096,7 @@ describe('SQL Builder test', () => {
       table_2 as (
         select
           event_date as event_date_2,
-          event_name as event_name_2,
+          '3_' || event_name as event_name_2,
           event_timestamp as event_timestamp_2,
           event_id as event_id_2,
           user_id as user_id_2,
@@ -18600,20 +19170,20 @@ describe('SQL Builder test', () => {
           case
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is not null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
-              when seq = 2 then '3_' || event_name_2
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
+              when seq = 2 then event_name_2
               else null
             end
             when user_pseudo_id_1 is not null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
-              when seq = 1 then '2_' || event_name_1
+              when seq = 0 then event_name_0
+              when seq = 1 then event_name_1
               else null
             end
             when user_pseudo_id_1 is null
             and user_pseudo_id_2 is null then case
-              when seq = 0 then '1_' || event_name_0
+              when seq = 0 then event_name_0
               else null
             end
           end as event_name,

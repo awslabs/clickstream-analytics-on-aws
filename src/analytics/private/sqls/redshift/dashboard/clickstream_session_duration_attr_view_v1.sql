@@ -1,5 +1,5 @@
 CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
-BACKUP NO
+BACKUP YES
 SORTKEY(user_pseudo_id)
 AUTO REFRESH NO
 AS

@@ -391,7 +391,8 @@
     "alarmDescription": "描述",
     "tags": "标签",
     "bufferSize": "缓冲区大小",
-    "bufferInterval": "缓冲间隔"
+    "bufferInterval": "缓冲间隔",
+    "analyticSchemaStatus": "Redshift Schemas"
   },
   "list": {
     "id": "管道 ID",

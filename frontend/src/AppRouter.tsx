@@ -20,6 +20,7 @@ import { UserContext } from 'context/UserContext';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
 import AnalyticsAnalyzes from 'pages/analytics/analyzes/AnalyticsAnalyzes';
+import AnalyticsAnalyzesFullWindow from 'pages/analytics/analyzes/full/AnalyticsAnalyzesFullWindow';
 import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
 import AnalyticsDashboardFullWindow from 'pages/analytics/dashboard/full/AnalyticsDashboardFullWindow';
@@ -356,6 +357,18 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
                 <AnalyticsAnalyzes />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/analyzes/full"
+            element={
+              <RoleRoute
+                layout="none"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <AnalyticsAnalyzesFullWindow />
               </RoleRoute>
             }
           />

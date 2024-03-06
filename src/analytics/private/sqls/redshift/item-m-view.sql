@@ -1,5 +1,6 @@
 CREATE MATERIALIZED VIEW {{schema}}.item_m_view 
-BACKUP NO SORTKEY(id) 
+BACKUP YES
+SORTKEY(id) 
 AUTO REFRESH YES 
 AS
 WITH item_id_rank AS

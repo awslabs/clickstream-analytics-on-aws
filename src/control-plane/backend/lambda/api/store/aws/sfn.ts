@@ -15,7 +15,8 @@ import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
   ExecutionDoesNotExist,
-  SFNClient, StartExecutionCommand, StartExecutionCommandOutput,
+  ExecutionListItem,
+  SFNClient, StartExecutionCommand, StartExecutionCommandOutput, paginateListExecutions,
 } from '@aws-sdk/client-sfn';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
@@ -59,5 +60,23 @@ export const getExecutionDetail = async (region: string, executionArn: string) =
       logger.warn('Get execution detail error ', { error });
     }
     return undefined;
+  }
+};
+
+export const listExecutions = async (region: string, stateMachineArn: string) => {
+  try {
+    const client = new SFNClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const records: ExecutionListItem[] = [];
+    for await (const page of paginateListExecutions({ client: client }, {
+      stateMachineArn: stateMachineArn,
+    })) {
+      records.push(...page.executions as ExecutionListItem[]);
+    }
+    return records.sort((a: ExecutionListItem, b: ExecutionListItem) => (b.startDate?.getTime() ?? 0) - (a.startDate?.getTime() ?? 0));
+  } catch (error) {
+    return [];
   }
 };
