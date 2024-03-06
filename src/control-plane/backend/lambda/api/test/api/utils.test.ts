@@ -741,6 +741,7 @@ describe('Network test', () => {
       'cron(0/10 * ? * MON-FRI *)',
       'cron(0/6 8-17 ? * MON-FRI *)',
       'cron(0 9 ? * 2#1 *)',
+      'cron(5 1-13/2 * * ? *)',
       'rate(6 minutes)',
       'rate(1 hour)',
       'rate(1 day)',
