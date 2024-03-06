@@ -158,6 +158,8 @@ ClickstreamAnalytics.record({
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 
+    ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
+
 #### 在批处理模式时发送实时事件
 
 当您处于批处理模式时，您仍然可以通过将 `isImmediate `属性设置为 `true` 来立即发送事件，代码如下：
@@ -359,7 +361,6 @@ Clickstream Web SDK 支持以下数据类型：
 
 ```json
 {
-	"hash_code": "80452b0",
 	"unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
 	"event_type": "add_to_cart",
 	"event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
@@ -420,7 +421,6 @@ Clickstream Web SDK 支持以下数据类型：
 
 | 属性              | 数据类型    | 描述                        | 如何生成                                                                                                             | 用途和目的                     |
 |-----------------|---------|---------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
-| hash_code       | string  | 事件对象的哈希码                  | 通过 `@aws-crypto/sha256-js` 库来计算                                                                                  | 区分不同的事件                   |
 | app_id          | string  | 点击流app id                 | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
 | unique_id       | string  | 用户唯一id                    | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
 | device_id       | string  | 浏览器唯一id                   | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
@@ -487,6 +487,24 @@ Clickstream Web SDK 支持以下数据类型：
 | category5     | string   | 否    | item的类别5  |
 
 您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
+
+## 在 Google Tag Manager 中集成
+
+1. 从 SDK [发布页面]((https://github.com/awslabs/clickstream-web/releases))下载 Clickstream SDK Google Tag Manager 模板文件（.tpl）。
+
+2. 请参考 Google Tag Manager [导入指南](https://developers.google.com/tag-platform/tag-manager/templates#export_and_import)，按照说明在您的标签管理器控制台将 .tpl 文件作为自定义模板导入。
+
+3. 查看[使用新标签](https://developers.google.com/tag-platform/tag-manager/templates#use_your_new_tag)并将 ClickstreamAnalytics 标签添加到您的容器中。
+
+4. ClickstreamAnalytics 标签目前支持四种标签类型： 
+     * Initialize SDK
+     * Record Custom Event
+     * Set User ID
+     * Set User Attribute
+
+!!! info "提示"
+   
+    请确保在使用其他 ClickstreamAnalytics 标签类型之前先使用 Initialize SDK 标签对 SDK 进行初始化。
 
 ## SDK更新日志
 

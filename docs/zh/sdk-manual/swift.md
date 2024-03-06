@@ -287,6 +287,7 @@ struct YourApp: App {
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+    
     ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
 
 #### 手动记录 Screen View 事件
@@ -565,7 +566,6 @@ Clickstream Swift SDK 支持以下数据类型：
     "device_unique_id": "",
     "event_id": "91DA4BBE-933F-4DFA-A489-8AEFBC7A06D8",
     "event_type": "add_to_cart",
-    "hashCode": "63D7991D",
     "locale": "en_US",
     "make": "apple",
     "model": "iPhone 14 Pro",
@@ -613,7 +613,6 @@ Clickstream Swift SDK 支持以下数据类型：
 
 | 属性               | 数据类型    | 描述                       | 如何生成                                                                                                       | 用途和目的                    |
 |------------------|---------|--------------------------|------------------------------------------------------------------------------------------------------------|--------------------------|
-| hashCode         | String  | 事件对象的哈希码                 | 通过`String(format："%08X", hasher.combine(eventjson))`生成                                                     | 区分不同的事件                  |
 | app_id           | String  | 您应用的app id               | app id 是在您将应用程序注册到数据管道时由点击流解决方案生成的                                                                         | 区分不同app的事件               |
 | unique_id        | String  | 用户的唯一id                  | sdk第一次初始化时生成`UUID().uuidString`形式<br>如果用户注销然后登录新用户，它将被更改。 当用户在同一设备中重新登录到以前的用户时，unique_id 将重置为之前的 unique_id | 唯一id来标识不同的用户并关联登录和未登录的行为 |
 | device_id        | String  | 设备的唯一id                  | 通过`UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString`生成 <br>应用程序重新安装后将更改<br>           | 区分不同设备                   |
