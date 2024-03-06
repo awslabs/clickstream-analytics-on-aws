@@ -10,7 +10,7 @@ You need to set below configurations for Reporting.
 
   * **Create sample dashboard in QuickSight**: Enabling this feature will allow the solution to create sample dashboards in your QuickSight Account.
 
-    * **QuickSight user**: Select an admin user for the solution to create QuickSight resources. (Only required for AWS China regions)
+    * **QuickSight user**: Select an admin user for the solution to create QuickSight resources. (Only required for AWS China Regions)
 
 
 
