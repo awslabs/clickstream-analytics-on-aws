@@ -13,18 +13,13 @@
 
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
-import { calculateWaitTime } from '../load-data-workflow/check-load-status';
+import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
 import { executeBySqlOrS3File, getRedshiftClient } from '../redshift-data';
 
 interface EventType {
   waitTimeInfo: WaitTimeInfo;
   queryId?: string;
   sql?: string;
-}
-
-interface WaitTimeInfo {
-  waitTime: number;
-  loopCount: number;
 }
 
 interface SubmitSqlResponse {
