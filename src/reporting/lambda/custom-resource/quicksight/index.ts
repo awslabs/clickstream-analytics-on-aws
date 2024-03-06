@@ -478,7 +478,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     for ( const dataSet of dataSets) {
       await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
     }
-    return result;
+    return await result;
 
   } catch (err: any) {
     logger.error('Delete QuickSight dashboard failed, skip retry. Manually delete it if necessary.', err);
@@ -486,7 +486,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
       deleteDatabase,
       schema,
     });
-    
+
     return {
       $metadata: {},
       DashboardId: 'NULL',
