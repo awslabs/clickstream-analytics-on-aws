@@ -502,7 +502,7 @@ Clickstream Web SDK 支持以下数据类型：
      * Set User ID
      * Set User Attribute
 
-!!! info "提示"
+!!! info "重要提示"
    
     请确保在使用其他 ClickstreamAnalytics 标签类型之前先使用 Initialize SDK 标签对 SDK 进行初始化。
 
