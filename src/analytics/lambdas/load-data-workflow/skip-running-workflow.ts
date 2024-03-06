@@ -133,7 +133,7 @@ async function queryAllCount(tableName: string, indexName: string, odsEventBucke
   let count = 0;
   let res;
   while (true) {
-    res = await queryItems('', tableName, indexName, odsEventBucketWithPrefix, jobStatus, nextKey);
+    res = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, nextKey);
     count += res.Count;
     if (res.LastEvaluatedKey) {
       nextKey = res.LastEvaluatedKey;

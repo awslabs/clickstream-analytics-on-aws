@@ -11,8 +11,7 @@
  *  and limitations under the License.
  */
 
-process.env.REDSHIFT_ODS_TABLE_NAME = 'test_me_table';
-process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/test_me_table/';
+process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/';
 
 import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
@@ -81,7 +80,7 @@ test('Should get all JOB_NEW files', async () => {
     ],
   });
 
-  const response = await handler({}, context);
+  const response = await handler({ odsTableName: 'test_me_table' }, context);
   expect(response).toEqual({
     processingFilesCount: {
       event: 1,
@@ -91,6 +90,7 @@ test('Should get all JOB_NEW files', async () => {
     },
     jobNewCount: 5,
     hasMoreWork: true,
+    odsTableName: 'test_me_table',
   });
 
   expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {

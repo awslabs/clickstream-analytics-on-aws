@@ -159,9 +159,9 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
  */
 export const updateItem = async (
   odsTableName: string,
-  tableName: string, 
-  s3Uri: string, 
-  jobStatus: string
+  tableName: string,
+  s3Uri: string,
+  jobStatus: string,
 ) => {
 
   const qJobStatus = composeJobStatus(jobStatus, odsTableName);

@@ -65,6 +65,7 @@ const loadManifestEvent: LoadManifestEvent = {
     manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
     retryCount: 0,
   },
+  odsTableName: 'test_me_table',
 };
 
 const loadManifestEvent2: LoadManifestEvent = {
@@ -83,6 +84,7 @@ const loadManifestEvent2: LoadManifestEvent = {
     manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56-2.manifest',
     retryCount: 3,
   },
+  odsTableName: 'test_me_table',
 };
 const context = getMockContext();
 
@@ -114,6 +116,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
         id: executeId,
         retryCount: 0,
       }),
+      odsTableName: 'test_me_table',
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
@@ -149,6 +152,7 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
         },
         manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56-2.manifest',
       }),
+      odsTableName: 'test_me_table',
     });
   });
 
@@ -208,7 +212,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).callsFakeOnce(input => {
       if (input as ExecuteStatementCommandInput) {
-        if (input.Sql.includes(`COPY app1.${process.env.REDSHIFT_ODS_TABLE_NAME} FROM `)) {return { Id: executeId };}
+        if (input.Sql.includes(`COPY app1.${loadManifestEvent.odsTableName} FROM `)) {return { Id: executeId };}
       }
       throw new Error(`Sql '${input.Sql}' is not expected.`);
     },
@@ -220,6 +224,7 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
         id: executeId,
         retryCount: 0,
       }),
+      odsTableName: 'test_me_table',
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {

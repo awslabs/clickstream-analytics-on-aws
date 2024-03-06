@@ -40,6 +40,7 @@ export const handler = async (_: any, context: Context) => {
 
     let lastEvaluatedKey = undefined;
     const jobStatusQuery = composeJobStatus(jobStatus, redshiftTableName);
+
     const prefixQuery = odsEventBucketWithPrefix.replace(new RegExp(`/${odsTableName}/?$`), `/${redshiftTableName}/`);
 
     logger.info('queryItems by', {
@@ -52,7 +53,7 @@ export const handler = async (_: any, context: Context) => {
 
     let jobNewCountForTable = 0;
     while (true) {
-      newRecordResp = await queryItems(odsTableName, tableName, indexName, prefixQuery, jobStatusQuery, lastEvaluatedKey);
+      newRecordResp = await queryItems(tableName, indexName, prefixQuery, jobStatusQuery, lastEvaluatedKey, odsTableName);
       jobNewCountForTable += newRecordResp.Count;
       if (newRecordResp.LastEvaluatedKey) {
         lastEvaluatedKey = newRecordResp.LastEvaluatedKey;

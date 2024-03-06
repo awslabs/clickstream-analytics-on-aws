@@ -21,10 +21,7 @@ describe('Load data workflow', () => {
   const stack = new DataAnalyticsRedshiftStack(app, 'redshiftserverlessstack', {});
   const newServerlessTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
   const loadDataStepFuncDef =readFileSync(__dirname + '/load-data-stepfuncs.json', 'utf8');
-  const loadDataEventSubStepFuncDef =readFileSync(__dirname + '/load-data-event-sub-stepfuncs.json', 'utf8');
-  const loadDataEventParametersSubStepFuncDef =readFileSync(__dirname + '/load-data-event-parameters-sub-stepfuncs.json', 'utf8');
-  const loadDataUserSubStepFuncDef =readFileSync(__dirname + '/load-data-user-sub-stepfuncs.json', 'utf8');
-  const loadDataItemsSubStepFuncDef =readFileSync(__dirname + '/load-data-items-sub-stepfuncs.json', 'utf8');
+  const loadDataSubStepFuncDef =readFileSync(__dirname + '/load-data-sub-stepfuncs.json', 'utf8');
 
   test('ClickstreamLoadDataWorkflow is created as expected', () => {
     const strCapture = new Capture();
@@ -42,64 +39,19 @@ describe('Load data workflow', () => {
     expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataStepFuncDef);
   });
 
-  test('ClickstreamLoadDataEventSubWorkflow is created as expected', () => {
+  test('ClickstreamLoadDataSubWorkflow is created as expected', () => {
     const strCapture = new Capture();
 
     newServerlessTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
       DefinitionString: strCapture,
       RoleArn: {
         'Fn::GetAtt': [
-          'LoadDataeventSubLoadDataStateMachineRoleB6518897',
+          'LoadDataSubLoadDataStateMachineRole5305FB89',
           'Arn',
         ],
       },
     });
 
-    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataEventSubStepFuncDef);
-  });
-
-  test('ClickstreamLoadDataEventParametersSubWorkflow is created as expected', () => {
-    const strCapture = new Capture();
-
-    newServerlessTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
-      DefinitionString: strCapture,
-      RoleArn: {
-        'Fn::GetAtt': [
-          'LoadDataeventparameterSubLoadDataStateMachineRole7AD798F2',
-          'Arn',
-        ],
-      },
-    });
-    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataEventParametersSubStepFuncDef);
-  });
-
-  test('ClickstreamLoadDataUserSubWorkflow is created as expected', () => {
-    const strCapture = new Capture();
-
-    newServerlessTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
-      DefinitionString: strCapture,
-      RoleArn: {
-        'Fn::GetAtt': [
-          'LoadDatauserSubLoadDataStateMachineRole32ADFEE7',
-          'Arn',
-        ],
-      },
-    });
-    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataUserSubStepFuncDef);
-  });
-
-  test('ClickstreamLoadDataItemsSubWorkflow is created as expected', () => {
-    const strCapture = new Capture();
-
-    newServerlessTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
-      DefinitionString: strCapture,
-      RoleArn: {
-        'Fn::GetAtt': [
-          'LoadDataitemSubLoadDataStateMachineRole8DC8701B',
-          'Arn',
-        ],
-      },
-    });
-    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataItemsSubStepFuncDef);
+    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataSubStepFuncDef);
   });
 });
