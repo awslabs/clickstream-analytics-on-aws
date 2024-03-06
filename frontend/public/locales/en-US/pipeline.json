@@ -22,6 +22,7 @@
     "domainNameInvalid": "Domain name format invalid",
     "certificateEmpty": "Please select SSL certificate",
     "dataProcessorIntervalError": "Data processing interval could not be less than 6 minutes",
+    "dataProcessorIntervalCronError": "Cron expressions have the following format: cron(Minutes Hours Day-of-month Month Day-of-week Year)",
     "acknowledgeHTTPSecurity": "Please click acknowledge button to continue.",
     "sinkIntervalError": "The interval value must be greater than {{min}} and less than {{max}}",
     "sinkSizeError": "The size value must be greater than {{min}} and less than {{max}}",

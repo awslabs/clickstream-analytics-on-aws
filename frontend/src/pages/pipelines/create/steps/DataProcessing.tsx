@@ -97,6 +97,7 @@ interface DataProcessingProps {
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
   changeDataLoadCronExp: (cron: string) => void;
+  dataProcessorIntervalCronInvalidError: boolean;
   dataProcessorIntervalInvalidError: boolean;
   redshiftServerlessVpcEmptyError: boolean;
   redshiftServerlessSGEmptyError: boolean;
@@ -136,6 +137,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeReshiftSubnets,
     changeBaseCapacity,
     changeDBUser,
+    dataProcessorIntervalCronInvalidError,
     dataProcessorIntervalInvalidError,
     redshiftServerlessVpcEmptyError,
     redshiftServerlessSGEmptyError,
@@ -345,6 +347,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     }
   };
 
+  const dataProcessorIntervalInvalidErrorText = () => {
+    if (dataProcessorIntervalInvalidError) {
+      return t('pipeline:valid.dataProcessorIntervalError');
+    }
+    if (dataProcessorIntervalCronInvalidError) {
+      return t('pipeline:valid.dataProcessorIntervalCronError');
+    }
+    return undefined;
+  }
+
   useEffect(() => {
     if (!update && pipelineInfo.redshiftServerlessVPC?.value) {
       getSecurityGroupByVPC(pipelineInfo.redshiftServerlessVPC.value);
@@ -459,11 +471,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <FormField
                 label={t('pipeline:create.processInterval')}
                 description={t('pipeline:create.processIntervalDesc')}
-                errorText={ternary(
-                  dataProcessorIntervalInvalidError,
-                  t('pipeline:valid.dataProcessorIntervalError'),
-                  undefined
-                )}
+                errorText={dataProcessorIntervalInvalidErrorText()}
               >
                 <div className="flex">
                   <div style={{ width: 200 }}>
@@ -479,7 +487,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                     <div className="flex-1 ml-10">
                       <SpaceBetween direction="horizontal" size="xs">
                         <Input
-                          placeholder="0 15 10 * * ? *"
+                          placeholder="15 10 * * ? *"
                           value={pipelineInfo.exeCronExp}
                           onChange={(e) => {
                             if (

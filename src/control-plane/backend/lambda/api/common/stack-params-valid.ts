@@ -194,15 +194,18 @@ export const validateDataProcessingInterval = (scheduleExpression: string) => {
 };
 
 const validateCronInterval = (cronExpression: string, maxIntervalMilliSeconds: number) => {
+  if (cronExpression.split(' ').length !== 6 ) {
+    return [false, 'Validation error: Cron expressions have the following format: cron(Minutes Hours Day-of-month Month Day-of-week Year).'];
+  }
+  // split the cron expression and get the first 5 fields
+  const testCronExpression = `0 ${cronExpression.split(' ').slice(0, 5).join(' ')}`;
   const nowDate = new Date();
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   let options = {
     currentDate: nowDate,
     iterator: true,
   };
   try {
-    const interval = parseExpression(cronExpression, options);
+    const interval = parseExpression(testCronExpression, options);
     const runTimes = [];
     let num = 0;
     while (num < 10) {
