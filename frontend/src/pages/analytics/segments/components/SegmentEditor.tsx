@@ -11,10 +11,34 @@
  *  and limitations under the License.
  */
 
+import { Button } from '@cloudscape-design/components';
+import RelationAnd from 'components/eventselect/comps/RelationAnd';
+import { identity } from 'lodash';
 import React from 'react';
+import SegmentItem from './group/SegmentItem';
+
+const FILTER_GROUP_DATA = ['1'];
 
 const SegmentEditor: React.FC = () => {
-  return <div>SegmentEditor</div>;
+  return (
+    <div className="flex-v gap-10">
+      {FILTER_GROUP_DATA.map((item, index) => {
+        return (
+          <div key={identity(index)}>
+            <SegmentItem />
+            {index < FILTER_GROUP_DATA.length - 1 && (
+              <div className="cs-analytics-dropdown">
+                <RelationAnd hideRadius minHeight={40} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <div>
+        <Button iconName="add-plus">Filter group</Button>
+      </div>
+    </div>
+  );
 };
 
 export default SegmentEditor;

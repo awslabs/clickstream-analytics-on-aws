@@ -58,6 +58,7 @@ const AddUserSegments: React.FC = () => {
       <AnalyticsNavigation activeHref={`/analytics/segments`} />
       <div className="flex-1">
         <AppLayout
+          // toolsHide
           tools={<HelpInfo />}
           navigationHide
           content={
@@ -197,7 +198,9 @@ const AddUserSegments: React.FC = () => {
                       </Header>
                     }
                   >
-                    <SegmentEditor />
+                    <div style={{ paddingBottom: 300 }}>
+                      <SegmentEditor />
+                    </div>
                   </Container>
                 </SpaceBetween>
               </Form>
