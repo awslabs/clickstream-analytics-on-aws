@@ -84,6 +84,12 @@ export interface IEventAnalyticsItem {
   enableChangeRelation?: boolean;
 }
 
+// for segment group
+export interface IEventSegmentationItem extends IEventAnalyticsItem {
+  segmentGroupItem: IEventSegmentationItem[];
+  groupDateRange?: any; // TODO
+}
+
 export interface IRetentionAnalyticsItem {
   startEventOption: IAnalyticsItem | null;
   revisitEventOption: IAnalyticsItem | null;

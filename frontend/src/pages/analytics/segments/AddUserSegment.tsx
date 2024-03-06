@@ -25,14 +25,16 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { analyticsSegmentGroupReducer } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
-import React from 'react';
+import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
+import { DEFAULT_SEGMENT_GROUP_DATA } from './components/group/mock_data';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
@@ -53,6 +55,10 @@ const AddUserSegments: React.FC = () => {
     },
   ];
 
+  const [segmentDataState, segmentDataDispatch] = useReducer(
+    analyticsSegmentGroupReducer,
+    { ...DEFAULT_SEGMENT_GROUP_DATA }
+  );
   return (
     <div className="flex">
       <AnalyticsNavigation activeHref={`/analytics/segments`} />
@@ -199,7 +205,10 @@ const AddUserSegments: React.FC = () => {
                     }
                   >
                     <div style={{ paddingBottom: 300 }}>
-                      <SegmentEditor />
+                      <SegmentEditor
+                        segmentDataState={segmentDataState}
+                        segmentDataDispatch={segmentDataDispatch}
+                      />
                     </div>
                   </Container>
                 </SpaceBetween>

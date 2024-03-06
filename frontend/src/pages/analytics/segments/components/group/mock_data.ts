@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CategoryItemType } from 'components/eventselect/AnalyticsType';
+import {
+  CategoryItemType,
+  ERelationShip,
+  IEventSegmentationItem,
+} from 'components/eventselect/AnalyticsType';
 import {
   ConditionCategory,
   MetadataSource,
@@ -1873,3 +1877,125 @@ export const MULTI_LEVEL_SELECT_OPTIONS: any = [
     ],
   },
 ];
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationItem = {
+  selectedEventOption: null,
+  selectedEventAttributeOption: [],
+  conditionOptions: [],
+  conditionList: [],
+  conditionRelationShip: ERelationShip.AND,
+  segmentGroupItem: [
+    {
+      selectedEventOption: null,
+      selectedEventAttributeOption: [],
+      conditionOptions: [],
+      conditionList: [],
+      conditionRelationShip: ERelationShip.OR,
+      segmentGroupItem: [
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.OR,
+          segmentGroupItem: [
+            {
+              selectedEventOption: null,
+              selectedEventAttributeOption: [],
+              conditionOptions: [],
+              conditionList: [],
+              conditionRelationShip: ERelationShip.AND,
+              segmentGroupItem: [],
+            },
+          ],
+        },
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.OR,
+          segmentGroupItem: [
+            {
+              selectedEventOption: null,
+              selectedEventAttributeOption: [],
+              conditionOptions: [],
+              conditionList: [],
+              conditionRelationShip: ERelationShip.AND,
+              segmentGroupItem: [],
+            },
+          ],
+        },
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.AND,
+          segmentGroupItem: [],
+        },
+      ],
+      groupDateRange: 'a',
+    },
+    {
+      selectedEventOption: null,
+      selectedEventAttributeOption: [],
+      conditionOptions: [],
+      conditionList: [],
+      conditionRelationShip: ERelationShip.AND,
+      segmentGroupItem: [
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.OR,
+          segmentGroupItem: [
+            {
+              selectedEventOption: null,
+              selectedEventAttributeOption: [],
+              conditionOptions: [],
+              conditionList: [],
+              conditionRelationShip: ERelationShip.AND,
+              segmentGroupItem: [],
+            },
+            {
+              selectedEventOption: null,
+              selectedEventAttributeOption: [],
+              conditionOptions: [],
+              conditionList: [],
+              conditionRelationShip: ERelationShip.AND,
+              segmentGroupItem: [],
+            },
+          ],
+        },
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.OR,
+          segmentGroupItem: [
+            {
+              selectedEventOption: null,
+              selectedEventAttributeOption: [],
+              conditionOptions: [],
+              conditionList: [],
+              conditionRelationShip: ERelationShip.AND,
+              segmentGroupItem: [],
+            },
+          ],
+        },
+        {
+          selectedEventOption: null,
+          selectedEventAttributeOption: [],
+          conditionOptions: [],
+          conditionList: [],
+          conditionRelationShip: ERelationShip.AND,
+          segmentGroupItem: [],
+        },
+      ],
+      groupDateRange: 'b',
+    },
+  ],
+};

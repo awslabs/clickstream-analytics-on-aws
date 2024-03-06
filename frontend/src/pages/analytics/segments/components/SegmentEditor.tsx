@@ -12,25 +12,37 @@
  */
 
 import { Button } from '@cloudscape-design/components';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
+import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
-import React from 'react';
+import React, { Dispatch } from 'react';
 import SegmentItem from './group/SegmentItem';
 
-const FILTER_GROUP_DATA = ['1'];
-
-const SegmentEditor: React.FC = () => {
+interface SegmentationFilterProps {
+  segmentDataState: IEventSegmentationItem;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+}
+const SegmentEditor: React.FC<SegmentationFilterProps> = (
+  props: SegmentationFilterProps
+) => {
+  const { segmentDataState, segmentDataDispatch } = props;
   return (
     <div className="flex-v gap-10">
-      {FILTER_GROUP_DATA.map((item, index) => {
+      <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
+      {segmentDataState?.segmentGroupItem?.map((item, index) => {
         return (
           <div key={identity(index)}>
-            <SegmentItem />
-            {index < FILTER_GROUP_DATA.length - 1 && (
-              <div className="cs-analytics-dropdown">
-                <RelationAnd hideRadius minHeight={40} />
-              </div>
-            )}
+            <SegmentItem
+              segmentItemData={item}
+              segmentDataDispatch={segmentDataDispatch}
+            />
+            {segmentDataState.segmentGroupItem &&
+              index < segmentDataState?.segmentGroupItem?.length - 1 && (
+                <div className="cs-analytics-dropdown">
+                  <RelationAnd hideRadius minHeight={40} />
+                </div>
+              )}
           </div>
         );
       })}

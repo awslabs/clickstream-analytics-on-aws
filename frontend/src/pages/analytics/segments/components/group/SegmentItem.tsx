@@ -12,44 +12,40 @@
  */
 
 import { Button, Input } from '@cloudscape-design/components';
-import RelationAnd from 'components/eventselect/comps/RelationAnd';
-import RelationOr from 'components/eventselect/comps/RelationOr';
-import React from 'react';
-import ConditionGroup from './ConditionGroup';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
+import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import React, { Dispatch } from 'react';
 import ConditionTimeRange from './ConditionTimeRange';
+import RenderNestSegment from './RenderNestSegment';
 
-const SegmentItem: React.FC = () => {
+interface SegmentItemProps {
+  segmentItemData: IEventSegmentationItem;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+}
+
+const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
+  const { segmentItemData, segmentDataDispatch } = props;
   return (
-    <div>
-      <div className="flex-v gap-5">
-        <div style={{ backgroundColor: '#79bcfa', padding: '4px 5px' }}>
-          <div className="flex align-center m-w-300 gap-5">
-            <div className="cs-analytics-group-index">1</div>
-            <div className="flex-1">
-              <Input value="" />
-            </div>
+    <div className="flex-v gap-5">
+      <div className="cs-analytics-group-header-bg">
+        <div className="flex align-center m-w-300 gap-5">
+          <div className="cs-analytics-group-index">1</div>
+          <div className="flex-1">
+            <Input value="" />
           </div>
         </div>
-        <div
-          className="flex-v gap-5"
-          style={{ backgroundColor: '#f7f9fc', padding: '15px' }}
-        >
-          <ConditionTimeRange />
-          <div className="cs-analytics-dropdown">
-            <div className="flex gap-10">
-              <RelationAnd enableChangeRelation={false} />
-              <div className="flex-v gap-10">
-                <div className="flex gap-10">
-                  <RelationOr isIsolate enableChangeRelation={false} />
-                  <ConditionGroup />
-                </div>
-                <ConditionGroup />
-              </div>
-            </div>
-          </div>
-          <div>
-            <Button variant="primary">And</Button>
-          </div>
+      </div>
+      <div className="flex-v gap-5 cs-analytics-group-content-bg">
+        <ConditionTimeRange />
+        <div className="cs-analytics-dropdown">
+          <RenderNestSegment
+            level={1}
+            segmentItemData={segmentItemData ?? []}
+            segmentDataDispatch={segmentDataDispatch}
+          />
+        </div>
+        <div>
+          <Button variant="primary">And</Button>
         </div>
       </div>
     </div>

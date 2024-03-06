@@ -22,7 +22,11 @@ import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
-import React, { useReducer, useState } from 'react';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import React, { Dispatch, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ExploreAnalyticsOperators,
@@ -36,8 +40,17 @@ import {
   PRESET_PARAMETERS,
 } from './mock_data';
 
-const ConditionGroup: React.FC = () => {
+interface ConditionGroupProps {
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+  level: number;
+  parentIndex: number;
+}
+
+const ConditionGroup: React.FC<ConditionGroupProps> = (
+  props: ConditionGroupProps
+) => {
   const { t } = useTranslation();
+  const { segmentDataDispatch, level, parentIndex } = props;
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
@@ -214,7 +227,18 @@ const ConditionGroup: React.FC = () => {
         </div>
 
         <div>
-          <Button iconName="add-plus">Or</Button>
+          <Button
+            iconName="add-plus"
+            onClick={() => {
+              segmentDataDispatch({
+                type: AnalyticsSegmentActionType.AddOrEventData,
+                level: level,
+                parentIndex: parentIndex,
+              });
+            }}
+          >
+            Or
+          </Button>
         </div>
       </div>
       <div
@@ -224,10 +248,12 @@ const ConditionGroup: React.FC = () => {
           maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
         }}
       >
-        <AnalyticsSegmentFilter
-          filterDataState={filterOptionData}
-          filterDataDispatch={filterOptionDataDispatch}
-        />
+        <div style={{ display: 'none' }}>
+          <AnalyticsSegmentFilter
+            filterDataState={filterOptionData}
+            filterDataDispatch={filterOptionDataDispatch}
+          />
+        </div>
       </div>
     </div>
   );
