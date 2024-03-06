@@ -459,26 +459,39 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<DeleteDashboardCommandOutput|undefined> => {
-  // Delete Folder
-  await deleteFolder(quickSight, accountId, deleteDatabase, schema);
 
-  // Delete Dashboard
-  const dashboardId = buildDashBoardId(deleteDatabase, schema);
-  const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
+  try {
+    // Delete Folder
+    await deleteFolder(quickSight, accountId, deleteDatabase, schema);
 
-  //delete Analysis
-  const analysisId = buildAnalysisId(deleteDatabase, schema);
-  await deleteAnalysisById(quickSight, accountId, analysisId.id);
+    // Delete Dashboard
+    const dashboardId = buildDashBoardId(deleteDatabase, schema);
+    const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
 
-  //delete DataSets
-  const dataSets = dashboardDef.dataSets;
-  const databaseName = deleteDatabase;
-  for ( const dataSet of dataSets) {
-    await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    //delete Analysis
+    const analysisId = buildAnalysisId(deleteDatabase, schema);
+    await deleteAnalysisById(quickSight, accountId, analysisId.id);
+
+    //delete DataSets
+    const dataSets = dashboardDef.dataSets;
+    const databaseName = deleteDatabase;
+    for ( const dataSet of dataSets) {
+      await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    }
+    return result;
+
+  } catch (err: any) {
+    logger.error('Delete QuickSight dashboard failed, skip retry. Manually delete it if necessary.', err);
+    logger.error('Delete fail at:', {
+      deleteDatabase,
+      schema,
+    });
+    
+    return {
+      $metadata: {},
+      DashboardId: 'NULL',
+    };
   }
-
-  return result;
-
 };
 
 const getMemberType = function(memberArn: string, memberId: string): MemberType | undefined {
