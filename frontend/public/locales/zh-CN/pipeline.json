@@ -22,6 +22,7 @@
     "domainNameInvalid": "域名格式无效",
     "certificateEmpty": "请选择 SSL 证书",
     "dataProcessorIntervalError": "数据处理间隔不能低于 6 分钟",
+    "dataProcessorIntervalCronError": "Cron表达式的格式如下：Cron(分 时 每月的第N天 月 星期 年)",
     "acknowledgeHTTPSecurity": "请单击 “确认” 按钮继续。",
     "sinkIntervalError": "间隔值必须大于 {{min}} 且小于 {{max}}",
     "sinkSizeError": "大小值必须大于 {{min}} 且小于 {{max}}",
