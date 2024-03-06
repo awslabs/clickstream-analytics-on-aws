@@ -21,6 +21,7 @@ import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
 import { ManifestBody } from '../../private/model';
 import { getRedshiftClient } from '../redshift-data';
 
@@ -48,11 +49,6 @@ type CheckLoadStatusEventDetail = ManifestBody & {
 export interface CheckLoadStatusEvent {
   detail: CheckLoadStatusEventDetail;
   waitTimeInfo: WaitTimeInfo;
-}
-
-interface WaitTimeInfo {
-  waitTime: number;
-  loopCount: number;
 }
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -203,12 +199,3 @@ export const delFinishedJobInDynamodb = async (tableName: string, s3Uri: string)
   const response = await ddbClient.send(new DeleteCommand(params));
   return response;
 };
-
-function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
-  if (loopCount > 4) {
-    const additionalTime = (loopCount - 4) * 10;
-    waitTime += additionalTime;
-  }
-  loopCount++;
-  return { waitTime: Math.min(waitTime, maxWaitTime), loopCount };
-}
