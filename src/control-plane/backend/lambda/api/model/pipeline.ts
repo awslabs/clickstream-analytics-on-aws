@@ -21,7 +21,7 @@ import {
 } from '@aws/clickstream-base-lib';
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { getDiff } from 'json-difference';
+import { EditedPath, getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -367,10 +367,8 @@ export class CPipeline {
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    const { editStacks, editParameters } = await this._getEditStacksAndParameters(oldPipeline);
-    // update workflow
-    this.stackManager.updateWorkflowParameters(editParameters);
-    this.stackManager.updateWorkflowAction(editStacks);
+    // update parameters
+    await this._mergeUpdateParameters(oldPipeline);
     // enable reporting
     await this._updateReporting(oldPipeline);
     // update tags
@@ -404,13 +402,48 @@ export class CPipeline {
     }
   }
 
-  private async _getEditStacksAndParameters(oldPipeline: IPipeline):
-  Promise<{ editStacks: string[]; editParameters: StackUpdateParameter[] }> {
+  private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
+    // generate parameters accroding to current control plane version
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
-    const diffParameters = getDiff(newStackParameters, oldStackParameters);
+    // get diff parameters
+    const diffParameters = getDiff(oldStackParameters, newStackParameters);
+    const editedParameters = diffParameters.edited;
 
+    this._checkParametersAllowEdit(editedParameters);
+
+    this._overwriteParameters(editedParameters, oldPipeline);
+
+  }
+
+  private _overwriteParameters(editedParameters: EditedPath[], oldPipeline: IPipeline): void {
+    const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
+    const editStacks: string[] = [];
+    const editParameters: StackUpdateParameter[] = [];
+    for (let key of editKeys) {
+      const stackName = key.split('.')[0];
+      const paramName = key.split('.')[1];
+      const parameterValue = editedParameters.find((p: EditedPath) => p[0] === key)?.[2];
+      if (stackName.startsWith(`${getStackPrefix()}-${PipelineStackType.REPORTING}`) &&
+      !oldPipeline.region.startsWith('cn')) {
+        continue; // skip reporting stack
+      }
+      if (!editStacks.includes(stackName)) {
+        editStacks.push(stackName);
+      }
+      editParameters.push({
+        stackName: stackName,
+        parameterKey: paramName,
+        parameterValue: parameterValue,
+      });
+    }
+    // update workflow
+    this.stackManager.updateWorkflowParameters(editParameters);
+    this.stackManager.updateWorkflowAction(editStacks);
+  }
+
+  private _checkParametersAllowEdit(editedParameters: EditedPath[]): void {
     // AllowedList
     const AllowedList: string[] = [
       ...CIngestionServerStack.editAllowedList(),
@@ -420,37 +453,19 @@ export class CPipeline {
       ...CReportingStack.editAllowedList(),
       ...CMetricsStack.editAllowedList(),
     ];
-    const editKeys = diffParameters.edited.map((p: any[]) => p[0]);
+
+    const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
+    // check editKeys all in AllowedList
     const notAllowEdit: string[] = [];
-    const editStacks: string[] = [];
-    const editParameters: StackUpdateParameter[] = [];
     for (let key of editKeys) {
-      const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
-      if (stackName.startsWith(`${getStackPrefix()}-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
-        continue; // skip reporting stack when template version is v1.0
-      }
-      if (!editStacks.includes(stackName)) {
-        editStacks.push(stackName);
-      }
       if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
-      } else {
-        editParameters.push({
-          stackName: stackName,
-          parameterKey: paramName,
-          parameterValue: diffParameters.edited.find((p: any[]) => p[0] === key)?.[1],
-        });
       }
     }
     if (!isEmpty(notAllowEdit)) {
       throw new ClickStreamBadRequestError(`Property modification not allowed: ${notAllowEdit.join(',')}.`);
     }
-
-    return {
-      editStacks,
-      editParameters,
-    };
   }
 
   private _editStackTags(oldPipeline: IPipeline): boolean {
