@@ -116,8 +116,6 @@ export function createRedshiftAnalyticsStack(
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    s3Bucket: props.dataSourceConfiguration.bucket,
-    commonPrefix: props.dataSourceConfiguration.prefix,
   };
 
   const workflowBucketInfo: WorkflowBucketInfo = {
@@ -139,6 +137,8 @@ export function createRedshiftAnalyticsStack(
     loadDataConfig,
     workflowBucketInfo,
     mvRefreshInterval: props.redshift.mvRefreshInterval,
+    dataSourceBucket: props.dataSourceConfiguration.bucket,
+    dataSourcePrefix: props.dataSourceConfiguration.prefix,
 
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,

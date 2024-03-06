@@ -33,8 +33,6 @@ export interface TablesODSSource {
   readonly event_parameter: ODSSource;
   readonly user: ODSSource;
   readonly item: ODSSource;
-  readonly s3Bucket: IBucket;
-  readonly commonPrefix: string;
 }
 
 export type WorkflowBucketInfo = BucketInfo;

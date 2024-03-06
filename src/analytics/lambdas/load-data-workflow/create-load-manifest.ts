@@ -179,7 +179,7 @@ const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEv
     logger.info('Queried candidate to be loaded length=' + itemsToBeLoaded.length);
 
     const updateItemsPromise = itemsToBeLoaded.map(
-      (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE));
+      (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE, odsTableName));
     await Promise.all(updateItemsPromise);
 
     itemsToBeLoaded.forEach((item) => {
@@ -217,6 +217,7 @@ const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEv
   return {
     manifestList: manifestFiles,
     count: manifestFiles.length,
+    odsTableName: odsTableName,
   };
 };
 
@@ -307,9 +308,8 @@ export const queryItems = async (odsTableName: string, tableName: string, indexN
  * @param jobStatus The status of job.
  * @returns The response of update item.
  */
-const updateItem = async (tableName: string, s3Uri: string, requestId: string, jobStatus: string) => {
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
-  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+const updateItem = async (tableName: string, s3Uri: string, requestId: string, jobStatus: string, odsTableName: string) => {
+  const qJobStatus = composeJobStatus(jobStatus, odsTableName);
 
   const params = {
     TableName: tableName,

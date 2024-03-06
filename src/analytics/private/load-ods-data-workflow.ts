@@ -33,6 +33,7 @@ import { createLogGroup } from '../../common/logs';
 import { getPutMetricsPolicyStatements } from '../../common/metrics';
 import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
 import { SolutionNodejsFunction } from '../../private/function';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 
 export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly projectId: string;
@@ -51,6 +52,9 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly redshiftRoleForCopyFromS3: IRole;
   readonly ddbStatusTable: ITable;
   readonly mvRefreshInterval: number;
+
+  readonly odsSourceS3Bucket: IBucket;
+  readonly odsSourceS3Prefix: string;
 
   readonly tablesOdsSource: TablesODSSource; // data S3 bucket
   readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
@@ -241,13 +245,15 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       // const subWorkflow = this.createSubWorkflow(ddbTable, odsTable, props, copyRole, logGroup);
       const subExecution = new StepFunctionsStartExecution(this, `${this.node.id} - ${odsTable}`, {
         stateMachine: subWorkflow,
+        // integrationPattern: IntegrationPattern.WAIT_FOR_TASK_TOKEN,
+        integrationPattern: IntegrationPattern.RUN_JOB,
         input: TaskInput.fromObject({
-          'inputOdsTableName': odsTable,
+          // token: JsonPath.taskToken,
+          odsTableName: odsTable,
         }),
         resultSelector: {
           'ExecutionArn.$': '$.ExecutionArn',
         },
-        resultPath: `$.inputOdsTableName`,
       });
       parallelLoadDataToTables = parallelLoadDataToTables.branch(subExecution);
     }
@@ -308,7 +314,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         lambdaFunction: createLoadManifestFn,
         payload: TaskInput.fromObject({
           'execution_id.$': '$$.Execution.Id',
-          'odsTableName': '$.inputOdsTableName',
+          'odsTableName.$': '$.odsTableName',
         }),
         outputPath: '$.Payload',
       });
@@ -332,7 +338,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
             'jobList.$': '$.jobList',
             'retryCount.$': '$.retryCount',
           },
-          'odsTableName': '$.inputOdsTableName',
+          'odsTableName.$': '$.odsTableName',
         }),
         outputPath: '$.Payload',
       });
@@ -351,6 +357,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         payload: TaskInput.fromObject({
           'detail.$': '$.detail',
           'waitTimeInfo.$': '$.waitTimeInfo',
+          'odsTableName.$': '$.odsTableName',
         }),
         outputPath: '$.Payload',
       });
@@ -413,6 +420,14 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         {
           maxConcurrency: 1,
           itemsPath: '$.manifestList',
+          parameters: {
+            'odsTableName.$': '$.odsTableName',
+            'execution_id.$': '$$.Execution.Id',
+            'appId.$': '$$.Map.Item.Value.appId',
+            'manifestFileName.$': '$$.Map.Item.Value.manifestFileName',
+            'jobList.$': '$$.Map.Item.Value.jobList',
+            'retryCount.$': '$$.Map.Item.Value.retryCount',
+          },
         },
       );
       doLoadJob.itemProcessor(subDefinition);
@@ -421,7 +436,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       const hasMoreWorkFn = this.createHasMoreWorkFn(ddbTable, props);
       const checkMoreWork = new LambdaInvoke(this, ` Check more work`, {
         payload: TaskInput.fromObject({
-          'odsTableName': '$.inputOdsTableName',
+          'odsTableName.$': '$.odsTableName',
         }),        
         lambdaFunction: hasMoreWorkFn,
         outputPath: '$.Payload',
@@ -446,10 +461,19 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         time: WaitTime.duration(Duration.seconds(120)),
       });
 
+      const mapResultPass = new Pass(this, 'process map result', {
+        inputPath: '$',
+        parameters: {
+          'odsTableName.$': '$[0].odsTableName',
+        },
+      }); 
+      
+      mapResultPass.next(checkMoreWorkTodo);
+
       const waitAndCheckMoreWork = waitX2.next(checkMoreWorkTodo);
       const checkJobExist = new Choice(this, `Check if job exists`)
         .when(Condition.isNotPresent('$.manifestList'), waitAndCheckMoreWork)
-        .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(checkMoreWorkTodo))
+        .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(mapResultPass))
         .otherwise(waitAndCheckMoreWork);
 
       const doWorkflow = getJobList.next(checkJobExist);
@@ -496,8 +520,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         MANIFEST_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
         MANIFEST_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
-        ODS_EVENT_BUCKET: props.tablesOdsSource.s3Bucket.bucketName,
-        ODS_EVENT_BUCKET_PREFIX: props.tablesOdsSource.commonPrefix,
+        ODS_EVENT_BUCKET: props.odsSourceS3Bucket.bucketName,
+        ODS_EVENT_BUCKET_PREFIX: props.odsSourceS3Prefix,
         QUERY_RESULT_LIMIT: loadDataConfig.maxFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
@@ -558,7 +582,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
       REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
       REDSHIFT_DATABASE: props.databaseName,
-      // REDSHIFT_ODS_TABLE_NAME: odsTableName,
       REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
     };
   }
@@ -625,8 +648,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        ODS_EVENT_BUCKET: props.tablesOdsSource.s3Bucket.bucketName,
-        ODS_EVENT_BUCKET_PREFIX: props.tablesOdsSource.commonPrefix,
+        ODS_EVENT_BUCKET: props.odsSourceS3Bucket.bucketName,
+        ODS_EVENT_BUCKET_PREFIX: props.odsSourceS3Prefix,
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
       },

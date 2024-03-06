@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
   Stack,
@@ -64,6 +65,8 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
+  readonly dataSourceBucket: IBucket;
+  readonly dataSourcePrefix: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -304,6 +307,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
       tablesOdsSource: props.tablesOdsSource,
       workflowBucketInfo: props.workflowBucketInfo,
       loadDataConfig: props.loadDataConfig,
+      odsSourceS3Bucket: props.dataSourceBucket,
+      odsSourceS3Prefix: props.dataSourcePrefix,
       nextStateStateMachines: [
         {
           name: 'Scan Metadata Async',

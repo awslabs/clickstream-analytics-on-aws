@@ -57,6 +57,7 @@ export const handler = async (event: {
   const filesCountInfo = [];
   let pendingCount = 0;
   for (const odsTableName of odsTableNames) {
+    logger.info('mingtong ######### odsTableName', { odsTableName });
     const tableCountInfo = await getCountForOdsTable(odsTableName, eventBucketWithPrefix);
     filesCountInfo.push(tableCountInfo);
     pendingCount += tableCountInfo.countEnQ + tableCountInfo.countProcessing + tableCountInfo.countNew;
@@ -107,11 +108,17 @@ async function getCountForOdsTable(odsTableName: string, eventBucketWithPrefix: 
   const countEnQ = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
     composeJobStatus(JobStatus.JOB_ENQUEUE, odsTableName));
 
+  logger.info('mingtong ######### countEnQ', { countEnQ });    
+
   const countProcessing = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
     composeJobStatus(JobStatus.JOB_PROCESSING, odsTableName));
+  
+  logger.info('mingtong ######### countProcessing', { countEnQ });    
 
   const countNew = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
     composeJobStatus(JobStatus.JOB_NEW, odsTableName));
+
+  logger.info('mingtong ######### countNew', { countNew });    
 
   return {
     tableName: odsTableName,
@@ -133,7 +140,7 @@ async function queryAllCount(tableName: string, indexName: string, odsEventBucke
   let count = 0;
   let res;
   while (true) {
-    res = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, nextKey);
+    res = await queryItems('', tableName, indexName, odsEventBucketWithPrefix, jobStatus, nextKey);
     count += res.Count;
     if (res.LastEvaluatedKey) {
       nextKey = res.LastEvaluatedKey;

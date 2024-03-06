@@ -30,6 +30,7 @@ export const handler = async (_: any, context: Context) => {
   const tableName = DYNAMODB_TABLE_NAME;
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
   const odsTableName = _.odsTableName;
+  logger.info(`mingtong ################ odsTableName: ${odsTableName}`);
 
   const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}${odsTableName}/`;
 
@@ -81,6 +82,7 @@ export const handler = async (_: any, context: Context) => {
     processingFilesCount: tableProcessingCountInfo,
     jobNewCount: currentJobNewCount,
     hasMoreWork: (currentJobNewCount + totalProcessCount) > 0,
+    odsTableName: odsTableName,
   };
 };
 
