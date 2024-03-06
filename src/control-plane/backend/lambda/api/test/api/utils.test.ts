@@ -735,10 +735,13 @@ describe('Network test', () => {
 
   it('Validate Interval', async () => {
     const validValues = [
-      'cron(0 0/6 * * * ?)',
-      'cron(0 0/30 * * * ?)',
-      'cron(0 0,6,12 * * * ?)',
-      'cron(0 15 * * * ?)',
+      'cron(15 10 * * ? *)',
+      'cron(0 18 ? * MON-FRI *)',
+      'cron(0 8 1 * ? *)',
+      'cron(0/10 * ? * MON-FRI *)',
+      'cron(0/6 8-17 ? * MON-FRI *)',
+      'cron(0 9 ? * 2#1 *)',
+      'cron(5 1-13/2 * * ? *)',
       'rate(6 minutes)',
       'rate(1 hour)',
       'rate(1 day)',
@@ -746,12 +749,11 @@ describe('Network test', () => {
     validValues.forEach(v => expect(validateDataProcessingInterval(v)).toEqual(true));
     const invalidValues = [
       '',
-      'cron(0 * * * * ?)',
-      'cron(0 0/2 * * * ?)',
-      'cron(0 0-10 * * * ?)',
-      'cron(0 0,5,15 * * * ?)',
-      'cron(0 20,25,35 * * * ?)',
-      'cron(0 40,45,55 * * * ?)',
+      'cron(0 * * * * ? *)',
+      'cron(0/2 * * * ? *)',
+      'cron(0,5,15 * * * ? *)',
+      'cron(20,25,35 * * * ? *)',
+      'cron(40,45,55 * * * ? *)',
       'rate(1 minute)',
       'rate(5 minutes)',
     ];
