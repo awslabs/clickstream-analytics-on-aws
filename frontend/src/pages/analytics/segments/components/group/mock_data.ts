@@ -1879,120 +1879,47 @@ export const MULTI_LEVEL_SELECT_OPTIONS: any = [
 ];
 
 export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationItem = {
-  selectedEventOption: null,
-  selectedEventAttributeOption: [],
-  conditionOptions: [],
-  conditionList: [],
   conditionRelationShip: ERelationShip.AND,
-  segmentGroupItem: [
+  subItemList: [
     {
-      selectedEventOption: null,
-      selectedEventAttributeOption: [],
-      conditionOptions: [],
-      conditionList: [],
       conditionRelationShip: ERelationShip.OR,
-      segmentGroupItem: [
+      subItemList: [
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
           conditionRelationShip: ERelationShip.OR,
-          segmentGroupItem: [
-            {
-              selectedEventOption: null,
-              selectedEventAttributeOption: [],
-              conditionOptions: [],
-              conditionList: [],
-              conditionRelationShip: ERelationShip.AND,
-              segmentGroupItem: [],
-            },
-          ],
+          subItemList: [],
         },
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
           conditionRelationShip: ERelationShip.OR,
-          segmentGroupItem: [
-            {
-              selectedEventOption: null,
-              selectedEventAttributeOption: [],
-              conditionOptions: [],
-              conditionList: [],
-              conditionRelationShip: ERelationShip.AND,
-              segmentGroupItem: [],
-            },
-          ],
+          subItemList: [],
         },
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
           conditionRelationShip: ERelationShip.AND,
-          segmentGroupItem: [],
+          subItemList: [],
         },
       ],
       groupDateRange: 'a',
     },
     {
-      selectedEventOption: null,
-      selectedEventAttributeOption: [],
-      conditionOptions: [],
-      conditionList: [],
       conditionRelationShip: ERelationShip.AND,
-      segmentGroupItem: [
+      eventConditionList: [],
+      subItemList: [
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
           conditionRelationShip: ERelationShip.OR,
-          segmentGroupItem: [
+          subItemList: [
             {
-              selectedEventOption: null,
-              selectedEventAttributeOption: [],
-              conditionOptions: [],
-              conditionList: [],
-              conditionRelationShip: ERelationShip.AND,
-              segmentGroupItem: [],
+              subItemList: [],
             },
             {
-              selectedEventOption: null,
-              selectedEventAttributeOption: [],
-              conditionOptions: [],
-              conditionList: [],
-              conditionRelationShip: ERelationShip.AND,
-              segmentGroupItem: [],
+              subItemList: [],
             },
           ],
         },
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
           conditionRelationShip: ERelationShip.OR,
-          segmentGroupItem: [
-            {
-              selectedEventOption: null,
-              selectedEventAttributeOption: [],
-              conditionOptions: [],
-              conditionList: [],
-              conditionRelationShip: ERelationShip.AND,
-              segmentGroupItem: [],
-            },
-          ],
+          subItemList: [],
         },
         {
-          selectedEventOption: null,
-          selectedEventAttributeOption: [],
-          conditionOptions: [],
-          conditionList: [],
-          conditionRelationShip: ERelationShip.AND,
-          segmentGroupItem: [],
+          subItemList: [],
         },
       ],
       groupDateRange: 'b',

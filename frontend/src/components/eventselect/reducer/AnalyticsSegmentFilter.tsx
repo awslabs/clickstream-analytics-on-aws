@@ -24,13 +24,15 @@ interface SegmentationFilterProps {
   filterDataState: SegmentationFilterDataType;
   filterDataDispatch: any;
   maxSelectNum?: number;
+  hideAddButton?: boolean;
 }
 
 const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
   props: SegmentationFilterProps
 ) => {
   const { t } = useTranslation();
-  const { filterDataState, filterDataDispatch, maxSelectNum } = props;
+  const { filterDataState, filterDataDispatch, maxSelectNum, hideAddButton } =
+    props;
 
   return (
     <div className="cs-analytics-dropdown">
@@ -102,19 +104,21 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
               })}
           </div>
         </div>
-        <div className="mt-10">
-          <Button
-            iconName="add-plus"
-            onClick={() => {
-              filterDataDispatch({
-                type: 'addEventCondition',
-              });
-            }}
-            disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
-          >
-            {t('common:button.addFilter')}
-          </Button>
-        </div>
+        {!hideAddButton && (
+          <div className="mt-10">
+            <Button
+              iconName="add-plus"
+              onClick={() => {
+                filterDataDispatch({
+                  type: 'addEventCondition',
+                });
+              }}
+              disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
+            >
+              {t('common:button.addFilter')}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

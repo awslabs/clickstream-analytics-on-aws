@@ -58,25 +58,6 @@ export const analyticsSegmentGroupReducer = (
       console.info('action.parentIndex:', action.parentIndex);
       if (action.level === 1) {
         console.info('newState:', newState);
-        // newState.segmentGroupItem[action.parentIndex].conditionRelationShip =
-        //   ERelationShip.OR;
-        // newState.segmentGroupItem[action.parentIndex].segmentGroupItem?.push({
-        //   selectedEventOption: null,
-        //   selectedEventAttributeOption: [],
-        //   conditionOptions: [],
-        //   conditionList: [],
-        //   conditionRelationShip: ERelationShip.OR,
-        //   segmentGroupItem: [],
-        // });
-        // newState.segmentGroupItem.
-        // newState.segmentGroupItem[action.parentIndex].segmentGroupItem?.push({
-        //   selectedEventOption: null,
-        //   selectedEventAttributeOption: [],
-        //   conditionOptions: [],
-        //   conditionList: [],
-        //   conditionRelationShip: ERelationShip.OR,
-        //   segmentGroupItem: [],
-        // });
       }
       return { ...newState };
     default:

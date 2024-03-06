@@ -32,18 +32,18 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
   const { segmentItemData, segmentDataDispatch, level } = props;
   return (
     <div className="flex gap-10">
-      {segmentItemData.segmentGroupItem.length > 1 && (
+      {segmentItemData.subItemList.length > 1 && (
         <>
           {segmentItemData.conditionRelationShip === ERelationShip.OR ? (
             <RelationOr enableChangeRelation={false} isIsolate />
           ) : (
-            <RelationAnd enableChangeRelation={false} />
+            <RelationAnd enableChangeRelation={false} isIsolate />
           )}
         </>
       )}
       <div className="flex-v gap-10">
-        {segmentItemData.segmentGroupItem.map((item, index) => {
-          if (item.segmentGroupItem.length > 0) {
+        {segmentItemData.subItemList.map((item, index) => {
+          if (item.subItemList.length > 0) {
             return (
               <RenderNestSegment
                 segmentItemData={item}
@@ -54,6 +54,7 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
           }
           return (
             <ConditionGroup
+              segmentData={item}
               level={level}
               parentIndex={index}
               segmentDataDispatch={segmentDataDispatch}

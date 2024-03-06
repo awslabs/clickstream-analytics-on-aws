@@ -17,7 +17,10 @@ import {
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
-import { INIT_SEGMENTATION_DATA } from 'components/eventselect/AnalyticsType';
+import {
+  IEventSegmentationItem,
+  INIT_SEGMENTATION_DATA,
+} from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
@@ -41,6 +44,7 @@ import {
 } from './mock_data';
 
 interface ConditionGroupProps {
+  segmentData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   level: number;
   parentIndex: number;
@@ -50,7 +54,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
   props: ConditionGroupProps
 ) => {
   const { t } = useTranslation();
-  const { segmentDataDispatch, level, parentIndex } = props;
+  const { segmentDataDispatch, level, parentIndex, segmentData } = props;
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
@@ -244,16 +248,17 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
       <div
         className="cs-analytics-second-condition"
         style={{
-          left: conditionWidth + 5,
+          left: conditionWidth + 10,
           maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
         }}
       >
-        <div style={{ display: 'none' }}>
+        {(segmentData.eventConditionList?.length ?? 0) > 0 && (
           <AnalyticsSegmentFilter
+            hideAddButton
             filterDataState={filterOptionData}
             filterDataDispatch={filterOptionDataDispatch}
           />
-        </div>
+        )}
       </div>
     </div>
   );

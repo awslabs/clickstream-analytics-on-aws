@@ -28,19 +28,19 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
 ) => {
   const { segmentDataState, segmentDataDispatch } = props;
   return (
-    <div className="flex-v gap-10">
+    <div className="flex-v">
       <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
-      {segmentDataState?.segmentGroupItem?.map((item, index) => {
+      {segmentDataState?.subItemList?.map((item, index) => {
         return (
           <div key={identity(index)}>
             <SegmentItem
               segmentItemData={item}
               segmentDataDispatch={segmentDataDispatch}
             />
-            {segmentDataState.segmentGroupItem &&
-              index < segmentDataState?.segmentGroupItem?.length - 1 && (
+            {segmentDataState.subItemList &&
+              index < segmentDataState?.subItemList?.length - 1 && (
                 <div className="cs-analytics-dropdown">
-                  <RelationAnd hideRadius minHeight={40} />
+                  <RelationAnd hideRadius minHeight={50} />
                 </div>
               )}
           </div>
