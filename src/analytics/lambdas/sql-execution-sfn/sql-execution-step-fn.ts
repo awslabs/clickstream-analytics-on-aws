@@ -13,21 +13,30 @@
 
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
+import { calculateWaitTime } from '../load-data-workflow/check-load-status';
 import { executeBySqlOrS3File, getRedshiftClient } from '../redshift-data';
 
 interface EventType {
+  waitTimeInfo: WaitTimeInfo;
   queryId?: string;
   sql?: string;
 }
 
+interface WaitTimeInfo {
+  waitTime: number;
+  loopCount: number;
+}
+
 interface SubmitSqlResponse {
   queryId: string;
+  waitTimeInfo: WaitTimeInfo;
 }
 
 interface QueryResponse {
   status: string;
   queryId: string;
   reason?: string;
+  waitTimeInfo: WaitTimeInfo;
 }
 
 type ResponseType = SubmitSqlResponse | QueryResponse;
@@ -52,18 +61,18 @@ export const handler = async (event: EventType): Promise<ResponseType> => {
 async function _handler(event: EventType): Promise<ResponseType> {
 
   const redShiftClient = getRedshiftClient(dataAPIRole);
+  const waitTimeInfo = calculateWaitTime(event.waitTimeInfo.waitTime, event.waitTimeInfo.loopCount);
   if (event.sql) {
-
-    return submitSql(event.sql, redShiftClient);
+    return submitSql(event.sql, redShiftClient, waitTimeInfo);
   } else if (event.queryId) {
-    return queryStatus(event.queryId, redShiftClient);
+    return queryStatus(event.queryId, redShiftClient, waitTimeInfo);
   } else {
     logger.error('event', { event });
     throw new Error('Invalid event');
   }
 }
 
-async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient): Promise<SubmitSqlResponse> {
+async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient, waitTimeInfo: WaitTimeInfo): Promise<SubmitSqlResponse> {
   logger.info('submitSql() sqlOrs3File: ' + sqlOrs3File);
 
   let provisionedRedshiftProps = undefined;
@@ -85,10 +94,13 @@ async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient
   }
   const res = await executeBySqlOrS3File(sqlOrs3File, redShiftClient, serverlessRedshiftProps, provisionedRedshiftProps, databaseName);
   logger.info('submitSql() return queryId: ' + res.queryId);
-  return res;
+  return {
+    queryId: res.queryId,
+    waitTimeInfo,
+  };
 }
 
-async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient): Promise<QueryResponse> {
+async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient, waitTimeInfo: WaitTimeInfo): Promise<QueryResponse> {
   logger.info('queryStatus() queryId: ' + queryId);
 
   const checkParams = new DescribeStatementCommand({
@@ -106,6 +118,7 @@ async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient):
         status: 'FINISHED',
         queryId: queryId,
         reason: errorMsg,
+        waitTimeInfo,
       };
     }
   }
@@ -114,5 +127,6 @@ async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient):
     status: response.Status!,
     queryId: queryId,
     reason: errorMsg,
+    waitTimeInfo,
   };
 }

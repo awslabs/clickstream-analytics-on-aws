@@ -36,8 +36,16 @@ beforeEach(async () => {
   s3Mock.reset();
 });
 
+const waitTimeInfo = {
+  waitTime: 2,
+  loopCount: 0,
+};
+
 test('handler submit sql - s3 file', async () => {
-  const event = { sql: 's3://test/test.sql' };
+  const event = {
+    sql: 's3://test/test.sql',
+    waitTimeInfo,
+  };
   s3Mock.on(GetObjectCommand).resolves({
     Body: {
       transformToString: () => { return 'select * from test'; },
@@ -47,7 +55,13 @@ test('handler submit sql - s3 file', async () => {
 
   const response = await handler(event);
 
-  expect(response).toEqual({ queryId: 'id-1' });
+  expect(response).toEqual({
+    queryId: 'id-1',
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
+  });
   expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
   expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
 
@@ -63,12 +77,21 @@ test('handler submit sql - s3 file', async () => {
 
 
 test('handler submit sql - raw sql', async () => {
-  const event = { sql: 'select * from test1' };
+  const event = {
+    sql: 'select * from test1',
+    waitTimeInfo,
+  };
   redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'id-1' });
 
   const response = await handler(event);
 
-  expect(response).toEqual({ queryId: 'id-1' });
+  expect(response).toEqual({
+    queryId: 'id-1',
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
+  });
   expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 0);
   expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
 
@@ -84,37 +107,58 @@ test('handler submit sql - raw sql', async () => {
 
 
 test('handler query result - finished', async () => {
-  const event = { queryId: 'queryId-111' };
+  const event = {
+    queryId: 'queryId-111',
+    waitTimeInfo,
+  };
   redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
   const response = await handler(event);
   expect(response).toEqual({
     status: 'FINISHED',
     queryId: 'queryId-111',
     reason: undefined,
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
   });
 
 });
 
 test('handler query result - failed', async () => {
-  const event = { queryId: 'queryId-111' };
+  const event = {
+    queryId: 'queryId-111',
+    waitTimeInfo,
+  };
   redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FAILED', Error: 'error' });
   const response = await handler(event);
   expect(response).toEqual({
     status: 'FAILED',
     queryId: 'queryId-111',
     reason: 'error',
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
   });
 });
 
 
 test('handler query result - object already exists', async () => {
-  const event = { queryId: 'queryId-111' };
+  const event = {
+    queryId: 'queryId-111',
+    waitTimeInfo,
+  };
   redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FAILED', Error: 'table xxxx already exists' });
   const response = await handler(event);
   expect(response).toEqual({
     status: 'FINISHED',
     queryId: 'queryId-111',
     reason: 'table xxxx already exists',
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
   });
 });
 

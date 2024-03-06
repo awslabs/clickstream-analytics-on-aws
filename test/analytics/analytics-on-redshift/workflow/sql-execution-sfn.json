@@ -2,7 +2,7 @@
     "Fn::Join": [
         "",
         [
-            "{\"StartAt\":\"Execute SQL statements\",\"States\":{\"Execute SQL statements\":{\"Type\":\"Map\",\"End\":true,\"Parameters\":{\"sql.$\":\"$$.Map.Item.Value\"},\"ItemsPath\":\"$.sqls\",\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"Submit SQL\",\"States\":{\"Submit SQL\":{\"Next\":\"Wait #1\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":10,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+            "{\"StartAt\":\"Execute SQL statements\",\"States\":{\"Execute SQL statements\":{\"Type\":\"Map\",\"End\":true,\"Parameters\":{\"sql.$\":\"$$.Map.Item.Value\"},\"ItemsPath\":\"$.sqls\",\"ItemProcessor\":{\"ProcessorConfig\":{\"Mode\":\"INLINE\"},\"StartAt\":\"Init wait time info\",\"States\":{\"Init wait time info\":{\"Type\":\"Pass\",\"ResultPath\":\"$.waitTimeInfo\",\"Parameters\":{\"waitTime\":2,\"loopCount\":0},\"Next\":\"Submit SQL\"},\"Submit SQL\":{\"Next\":\"Wait #1\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":10,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
             {
                 "Ref": "AWS::Partition"
             },
@@ -13,7 +13,7 @@
                     "Arn"
                 ]
             },
-            "\",\"Payload.$\":\"$\"}},\"Wait #1\":{\"Type\":\"Wait\",\"Seconds\":2,\"Next\":\"Check Status\"},\"Check Status\":{\"Next\":\"Is Done?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":10,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+            "\",\"Payload.$\":\"$\"}},\"Wait #1\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"Check Status\"},\"Check Status\":{\"Next\":\"Is Done?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":10,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
             {
                 "Ref": "AWS::Partition"
             },
@@ -24,7 +24,7 @@
                     "Arn"
                 ]
             },
-            "\",\"Payload\":{\"queryId.$\":\"$.queryId\"}}},\"Wait #2\":{\"Type\":\"Wait\",\"Seconds\":2,\"Next\":\"Check Status\"},\"Is Done?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.status\",\"StringEquals\":\"FAILED\",\"Next\":\"Fail\"},{\"Variable\":\"$.status\",\"StringEquals\":\"FINISHED\",\"Next\":\"Succeed\"}],\"Default\":\"Wait #2\"},\"Fail\":{\"Type\":\"Fail\"},\"Succeed\":{\"Type\":\"Succeed\"}}},\"MaxConcurrency\":1}},\"TimeoutSeconds\":7200,\"Comment\":\"Execute SQL in Redshift using Redshift Data API\"}"
+            "\",\"Payload\":{\"queryId.$\":\"$.queryId\",\"waitTimeInfo.$\":\"$.waitTimeInfo\"}}},\"Wait #2\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"Check Status\"},\"Is Done?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.status\",\"StringEquals\":\"FAILED\",\"Next\":\"Fail\"},{\"Variable\":\"$.status\",\"StringEquals\":\"FINISHED\",\"Next\":\"Succeed\"}],\"Default\":\"Wait #2\"},\"Fail\":{\"Type\":\"Fail\"},\"Succeed\":{\"Type\":\"Succeed\"}}},\"MaxConcurrency\":1}},\"TimeoutSeconds\":7200,\"Comment\":\"Execute SQL in Redshift using Redshift Data API\"}"
         ]
     ]
 }
