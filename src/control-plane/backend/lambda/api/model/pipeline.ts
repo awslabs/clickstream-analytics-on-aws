@@ -295,6 +295,7 @@ export class CPipeline {
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
+    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
@@ -302,7 +303,6 @@ export class CPipeline {
       this.pipeline.status.status === PipelineStatusType.UPDATING) {
       throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
     }
-    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     // update parameters
     await this._mergeUpdateParameters(oldPipeline);
     // enable reporting
@@ -355,7 +355,7 @@ export class CPipeline {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
       const parameterValue = editedParameters.find((p: EditedPath) => p[0] === key)?.[2];
-      if (stackName.startsWith(`${PipelineStackType.REPORTING}`) &&
+      if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) &&
       !oldPipeline.region.startsWith('cn')) {
         continue; // skip reporting stack
       }

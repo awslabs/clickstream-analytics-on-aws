@@ -3957,19 +3957,20 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    createPipelineMock(mockClients, {
-      publicAZContainPrivateAZ: true,
-      subnetsCross3AZ: true,
-      subnetsIsolated: false,
-      update: true,
-      updatePipeline: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
-        templateVersion: 'v1.0.0',
-        tags: [
-          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
-        ],
-      },
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: false,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+          templateVersion: 'v1.0.0',
+          tags: [
+            { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          ],
+        },
+      });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
@@ -4038,23 +4039,24 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    createPipelineMock(mockClients, {
-      publicAZContainPrivateAZ: true,
-      subnetsCross3AZ: true,
-      subnetsIsolated: false,
-      update: true,
-      updatePipeline: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
-        region: 'cn-north-1',
-        templateVersion: 'v1.0.0',
-        tags: [
-          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
-        ],
-      },
-      bucket: {
-        location: BucketLocationConstraint.cn_north_1,
-      },
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: false,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+          region: 'cn-north-1',
+          templateVersion: 'v1.0.0',
+          tags: [
+            { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          ],
+        },
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
+      });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
