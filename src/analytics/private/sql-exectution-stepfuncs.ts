@@ -18,7 +18,7 @@ import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
-  Condition, Fail, DefinitionBody, JsonPath, LogLevel,
+  Condition, Fail, DefinitionBody, JsonPath, LogLevel, Pass,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
@@ -54,13 +54,14 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
   });
 
   const wait1 = new Wait(scope, 'Wait #1', {
-    time: WaitTime.duration(Duration.seconds(2)),
+    time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
   });
 
   const checkStatus = new LambdaInvoke(scope, 'Check Status', {
     lambdaFunction: fn,
     payload: TaskInput.fromObject({
       'queryId.$': '$.queryId',
+      'waitTimeInfo.$': '$.waitTimeInfo',
     }),
     outputPath: '$.Payload',
   });
@@ -75,10 +76,22 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
   const isDoneChoice = new Choice(scope, 'Is Done?');
 
   const checkStatusAgain = new Wait(scope, 'Wait #2', {
-    time: WaitTime.duration(Duration.seconds(2)),
+    time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
   }).next(checkStatus);
 
-  const definition = submitSQL.next(wait1).next(checkStatus).next(isDoneChoice);
+  const initWaitTimeInfo = new Pass(scope, 'Init wait time info', {
+    parameters: {
+      waitTime: 2,
+      loopCount: 0,
+    },
+    resultPath: '$.waitTimeInfo',
+  });
+
+  const definition = initWaitTimeInfo
+    .next(submitSQL)
+    .next(wait1)
+    .next(checkStatus)
+    .next(isDoneChoice);
 
   isDoneChoice.when(Condition.stringEquals('$.status', 'FAILED'), new Fail(scope, 'Fail'));
   isDoneChoice.when(Condition.stringEquals('$.status', 'FINISHED'), new Succeed(scope, 'Succeed'));
