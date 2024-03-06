@@ -812,7 +812,7 @@ function rawToParameter(metadataArray: IMetadataRaw[], associated: boolean): IMe
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
       eventNames: meta.summary.associatedEvents ?? [],
@@ -848,7 +848,7 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     return parameters;
   }
   for (let meta of metadataArray) {
-    const category = meta.category ?? ConditionCategory.OTHER;
+    const category = meta.category ?? ConditionCategory.EVENT_OUTER;
     const valueType = meta.valueType ?? MetadataValueType.STRING;
     const parameter: IMetadataEventParameter = {
       id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
@@ -902,7 +902,7 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
@@ -964,7 +964,7 @@ IMetadataEventParameter | undefined {
     eventName: '',
     hasData: lastDayData.hasData,
     platform: filteredMetadata[0].summary.platform ?? [],
-    category: filteredMetadata[0].category ?? ConditionCategory.OTHER,
+    category: filteredMetadata[0].category ?? ConditionCategory.EVENT_OUTER,
     valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
     associatedEvents: groupEvents,
@@ -981,7 +981,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };

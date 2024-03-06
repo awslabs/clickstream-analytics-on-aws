@@ -482,7 +482,7 @@ export const getTouchPointsAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT_OUTER
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -522,7 +522,7 @@ export const getGoalAndConditions = (
       const conditionObj: ICondition = {
         category: defaultStr(
           condition.conditionOption?.category,
-          ConditionCategory.OTHER
+          ConditionCategory.EVENT_OUTER
         ),
         property: defaultStr(condition.conditionOption?.name),
         operator: defaultStr(condition.conditionOperator?.value),
@@ -540,7 +540,7 @@ export const getGoalAndConditions = (
     groupColumn = {
       category: defaultStr(
         goalData.calculateMethodOption?.category,
-        ConditionCategory.OTHER
+        ConditionCategory.EVENT_OUTER
       ),
       property: defaultStr(goalData.calculateMethodOption?.name),
       dataType: defaultStr(
@@ -627,7 +627,7 @@ export const getEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT_OUTER
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -677,7 +677,7 @@ export const getPairEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT_OUTER
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -695,7 +695,7 @@ export const getPairEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT_OUTER
             ),
             property: defaultStr(condition.conditionOption?.name, ''),
             operator: defaultStr(condition.conditionOperator?.value, ''),
@@ -733,7 +733,7 @@ export const getPairEventAndConditions = (
             retentionJoinColumn: {
               category: defaultStr(
                 item.startEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+                ConditionCategory.EVENT_OUTER
               ),
               property: defaultStr(item.startEventRelationAttribute?.name, ''),
               dataType: defaultStr(
@@ -752,7 +752,7 @@ export const getPairEventAndConditions = (
             retentionJoinColumn: {
               category: defaultStr(
                 item.revisitEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+                ConditionCategory.EVENT_OUTER
               ),
               property: defaultStr(
                 item.revisitEventRelationAttribute?.name,
@@ -777,7 +777,7 @@ export const getGroupCondition = (
   groupApplyToFirst: boolean | null
 ) => {
   let groupingCondition: GroupingCondition = {
-    category: defaultStr(option?.category, ConditionCategory.OTHER),
+    category: defaultStr(option?.category, ConditionCategory.EVENT_OUTER),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
@@ -802,7 +802,7 @@ export const getGlobalEventCondition = (
       const conditionObj: ICondition = {
         category: defaultStr(
           condition.conditionOption?.category,
-          ConditionCategory.OTHER
+          ConditionCategory.EVENT_OUTER
         ),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),

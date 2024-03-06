@@ -604,7 +604,7 @@ describe('Metadata Event test', () => {
     expect(res.body.data.associatedParameters.length).toEqual(57);
     expect(res.body.data.associatedParameters).toContainEqual({
       appId: MOCK_APP_ID,
-      category: ConditionCategory.APP_INFO,
+      category: ConditionCategory.EVENT_OUTER,
       description: {
         'en-US': 'Store where applications are installed',
         'zh-CN': '安装应用程序的商店',
@@ -1188,7 +1188,7 @@ describe('Metadata Event test V2', () => {
       projectId: MOCK_PROJECT_ID,
       appId: MOCK_APP_ID,
       name: MOCK_EVENT_PARAMETER_NAME,
-      category: ConditionCategory.APP_INFO,
+      category: ConditionCategory.EVENT_OUTER,
       valueType: MetadataValueType.STRING,
       platform: [],
       displayName: {
@@ -1493,10 +1493,10 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.APP_INFO}&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.EVENT_OUTER}&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.APP_INFO}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
+    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT_OUTER}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
     expect(res.body.data.month).toEqual('#202303');
     expect(res.body.data.associatedEvents.length).toEqual(17);
     expect(res.body.data.associatedEvents).toContainEqual({

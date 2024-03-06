@@ -2485,7 +2485,7 @@ describe('reporting test', () => {
         eventName: `event${i}`,
       });
       globalEventConditions.conditions.push({
-        category: ConditionCategory.OTHER,
+        category: ConditionCategory.EVENT_OUTER,
         property: `atrri${i}`,
         operator: '=',
         value: ['Android'],
@@ -3249,7 +3249,7 @@ describe('reporting test', () => {
             sqlConditions: {
               conditions: [
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['Japan'],
@@ -3264,7 +3264,7 @@ describe('reporting test', () => {
             sqlConditions: {
               conditions: [
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -3380,7 +3380,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\''],
@@ -3403,7 +3403,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\''],
@@ -3450,7 +3450,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\'\''],
@@ -3473,7 +3473,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\'\''],
@@ -3574,7 +3574,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.DEVICE,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'platform',
                     operator: ExploreAnalyticsOperators.CONTAINS,
                     value: ['%'],
@@ -3597,7 +3597,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.APP_INFO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'install_source',
                     operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                     value: ['_'],
@@ -3644,7 +3644,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.DEVICE,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'platform',
                     operator: 'contains',
                     value: ['%'],
@@ -3667,7 +3667,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.APP_INFO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'install_source',
                     operator: 'not_contains',
                     value: ['_'],

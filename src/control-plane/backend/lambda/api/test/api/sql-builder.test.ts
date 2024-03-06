@@ -803,14 +803,14 @@ describe('SQL Builder test', () => {
           eventName: 'view_item',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -823,14 +823,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1038,14 +1038,14 @@ describe('SQL Builder test', () => {
           eventName: '_first_open',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1058,14 +1058,14 @@ describe('SQL Builder test', () => {
           eventName: '_scroll',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1570,14 +1570,14 @@ describe('SQL Builder test', () => {
           eventName: 'view_item',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1590,14 +1590,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1874,14 +1874,14 @@ describe('SQL Builder test', () => {
           eventName: 'view_item',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1894,14 +1894,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -3808,14 +3808,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -3834,14 +3834,14 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
                   dataType: MetadataValueType.INTEGER,
                 },
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1800],
@@ -3856,7 +3856,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -3876,7 +3876,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4097,14 +4097,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -4123,7 +4123,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4133,7 +4133,7 @@ describe('SQL Builder test', () => {
               conditionOperator: 'or',
             },
             retentionJoinColumn: {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               dataType: MetadataValueType.STRING,
             },
@@ -4143,7 +4143,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4153,7 +4153,7 @@ describe('SQL Builder test', () => {
               conditionOperator: 'or',
             },
             retentionJoinColumn: {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               dataType: MetadataValueType.INTEGER,
             },
@@ -4168,7 +4168,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4389,14 +4389,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -4415,7 +4415,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4435,7 +4435,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4460,7 +4460,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4718,14 +4718,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -4744,7 +4744,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4764,7 +4764,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4789,7 +4789,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -5028,14 +5028,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -5078,7 +5078,7 @@ describe('SQL Builder test', () => {
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'city',
                 operator: '=',
                 value: ['Shanghai'],
@@ -5093,7 +5093,7 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: ConditionCategory.DEVICE,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'mobile_brand_name',
                 operator: '=',
                 value: ['Samsung'],
@@ -5355,35 +5355,35 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.IN,
           value: ['Android', 'iOS'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.NOT_CONTAINS,
           value: ['Web', 'WebchatMP'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.NOT_IN,
           value: ['Web', 'WebchatMP'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -5440,7 +5440,7 @@ describe('SQL Builder test', () => {
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'city',
                 operator: '=',
                 value: ['Shanghai'],
@@ -5455,7 +5455,7 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: ConditionCategory.DEVICE,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'mobile_brand_name',
                 operator: '=',
                 value: ['Samsung'],
@@ -5729,14 +5729,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -5766,14 +5766,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -5807,14 +5807,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6135,14 +6135,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -6172,14 +6172,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6213,14 +6213,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6494,14 +6494,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -6531,14 +6531,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6572,14 +6572,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6866,14 +6866,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -6903,14 +6903,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -6944,14 +6944,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7282,14 +7282,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -7319,14 +7319,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7360,14 +7360,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7745,14 +7745,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -7782,14 +7782,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7819,14 +7819,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7849,14 +7849,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -7879,14 +7879,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -8273,14 +8273,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -8310,14 +8310,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -8347,14 +8347,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -8377,14 +8377,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -8802,14 +8802,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -8839,14 +8839,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -8880,14 +8880,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -9536,7 +9536,7 @@ describe('SQL Builder test', () => {
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         dataType: MetadataValueType.STRING,
       },
       eventAndConditions: [
@@ -10153,7 +10153,7 @@ describe('SQL Builder test', () => {
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         dataType: MetadataValueType.STRING,
       },
       eventAndConditions: [
@@ -10487,7 +10487,7 @@ describe('SQL Builder test', () => {
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         dataType: MetadataValueType.STRING,
         applyTo: 'FIRST',
       },
@@ -11073,14 +11073,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -11241,14 +11241,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -11374,14 +11374,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -11534,14 +11534,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -11713,14 +11713,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -12206,14 +12206,14 @@ describe('SQL Builder test', () => {
         globalEventCondition: {
           conditions: [
             {
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               operator: '=',
               value: ['China'],
@@ -12412,14 +12412,14 @@ describe('SQL Builder test', () => {
         globalEventCondition: {
           conditions: [
             {
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               operator: '=',
               value: ['China'],
@@ -12620,14 +12620,14 @@ describe('SQL Builder test', () => {
         globalEventCondition: {
           conditions: [
             {
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               operator: '=',
               value: ['China'],
@@ -12656,14 +12656,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -12884,14 +12884,14 @@ describe('SQL Builder test', () => {
         globalEventCondition: {
           conditions: [
             {
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               operator: '=',
               value: ['China'],
@@ -12920,14 +12920,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -13148,21 +13148,21 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'country',
         dataType: MetadataValueType.STRING,
       },
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -13192,14 +13192,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -13233,14 +13233,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -13587,21 +13587,21 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'country',
         dataType: MetadataValueType.STRING,
       },
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -13631,14 +13631,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -13668,14 +13668,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['iOS'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -13691,14 +13691,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -14051,14 +14051,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -14088,7 +14088,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
@@ -14122,14 +14122,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -14426,7 +14426,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
@@ -14442,7 +14442,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['iOS'],
@@ -14675,14 +14675,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -14712,7 +14712,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
@@ -14746,14 +14746,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -15046,14 +15046,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -15083,7 +15083,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
@@ -15117,14 +15117,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -15411,21 +15411,21 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'country',
         dataType: MetadataValueType.STRING,
       },
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -15455,14 +15455,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -15496,14 +15496,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -15798,14 +15798,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -15835,14 +15835,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -15876,14 +15876,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -16417,14 +16417,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -16454,14 +16454,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -16495,14 +16495,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -16826,7 +16826,7 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'country',
         dataType: MetadataValueType.STRING,
 
@@ -16834,14 +16834,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -16871,14 +16871,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -16907,14 +16907,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -16945,14 +16945,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -16981,14 +16981,14 @@ describe('SQL Builder test', () => {
               conditionOperator: 'and',
               conditions: [
                 {
-                  category: ConditionCategory.OTHER,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: '=',
                   value: ['Android'],
                   dataType: MetadataValueType.STRING,
                 },
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -17319,7 +17319,7 @@ describe('SQL Builder test', () => {
           eventName: 'view_item',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
@@ -17339,14 +17339,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
-              category: ConditionCategory.OTHER,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: ConditionCategory.DEVICE,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -17618,14 +17618,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: '=',
             value: ['China'],
@@ -17655,14 +17655,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -17696,14 +17696,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -18732,7 +18732,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
         property: 'country',
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         dataType: MetadataValueType.STRING,
         applyTo: 'FIRST',
       },
@@ -18972,7 +18972,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
         property: 'country',
-        category: ConditionCategory.GEO,
+        category: ConditionCategory.EVENT_OUTER,
         dataType: MetadataValueType.STRING,
         applyTo: 'ALL',
       },
@@ -19457,14 +19457,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: ConditionCategory.OTHER,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: ConditionCategory.DEVICE,
+          category: ConditionCategory.EVENT_OUTER,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -19483,14 +19483,14 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
                   dataType: MetadataValueType.INTEGER,
                 },
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1800],
@@ -19505,7 +19505,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -19525,7 +19525,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -19747,14 +19747,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: ExploreAnalyticsOperators.NOT_IN,
             value: ['AAA', 'BBB'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: ExploreAnalyticsOperators.NOT_CONTAINS,
             value: ['JP'],
@@ -19770,14 +19770,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: ExploreAnalyticsOperators.NOT_IN,
                 value: ['AAA', 'BBB'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                 value: ['JP'],
@@ -19811,14 +19811,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -20115,14 +20115,14 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: ExploreAnalyticsOperators.NOT_IN,
             value: ['AAA', 'BBB'],
             dataType: MetadataValueType.STRING,
           },
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: ExploreAnalyticsOperators.NOT_CONTAINS,
             value: ['JP'],
@@ -20138,7 +20138,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: ExploreAnalyticsOperators.EQUAL,
                 value: ['America'],
@@ -20154,7 +20154,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: ExploreAnalyticsOperators.EQUAL,
                 value: ['China'],
@@ -20170,14 +20170,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -20464,7 +20464,7 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.GEO,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'country',
             operator: ExploreAnalyticsOperators.EQUAL,
             value: ['China\'\''],
@@ -20480,7 +20480,7 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: ExploreAnalyticsOperators.EQUAL,
                 value: ['China\'\''],
@@ -20496,14 +20496,14 @@ describe('SQL Builder test', () => {
             conditionOperator: 'and',
             conditions: [
               {
-                category: ConditionCategory.OTHER,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'platform',
                 operator: '=',
                 value: ['Android'],
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.GEO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'country',
                 operator: '=',
                 value: ['China'],
@@ -20752,7 +20752,7 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.OTHER,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: '=',
             value: ['Android\'\''],
@@ -20807,7 +20807,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -21035,7 +21035,7 @@ describe('SQL Builder test', () => {
       globalEventCondition: {
         conditions: [
           {
-            category: ConditionCategory.DEVICE,
+            category: ConditionCategory.EVENT_OUTER,
             property: 'platform',
             operator: ExploreAnalyticsOperators.CONTAINS,
             value: ['%'],
@@ -21062,7 +21062,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: ExploreAnalyticsOperators.CONTAINS,
                   value: ['%'],
@@ -21084,7 +21084,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.DEVICE,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'platform',
                   operator: ExploreAnalyticsOperators.CONTAINS,
                   value: ['%'],
@@ -21108,7 +21108,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.APP_INFO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'install_source',
                   operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                   value: ['_'],
@@ -21130,7 +21130,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: ConditionCategory.APP_INFO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'install_source',
                   operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                   value: ['_'],
@@ -21434,7 +21434,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -21445,7 +21445,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -21456,7 +21456,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -22177,7 +22177,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -22200,7 +22200,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -22453,7 +22453,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -22666,7 +22666,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -22979,7 +22979,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -23294,7 +23294,7 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.OTHER,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'platform',
         dataType: MetadataValueType.STRING,
       },
@@ -23304,7 +23304,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -23638,7 +23638,7 @@ describe('SQL Builder test', () => {
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
       groupCondition: {
-        category: ConditionCategory.OTHER,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'platform',
         dataType: MetadataValueType.STRING,
       },
@@ -23648,7 +23648,7 @@ describe('SQL Builder test', () => {
           computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
           eventExtParameter: {
             targetProperty: {
-              category: ConditionCategory.GEO,
+              category: ConditionCategory.EVENT_OUTER,
               property: 'country',
               dataType: MetadataValueType.STRING,
             },
@@ -23656,7 +23656,7 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: ConditionCategory.APP_INFO,
+                category: ConditionCategory.EVENT_OUTER,
                 property: 'install_source',
                 operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                 value: ['_'],

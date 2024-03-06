@@ -102,11 +102,7 @@ export enum ConditionCategory {
   USER = 'user',
   USER_OUTER = 'user_outer',
   EVENT = 'event',
-  DEVICE = 'device',
-  GEO = 'geo',
-  APP_INFO = 'app_info',
-  TRAFFIC_SOURCE = 'traffic_source',
-  OTHER = 'other',
+  EVENT_OUTER = 'event_outer',
 }
 
 export enum ExploreLocales {

@@ -111,14 +111,10 @@ export enum ExploreAnalyticsOperators {
 }
 
 export enum ConditionCategory {
-  APP_INFO = 'app_info',
-  DEVICE = 'device',
-  EVENT = 'event',
-  GEO = 'geo',
-  OTHER = 'other',
-  TRAFFIC_SOURCE = 'traffic_source',
-  USER = 'user',
   USER_OUTER = 'user_outer',
+  USER = 'user',
+  EVENT = 'event',
+  EVENT_OUTER = 'event_outer',
 }
 
 export enum QuickSightChartType {
