@@ -355,7 +355,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
       return t('pipeline:valid.dataProcessorIntervalCronError');
     }
     return undefined;
-  }
+  };
 
   useEffect(() => {
     if (!update && pipelineInfo.redshiftServerlessVPC?.value) {
