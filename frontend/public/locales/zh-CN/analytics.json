@@ -314,5 +314,27 @@
     "attributionSetConversionGoalInfo": "转化目标通常是能够代表某一业务目标的事件，常见的事件有购买、支付成功、注册等。",
     "attributionSetConversionWindowInfo": "只有距目标转化时间在转化窗口发生的事件才会被纳入分析。",
     "attributionSelectTouchpointEventInfo": "参与归因分析的事件，通常为推广运营为的点击事件、落地页的进入。"
+  },
+  "segment": {
+    "comp": {
+      "title": "创建分群",
+      "desc": "通过选择一段时间内具有相同行为属性的用户来创建一个细分。",
+      "userSegmentSettings": "用户段设置",
+      "segmentName": "分群名称",
+      "segmentNameDesc": "提供分群的名称",
+      "segmentNamePlaceholder": "输入分群名称",
+      "segmentDescription": "描述",
+      "segmentDescriptionDesc": "为该分群提供有用的描述",
+      "segmentDescriptionPlaceholder": "输入分群描述",
+      "refreshMethod": "刷新方法",
+      "refreshMethodDesc": "指定您想要如何更新分群。对于自动刷新，请指定时间表。",
+      "refreshMethodManual": "手动",
+      "refreshMethodAuto": "自动",
+      "expirationSettings": "过期设置",
+      "expirationSettingsDesc": "分群在过期日期后将变为自动刷新，为分群设置过期日期可以避免在分群不使用时产生不必要的成本。您可以随时将其更新回自动刷新方法。",
+      "filterGroup": "过滤器组",
+      "filterGroupDesc": "满足以下条件的用户将被包含在细分中。",
+      "provideDesc": "提供简短描述"
+    }
   }
 }
