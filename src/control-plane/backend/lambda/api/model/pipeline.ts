@@ -12,8 +12,7 @@
  */
 
 import { Tag } from '@aws-sdk/client-cloudformation';
-import { getDiff } from 'json-difference';
-import { v4 as uuidv4 } from 'uuid';
+import { EditedPath, getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -65,7 +64,7 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, getStackTags, getUpdateTags, isEmpty } from '../common/utils';
+import { getStackName, getStackTags, getStateMachineExecutionName, getUpdateTags, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -271,7 +270,7 @@ export class CPipeline {
   public async create(): Promise<void> {
     // state machine
     this.pipeline.lastAction = 'Create';
-    this.pipeline.executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.workflow = await this.generateWorkflow();
 
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
@@ -296,7 +295,6 @@ export class CPipeline {
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    this.pipeline.executionName = `main-${uuidv4()}`;
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
@@ -304,10 +302,9 @@ export class CPipeline {
       this.pipeline.status.status === PipelineStatusType.UPDATING) {
       throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
     }
-    const { editStacks, editParameters } = await this._getEditStacksAndParameters(oldPipeline);
-    // update workflow
-    this.stackManager.updateWorkflowParameters(editParameters);
-    this.stackManager.updateWorkflowAction(editStacks);
+    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    // update parameters
+    await this._mergeUpdateParameters(oldPipeline);
     // enable reporting
     await this._updateReporting(oldPipeline);
     // update tags
@@ -335,13 +332,48 @@ export class CPipeline {
     }
   }
 
-  private async _getEditStacksAndParameters(oldPipeline: IPipeline):
-  Promise<{ editStacks: string[]; editParameters: StackUpdateParameter[] }> {
+  private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
+    // generate parameters accroding to current control plane version
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
-    const diffParameters = getDiff(newStackParameters, oldStackParameters);
+    // get diff parameters
+    const diffParameters = getDiff(oldStackParameters, newStackParameters);
+    const editedParameters = diffParameters.edited;
 
+    this._checkParametersAllowEdit(editedParameters);
+
+    this._overwriteParameters(editedParameters, oldPipeline);
+
+  }
+
+  private _overwriteParameters(editedParameters: EditedPath[], oldPipeline: IPipeline): void {
+    const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
+    const editStacks: string[] = [];
+    const editParameters: StackUpdateParameter[] = [];
+    for (let key of editKeys) {
+      const stackName = key.split('.')[0];
+      const paramName = key.split('.')[1];
+      const parameterValue = editedParameters.find((p: EditedPath) => p[0] === key)?.[2];
+      if (stackName.startsWith(`${PipelineStackType.REPORTING}`) &&
+      !oldPipeline.region.startsWith('cn')) {
+        continue; // skip reporting stack
+      }
+      if (!editStacks.includes(stackName)) {
+        editStacks.push(stackName);
+      }
+      editParameters.push({
+        stackName: stackName,
+        parameterKey: paramName,
+        parameterValue: parameterValue,
+      });
+    }
+    // update workflow
+    this.stackManager.updateWorkflowParameters(editParameters);
+    this.stackManager.updateWorkflowAction(editStacks);
+  }
+
+  private _checkParametersAllowEdit(editedParameters: EditedPath[]): void {
     // AllowedList
     const AllowedList: string[] = [
       ...CIngestionServerStack.editAllowedList(),
@@ -351,37 +383,19 @@ export class CPipeline {
       ...CReportingStack.editAllowedList(),
       ...CMetricsStack.editAllowedList(),
     ];
-    const editKeys = diffParameters.edited.map(p => p[0]);
+
+    const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
+    // check editKeys all in AllowedList
     const notAllowEdit: string[] = [];
-    const editStacks: string[] = [];
-    const editParameters: StackUpdateParameter[] = [];
     for (let key of editKeys) {
-      const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
-      if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
-        continue; // skip reporting stack when template version is v1.0
-      }
-      if (!editStacks.includes(stackName)) {
-        editStacks.push(stackName);
-      }
       if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
-      } else {
-        editParameters.push({
-          stackName: stackName,
-          parameterKey: paramName,
-          parameterValue: diffParameters.edited.find(p => p[0] === key)?.[1],
-        });
       }
     }
     if (!isEmpty(notAllowEdit)) {
       throw new ClickStreamBadRequestError(`Property modification not allowed: ${notAllowEdit.join(',')}.`);
     }
-
-    return {
-      editStacks,
-      editParameters,
-    };
   }
 
   private _editStackTags(oldPipeline: IPipeline): boolean {
@@ -397,7 +411,7 @@ export class CPipeline {
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
 
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
@@ -419,7 +433,7 @@ export class CPipeline {
 
   public async updateApp(appIds: string[]): Promise<void> {
     this.pipeline.lastAction = 'Update';
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
@@ -441,7 +455,7 @@ export class CPipeline {
 
   public async delete(): Promise<void> {
     this.pipeline.lastAction = 'Delete';
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     // update workflow
     this.stackManager.deleteWorkflow();
@@ -465,7 +479,7 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     this.stackManager.retryWorkflow();
     // create new execution
