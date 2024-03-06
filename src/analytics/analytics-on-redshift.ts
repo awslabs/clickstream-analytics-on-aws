@@ -315,7 +315,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
 
-
     const loadDataProps = {
       projectId: props.projectId,
       appIds: props.appIds,
@@ -469,7 +468,6 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithWildcardResources('Associate Role to Redshift', 'passRole'),
       ],
     },
-
     {
       paths_endswith: ['LoadDataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
@@ -479,7 +477,6 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithHighSPCM('LoadData'),
       ],
     },
-
     {
       paths_endswith: ['ScanMetadataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
@@ -489,14 +486,20 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithHighSPCM('ScanMetadata'),
       ],
     },
-
     {
       paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
       ],
     },
-
+    {
+      paths_endswith: ['UserSegmentsWorkflow/UserSegmentsStateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'UserSegmentsWorkflow/UserSegmentsStateMachine/Role/DefaultPolicy/Resource',
+          'UserSegmentsStateMachine', 'logs/xray').rules_to_suppress,
+        ruleToSuppressRolePolicyWithHighSPCM('UserSegments'),
+      ],
+    },
   ]);
-
 }

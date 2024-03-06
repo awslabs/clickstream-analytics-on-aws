@@ -38,7 +38,7 @@ describe('User segments workflow segment-job-init lambda tests', () => {
     refreshSchedule: {
       expireAfter: 1709705841300,
     },
-    eventBridgeRuleArn: 'arn:aws:events:us-east-1:012345678901:rule/segment-111-scheduler',
+    eventBridgeRuleArn: 'arn:aws:events:us-east-1:account:rule/segment-111-scheduler',
   };
   const jobStatusItem = {
     id: 'segment-id',

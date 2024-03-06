@@ -248,7 +248,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Should has Rules S3BucketReadinessRule', () => {
     const rule = template.toJSON().Rules.S3BucketReadinessRule;
-    expect(rule.Assertions[0].Assert[CFN_FN.AND].length).toEqual(6);
+    expect(rule.Assertions[0].Assert[CFN_FN.AND].length).toEqual(7);
     const paramList = ['ODSEventBucket', 'ODSEventPrefix', 'LoadWorkflowBucket', 'LoadWorkflowBucketPrefix', 'PipelineS3Bucket', 'PipelineS3Prefix', 'SegmentsS3Prefix'];
     let paramCount = 0;
     for (const element of rule.Assertions[0].Assert[CFN_FN.AND]) {
