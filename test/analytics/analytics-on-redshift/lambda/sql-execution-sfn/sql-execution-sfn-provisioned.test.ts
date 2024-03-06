@@ -36,8 +36,16 @@ beforeEach(async () => {
   s3Mock.reset();
 });
 
+const waitTimeInfo = {
+  waitTime: 2,
+  loopCount: 0,
+};
+
 test('handler submit sql - s3 file', async () => {
-  const event = { sql: 's3://test/test.sql' };
+  const event = {
+    sql: 's3://test/test.sql',
+    waitTimeInfo,
+  };
   s3Mock.on(GetObjectCommand).resolves({
     Body: {
       transformToString: () => { return 'select * from test'; },
@@ -47,7 +55,13 @@ test('handler submit sql - s3 file', async () => {
 
   const response = await handler(event);
 
-  expect(response).toEqual({ queryId: 'id-1' });
+  expect(response).toEqual({
+    queryId: 'id-1',
+    waitTimeInfo: {
+      waitTime: 2,
+      loopCount: 1,
+    },
+  });
   expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
   expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
 
