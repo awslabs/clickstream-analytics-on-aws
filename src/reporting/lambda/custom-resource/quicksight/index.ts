@@ -158,7 +158,7 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
         dashboardDefProps: dashboardDefProps,
       });
 
-      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, schemaName, dashboardDefProps);
+      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, dashboardDefProps.databaseName, schemaName, dashboardDefProps);
       logger.info(`delete dashboard: ${dashboard?.DashboardId}`);
     };
   } else {
@@ -172,27 +172,41 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   const oldProps = event.OldResourceProperties as QuicksightCustomResourceLambdaPropsType;
 
   let dashboards = [];
+  let databaseSchemaNameArray: string[] = [];
+  let oldDatabaseSchemaNameArray: string[] = [];
+  let updateSchemas: string[] = [];
+  let deleteSchemas: string[] = [];
+  let createSchemas: string[] = [];
 
-  const databaseSchemaNameArray: string[] = [];
-  if ( props.schemas.trim().length > 0 ) {
-    databaseSchemaNameArray.push(...props.schemas.trim().split(','));
-  };
-
-  const oldDatabaseSchemaNameArray: string[] = [];
-  if ( oldProps.schemas.trim().length > 0 ) {
-    oldDatabaseSchemaNameArray.push(...oldProps.schemas.trim().split(','));
-  };
-
-  logger.info('Filtering params:', {
-    propsSchemas: props.schemas,
-    oldPropsSchemas: oldProps.schemas,
-    databaseSchemaNameArray: databaseSchemaNameArray,
-    oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
+  const deleteDatabase = oldProps.dashboardDefProps.databaseName;
+  logger.info('database:', {
+    database: props.dashboardDefProps.databaseName,
+    oldDatabase: oldProps.dashboardDefProps.databaseName,
   });
 
-  const updateSchemas = databaseSchemaNameArray.filter(item => oldDatabaseSchemaNameArray.includes(item));
-  const deleteSchemas = oldDatabaseSchemaNameArray.filter(item => !databaseSchemaNameArray.includes(item));
-  const createSchemas = databaseSchemaNameArray.filter(item => !oldDatabaseSchemaNameArray.includes(item));
+  if (props.dashboardDefProps.databaseName !== oldProps.dashboardDefProps.databaseName) {
+    createSchemas.push(...props.schemas.trim().split(','));
+    deleteSchemas.push(...oldProps.schemas.trim().split(','));
+  } else {
+    if ( props.schemas.trim().length > 0 ) {
+      databaseSchemaNameArray.push(...props.schemas.trim().split(','));
+    };
+
+    if ( oldProps.schemas.trim().length > 0 ) {
+      oldDatabaseSchemaNameArray.push(...oldProps.schemas.trim().split(','));
+    };
+
+    updateSchemas = databaseSchemaNameArray.filter(item => oldDatabaseSchemaNameArray.includes(item));
+    deleteSchemas = oldDatabaseSchemaNameArray.filter(item => !databaseSchemaNameArray.includes(item));
+    createSchemas = databaseSchemaNameArray.filter(item => !oldDatabaseSchemaNameArray.includes(item));
+
+    logger.info('Filtering params:', {
+      propsSchemas: props.schemas,
+      oldPropsSchemas: oldProps.schemas,
+      databaseSchemaNameArray: databaseSchemaNameArray,
+      oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
+    });
+  }
 
   logger.info('schemas to process', {
     updateSchemas: updateSchemas,
@@ -243,6 +257,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
 
     const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
+      deleteDatabase,
       schemaName,
       dashboardDefProps);
 
@@ -440,23 +455,24 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
 const deleteQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
+  deleteDatabase: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<DeleteDashboardCommandOutput|undefined> => {
   // Delete Folder
-  await deleteFolder(quickSight, accountId, dashboardDef.databaseName, schema);
+  await deleteFolder(quickSight, accountId, deleteDatabase, schema);
 
   // Delete Dashboard
-  const dashboardId = buildDashBoardId(dashboardDef.databaseName, schema);
+  const dashboardId = buildDashBoardId(deleteDatabase, schema);
   const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
 
   //delete Analysis
-  const analysisId = buildAnalysisId(dashboardDef.databaseName, schema);
+  const analysisId = buildAnalysisId(deleteDatabase, schema);
   await deleteAnalysisById(quickSight, accountId, analysisId.id);
 
   //delete DataSets
   const dataSets = dashboardDef.dataSets;
-  const databaseName = dashboardDef.databaseName;
+  const databaseName = deleteDatabase;
   for ( const dataSet of dataSets) {
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
