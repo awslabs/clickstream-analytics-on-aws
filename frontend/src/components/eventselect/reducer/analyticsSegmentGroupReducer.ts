@@ -54,6 +54,7 @@ export type ConvertAndDataToOr = {
 
 export type AddAndEventData = {
   type: AnalyticsSegmentActionType.AddAndEventData;
+  rootIndex: number;
 };
 
 export type UpdateUserEventType = {
@@ -101,37 +102,40 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.ConvertAndDataToOr: {
-      console.info('newState:', newState);
-      console.info('action.level:', action.level);
-      console.info('action.rootIndex:', action.rootIndex);
-      console.info('action.parentData:', action.parentData);
-      console.info('action.parentIndex:', action.parentIndex);
-      console.info('action.currentIndex:', action.currentIndex);
-      console.info(
-        newState.subItemList[action.rootIndex].subItemList[action.parentIndex]
-      );
       newState.subItemList[action.rootIndex].subItemList[action.currentIndex] =
         {
           userEventType: null,
           conditionRelationShip: ERelationShip.OR,
           subItemList: [
-            { ...DEFAULT_SEGMENT_ITEM },
+            { ...DEFAULT_SEGMENT_ITEM }, // TODO, replace to current data
             { ...DEFAULT_SEGMENT_ITEM },
           ],
         };
-      // newState.subItemList[action.rootIndex].subItemList[action.parentIndex] = {
-      //   userEventType: null,
-      //   conditionRelationShip: ERelationShip.OR,
-      //   subItemList: [
-      //     {
-      //       ...action.parentData[action.currentIndex],
-      //     },
-      //     DEFAULT_SEGMENT_ITEM,
-      //   ],
-      // };
       return { ...newState };
     }
-    case AnalyticsSegmentActionType.UpdateUserEventType:
+
+    case AnalyticsSegmentActionType.AddAndEventData: {
+      if (
+        newState.subItemList[action.rootIndex].conditionRelationShip ===
+        ERelationShip.OR
+      ) {
+        newState.subItemList[action.rootIndex] = {
+          userEventType: null,
+          conditionRelationShip: ERelationShip.AND,
+          subItemList: [
+            { ...newState.subItemList[action.rootIndex] },
+            { ...DEFAULT_SEGMENT_ITEM },
+          ],
+        };
+      } else {
+        newState.subItemList[action.rootIndex].subItemList.push(
+          DEFAULT_SEGMENT_ITEM
+        );
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserEventType: {
       console.info('update user event type');
       // newState.subItemList[action.rootIndex]?.
       if (action.level === 1) {
@@ -144,6 +148,7 @@ export const analyticsSegmentGroupReducer = (
         ].subItemList[action.currentIndex].userEventType = action.userEventType;
       }
       return { ...newState };
+    }
     default:
       return state;
   }

@@ -18,6 +18,7 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import {
+  ERelationShip,
   IEventSegmentationItem,
   INIT_SEGMENTATION_DATA,
 } from 'components/eventselect/AnalyticsType';
@@ -246,34 +247,41 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
 
         <div>
-          <Button
-            iconName="add-plus"
-            onClick={() => {
-              if (rootIndex > 0 && parentIndex === rootIndex) {
-                // convert and to combine or relation
-                console.info('A');
-                segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.ConvertAndDataToOr,
-                  level,
-                  rootIndex,
-                  parentIndex,
-                  currentIndex,
-                  parentData,
-                });
-              } else {
-                console.info('B');
-                segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.AddOrEventData,
-                  level,
-                  rootIndex,
-                  parentIndex,
-                  parentData,
-                });
-              }
-            }}
-          >
-            Or
-          </Button>
+          {level === 1 &&
+            parentData.conditionRelationShip === ERelationShip.AND && (
+              <Button
+                iconName="add-plus"
+                onClick={() => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.ConvertAndDataToOr,
+                    level,
+                    rootIndex,
+                    parentIndex,
+                    currentIndex,
+                    parentData,
+                  });
+                }}
+              >
+                Or
+              </Button>
+            )}
+          {parentData.conditionRelationShip === ERelationShip.OR &&
+            currentIndex === parentData.subItemList.length - 1 && (
+              <Button
+                iconName="add-plus"
+                onClick={() => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.AddOrEventData,
+                    level,
+                    rootIndex,
+                    parentIndex,
+                    parentData,
+                  });
+                }}
+              >
+                Or
+              </Button>
+            )}
         </div>
 
         <div className="segment-remove-icon">

@@ -13,7 +13,10 @@
 
 import { Button, Input } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch } from 'react';
 import ConditionTimeRange from './ConditionTimeRange';
 import RenderNestSegment from './RenderNestSegment';
@@ -48,7 +51,17 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
           />
         </div>
         <div>
-          <Button variant="primary">And</Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              segmentDataDispatch({
+                type: AnalyticsSegmentActionType.AddAndEventData,
+                rootIndex: index,
+              });
+            }}
+          >
+            And
+          </Button>
         </div>
       </div>
     </div>
