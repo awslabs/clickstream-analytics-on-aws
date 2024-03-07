@@ -31,9 +31,21 @@ import {
 import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
-import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
+import {
+  validateDataProcessingInterval,
+  validatePattern,
+  validateSinkBatch,
+  validateXSS,
+} from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';
+import {
+  containRule,
+  corsStackInput,
+  filterDynamicPipelineTags,
+  getAppRegistryApplicationArn,
+  getStackPrefix,
+  isEmpty,
+} from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -791,5 +803,28 @@ describe('Network test', () => {
       region: 'cn-north-1',
     };
     expect(getAppRegistryApplicationArn(pipeline)).toEqual('');
+  });
+
+  it('filters out dynamic pipeline tags', () => {
+    const pipeline = {
+      ...S3_INGESTION_PIPELINE,
+      tags: [
+        ...S3_INGESTION_PIPELINE.tags,
+        {
+          key: 'DynamicTagKey',
+          value: '#.dynamicTag.value',
+        },
+        {
+          key: '#.DynamicTag.key',
+          value: 'DynamicTagValue',
+        },
+        {
+          key: '#.DynamicTag.key',
+          value: '#.dynamicTag.value',
+        },
+      ],
+    };
+
+    expect(filterDynamicPipelineTags(pipeline).tags).toEqual(S3_INGESTION_PIPELINE.tags);
   });
 });
