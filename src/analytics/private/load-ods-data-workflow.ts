@@ -394,7 +394,10 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       }).next(
         new Pass(this, 'Set parameters', {
           parameters: {
-            'detail.$': '$.detail',
+            'appId.$': '$.detail.appId',
+            'manifestFileName.$': '$.detail.manifestFileName',
+            'jobList.$': '$.detail.jobList',
+            'retryCount.$': '$.detail.retryCount',
             'odsTableName.$': '$.odsTableName',
           },
         }),
