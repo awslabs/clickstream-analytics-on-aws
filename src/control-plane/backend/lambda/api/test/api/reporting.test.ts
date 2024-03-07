@@ -621,7 +621,7 @@ describe('reporting test', () => {
       timeUnit: 'WK',
       groupColumn: 'week',
       groupCondition: {
-        category: ConditionCategory.EVENT,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'platform',
         dataType: MetadataValueType.STRING,
       },

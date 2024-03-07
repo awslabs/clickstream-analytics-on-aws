@@ -470,10 +470,10 @@ export function buildBaseDataForAttribution(eventNames: string[], sqlParameters:
 
   // build column sql from user condition
   const userConditionProps = _getUserConditionProps(sqlParameters);
-  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'user').columnsSql;
+  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'user');
 
   // build base data sql
-  const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql);
+  const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql.columnsSql, userColumnSql.columns);
 
   return format(baseDataSql, { language: 'postgresql' });
 }
@@ -721,7 +721,7 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   if (sqlParameters.timeWindowType === ExploreAttributionTimeWindowType.SESSION) {
     hasEventAttribute = hasEventAttribute || true;
     eventAttributes.push({
-      category: ConditionCategory.EVENT,
+      category: ConditionCategory.EVENT_OUTER,
       property: 'session_id',
       dataType: MetadataValueType.STRING,
     });
@@ -735,28 +735,67 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   };
 }
 
-function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters,  eventColumnSql: string, userColumnSql: string) {
+function _getUserConditionSql(sqlParameters: AttributionSQLParameters, userColumnSql: string, hasComputeMethodOnUserId: boolean) {
+
+  let joinSql = '';
+  let idColumnsSql = '';
+
+  if(hasComputeMethodOnUserId) {
+    joinSql = `
+      join 
+      (
+        select 
+          user_pseudo_id, 
+          user_id,
+          ${userColumnSql}
+        from 
+          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE}
+      ) as u on event.user_pseudo_id= u.user_pseudo_id
+    `;
+    idColumnsSql = `
+      COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
+      u.user_id,
+    `;
+
+  } else {
+    idColumnsSql = `
+      event.user_pseudo_id,
+      event.user_id,
+    `;
+  }
+
+  return {
+    joinSql,
+    idColumnsSql
+  }
+}
+
+function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters,  eventColumnSql: string, 
+  userColumnSql: string, userColumns: string[], hasComputeMethodOnUserId: boolean = false) {
 
   const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.', sqlParameters.timeWindowInSeconds);
   const eventNameClause = _buildEventNameClause(eventNames);
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
+  const {joinSql, idColumnsSql} = _getUserConditionSql(sqlParameters, userColumnSql, hasComputeMethodOnUserId);
+
+  let userTableSql = userColumns.join(',')
+  if (userTableSql !== '') {
+    userTableSql += ',';
+  }
+
   return `
     with base_data as (
       select
         event.event_id,
-        COALESCE(user.user_id, event.user_pseudo_id) as user_pseudo_id,
-        user.user_id,
-        ${eventColumnSql},
-        ${userColumnSql},
+        ${idColumnsSql}
+        ${eventColumnSql}
+        ${userTableSql}
         ${buildDateUnitsSql()}
       from
         ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
-        join 
-        (
-          select user_pseudo_id, user_id from ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE}
-        ) as user on event.user_pseudo_id= user.user_pseudo_id
+        ${joinSql}
       where
         ${eventDateSQL}
         ${eventNameClause}

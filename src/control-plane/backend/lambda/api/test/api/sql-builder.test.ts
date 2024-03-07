@@ -14,7 +14,7 @@
 import { afterEach } from 'node:test';
 import { ConditionCategory, ExploreAggregationMethod, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
-import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView } from '../../service/quicksight/sql-builder';
+import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -55,6 +55,7 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
+    console.log(sql);
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
@@ -238,7 +239,7 @@ describe('SQL Builder test', () => {
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
-
+    console.log(sql);
     expect(sql.trim().replace(/ /g, '')).toEqual(
       `
       with
@@ -10790,7 +10791,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - no condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -10814,8 +10815,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
     with
@@ -10894,7 +10894,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition - two user condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -10936,7 +10936,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      }, false);
+      });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11057,7 +11057,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - event condition - two event condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11114,8 +11114,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -11225,7 +11224,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11268,7 +11267,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      }, false);
+      });
 
     const expectResult = `
       with
@@ -11358,7 +11357,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11408,8 +11407,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -11518,7 +11516,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - user,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11568,8 +11566,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -11697,7 +11694,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11761,8 +11758,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -11912,7 +11908,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - only has user_outer condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -11948,8 +11944,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
     with
@@ -12047,7 +12042,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - grouping condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -12076,8 +12071,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -12194,7 +12188,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -12250,8 +12244,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -12395,7 +12388,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition and grouping condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -12456,8 +12449,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -12608,7 +12600,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition and user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -12704,8 +12696,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
@@ -12867,7 +12858,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - grouping condition and global condition and user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
+    const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
         schemaName: 'shop',
@@ -12968,8 +12959,7 @@ describe('SQL Builder test', () => {
         timeStart: new Date('2023-10-01'),
         timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
-      },
-      false);
+      });
 
     const expectResult = `
       with
