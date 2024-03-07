@@ -20,22 +20,45 @@ import {
 import React, { Dispatch } from 'react';
 import ConditionTimeRange from './ConditionTimeRange';
 import RenderNestSegment from './RenderNestSegment';
+import { darkBackgroundColors } from './mock_data';
 
 interface SegmentItemProps {
   segmentItemData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   index: number;
+  hideRemove?: boolean;
 }
 
 const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
-  const { segmentItemData, segmentDataDispatch, index } = props;
+  const { segmentItemData, segmentDataDispatch, index, hideRemove } = props;
   return (
     <div className="flex-v gap-5">
       <div className="cs-analytics-group-header-bg">
-        <div className="flex align-center m-w-300 gap-5">
-          <div className="cs-analytics-group-index">1</div>
-          <div className="flex-1">
-            <Input value="" />
+        <div className="flex space-between">
+          <div className="flex align-center gap-5 flex-1">
+            <div
+              className="cs-analytics-group-index"
+              style={{ backgroundColor: darkBackgroundColors[index % 10] }}
+            >
+              {index + 1}
+            </div>
+            <div className="flex-1 m-w-300">
+              <Input value="" />
+            </div>
+          </div>
+          <div>
+            {!hideRemove && (
+              <Button
+                variant="link"
+                iconName="close"
+                onClick={() => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.RemoveFilterGroup,
+                    index: index,
+                  });
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

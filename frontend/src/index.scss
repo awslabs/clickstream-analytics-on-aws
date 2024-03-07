@@ -39,6 +39,10 @@ code {
   flex: 1;
 }
 
+.space-between {
+  justify-content: space-between;
+}
+
 .gap-3 {
   gap: 3px;
 }
@@ -1045,7 +1049,6 @@ ul.menu-list li.checkbox-item {
   font-size: 16px;
   font-weight: bold;
   border-radius: 5px;
-  background-color: #033160;
   color: #fff;
   padding: 0 10px;
   line-height: 28px;

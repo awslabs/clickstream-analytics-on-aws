@@ -1881,6 +1881,20 @@ export const MULTI_LEVEL_SELECT_OPTIONS: any = [
 ];
 
 // For segment selection
+
+export const darkBackgroundColors = [
+  '#033160',
+  '#A82A0C',
+  '#037F0C',
+  '#1D3557',
+  '#780000',
+  '#0B3C5D',
+  '#F13C20',
+  '#343A40',
+  '#10316B',
+  '#8D0801',
+];
+
 enum ConditionType {
   USER_DONE = 'USER_DONE',
   USER_NOT_DONE = 'USER_NOT_DONE',
@@ -1905,57 +1919,19 @@ export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   subItemList: [],
 };
 
-export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
-  conditionRelationShip: ERelationShip.AND,
+export const DEFAULT_FILTER_GROUP_ITEM = {
+  userEventType: CONDITION_LIST[0],
+  conditionRelationShip: ERelationShip.OR,
   subItemList: [
     {
       userEventType: CONDITION_LIST[0],
-      conditionRelationShip: ERelationShip.OR,
-      subItemList: [
-        {
-          userEventType: CONDITION_LIST[0],
-          subItemList: [],
-        },
-        {
-          userEventType: CONDITION_LIST[0],
-          subItemList: [],
-        },
-        {
-          userEventType: CONDITION_LIST[0],
-          subItemList: [],
-        },
-      ],
-      groupDateRange: 'a',
-    },
-    {
-      conditionRelationShip: ERelationShip.AND,
-      eventConditionList: [],
-      userEventType: CONDITION_LIST[0],
-      subItemList: [
-        {
-          conditionRelationShip: ERelationShip.OR,
-          userEventType: CONDITION_LIST[0],
-          subItemList: [
-            {
-              userEventType: CONDITION_LIST[0],
-              subItemList: [],
-            },
-            {
-              userEventType: CONDITION_LIST[0],
-              subItemList: [],
-            },
-          ],
-        },
-        {
-          userEventType: CONDITION_LIST[0],
-          subItemList: [],
-        },
-        {
-          userEventType: CONDITION_LIST[0],
-          subItemList: [],
-        },
-      ],
-      groupDateRange: 'b',
+      subItemList: [],
     },
   ],
+  groupDateRange: 'a',
+};
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
+  conditionRelationShip: ERelationShip.AND,
+  subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
 };

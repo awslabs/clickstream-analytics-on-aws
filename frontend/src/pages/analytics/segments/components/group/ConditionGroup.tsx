@@ -285,7 +285,26 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
 
         <div className="segment-remove-icon">
-          <Button iconName="close" variant="link"></Button>
+          {!(
+            level === 1 &&
+            parentData.subItemList.length === 1 &&
+            currentIndex === parentData.subItemList.length - 1
+          ) && (
+            <Button
+              iconName="close"
+              variant="link"
+              onClick={() => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.RemoveEventData,
+                  level,
+                  rootIndex,
+                  parentIndex,
+                  currentIndex,
+                  parentData,
+                });
+              }}
+            />
+          )}
         </div>
       </div>
       <div

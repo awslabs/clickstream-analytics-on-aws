@@ -13,6 +13,7 @@
 
 import cloneDeep from 'lodash/cloneDeep';
 import {
+  DEFAULT_FILTER_GROUP_ITEM,
   DEFAULT_SEGMENT_GROUP_DATA,
   DEFAULT_SEGMENT_ITEM,
 } from 'pages/analytics/segments/components/group/mock_data';
@@ -28,7 +29,10 @@ export enum AnalyticsSegmentActionType {
   AddOrEventData = 'addOrEventData',
   ConvertAndDataToOr = 'convertAndDataToOr',
   AddAndEventData = 'addAndEventData',
+  RemoveEventData = 'removeEventData',
   UpdateUserEventType = 'updateUserEventType',
+  AddFilterGroup = 'addFilterGroup',
+  RemoveFilterGroup = 'removeFilterGroup',
 }
 
 export type ResetEventData = {
@@ -57,6 +61,24 @@ export type AddAndEventData = {
   rootIndex: number;
 };
 
+export type RemoveEventData = {
+  type: AnalyticsSegmentActionType.RemoveEventData;
+  level: number;
+  rootIndex: number;
+  parentIndex: number;
+  parentData: IEventSegmentationItem;
+  currentIndex: number;
+};
+
+export type AddFilterGroup = {
+  type: AnalyticsSegmentActionType.AddFilterGroup;
+};
+
+export type RemoveFilterGroup = {
+  type: AnalyticsSegmentActionType.RemoveFilterGroup;
+  index: number;
+};
+
 export type UpdateUserEventType = {
   type: AnalyticsSegmentActionType.UpdateUserEventType;
   level: number;
@@ -71,6 +93,9 @@ export type AnalyticsSegmentAction =
   | AddOrEventData
   | ConvertAndDataToOr
   | AddAndEventData
+  | RemoveEventData
+  | AddFilterGroup
+  | RemoveFilterGroup
   | UpdateUserEventType;
 
 export type AnalyticsDispatchFunction = (
@@ -135,9 +160,44 @@ export const analyticsSegmentGroupReducer = (
       return { ...newState };
     }
 
+    case AnalyticsSegmentActionType.RemoveEventData: {
+      console.info('remove event data');
+      if (action.level === 1) {
+        newState.subItemList[action.rootIndex].subItemList.splice(
+          action.currentIndex,
+          1
+        );
+      } else if (action.level === 2) {
+        if (action.parentData.subItemList.length === 2) {
+          // convert to and
+          newState.subItemList[action.rootIndex].subItemList[
+            action.parentIndex
+          ] = {
+            ...newState.subItemList[action.rootIndex].subItemList[
+              action.parentIndex
+            ].subItemList[action.currentIndex === 0 ? 1 : 0],
+          };
+        } else {
+          newState.subItemList[action.rootIndex].subItemList[
+            action.parentIndex
+          ].subItemList.splice(action.currentIndex, 1);
+        }
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.AddFilterGroup: {
+      newState.subItemList.push({ ...DEFAULT_FILTER_GROUP_ITEM });
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.RemoveFilterGroup: {
+      newState.subItemList.splice(action.index, 1);
+      return { ...newState };
+    }
+
     case AnalyticsSegmentActionType.UpdateUserEventType: {
       console.info('update user event type');
-      // newState.subItemList[action.rootIndex]?.
       if (action.level === 1) {
         newState.subItemList[action.rootIndex].subItemList[
           action.currentIndex

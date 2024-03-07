@@ -14,7 +14,10 @@
 import { Button } from '@cloudscape-design/components';
 import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
-import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
 import React, { Dispatch } from 'react';
 import SegmentItem from './group/SegmentItem';
@@ -36,6 +39,10 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
               segmentItemData={item}
               segmentDataDispatch={segmentDataDispatch}
               index={index}
+              hideRemove={
+                segmentDataState.subItemList.length === 1 &&
+                index === segmentDataState.subItemList.length - 1
+              }
             />
             {segmentDataState.subItemList &&
               index < segmentDataState?.subItemList?.length - 1 && (
@@ -47,7 +54,16 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
         );
       })}
       <div>
-        <Button iconName="add-plus">Filter group</Button>
+        <Button
+          iconName="add-plus"
+          onClick={() => {
+            segmentDataDispatch({
+              type: AnalyticsSegmentActionType.AddFilterGroup,
+            });
+          }}
+        >
+          Filter group
+        </Button>
       </div>
       <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
     </div>
