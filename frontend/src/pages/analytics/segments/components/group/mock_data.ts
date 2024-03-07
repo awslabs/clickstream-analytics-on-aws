@@ -1919,10 +1919,14 @@ export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   subItemList: [],
 };
 
-export const DEFAULT_FILTER_GROUP_ITEM = {
+export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   conditionRelationShip: ERelationShip.OR,
   subItemList: [
+    {
+      userEventType: CONDITION_LIST[0],
+      subItemList: [],
+    },
     {
       userEventType: CONDITION_LIST[0],
       subItemList: [],

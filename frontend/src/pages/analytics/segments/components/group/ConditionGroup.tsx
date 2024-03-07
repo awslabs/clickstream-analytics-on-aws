@@ -18,6 +18,7 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import {
+  DEFAULT_CONDITION_DATA,
   ERelationShip,
   IEventSegmentationItem,
   INIT_SEGMENTATION_DATA,
@@ -30,7 +31,7 @@ import {
   AnalyticsSegmentAction,
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch, useReducer, useState } from 'react';
+import React, { Dispatch, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ExploreAnalyticsOperators,
@@ -138,6 +139,11 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
     ANALYTICS_OPERATORS.not_contains,
   ];
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
+
+  useEffect(() => {
+    console.info('filterOptionData:', filterOptionData);
+  }, [filterOptionData]);
+
   return (
     <div className="analytics-segment-group-item">
       <div className="flex flex-1 gap-5">
@@ -171,7 +177,28 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
 
         <div>
-          <Button iconName="filter" />
+          <Button
+            iconName="filter"
+            onClick={() => {
+              if (!segmentData.eventConditionList) {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateEventFilterCondition,
+                  level,
+                  rootIndex,
+                  parentIndex,
+                  currentIndex,
+                  conditionList: {
+                    ...DEFAULT_CONDITION_DATA,
+                    conditionRelationShip: ERelationShip.AND,
+                    conditionOptions: [],
+                    data: [],
+                  },
+                });
+              } else {
+                filterOptionDataDispatch({ type: 'addEventCondition' });
+              }
+            }}
+          />
         </div>
 
         <div className="cs-analytics-dropdown">
@@ -314,7 +341,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
         }}
       >
-        {(segmentData.eventConditionList?.length ?? 0) > 0 && (
+        {segmentData.eventConditionList && (
           <AnalyticsSegmentFilter
             hideAddButton
             filterDataState={filterOptionData}

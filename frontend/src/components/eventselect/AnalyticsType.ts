@@ -89,7 +89,7 @@ export interface IEventSegmentationItem {
   groupDateRange?: any; // TODO Type
   userEventType: IAnalyticsItem | null;
   conditionRelationShip?: ERelationShip;
-  eventConditionList?: SegmentationFilterDataType[];
+  eventConditionList?: SegmentationFilterDataType;
   subItemList: IEventSegmentationItem[];
 }
 

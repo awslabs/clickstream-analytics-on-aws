@@ -22,6 +22,7 @@ import {
   IAnalyticsItem,
   IEventSegmentationItem,
   IEventSegmentationObj,
+  SegmentationFilterDataType,
 } from '../AnalyticsType';
 
 export enum AnalyticsSegmentActionType {
@@ -33,6 +34,7 @@ export enum AnalyticsSegmentActionType {
   UpdateUserEventType = 'updateUserEventType',
   AddFilterGroup = 'addFilterGroup',
   RemoveFilterGroup = 'removeFilterGroup',
+  UpdateEventFilterCondition = 'updateEventFilterCondition',
 }
 
 export type ResetEventData = {
@@ -88,6 +90,15 @@ export type UpdateUserEventType = {
   userEventType: IAnalyticsItem;
 };
 
+export type UpdateEventFilterCondition = {
+  type: AnalyticsSegmentActionType.UpdateEventFilterCondition;
+  level: number;
+  rootIndex: number;
+  parentIndex: number;
+  currentIndex: number;
+  conditionList: SegmentationFilterDataType;
+};
+
 export type AnalyticsSegmentAction =
   | ResetEventData
   | AddOrEventData
@@ -96,7 +107,8 @@ export type AnalyticsSegmentAction =
   | RemoveEventData
   | AddFilterGroup
   | RemoveFilterGroup
-  | UpdateUserEventType;
+  | UpdateUserEventType
+  | UpdateEventFilterCondition;
 
 export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
@@ -206,6 +218,20 @@ export const analyticsSegmentGroupReducer = (
         newState.subItemList[action.rootIndex].subItemList[
           action.parentIndex
         ].subItemList[action.currentIndex].userEventType = action.userEventType;
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateEventFilterCondition: {
+      if (action.level === 1) {
+        newState.subItemList[action.rootIndex].subItemList[
+          action.currentIndex
+        ].eventConditionList = action.conditionList;
+      } else if (action.level === 2) {
+        newState.subItemList[action.rootIndex].subItemList[
+          action.parentIndex
+        ].subItemList[action.currentIndex].eventConditionList =
+          action.conditionList;
       }
       return { ...newState };
     }
