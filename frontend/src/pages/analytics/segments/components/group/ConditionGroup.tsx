@@ -18,7 +18,6 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import {
-  DEFAULT_CONDITION_DATA,
   ERelationShip,
   IEventSegmentationItem,
   INIT_SEGMENTATION_DATA,
@@ -188,10 +187,9 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                   parentIndex,
                   currentIndex,
                   conditionList: {
-                    ...DEFAULT_CONDITION_DATA,
-                    conditionRelationShip: ERelationShip.AND,
+                    ...INIT_SEGMENTATION_DATA,
                     conditionOptions: [],
-                    data: [],
+                    enableChangeRelation: true,
                   },
                 });
               } else {
