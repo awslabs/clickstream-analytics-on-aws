@@ -139,12 +139,15 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.ConvertAndDataToOr: {
+      const currentData = cloneDeep(
+        newState.subItemList[action.rootIndex].subItemList[action.currentIndex]
+      );
       newState.subItemList[action.rootIndex].subItemList[action.currentIndex] =
         {
           userEventType: null,
           conditionRelationShip: ERelationShip.OR,
           subItemList: [
-            { ...DEFAULT_SEGMENT_ITEM }, // TODO, replace to current data
+            { ...currentData }, // TODO, replace to current data
             { ...DEFAULT_SEGMENT_ITEM },
           ],
         };

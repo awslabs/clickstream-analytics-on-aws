@@ -39,6 +39,7 @@ import {
 import { defaultStr } from 'ts/utils';
 import Condition from './Condition';
 import {
+  ConditionType,
   EVENT_CATEGORIES,
   MULTI_LEVEL_SELECT_OPTIONS,
   PRESET_PARAMETERS,
@@ -155,121 +156,143 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           parentIndex={parentIndex}
           currentIndex={currentIndex}
         />
-        <div className="cs-analytics-dropdown">
-          <div className="cs-analytics-parameter">
-            <div className="flex-1">
-              <EventItem
-                type="event"
-                placeholder={t('analytics:labels.eventSelectPlaceholder')}
-                categoryOption={null}
-                changeCurCategoryOption={(item) => {
-                  console.info('item:', item);
-                  // changeEventOption(item);
-                }}
-                hasTab={true}
-                isMultiSelect={false}
-                categories={EVENT_CATEGORIES}
-                loading={false}
+        <>
+          {(segmentData.userEventType?.value === ConditionType.USER_DONE ||
+            segmentData.userEventType?.value ===
+              ConditionType.USER_NOT_DONE) && (
+            <>
+              <div className="cs-analytics-dropdown">
+                <div className="cs-analytics-parameter">
+                  <div className="flex-1">
+                    <EventItem
+                      type="event"
+                      placeholder={t('analytics:labels.eventSelectPlaceholder')}
+                      categoryOption={null}
+                      changeCurCategoryOption={(item) => {
+                        console.info('item:', item);
+                        // changeEventOption(item);
+                      }}
+                      hasTab={true}
+                      isMultiSelect={false}
+                      categories={EVENT_CATEGORIES}
+                      loading={false}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Button
+                  iconName="filter"
+                  onClick={() => {
+                    if (!segmentData.eventConditionList) {
+                      segmentDataDispatch({
+                        type: AnalyticsSegmentActionType.UpdateEventFilterCondition,
+                        level,
+                        rootIndex,
+                        parentIndex,
+                        currentIndex,
+                        conditionList: {
+                          ...INIT_SEGMENTATION_DATA,
+                          conditionOptions: [],
+                          enableChangeRelation: true,
+                        },
+                      });
+                    } else {
+                      filterOptionDataDispatch({ type: 'addEventCondition' });
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="cs-analytics-dropdown">
+                <div className="cs-dropdown-input">
+                  <div className="dropdown-input-column">
+                    <div
+                      className="second-select-option"
+                      title="AAAAAA"
+                      onClick={() => {
+                        setShowGroupSelectDropdown((prev) => !prev);
+                        // setShowDropdown(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setShowGroupSelectDropdown((prev) => !prev);
+                          // setShowDropdown(false);
+                        }
+                      }}
+                    >
+                      <Select selectedOption={MULTI_LEVEL_SELECT_OPTIONS[0]} />
+                      {showGroupSelectDropdown && (
+                        <GroupSelectContainer
+                          categories={MULTI_LEVEL_SELECT_OPTIONS}
+                          selectedItem={MULTI_LEVEL_SELECT_OPTIONS[0]}
+                          changeSelectItem={(item) => {
+                            if (item) {
+                              const newItem: any = { ...item };
+                              if (
+                                item.itemType === 'children' &&
+                                item.groupName ===
+                                  ExploreComputeMethod.SUM_VALUE
+                              ) {
+                                newItem.label = t('analytics:sumGroupLabel', {
+                                  label: item.label,
+                                });
+                              }
+                              if (
+                                item.itemType === 'children' &&
+                                item.groupName ===
+                                  ExploreComputeMethod.AVG_VALUE
+                              ) {
+                                newItem.label = t('analytics:avgGroupLabel', {
+                                  label: item.label,
+                                });
+                              }
+                              // changeCurCalcMethodOption?.(newItem);
+                            } else {
+                              // changeCurCalcMethodOption?.(null);
+                            }
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="condition-select">
+                <Select
+                  // disabled={!item.conditionOption}
+                  placeholder={defaultStr(
+                    t('analytics:labels.operatorSelectPlaceholder')
+                  )}
+                  selectedOption={null}
+                  onChange={(e) => {
+                    // changeConditionOperator(e.detail.selectedOption);
+                    console.info(e);
+                  }}
+                  options={CONDITION_STRING_OPERATORS}
+                />
+              </div>
+
+              <div>
+                <Input value="" />
+              </div>
+            </>
+          )}
+        </>
+        <>
+          {(segmentData.userEventType?.value === ConditionType.USER_IS ||
+            segmentData.userEventType?.value === ConditionType.USER_IS_NOT) && (
+            <div style={{ marginTop: -10 }}>
+              <AnalyticsSegmentFilter
+                hideAddButton
+                filterDataState={filterOptionData}
+                filterDataDispatch={filterOptionDataDispatch}
               />
             </div>
-          </div>
-        </div>
-
-        <div>
-          <Button
-            iconName="filter"
-            onClick={() => {
-              if (!segmentData.eventConditionList) {
-                segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.UpdateEventFilterCondition,
-                  level,
-                  rootIndex,
-                  parentIndex,
-                  currentIndex,
-                  conditionList: {
-                    ...INIT_SEGMENTATION_DATA,
-                    conditionOptions: [],
-                    enableChangeRelation: true,
-                  },
-                });
-              } else {
-                filterOptionDataDispatch({ type: 'addEventCondition' });
-              }
-            }}
-          />
-        </div>
-
-        <div className="cs-analytics-dropdown">
-          <div className="cs-dropdown-input">
-            <div className="dropdown-input-column">
-              <div
-                className="second-select-option"
-                title="AAAAAA"
-                onClick={() => {
-                  setShowGroupSelectDropdown((prev) => !prev);
-                  // setShowDropdown(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setShowGroupSelectDropdown((prev) => !prev);
-                    // setShowDropdown(false);
-                  }
-                }}
-              >
-                <Select selectedOption={MULTI_LEVEL_SELECT_OPTIONS[0]} />
-                {showGroupSelectDropdown && (
-                  <GroupSelectContainer
-                    categories={MULTI_LEVEL_SELECT_OPTIONS}
-                    selectedItem={MULTI_LEVEL_SELECT_OPTIONS[0]}
-                    changeSelectItem={(item) => {
-                      if (item) {
-                        const newItem: any = { ...item };
-                        if (
-                          item.itemType === 'children' &&
-                          item.groupName === ExploreComputeMethod.SUM_VALUE
-                        ) {
-                          newItem.label = t('analytics:sumGroupLabel', {
-                            label: item.label,
-                          });
-                        }
-                        if (
-                          item.itemType === 'children' &&
-                          item.groupName === ExploreComputeMethod.AVG_VALUE
-                        ) {
-                          newItem.label = t('analytics:avgGroupLabel', {
-                            label: item.label,
-                          });
-                        }
-                        // changeCurCalcMethodOption?.(newItem);
-                      } else {
-                        // changeCurCalcMethodOption?.(null);
-                      }
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="condition-select">
-          <Select
-            // disabled={!item.conditionOption}
-            placeholder={defaultStr(
-              t('analytics:labels.operatorSelectPlaceholder')
-            )}
-            selectedOption={null}
-            onChange={(e) => {
-              // changeConditionOperator(e.detail.selectedOption);
-              console.info(e);
-            }}
-            options={CONDITION_STRING_OPERATORS}
-          />
-        </div>
-
-        <div>
-          <Input value="" />
-        </div>
+          )}
+        </>
 
         <div>
           {level === 1 &&

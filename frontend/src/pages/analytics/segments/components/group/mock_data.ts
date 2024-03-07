@@ -1895,7 +1895,7 @@ export const darkBackgroundColors = [
   '#8D0801',
 ];
 
-enum ConditionType {
+export enum ConditionType {
   USER_DONE = 'USER_DONE',
   USER_NOT_DONE = 'USER_NOT_DONE',
   USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
