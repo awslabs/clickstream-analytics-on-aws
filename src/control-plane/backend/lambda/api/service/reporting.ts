@@ -1082,7 +1082,7 @@ async function _cleanUser() {
 
 function _needExploreUserVersion(pipeline: IPipeline) {
   const version = pipeline.templateVersion?.split('-')[0] ?? '';
-  const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3'];
+  const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'];
   return oldVersions.includes(version);
 
 }

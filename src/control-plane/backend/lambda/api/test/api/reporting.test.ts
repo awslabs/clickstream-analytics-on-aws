@@ -1211,7 +1211,7 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 1);
   });
 
-  it('clean - include v1.1.3 pipeline', async () => {
+  it('clean - include v1.1.4 pipeline', async () => {
 
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{
@@ -1274,7 +1274,7 @@ describe('reporting test', () => {
 
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { templateVersion: 'v1.1.3' },
+        { templateVersion: 'v1.1.4' },
         { templateVersion: 'v1.2.0' },
       ],
     });
