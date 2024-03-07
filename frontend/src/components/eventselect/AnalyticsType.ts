@@ -87,8 +87,14 @@ export interface IEventAnalyticsItem {
 // for segment group
 export interface IEventSegmentationItem {
   groupDateRange?: any; // TODO Type
+  userEventType: IAnalyticsItem | null;
   conditionRelationShip?: ERelationShip;
   eventConditionList?: SegmentationFilterDataType[];
+  subItemList: IEventSegmentationItem[];
+}
+
+export interface IEventSegmentationObj {
+  conditionRelationShip: ERelationShip;
   subItemList: IEventSegmentationItem[];
 }
 

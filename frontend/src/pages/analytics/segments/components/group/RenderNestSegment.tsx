@@ -18,10 +18,13 @@ import {
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import RelationOr from 'components/eventselect/comps/RelationOr';
 import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { identity } from 'lodash';
 import React, { Dispatch } from 'react';
 import ConditionGroup from './ConditionGroup';
 
 interface RenderNestSegmentProps {
+  rootIndex: number;
+  parentIndex: number;
   segmentItemData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   level: number;
@@ -29,9 +32,15 @@ interface RenderNestSegmentProps {
 const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
   props: RenderNestSegmentProps
 ) => {
-  const { segmentItemData, segmentDataDispatch, level } = props;
+  const {
+    segmentItemData,
+    segmentDataDispatch,
+    level,
+    rootIndex,
+    parentIndex,
+  } = props;
   return (
-    <div className="flex gap-10">
+    <div className="flex flex-1 gap-10">
       {segmentItemData.subItemList.length > 1 && (
         <>
           {segmentItemData.conditionRelationShip === ERelationShip.OR ? (
@@ -41,13 +50,16 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
           )}
         </>
       )}
-      <div className="flex-v gap-10">
+      <div className="flex-v flex-1 gap-10">
         {segmentItemData.subItemList.map((item, index) => {
           if (item.subItemList.length > 0) {
             return (
               <RenderNestSegment
+                key={identity(index)}
                 segmentItemData={item}
                 segmentDataDispatch={segmentDataDispatch}
+                parentIndex={index}
+                rootIndex={rootIndex}
                 level={level + 1}
               />
             );
@@ -56,7 +68,10 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
             <ConditionGroup
               segmentData={item}
               level={level}
-              parentIndex={index}
+              parentData={segmentItemData}
+              parentIndex={parentIndex}
+              rootIndex={rootIndex}
+              currentIndex={index}
               segmentDataDispatch={segmentDataDispatch}
             />
           );

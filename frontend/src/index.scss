@@ -1061,6 +1061,17 @@ ul.menu-list li.checkbox-item {
   padding: 15px;
 }
 
+.analytics-segment-group-item {
+  .segment-remove-icon {
+    display: none;
+  }
+  &:hover {
+    .segment-remove-icon {
+      display: block;
+    }
+  }
+}
+
 // Analytics Layout Style
 .gs-analytics {
   header {

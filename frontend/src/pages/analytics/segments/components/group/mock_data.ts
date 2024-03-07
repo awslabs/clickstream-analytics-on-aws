@@ -11,10 +11,12 @@
  *  and limitations under the License.
  */
 
+import { SelectProps } from '@cloudscape-design/components';
 import {
   CategoryItemType,
   ERelationShip,
   IEventSegmentationItem,
+  IEventSegmentationObj,
 } from 'components/eventselect/AnalyticsType';
 import {
   ConditionCategory,
@@ -1878,22 +1880,48 @@ export const MULTI_LEVEL_SELECT_OPTIONS: any = [
   },
 ];
 
-export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationItem = {
+// For segment selection
+enum ConditionType {
+  USER_DONE = 'USER_DONE',
+  USER_NOT_DONE = 'USER_NOT_DONE',
+  USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
+  USER_IS = 'USER_IS',
+  USER_IS_NOT = 'USER_IS_NOT',
+}
+
+export const CONDITION_LIST: SelectProps.Option[] = [
+  { label: 'User has done', value: ConditionType.USER_DONE },
+  { label: 'The user has not done', value: ConditionType.USER_NOT_DONE },
+  {
+    label: 'User has done in sequence',
+    value: ConditionType.USER_DONE_IN_SEQUENCE,
+  },
+  { label: 'User is', value: ConditionType.USER_IS },
+  { label: 'User is not', value: ConditionType.USER_IS_NOT },
+];
+
+export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
+  userEventType: CONDITION_LIST[0],
+  subItemList: [],
+};
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   conditionRelationShip: ERelationShip.AND,
   subItemList: [
     {
+      userEventType: CONDITION_LIST[0],
       conditionRelationShip: ERelationShip.OR,
       subItemList: [
         {
-          conditionRelationShip: ERelationShip.OR,
+          userEventType: CONDITION_LIST[0],
           subItemList: [],
         },
         {
-          conditionRelationShip: ERelationShip.OR,
+          userEventType: CONDITION_LIST[0],
           subItemList: [],
         },
         {
-          conditionRelationShip: ERelationShip.AND,
+          userEventType: CONDITION_LIST[0],
           subItemList: [],
         },
       ],
@@ -1902,23 +1930,28 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationItem = {
     {
       conditionRelationShip: ERelationShip.AND,
       eventConditionList: [],
+      userEventType: CONDITION_LIST[0],
       subItemList: [
         {
           conditionRelationShip: ERelationShip.OR,
+          userEventType: CONDITION_LIST[0],
           subItemList: [
             {
+              userEventType: CONDITION_LIST[0],
               subItemList: [],
             },
             {
+              userEventType: CONDITION_LIST[0],
               subItemList: [],
             },
           ],
         },
         {
-          conditionRelationShip: ERelationShip.OR,
+          userEventType: CONDITION_LIST[0],
           subItemList: [],
         },
         {
+          userEventType: CONDITION_LIST[0],
           subItemList: [],
         },
       ],

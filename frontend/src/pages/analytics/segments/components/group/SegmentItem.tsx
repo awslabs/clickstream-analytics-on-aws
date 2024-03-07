@@ -21,10 +21,11 @@ import RenderNestSegment from './RenderNestSegment';
 interface SegmentItemProps {
   segmentItemData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+  index: number;
 }
 
 const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
-  const { segmentItemData, segmentDataDispatch } = props;
+  const { segmentItemData, segmentDataDispatch, index } = props;
   return (
     <div className="flex-v gap-5">
       <div className="cs-analytics-group-header-bg">
@@ -40,6 +41,8 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
         <div className="cs-analytics-dropdown">
           <RenderNestSegment
             level={1}
+            parentIndex={index}
+            rootIndex={index}
             segmentItemData={segmentItemData ?? []}
             segmentDataDispatch={segmentDataDispatch}
           />

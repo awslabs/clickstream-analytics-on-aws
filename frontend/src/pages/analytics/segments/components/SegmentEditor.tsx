@@ -12,7 +12,7 @@
  */
 
 import { Button } from '@cloudscape-design/components';
-import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
+import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
@@ -20,7 +20,7 @@ import React, { Dispatch } from 'react';
 import SegmentItem from './group/SegmentItem';
 
 interface SegmentationFilterProps {
-  segmentDataState: IEventSegmentationItem;
+  segmentDataState: IEventSegmentationObj;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
 }
 const SegmentEditor: React.FC<SegmentationFilterProps> = (
@@ -29,13 +29,13 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
   const { segmentDataState, segmentDataDispatch } = props;
   return (
     <div className="flex-v">
-      <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
       {segmentDataState?.subItemList?.map((item, index) => {
         return (
           <div key={identity(index)}>
             <SegmentItem
               segmentItemData={item}
               segmentDataDispatch={segmentDataDispatch}
+              index={index}
             />
             {segmentDataState.subItemList &&
               index < segmentDataState?.subItemList?.length - 1 && (
@@ -49,6 +49,7 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
       <div>
         <Button iconName="add-plus">Filter group</Button>
       </div>
+      <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
     </div>
   );
 };

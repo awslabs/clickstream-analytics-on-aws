@@ -47,14 +47,25 @@ interface ConditionGroupProps {
   segmentData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   level: number;
+  rootIndex: number;
   parentIndex: number;
+  currentIndex: number;
+  parentData: IEventSegmentationItem;
 }
 
 const ConditionGroup: React.FC<ConditionGroupProps> = (
   props: ConditionGroupProps
 ) => {
   const { t } = useTranslation();
-  const { segmentDataDispatch, level, parentIndex, segmentData } = props;
+  const {
+    segmentDataDispatch,
+    level,
+    rootIndex,
+    parentData,
+    parentIndex,
+    currentIndex,
+    segmentData,
+  } = props;
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
@@ -127,9 +138,17 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
   ];
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
   return (
-    <div>
-      <div className="flex gap-5">
-        <Condition updateConditionWidth={setConditionWidth} />
+    <div className="analytics-segment-group-item">
+      <div className="flex flex-1 gap-5">
+        <Condition
+          segmentData={segmentData}
+          segmentDataDispatch={segmentDataDispatch}
+          updateConditionWidth={setConditionWidth}
+          level={level}
+          rootIndex={rootIndex}
+          parentIndex={parentIndex}
+          currentIndex={currentIndex}
+        />
         <div className="cs-analytics-dropdown">
           <div className="cs-analytics-parameter">
             <div className="flex-1">
@@ -227,22 +246,38 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
 
         <div>
-          <Button iconName="close" variant="link"></Button>
-        </div>
-
-        <div>
           <Button
             iconName="add-plus"
             onClick={() => {
-              segmentDataDispatch({
-                type: AnalyticsSegmentActionType.AddOrEventData,
-                level: level,
-                parentIndex: parentIndex,
-              });
+              if (rootIndex > 0 && parentIndex === rootIndex) {
+                // convert and to combine or relation
+                console.info('A');
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.ConvertAndDataToOr,
+                  level,
+                  rootIndex,
+                  parentIndex,
+                  currentIndex,
+                  parentData,
+                });
+              } else {
+                console.info('B');
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.AddOrEventData,
+                  level,
+                  rootIndex,
+                  parentIndex,
+                  parentData,
+                });
+              }
             }}
           >
             Or
           </Button>
+        </div>
+
+        <div className="segment-remove-icon">
+          <Button iconName="close" variant="link"></Button>
         </div>
       </div>
       <div

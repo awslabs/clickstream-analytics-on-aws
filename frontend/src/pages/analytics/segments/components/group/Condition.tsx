@@ -11,37 +11,35 @@
  *  and limitations under the License.
  */
 
-import { Select, SelectProps } from '@cloudscape-design/components';
-import React, { useEffect, useRef, useState } from 'react';
-
-enum ConditionType {
-  USER_DONE = 'USER_DONE',
-  USER_NOT_DONE = 'USER_NOT_DONE',
-  USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
-  USER_IS = 'USER_IS',
-  USER_IS_NOT = 'USER_IS_NOT',
-}
-
-const CONDITION_LIST: SelectProps.Option[] = [
-  { label: 'User has done', value: ConditionType.USER_DONE },
-  { label: 'The user has not done', value: ConditionType.USER_NOT_DONE },
-  {
-    label: 'User has done in sequence',
-    value: ConditionType.USER_DONE_IN_SEQUENCE,
-  },
-  { label: 'User is', value: ConditionType.USER_IS },
-  { label: 'User is not', value: ConditionType.USER_IS_NOT },
-];
+import { Select } from '@cloudscape-design/components';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import React, { Dispatch, useEffect, useRef } from 'react';
+import { CONDITION_LIST } from './mock_data';
 
 interface ConditionProps {
+  level: number;
+  rootIndex: number;
+  parentIndex: number;
+  currentIndex: number;
+  segmentData: IEventSegmentationItem;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   updateConditionWidth: (w: number) => void;
 }
 
 const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
-  const { updateConditionWidth } = props;
-  const [selectedOption, setSelectedOption] = useState<SelectProps.Option>(
-    CONDITION_LIST[0]
-  );
+  const {
+    level,
+    rootIndex,
+    parentIndex,
+    currentIndex,
+    segmentData,
+    segmentDataDispatch,
+    updateConditionWidth,
+  } = props;
   const selectRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const calculateWidth = () => {
@@ -51,13 +49,22 @@ const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
       }
     };
     calculateWidth();
-  }, [selectedOption]);
+  }, [segmentData.userEventType]);
 
   return (
     <div ref={selectRef}>
       <Select
-        selectedOption={selectedOption}
-        onChange={({ detail }) => setSelectedOption(detail.selectedOption)}
+        selectedOption={segmentData.userEventType}
+        onChange={({ detail }) =>
+          segmentDataDispatch({
+            type: AnalyticsSegmentActionType.UpdateUserEventType,
+            level: level,
+            rootIndex: rootIndex,
+            parentIndex: parentIndex,
+            currentIndex: currentIndex,
+            userEventType: detail.selectedOption,
+          })
+        }
         options={CONDITION_LIST}
       />
     </div>
