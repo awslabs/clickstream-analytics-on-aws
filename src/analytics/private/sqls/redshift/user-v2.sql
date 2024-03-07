@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS {{schema}}.user_v2 (
+    event_timestamp timestamp not null,
+    user_pseudo_id varchar(255) not null,
+    user_id varchar(255),
+    user_properties super,
+    user_properties_json_str varchar(65535),
+    first_touch_time_msec bigint,
+    first_visit_date DATE,
+    first_referrer varchar(65535),
+    first_traffic_source varchar(255),
+    first_traffic_medium varchar(255),
+    first_traffic_campaign varchar(255),
+    first_traffic_content varchar(2048),
+    first_traffic_term varchar(2048),
+    first_traffic_campaign_id varchar(255),
+    first_traffic_clid_platform varchar(255),
+    first_traffic_clid varchar(2048),
+    first_traffic_channel_group varchar(255),
+    first_traffic_category varchar(255),
+    first_app_install_source varchar(255),
+    process_info super,
+    created_time timestamp DEFAULT getdate()
+) BACKUP YES DISTSTYLE EVEN SORTKEY (user_pseudo_id, event_timestamp);
