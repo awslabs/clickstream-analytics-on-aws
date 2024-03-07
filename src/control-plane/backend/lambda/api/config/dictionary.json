@@ -855,7 +855,7 @@
         {
           "name": "event_timestamp",
           "dataType": "int",
-          "category": "event_outer",
+          "category": "other",
           "displayName": {
             "en-US": "Event timestamp",
             "zh-CN": "事件时间戳"
@@ -868,7 +868,7 @@
         {
           "name": "event_value_in_usd",
           "dataType": "float",
-          "category": "event_outer",
+          "category": "other",
           "displayName": {
             "en-US": "Event value (USD)",
             "zh-CN": "事件价值（USD）"
@@ -881,7 +881,7 @@
         {
           "name": "platform",
           "dataType": "string",
-          "category": "event_outer",
+          "category": "other",
           "displayName": {
             "en-US": "Platform",
             "zh-CN": "平台"
@@ -894,7 +894,7 @@
         {
           "name": "project_id",
           "dataType": "string",
-          "category": "event_outer",
+          "category": "other",
           "displayName": {
             "en-US": "Project ID",
             "zh-CN": "项目ID"
