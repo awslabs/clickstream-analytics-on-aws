@@ -1209,6 +1209,19 @@ function mergeIntoPipelineTags(pipelineTags: ITag[], newTag: Tag): ITag[] {
   return pipelineTags;
 }
 
+/**
+ * Filter out dynamic pipeline tags with prefix '#.'
+ * @param pipeline
+ * @returns IPipeline
+ */
+function filterDynamicPipelineTags(pipeline: IPipeline): IPipeline {
+  const tags = pipeline.tags.filter(tag => !tag.key.startsWith('#.') && !tag.value.startsWith('#.'));
+  return {
+    ...pipeline,
+    tags,
+  };
+}
+
 function getStateMachineExecutionName(pipelineId: string) {
   return `main-${pipelineId}-${new Date().getTime()}`;
 }
@@ -1405,6 +1418,7 @@ export {
   getDefaultTags,
   mergeIntoStackTags,
   mergeIntoPipelineTags,
+  filterDynamicPipelineTags,
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,
