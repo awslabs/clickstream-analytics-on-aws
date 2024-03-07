@@ -470,10 +470,14 @@ export function buildBaseDataForAttribution(eventNames: string[], sqlParameters:
 
   // build column sql from user condition
   const userConditionProps = _getUserConditionProps(sqlParameters);
-  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'user');
+  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'iu');
 
   // build base data sql
-  const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql.columnsSql, userColumnSql.columns);
+  const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql,
+    userColumnSql.columnsSql,
+    userColumnSql.columns,
+    userConditionProps.userAttributes.length > 0,
+  );
 
   return format(baseDataSql, { language: 'postgresql' });
 }
@@ -522,17 +526,17 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       timeWindowSql = `
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         and TO_CHAR(
-          TIMESTAMP 'epoch' + cast(target_data.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          target_data.event_timestamp,
           'YYYY-MM-DD'
         ) = TO_CHAR(
-          TIMESTAMP 'epoch' + cast(touch_point_data_3.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          touch_point_data_3.event_timestamp,
           'YYYY-MM-DD'
         )
       `;
       break;
     case ExploreAttributionTimeWindowType.CUSTOMIZE:
       timeWindowSql = `
-        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * cast(1000 as bigint) )
+        and (EXTRACT(epoch FROM target_data.event_timestamp - touch_point_data_3.event_timestamp) <= cast(${params.timeWindowInSeconds} as bigint) )
       `;
       break;
     default:
@@ -640,7 +644,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         ${timeWindowSql}
         where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
-        and TIMESTAMP 'epoch' + target_data.event_timestamp/1000 * INTERVAL '1 second' >= ${_buildConversionStartDateSql(params)}
+        and target_data.event_timestamp >= ${_buildConversionStartDateSql(params)}
     ),
   `;
 
@@ -735,21 +739,22 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   };
 }
 
-function _getUserConditionSql(sqlParameters: AttributionSQLParameters, userColumnSql: string, hasComputeMethodOnUserId: boolean) {
+function _getUserConditionSql(sqlParameters: AttributionSQLParameters,
+  userColumnSql: string, needJoinUserTable: boolean) {
 
   let joinSql = '';
   let idColumnsSql = '';
 
-  if(hasComputeMethodOnUserId) {
+  if (needJoinUserTable) {
     joinSql = `
       join 
       (
         select 
           user_pseudo_id, 
-          user_id,
           ${userColumnSql}
+          user_id
         from 
-          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE}
+          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} as iu
       ) as u on event.user_pseudo_id= u.user_pseudo_id
     `;
     idColumnsSql = `
@@ -766,21 +771,21 @@ function _getUserConditionSql(sqlParameters: AttributionSQLParameters, userColum
 
   return {
     joinSql,
-    idColumnsSql
-  }
+    idColumnsSql,
+  };
 }
 
-function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters,  eventColumnSql: string, 
-  userColumnSql: string, userColumns: string[], hasComputeMethodOnUserId: boolean = false) {
+function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters, eventColumnSql: string,
+  userColumnSql: string, userColumns: string[], needJoinUserTable: boolean = false) {
 
   const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.', sqlParameters.timeWindowInSeconds);
   const eventNameClause = _buildEventNameClause(eventNames);
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
-  const {joinSql, idColumnsSql} = _getUserConditionSql(sqlParameters, userColumnSql, hasComputeMethodOnUserId);
+  const { joinSql, idColumnsSql } = _getUserConditionSql(sqlParameters, userColumnSql, needJoinUserTable);
 
-  let userTableSql = userColumns.join(',')
+  let userTableSql = userColumns.join(',');
   if (userTableSql !== '') {
     userTableSql += ',';
   }
@@ -789,6 +794,8 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: Attribution
     with base_data as (
       select
         event.event_id,
+        event.event_name,
+        event.event_timestamp,
         ${idColumnsSql}
         ${eventColumnSql}
         ${userTableSql}

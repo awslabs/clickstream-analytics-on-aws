@@ -114,7 +114,11 @@ export enum ConditionCategory {
   USER_OUTER = 'user_outer',
   USER = 'user',
   EVENT = 'event',
-  EVENT_OUTER = 'event_outer',
+  DEVICE = 'device',
+  GEO = 'geo',
+  APP_INFO = 'app_info',
+  TRAFFIC_SOURCE = 'traffic_source',
+  OTHER = 'other',
 }
 
 export enum QuickSightChartType {

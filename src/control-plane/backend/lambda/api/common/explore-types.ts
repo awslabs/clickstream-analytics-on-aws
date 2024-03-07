@@ -87,10 +87,10 @@ export enum ExplorePathSessionDef {
 
 export enum ExplorePathNodeType {
   EVENT = 'event',
-  PAGE_TITLE = '_page_title',
-  PAGE_URL = '_page_url',
-  SCREEN_NAME = '_screen_name',
-  SCREEN_ID = '_screen_id',
+  PAGE_TITLE = 'page_title',
+  PAGE_URL = 'page_url',
+  SCREEN_NAME = 'screen_name',
+  SCREEN_ID = 'screen_id',
 }
 
 export enum ExploreVisualName {
