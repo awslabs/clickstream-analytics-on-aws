@@ -1927,10 +1927,6 @@ export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
       userEventType: CONDITION_LIST[0],
       subItemList: [],
     },
-    {
-      userEventType: CONDITION_LIST[0],
-      subItemList: [],
-    },
   ],
   groupDateRange: 'a',
 };
