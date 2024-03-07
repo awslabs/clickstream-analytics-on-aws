@@ -330,6 +330,90 @@ describe('QuickSight Lambda function', () => {
     },
   };
 
+  const testProps4 = {
+    awsAccountId: 'xxxxxxxxxx',
+    awsRegion: 'us-east-1',
+    awsPartition: 'aws',
+    quickSightNamespace: 'default',
+    quickSightUser: 'clickstream',
+    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
+    databaseName: 'changed-database',
+    templateArn: 'test-template-arn',
+    vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
+
+    dashboardDefProps: {
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
+      templateArn: 'test-template-arn',
+      databaseName: 'changed-database',
+      dataSourceArn: 'test-datasource',
+      dataSets: [
+        {
+          name: 'User Dim Data Set',
+          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_user_dim_view_columns,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'registration_status',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
+            },
+          ],
+        },
+        {
+          name: 'ODS Flattened Data Set',
+          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_session_view_columns,
+          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          dateTimeDatasetParameter: [
+            {
+              name: 'startDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: tenYearsAgo,
+            },
+            {
+              name: 'endDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: futureDate,
+            },
+          ],
+        },
+      ],
+    },
+  };
+
   const commonPropsUserChange = {
     awsAccountId: 'xxxxxxxxxx',
     awsRegion: 'us-east-1',
@@ -455,6 +539,20 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
+      schemas: 'test1',
+    },
+    OldResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...commonProps,
+      schemas: 'test1',
+    },
+  };
+
+  const updateEventDbChanged = {
+    ...basicCloudFormationUpdateEvent,
+    ResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...testProps4,
       schemas: 'test1',
     },
     OldResourceProperties: {
@@ -2817,6 +2915,104 @@ describe('QuickSight Lambda function', () => {
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Update QuickSight dashboard - database name changed', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).rejectsOnce(notExistError).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    }).resolvesOnce({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    }).resolvesOnce({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeFolderCommand).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).resolves({});
+
+    quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
+
+    quickSightClientMock.on(DeleteDashboardCommand).resolves({});
+
+    const resp = await handler(updateEventDbChanged, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 1);
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
