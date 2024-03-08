@@ -25,6 +25,7 @@ import org.apache.spark.sql.types.StructType;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import java.nio.file.Paths;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -357,17 +358,35 @@ public final class DatasetUtil {
     public static Dataset<Row> readDatasetFromPath(final SparkSession spark, final String path, final int fromNDays) {
         Date nDaysBeforeDate = Date.from(Instant.now().minusSeconds(fromNDays * 24 * 3600L));
         StructType schemaRead = SCHEMA_MAP.get(path);
+
+        // get the type of EVENT_TIMESTAMP
+        StructField eventTimestampField = schemaRead.apply(EVENT_TIMESTAMP);
+        boolean isEventTimestampTypeLong = eventTimestampField.dataType() == DataTypes.LongType;
+
         DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
         String nDaysBefore = dateFormatYMD.format(nDaysBeforeDate);
         String pathInfo = "readDatasetFromPath path=" + path;
-        log.info(pathInfo + ", nDaysBefore=" + nDaysBefore + ", fromNDays=" + fromNDays);
+        log.info(pathInfo + ", nDaysBefore=" + nDaysBefore + ", fromNDays=" + fromNDays + ", isEventTimestampTypeLong=" + isEventTimestampTypeLong);
         Dataset<Row> fullItemsDataset;
         try {
             Dataset<Row> fullItemsDatasetRead = spark.read().schema(schemaRead).parquet(path);
             log.info(pathInfo + ", read count:" + fullItemsDatasetRead.count());
+            log.info("schema: {}", fullItemsDatasetRead.schema().treeString());
 
-            fullItemsDataset = fullItemsDatasetRead.filter(expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
-                    .and(expr(String.format("%s >= %s", EVENT_TIMESTAMP, nDaysBeforeDate.getTime()))));
+            if (isEventTimestampTypeLong) {
+                log.info("filtered by EVENT_TIMESTAMP >= '{}'", nDaysBeforeDate.getTime());
+                fullItemsDataset = fullItemsDatasetRead.filter(
+                        expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
+                        .or(col(EVENT_TIMESTAMP).geq(nDaysBeforeDate.getTime()))
+                );
+            } else {
+                log.info("filtered by EVENT_TIMESTAMP >= '{}'", new Timestamp(nDaysBeforeDate.getTime()));
+                fullItemsDataset = fullItemsDatasetRead.filter(
+                        expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
+                        .or(col(EVENT_TIMESTAMP).$greater$eq(new Timestamp(nDaysBeforeDate.getTime())))
+                );
+            }
+
             fullItemsDataset.cache();
             // forces Spark to load the data immediately and cache it in memory
             log.info(pathInfo + ",cache data count:" + fullItemsDataset.count());

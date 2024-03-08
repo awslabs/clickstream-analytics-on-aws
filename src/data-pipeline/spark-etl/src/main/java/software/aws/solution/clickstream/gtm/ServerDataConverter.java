@@ -33,8 +33,6 @@ import software.aws.solution.clickstream.ETLMetric;
 import software.aws.solution.clickstream.KvConverter;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -337,7 +335,7 @@ public class ServerDataConverter {
         });
     }
 
-    private static ServerDataConverter.RowResult parseJsonNode(final JsonNode jsonNode) {
+    public static ServerDataConverter.RowResult parseJsonNode(final JsonNode jsonNode) {
         String userId = null;
         String eventName = null;
         String ip = null;
@@ -485,7 +483,7 @@ public class ServerDataConverter {
         return new ScreenResolution(screenWidth, screenHeight);
     }
 
-    private static String mapEventNameToClickstream(final String eventName) {
+    public static String mapEventNameToClickstream(final String eventName) {
         if (eventName == null) {
             return null;
         }
@@ -498,7 +496,7 @@ public class ServerDataConverter {
         return PROPS_NAME_MAP.getOrDefault(gaPropName, gaPropName1);
     }
 
-    private static Map<String, String> createEventNameMap() {
+    public static Map<String, String> createEventNameMap() {
         Map<String, String> eventNameMap = new HashMap<>();
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
@@ -759,13 +757,7 @@ public class ServerDataConverter {
     }
 
     public static String deCodeUri(final String uri) {
-        String result = "";
-        try {
-            result = URLDecoder.decode(uri, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            log.warn(e.getMessage() + ", uri:" + uri);
-        }
-        return result;
+        return ServerDataConverterV2.deCodeUri(uri);
     }
 
     @AllArgsConstructor

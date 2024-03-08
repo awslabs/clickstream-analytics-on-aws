@@ -1,0 +1,29 @@
+{
+  "event_timestamp" : "2023-09-21 01:54:26",
+  "event_id" : "25aefd4cb653fd0fcbac33e24fd3f0ba-0-1695261065-1",
+  "event_name" : "select_item",
+  "platform" : "Web",
+  "user_pseudo_id" : "oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066",
+  "user_id" : null,
+  "item_id" : "CTF-28015231-16005642",
+  "name" : "Apple Watch Metallic Impact Case with Screen Protector 49mm - Orange",
+  "brand" : null,
+  "currency" : null,
+  "price" : 35.6638714628,
+  "quantity" : null,
+  "creative_name" : null,
+  "creative_slot" : null,
+  "location_id" : null,
+  "category" : null,
+  "category2" : null,
+  "category3" : null,
+  "category4" : null,
+  "category5" : null,
+  "custom_parameters_json_str" : null,
+  "custom_parameters" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "testAllAppId1"
+}

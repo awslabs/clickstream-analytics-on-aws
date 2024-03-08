@@ -60,7 +60,7 @@ import static software.aws.solution.clickstream.DatasetUtil.USER_PSEUDO_ID;
 @Slf4j
 public class MaxLengthTransformer {
 
-    private static UDF2<String, Integer, Row> truncateWithMaxByteLength() {
+     static UDF2<String, Integer, Row> truncateWithMaxByteLength() {
         return (value, maxByteLen) -> {
             if (value != null && value.getBytes(StandardCharsets.UTF_8).length > maxByteLen) {
                 return new GenericRow(new Object[]{checkStringValueLength(value, maxByteLen), Boolean.TRUE});
