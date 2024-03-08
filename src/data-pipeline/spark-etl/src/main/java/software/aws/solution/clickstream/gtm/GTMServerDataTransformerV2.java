@@ -52,7 +52,7 @@ import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
 
 @Slf4j
 public class GTMServerDataTransformerV2 {
-    public static final String TABLE_VERSION_SUFFIX_V2 = "_v1";
+    public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
     public static final String ETL_GTM_USER_V2_PROPS = "etl_gtm_user_v2_props";
     public static final String INPUT_FILE_NAME = "input_file_name";
     public static final String PROCESS_JOB_ID = "process_job_id";
@@ -218,7 +218,7 @@ public class GTMServerDataTransformerV2 {
         List<DatasetUtil.TableInfo> l = new ArrayList<>();
 
         l.add(new DatasetUtil.TableInfo(
-                ETL_GTM_USER_V2_PROPS, TABLE_VERSION_SUFFIX_V2, userKeepDays
+                ETL_GTM_USER_V2_PROPS, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
 
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
@@ -264,7 +264,7 @@ public class GTMServerDataTransformerV2 {
         log.info("newUserAggDataset count: {}", newUserAggDataset.count());
 
         String tableName = ETL_GTM_USER_V2_PROPS;
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(userDataset, tableName, TABLE_VERSION_SUFFIX_V2);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(userDataset, tableName, TABLE_VERSION_SUFFIX_V1);
         log.info("tableName: {}", tableName);
         log.info("pathInfo - incremental: " + pathInfo.getIncremental() + ", full: " + pathInfo.getFull());
 

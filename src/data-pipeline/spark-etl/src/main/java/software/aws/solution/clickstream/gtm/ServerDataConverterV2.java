@@ -468,12 +468,14 @@ public class ServerDataConverterV2 {
         }));
 
         UserDefinedFunction convertGTMServerDataUdf = udf(convertGTMServerData(), udfOutType);
-        Dataset<Row> convertedKeyValueDataset = dataset.withColumn(DATA_OUT,
-                explode(convertGTMServerDataUdf.apply(
+        String appId = "appId";
+        Dataset<Row> convertedKeyValueDataset = dataset
+                .filter(col(appId).isNotNull().and(col(appId).notEqual("")))
+                .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
                         col(DATA),
                         col("ingest_time"),
                         col("rid"),
-                        col("appId"),
+                        col(appId),
                         lit(projectId),
                         col(INPUT_FILE_NAME)
                         )

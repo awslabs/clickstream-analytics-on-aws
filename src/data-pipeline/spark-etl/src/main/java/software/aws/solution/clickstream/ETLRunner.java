@@ -345,23 +345,16 @@ public class ETLRunner {
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
         } else {
-            if (tbName == TableName.ITEM
-                    || tbName == TableName.USER
-                    || tbName == TableName.ITEM_V2
-                    || tbName == TableName.USER_V2
-                    || tbName == TableName.SESSION) {
-                int numPartitions = partitionedDataset.rdd().getNumPartitions();
-                numPartitions = Math.max(Math.min(numPartitions, 10), 1);
-                partitionedDataset = partitionedDataset.coalesce(numPartitions);
-            } else {
-                int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
-                int numPartitions = partitionedDataset.rdd().getNumPartitions();
-                log.info("outPartitions:" + outPartitions);
-                log.info("partitionedDataset.NumPartitions: " + numPartitions);
-                if (outPartitions > 0 && numPartitions > outPartitions) {
-                    partitionedDataset = partitionedDataset.coalesce(outPartitions);
-                }
+            int numPartitions = Math.max((int) (resultCount / 100_000), 1);
+            int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
+            log.info("calculated numPartitions: " + numPartitions + ", outPartitions:" + outPartitions);
+
+            if (outPartitions > 0 && numPartitions > outPartitions) {
+                numPartitions = outPartitions;
             }
+            log.info("actual numPartitions: " + numPartitions);
+            partitionedDataset = partitionedDataset.coalesce(numPartitions);
+
             partitionedDataset.write()
                     .option("compression", "snappy")
                     .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);

@@ -19,6 +19,6 @@
   "first_traffic_category" : null,
   "first_app_install_source" : null,
   "process_info" : null,
-  "update_date" : "20240312",
+  "update_date" : "_YYYYMMDD_",
   "app_id" : "GMTServerLogin2"
 }

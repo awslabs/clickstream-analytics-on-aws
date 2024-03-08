@@ -377,13 +377,13 @@ public final class DatasetUtil {
                 log.info("filtered by EVENT_TIMESTAMP >= '{}'", nDaysBeforeDate.getTime());
                 fullItemsDataset = fullItemsDatasetRead.filter(
                         expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
-                        .or(col(EVENT_TIMESTAMP).geq(nDaysBeforeDate.getTime()))
+                        .and(col(EVENT_TIMESTAMP).$greater$eq(nDaysBeforeDate.getTime()))
                 );
             } else {
                 log.info("filtered by EVENT_TIMESTAMP >= '{}'", new Timestamp(nDaysBeforeDate.getTime()));
                 fullItemsDataset = fullItemsDatasetRead.filter(
                         expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
-                        .or(col(EVENT_TIMESTAMP).$greater$eq(new Timestamp(nDaysBeforeDate.getTime())))
+                        .and(col(EVENT_TIMESTAMP).$greater$eq(new Timestamp(nDaysBeforeDate.getTime())))
                 );
             }
 

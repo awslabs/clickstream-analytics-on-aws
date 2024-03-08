@@ -317,13 +317,14 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         DatasetUtil.getSchemaMap().forEach((k, v) -> {
             log.info("{} -> {}", k, v.prettyJson());
         });
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
-        String todayYMD = dateFormatYMD.format(new Date());
-
         Dataset<Row> incrementalUserDataset = DatasetUtil.readDatasetFromPath(spark, "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/etl_gtm_user_v2_props_incremental_v1", year100);
-        String expectedDataInc = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_incremental_v2.json").replaceAll("20240312", todayYMD);
-        //  "user_id" : "x-0eb41e46-2373-4883-8daf-e1975ccb3821"
-        Assertions.assertEquals(expectedDataInc, incrementalUserDataset.filter(col("user_id").equalTo("x-0eb41e46-2373-4883-8daf-e1975ccb3821")).first().prettyJson(), "test_transform_data_user_incremental_v2.json");
+        String expectedDataInc = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_incremental_v2.json");
+
+        Assertions.assertEquals(expectedDataInc,
+                incrementalUserDataset.filter(col("user_id").equalTo("x-0eb41e46-2373-4883-8daf-e1975ccb3821")).first().prettyJson()
+                        // "update_date" : ".*", -> "update_date" : "_YYYYMMDD_",
+                        .replaceAll("\"update_date\" : \"\\d+\",", "\"update_date\" : \"_YYYYMMDD_\","),
+                "test_transform_data_user_incremental_v2.json");
 
         Dataset<Row> fullUserDataset = DatasetUtil.readDatasetFromPath(spark, "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/etl_gtm_user_v2_props_full_v1", year100);
         Assertions.assertTrue(fullUserDataset.count() > 0);
