@@ -522,6 +522,7 @@ export class ReportingService {
 
       const sqlParameters = {
         ...query,
+        dbName: query.projectId,
         schemaName: query.appId,
         timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
         timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,

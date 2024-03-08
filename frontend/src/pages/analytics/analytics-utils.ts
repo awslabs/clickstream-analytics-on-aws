@@ -574,15 +574,17 @@ export const getTargetComputeMethod = (
   return ExploreComputeMethod.SUM_VALUE;
 };
 
-const _getComputeMethod = (value: string) => {
+const _getComputeMethod = (groupName: string, value: string) => {
   if (
-    value === ExploreAggregationMethod.MIN ||
-    value === ExploreAggregationMethod.MAX ||
-    value === ExploreAggregationMethod.SUM ||
-    value === ExploreAggregationMethod.AVG ||
-    value === ExploreAggregationMethod.MEDIAN
+    groupName === ExploreAggregationMethod.MIN ||
+    groupName === ExploreAggregationMethod.MAX ||
+    groupName === ExploreAggregationMethod.SUM ||
+    groupName === ExploreAggregationMethod.AVG ||
+    groupName === ExploreAggregationMethod.MEDIAN
   ) {
     return ExploreComputeMethod.AGGREGATION_PROPERTY;
+  } else if (groupName === ExploreComputeMethod.COUNT_PROPERTY) {
+    return ExploreComputeMethod.COUNT_PROPERTY;
   }
   return value;
 };
@@ -591,20 +593,23 @@ const _gatEventExtParameter = (
   computeMethod: string,
   computeMethodOption: IAnalyticsItem | null | undefined
 ) => {
-  if (computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
+  if (
+    computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY ||
+    computeMethod === ExploreComputeMethod.COUNT_PROPERTY
+  ) {
     return {
       targetProperty: {
         category: defaultStr(
           computeMethodOption?.category,
           ConditionCategory.OTHER
         ),
-        property: defaultStr(computeMethodOption?.name),
+        property: defaultStr(computeMethodOption?.value),
         dataType: defaultStr(
           computeMethodOption?.valueType,
           MetadataValueType.STRING
         ),
       },
-      aggregationMethod: computeMethod,
+      aggregationMethod: computeMethodOption?.groupName,
     };
   }
   return undefined;
@@ -637,10 +642,8 @@ export const getEventAndConditions = (
       });
 
       const computeMethod = _getComputeMethod(
-        defaultStr(
-          item.calculateMethodOption?.value,
-          ExploreComputeMethod.USER_ID_CNT
-        )
+        item.calculateMethodOption?.groupName ?? '',
+        item.calculateMethodOption?.value ?? ''
       );
       const eventExtParameter = _gatEventExtParameter(
         computeMethod,
