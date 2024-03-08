@@ -68,6 +68,8 @@ async function _handler(event: CheckLoadStatusEvent, context: Context) {
   const dynamodbTableName = DYNAMODB_TABLE_NAME!;
   const manifestFileName = event.detail.manifestFileName;
   const odsTableName = event.odsTableName;
+  const odsSourceBucket = event.odsSourceBucket;
+  const odsSourcePrefix = event.odsSourcePrefix;
   logger.debug(`odsTableName:${odsTableName}`);
   let jobList = event.detail.jobList;
   logger.debug(`query_id:${queryId}`);
@@ -104,6 +106,8 @@ async function _handler(event: CheckLoadStatusEvent, context: Context) {
           status: response.Status,
         },
         odsTableName: odsTableName,
+        odsSourceBucket: odsSourceBucket,
+        odsSourcePrefix: odsSourcePrefix,
       };
     } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
       logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
@@ -119,6 +123,8 @@ async function _handler(event: CheckLoadStatusEvent, context: Context) {
           retryCount: retryCount + 1,
         },
         odsTableName: odsTableName,
+        odsSourceBucket: odsSourceBucket,
+        odsSourcePrefix: odsSourcePrefix,
       };
     }
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);

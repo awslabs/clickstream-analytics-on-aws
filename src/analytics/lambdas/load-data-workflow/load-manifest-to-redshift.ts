@@ -52,6 +52,8 @@ type LoadManifestEventDetail = ManifestBody & {
 export interface LoadManifestEvent {
   detail: LoadManifestEventDetail;
   odsTableName: string;
+  odsSourceBucket: string;
+  odsSourcePrefix: string;
 }
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -83,6 +85,8 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const odsTableName = event.odsTableName;
+  const odsSourceBucket = event.odsSourceBucket;
+  const odsSourcePrefix = event.odsSourcePrefix;
   logger.debug(`odsTableName: ${odsTableName}`);
   const jobList = event.detail.jobList;
   logger.info('Event details', { details: event.detail });
@@ -139,6 +143,8 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
         retryCount,
       },
       odsTableName: odsTableName,
+      odsSourceBucket: odsSourceBucket,
+      odsSourcePrefix: odsSourcePrefix,
     };
   } catch (err) {
     if (err instanceof Error) {

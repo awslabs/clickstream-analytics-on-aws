@@ -36,6 +36,12 @@ describe('Load data workflow', () => {
       },
     });
 
+    console.log('######################### ClickstreamLoadDataWorkflow start #########################');
+
+    console.log(JSON.stringify(strCapture.asObject(), undefined, 2));
+
+    console.log('######################### ClickstreamLoadDataWorkflow end #########################');
+
     expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataStepFuncDef);
   });
 

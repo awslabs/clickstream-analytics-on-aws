@@ -42,8 +42,6 @@ const s3Client = new S3Client({
 
 const MANIFEST_BUCKET = process.env.MANIFEST_BUCKET!;
 const MANIFEST_BUCKET_PREFIX = process.env.MANIFEST_BUCKET_PREFIX!;
-const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
-const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;
 const QUERY_RESULT_LIMIT = process.env.QUERY_RESULT_LIMIT!;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
@@ -62,6 +60,12 @@ metrics.addDimensions({
   ProjectId: PROJECT_ID,
 });
 
+export interface CreateLoadManifestEvent {
+  odsTableName: string;
+  odsSourceBucket: string;
+  odsSourcePrefix: string;
+}
+
 /**
 {
   "version": "0",
@@ -72,7 +76,6 @@ metrics.addDimensions({
   "time": "2023-05-29T07:49:25Z",
   "region": "us-east-1",
   "resources": [],
-  "odsTableName": "event",
   "detail": {
     "jobRunId": "00fag0b74fhau80a",
     "jobRunName": "1685345723122-ac3e0971-8c7c-444e-bc60-3388bee9afef",
@@ -89,23 +92,24 @@ metrics.addDimensions({
  * @param context The context of lambda function.
  * @returns The list of manifest file.
  */
-export const handler = async (_event: any, context: Context) => {
+export const handler = async (event: CreateLoadManifestEvent, context: Context) => {
   const requestId = context.awsRequestId;
   const nowMillis = new Date().getTime(); //.getMilliseconds;
 
 
   logger.debug(`context.awsRequestId:${requestId}.`);
-  logger.debug('triggered by job', _event.detail);
   logger.info('nowMilis: ' + nowMillis);
 
   const tableName = DYNAMODB_TABLE_NAME;
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
 
-  const odsTableName = _event.odsTableName;
+  const odsTableName = event.odsTableName;
+  const odsSourceBucket = event.odsSourceBucket;
+  const odsSourcePrefix = event.odsSourcePrefix;
 
   const queryResultLimit = parseInt(QUERY_RESULT_LIMIT);
 
-  const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}${odsTableName}/`;
+  const odsEventBucketWithPrefix = `${odsSourceBucket}/${odsSourcePrefix}`;
 
   let newMinFileTimestamp = nowMillis;
 
@@ -192,7 +196,11 @@ export const handler = async (_event: any, context: Context) => {
   logger.info('FILE_NEW=' + allJobNewCount + ', FILE_PROCESSING=' + processInfo.jobNum
     + ', FILE_ENQUEUE=' + enQueueInfo.jobNum + ', FILE_MAX_AGE=' + maxFileAgeSeconds);
 
-  return response;
+  return {
+    ...response,
+    odsSourceBucket: odsSourceBucket,
+    odsSourcePrefix: odsSourcePrefix,
+  };
 };
 
 const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEventItem>,

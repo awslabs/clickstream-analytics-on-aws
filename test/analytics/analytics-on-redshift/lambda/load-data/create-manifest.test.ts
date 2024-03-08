@@ -54,6 +54,7 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
 import {
   handler,
   ODSEventItem,
+  CreateLoadManifestEvent,
 } from '../../../../../src/analytics/lambdas/load-data-workflow/create-load-manifest';
 import {
   JobStatus,
@@ -81,19 +82,10 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
   const dynamoDBClientMock = mockClient(DynamoDBClient);
   const s3ClientMock = mockClient(S3Client);
 
-  const scheduleEvent: any = {
-    'version': '0',
-    'id': 'e073f888-c8d4-67ac-2b2c-f858903d4e7c',
-    'detail-type': 'Scheduled Event',
-    'source': 'aws.events',
-    'account': 'xxxxxxxxxxxx',
-    'time': '2023-02-24T13:14:18Z',
-    'region': 'us-east-2',
-    'resources': [
-      'arn:aws:events:us-east-2:xxxxxxxxxxxx:rule/load-data-to-redshift-loaddatatoredshiftManifestOn-RQHE7PBBA2KD',
-    ],
-    'detail': {},
-    'odsTableName': 'test_me_table',
+  const scheduleEvent: CreateLoadManifestEvent = {
+    odsTableName: 'test_me_table',
+    odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
+    odsSourcePrefix: 'project1/ods_external_events',
   };
 
   const context = getMockContext();
@@ -581,7 +573,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(1, QueryCommand, {
       ExclusiveStartKey: undefined,
       ExpressionAttributeNames: { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://EXAMPLE-BUCKET-2/project1/raw/${scheduleEvent.odsTableName}/` },
+      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://${scheduleEvent.odsSourceBucket}/${scheduleEvent.odsSourcePrefix}` },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
       IndexName: 'by_status',
       KeyConditionExpression: '#job_status = :job_status',
@@ -591,7 +583,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
       ExclusiveStartKey: { key1: 'NextKey1' },
       ExpressionAttributeNames: { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://EXAMPLE-BUCKET-2/project1/raw/${scheduleEvent.odsTableName}/` },
+      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://${scheduleEvent.odsSourceBucket}/${scheduleEvent.odsSourcePrefix}` },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
       IndexName: 'by_status',
       KeyConditionExpression: '#job_status = :job_status',
@@ -601,7 +593,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(3, QueryCommand, {
       ExclusiveStartKey: { key1: 'NextKey2' },
       ExpressionAttributeNames: { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://EXAMPLE-BUCKET-2/project1/raw/${scheduleEvent.odsTableName}/` },
+      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://${scheduleEvent.odsSourceBucket}/${scheduleEvent.odsSourcePrefix}` },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
       IndexName: 'by_status',
       KeyConditionExpression: '#job_status = :job_status',
@@ -611,7 +603,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(dynamoDBClientMock).toHaveReceivedNthCommandWith(4, QueryCommand, {
       ExclusiveStartKey: { key1: 'NextKey3' },
       ExpressionAttributeNames: { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://EXAMPLE-BUCKET-2/project1/raw/${scheduleEvent.odsTableName}/` },
+      ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#NEW`, ':s3_uri': `s3://${scheduleEvent.odsSourceBucket}/${scheduleEvent.odsSourcePrefix}` },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
       IndexName: 'by_status',
       KeyConditionExpression: '#job_status = :job_status',
@@ -633,7 +625,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
       {
         ExclusiveStartKey: undefined,
         ExpressionAttributeNames: { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-        ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#ENQUEUE`, ':s3_uri': `s3://EXAMPLE-BUCKET-2/project1/raw/${scheduleEvent.odsTableName}/` },
+        ExpressionAttributeValues: { ':job_status': `${scheduleEvent.odsTableName}#ENQUEUE`, ':s3_uri': `s3://${scheduleEvent.odsSourceBucket}/${scheduleEvent.odsSourcePrefix}` },
         FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
         IndexName: 'by_status',
         KeyConditionExpression: '#job_status = :job_status',
