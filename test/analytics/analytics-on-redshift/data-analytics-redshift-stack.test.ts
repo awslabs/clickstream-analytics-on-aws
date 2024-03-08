@@ -26,6 +26,7 @@ import { Logger } from '@aws-lambda-powertools/logger';
 import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
@@ -392,6 +393,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   const app = new App();
   const testId = 'test-2';
   const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
+  const metadataDdbTable = Table.fromTableArn(stack, 'Test2-ClickstreamMetadataDdbTable', 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata');
   const template = Template.fromStack(stack);
   let count = 1;
 
@@ -654,7 +656,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      clickstreamMetadataDdbTable: metadataDdbTable,
       segmentsS3Prefix: 'segmentsS3Prefix',
     };
     let error = false;
@@ -710,7 +712,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      clickstreamMetadataDdbTable: metadataDdbTable,
       segmentsS3Prefix: 'segmentsS3Prefix',
     };
     let error = false;
@@ -753,7 +755,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      clickstreamMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamMetadata',
+      clickstreamMetadataDdbTable: metadataDdbTable,
       segmentsS3Prefix: 'segmentsS3Prefix',
     };
 
