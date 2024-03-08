@@ -82,22 +82,19 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
 
     return output;
   } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when executing segment query.', err);
-    }
+    logger.error('Error when executing segment query.', err as Error);
     throw err;
   }
 };
 
 const constructSqlStatement = async (appId: string, segmentId: string) => {
-  const response = await ddbDocClient.send(new GetCommand({
+  await ddbDocClient.send(new GetCommand({
     TableName: ddbTableName,
     Key: {
       id: appId,
       type: `SEGMENT_SETTING#${segmentId}`,
     },
   }));
-  console.log(response);
 
   // TODO: construct sql
   return `SELECT 1, '${appId}', '${segmentId}';`;

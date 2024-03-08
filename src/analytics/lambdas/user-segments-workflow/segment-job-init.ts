@@ -105,9 +105,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
     };
     return output;
   } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when get/put segment setting item for segment job init', err);
-    }
+    logger.error('Error when get/put segment setting item for segment job init', err as Error);
     throw err;
   }
 };

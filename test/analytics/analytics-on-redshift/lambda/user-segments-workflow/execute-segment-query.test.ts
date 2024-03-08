@@ -26,6 +26,10 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
     segmentId: 'segment-id',
     jobRunId: 'job-run-id',
     stateMachineStatus: StateMachineStatus.IDLE,
+    waitTimeInfo: {
+      waitTime: 60,
+      loopCount: 0,
+    },
   };
 
   test('Execute segment query', async () => {

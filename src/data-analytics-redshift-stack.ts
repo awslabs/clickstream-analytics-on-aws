@@ -39,10 +39,10 @@ import {
   addCfnNagForLogRetention,
   ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
+import { REDSHIFT_MODE } from './common/model';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
-import { REDSHIFT_MODE } from '../src/common/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -133,7 +133,7 @@ export function createRedshiftAnalyticsStack(
     loadDataConfig,
     workflowBucketInfo,
     mvRefreshInterval: props.redshift.mvRefreshInterval,
-    clickstreamMetadataDdbArn: props.clickstreamMetadataDdbArn,
+    clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
     segmentsS3Prefix: props.segmentsS3Prefix,
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,

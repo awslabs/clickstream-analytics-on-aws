@@ -29,10 +29,6 @@ interface Segment {
 
 interface RefreshSchedule {
   cron: 'Manual' | 'Daily' | 'Weekly' | 'Monthly' | 'Custom';
-  hour?: number;
-  minute?: number;
-  weeklyDay?: 'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday';
-  monthlyDay?: number;
   cronExpression?: string;
   expireAfter: number; // timestamp
 }

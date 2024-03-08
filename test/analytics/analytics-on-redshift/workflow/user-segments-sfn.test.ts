@@ -37,7 +37,7 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
         DefinitionString: strCapture,
         RoleArn: {
           'Fn::GetAtt': [
-            'UserSegmentsWorkflowUserSegmentsStateMachineRoleF61E7032',
+            'ClickstreamUserSegmentsWorkflowStateMachineRoleDCC1FAB4',
             'Arn',
           ],
         },
@@ -93,16 +93,6 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
               Resource: '*',
             },
             {
-              Action: [
-                'dynamodb:GetItem',
-                'dynamodb:PutItem',
-              ],
-              Effect: 'Allow',
-              Resource: {
-                Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
-              },
-            },
-            {
               Action: 'events:DisableRule',
               Effect: 'Allow',
               Resource: {
@@ -117,10 +107,35 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':rule/*',
+                    ':rule/Clickstream-*',
                   ],
                 ],
               },
+            },
+            {
+              Action: [
+                'dynamodb:BatchGetItem',
+                'dynamodb:GetRecords',
+                'dynamodb:GetShardIterator',
+                'dynamodb:Query',
+                'dynamodb:GetItem',
+                'dynamodb:Scan',
+                'dynamodb:ConditionCheckItem',
+                'dynamodb:BatchWriteItem',
+                'dynamodb:PutItem',
+                'dynamodb:UpdateItem',
+                'dynamodb:DeleteItem',
+                'dynamodb:DescribeTable',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
+                },
+                {
+                  Ref: 'AWS::NoValue',
+                },
+              ],
             },
           ],
           Version: '2012-10-17',
@@ -186,7 +201,7 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':stateMachine:*',
+                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
                   ],
                 ],
               },
@@ -260,13 +275,28 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
           },
           {
             Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
               'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
               'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
             ],
             Effect: 'Allow',
-            Resource: {
-              Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
-            },
+            Resource: [
+              {
+                Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
           },
           {
             Action: 'sts:AssumeRole',
@@ -336,11 +366,22 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
             Resource: '*',
           },
           {
-            Action: 'dynamodb:UpdateItem',
+            Action: [
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
             Effect: 'Allow',
-            Resource: {
-              Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
-            },
+            Resource: [
+              {
+                Ref: Match.stringLikeRegexp('ClickstreamMetadataDdbArn'),
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
           },
           {
             Action: 'sts:AssumeRole',

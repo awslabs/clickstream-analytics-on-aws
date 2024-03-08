@@ -15,10 +15,13 @@ import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFN
 import { SegmentJobInitOutput } from './segment-job-init';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
 
-interface StateMachineStatusEvent {
+export interface StateMachineStatusEvent {
   stateMachineArn: string;
-  input: SegmentJobInitOutput;
+  input: SegmentJobInitOutput & {
+    waitTimeInfo?: WaitTimeInfo;
+  };
 }
 
 export interface StateMachineStatusOutput {
@@ -26,6 +29,7 @@ export interface StateMachineStatusOutput {
   segmentId: string;
   jobRunId: string;
   stateMachineStatus: StateMachineStatus;
+  waitTimeInfo: WaitTimeInfo;
 }
 
 export enum StateMachineStatus {
@@ -40,6 +44,17 @@ const sfnClient = new SFNClient({
 
 export const handler = async (event: StateMachineStatusEvent) => {
   try {
+    // Update waitTimeInfo
+    const waitTimeInfo = event.input.waitTimeInfo;
+    const updatedWaitTimeInfo = !!waitTimeInfo ? calculateWaitTime(
+      waitTimeInfo.waitTime,
+      waitTimeInfo.loopCount,
+    ) : {
+      waitTime: 60,
+      loopCount: 0,
+    };
+
+    // Get state machine executions status
     const request: ListExecutionsCommandInput = {
       stateMachineArn: event.stateMachineArn,
       statusFilter: ExecutionStatus.RUNNING,
@@ -49,14 +64,13 @@ export const handler = async (event: StateMachineStatusEvent) => {
 
     const output: StateMachineStatusOutput = {
       ...event.input,
+      waitTimeInfo: updatedWaitTimeInfo,
       stateMachineStatus: (response.executions === undefined || response.executions.length <= 1) ?
         StateMachineStatus.IDLE : StateMachineStatus.BUSY,
     };
     return output;
-  } catch (e) {
-    if (e instanceof Error) {
-      logger.error('Failed to get state machine status', e);
-    }
-    throw e;
+  } catch (err) {
+    logger.error('Failed to get state machine status', err as Error);
+    throw err;
   }
 };

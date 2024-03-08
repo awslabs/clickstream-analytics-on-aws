@@ -92,7 +92,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
-  readonly clickstreamMetadataDdbArn: string;
+  readonly clickstreamMetadataDdbTable: ITable;
   readonly segmentsS3Prefix: string;
 }
 
@@ -389,14 +389,14 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // User segments workflow
-    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'UserSegmentsWorkflow', {
+    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'ClickstreamUserSegmentsWorkflow', {
       projectId: props.projectId,
       securityGroupForLambda,
       networkConfig: {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
-      clickstreamMetadataDdbArn: props.clickstreamMetadataDdbArn,
+      clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
       dataAPIRole: this.redshiftDataAPIExecRole,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,

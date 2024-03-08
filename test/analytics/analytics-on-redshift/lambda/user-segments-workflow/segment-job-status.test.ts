@@ -14,20 +14,27 @@
 import { DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler } from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-status';
+import {
+  handler,
+  SegmentJobStatusEvent,
+} from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-status';
 import 'aws-sdk-client-mock-jest';
 import { SegmentJobStatus } from '../../../../../src/analytics/private/segments/segments-model';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
   const ddbDocClientMock = mockClient(DynamoDBDocumentClient);
   const redshiftDataClientMock = mockClient(RedshiftDataClient);
-  const event = {
-    appId: 'app-id',
-    segmentId: 'segment-id',
-    jobRunId: 'job-run-id',
-    queryId: 'query-id',
-    jobStatus: SegmentJobStatus.IN_PROGRESS,
-  };
+  let event: SegmentJobStatusEvent;
+
+  beforeEach(() => {
+    event = {
+      appId: 'app-id',
+      segmentId: 'segment-id',
+      jobRunId: 'job-run-id',
+      queryId: 'query-id',
+      jobStatus: SegmentJobStatus.IN_PROGRESS,
+    };
+  });
 
   test('Segment job is running', async () => {
     redshiftDataClientMock.on(DescribeStatementCommand).resolves({ Status: StatusString.STARTED });
@@ -37,6 +44,10 @@ describe('User segments workflow segment-job-status lambda tests', () => {
     expect(resp).toEqual({
       ...event,
       jobStatus: SegmentJobStatus.IN_PROGRESS,
+      waitTimeInfo: {
+        waitTime: 15,
+        loopCount: 0,
+      },
     });
     expect(ddbDocClientMock).not.toHaveReceivedCommandWith(UpdateCommand, expect.any(Object));
   });
@@ -44,11 +55,19 @@ describe('User segments workflow segment-job-status lambda tests', () => {
   test('Segment job is completed', async () => {
     redshiftDataClientMock.on(DescribeStatementCommand).resolves({ Status: StatusString.FINISHED });
 
+    event.waitTimeInfo = {
+      waitTime: 15,
+      loopCount: 0,
+    };
     const resp = await handler(event);
 
     expect(resp).toEqual({
       ...event,
       jobStatus: SegmentJobStatus.COMPLETED,
+      waitTimeInfo: {
+        waitTime: 15,
+        loopCount: 1,
+      },
     });
     expect(ddbDocClientMock).toHaveReceivedCommandWith(UpdateCommand, {
       TableName: 'ClickStreamApiClickstreamMetadata',
@@ -73,6 +92,10 @@ describe('User segments workflow segment-job-status lambda tests', () => {
     expect(resp).toEqual({
       ...event,
       jobStatus: SegmentJobStatus.FAILED,
+      waitTimeInfo: {
+        waitTime: 15,
+        loopCount: 0,
+      },
     });
     expect(ddbDocClientMock).toHaveReceivedCommandWith(UpdateCommand, {
       TableName: 'ClickStreamApiClickstreamMetadata',

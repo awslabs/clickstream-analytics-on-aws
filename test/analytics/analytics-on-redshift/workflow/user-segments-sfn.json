@@ -9,7 +9,7 @@
       ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
       {
         "Fn::GetAtt": [
-          "UserSegmentsWorkflowWorkflowLambdasegmentjobinit7C6F1181",
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdasegmentjobinit6C85864A",
           "Arn"
         ]
       },
@@ -20,18 +20,18 @@
       ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
       {
         "Fn::GetAtt": [
-          "UserSegmentsWorkflowWorkflowLambdastatemachinestatus0D87C36A",
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdastatemachinestatus9275028B",
           "Arn"
         ]
       },
-      "\",\"Payload\":{\"stateMachineArn.$\":\"$$.StateMachine.Id\",\"input.$\":\"$\"}}},\"WorkflowWait-StateMachineStatus\":{\"Type\":\"Wait\",\"Seconds\":60,\"Next\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowChoice-StateMachineStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.stateMachineStatus\",\"StringEquals\":\"IDLE\",\"Next\":\"WorkflowTask-ExecuteSegmentQuery\"}],\"Default\":\"WorkflowWait-StateMachineStatus\"},\"WorkflowTask-ExecuteSegmentQuery\":{\"Next\":\"WorkflowTask-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      "\",\"Payload\":{\"stateMachineArn.$\":\"$$.StateMachine.Id\",\"input.$\":\"$\"}}},\"WorkflowWait-StateMachineStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowChoice-StateMachineStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.stateMachineStatus\",\"StringEquals\":\"IDLE\",\"Next\":\"WorkflowTask-ExecuteSegmentQuery\"}],\"Default\":\"WorkflowWait-StateMachineStatus\"},\"WorkflowTask-ExecuteSegmentQuery\":{\"Next\":\"WorkflowTask-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
       ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
       {
         "Fn::GetAtt": [
-          "UserSegmentsWorkflowWorkflowLambdaexecutesegmentqueryE71292AC",
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdaexecutesegmentqueryC9A84334",
           "Arn"
         ]
       },
@@ -42,11 +42,11 @@
       ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
       {
         "Fn::GetAtt": [
-          "UserSegmentsWorkflowWorkflowLambdasegmentjobstatusA535CF55",
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdasegmentjobstatus78D7A101",
           "Arn"
         ]
       },
-      "\",\"Payload.$\":\"$\"}},\"WorkflowWait-CheckJobStatus\":{\"Type\":\"Wait\",\"Seconds\":15,\"Next\":\"WorkflowTask-SegmentJobStatus\"},\"WorkflowChoice-SegmentJobStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Completed\",\"Next\":\"WorkflowEndState-Succeed\"},{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Failed\",\"Next\":\"WorkflowEndState-Fail\"}],\"Default\":\"WorkflowWait-CheckJobStatus\"},\"WorkflowEndState-Succeed\":{\"Type\":\"Succeed\"},\"WorkflowEndState-Fail\":{\"Type\":\"Fail\"}},\"Comment\":\"This state machine is responsible for creating and refreshing user segments.\"}"
+      "\",\"Payload.$\":\"$\"}},\"WorkflowWait-CheckJobStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-SegmentJobStatus\"},\"WorkflowChoice-SegmentJobStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Completed\",\"Next\":\"WorkflowEndState-Succeed\"},{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Failed\",\"Next\":\"WorkflowEndState-Fail\"}],\"Default\":\"WorkflowWait-CheckJobStatus\"},\"WorkflowEndState-Succeed\":{\"Type\":\"Succeed\"},\"WorkflowEndState-Fail\":{\"Type\":\"Fail\"}},\"Comment\":\"This state machine is responsible for creating and refreshing user segments.\"}"
     ]
   ]
 }

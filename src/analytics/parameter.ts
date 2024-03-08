@@ -21,6 +21,7 @@ import {
   TABLE_NAME_USER,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
+import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -90,7 +91,7 @@ export interface RedshiftAnalyticsStackProps {
       dbUser: string;
     };
   };
-  clickstreamMetadataDdbArn: string;
+  clickstreamMetadataDdbTable: ITable;
   segmentsS3Prefix: string;
 }
 
@@ -816,7 +817,7 @@ export function createStackParameters(scope: Construct): {
           clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
         },
       },
-      clickstreamMetadataDdbArn: clickstreamMetadataDdbArnParam.valueAsString,
+      clickstreamMetadataDdbTable: Table.fromTableArn(scope, 'ClickstreamMetadataDdbTable', clickstreamMetadataDdbArnParam.valueAsString),
       segmentsS3Prefix: segmentsS3PrefixParam.valueAsString,
     },
   };

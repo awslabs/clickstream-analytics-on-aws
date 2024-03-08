@@ -17,19 +17,11 @@ import 'aws-sdk-client-mock-jest';
 import {
   handler,
   StateMachineStatus,
+  StateMachineStatusEvent,
 } from '../../../../../src/analytics/lambdas/user-segments-workflow/state-machine-status';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
   const sfnClientMock = mockClient(SFNClient);
-  const event = {
-    input: {
-      appId: 'app-id',
-      segmentId: 'segment-id',
-      jobRunId: 'job-run-id',
-      scheduleIsExpired: false,
-    },
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
-  };
   const executionListItem = {
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution/abc',
     stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
@@ -37,8 +29,21 @@ describe('User segments workflow segment-job-status lambda tests', () => {
     status: undefined,
     startDate: new Date(),
   };
+  let event: StateMachineStatusEvent;
 
-  test('state machine is busy', async () => {
+  beforeEach(() => {
+    event = {
+      input: {
+        appId: 'app-id',
+        segmentId: 'segment-id',
+        jobRunId: 'job-run-id',
+        scheduleIsExpired: false,
+      },
+      stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
+    };
+  });
+
+  test('state machine is busy on the first invocation', async () => {
     sfnClientMock.on(ListExecutionsCommand).resolves({
       executions: [executionListItem, executionListItem],
     });
@@ -51,14 +56,22 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       jobRunId: 'job-run-id',
       scheduleIsExpired: false,
       stateMachineStatus: StateMachineStatus.BUSY,
+      waitTimeInfo: {
+        waitTime: 60,
+        loopCount: 0,
+      },
     });
   });
 
-  test('state machine is idle', async () => {
+  test('state machine is idle on the 5th invocation', async () => {
     sfnClientMock.on(ListExecutionsCommand).resolves({
       executions: [executionListItem],
     });
 
+    event.input.waitTimeInfo = {
+      waitTime: 60,
+      loopCount: 5,
+    };
     const resp = await handler(event);
 
     expect(resp).toEqual({
@@ -67,6 +80,10 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       jobRunId: 'job-run-id',
       scheduleIsExpired: false,
       stateMachineStatus: StateMachineStatus.IDLE,
+      waitTimeInfo: {
+        waitTime: 70,
+        loopCount: 6,
+      },
     });
   });
 });

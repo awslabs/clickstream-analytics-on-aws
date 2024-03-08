@@ -13,6 +13,7 @@
 
 import { join } from 'path';
 import { Aws, Duration } from 'aws-cdk-lib';
+import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
@@ -46,7 +47,7 @@ export interface UserSegmentsWorkflowProps {
     readonly vpcSubnets: SubnetSelection;
   };
   readonly securityGroupForLambda: ISecurityGroup;
-  readonly clickstreamMetadataDdbArn: string;
+  readonly clickstreamMetadataDdbTable: ITable;
   readonly dataAPIRole: IRole;
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
@@ -70,31 +71,26 @@ export class UserSegmentsWorkflow extends Construct {
 
   private createWorkflow(props: UserSegmentsWorkflowProps): IStateMachine {
     // Define task for segment job initialization
-    const segmentJobInitTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobInit', {
-      lambdaFunction: this.constructNodejsFunction('segment-job-init', [
-        new PolicyStatement({
-          actions: [
-            'dynamodb:GetItem',
-            'dynamodb:PutItem',
-          ],
-          resources: [props.clickstreamMetadataDdbArn],
-        }),
-        new PolicyStatement({
-          actions: ['events:DisableRule'],
-          resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/*`],
-        }),
-      ], {
-        CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+    const segmentJobInitFunc = this.constructNodejsFunction('segment-job-init', [
+      new PolicyStatement({
+        actions: ['events:DisableRule'],
+        resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/Clickstream-*`],
       }),
+    ], {
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
+    });
+    const segmentJobInitTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobInit', {
+      lambdaFunction: segmentJobInitFunc,
       outputPath: '$.Payload',
     });
+    props.clickstreamMetadataDdbTable.grantReadWriteData(segmentJobInitFunc);
 
     // Define task for checking state machine status
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
       lambdaFunction: this.constructNodejsFunction('state-machine-status', [
         new PolicyStatement({
           actions: ['states:ListExecutions'],
-          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:*`],
+          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*`],
         }),
       ]),
       payload: TaskInput.fromObject({
@@ -105,44 +101,33 @@ export class UserSegmentsWorkflow extends Construct {
     });
 
     // Define task for segment query execution
-    const executeSegmentQueryFunc = this.constructNodejsFunction('execute-segment-query', [
-      new PolicyStatement({
-        actions: [
-          'dynamodb:GetItem',
-          'dynamodb:UpdateItem',
-        ],
-        resources: [props.clickstreamMetadataDdbArn],
-      }),
-    ], {
+    const executeSegmentQueryFunc = this.constructNodejsFunction('execute-segment-query', [], {
       REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
       REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
       REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
       REDSHIFT_DATABASE: props.databaseName,
       REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
     });
     const executeSegmentQueryTask = new LambdaInvoke(this, 'WorkflowTask-ExecuteSegmentQuery', {
       lambdaFunction: executeSegmentQueryFunc,
       outputPath: '$.Payload',
     });
+    props.clickstreamMetadataDdbTable.grantReadWriteData(executeSegmentQueryFunc);
     props.dataAPIRole.grantAssumeRole(executeSegmentQueryFunc.grantPrincipal);
 
     // Define task for checking segment job status
-    const segmentJobStatusFunc = this.constructNodejsFunction('segment-job-status', [
-      new PolicyStatement({
-        actions: ['dynamodb:UpdateItem'],
-        resources: [props.clickstreamMetadataDdbArn],
-      }),
-    ], {
+    const segmentJobStatusFunc = this.constructNodejsFunction('segment-job-status', [], {
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbArn,
+      CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
       SEGMENTS_S3_PREFIX: props.segmentsS3Prefix,
     });
     const segmentJobStatusTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobStatus', {
       lambdaFunction: segmentJobStatusFunc,
       outputPath: '$.Payload',
     });
+    props.clickstreamMetadataDdbTable.grantWriteData(segmentJobStatusFunc);
     props.dataAPIRole.grantAssumeRole(segmentJobStatusFunc.grantPrincipal);
     Bucket.fromBucketName(this, 'PipelineS3Bucket', props.pipelineS3Bucket).grantRead(segmentJobStatusFunc, `${props.segmentsS3Prefix}*`);
 
@@ -164,7 +149,7 @@ export class UserSegmentsWorkflow extends Construct {
     const stateMachineStatusChoice = new Choice(this, 'WorkflowChoice-StateMachineStatus')
       .when(Condition.stringEquals('$.stateMachineStatus', 'IDLE'), executeSegmentQueryTask)
       .otherwise(new Wait(this, 'WorkflowWait-StateMachineStatus', {
-        time: WaitTime.duration(Duration.minutes(1)),
+        time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
       }).next(stateMachineStatusTask));
 
     // Connect checking state machine status task to the choice
@@ -178,13 +163,13 @@ export class UserSegmentsWorkflow extends Construct {
       .when(Condition.stringEquals('$.jobStatus', SegmentJobStatus.COMPLETED), succeedState)
       .when(Condition.stringEquals('$.jobStatus', SegmentJobStatus.FAILED), failState)
       .otherwise(new Wait(this, 'WorkflowWait-CheckJobStatus', {
-        time: WaitTime.duration(Duration.seconds(15)),
+        time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
       }).next(segmentJobStatusTask));
 
     // Connect checking job status task to the choice
     segmentJobStatusTask.next(jobStatusChoice);
 
-    return new StateMachine(this, 'UserSegmentsStateMachine', {
+    return new StateMachine(this, 'StateMachine', {
       definition: segmentJobInitTask,
       logs: {
         destination: createLogGroup(this, {
@@ -202,7 +187,7 @@ export class UserSegmentsWorkflow extends Construct {
       entry: join(lambdaRootPath, `${name}.ts`),
       handler: 'handler',
       memorySize: 1024,
-      timeout: Duration.minutes(15),
+      timeout: Duration.minutes(1),
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
