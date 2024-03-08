@@ -18,10 +18,11 @@ import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckLoadStatusEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/check-load-status';
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
+import { WaitTimeInfo } from '../../../../../src/common/workflow';
 import { getMockContext } from '../../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
-const loadStatusEvent: CheckLoadStatusEvent = {
+const loadStatusEvent: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = {
   detail: {
     id: '70bfb836-c7d5-7cab-75b0-5222e78194ac',
     status: '',
@@ -45,7 +46,7 @@ const loadStatusEvent: CheckLoadStatusEvent = {
 };
 
 
-const loadStatusEvent2: CheckLoadStatusEvent = {
+const loadStatusEvent2: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = {
   detail: {
     id: '70bfb836-c7d5-7cab-75b0-5222e78194ac',
     status: '',
@@ -69,7 +70,7 @@ const loadStatusEvent2: CheckLoadStatusEvent = {
 };
 
 
-const loadStatusEvent3: CheckLoadStatusEvent = {
+const loadStatusEvent3: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = {
   detail: {
     id: '70bfb836-c7d5-7cab-75b0-5222e78194ac',
     status: '',
@@ -122,6 +123,10 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     expect(resp).toEqual({
       detail: {
         status: StatusString.FINISHED,
+      },
+      waitTimeInfo: {
+        waitTime: 10,
+        loopCount: 2,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
@@ -271,6 +276,10 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     expect(resp).toEqual({
       detail: {
         status: StatusString.FINISHED,
+      },
+      waitTimeInfo: {
+        waitTime: 10,
+        loopCount: 2,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {

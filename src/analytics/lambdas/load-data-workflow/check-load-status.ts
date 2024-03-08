@@ -21,7 +21,7 @@ import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
+import { handleBackoffTimeInfo } from '../../../common/workflow';
 import { ManifestBody } from '../../private/model';
 import { getRedshiftClient } from '../redshift-data';
 
@@ -48,7 +48,6 @@ type CheckLoadStatusEventDetail = ManifestBody & {
 
 export interface CheckLoadStatusEvent {
   detail: CheckLoadStatusEventDetail;
-  waitTimeInfo: WaitTimeInfo;
 }
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -59,7 +58,7 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
  * @param context The context of lambda function.
  * @returns The load results of query_id.
  */
-export const handler = async (event: CheckLoadStatusEvent, context: Context) => {
+async function _handler(event: CheckLoadStatusEvent, context: Context) {
   logger.debug('request event:', { event });
   logger.debug(`context.awsRequestId:${context.awsRequestId}`);
 
@@ -119,8 +118,6 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
       };
     }
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
-    // set next wait time
-    const waitTimeInfo = calculateWaitTime(event.waitTimeInfo.waitTime, event.waitTimeInfo.loopCount);
     return {
       detail: {
         id: queryId,
@@ -130,7 +127,6 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         jobList: jobList,
         retryCount,
       },
-      waitTimeInfo,
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -139,6 +135,8 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
     throw err;
   }
 };
+
+export const handler = handleBackoffTimeInfo(_handler);
 
 /**
  * Check load status in Redshift.
