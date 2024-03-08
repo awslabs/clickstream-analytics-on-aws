@@ -110,6 +110,7 @@ export async function getPipeline(pipelineId: string): Promise<any> {
 async function updateStackStatusWithOptimisticLocking(
   projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<boolean> {
   try {
+    console.log('stackDetails', JSON.stringify(stackDetails, null, 2));
     const input: UpdateCommandInput = {
       TableName: clickStreamTableName,
       Key: {
