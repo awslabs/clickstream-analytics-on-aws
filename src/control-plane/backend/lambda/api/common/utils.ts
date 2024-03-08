@@ -19,6 +19,7 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
+  SPECIAL_CHARACTERS_PATTERN,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -1367,6 +1368,11 @@ function defaultValueFunc(exceptValue: any, defaultValue: any) {
   return exceptValue || defaultValue;
 }
 
+function replaceSpecialCharacters (str: string) {
+  const regexp = new RegExp(SPECIAL_CHARACTERS_PATTERN, 'g');
+  return str.replace(regexp, '');
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1429,4 +1435,5 @@ export {
   getLocalDateISOString,
   getSinkType,
   defaultValueFunc,
+  replaceSpecialCharacters,
 };

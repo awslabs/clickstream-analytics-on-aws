@@ -385,7 +385,7 @@ export const createPublishDashboard = async (
       DashboardId: dashboard.id,
       Name: dashboard.name,
       Definition: dashboardDefinition,
-      VersionDescription: dashboard.description,
+      VersionDescription: dashboard.description === '' ? undefined : dashboard.description,
       Permissions: [
         {
           Principal: principals.publishUserArn,
