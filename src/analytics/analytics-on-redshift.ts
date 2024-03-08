@@ -493,10 +493,10 @@ function addCfnNag(stack: Stack) {
       ],
     },
     {
-      paths_endswith: ['UserSegmentsWorkflow/UserSegmentsStateMachine/Role/DefaultPolicy/Resource'],
+      paths_endswith: ['ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
-          'UserSegmentsWorkflow/UserSegmentsStateMachine/Role/DefaultPolicy/Resource',
+          'ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource',
           'UserSegmentsStateMachine', 'logs/xray').rules_to_suppress,
         ruleToSuppressRolePolicyWithHighSPCM('UserSegments'),
       ],
