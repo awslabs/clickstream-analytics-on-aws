@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * handle multiple source IPs in single event
 * filter event date happened in future
+* incorrect cron validation when configuring data processing interval
 
 ## [1.1.4] - 2024-02-28
 
