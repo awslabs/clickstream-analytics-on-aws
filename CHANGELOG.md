@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2024-03-08
+
+### Updated
+
+* onboard QuickSight in AWS China Beijing region
+* set the materialized views of Redshift backup YES
+* optimize the waiting backoff when copying data to Redshift
+* optimize the waiting backoff when creating or updating database schema in Redshift
+
+### Fixed
+
+* handle multiple source IPs in single event
+* filter event date happened in future
+* incorrect cron validation when configuring data processing interval
+
 ## [1.1.4] - 2024-02-28
 
 ### Fixed
