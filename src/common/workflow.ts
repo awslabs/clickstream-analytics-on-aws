@@ -10,13 +10,14 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { Context } from 'aws-lambda';
 
 export interface WaitTimeInfo {
   waitTime: number;
   loopCount: number;
 }
 
-export function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
+function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
   if (loopCount > 4) {
     const additionalTime = (loopCount - 4) * 10;
     waitTime += additionalTime;
@@ -25,3 +26,17 @@ export function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTi
   return { waitTime: Math.min(waitTime, maxWaitTime), loopCount };
 }
 
+export function handleBackoffTimeInfo<T, R>(handler: (event: T, context: Context) => Promise<R>) {
+  return async (event: T & { waitTimeInfo: WaitTimeInfo }, context: Context): Promise<R & { waitTimeInfo: WaitTimeInfo }> => {
+    const updatedWaitTimeInfo = calculateWaitTime(event.waitTimeInfo.waitTime, event.waitTimeInfo.loopCount);
+
+    const { waitTimeInfo, ...restEvent } = event;
+
+    const originalResponse = await handler(restEvent as T, context);
+
+    return {
+      ...originalResponse,
+      waitTimeInfo: updatedWaitTimeInfo,
+    };
+  };
+}
