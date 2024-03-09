@@ -246,7 +246,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
           odsSourceBucket: odsSource.s3Bucket.bucketName,
           odsSourcePrefix: odsSource.prefix,
         }),
-        name: JsonPath.format('{}-{}', JsonPath.stringAt('$$.Execution.Name'), odsTableName),
+        name: JsonPath.format('{}-{}', JsonPath.stringAt('$.subExecutionNamePrefix'), odsTableName),
         resultSelector: {
           'ExecutionArn.$': '$.ExecutionArn',
         },

@@ -132,6 +132,7 @@ test('Should have other running workflow', async () => {
   expect(response.HasRunningWorkflow).toBeTruthy();
   expect(response.SkipRunningWorkflow).toBeTruthy();
   expect(response.PendingCount).toEqual(17);
+  expect(response.subExecutionNamePrefix).toEqual('exec_id_1');
 
   expect(snfClientMock).toReceiveNthCommandWith(1, ListExecutionsCommand, {
     stateMachineArn: 'arn:aws:states:us-east-1:xxxxxxxxx:stateMachine:stateMachineNameTest',

@@ -82,11 +82,14 @@ export const handler = async (event: {
     hasRunningWorkflow = true;
   }
 
+  const subExecutionNamePrefix = executionArn.split(':').pop()?.substring(0, 36);
+
   const data = {
     HasRunningWorkflow: hasRunningWorkflow,
     PendingCount: pendingCount,
     FilesCountInfo: filesCountInfo,
     SkipRunningWorkflow: hasRunningWorkflow || pendingCount == 0,
+    subExecutionNamePrefix: subExecutionNamePrefix,
   };
   logger.info('return data', { data });
   return data;
