@@ -1904,28 +1904,31 @@ export enum ConditionType {
 }
 
 export const CONDITION_LIST: SelectProps.Option[] = [
-  { label: 'User has done', value: ConditionType.USER_DONE },
-  { label: 'The user has not done', value: ConditionType.USER_NOT_DONE },
+  { label: '用户做过', value: ConditionType.USER_DONE },
+  { label: '用户没做过', value: ConditionType.USER_NOT_DONE },
   {
-    label: 'User has done in sequence',
+    label: '用户依次做过',
     value: ConditionType.USER_DONE_IN_SEQUENCE,
   },
-  { label: 'User is', value: ConditionType.USER_IS },
-  { label: 'User is not', value: ConditionType.USER_IS_NOT },
+  { label: '用户是', value: ConditionType.USER_IS },
+  { label: '用户不是', value: ConditionType.USER_IS_NOT },
 ];
 
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   subItemList: [],
+  eventConditionList: [],
 };
 
 export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
-  conditionRelationShip: ERelationShip.OR,
+  segmentEventRelationShip: ERelationShip.OR,
+  eventConditionList: [],
   subItemList: [
     {
       userEventType: CONDITION_LIST[0],
       subItemList: [],
+      eventConditionList: [],
     },
   ],
   groupDateRange: 'a',

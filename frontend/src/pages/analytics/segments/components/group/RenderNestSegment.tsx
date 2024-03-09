@@ -43,7 +43,7 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
     <div className="flex flex-1 gap-10">
       {segmentItemData.subItemList.length > 1 && (
         <>
-          {segmentItemData.conditionRelationShip === ERelationShip.OR ? (
+          {segmentItemData.segmentEventRelationShip === ERelationShip.OR ? (
             <RelationOr enableChangeRelation={false} isIsolate />
           ) : (
             <RelationAnd enableChangeRelation={false} isIsolate />
@@ -67,11 +67,13 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
           return (
             <ConditionGroup
               segmentData={item}
-              level={level}
-              parentData={segmentItemData}
-              parentIndex={parentIndex}
-              rootIndex={rootIndex}
-              currentIndex={index}
+              segmentProps={{
+                level,
+                rootIndex,
+                parentIndex,
+                currentIndex: index,
+                parentData: segmentItemData,
+              }}
               segmentDataDispatch={segmentDataDispatch}
             />
           );

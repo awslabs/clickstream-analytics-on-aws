@@ -18,13 +18,11 @@ import {
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch, useEffect, useRef } from 'react';
+import { SegmentPropsData } from './ConditionGroup';
 import { CONDITION_LIST } from './mock_data';
 
 interface ConditionProps {
-  level: number;
-  rootIndex: number;
-  parentIndex: number;
-  currentIndex: number;
+  segmentProps: SegmentPropsData;
   segmentData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   updateConditionWidth: (w: number) => void;
@@ -32,11 +30,8 @@ interface ConditionProps {
 
 const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
   const {
-    level,
-    rootIndex,
-    parentIndex,
-    currentIndex,
     segmentData,
+    segmentProps,
     segmentDataDispatch,
     updateConditionWidth,
   } = props;
@@ -58,10 +53,7 @@ const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
         onChange={({ detail }) =>
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserEventType,
-            level: level,
-            rootIndex: rootIndex,
-            parentIndex: parentIndex,
-            currentIndex: currentIndex,
+            segmentProps,
             userEventType: detail.selectedOption,
           })
         }

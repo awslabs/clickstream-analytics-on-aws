@@ -11,19 +11,12 @@
  *  and limitations under the License.
  */
 
-import {
-  Button,
-  Input,
-  Select,
-  SelectProps,
-} from '@cloudscape-design/components';
+import { Button } from '@cloudscape-design/components';
 import {
   ERelationShip,
   IEventSegmentationItem,
   INIT_SEGMENTATION_DATA,
 } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
-import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import {
@@ -31,23 +24,11 @@ import {
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch, useEffect, useReducer, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  ExploreAnalyticsOperators,
-  ExploreComputeMethod,
-} from 'ts/explore-types';
-import { defaultStr } from 'ts/utils';
 import Condition from './Condition';
-import {
-  ConditionType,
-  EVENT_CATEGORIES,
-  MULTI_LEVEL_SELECT_OPTIONS,
-  PRESET_PARAMETERS,
-} from './mock_data';
+import { ConditionType, PRESET_PARAMETERS } from './mock_data';
+import UserDoneComp from './type/UserDoneComp';
 
-interface ConditionGroupProps {
-  segmentData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+export interface SegmentPropsData {
   level: number;
   rootIndex: number;
   parentIndex: number;
@@ -55,19 +36,16 @@ interface ConditionGroupProps {
   parentData: IEventSegmentationItem;
 }
 
+interface ConditionGroupProps {
+  segmentData: IEventSegmentationItem;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+  segmentProps: SegmentPropsData;
+}
+
 const ConditionGroup: React.FC<ConditionGroupProps> = (
   props: ConditionGroupProps
 ) => {
-  const { t } = useTranslation();
-  const {
-    segmentDataDispatch,
-    level,
-    rootIndex,
-    parentData,
-    parentIndex,
-    currentIndex,
-    segmentData,
-  } = props;
+  const { segmentDataDispatch, segmentProps, segmentData } = props;
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
@@ -76,69 +54,6 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
       conditionOptions: PRESET_PARAMETERS,
     }
   );
-
-  const ANALYTICS_OPERATORS = {
-    is_null: {
-      value: ExploreAnalyticsOperators.NULL,
-      label: t('analytics:operators.null'),
-    },
-    is_not_null: {
-      value: ExploreAnalyticsOperators.NOT_NULL,
-      label: t('analytics:operators.notNull'),
-    },
-    equal: {
-      value: ExploreAnalyticsOperators.EQUAL,
-      label: t('analytics:operators.equal'),
-    },
-    not_equal: {
-      value: ExploreAnalyticsOperators.NOT_EQUAL,
-      label: t('analytics:operators.notEqual'),
-    },
-    greater_than: {
-      value: ExploreAnalyticsOperators.GREATER_THAN,
-      label: t('analytics:operators.greaterThan'),
-    },
-    greater_than_or_equal: {
-      value: ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL,
-      label: t('analytics:operators.greaterThanOrEqual'),
-    },
-    less_than: {
-      value: ExploreAnalyticsOperators.LESS_THAN,
-      label: t('analytics:operators.lessThan'),
-    },
-    less_than_or_equal: {
-      value: ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL,
-      label: t('analytics:operators.lessThanOrEqual'),
-    },
-    in: {
-      value: ExploreAnalyticsOperators.IN,
-      label: t('analytics:operators.in'),
-    },
-    not_in: {
-      value: ExploreAnalyticsOperators.NOT_IN,
-      label: t('analytics:operators.notIn'),
-    },
-    contains: {
-      value: ExploreAnalyticsOperators.CONTAINS,
-      label: t('analytics:operators.contains'),
-    },
-    not_contains: {
-      value: ExploreAnalyticsOperators.NOT_CONTAINS,
-      label: t('analytics:operators.notContains'),
-    },
-  };
-
-  const CONDITION_STRING_OPERATORS: SelectProps.Options = [
-    ANALYTICS_OPERATORS.is_null,
-    ANALYTICS_OPERATORS.is_not_null,
-    ANALYTICS_OPERATORS.equal,
-    ANALYTICS_OPERATORS.not_equal,
-    ANALYTICS_OPERATORS.in,
-    ANALYTICS_OPERATORS.not_in,
-    ANALYTICS_OPERATORS.contains,
-    ANALYTICS_OPERATORS.not_contains,
-  ];
-  const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 
   useEffect(() => {
     console.info('filterOptionData:', filterOptionData);
@@ -151,179 +66,65 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           segmentData={segmentData}
           segmentDataDispatch={segmentDataDispatch}
           updateConditionWidth={setConditionWidth}
-          level={level}
-          rootIndex={rootIndex}
-          parentIndex={parentIndex}
-          currentIndex={currentIndex}
+          segmentProps={segmentProps}
         />
-        <>
-          {(segmentData.userEventType?.value === ConditionType.USER_DONE ||
-            segmentData.userEventType?.value ===
-              ConditionType.USER_NOT_DONE) && (
-            <>
-              <div className="cs-analytics-dropdown">
-                <div className="cs-analytics-parameter">
-                  <div className="flex-1">
-                    <EventItem
-                      type="event"
-                      placeholder={t('analytics:labels.eventSelectPlaceholder')}
-                      categoryOption={null}
-                      changeCurCategoryOption={(item) => {
-                        console.info('item:', item);
-                        // changeEventOption(item);
-                      }}
-                      hasTab={true}
-                      isMultiSelect={false}
-                      categories={EVENT_CATEGORIES}
-                      loading={false}
-                    />
-                  </div>
-                </div>
-              </div>
 
-              <div>
-                <Button
-                  iconName="filter"
-                  onClick={() => {
-                    if (!segmentData.eventConditionList) {
-                      segmentDataDispatch({
-                        type: AnalyticsSegmentActionType.UpdateEventFilterCondition,
-                        level,
-                        rootIndex,
-                        parentIndex,
-                        currentIndex,
-                        conditionList: {
-                          ...INIT_SEGMENTATION_DATA,
-                          conditionOptions: [],
-                          enableChangeRelation: true,
-                        },
-                      });
-                    } else {
-                      filterOptionDataDispatch({ type: 'addEventCondition' });
-                    }
-                  }}
-                />
-              </div>
+        {(segmentData.userEventType?.value === ConditionType.USER_DONE ||
+          segmentData.userEventType?.value === ConditionType.USER_NOT_DONE) && (
+          <UserDoneComp
+            segmentData={segmentData}
+            segmentDataDispatch={segmentDataDispatch}
+            level={segmentProps.level}
+            rootIndex={segmentProps.rootIndex}
+            parentIndex={segmentProps.parentIndex}
+            currentIndex={segmentProps.currentIndex}
+            parentData={segmentProps.parentData}
+            addNewEventCondition={() => {
+              segmentDataDispatch({
+                type: AnalyticsSegmentActionType.AddEventFilterCondition,
+                segmentProps,
+              });
+            }}
+          />
+        )}
 
-              <div className="cs-analytics-dropdown">
-                <div className="cs-dropdown-input">
-                  <div className="dropdown-input-column">
-                    <div
-                      className="second-select-option"
-                      title="AAAAAA"
-                      onClick={() => {
-                        setShowGroupSelectDropdown((prev) => !prev);
-                        // setShowDropdown(false);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setShowGroupSelectDropdown((prev) => !prev);
-                          // setShowDropdown(false);
-                        }
-                      }}
-                    >
-                      <Select selectedOption={MULTI_LEVEL_SELECT_OPTIONS[0]} />
-                      {showGroupSelectDropdown && (
-                        <GroupSelectContainer
-                          categories={MULTI_LEVEL_SELECT_OPTIONS}
-                          selectedItem={MULTI_LEVEL_SELECT_OPTIONS[0]}
-                          changeSelectItem={(item) => {
-                            if (item) {
-                              const newItem: any = { ...item };
-                              if (
-                                item.itemType === 'children' &&
-                                item.groupName ===
-                                  ExploreComputeMethod.SUM_VALUE
-                              ) {
-                                newItem.label = t('analytics:sumGroupLabel', {
-                                  label: item.label,
-                                });
-                              }
-                              if (
-                                item.itemType === 'children' &&
-                                item.groupName ===
-                                  ExploreComputeMethod.AVG_VALUE
-                              ) {
-                                newItem.label = t('analytics:avgGroupLabel', {
-                                  label: item.label,
-                                });
-                              }
-                              // changeCurCalcMethodOption?.(newItem);
-                            } else {
-                              // changeCurCalcMethodOption?.(null);
-                            }
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="condition-select">
-                <Select
-                  // disabled={!item.conditionOption}
-                  placeholder={defaultStr(
-                    t('analytics:labels.operatorSelectPlaceholder')
-                  )}
-                  selectedOption={null}
-                  onChange={(e) => {
-                    // changeConditionOperator(e.detail.selectedOption);
-                    console.info(e);
-                  }}
-                  options={CONDITION_STRING_OPERATORS}
-                />
-              </div>
-
-              <div>
-                <Input value="" />
-              </div>
-            </>
-          )}
-        </>
-        <>
-          {(segmentData.userEventType?.value === ConditionType.USER_IS ||
-            segmentData.userEventType?.value === ConditionType.USER_IS_NOT) && (
-            <div style={{ marginTop: -10 }}>
-              <AnalyticsSegmentFilter
-                hideAddButton
-                filterDataState={filterOptionData}
-                filterDataDispatch={filterOptionDataDispatch}
-              />
-            </div>
-          )}
-        </>
+        {(segmentData.userEventType?.value === ConditionType.USER_IS ||
+          segmentData.userEventType?.value === ConditionType.USER_IS_NOT) && (
+          <div style={{ marginTop: -10 }}>
+            {/* <AnalyticsSegmentFilter
+              hideAddButton
+              filterDataState={filterOptionData}
+              filterDataDispatch={filterOptionDataDispatch}
+            /> */}
+          </div>
+        )}
 
         <div>
-          {level === 1 &&
-            parentData.conditionRelationShip === ERelationShip.AND && (
+          {segmentProps.level === 1 &&
+            segmentProps.parentData.segmentEventRelationShip ===
+              ERelationShip.AND && (
               <Button
                 iconName="add-plus"
                 onClick={() => {
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.ConvertAndDataToOr,
-                    level,
-                    rootIndex,
-                    parentIndex,
-                    currentIndex,
-                    parentData,
+                    segmentProps,
                   });
                 }}
               >
                 Or
               </Button>
             )}
-          {parentData.conditionRelationShip === ERelationShip.OR &&
-            currentIndex === parentData.subItemList.length - 1 && (
+          {segmentProps.parentData.segmentEventRelationShip ===
+            ERelationShip.OR &&
+            segmentProps.currentIndex ===
+              segmentProps.parentData.subItemList.length - 1 && (
               <Button
                 iconName="add-plus"
                 onClick={() => {
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.AddOrEventData,
-                    level,
-                    rootIndex,
-                    parentIndex,
-                    parentData,
+                    segmentProps,
                   });
                 }}
               >
@@ -334,9 +135,10 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
 
         <div className="segment-remove-icon">
           {!(
-            level === 1 &&
-            parentData.subItemList.length === 1 &&
-            currentIndex === parentData.subItemList.length - 1
+            segmentProps.level === 1 &&
+            segmentProps.parentData.subItemList.length === 1 &&
+            segmentProps.currentIndex ===
+              segmentProps.parentData.subItemList.length - 1
           ) && (
             <Button
               iconName="close"
@@ -344,11 +146,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
               onClick={() => {
                 segmentDataDispatch({
                   type: AnalyticsSegmentActionType.RemoveEventData,
-                  level,
-                  rootIndex,
-                  parentIndex,
-                  currentIndex,
-                  parentData,
+                  segmentProps,
                 });
               }}
             />
@@ -362,13 +160,26 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
         }}
       >
-        {segmentData.eventConditionList && (
-          <AnalyticsSegmentFilter
-            hideAddButton
-            filterDataState={filterOptionData}
-            filterDataDispatch={filterOptionDataDispatch}
-          />
-        )}
+        {segmentData.eventConditionList &&
+          segmentData.eventConditionList.length > 0 && (
+            <AnalyticsSegmentFilter
+              hideAddButton
+              filterDataState={{
+                conditionOptions: filterOptionData.conditionOptions,
+                conditionRelationShip:
+                  segmentData.eventConditionRelationShip ?? ERelationShip.AND,
+                data: segmentData.eventConditionList,
+              }}
+              filterDataDispatch={filterOptionDataDispatch}
+              segmentProps={segmentProps}
+              addSegmentCondition={(segmentProps: SegmentPropsData) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.AddEventFilterCondition,
+                  segmentProps,
+                });
+              }}
+            />
+          )}
       </div>
     </div>
   );

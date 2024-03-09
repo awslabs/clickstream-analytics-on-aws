@@ -13,6 +13,7 @@
 
 import { Button } from '@cloudscape-design/components';
 import { identity } from 'lodash';
+import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ERelationShip, SegmentationFilterDataType } from '../AnalyticsType';
@@ -25,14 +26,23 @@ interface SegmentationFilterProps {
   filterDataDispatch: any;
   maxSelectNum?: number;
   hideAddButton?: boolean;
+  // For Segment Components
+  segmentProps?: SegmentPropsData;
+  addSegmentCondition?: (segmentProps: SegmentPropsData) => void;
 }
 
 const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
   props: SegmentationFilterProps
 ) => {
   const { t } = useTranslation();
-  const { filterDataState, filterDataDispatch, maxSelectNum, hideAddButton } =
-    props;
+  const {
+    filterDataState,
+    filterDataDispatch,
+    maxSelectNum,
+    hideAddButton,
+    segmentProps,
+    addSegmentCondition,
+  } = props;
 
   return (
     <div className="cs-analytics-dropdown">
@@ -112,6 +122,9 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                 filterDataDispatch({
                   type: 'addEventCondition',
                 });
+                if (segmentProps) {
+                  addSegmentCondition?.(segmentProps);
+                }
               }}
               disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
             >
