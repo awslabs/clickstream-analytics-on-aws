@@ -44,6 +44,9 @@ export interface IAnalyticsItem extends SelectProps.Option {
   groupName?: string;
   itemType?: string;
   subList?: IAnalyticsItem[];
+  // for segment sequence event filter
+  filterGroupRelationShip?: ERelationShip;
+  sequenceEventConditionFilterList?: IConditionItemType[];
 }
 
 export interface IProjectSelectItem extends SelectProps.Option {
@@ -92,10 +95,11 @@ export interface IEventSegmentationItem {
   subItemList: IEventSegmentationItem[];
   eventConditionRelationShip?: ERelationShip | null;
   eventConditionList: IConditionItemType[];
+  sequenceEventList: IAnalyticsItem[];
 }
 
 export interface IEventSegmentationObj {
-  conditionRelationShip: ERelationShip;
+  filterGroupRelationShip: ERelationShip;
   subItemList: IEventSegmentationItem[];
 }
 

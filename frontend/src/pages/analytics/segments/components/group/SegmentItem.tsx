@@ -73,7 +73,7 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
             segmentDataDispatch={segmentDataDispatch}
           />
         </div>
-        <div>
+        <div className="mt-10">
           <Button
             variant="primary"
             onClick={() => {

@@ -23,10 +23,14 @@ import {
   AnalyticsSegmentAction,
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch, useEffect, useReducer, useState } from 'react';
+import { identity } from 'lodash';
+import React, { Dispatch, useMemo, useReducer, useState } from 'react';
 import Condition from './Condition';
+import EventSeqItem from './EventSeqItem';
 import { ConditionType, PRESET_PARAMETERS } from './mock_data';
 import UserDoneComp from './type/UserDoneComp';
+import UserDoneInSeq from './type/UserDoneInSeq';
+import UserIsComp from './type/UserIsComp';
 
 export interface SegmentPropsData {
   level: number;
@@ -34,6 +38,8 @@ export interface SegmentPropsData {
   parentIndex: number;
   currentIndex: number;
   parentData: IEventSegmentationItem;
+  sequenceEventIndex?: number;
+  sequenceConditionIndex?: number;
 }
 
 interface ConditionGroupProps {
@@ -55,9 +61,25 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
     }
   );
 
-  useEffect(() => {
-    console.info('filterOptionData:', filterOptionData);
-  }, [filterOptionData]);
+  const isDoneEvent = useMemo(() => {
+    return (
+      segmentData.userEventType?.value === ConditionType.USER_DONE ||
+      segmentData.userEventType?.value === ConditionType.USER_NOT_DONE
+    );
+  }, [segmentData.userEventType?.value]);
+
+  const isUserIsEvent = useMemo(() => {
+    return (
+      segmentData.userEventType?.value === ConditionType.USER_IS ||
+      segmentData.userEventType?.value === ConditionType.USER_IS_NOT
+    );
+  }, [segmentData.userEventType?.value]);
+
+  const isDoneInSeqEvent = useMemo(() => {
+    return (
+      segmentData.userEventType?.value === ConditionType.USER_DONE_IN_SEQUENCE
+    );
+  }, [segmentData.userEventType?.value]);
 
   return (
     <div className="analytics-segment-group-item">
@@ -69,8 +91,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           segmentProps={segmentProps}
         />
 
-        {(segmentData.userEventType?.value === ConditionType.USER_DONE ||
-          segmentData.userEventType?.value === ConditionType.USER_NOT_DONE) && (
+        {isDoneEvent && (
           <UserDoneComp
             segmentData={segmentData}
             segmentDataDispatch={segmentDataDispatch}
@@ -87,18 +108,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
             }}
           />
         )}
-
-        {(segmentData.userEventType?.value === ConditionType.USER_IS ||
-          segmentData.userEventType?.value === ConditionType.USER_IS_NOT) && (
-          <div style={{ marginTop: -10 }}>
-            {/* <AnalyticsSegmentFilter
-              hideAddButton
-              filterDataState={filterOptionData}
-              filterDataDispatch={filterOptionDataDispatch}
-            /> */}
-          </div>
+        {isUserIsEvent && <UserIsComp />}
+        {isDoneInSeqEvent && (
+          <UserDoneInSeq
+            segmentProps={segmentProps}
+            segmentDataDispatch={segmentDataDispatch}
+          />
         )}
-
         <div>
           {segmentProps.level === 1 &&
             segmentProps.parentData.segmentEventRelationShip ===
@@ -153,34 +169,62 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           )}
         </div>
       </div>
-      <div
-        className="cs-analytics-second-condition"
-        style={{
-          left: conditionWidth + 10,
-          maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
-        }}
-      >
-        {segmentData.eventConditionList &&
-          segmentData.eventConditionList.length > 0 && (
-            <AnalyticsSegmentFilter
-              hideAddButton
-              filterDataState={{
-                conditionOptions: filterOptionData.conditionOptions,
-                conditionRelationShip:
-                  segmentData.eventConditionRelationShip ?? ERelationShip.AND,
-                data: segmentData.eventConditionList,
-              }}
-              filterDataDispatch={filterOptionDataDispatch}
-              segmentProps={segmentProps}
-              addSegmentCondition={(segmentProps: SegmentPropsData) => {
-                segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.AddEventFilterCondition,
-                  segmentProps,
-                });
-              }}
-            />
-          )}
-      </div>
+
+      {isDoneEvent && (
+        <div
+          className="cs-analytics-second-condition"
+          style={{
+            left: conditionWidth + 10,
+            maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
+          }}
+        >
+          {segmentData.eventConditionList &&
+            segmentData.eventConditionList.length > 0 && (
+              <AnalyticsSegmentFilter
+                hideAddButton
+                filterDataState={{
+                  enableChangeRelation: true,
+                  conditionOptions: filterOptionData.conditionOptions,
+                  conditionRelationShip:
+                    segmentData.eventConditionRelationShip ?? ERelationShip.AND,
+                  data: segmentData.eventConditionList,
+                }}
+                filterDataDispatch={filterOptionDataDispatch}
+                addSegmentCondition={() => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.AddEventFilterCondition,
+                    segmentProps,
+                  });
+                }}
+                changeSegmentConditionRelation={(relation) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.ChangeEventFilterConditionRelation,
+                    segmentProps,
+                    relation,
+                  });
+                }}
+              />
+            )}
+        </div>
+      )}
+
+      {isDoneInSeqEvent && (
+        <div className="flex-v gap-5">
+          {segmentData.sequenceEventList.map((item, index) => {
+            return (
+              <EventSeqItem
+                key={identity(index)}
+                sequenceEventIndex={index}
+                segmentData={segmentData}
+                sequenceEventData={item}
+                conditionWidth={conditionWidth}
+                segmentDataDispatch={segmentDataDispatch}
+                segmentProps={segmentProps}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

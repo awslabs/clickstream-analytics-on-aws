@@ -13,7 +13,6 @@
 
 import { Button } from '@cloudscape-design/components';
 import { identity } from 'lodash';
-import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ERelationShip, SegmentationFilterDataType } from '../AnalyticsType';
@@ -27,8 +26,8 @@ interface SegmentationFilterProps {
   maxSelectNum?: number;
   hideAddButton?: boolean;
   // For Segment Components
-  segmentProps?: SegmentPropsData;
-  addSegmentCondition?: (segmentProps: SegmentPropsData) => void;
+  addSegmentCondition?: () => void;
+  changeSegmentConditionRelation?: (relation: ERelationShip) => void;
 }
 
 const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
@@ -40,8 +39,9 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
     filterDataDispatch,
     maxSelectNum,
     hideAddButton,
-    segmentProps,
+    // segmentProps,
     addSegmentCondition,
+    changeSegmentConditionRelation,
   } = props;
 
   return (
@@ -58,6 +58,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                       type: 'changeRelationShip',
                       relation: ERelationShip.OR,
                     });
+                  changeSegmentConditionRelation?.(ERelationShip.OR);
                 }}
               />
             )}
@@ -71,6 +72,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                       type: 'changeRelationShip',
                       relation: ERelationShip.AND,
                     });
+                  changeSegmentConditionRelation?.(ERelationShip.AND);
                 }}
               />
             )}
@@ -122,9 +124,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                 filterDataDispatch({
                   type: 'addEventCondition',
                 });
-                if (segmentProps) {
-                  addSegmentCondition?.(segmentProps);
-                }
+                addSegmentCondition?.();
               }}
               disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
             >

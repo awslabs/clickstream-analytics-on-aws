@@ -14,6 +14,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import {
+  ConditionType,
   DEFAULT_FILTER_GROUP_ITEM,
   DEFAULT_SEGMENT_GROUP_DATA,
   DEFAULT_SEGMENT_ITEM,
@@ -37,6 +38,11 @@ export enum AnalyticsSegmentActionType {
   RemoveFilterGroup = 'removeFilterGroup',
   AddEventFilterCondition = 'addEventFilterCondition',
   UpdateEventFilterCondition = 'updateEventFilterCondition',
+  ChangeEventFilterConditionRelation = 'changeEventFilterConditionRelation',
+
+  AddSequenceDoneEvent = 'addSequenceDoneEvent',
+  AddSequenceEventFilterCondition = 'addSequenceEventFilterCondition',
+  ChangeSequenceEventFilterConditionRelation = 'changeSequenceEventFilterConditionRelation',
 }
 
 export type ResetEventData = {
@@ -83,10 +89,32 @@ export type AddEventFilterCondition = {
   segmentProps: SegmentPropsData;
 };
 
+export type ChangeEventFilterConditionRelation = {
+  type: AnalyticsSegmentActionType.ChangeEventFilterConditionRelation;
+  segmentProps: SegmentPropsData;
+  relation: ERelationShip;
+};
+
 export type UpdateEventFilterCondition = {
   type: AnalyticsSegmentActionType.UpdateEventFilterCondition;
   segmentProps: SegmentPropsData;
   conditionList: SegmentationFilterDataType;
+};
+
+export type AddSequenceDoneEvent = {
+  type: AnalyticsSegmentActionType.AddSequenceDoneEvent;
+  segmentProps: SegmentPropsData;
+};
+
+export type AddSequenceEventFilterCondition = {
+  type: AnalyticsSegmentActionType.AddSequenceEventFilterCondition;
+  segmentProps: SegmentPropsData;
+};
+
+export type ChangeSequenceEventFilterConditionRelation = {
+  type: AnalyticsSegmentActionType.ChangeSequenceEventFilterConditionRelation;
+  segmentProps: SegmentPropsData;
+  relation: ERelationShip;
 };
 
 export type AnalyticsSegmentAction =
@@ -99,7 +127,11 @@ export type AnalyticsSegmentAction =
   | RemoveFilterGroup
   | UpdateUserEventType
   | AddEventFilterCondition
-  | UpdateEventFilterCondition;
+  | ChangeEventFilterConditionRelation
+  | UpdateEventFilterCondition
+  | AddSequenceDoneEvent
+  | AddSequenceEventFilterCondition
+  | ChangeSequenceEventFilterConditionRelation;
 
 export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
@@ -141,6 +173,7 @@ export const analyticsSegmentGroupReducer = (
         userEventType: null,
         segmentEventRelationShip: ERelationShip.OR,
         eventConditionList: [],
+        sequenceEventList: [],
         subItemList: [
           { ...currentData }, // TODO, replace to current data
           { ...DEFAULT_SEGMENT_ITEM },
@@ -158,6 +191,7 @@ export const analyticsSegmentGroupReducer = (
           userEventType: null,
           segmentEventRelationShip: ERelationShip.AND,
           eventConditionList: [],
+          sequenceEventList: [],
           subItemList: [
             { ...newState.subItemList[action.rootIndex] },
             { ...DEFAULT_SEGMENT_ITEM },
@@ -208,17 +242,27 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.UpdateUserEventType: {
-      console.info('update user event type');
-      if (action.segmentProps.level === 1) {
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].userEventType = action.userEventType;
-      } else if (action.segmentProps.level === 2) {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].userEventType =
-          action.userEventType;
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.userEventType = action.userEventType;
+      currentData.eventConditionList = [];
+      currentData.sequenceEventList =
+        action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE
+          ? [
+              {
+                name: 'Sequence Event 1',
+                sequenceEventConditionFilterList: [],
+              },
+            ]
+          : [];
       return { ...newState };
     }
 
@@ -235,6 +279,21 @@ export const analyticsSegmentGroupReducer = (
             ...DEFAULT_CONDITION_DATA,
           }
         );
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.ChangeEventFilterConditionRelation: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].eventConditionRelationShip = action.relation;
+      } else if (action.segmentProps.level === 2) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[
+          action.segmentProps.currentIndex
+        ].eventConditionRelationShip = action.relation;
       }
       return { ...newState };
     }
@@ -259,6 +318,62 @@ export const analyticsSegmentGroupReducer = (
       // }
       return { ...newState };
     }
+
+    case AnalyticsSegmentActionType.AddSequenceDoneEvent: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].sequenceEventList.push({
+          name: 'Sequence Event',
+          sequenceEventConditionFilterList: [],
+        });
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[action.segmentProps.currentIndex].sequenceEventList.push({
+          name: 'Sequence Event',
+          sequenceEventConditionFilterList: [],
+        });
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.AddSequenceEventFilterCondition: {
+      console.info('AddSequenceEventFilterCondition:');
+      console.info('action.segmentProps:', action.segmentProps);
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].sequenceEventList[
+          action.segmentProps.sequenceEventIndex ?? 0
+        ].sequenceEventConditionFilterList?.push({ ...DEFAULT_CONDITION_DATA });
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+          action.segmentProps.sequenceEventIndex ?? 0
+        ].sequenceEventConditionFilterList?.push({ ...DEFAULT_CONDITION_DATA });
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.ChangeSequenceEventFilterConditionRelation: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].sequenceEventList[
+          action.segmentProps.sequenceEventIndex ?? 0
+        ].filterGroupRelationShip = action.relation;
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+          action.segmentProps.sequenceEventIndex ?? 0
+        ].filterGroupRelationShip = action.relation;
+      }
+      return { ...newState };
+    }
+
     default:
       return state;
   }
