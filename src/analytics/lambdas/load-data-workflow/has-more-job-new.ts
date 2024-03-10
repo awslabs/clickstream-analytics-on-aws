@@ -90,9 +90,6 @@ export const handler = async (event: HasMoreWorkEvent, context: Context) => {
     processingFilesCount: tableProcessingCountInfo,
     jobNewCount: currentJobNewCount,
     hasMoreWork: (currentJobNewCount + totalProcessCount) > 0,
-    odsTableName: odsTableName,
-    odsSourceBucket: odsSourceBucket,
-    odsSourcePrefix: odsSourcePrefix,
   };
 };
 

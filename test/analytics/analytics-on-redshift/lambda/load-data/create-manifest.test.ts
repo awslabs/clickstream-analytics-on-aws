@@ -128,7 +128,6 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         retryCount: 0,
       }],
       count: 1,
-      odsTableName: 'test_me_table',
     }));
 
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 4);
@@ -226,7 +225,6 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         }),
       ]),
       count: 3,
-      odsTableName: scheduleEvent.odsTableName,
     }));
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 4);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 5);
@@ -381,7 +379,6 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         }),
       ]),
       count: 1,
-      odsTableName: scheduleEvent.odsTableName,
     }));
     expect(response.manifestList[0].jobList.entries).toHaveLength(parseInt(process.env.QUERY_RESULT_LIMIT!));
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(QueryCommand, 5);

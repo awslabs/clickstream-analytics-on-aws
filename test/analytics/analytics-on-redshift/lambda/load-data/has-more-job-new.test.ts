@@ -96,9 +96,6 @@ test('Should get all JOB_NEW files', async () => {
     },
     jobNewCount: 5,
     hasMoreWork: true,
-    odsTableName: inputEvent.odsTableName,
-    odsSourceBucket: inputEvent.odsSourceBucket,
-    odsSourcePrefix: inputEvent.odsSourcePrefix,
   });
 
   expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {

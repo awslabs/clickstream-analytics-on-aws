@@ -196,11 +196,7 @@ export const handler = async (event: CreateLoadManifestEvent, context: Context) 
   logger.info('FILE_NEW=' + allJobNewCount + ', FILE_PROCESSING=' + processInfo.jobNum
     + ', FILE_ENQUEUE=' + enQueueInfo.jobNum + ', FILE_MAX_AGE=' + maxFileAgeSeconds);
 
-  return {
-    ...response,
-    odsSourceBucket: odsSourceBucket,
-    odsSourcePrefix: odsSourcePrefix,
-  };
+  return response;
 };
 
 const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEventItem>,
@@ -253,7 +249,6 @@ const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEv
   return {
     manifestList: manifestFiles,
     count: manifestFiles.length,
-    odsTableName: odsTableName,
   };
 };
 

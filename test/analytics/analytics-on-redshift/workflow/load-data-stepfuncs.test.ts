@@ -52,6 +52,8 @@ describe('Load data workflow', () => {
       },
     });
 
+    console.log(JSON.stringify(strCapture.asObject(), undefined, 2));
+
     expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataSubStepFuncDef);
   });
 });

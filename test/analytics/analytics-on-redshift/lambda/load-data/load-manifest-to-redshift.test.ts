@@ -66,8 +66,6 @@ const loadManifestEvent: LoadManifestEvent = {
     retryCount: 0,
   },
   odsTableName: 'test_me_table',
-  odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
-  odsSourcePrefix: 'project1/ods_external_events',
 };
 
 const loadManifestEvent2: LoadManifestEvent = {
@@ -87,8 +85,6 @@ const loadManifestEvent2: LoadManifestEvent = {
     retryCount: 3,
   },
   odsTableName: 'test_me_table',
-  odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
-  odsSourcePrefix: 'project1/ods_external_events',
 };
 const context = getMockContext();
 
@@ -120,9 +116,6 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
         id: executeId,
         retryCount: 0,
       }),
-      odsTableName: loadManifestEvent.odsTableName,
-      odsSourceBucket: loadManifestEvent.odsSourceBucket,
-      odsSourcePrefix: loadManifestEvent.odsSourcePrefix,
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
@@ -158,9 +151,6 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
         },
         manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56-2.manifest',
       }),
-      odsTableName: loadManifestEvent2.odsTableName,
-      odsSourceBucket: loadManifestEvent2.odsSourceBucket,
-      odsSourcePrefix: loadManifestEvent2.odsSourcePrefix,
     });
   });
 
@@ -232,9 +222,6 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
         id: executeId,
         retryCount: 0,
       }),
-      odsTableName: loadManifestEvent.odsTableName,
-      odsSourceBucket: loadManifestEvent.odsSourceBucket,
-      odsSourcePrefix: loadManifestEvent.odsSourcePrefix,
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {

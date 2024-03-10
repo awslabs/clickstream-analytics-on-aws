@@ -309,9 +309,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         lambdaFunction: createLoadManifestFn,
         payload: TaskInput.fromObject({
           'execution_id.$': '$$.Execution.Id',
-          'odsTableName.$': '$.odsTableName',
-          'odsSourceBucket.$': '$.odsSourceBucket',
-          'odsSourcePrefix.$': '$.odsSourcePrefix',
+          'odsTableName.$': '$$.Execution.Input.odsTableName',
+          'odsSourceBucket.$': '$$.Execution.Input.odsSourceBucket',
+          'odsSourcePrefix.$': '$$.Execution.Input.odsSourcePrefix',
         }),
         outputPath: '$.Payload',
       });
@@ -335,9 +335,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
             'jobList.$': '$.jobList',
             'retryCount.$': '$.retryCount',
           },
-          'odsTableName.$': '$.odsTableName',
-          'odsSourceBucket.$': '$.odsSourceBucket',
-          'odsSourcePrefix.$': '$.odsSourcePrefix',
+          'odsTableName.$': '$$.Execution.Input.odsTableName',
         }),
         outputPath: '$.Payload',
       });
@@ -356,9 +354,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         payload: TaskInput.fromObject({
           'detail.$': '$.detail',
           'waitTimeInfo.$': '$.waitTimeInfo',
-          'odsTableName.$': '$.odsTableName',
-          'odsSourceBucket.$': '$.odsSourceBucket',
-          'odsSourcePrefix.$': '$.odsSourcePrefix',
         }),
         outputPath: '$.Payload',
       });
@@ -402,9 +397,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
             'manifestFileName.$': '$.detail.manifestFileName',
             'jobList.$': '$.detail.jobList',
             'retryCount.$': '$.detail.retryCount',
-            'odsTableName.$': '$.odsTableName',
-            'odsSourceBucket.$': '$.odsSourceBucket',
-            'odsSourcePrefix.$': '$.odsSourcePrefix',
           },
         }),
       ).next(submitJob);
@@ -430,9 +422,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
           maxConcurrency: 1,
           itemsPath: '$.manifestList',
           parameters: {
-            'odsTableName.$': '$.odsTableName',
-            'odsSourceBucket.$': '$.odsSourceBucket',
-            'odsSourcePrefix.$': '$.odsSourcePrefix',
             'execution_id.$': '$$.Execution.Id',
             'appId.$': '$$.Map.Item.Value.appId',
             'manifestFileName.$': '$$.Map.Item.Value.manifestFileName',
@@ -447,9 +436,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       const hasMoreWorkFn = this.createHasMoreWorkFn(ddbTable, props);
       const checkMoreWork = new LambdaInvoke(this, ' Check more work', {
         payload: TaskInput.fromObject({
-          'odsTableName.$': '$.odsTableName',
-          'odsSourceBucket.$': '$.odsSourceBucket',
-          'odsSourcePrefix.$': '$.odsSourcePrefix',
+          'odsTableName.$': '$$.Execution.Input.odsTableName',
+          'odsSourceBucket.$': '$$.Execution.Input.odsSourceBucket',
+          'odsSourcePrefix.$': '$$.Execution.Input.odsSourcePrefix',
         }),
         lambdaFunction: hasMoreWorkFn,
         outputPath: '$.Payload',
@@ -474,21 +463,10 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         time: WaitTime.duration(Duration.seconds(120)),
       });
 
-      const mapResultPass = new Pass(this, 'process map result', {
-        inputPath: '$',
-        parameters: {
-          'odsTableName.$': '$[0].odsTableName',
-          'odsSourceBucket.$': '$[0].odsSourceBucket',
-          'odsSourcePrefix.$': '$[0].odsSourcePrefix',
-        },
-      });
-
-      mapResultPass.next(checkMoreWorkTodo);
-
       const waitAndCheckMoreWork = waitX2.next(checkMoreWorkTodo);
       const checkJobExist = new Choice(this, 'Check if job exists')
         .when(Condition.isNotPresent('$.manifestList'), waitAndCheckMoreWork)
-        .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(mapResultPass))
+        .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(checkMoreWorkTodo))
         .otherwise(waitAndCheckMoreWork);
 
       const doWorkflow = getJobList.next(checkJobExist);

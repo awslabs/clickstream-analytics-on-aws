@@ -39,9 +39,6 @@ const loadStatusEvent: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = {
       }],
     },
   },
-  odsTableName: 'test_me_table',
-  odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
-  odsSourcePrefix: 'project1/ods_external_events',
   waitTimeInfo: {
     waitTime: 10,
     loopCount: 1,
@@ -66,9 +63,6 @@ const loadStatusEvent2: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = 
       }],
     },
   },
-  odsTableName: 'test_me_table',
-  odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
-  odsSourcePrefix: 'project1/ods_external_events',
   waitTimeInfo: {
     waitTime: 10,
     loopCount: 1,
@@ -93,9 +87,6 @@ const loadStatusEvent3: CheckLoadStatusEvent & { waitTimeInfo: WaitTimeInfo } = 
       }],
     },
   },
-  odsTableName: 'test_me_table',
-  odsSourceBucket: 'DOC-EXAMPLE-BUCKET',
-  odsSourcePrefix: 'project1/ods_external_events',
   waitTimeInfo: {
     waitTime: 10,
     loopCount: 1,
@@ -158,9 +149,6 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
       detail: expect.objectContaining({
         status: StatusString.STARTED,
       }),
-      odsTableName: loadStatusEvent.odsTableName,
-      odsSourceBucket: loadStatusEvent.odsSourceBucket,
-      odsSourcePrefix: loadStatusEvent.odsSourcePrefix,
       waitTimeInfo: expect.objectContaining({
         waitTime: 10,
         loopCount: 2,
