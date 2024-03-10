@@ -16,22 +16,22 @@
                   "Rows": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "{{smalMultiplesFieldId}}",
-                              "Column": {
-                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "group_col"
-                              }
-                          }
-                      },
-                      {
-                          "CategoricalDimensionField": {
                               "FieldId": "{{catDimFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "event_name"
                               }
                           }
-                      }
+                      },
+                      {
+                        "CategoricalDimensionField": {
+                            "FieldId": "{{smalMultiplesFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "group_col"
+                            }
+                        }
+                    }
                   ],
                   "Columns": [
                       {
@@ -94,10 +94,6 @@
                   },
                   {
                       "FieldId": "{{dateDimFieldId}}",
-                      "Visibility": "VISIBLE"
-                  },
-                  {
-                      "FieldId": "{{catMeasureFieldId}}",
                       "Visibility": "VISIBLE"
                   }
               ]

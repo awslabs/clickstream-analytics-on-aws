@@ -18,15 +18,6 @@
               "TableAggregatedFieldWells": {
                   "GroupBy": [
                         {
-                          "CategoricalDimensionField": {
-                              "FieldId": "{{dateDimFieldId}}",
-                              "Column": {
-                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "event_date"
-                              }
-                          }
-                        },
-                        {
                             "CategoricalDimensionField": {
                               "FieldId": "{{nameDimFieldId}}",
                               "Column": {
@@ -34,6 +25,15 @@
                                   "ColumnName": "event_name"
                               }
                             }
+                        },
+                        {
+                          "DateDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              }
+                          }
                         }
                   ],
                   "Values": []
@@ -41,6 +41,24 @@
           },
           "SortConfiguration": {
               "RowSort": [
+                {
+                    "FieldId": "{{nameDimFieldId}}",
+                    "SortBy": {
+                        "Field": {
+                            "FieldId": "{{nameDimFieldId}}",
+                            "Direction": "ASC"
+                        }
+                    }
+                },
+                {
+                    "FieldId": "{{dateDimFieldId}}",
+                    "SortBy": {
+                        "Field": {
+                            "FieldId": "{{dateDimFieldId}}",
+                            "Direction": "DESC"
+                        }
+                    }
+                }
               ]
           },
           "TableOptions": {
@@ -50,10 +68,18 @@
               }
           },
           "FieldOptions": {
-              "SelectedFieldOptions": [
-              ],
-              "Order": []
-          }
+            "SelectedFieldOptions": [
+                {
+                  "FieldId": "{{nameDimFieldId}}",
+                  "Visibility": "VISIBLE"
+                },
+                {
+                    "FieldId": "{{dateDimFieldId}}",
+                    "Visibility": "VISIBLE"
+                }
+            ],
+            "Order": []
+        }
       },
       "Actions": []
   }
