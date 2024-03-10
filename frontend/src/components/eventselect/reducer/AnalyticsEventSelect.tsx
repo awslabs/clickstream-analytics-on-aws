@@ -68,7 +68,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     metadataUserAttributes,
     loading,
   } = props;
-
+  console.info('eventOptionList:', eventOptionList);
   return (
     <div className="cs-analytics-dropdown">
       {eventDataState.map((element, index) => {

@@ -22,7 +22,7 @@ import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import {
   CONDITION_STRING_OPERATORS,
-  EVENT_CATEGORIES,
+  MOCK_EVENT_LIST,
   MULTI_LEVEL_SELECT_OPTIONS,
 } from '../mock_data';
 
@@ -60,7 +60,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               }}
               hasTab={true}
               isMultiSelect={false}
-              categories={EVENT_CATEGORIES}
+              categories={MOCK_EVENT_LIST}
               loading={false}
             />
           </div>

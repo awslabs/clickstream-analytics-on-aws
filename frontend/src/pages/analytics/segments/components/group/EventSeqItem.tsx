@@ -28,7 +28,7 @@ import {
 import React, { Dispatch, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from './ConditionGroup';
-import { EVENT_CATEGORIES, PRESET_PARAMETERS } from './mock_data';
+import { MOCK_EVENT_LIST, PRESET_PARAMETERS } from './mock_data';
 
 interface EventSeqItemProps {
   conditionWidth: number;
@@ -85,7 +85,7 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 }}
                 hasTab={true}
                 isMultiSelect={false}
-                categories={EVENT_CATEGORIES}
+                categories={MOCK_EVENT_LIST}
                 loading={false}
               />
             </div>

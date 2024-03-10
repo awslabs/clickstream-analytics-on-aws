@@ -11,16 +11,42 @@
  *  and limitations under the License.
  */
 
-import { DateRangePicker } from '@cloudscape-design/components';
-import React from 'react';
+import {
+  DateRangePicker,
+  DateRangePickerProps,
+} from '@cloudscape-design/components';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import React, { Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 
-const ConditionTimeRange: React.FC = () => {
-  const [value, setValue] = React.useState<any>(undefined);
+interface ConditionTimeRangeProps {
+  segmentData: IEventSegmentationItem;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+  groupIndex: number;
+}
+
+const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
+  props: ConditionTimeRangeProps
+) => {
+  const { t } = useTranslation();
+  const { segmentData, groupIndex, segmentDataDispatch } = props;
   return (
     <div>
       <DateRangePicker
-        onChange={({ detail }) => setValue(detail.value)}
-        value={value}
+        onChange={({ detail }) => {
+          console.log(detail.value);
+          segmentDataDispatch({
+            type: AnalyticsSegmentActionType.UpdateFilterGroupTimeRange,
+            index: groupIndex,
+            timeRange: detail,
+          });
+        }}
+        value={segmentData.groupDateRange?.value ?? null}
         relativeOptions={[
           {
             key: 'previous-5-minutes',
@@ -72,7 +98,34 @@ const ConditionTimeRange: React.FC = () => {
           }
           return { valid: true };
         }}
-        i18nStrings={{}}
+        i18nStrings={{
+          relativeModeTitle: defaultStr(
+            t('analytics:dateRange.relativeModeTitle')
+          ),
+          absoluteModeTitle: defaultStr(
+            t('analytics:dateRange.absoluteModeTitle')
+          ),
+          relativeRangeSelectionHeading: defaultStr(
+            t('analytics:dateRange.relativeRangeSelectionHeading')
+          ),
+          cancelButtonLabel: defaultStr(
+            t('analytics:dateRange.cancelButtonLabel')
+          ),
+          applyButtonLabel: defaultStr(
+            t('analytics:dateRange.applyButtonLabel')
+          ),
+          clearButtonLabel: defaultStr(
+            t('analytics:dateRange.clearButtonLabel')
+          ),
+          customRelativeRangeOptionLabel: defaultStr(
+            t('analytics:dateRange.customRelativeRangeOptionLabel')
+          ),
+          formatRelativeRange: (value: DateRangePickerProps.RelativeValue) => {
+            const label = t('analytics:dateRange.formatRelativeRangeLabel');
+            const unit = t(`analytics:dateRange.${value.unit}`);
+            return `${label} ${value.amount} ${unit}`;
+          },
+        }}
         placeholder="Filter by a date and time range"
       />
     </div>

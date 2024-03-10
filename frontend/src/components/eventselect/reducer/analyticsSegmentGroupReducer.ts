@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DateRangePickerProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import {
@@ -34,8 +35,12 @@ export enum AnalyticsSegmentActionType {
   AddAndEventData = 'addAndEventData',
   RemoveEventData = 'removeEventData',
   UpdateUserEventType = 'updateUserEventType',
+
   AddFilterGroup = 'addFilterGroup',
   RemoveFilterGroup = 'removeFilterGroup',
+  UpdateFilterGroupName = 'updateFilterGroupName',
+  UpdateFilterGroupTimeRange = 'updateFilterGroupTimeRange',
+
   AddEventFilterCondition = 'addEventFilterCondition',
   UpdateEventFilterCondition = 'updateEventFilterCondition',
   ChangeEventFilterConditionRelation = 'changeEventFilterConditionRelation',
@@ -76,6 +81,18 @@ export type AddFilterGroup = {
 export type RemoveFilterGroup = {
   type: AnalyticsSegmentActionType.RemoveFilterGroup;
   index: number;
+};
+
+export type UpdateFilterGroupName = {
+  type: AnalyticsSegmentActionType.UpdateFilterGroupName;
+  index: number;
+  name: string;
+};
+
+export type UpdateFilterGroupTimeRange = {
+  type: AnalyticsSegmentActionType.UpdateFilterGroupTimeRange;
+  index: number;
+  timeRange: DateRangePickerProps.ChangeDetail | null;
 };
 
 export type UpdateUserEventType = {
@@ -125,6 +142,8 @@ export type AnalyticsSegmentAction =
   | RemoveEventData
   | AddFilterGroup
   | RemoveFilterGroup
+  | UpdateFilterGroupName
+  | UpdateFilterGroupTimeRange
   | UpdateUserEventType
   | AddEventFilterCondition
   | ChangeEventFilterConditionRelation
@@ -174,10 +193,7 @@ export const analyticsSegmentGroupReducer = (
         segmentEventRelationShip: ERelationShip.OR,
         eventConditionList: [],
         sequenceEventList: [],
-        subItemList: [
-          { ...currentData }, // TODO, replace to current data
-          { ...DEFAULT_SEGMENT_ITEM },
-        ],
+        subItemList: [{ ...currentData }, { ...DEFAULT_SEGMENT_ITEM }],
       };
       return { ...newState };
     }
@@ -187,15 +203,15 @@ export const analyticsSegmentGroupReducer = (
         newState.subItemList[action.rootIndex].segmentEventRelationShip ===
         ERelationShip.OR
       ) {
+        const previousData = cloneDeep(
+          newState.subItemList[action.rootIndex].subItemList[0]
+        );
         newState.subItemList[action.rootIndex] = {
           userEventType: null,
           segmentEventRelationShip: ERelationShip.AND,
           eventConditionList: [],
           sequenceEventList: [],
-          subItemList: [
-            { ...newState.subItemList[action.rootIndex] },
-            { ...DEFAULT_SEGMENT_ITEM },
-          ],
+          subItemList: [{ ...previousData }, { ...DEFAULT_SEGMENT_ITEM }],
         };
       } else {
         newState.subItemList[action.rootIndex].subItemList.push(
@@ -238,6 +254,16 @@ export const analyticsSegmentGroupReducer = (
 
     case AnalyticsSegmentActionType.RemoveFilterGroup: {
       newState.subItemList.splice(action.index, 1);
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateFilterGroupName: {
+      newState.subItemList[action.index].groupName = action.name;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateFilterGroupTimeRange: {
+      newState.subItemList[action.index].groupDateRange = action.timeRange;
       return { ...newState };
     }
 

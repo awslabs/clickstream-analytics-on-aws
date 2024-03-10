@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import {
   ConditionCategory,
   MetadataPlatform,
@@ -89,7 +92,8 @@ export interface IEventAnalyticsItem {
 
 // for segment group
 export interface IEventSegmentationItem {
-  groupDateRange?: any; // TODO Type
+  groupDateRange?: DateRangePickerProps.ChangeDetail | null;
+  groupName?: string;
   userEventType: IAnalyticsItem | null;
   segmentEventRelationShip?: ERelationShip;
   subItemList: IEventSegmentationItem[];

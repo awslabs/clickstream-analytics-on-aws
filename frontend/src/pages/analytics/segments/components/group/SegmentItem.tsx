@@ -43,7 +43,17 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
               {index + 1}
             </div>
             <div className="flex-1 m-w-300">
-              <Input value="" />
+              <Input
+                placeholder="Provide a short description"
+                value={segmentItemData.groupName ?? ''}
+                onChange={({ detail }) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateFilterGroupName,
+                    index: index,
+                    name: detail.value,
+                  });
+                }}
+              />
             </div>
           </div>
           <div>
@@ -63,7 +73,11 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
         </div>
       </div>
       <div className="flex-v gap-5 cs-analytics-group-content-bg">
-        <ConditionTimeRange />
+        <ConditionTimeRange
+          groupIndex={index}
+          segmentData={segmentItemData}
+          segmentDataDispatch={segmentDataDispatch}
+        />
         <div className="cs-analytics-dropdown">
           <RenderNestSegment
             level={1}
