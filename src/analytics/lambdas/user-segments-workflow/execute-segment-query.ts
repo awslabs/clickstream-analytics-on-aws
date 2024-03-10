@@ -20,7 +20,7 @@ import { parseDynamoDBTableARN } from '../../../common/utils';
 import { SegmentJobStatus } from '../../private/segments/segments-model';
 import { executeStatements, getRedshiftClient, getRedshiftProps } from '../redshift-data';
 
-type ExecuteSegmentQueryEvent = StateMachineStatusOutput;
+export type ExecuteSegmentQueryEvent = StateMachineStatusOutput;
 
 export interface ExecuteSegmentQueryOutput {
   appId: string;
@@ -76,7 +76,9 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
     const queryId = await executeStatements(redshiftClient, [sql], serverlessRedshiftProps, provisionedRedshiftProps);
     logger.info('Execute segment query: ', { queryId });
     const output: ExecuteSegmentQueryOutput = {
-      ...event,
+      appId: event.appId,
+      segmentId: event.segmentId,
+      jobRunId: event.jobRunId,
       queryId: queryId ?? '',
     };
 

@@ -45,8 +45,8 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       ...event,
       jobStatus: SegmentJobStatus.IN_PROGRESS,
       waitTimeInfo: {
-        waitTime: 15,
-        loopCount: 0,
+        waitTime: 30,
+        loopCount: 1,
       },
     });
     expect(ddbDocClientMock).not.toHaveReceivedCommandWith(UpdateCommand, expect.any(Object));
@@ -55,18 +55,20 @@ describe('User segments workflow segment-job-status lambda tests', () => {
   test('Segment job is completed', async () => {
     redshiftDataClientMock.on(DescribeStatementCommand).resolves({ Status: StatusString.FINISHED });
 
-    event.waitTimeInfo = {
-      waitTime: 15,
-      loopCount: 0,
-    };
-    const resp = await handler(event);
+    const resp = await handler({
+      ...event,
+      waitTimeInfo: {
+        waitTime: 25,
+        loopCount: 5,
+      },
+    });
 
     expect(resp).toEqual({
       ...event,
       jobStatus: SegmentJobStatus.COMPLETED,
       waitTimeInfo: {
-        waitTime: 15,
-        loopCount: 1,
+        waitTime: 35,
+        loopCount: 6,
       },
     });
     expect(ddbDocClientMock).toHaveReceivedCommandWith(UpdateCommand, {
@@ -93,8 +95,8 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       ...event,
       jobStatus: SegmentJobStatus.FAILED,
       waitTimeInfo: {
-        waitTime: 15,
-        loopCount: 0,
+        waitTime: 30,
+        loopCount: 1,
       },
     });
     expect(ddbDocClientMock).toHaveReceivedCommandWith(UpdateCommand, {

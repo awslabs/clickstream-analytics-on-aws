@@ -26,14 +26,14 @@ import {
 } from '../../private/segments/segments-model';
 
 interface SegmentJobInitEvent {
-  segmentId: string;
   appId: string;
+  segmentId: string;
   trigger: SegmentJobTriggerType;
 }
 
 export interface SegmentJobInitOutput {
-  segmentId: string;
   appId: string;
+  segmentId: string;
   jobRunId: string;
   scheduleIsExpired: boolean;
 }
@@ -99,7 +99,8 @@ export const handler = async (event: SegmentJobInitEvent) => {
     }));
 
     const output: SegmentJobInitOutput = {
-      ...event,
+      appId: event.appId,
+      segmentId: event.segmentId,
       jobRunId,
       scheduleIsExpired: false,
     };

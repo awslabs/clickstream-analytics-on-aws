@@ -70,7 +70,8 @@ describe('User segments workflow segment-job-init lambda tests', () => {
     const resp = await handler(event);
 
     expect(resp).toEqual({
-      ...event,
+      appId: event.appId,
+      segmentId: event.segmentId,
       jobRunId: expect.any(String),
       scheduleIsExpired: false,
     });
@@ -96,7 +97,8 @@ describe('User segments workflow segment-job-init lambda tests', () => {
     const resp = await handler(event);
 
     expect(resp).toEqual({
-      ...event,
+      appId: event.appId,
+      segmentId: event.segmentId,
       jobRunId: expect.any(String),
       scheduleIsExpired: false,
     });

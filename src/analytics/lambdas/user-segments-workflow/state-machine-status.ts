@@ -15,13 +15,11 @@ import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFN
 import { SegmentJobInitOutput } from './segment-job-init';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
+import { handleBackoffTimeInfo } from '../../../common/workflow';
 
 export interface StateMachineStatusEvent {
   stateMachineArn: string;
-  input: SegmentJobInitOutput & {
-    waitTimeInfo?: WaitTimeInfo;
-  };
+  input: SegmentJobInitOutput;
 }
 
 export interface StateMachineStatusOutput {
@@ -29,7 +27,6 @@ export interface StateMachineStatusOutput {
   segmentId: string;
   jobRunId: string;
   stateMachineStatus: StateMachineStatus;
-  waitTimeInfo: WaitTimeInfo;
 }
 
 export enum StateMachineStatus {
@@ -42,18 +39,8 @@ const sfnClient = new SFNClient({
   region: process.env.AWS_REGION,
 });
 
-export const handler = async (event: StateMachineStatusEvent) => {
+const _handler = async (event: StateMachineStatusEvent) => {
   try {
-    // Update waitTimeInfo
-    const waitTimeInfo = event.input.waitTimeInfo;
-    const updatedWaitTimeInfo = !!waitTimeInfo ? calculateWaitTime(
-      waitTimeInfo.waitTime,
-      waitTimeInfo.loopCount,
-    ) : {
-      waitTime: 60,
-      loopCount: 0,
-    };
-
     // Get state machine executions status
     const request: ListExecutionsCommandInput = {
       stateMachineArn: event.stateMachineArn,
@@ -63,8 +50,9 @@ export const handler = async (event: StateMachineStatusEvent) => {
     const response = await sfnClient.send(command);
 
     const output: StateMachineStatusOutput = {
-      ...event.input,
-      waitTimeInfo: updatedWaitTimeInfo,
+      appId: event.input.appId,
+      segmentId: event.input.segmentId,
+      jobRunId: event.input.jobRunId,
       stateMachineStatus: (response.executions === undefined || response.executions.length <= 1) ?
         StateMachineStatus.IDLE : StateMachineStatus.BUSY,
     };
@@ -74,3 +62,5 @@ export const handler = async (event: StateMachineStatusEvent) => {
     throw err;
   }
 };
+
+export const handler = handleBackoffTimeInfo(_handler);

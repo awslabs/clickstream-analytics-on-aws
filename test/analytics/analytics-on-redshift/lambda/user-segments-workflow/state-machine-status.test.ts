@@ -54,11 +54,10 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       appId: 'app-id',
       segmentId: 'segment-id',
       jobRunId: 'job-run-id',
-      scheduleIsExpired: false,
       stateMachineStatus: StateMachineStatus.BUSY,
       waitTimeInfo: {
-        waitTime: 60,
-        loopCount: 0,
+        waitTime: 30,
+        loopCount: 1,
       },
     });
   });
@@ -68,17 +67,18 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       executions: [executionListItem],
     });
 
-    event.input.waitTimeInfo = {
-      waitTime: 60,
-      loopCount: 5,
-    };
-    const resp = await handler(event);
+    const resp = await handler({
+      ...event,
+      waitTimeInfo: {
+        waitTime: 60,
+        loopCount: 5,
+      },
+    });
 
     expect(resp).toEqual({
       appId: 'app-id',
       segmentId: 'segment-id',
       jobRunId: 'job-run-id',
-      scheduleIsExpired: false,
       stateMachineStatus: StateMachineStatus.IDLE,
       waitTimeInfo: {
         waitTime: 70,

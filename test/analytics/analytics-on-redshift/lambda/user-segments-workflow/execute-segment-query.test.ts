@@ -14,22 +14,21 @@
 import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler } from '../../../../../src/analytics/lambdas/user-segments-workflow/execute-segment-query';
+import {
+  ExecuteSegmentQueryEvent,
+  handler,
+} from '../../../../../src/analytics/lambdas/user-segments-workflow/execute-segment-query';
 import { StateMachineStatus } from '../../../../../src/analytics/lambdas/user-segments-workflow/state-machine-status';
 import 'aws-sdk-client-mock-jest';
 
 describe('User segments workflow execute-segment-query lambda tests', () => {
   const ddbDocClientMock = mockClient(DynamoDBDocumentClient);
   const redshiftDataClientMock = mockClient(RedshiftDataClient);
-  const event = {
+  const event: ExecuteSegmentQueryEvent = {
     appId: 'app-id',
     segmentId: 'segment-id',
     jobRunId: 'job-run-id',
     stateMachineStatus: StateMachineStatus.IDLE,
-    waitTimeInfo: {
-      waitTime: 60,
-      loopCount: 0,
-    },
   };
 
   test('Execute segment query', async () => {
@@ -39,7 +38,9 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
     const resp = await handler(event);
 
     expect(resp).toEqual({
-      ...event,
+      appId: event.appId,
+      segmentId: event.segmentId,
+      jobRunId: event.jobRunId,
       queryId: 'query-id-1',
     });
     expect(ddbDocClientMock).toHaveReceivedCommandWith(UpdateCommand, {

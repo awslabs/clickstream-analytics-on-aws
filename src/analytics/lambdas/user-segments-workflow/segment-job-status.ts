@@ -18,13 +18,12 @@ import { ExecuteSegmentQueryOutput } from './execute-segment-query';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { parseDynamoDBTableARN } from '../../../common/utils';
-import { calculateWaitTime, WaitTimeInfo } from '../../../common/workflow';
+import { handleBackoffTimeInfo } from '../../../common/workflow';
 import { SegmentJobStatus } from '../../private/segments/segments-model';
 import { describeStatement, getRedshiftClient } from '../redshift-data';
 
 export interface SegmentJobStatusEvent extends ExecuteSegmentQueryOutput {
   jobStatus?: SegmentJobStatus;
-  waitTimeInfo?: WaitTimeInfo;
 }
 
 const { ddbRegion, ddbTableName } = parseDynamoDBTableARN(process.env.CLICKSTREAM_METADATA_DDB_ARN!);
@@ -36,18 +35,8 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 const redshiftClient = getRedshiftClient(process.env.REDSHIFT_DATA_API_ROLE!);
 
-export const handler = async (event: SegmentJobStatusEvent) => {
+const _handler = async (event: SegmentJobStatusEvent) => {
   try {
-    // Update waitTimeInfo
-    const waitTimeInfo = event.waitTimeInfo;
-    const updatedWaitTimeInfo = !!waitTimeInfo ? calculateWaitTime(
-      waitTimeInfo.waitTime,
-      waitTimeInfo.loopCount,
-    ) : {
-      waitTime: 15,
-      loopCount: 0,
-    };
-
     // Check segment job status
     const response = await describeStatement(redshiftClient, event.queryId);
     const status = response.Status;
@@ -82,10 +71,11 @@ export const handler = async (event: SegmentJobStatusEvent) => {
     return {
       ...event,
       jobStatus,
-      waitTimeInfo: updatedWaitTimeInfo,
     };
   } catch (err) {
     logger.error('Error when executing segment query.', err as Error);
     throw err;
   }
 };
+
+export const handler = handleBackoffTimeInfo(_handler);
