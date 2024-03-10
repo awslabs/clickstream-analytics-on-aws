@@ -19,9 +19,11 @@ import {
   StateMachineStatus,
   StateMachineStatusEvent,
 } from '../../../../../src/analytics/lambdas/user-segments-workflow/state-machine-status';
+import { getMockContext } from '../../../../common/lambda-context';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
   const sfnClientMock = mockClient(SFNClient);
+  const contextMock = getMockContext();
   const executionListItem = {
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution/abc',
     stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
@@ -48,7 +50,7 @@ describe('User segments workflow segment-job-status lambda tests', () => {
       executions: [executionListItem, executionListItem],
     });
 
-    const resp = await handler(event);
+    const resp = await handler(event, contextMock);
 
     expect(resp).toEqual({
       appId: 'app-id',
@@ -73,7 +75,7 @@ describe('User segments workflow segment-job-status lambda tests', () => {
         waitTime: 60,
         loopCount: 5,
       },
-    });
+    }, contextMock);
 
     expect(resp).toEqual({
       appId: 'app-id',

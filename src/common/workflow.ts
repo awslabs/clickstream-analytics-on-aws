@@ -31,8 +31,8 @@ function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 60
   return { waitTime: Math.min(waitTime, maxWaitTime), loopCount };
 }
 
-export function handleBackoffTimeInfo<T, R>(handler: (event: T, context?: Context) => Promise<R>) {
-  return async (event: T & { waitTimeInfo?: WaitTimeInfo }, context?: Context): Promise<R & { waitTimeInfo: WaitTimeInfo }> => {
+export function handleBackoffTimeInfo<T, R>(handler: (event: T, context: Context) => Promise<R>) {
+  return async (event: T & { waitTimeInfo?: WaitTimeInfo }, context: Context): Promise<R & { waitTimeInfo: WaitTimeInfo }> => {
     if (event.waitTimeInfo === undefined) {
       event.waitTimeInfo = DEFAULT_WAIT_TIME_INFO;
     }

@@ -20,10 +20,12 @@ import {
 } from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-status';
 import 'aws-sdk-client-mock-jest';
 import { SegmentJobStatus } from '../../../../../src/analytics/private/segments/segments-model';
+import { getMockContext } from '../../../../common/lambda-context';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
   const ddbDocClientMock = mockClient(DynamoDBDocumentClient);
   const redshiftDataClientMock = mockClient(RedshiftDataClient);
+  const contextMock = getMockContext();
   let event: SegmentJobStatusEvent;
 
   beforeEach(() => {
@@ -39,7 +41,7 @@ describe('User segments workflow segment-job-status lambda tests', () => {
   test('Segment job is running', async () => {
     redshiftDataClientMock.on(DescribeStatementCommand).resolves({ Status: StatusString.STARTED });
 
-    const resp = await handler(event);
+    const resp = await handler(event, contextMock);
 
     expect(resp).toEqual({
       ...event,
@@ -61,7 +63,7 @@ describe('User segments workflow segment-job-status lambda tests', () => {
         waitTime: 25,
         loopCount: 5,
       },
-    });
+    }, contextMock);
 
     expect(resp).toEqual({
       ...event,
@@ -89,7 +91,7 @@ describe('User segments workflow segment-job-status lambda tests', () => {
   test('Segment job is failed', async () => {
     redshiftDataClientMock.on(DescribeStatementCommand).resolves({ Status: StatusString.FAILED });
 
-    const resp = await handler(event);
+    const resp = await handler(event, contextMock);
 
     expect(resp).toEqual({
       ...event,
