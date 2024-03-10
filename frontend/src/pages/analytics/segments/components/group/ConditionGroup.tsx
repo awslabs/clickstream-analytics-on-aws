@@ -95,11 +95,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           <UserDoneComp
             segmentData={segmentData}
             segmentDataDispatch={segmentDataDispatch}
-            level={segmentProps.level}
-            rootIndex={segmentProps.rootIndex}
-            parentIndex={segmentProps.parentIndex}
-            currentIndex={segmentProps.currentIndex}
-            parentData={segmentProps.parentData}
+            segmentProps={segmentProps}
             addNewEventCondition={() => {
               segmentDataDispatch({
                 type: AnalyticsSegmentActionType.AddEventFilterCondition,

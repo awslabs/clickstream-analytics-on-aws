@@ -100,6 +100,10 @@ export interface IEventSegmentationItem {
   eventConditionRelationShip?: ERelationShip | null;
   eventConditionList: IConditionItemType[];
   sequenceEventList: IAnalyticsItem[];
+  userDoneEvent?: IAnalyticsItem | null;
+  userDoneEventCalculateMethod?: IAnalyticsItem | null;
+  userDoneEventOperation?: SelectProps.Option | null;
+  userDoneEventValue?: any;
 }
 
 export interface IEventSegmentationObj {

@@ -34,7 +34,12 @@ export enum AnalyticsSegmentActionType {
   ConvertAndDataToOr = 'convertAndDataToOr',
   AddAndEventData = 'addAndEventData',
   RemoveEventData = 'removeEventData',
+
   UpdateUserEventType = 'updateUserEventType',
+  UpdateUserDoneEvent = 'updateUserDoneEvent',
+  UpdateUserDoneEventCalculate = 'updateUserDoneEventCalculate',
+  UpdateUserDoneEventOperation = 'updateUserDoneEventOperation',
+  UpdateUserDoneEventValue = 'updateUserDoneEventValue',
 
   AddFilterGroup = 'addFilterGroup',
   RemoveFilterGroup = 'removeFilterGroup',
@@ -74,6 +79,36 @@ export type RemoveEventData = {
   segmentProps: SegmentPropsData;
 };
 
+export type UpdateUserEventType = {
+  type: AnalyticsSegmentActionType.UpdateUserEventType;
+  segmentProps: SegmentPropsData;
+  userEventType: IAnalyticsItem;
+};
+
+export type UpdateUserDoneEvent = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEvent;
+  segmentProps: SegmentPropsData;
+  event: IAnalyticsItem | null;
+};
+
+export type UpdateUserDoneEventCalculate = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate;
+  segmentProps: SegmentPropsData;
+  calculate: IAnalyticsItem;
+};
+
+export type UpdateUserDoneEventOperation = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventOperation;
+  segmentProps: SegmentPropsData;
+  operation: IAnalyticsItem;
+};
+
+export type UpdateUserDoneEventValue = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventValue;
+  segmentProps: SegmentPropsData;
+  value: any;
+};
+
 export type AddFilterGroup = {
   type: AnalyticsSegmentActionType.AddFilterGroup;
 };
@@ -93,12 +128,6 @@ export type UpdateFilterGroupTimeRange = {
   type: AnalyticsSegmentActionType.UpdateFilterGroupTimeRange;
   index: number;
   timeRange: DateRangePickerProps.ChangeDetail | null;
-};
-
-export type UpdateUserEventType = {
-  type: AnalyticsSegmentActionType.UpdateUserEventType;
-  segmentProps: SegmentPropsData;
-  userEventType: IAnalyticsItem;
 };
 
 export type AddEventFilterCondition = {
@@ -140,11 +169,15 @@ export type AnalyticsSegmentAction =
   | ConvertAndDataToOr
   | AddAndEventData
   | RemoveEventData
+  | UpdateUserEventType
+  | UpdateUserDoneEvent
+  | UpdateUserDoneEventCalculate
+  | UpdateUserDoneEventOperation
+  | UpdateUserDoneEventValue
   | AddFilterGroup
   | RemoveFilterGroup
   | UpdateFilterGroupName
   | UpdateFilterGroupTimeRange
-  | UpdateUserEventType
   | AddEventFilterCondition
   | ChangeEventFilterConditionRelation
   | UpdateEventFilterCondition
@@ -168,7 +201,6 @@ export const analyticsSegmentGroupReducer = (
 
     case AnalyticsSegmentActionType.AddOrEventData: {
       if (action.segmentProps.level === 1) {
-        console.info('newState:', newState);
         newState.subItemList[action.segmentProps.rootIndex].subItemList.push(
           DEFAULT_SEGMENT_ITEM
         );
@@ -203,9 +235,10 @@ export const analyticsSegmentGroupReducer = (
         newState.subItemList[action.rootIndex].segmentEventRelationShip ===
         ERelationShip.OR
       ) {
-        const previousData = cloneDeep(
-          newState.subItemList[action.rootIndex].subItemList[0]
-        );
+        let previousData = cloneDeep(newState.subItemList[action.rootIndex]);
+        if (previousData.subItemList.length === 1) {
+          previousData = previousData.subItemList[0];
+        }
         newState.subItemList[action.rootIndex] = {
           userEventType: null,
           segmentEventRelationShip: ERelationShip.AND,
@@ -222,7 +255,6 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.RemoveEventData: {
-      console.info('remove event data');
       if (action.segmentProps.level === 1) {
         newState.subItemList[action.segmentProps.rootIndex].subItemList.splice(
           action.segmentProps.currentIndex,
@@ -244,26 +276,6 @@ export const analyticsSegmentGroupReducer = (
           ].subItemList.splice(action.segmentProps.currentIndex, 1);
         }
       }
-      return { ...newState };
-    }
-
-    case AnalyticsSegmentActionType.AddFilterGroup: {
-      newState.subItemList.push({ ...DEFAULT_FILTER_GROUP_ITEM });
-      return { ...newState };
-    }
-
-    case AnalyticsSegmentActionType.RemoveFilterGroup: {
-      newState.subItemList.splice(action.index, 1);
-      return { ...newState };
-    }
-
-    case AnalyticsSegmentActionType.UpdateFilterGroupName: {
-      newState.subItemList[action.index].groupName = action.name;
-      return { ...newState };
-    }
-
-    case AnalyticsSegmentActionType.UpdateFilterGroupTimeRange: {
-      newState.subItemList[action.index].groupDateRange = action.timeRange;
       return { ...newState };
     }
 
@@ -289,6 +301,86 @@ export const analyticsSegmentGroupReducer = (
               },
             ]
           : [];
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEvent: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userDoneEvent = action.event;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEventCalculate: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userDoneEventCalculateMethod = action.calculate;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEventOperation: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userDoneEventOperation = action.operation;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEventValue: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userDoneEventValue = action.value;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.AddFilterGroup: {
+      newState.subItemList.push({ ...DEFAULT_FILTER_GROUP_ITEM });
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.RemoveFilterGroup: {
+      newState.subItemList.splice(action.index, 1);
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateFilterGroupName: {
+      newState.subItemList[action.index].groupName = action.name;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateFilterGroupTimeRange: {
+      newState.subItemList[action.index].groupDateRange = action.timeRange;
       return { ...newState };
     }
 

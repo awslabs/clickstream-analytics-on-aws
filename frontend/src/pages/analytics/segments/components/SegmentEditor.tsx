@@ -53,7 +53,7 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
           </div>
         );
       })}
-      <div>
+      <div className="mt-10">
         <Button
           iconName="add-plus"
           onClick={() => {

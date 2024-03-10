@@ -17,7 +17,6 @@ import {
   IEventSegmentationItem,
   IEventSegmentationObj,
 } from 'components/eventselect/AnalyticsType';
-import i18n from 'i18n';
 import { ExploreAnalyticsOperators } from 'ts/explore-types';
 
 export const MOCK_EVENT_LIST: any = [
@@ -319,57 +318,62 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
 };
 
 export const ANALYTICS_OPERATORS = {
+  grater_than: {
+    value: ExploreAnalyticsOperators.GREATER_THAN,
+    label: 'analytics:operators.greaterThan',
+  },
   is_null: {
     value: ExploreAnalyticsOperators.NULL,
-    label: i18n.t('analytics:operators.null'),
+    label: 'analytics:operators.null',
   },
   is_not_null: {
     value: ExploreAnalyticsOperators.NOT_NULL,
-    label: i18n.t('analytics:operators.notNull'),
+    label: 'analytics:operators.notNull',
   },
   equal: {
     value: ExploreAnalyticsOperators.EQUAL,
-    label: i18n.t('analytics:operators.equal'),
+    label: 'analytics:operators.equal',
   },
   not_equal: {
     value: ExploreAnalyticsOperators.NOT_EQUAL,
-    label: i18n.t('analytics:operators.notEqual'),
+    label: 'analytics:operators.notEqual',
   },
   greater_than: {
     value: ExploreAnalyticsOperators.GREATER_THAN,
-    label: i18n.t('analytics:operators.greaterThan'),
+    label: 'analytics:operators.greaterThan',
   },
   greater_than_or_equal: {
     value: ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL,
-    label: i18n.t('analytics:operators.greaterThanOrEqual'),
+    label: 'analytics:operators.greaterThanOrEqual',
   },
   less_than: {
     value: ExploreAnalyticsOperators.LESS_THAN,
-    label: i18n.t('analytics:operators.lessThan'),
+    label: 'analytics:operators.lessThan',
   },
   less_than_or_equal: {
     value: ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL,
-    label: i18n.t('analytics:operators.lessThanOrEqual'),
+    label: 'analytics:operators.lessThanOrEqual',
   },
   in: {
     value: ExploreAnalyticsOperators.IN,
-    label: i18n.t('analytics:operators.in'),
+    label: 'analytics:operators.in',
   },
   not_in: {
     value: ExploreAnalyticsOperators.NOT_IN,
-    label: i18n.t('analytics:operators.notIn'),
+    label: 'analytics:operators.notIn',
   },
   contains: {
     value: ExploreAnalyticsOperators.CONTAINS,
-    label: i18n.t('analytics:operators.contains'),
+    label: 'analytics:operators.contains',
   },
   not_contains: {
     value: ExploreAnalyticsOperators.NOT_CONTAINS,
-    label: i18n.t('analytics:operators.notContains'),
+    label: 'analytics:operators.notContains',
   },
 };
 
 export const CONDITION_STRING_OPERATORS: SelectProps.Options = [
+  ANALYTICS_OPERATORS.grater_than,
   ANALYTICS_OPERATORS.is_null,
   ANALYTICS_OPERATORS.is_not_null,
   ANALYTICS_OPERATORS.equal,
