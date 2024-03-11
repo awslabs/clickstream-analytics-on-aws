@@ -11,15 +11,27 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '@aws/clickstream-base-lib';
+import {
+  OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
+  OUTPUT_INGESTION_SERVER_URL_SUFFIX,
+  OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME,
+  OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+} from '@aws/clickstream-base-lib';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled, getPipelineStatusType, isEmpty } from '../common/utils';
-import { IPipeline, CPipeline } from '../model/pipeline';
+import {
+  filterDynamicPipelineTags,
+  getPipelineStatusType,
+  getReportingDashboardsUrl,
+  getStackOutputFromPipelineStatus,
+  isEmpty,
+  paginateData,
+  pipelineAnalysisStudioEnabled,
+} from '../common/utils';
+import { CPipeline, IPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
-
 
 const store: ClickStreamStore = new DynamoDbStore();
 
@@ -77,7 +89,7 @@ export class PipelineServ {
       const pluginsInfo = await pipeline.getPluginsInfo();
       const templateInfo = pipeline.getTemplateInfo();
       return res.json(new ApiSuccess({
-        ...latestPipeline,
+        ...filterDynamicPipelineTags(latestPipeline),
         statusType: getPipelineStatusType(latestPipeline),
         dataProcessing: !isEmpty(latestPipeline.dataProcessing) ? {
           ...latestPipeline.dataProcessing,

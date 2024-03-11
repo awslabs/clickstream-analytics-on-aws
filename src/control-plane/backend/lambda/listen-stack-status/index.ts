@@ -46,5 +46,5 @@ export const handler = async (event: SQSEvent): Promise<void> => {
   const projectId = pipeline.projectId;
   const stackNames = getWorkflowStacks(pipeline.workflow.Workflow);
   const newStackDetails = getNewStackDetails(stackDetail, pipeline.stackDetails ?? [], stackNames);
-  await updatePipelineStackStatus(projectId, pipelineId, newStackDetails, pipeline.updateAt);
+  await updatePipelineStackStatus(projectId, pipelineId, stackDetail, newStackDetails, pipeline.updateAt);
 };
