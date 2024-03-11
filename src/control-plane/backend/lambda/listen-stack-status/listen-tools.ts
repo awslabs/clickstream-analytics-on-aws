@@ -138,7 +138,7 @@ async function updateStackStatusWithOptimisticLocking(
 }
 
 export async function updatePipelineStackStatus(
-  projectId: string, pipelineId:string, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<void> {
+  projectId: string, pipelineId:string, curStackDetail: Stack, stackDetails: PipelineStatusDetail[], updateAt: number): Promise<void> {
   try {
     let retryCount = 0;
     let success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, updateAt);
@@ -149,7 +149,9 @@ export async function updatePipelineStackStatus(
         logger.error('Failed to get pipeline: ', { projectId, pipelineId });
         throw new Error('Failed to get pipeline');
       }
-      success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, stackDetails, pipeline.updateAt);
+      const stackNames = getWorkflowStacks(pipeline.workflow.Workflow);
+      const newStackDetails = getNewStackDetails(curStackDetail, pipeline.stackDetails ?? [], stackNames);
+      success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, newStackDetails, pipeline.updateAt);
       retryCount += 1;
     }
   } catch (err) {

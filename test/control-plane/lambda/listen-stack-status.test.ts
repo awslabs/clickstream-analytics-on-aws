@@ -341,8 +341,23 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [{ ...mockIngestionKafkaStack }],
     });
-    docMock.on(QueryCommand).resolves({
+    docMock.on(QueryCommand).resolvesOnce({
       Items: [{ ...mockPipeline }],
+    }).resolvesOnce({
+      Items: [{
+        ...mockPipeline,
+        stackDetails: [
+          mockStackDetails[0],
+          mockStackDetails[1],
+          mockStackDetails[2],
+          mockStackDetails[3],
+          mockStackDetails[4],
+          {
+            ...mockStackDetails[5],
+            stackStatus: StackStatus.CREATE_IN_PROGRESS,
+          },
+        ],
+      }],
     });
     const mockConditionalCheckFailed = new ConditionalCheckFailedException(
       {
@@ -381,6 +396,37 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       },
       ExpressionAttributeValues: {
         ':stackDetails': [...mockStackDetails],
+        ':ConditionVersionValue': new Date('2022-01-01').getTime(),
+        ':updateAt': new Date('2023-01-01').getTime(),
+      },
+    });
+    expect(docMock).toHaveReceivedNthSpecificCommandWith(2, UpdateCommand, {
+      TableName: process.env.CLICKSTREAM_TABLE_NAME ?? '',
+      Key: {
+        id: MOCK_PROJECT_ID,
+        type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+      },
+      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+      UpdateExpression: 'SET #stackDetails = :stackDetails, #ConditionVersion = :updateAt',
+      ExpressionAttributeNames: {
+        '#ConditionVersion': 'updateAt',
+        '#stackDetails': 'stackDetails',
+      },
+      ExpressionAttributeValues: {
+        ':stackDetails': [
+          mockStackDetails[0],
+          {
+            ...mockStackDetails[1],
+            stackStatus: StackStatus.CREATE_COMPLETE,
+          },
+          mockStackDetails[2],
+          mockStackDetails[3],
+          mockStackDetails[4],
+          {
+            ...mockStackDetails[5],
+            stackStatus: StackStatus.CREATE_IN_PROGRESS,
+          },
+        ],
         ':ConditionVersionValue': new Date('2022-01-01').getTime(),
         ':updateAt': new Date('2023-01-01').getTime(),
       },
