@@ -17,7 +17,7 @@ import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { CfnRule, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
+import { IFunction, Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
@@ -129,6 +129,7 @@ export class BackendEventBus extends Construct {
       description: 'Lambda function for listen CFN stack status of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/listen-stack-status/index.ts'),
       handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
       tracing: Tracing.ACTIVE,
       role: createLambdaRole(this, 'ListenStackFuncRole', true, [
         ...this.getDescribeStackPolicyStatements(),
@@ -160,6 +161,7 @@ export class BackendEventBus extends Construct {
       description: 'Lambda function for listen SFN state machine status of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/listen-state-status/index.ts'),
       handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
       tracing: Tracing.ACTIVE,
       role: createLambdaRole(this, 'ListenStateFuncRole', true, [
         ...this.getDeleteRulePolicyStatements(),
