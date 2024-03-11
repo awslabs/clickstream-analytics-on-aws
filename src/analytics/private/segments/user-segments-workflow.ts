@@ -74,7 +74,7 @@ export class UserSegmentsWorkflow extends Construct {
     const segmentJobInitFunc = this.constructNodejsFunction('segment-job-init', [
       new PolicyStatement({
         actions: ['events:DisableRule'],
-        resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/Clickstream-*`],
+        resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/Clickstream-*`], // TODO: extract the prefix as a constant when creating the event rule.
       }),
     ], {
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,

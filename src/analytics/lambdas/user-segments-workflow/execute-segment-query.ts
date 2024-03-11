@@ -69,6 +69,7 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
       },
       ReturnValues: 'ALL_NEW',
     });
+    logger.info('Update segment job status to \'In Progress\'');
     await ddbDocClient.send(command);
 
     // Construct and execute segment query

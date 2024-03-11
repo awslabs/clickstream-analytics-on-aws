@@ -48,6 +48,7 @@ const _handler = async (event: StateMachineStatusEvent) => {
     };
     const command = new ListExecutionsCommand(request);
     const response = await sfnClient.send(command);
+    logger.info(`Workflow step function executions number: ${response.executions?.length}`);
 
     const output: StateMachineStatusOutput = {
       appId: event.input.appId,

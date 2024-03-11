@@ -56,6 +56,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
   try {
     // If the job is triggered by EventBridge, check if the refresh schedule is expired
     if (trigger === SegmentJobTriggerType.SCHEDULED) {
+      logger.info('The segment job is triggered by EventBridge.');
       const response = await ddbDocClient.send(new GetCommand({
         TableName: ddbTableName,
         Key: {
@@ -68,6 +69,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
       // If job schedule has expired, disable the EventBridge rule
       if (Date.now() > item.refreshSchedule.expireAfter && item.eventBridgeRuleArn) {
         const ruleName = item.eventBridgeRuleArn.split(':rule/')[1];
+        logger.info(`The job schedule has expired, disable the EventBridge rule ${ruleName}`);
         await eventBridgeClient.send(new DisableRuleCommand({ Name: ruleName }));
 
         return {
@@ -97,6 +99,7 @@ export const handler = async (event: SegmentJobInitEvent) => {
       TableName: ddbTableName,
       Item: item,
     }));
+    logger.info(`Create new segment job status record. jobRunId: ${jobRunId}`);
 
     const output: SegmentJobInitOutput = {
       appId: event.appId,
