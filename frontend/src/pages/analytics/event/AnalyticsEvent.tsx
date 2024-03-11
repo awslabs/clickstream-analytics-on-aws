@@ -14,6 +14,7 @@
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
+  SPECIAL_CHARACTERS_PATTERN,
 } from '@aws/clickstream-base-lib';
 import {
   Button,
@@ -211,6 +212,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       );
       if (!body) {
         alertMsg(t('analytics:valid.funnelPipelineVersionError'));
+        return;
+      }
+      if (
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(chartTitle) ||
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(chartSubTitle)
+      ) {
+        alertMsg(t('analytics:valid.inputSpecialCharactersError'));
         return;
       }
       setLoadingData(true);
