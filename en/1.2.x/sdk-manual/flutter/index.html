@@ -3283,7 +3283,7 @@ events that occur after it is set.</p>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">});</span>
 </span></code></pre></div>
 <p>Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's
-attribute again, of course you can use the same api <code>analytics.setUserAttributes()</code> to update the current user's
+attribute again, of course you can use the same API <code>analytics.setUserAttributes()</code> to update the current user's
 attribute when it changes.</p>
 <h4 id="record-event-with-items">Record event with items</h4>
 <p>You can add the following code to log an event with an item, and you can add custom item attribute in the <code>attributes</code> Map. In addition to the preset attributes, an item can add up to 10 custom attributes.
@@ -3310,6 +3310,7 @@ attribute when it changes.</p>
 <div class="admonition warning">
 <p class="admonition-title">Important</p>
 <p>Only pipelines from version 1.1+ can handle items with custom attribute.</p>
+<p>item id is required attribute, if not set the item will be discarded.</p>
 </div>
 <h4 id="other-configurations">Other configurations</h4>
 <p>In addition to the required <code>appId</code> and <code>endpoint</code>, you can configure other information to get more customized usage:</p>
@@ -3434,7 +3435,7 @@ sending of any events. Of course, you can enable the SDK when you need to contin
 <p>You can follow the steps below to view the event raw JSON and debug your events.</p>
 <ol>
 <li>
-<p>Using <code>analytics.updateConfigure()</code> api and set the <code>isLogEvents</code> attributes with true in debug mode, for example:
+<p>Using <code>analytics.updateConfigure()</code> API and set the <code>isLogEvents</code> attributes with true in debug mode, for example:
     <div class="language-dart highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1">// log the event in debug mode.</span>
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span>
 </span></code></pre></div></p>
