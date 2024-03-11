@@ -49,6 +49,10 @@ export enum AnalyticsSegmentActionType {
   UpdateUserDoneEventConditionValue = 'updateUserDoneEventConditionValue',
   RemoveUserDoneEventConditionItem = 'removeUserDoneEventConditionItem',
 
+  UpdateUserIsParamOption = 'updateUserIsParamOption',
+  UpdateUserIsOperator = 'updateUserIsOperator',
+  UpdateUserIsValue = 'updateUserIsValue',
+
   AddFilterGroup = 'addFilterGroup',
   RemoveFilterGroup = 'removeFilterGroup',
   UpdateFilterGroupName = 'updateFilterGroupName',
@@ -140,6 +144,26 @@ export type RemoveUserDoneEventConditionItem = {
   conditionIndex: number;
 };
 
+// user is dispatch type
+export type UpdateUserIsParamOption = {
+  type: AnalyticsSegmentActionType.UpdateUserIsParamOption;
+  segmentProps: SegmentPropsData;
+  paramOption: IAnalyticsItem | null;
+};
+
+export type UpdateUserIsOperator = {
+  type: AnalyticsSegmentActionType.UpdateUserIsOperator;
+  segmentProps: SegmentPropsData;
+  operator: SelectProps.Option | null;
+};
+
+export type UpdateUserIsValue = {
+  type: AnalyticsSegmentActionType.UpdateUserIsValue;
+  segmentProps: SegmentPropsData;
+  value: any;
+};
+
+// filter group dispatch type
 export type AddFilterGroup = {
   type: AnalyticsSegmentActionType.AddFilterGroup;
 };
@@ -204,6 +228,10 @@ export type AnalyticsSegmentAction =
   | UpdateUserDoneEventConditionItem
   | UpdateUserDoneEventConditionOperator
   | UpdateUserDoneEventConditionValue
+  | RemoveUserDoneEventConditionItem
+  | UpdateUserIsParamOption
+  | UpdateUserIsOperator
+  | UpdateUserIsValue
   | AddFilterGroup
   | RemoveFilterGroup
   | UpdateFilterGroupName
@@ -226,6 +254,7 @@ export const analyticsSegmentGroupReducer = (
       return { ...DEFAULT_SEGMENT_GROUP_DATA };
     }
 
+    // event and or logic
     case AnalyticsSegmentActionType.AddOrEventData: {
       if (action.segmentProps.level === 1) {
         newState.subItemList[action.segmentProps.rootIndex].subItemList.push(
@@ -331,6 +360,7 @@ export const analyticsSegmentGroupReducer = (
       return { ...newState };
     }
 
+    // user done or not done event
     case AnalyticsSegmentActionType.UpdateUserDoneEvent: {
       let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
@@ -391,6 +421,68 @@ export const analyticsSegmentGroupReducer = (
       return { ...newState };
     }
 
+    case AnalyticsSegmentActionType.RemoveUserDoneEventConditionItem: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userDoneEventConditionList.splice(action.conditionIndex, 1);
+      return { ...newState };
+    }
+
+    // user is logic
+    case AnalyticsSegmentActionType.UpdateUserIsParamOption: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userIsParamOption = action.paramOption;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserIsOperator: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userISOperator = action.operator;
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserIsValue: {
+      let currentData =
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
+      }
+      currentData.userIsValue = action.value;
+      return { ...newState };
+    }
+
+    // filter group logic
     case AnalyticsSegmentActionType.AddFilterGroup: {
       newState.subItemList.push({ ...DEFAULT_FILTER_GROUP_ITEM });
       return { ...newState };

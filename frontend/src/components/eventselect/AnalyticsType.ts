@@ -104,6 +104,9 @@ export interface IEventSegmentationItem {
   userDoneEventCalculateMethod?: IAnalyticsItem | null;
   userDoneEventOperation?: SelectProps.Option | null;
   userDoneEventValue?: any;
+  userIsParamOption?: IAnalyticsItem | null;
+  userISOperator?: SelectProps.Option | null;
+  userIsValue?: any;
 }
 
 export interface IEventSegmentationObj {

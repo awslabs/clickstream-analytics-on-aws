@@ -106,7 +106,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
             }}
           />
         )}
-        {isUserIsEvent && <UserIsComp />}
+        {isUserIsEvent && (
+          <UserIsComp
+            segmentData={segmentData}
+            segmentProps={segmentProps}
+            segmentDataDispatch={segmentDataDispatch}
+          />
+        )}
         {isDoneInSeqEvent && (
           <UserDoneInSeq
             segmentProps={segmentProps}
@@ -217,6 +223,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                     segmentProps,
                     conditionIndex,
                     value,
+                  });
+                }}
+                removeSegmentConditionItem={(conditionIndex) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.RemoveUserDoneEventConditionItem,
+                    segmentProps,
+                    conditionIndex,
                   });
                 }}
               />

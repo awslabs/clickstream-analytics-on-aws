@@ -12,42 +12,81 @@
  */
 
 import { Input, Select } from '@cloudscape-design/components';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
-import React from 'react';
+import {
+  AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
+} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import React, { Dispatch } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
-import { CONDITION_STRING_OPERATORS } from '../mock_data';
+import { SegmentPropsData } from '../ConditionGroup';
+import { CONDITION_STRING_OPERATORS, PRESET_PARAMETERS } from '../mock_data';
 
-const UserIsComp: React.FC = () => {
+interface UserIsCompProps {
+  segmentData: IEventSegmentationItem;
+  segmentProps: SegmentPropsData;
+  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
+}
+
+const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
+  const { segmentData, segmentProps, segmentDataDispatch } = props;
   const { t } = useTranslation();
   return (
     <div className="flex gap-10">
       <EventItem
         type="attribute"
         placeholder={t('analytics:labels.attributeSelectPlaceholder')}
-        categoryOption={null}
-        changeCurCategoryOption={(item) => {
-          //   changeRelationAttributeOption(item);
+        categoryOption={segmentData.userIsParamOption ?? null}
+        changeCurCategoryOption={(paramOption) => {
           console.info('changeCurCategoryOption');
+          segmentDataDispatch({
+            type: AnalyticsSegmentActionType.UpdateUserIsParamOption,
+            segmentProps,
+            paramOption,
+          });
         }}
         hasTab={false}
         isMultiSelect={false}
-        categories={[]}
+        categories={PRESET_PARAMETERS}
       />
       <Select
-        // disabled={!item.conditionOption}
         placeholder={defaultStr(
           t('analytics:labels.operatorSelectPlaceholder')
         )}
-        selectedOption={null}
+        selectedOption={
+          segmentData.userISOperator ?? {
+            ...CONDITION_STRING_OPERATORS[0],
+            label: defaultStr(t(CONDITION_STRING_OPERATORS[0].label ?? '')),
+          }
+        }
         onChange={(e) => {
-          // changeConditionOperator(e.detail.selectedOption);
-          console.info(e);
+          segmentDataDispatch({
+            type: AnalyticsSegmentActionType.UpdateUserIsOperator,
+            segmentProps,
+            operator: e.detail.selectedOption,
+          });
         }}
-        options={CONDITION_STRING_OPERATORS}
+        options={CONDITION_STRING_OPERATORS.map((e) => {
+          return { ...e, label: defaultStr(t(e.label ?? '')) };
+        })}
       />
       <div>
-        <Input value="" />
+        <Input
+          type="number"
+          placeholder={defaultStr(
+            t('analytics:labels.conditionValuePlaceholder')
+          )}
+          value={segmentData.userIsValue ?? '1'}
+          onChange={(e) => {
+            segmentDataDispatch({
+              type: AnalyticsSegmentActionType.UpdateUserIsValue,
+              segmentProps,
+              value: e.detail.value,
+            });
+          }}
+        />
       </div>
     </div>
   );
