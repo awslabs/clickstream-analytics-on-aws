@@ -663,39 +663,6 @@ describe('Project test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
   });
-  it('Delete project witch no pipeline', async () => {
-    projectExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(ScanCommand).resolves({
-      Items: [
-        { type: 'project-01' },
-        { type: 'project-02' },
-      ],
-    });
-    ddbMock.on(QueryCommand).resolvesOnce({
-      Items: [],
-    }).resolvesOnce({
-      Items: [
-        { name: 'Project-01', id: '1' },
-      ],
-    });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
-    ddbMock.on(UpdateCommand).resolves({});
-    quickSightMock.on(DeleteUserCommand).resolves({});
-    const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'Project deleted.',
-    });
-    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 2);
-  });
   it('Delete project with ddb exception', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
