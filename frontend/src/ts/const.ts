@@ -1,4 +1,9 @@
 import { SelectProps } from '@cloudscape-design/components';
+import {
+  ERelationShip,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -433,3 +438,60 @@ export enum ENetworkType {
   General = 'General',
   Private = 'Private',
 }
+
+// For segment selection
+
+export enum ConditionType {
+  USER_DONE = 'USER_DONE',
+  USER_NOT_DONE = 'USER_NOT_DONE',
+  USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
+  USER_IS = 'USER_IS',
+  USER_IS_NOT = 'USER_IS_NOT',
+  USER_IN_GROUP = 'USER_IN_GROUP',
+  USER_NOT_IN_GROUP = 'USER_NOT_IN_GROUP',
+}
+
+export const CONDITION_LIST: SelectProps.Option[] = [
+  { label: '用户做过', value: ConditionType.USER_DONE },
+  { label: '用户没做过', value: ConditionType.USER_NOT_DONE },
+  {
+    label: '用户依次做过',
+    value: ConditionType.USER_DONE_IN_SEQUENCE,
+  },
+  { label: '用户是', value: ConditionType.USER_IS },
+  { label: '用户不是', value: ConditionType.USER_IS_NOT },
+];
+
+export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
+  userEventType: CONDITION_LIST[0],
+  subItemList: [],
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+};
+
+export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
+  userEventType: null,
+  segmentEventRelationShip: ERelationShip.OR,
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+  subItemList: [{ ...DEFAULT_SEGMENT_ITEM }],
+  groupDateRange: null,
+};
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
+  filterGroupRelationShip: ERelationShip.AND,
+  subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
+};
+
+export const darkBackgroundColors = [
+  '#033160',
+  '#A82A0C',
+  '#037F0C',
+  '#1D3557',
+  '#780000',
+  '#0B3C5D',
+  '#F13C20',
+  '#343A40',
+  '#10316B',
+  '#8D0801',
+];

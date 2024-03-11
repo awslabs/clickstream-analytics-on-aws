@@ -18,9 +18,9 @@ import {
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch } from 'react';
+import { darkBackgroundColors } from 'ts/const';
 import ConditionTimeRange from './ConditionTimeRange';
 import RenderNestSegment from './RenderNestSegment';
-import { darkBackgroundColors } from './mock_data';
 
 interface SegmentItemProps {
   segmentItemData: IEventSegmentationItem;

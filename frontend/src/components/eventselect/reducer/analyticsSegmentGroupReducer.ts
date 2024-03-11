@@ -22,7 +22,7 @@ import {
   DEFAULT_FILTER_GROUP_ITEM,
   DEFAULT_SEGMENT_GROUP_DATA,
   DEFAULT_SEGMENT_ITEM,
-} from 'pages/analytics/segments/components/group/mock_data';
+} from 'ts/const';
 import {
   DEFAULT_CONDITION_DATA,
   ERelationShip,

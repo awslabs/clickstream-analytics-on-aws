@@ -173,12 +173,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
           placeholder={defaultStr(
             t('analytics:labels.operatorSelectPlaceholder')
           )}
-          selectedOption={
-            segmentData.userDoneEventOperation ?? {
-              ...CONDITION_STRING_OPERATORS[0],
-              label: defaultStr(t(CONDITION_STRING_OPERATORS[0].label ?? '')),
-            }
-          }
+          selectedOption={segmentData.userDoneEventOperation ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateUserDoneEventOperation,
@@ -198,7 +193,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
           placeholder={defaultStr(
             t('analytics:labels.conditionValuePlaceholder')
           )}
-          value={segmentData.userDoneEventValue ?? '1'}
+          value={segmentData.userDoneEventValue ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateUserDoneEventValue,

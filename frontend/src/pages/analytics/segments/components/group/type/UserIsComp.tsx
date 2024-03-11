@@ -55,12 +55,7 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
         placeholder={defaultStr(
           t('analytics:labels.operatorSelectPlaceholder')
         )}
-        selectedOption={
-          segmentData.userISOperator ?? {
-            ...CONDITION_STRING_OPERATORS[0],
-            label: defaultStr(t(CONDITION_STRING_OPERATORS[0].label ?? '')),
-          }
-        }
+        selectedOption={segmentData.userISOperator ?? null}
         onChange={(e) => {
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserIsOperator,
@@ -78,7 +73,7 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
           placeholder={defaultStr(
             t('analytics:labels.conditionValuePlaceholder')
           )}
-          value={segmentData.userIsValue ?? '1'}
+          value={segmentData.userIsValue ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateUserIsValue,

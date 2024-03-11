@@ -26,9 +26,10 @@ import {
 import { identity } from 'lodash';
 import React, { Dispatch, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ConditionType } from 'ts/const';
 import Condition from './Condition';
 import EventSeqItem from './EventSeqItem';
-import { ConditionType, PRESET_PARAMETERS } from './mock_data';
+import { PRESET_PARAMETERS } from './mock_data';
 import UserDoneComp from './type/UserDoneComp';
 import UserDoneInSeq from './type/UserDoneInSeq';
 import UserIsComp from './type/UserIsComp';

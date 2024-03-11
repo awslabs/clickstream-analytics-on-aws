@@ -66,6 +66,7 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
           }
           return (
             <ConditionGroup
+              key={identity(index)}
               segmentData={item}
               segmentProps={{
                 level,

@@ -18,8 +18,8 @@ import {
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch, useEffect, useRef } from 'react';
+import { CONDITION_LIST } from 'ts/const';
 import { SegmentPropsData } from './ConditionGroup';
-import { CONDITION_LIST } from './mock_data';
 
 interface ConditionProps {
   segmentProps: SegmentPropsData;

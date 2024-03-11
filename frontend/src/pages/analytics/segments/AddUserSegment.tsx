@@ -32,9 +32,9 @@ import HelpInfo from 'components/layouts/HelpInfo';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { DEFAULT_SEGMENT_GROUP_DATA } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
-import { DEFAULT_SEGMENT_GROUP_DATA } from './components/group/mock_data';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
