@@ -120,7 +120,7 @@ ClickstreamAnalytics.setUserAttributes({
 });
 ```
 
-当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 API `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 !!! info "重要提示"
 
@@ -157,6 +157,8 @@ ClickstreamAnalytics.record({
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+
+    ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
 
 #### 在批处理模式时发送实时事件
 
@@ -239,7 +241,7 @@ ClickstreamAnalytics.updateConfigure({
 
 您可以按照以下步骤查看事件原始 json 并调试您的事件。
 
-1. 使用 `ClickstreamAnalytics.init()` api 并在调试模式下将 `isLogEvents` 属性设置为 true。
+1. 使用 `ClickstreamAnalytics.init()` API 并在调试模式下将 `isLogEvents` 属性设置为 true。
 2. 集成 SDK 并在浏览器中启动 Web 应用程序，然后打开检查页面并切换到控制台选项卡。
 3. 在 Filter 中输入 `EventRecorder`，您将看到 Clickstream Web SDK 记录的所有事件的 json 内容。
 
@@ -306,7 +308,7 @@ Clickstream Web SDK 支持以下数据类型：
 | _user_engagement   | 当用户离开当前页面，并且该页面处于焦点超过一秒时，[了解更多](#_18)                                                   | 1 ._engagement_time_msec<br>                                                                                                                                                                      |
 | _app_start         | 每次浏览器从不可见到进入可见状态时                                                                       | 1. _is_first_time（当应用程序启动后第一个`_app_start`事件时，值为`true`）                                                                                                                                            |
 | _app_end           | 每次浏览器从可见到进入不可见状态时                                                                       |                                                                                                                                                                                                   |
-| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` api 时                                         |                                                                                                                                                                                                   |
+| _profile_set       | 当调用 `addUserAttributes()` 或 `setUserId()` API 时                                         |                                                                                                                                                                                                   |
 | _scroll            | 用户第一次到达每个页面的底部时（即当 90% 的垂直深度变得可见时）                                                      | 1. _engagement_time_msec                                                                                                                                                                          |
 | _search            | 每次用户执行站点搜索时，根据 URL 查询参数的存在来判断，默认情况下，我们在查询参数中检测 `q`, `s`, `search`, `query` 和 `keyword`。 | 1. _search_key (搜索参数名称)<br>2. _search_term (搜索内容)                                                                                                                                                 |
 | _click             | 每次用户单击将其带离当前域名（或配置的域名列表）的链接时                                                            | 1. _link_classes（标签 `<a>`中`class`里的内容）<br>2. _link_domain（标签 `<a>`中`herf`里的域名）<br>3. _link_id（标签 `<a>`中`id`里的内容）<br>4. _link_url（标签 `<a>`中`herf`里的内容）<br>5. _outbound（如果该域不在配置的域名列表中，则属性值为“true”） |
@@ -321,7 +323,7 @@ Clickstream Web SDK 支持以下数据类型：
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如：dc7a7a18-20230905-131926703
 2. _session_duration：我们通过减去当前事件创建时间戳和会话的`_session_start_timestamp`来计算会话持续时间，该属性将添加到会话期间的每个事件中。
 3. _session_number：当前浏览器中session的自增数，初始值为1
-4. 会话超时时间：默认为30分钟，可以通过[configuration](#_7) api自定义。
+4. 会话超时时间：默认为 30 分钟，可以通过[configuration](#_7) API 自定义。
 
 ### 页面浏览定义
 
@@ -336,6 +338,8 @@ Clickstream Web SDK 支持以下数据类型：
 1. _entrances：当前会话中第一个页面浏览事件值为1，其他页面浏览事件值为0。
 2. _previous_timestamp：上一个 `_page_view ` 事件的时间戳。
 3. _engagement_time_msec：上个页面最后一次用户参与时长的毫秒数。
+
+当页面进入不可见状态超过 30 分钟再打开时，将生成新的会话并清除之前的页面url，然后发送新的 `_page_view` 事件。
 
 ### 用户参与度定义
 
@@ -357,7 +361,6 @@ Clickstream Web SDK 支持以下数据类型：
 
 ```json
 {
-	"hash_code": "80452b0",
 	"unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
 	"event_type": "add_to_cart",
 	"event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
@@ -418,7 +421,6 @@ Clickstream Web SDK 支持以下数据类型：
 
 | 属性              | 数据类型    | 描述                        | 如何生成                                                                                                             | 用途和目的                     |
 |-----------------|---------|---------------------------|------------------------------------------------------------------------------------------------------------------|---------------------------|
-| hash_code       | string  | 事件对象的哈希码                  | 通过 `@aws-crypto/sha256-js` 库来计算                                                                                  | 区分不同的事件                   |
 | app_id          | string  | 点击流app id                 | 控制平面创建点击流应用程序时生成                                                                                                 | 区分不同app的事件                |
 | unique_id       | string  | 用户唯一id                    | sdk 第一次初始化时从 `uuidV4()` 生成<br> 当用户重新登录到另一个从未登录过的用户后，它会被更改，并且当用户在同一浏览器中重新登录到之前的用户时，unique_id 将重置为之前 用户的 unique_id | 标识不同用户的唯一性，并关联登录和未登录用户的行为 |
 | device_id       | string  | 浏览器唯一id                   | 网站首次打开时生成`uuidV4()`形式，然后uuid将存储在localStorage中, 并且不会修改                                                            | 区分不同设备                    |
@@ -469,7 +471,7 @@ Clickstream Web SDK 支持以下数据类型：
 
 | 属性名           | 数据类型     | 是否必需 | 描述        |
 |---------------|----------|------|-----------|
-| id            | string   | 否    | item的id   |
+| id            | string   | 是    | item的id   |
 | name          | string   | 否    | item的名称   |
 | brand         | string   | 否    | item的品牌   |
 | currency      | string   | 否    | item的货币   |
@@ -485,6 +487,24 @@ Clickstream Web SDK 支持以下数据类型：
 | category5     | string   | 否    | item的类别5  |
 
 您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
+
+## 在 Google Tag Manager 中集成
+
+1. 从 SDK [发布页面]((https://github.com/awslabs/clickstream-web/releases))下载 Clickstream SDK Google Tag Manager 模板文件（.tpl）。
+
+2. 请参考 Google Tag Manager [导入指南](https://developers.google.com/tag-platform/tag-manager/templates#export_and_import)，按照说明在您的标签管理器控制台将 .tpl 文件作为自定义模板导入。
+
+3. 查看[使用新标签](https://developers.google.com/tag-platform/tag-manager/templates#use_your_new_tag)并将 ClickstreamAnalytics 标签添加到您的容器中。
+
+4. ClickstreamAnalytics 标签目前支持四种标签类型： 
+     * Initialize SDK
+     * Record Custom Event
+     * Set User ID
+     * Set User Attribute
+
+!!! info "重要提示"
+   
+    请确保在使用其他 ClickstreamAnalytics 标签类型之前先使用 Initialize SDK 标签对 SDK 进行初始化。
 
 ## SDK更新日志
 

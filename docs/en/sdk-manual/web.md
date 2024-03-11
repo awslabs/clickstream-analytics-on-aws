@@ -119,7 +119,7 @@ ClickstreamAnalytics.setUserAttributes({
 });
 ```
 
-Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same api `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
+Current login user's attributes will be cached in localStorage, so the next time browser open you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.setUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
@@ -155,6 +155,8 @@ For logging more attribute in an item, please refer to [item attributes](#item-a
 !!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
+    
+    ITEM_ID is required attribute, if not set the item will be discarded.
 
 #### Send event immediate in batch mode
 
@@ -237,7 +239,7 @@ ClickstreamAnalytics.updateConfigure({
 
 You can follow the steps below to view the event raw json and debug your events.
 
-1. Using `ClickstreamAnalytics.init()` api and set the `isLogEvents` attribute to true in debug mode.
+1. Using `ClickstreamAnalytics.init()` API and set the `isLogEvents` attribute to true in debug mode.
 2. Integrate the SDK and launch your web application in a browser, then open the Inspection page and switch to console tab.
 3. Input `EventRecorder` to Filter, and you will see the json content of all events recorded by Clickstream Web SDK.
 
@@ -295,19 +297,19 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 
 ### Automatically collected events
 
-| Event name         | Triggered                                                    | Event Attributes                                             |
-| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| _first_open        | the first time user launches the site in a browser           |                                                              |
-| _session_start     | when a user first visit the site or a user returns to the website after 30 minutes of inactivity period, [Learn more](#session-definition) | 1. _session_id <br>2. _session_start_timestamp               |
-| _page_view         | when new page is opens, [Learn more](#page-view-definition)  | 1. _page_referrer<br/>2. _page_referrer_title<br>3. _entrances<br>4. _previous_timestamp<br>5. _engagement_time_msec |
-| _user_engagement   | when user navigates away from current webpage and the page is in focus for at least one second, [Learn more](#user-engagement-definition) | 1._engagement_time_msec<br>                                  |
-| _app_start         | every time the browser goes to visible                       | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`) |
-| _app_end           | every time the browser goes to invisible                     |                                                              |
-| _profile_set       | when the `addUserAttributes()` or `setUserId()` api called   |                                                              |
-| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible) | 1. _engagement_time_msec                                     |
+| Event name         | Triggered                                                                                                                                                                       | Event Attributes                                             |
+| ------------------ |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------------------------------------------------------ |
+| _first_open        | the first time user launches the site in a browser                                                                                                                              |                                                              |
+| _session_start     | when a user first visit the site or a user returns to the website after 30 minutes of inactivity period, [Learn more](#session-definition)                                      | 1. _session_id <br>2. _session_start_timestamp               |
+| _page_view         | when new page is opens, [Learn more](#page-view-definition)                                                                                                                     | 1. _page_referrer<br/>2. _page_referrer_title<br>3. _entrances<br>4. _previous_timestamp<br>5. _engagement_time_msec |
+| _user_engagement   | when user navigates away from current webpage and the page is in focus for at least one second, [Learn more](#user-engagement-definition)                                       | 1._engagement_time_msec<br>                                  |
+| _app_start         | every time the browser goes to visible                                                                                                                                          | 1. _is_first_time(when it is the first `_app_start` event after the application starts, the value is `true`) |
+| _app_end           | every time the browser goes to invisible                                                                                                                                        |                                                              |
+| _profile_set       | when the `addUserAttributes()` or `setUserId()` API called                                                                                                                      |                                                              |
+| _scroll            | the first time a user reaches the bottom of each page (i.e., when a 90% vertical depth becomes visible)                                                                         | 1. _engagement_time_msec                                     |
 | _search            | each time a user performs a site search, indicated by the presence of a URL query parameter, by default we detect `q`, `s`, `search`, `query` and `keyword` in query parameters | 1. _search_key (the keyword name)<br>2. _search_term (the search content) |
-| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list) | 1. _link_classes (the content of `class` in tag `<a>` )<br>2. _link_domain (the domain of `herf` in tag `<a>` )<br>3. _link_id (the content of `id` in tag `<a>` )<br>4. _link_url (the content of `herf` in tag `<a>` )<br>5. _outbound (if the domain is not in configured domain list, the attribute value is `true`) |
-| _clickstream_error | event_name is invalid or user attribute is invalid           | 1. _error_code <br>2. _error_message                         |
+| _click             | each time a user clicks a link that leads away from the current domain (or configured domain list)                                                                              | 1. _link_classes (the content of `class` in tag `<a>` )<br>2. _link_domain (the domain of `herf` in tag `<a>` )<br>3. _link_id (the content of `id` in tag `<a>` )<br>4. _link_url (the content of `herf` in tag `<a>` )<br>5. _outbound (if the domain is not in configured domain list, the attribute value is `true`) |
+| _clickstream_error | event_name is invalid or user attribute is invalid                                                                                                                              | 1. _error_code <br>2. _error_message                         |
 
 ### Session definition
 
@@ -321,7 +323,7 @@ The `_session_start` event triggered when the website open for the first time, o
 
 3. _session_number : The auto increment number of session in current browser, the initial value is 1
 
-4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration](#other-configurations) api.
+4. Session timeout duration: By default is 30 minutes, which can be customized through the [configuration](#other-configurations) API.
 
 ### Page view definition
 
@@ -336,6 +338,8 @@ This event listens for `pushState`, `popState` in history, and `replaceState` of
 1. _entrances: The first page view event in a session is 1, others is 0.
 2. _previous_timestamp: The timestamp of the previous `_page_view` event.
 3. _engagement_time_msec: The previous page last engagement milliseconds.
+
+When the page goes to invisible for more than 30 minutes and then opened again, a new session will be generated, the previous page url will be cleared, and a new page view event will be sent.
 
 ### User engagement definition
 
@@ -356,7 +360,6 @@ We define that users leave the page in the following situations.
 
 ```json
 {
-	"hashCode": "80452b0",
 	"unique_id": "c84ad28d-16a8-4af4-a331-f34cdc7a7a18",
 	"event_type": "add_to_cart",
 	"event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
@@ -417,7 +420,6 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 | Attribute name  | Data type | Description                                                       | How to generate                                                                                                                                                                                                                                        | Usage and purpose                                                                                      |
 |-----------------|-----------|-------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| hashCode        | string    | the event object's hash code                                      | calculated by library `@aws-crypto/sha256-js`                                                                                                                                                                                                          | distinguish different events                                                                           |
 | app_id          | string    | the app_id for your app                                           | app_id was generated by clickstream solution when you register an app to a data pipeline                                                                                                                                                               | identify the events for your apps                                                                      |
 | unique_id       | string    | the unique id for user                                            | generated from `uuidV4()` when the sdk first initialization<br>it will be changed if user logout and then login to a new user. When user re-login to the previous user in the same browser, the unique_Id will be reset to the same previous unique_id | the unique id to identity different users and associating the behavior of logged-in and not logged-in  |
 | device_id       | string    | the unique id for device                                          | generated from `uuidV4()` when the website is first open, then the uuid will stored in localStorage and will never be changed                                                                                                                          | distinguish different devices                                                                          |
@@ -467,7 +469,7 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 | Attribute name | Data type | Required | Description                   |
 |----------------|-----------|----------|-------------------------------|
-| id             | string    | False    | The id of the item            |
+| id             | string    | True     | The id of the item            |
 | name           | string    | False    | The name of the item          |
 | brand          | string    | False    | The brand of the item         |
 | currency       | string    | False    | The currency of the item      |
@@ -483,6 +485,24 @@ All user attributes will be stored in `user` object, and all custom attributes a
 | category5      | string    | False    | The category5 of the item     |
 
 You can use the above preset item attributes, of course, you can also add custom attributes to an item. In addition to the preset attributes, an item can add up to 10 custom attributes.
+
+## Google Tag Manager integration
+
+1. Download the Clickstream SDK template file (.tpl) from the [SDK Release Page](https://github.com/awslabs/clickstream-web/releases).
+
+2. Refer to the Google Tag Manager [Import Guide](https://developers.google.com/tag-platform/tag-manager/templates#export_and_import) for instructions on importing the .tpl file as a custom template in your tag manager console.
+
+3. Refer to the [Use your new tag](https://developers.google.com/tag-platform/tag-manager/templates#use_your_new_tag) to add ClickstreamAnalytics tag to your container.
+
+4. The ClickstreamAnalytics tag currently supports four tag types:
+     * Initialize SDK
+     * Record Custom Event
+     * Set User ID
+     * Set User Attribute
+
+!!! info "Important"
+   
+    Please ensure that you initialize the SDK tag first before use other ClickstreamAnalytics tag types.
 
 ## Change log
 
