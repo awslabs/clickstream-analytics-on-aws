@@ -63,7 +63,7 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
       <div>
         <div className="cs-analytics-dropdown">
           <div
-            className="flex gap-5 align-center"
+            className="analytics-segment-sequence-event flex gap-5 align-center"
             style={{
               position: 'relative',
               marginTop: 5,
@@ -72,16 +72,20 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
             }}
           >
             <div className="cs-analytics-header">
-              Event {sequenceEventIndex + 1}
+              {t('analytics:labels.eventTitle')} {sequenceEventIndex + 1}
             </div>
             <div>
               <EventItem
                 type="event"
                 placeholder={t('analytics:labels.eventSelectPlaceholder')}
-                categoryOption={null}
+                categoryOption={sequenceEventData.sequenceEventOption ?? null}
                 changeCurCategoryOption={(item) => {
-                  console.info('item:', item);
-                  // changeEventOption(item);
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateSequenceDoneEvent,
+                    segmentProps: segmentProps,
+                    sequenceEventIndex,
+                    event: item,
+                  });
                 }}
                 hasTab={true}
                 isMultiSelect={false}
@@ -100,6 +104,19 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                       ...segmentProps,
                       sequenceEventIndex: sequenceEventIndex,
                     },
+                  });
+                }}
+              />
+            </div>
+            <div className="remove-icon">
+              <Button
+                variant="link"
+                iconName="close"
+                onClick={() => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.RemoveSequenceDoneEvent,
+                    segmentProps: segmentProps,
+                    sequenceEventIndex,
                   });
                 }}
               />

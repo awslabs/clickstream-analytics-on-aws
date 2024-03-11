@@ -197,7 +197,8 @@
     "clear": "清除",
     "fullWindowView": "全窗口查看",
     "scanMetadata": "扫描元数据",
-    "or": "或者"
+    "or": "或者",
+    "event": "事件"
   },
   "item": "项目",
   "items": "项目",

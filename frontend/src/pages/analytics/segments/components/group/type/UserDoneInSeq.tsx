@@ -12,23 +12,26 @@
  */
 
 import { Button, Select } from '@cloudscape-design/components';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from '../ConditionGroup';
 
 export const EVENT_SEQUENCE_SESSION_OPTION = [
-  { label: 'Session Start', value: 'session_start' },
-  { label: 'Session End', value: 'session_end' },
+  { label: 'Within a session', value: 'within_a_session' },
+  { label: 'Without a session', value: 'without_a_session' },
 ];
 export const EVENT_SEQUENCE_FLOW_OPTION = [
-  { label: 'Flow Start', value: 'flow_start' },
-  { label: 'Flow End', value: 'flow_end' },
+  { label: 'Indirectly flow', value: 'indirectly_flow' },
+  { label: 'Directly flow', value: 'directly_flow' },
 ];
 
 interface UserDoneInSeqProps {
+  segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
 }
@@ -36,7 +39,8 @@ interface UserDoneInSeqProps {
 const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
   props: UserDoneInSeqProps
 ) => {
-  const { segmentProps, segmentDataDispatch } = props;
+  const { t } = useTranslation();
+  const { segmentData, segmentProps, segmentDataDispatch } = props;
   return (
     <div className="flex gap-5">
       <div>
@@ -49,19 +53,39 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
             });
           }}
         >
-          Event
+          {t('button.event')}
         </Button>
       </div>
       <div>
         <Select
           options={EVENT_SEQUENCE_SESSION_OPTION}
-          selectedOption={EVENT_SEQUENCE_SESSION_OPTION[0]}
+          selectedOption={
+            segmentData.userSequenceSession ??
+            null ??
+            EVENT_SEQUENCE_SESSION_OPTION[0]
+          }
+          onChange={(e) => {
+            segmentDataDispatch({
+              type: AnalyticsSegmentActionType.UpdateSequenceSessionType,
+              segmentProps,
+              session: e.detail.selectedOption,
+            });
+          }}
         />
       </div>
       <div>
         <Select
           options={EVENT_SEQUENCE_FLOW_OPTION}
-          selectedOption={EVENT_SEQUENCE_FLOW_OPTION[0]}
+          selectedOption={
+            segmentData.userSequenceFlow ?? EVENT_SEQUENCE_FLOW_OPTION[0]
+          }
+          onChange={(e) => {
+            segmentDataDispatch({
+              type: AnalyticsSegmentActionType.UpdateSequenceFlowType,
+              segmentProps,
+              flow: e.detail.selectedOption,
+            });
+          }}
         />
       </div>
     </div>

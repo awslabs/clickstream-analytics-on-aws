@@ -115,6 +115,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         )}
         {isDoneInSeqEvent && (
           <UserDoneInSeq
+            segmentData={segmentData}
             segmentProps={segmentProps}
             segmentDataDispatch={segmentDataDispatch}
           />

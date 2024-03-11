@@ -48,6 +48,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   itemType?: string;
   subList?: IAnalyticsItem[];
   // for segment sequence event filter
+  sequenceEventOption?: IAnalyticsItem | null;
   filterGroupRelationShip?: ERelationShip;
   sequenceEventConditionFilterList?: IConditionItemType[];
 }
@@ -107,6 +108,8 @@ export interface IEventSegmentationItem {
   userIsParamOption?: IAnalyticsItem | null;
   userISOperator?: SelectProps.Option | null;
   userIsValue?: any;
+  userSequenceSession?: SelectProps.Option | null;
+  userSequenceFlow?: SelectProps.Option | null;
 }
 
 export interface IEventSegmentationObj {

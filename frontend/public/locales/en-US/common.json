@@ -196,7 +196,8 @@
     "clear": "Clear",
     "fullWindowView": "Full window view",
     "scanMetadata": "Scan metadata",
-    "or": "Or"
+    "or": "Or",
+    "event": "Event"
   },
   "item": "item",
   "items": "items",
