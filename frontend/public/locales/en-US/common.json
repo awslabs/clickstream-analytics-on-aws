@@ -197,7 +197,9 @@
     "fullWindowView": "Full window view",
     "scanMetadata": "Scan metadata",
     "or": "Or",
-    "event": "Event"
+    "event": "Event",
+    "actions": "Actions",
+    "createSegment": "Create Segment"
   },
   "item": "item",
   "items": "items",

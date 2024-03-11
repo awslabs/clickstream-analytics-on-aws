@@ -65,6 +65,8 @@ export enum AnalyticsSegmentActionType {
   UpdateSequenceFlowType = 'updateSequenceFlowType',
   AddSequenceEventFilterCondition = 'addSequenceEventFilterCondition',
   UpdateSequenceEventFilterConditionOption = 'updateSequenceEventFilterConditionOption',
+  UpdateSequenceEventFilterConditionOperation = 'updateSequenceEventFilterConditionOperation',
+  UpdateSequenceEventFilterConditionValue = 'updateSequenceEventFilterConditionValue',
   RemoveSequenceEventFilterConditionOption = 'removeSequenceEventFilterConditionOption',
   ChangeSequenceEventFilterConditionRelation = 'changeSequenceEventFilterConditionRelation',
 }
@@ -222,14 +224,12 @@ export type ChangeSequenceEventFilterConditionRelation = {
 export type UpdateSequenceDoneEvent = {
   type: AnalyticsSegmentActionType.UpdateSequenceDoneEvent;
   segmentProps: SegmentPropsData;
-  sequenceEventIndex: number;
   event: IAnalyticsItem | null;
 };
 
 export type RemoveSequenceDoneEvent = {
   type: AnalyticsSegmentActionType.RemoveSequenceDoneEvent;
   segmentProps: SegmentPropsData;
-  sequenceEventIndex: number;
 };
 
 export type UpdateSequenceSessionType = {
@@ -242,6 +242,33 @@ export type UpdateSequenceFlowType = {
   type: AnalyticsSegmentActionType.UpdateSequenceFlowType;
   segmentProps: SegmentPropsData;
   flow: SelectProps.Option;
+};
+
+export type UpdateSequenceEventFilterConditionOption = {
+  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOption;
+  segmentProps: SegmentPropsData;
+  sequenceEventConditionIndex: number;
+  item: IAnalyticsItem | null;
+};
+
+export type UpdateSequenceEventFilterConditionOperation = {
+  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOperation;
+  segmentProps: SegmentPropsData;
+  sequenceEventConditionIndex: number;
+  operator: SelectProps.Option | null;
+};
+
+export type UpdateSequenceEventFilterConditionValue = {
+  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionValue;
+  segmentProps: SegmentPropsData;
+  sequenceEventConditionIndex: number;
+  value: any;
+};
+
+export type RemoveSequenceEventFilterConditionOption = {
+  type: AnalyticsSegmentActionType.RemoveSequenceEventFilterConditionOption;
+  segmentProps: SegmentPropsData;
+  sequenceEventConditionIndex: number;
 };
 
 export type AnalyticsSegmentAction =
@@ -274,7 +301,11 @@ export type AnalyticsSegmentAction =
   | UpdateSequenceSessionType
   | UpdateSequenceFlowType
   | AddSequenceEventFilterCondition
-  | ChangeSequenceEventFilterConditionRelation;
+  | ChangeSequenceEventFilterConditionRelation
+  | UpdateSequenceEventFilterConditionOption
+  | UpdateSequenceEventFilterConditionOperation
+  | UpdateSequenceEventFilterConditionValue
+  | RemoveSequenceEventFilterConditionOption;
 
 export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
@@ -649,13 +680,13 @@ export const analyticsSegmentGroupReducer = (
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
         ].sequenceEventList[
-          action.sequenceEventIndex ?? 0
+          action.segmentProps.sequenceEventIndex ?? 0
         ].sequenceEventOption = action.event;
       } else {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.parentIndex
         ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
-          action.sequenceEventIndex ?? 0
+          action.segmentProps.sequenceEventIndex ?? 0
         ].sequenceEventOption = action.event;
       }
       return { ...newState };
@@ -665,13 +696,19 @@ export const analyticsSegmentGroupReducer = (
       if (action.segmentProps.level === 1) {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].sequenceEventList.splice(action.sequenceEventIndex, 1);
+        ].sequenceEventList.splice(
+          action.segmentProps.sequenceEventIndex ?? 0,
+          1
+        );
       } else {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.parentIndex
         ].subItemList[
           action.segmentProps.currentIndex
-        ].sequenceEventList.splice(action.sequenceEventIndex, 1);
+        ].sequenceEventList.splice(
+          action.segmentProps.sequenceEventIndex ?? 0,
+          1
+        );
       }
       return { ...newState };
     }
@@ -734,6 +771,110 @@ export const analyticsSegmentGroupReducer = (
         ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
           action.segmentProps.sequenceEventIndex ?? 0
         ].filterGroupRelationShip = action.relation;
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOption: {
+      if (action.segmentProps.level === 1) {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.currentIndex
+          ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0]
+            .sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[action.sequenceEventConditionIndex].conditionOption =
+            action.item;
+        }
+      } else {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ].sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[action.sequenceEventConditionIndex].conditionOption =
+            action.item;
+        }
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOperation: {
+      if (action.segmentProps.level === 1) {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.currentIndex
+          ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0]
+            .sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[
+            action.sequenceEventConditionIndex
+          ].conditionOperator = action.operator;
+        }
+      } else {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ].sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[
+            action.sequenceEventConditionIndex
+          ].conditionOperator = action.operator;
+        }
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionValue: {
+      if (action.segmentProps.level === 1) {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.currentIndex
+          ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0]
+            .sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[action.sequenceEventConditionIndex].conditionValue =
+            action.value;
+        }
+      } else {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ].sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList[action.sequenceEventConditionIndex].conditionValue =
+            action.value;
+        }
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.RemoveSequenceEventFilterConditionOption: {
+      if (action.segmentProps.level === 1) {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.currentIndex
+          ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0]
+            .sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList.splice(action.sequenceEventConditionIndex, 1);
+        }
+      } else {
+        const seqConditionList =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ].sequenceEventConditionFilterList;
+        if (seqConditionList && seqConditionList.length > 0) {
+          seqConditionList.splice(action.sequenceEventConditionIndex, 1);
+        }
       }
       return { ...newState };
     }

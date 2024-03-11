@@ -316,10 +316,12 @@
     "attributionSelectTouchpointEventInfo": "参与归因分析的事件，通常为推广运营为的点击事件、落地页的进入。"
   },
   "segment": {
+    "title": "用户分群",
+    "desc": "用户分群描述",
     "comp": {
       "title": "创建分群",
       "desc": "通过选择一段时间内具有相同行为属性的用户来创建一个细分。",
-      "userSegmentSettings": "用户段设置",
+      "userSegmentSettings": "用户分群设置",
       "segmentName": "分群名称",
       "segmentNameDesc": "提供分群的名称",
       "segmentNamePlaceholder": "输入分群名称",

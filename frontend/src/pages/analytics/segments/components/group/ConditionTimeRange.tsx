@@ -35,6 +35,32 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
 ) => {
   const { t } = useTranslation();
   const { segmentData, groupIndex, segmentDataDispatch } = props;
+
+  const isValidRange = (
+    range: DateRangePickerProps.Value | null
+  ): DateRangePickerProps.ValidationResult => {
+    if (range?.type === 'absolute') {
+      const [startDateWithoutTime] = range.startDate.split('T');
+      const [endDateWithoutTime] = range.endDate.split('T');
+      if (!startDateWithoutTime || !endDateWithoutTime) {
+        return {
+          valid: false,
+          errorMessage: t('analytics:valid.dateRangeIncomplete'),
+        };
+      }
+      if (
+        new Date(range.startDate).getTime() -
+          new Date(range.endDate).getTime() >
+        0
+      ) {
+        return {
+          valid: false,
+          errorMessage: t('analytics:valid.dateRangeInvalid'),
+        };
+      }
+    }
+    return { valid: true };
+  };
   return (
     <div>
       <DateRangePicker
@@ -73,31 +99,7 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
             type: 'relative',
           },
         ]}
-        isValidRange={(range: any) => {
-          if (range.type === 'absolute') {
-            const [startDateWithoutTime] = range.startDate.split('T');
-            const [endDateWithoutTime] = range.endDate.split('T');
-            if (!startDateWithoutTime || !endDateWithoutTime) {
-              return {
-                valid: false,
-                errorMessage:
-                  'The selected date range is incomplete. Select a start and end date for the date range.',
-              };
-            }
-            if (
-              new Date(range.startDate).getTime() -
-                new Date(range.endDate).getTime() >
-              0
-            ) {
-              return {
-                valid: false,
-                errorMessage:
-                  'The selected date range is invalid. The start date must be before the end date.',
-              };
-            }
-          }
-          return { valid: true };
-        }}
+        isValidRange={isValidRange}
         i18nStrings={{
           relativeModeTitle: defaultStr(
             t('analytics:dateRange.relativeModeTitle')

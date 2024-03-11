@@ -15,7 +15,6 @@ import { Button } from '@cloudscape-design/components';
 import {
   ERelationShip,
   IAnalyticsItem,
-  IEventSegmentationItem,
   INIT_SEGMENTATION_DATA,
 } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
@@ -33,7 +32,6 @@ import { MOCK_EVENT_LIST, PRESET_PARAMETERS } from './mock_data';
 interface EventSeqItemProps {
   conditionWidth: number;
   sequenceEventIndex: number;
-  segmentData: IEventSegmentationItem;
   segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   sequenceEventData: IAnalyticsItem;
   segmentProps: SegmentPropsData;
@@ -44,7 +42,6 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
 ) => {
   const { t } = useTranslation();
   const {
-    segmentData,
     sequenceEventIndex,
     segmentProps,
     sequenceEventData,
@@ -82,8 +79,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 changeCurCategoryOption={(item) => {
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.UpdateSequenceDoneEvent,
-                    segmentProps: segmentProps,
-                    sequenceEventIndex,
+                    segmentProps: {
+                      ...segmentProps,
+                      sequenceEventIndex: sequenceEventIndex,
+                    },
                     event: item,
                   });
                 }}
@@ -97,7 +96,6 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
               <Button
                 iconName="filter"
                 onClick={() => {
-                  // TODO Add Filter
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.AddSequenceEventFilterCondition,
                     segmentProps: {
@@ -115,8 +113,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 onClick={() => {
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.RemoveSequenceDoneEvent,
-                    segmentProps: segmentProps,
-                    sequenceEventIndex,
+                    segmentProps: {
+                      ...segmentProps,
+                      sequenceEventIndex: sequenceEventIndex,
+                    },
                   });
                 }}
               />
@@ -139,18 +139,62 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 enableChangeRelation: true,
                 conditionOptions: filterOptionData.conditionOptions,
                 conditionRelationShip:
-                  segmentData.eventConditionRelationShip ?? ERelationShip.AND,
+                  sequenceEventData.filterGroupRelationShip ??
+                  ERelationShip.AND,
                 data: sequenceEventData.sequenceEventConditionFilterList,
               }}
               filterDataDispatch={filterOptionDataDispatch}
               changeSegmentConditionRelation={(relation) => {
                 segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.ChangeEventFilterConditionRelation,
+                  type: AnalyticsSegmentActionType.ChangeSequenceEventFilterConditionRelation,
                   segmentProps: {
                     ...segmentProps,
-                    sequenceEventIndex: sequenceEventIndex,
+                    sequenceEventIndex,
                   },
                   relation,
+                });
+              }}
+              updateSegmentConditionItem={(index, item) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOption,
+                  segmentProps: {
+                    ...segmentProps,
+                    sequenceEventIndex,
+                  },
+                  sequenceEventConditionIndex: index,
+                  item,
+                });
+              }}
+              updateSegmentConditionOperator={(index, operator) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionOperation,
+                  segmentProps: {
+                    ...segmentProps,
+                    sequenceEventIndex,
+                  },
+                  sequenceEventConditionIndex: index,
+                  operator,
+                });
+              }}
+              updateSegmentConditionValue={(index, value) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateSequenceEventFilterConditionValue,
+                  segmentProps: {
+                    ...segmentProps,
+                    sequenceEventIndex,
+                  },
+                  sequenceEventConditionIndex: index,
+                  value,
+                });
+              }}
+              removeSegmentConditionItem={(index) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.RemoveSequenceEventFilterConditionOption,
+                  segmentProps: {
+                    ...segmentProps,
+                    sequenceEventIndex,
+                  },
+                  sequenceEventConditionIndex: index,
                 });
               }}
             />

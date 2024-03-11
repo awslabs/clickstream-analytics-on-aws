@@ -245,7 +245,6 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
               <EventSeqItem
                 key={identity(index)}
                 sequenceEventIndex={index}
-                segmentData={segmentData}
                 sequenceEventData={item}
                 conditionWidth={conditionWidth}
                 segmentDataDispatch={segmentDataDispatch}

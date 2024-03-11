@@ -23,11 +23,10 @@ import {
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
-import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { TIME_FORMAT } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface UserSegmentItem {
   id: string;
@@ -42,31 +41,9 @@ const UserSegments: React.FC = () => {
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
-      header: t('user:labels.tableColumnUserId'),
+      header: 'ID',
       cell: (e: UserSegmentItem) => {
         return e.id;
-      },
-    },
-    {
-      id: 'name',
-      header: t('user:labels.tableColumnName'),
-      cell: (e: UserSegmentItem) => {
-        return e.name;
-      },
-    },
-    {
-      id: 'roles',
-      header: t('user:labels.tableColumnRole'),
-      minWidth: 240,
-      cell: (e: UserSegmentItem) => {
-        return e.desc;
-      },
-    },
-    {
-      id: 'createAt',
-      header: t('user:labels.tableColumnCreateAt'),
-      cell: (e: UserSegmentItem) => {
-        return moment(e.createAt).format(TIME_FORMAT) || '-';
       },
     },
   ];
@@ -81,8 +58,8 @@ const UserSegments: React.FC = () => {
       href: '/',
     },
     {
-      text: t('breadCrumb.users'),
-      href: '/user',
+      text: t('nav.analytics.segments'),
+      href: '/analytics/segments',
     },
   ];
 
@@ -98,7 +75,9 @@ const UserSegments: React.FC = () => {
           tools={<HelpInfo />}
           navigationHide
           content={
-            <ContentLayout header={<Header>A</Header>}>
+            <ContentLayout
+              header={<Header>{t('nav.analytics.segments')}</Header>}
+            >
               <Table
                 header={
                   <Header
@@ -108,15 +87,23 @@ const UserSegments: React.FC = () => {
                         <ButtonDropdown
                           items={[
                             {
-                              text: 'View Details',
+                              text: defaultStr(t('button.viewDetails')),
                               id: 'detail',
                               disabled: false,
                             },
-                            { text: 'Edit', id: 'edit', disabled: false },
-                            { text: 'Delete', id: 'delete', disabled: true },
+                            {
+                              text: defaultStr(t('button.edit')),
+                              id: 'edit',
+                              disabled: false,
+                            },
+                            {
+                              text: defaultStr(t('button.delete')),
+                              id: 'delete',
+                              disabled: true,
+                            },
                           ]}
                         >
-                          Actions
+                          {t('button.actions')}
                         </ButtonDropdown>
                         <Button
                           iconAlign="right"
@@ -126,13 +113,13 @@ const UserSegments: React.FC = () => {
                             navigate('/analytics/segments/add');
                           }}
                         >
-                          Create Segment
+                          {t('button.createSegment')}
                         </Button>
                       </SpaceBetween>
                     }
-                    description="User Segments description"
+                    description={t('analytics:segment.desc')}
                   >
-                    User Segments
+                    {t('analytics:segment.title')}
                   </Header>
                 }
                 variant="container"

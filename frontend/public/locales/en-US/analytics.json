@@ -316,6 +316,8 @@
     "attributionSelectTouchpointEventInfo": "Events to be included in the attribution analysis, e.g., click events for promotion spot, landing page visits."
   },
   "segment": {
+    "title": "User Segments",
+    "desc": "User Segments description",
     "comp": {
       "title": "Create Segment",
       "desc": "Create a segment by selecting the users that shared the same attributes of behaviors within a period of time.",
