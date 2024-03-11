@@ -642,8 +642,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      dataSourceBucket: loadWorkflowS3Bucket,
-      dataSourcePrefix: 'project1/',
     };
     let error = false;
     try {
@@ -698,8 +696,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      dataSourceBucket: loadWorkflowS3Bucket,
-      dataSourcePrefix: 'project1/',
     };
     let error = false;
     try {
@@ -741,8 +737,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
-      dataSourceBucket: loadWorkflowS3Bucket,
-      dataSourcePrefix: 'project1/',
     };
 
     const nestedStack = new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);

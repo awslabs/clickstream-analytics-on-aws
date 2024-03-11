@@ -25,7 +25,6 @@ import {
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { PolicyStatement, Role, AccountPrincipal, IRole, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemasAndReporting } from './private/app-schema';
@@ -65,8 +64,6 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
-  readonly dataSourceBucket: IBucket;
-  readonly dataSourcePrefix: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -307,8 +304,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       tablesOdsSource: props.tablesOdsSource,
       workflowBucketInfo: props.workflowBucketInfo,
       loadDataConfig: props.loadDataConfig,
-      odsSourceS3Bucket: props.dataSourceBucket,
-      odsSourceS3Prefix: props.dataSourcePrefix,
       nextStateStateMachines: [
         {
           name: 'Scan Metadata Async',

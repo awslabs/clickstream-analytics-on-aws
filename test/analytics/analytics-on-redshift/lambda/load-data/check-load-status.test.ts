@@ -124,6 +124,10 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
       detail: {
         status: StatusString.FINISHED,
       },
+      waitTimeInfo: {
+        waitTime: 10,
+        loopCount: 2,
+      },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
       Id: loadStatusEvent.detail.id,
@@ -272,6 +276,10 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     expect(resp).toEqual({
       detail: {
         status: StatusString.FINISHED,
+      },
+      waitTimeInfo: {
+        waitTime: 10,
+        loopCount: 2,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
