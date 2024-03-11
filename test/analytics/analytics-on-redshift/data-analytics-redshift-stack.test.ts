@@ -763,14 +763,14 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     expect(nestedStack).toBeInstanceOf(RedshiftAnalyticsStack);
   });
 
-  test('Should has 5 StateMachines', () => {
+  test('Should has 6 StateMachines', () => {
     const templates = [
       Template.fromStack(stack.nestedStacks.redshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.redshiftProvisionedStack),
     ];
     for (const nestedTemplate of templates) {
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 5);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 6);
     }
   });
 
