@@ -3260,7 +3260,7 @@ appId 和 endpoint 的值。</p>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">});</span>
 </span></code></pre></div>
 <p>当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
-api <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
+API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
 <h4 id="item">记录带有 Item 的事件</h4>
 <p>您可以添加以下代码来记录带有 Item 的事件，同时您可以在 <code>attributes</code> Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
 <div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">var</span><span class="w"> </span><span class="n">itemBook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">(</span>
@@ -3286,6 +3286,7 @@ api <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
 <div class="admonition warning">
 <p class="admonition-title">重要提示</p>
 <p>数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。</p>
+<p>ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。</p>
 </div>
 <h4 id="_7">其他配置项</h4>
 <p>除了必需的 <code>appId</code> 和 <code>endpoint</code> 之外，您还可以配置其他参数以满足更多定制化的使用：</p>
