@@ -245,8 +245,10 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
           odsTableName: odsTableName,
           odsSourceBucket: odsSource.s3Bucket.bucketName,
           odsSourcePrefix: odsSource.prefix,
+          AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID: JsonPath.stringAt('$$.Execution.Id'),
         }),
-        name: JsonPath.format('{}-{}', JsonPath.stringAt('$.subExecutionNamePrefix'), odsTableName),
+        name: JsonPath.format('{}-{}', JsonPath.arrayGetItem(
+          JsonPath.stringSplit(JsonPath.arrayGetItem(JsonPath.stringSplit(JsonPath.executionId, ':'), 7), '_'), 0), odsTableName),
         resultSelector: {
           'ExecutionArn.$': '$.ExecutionArn',
         },

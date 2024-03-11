@@ -33,11 +33,11 @@
       {
         "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
       },
-      "event/\"},\"StateMachineArn\":\"",
+      "event/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
       {
         "Ref": "LoadDataSubLoadDataStateMachine65360865"
       },
-      "\",\"Name.$\":\"States.Format('{}-{}', $.subExecutionNamePrefix, 'event')\"}}}},{\"StartAt\":\"LoadData - event_parameter\",\"States\":{\"LoadData - event_parameter\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
+      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'event')\"}}}},{\"StartAt\":\"LoadData - event_parameter\",\"States\":{\"LoadData - event_parameter\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
@@ -49,11 +49,11 @@
       {
         "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
       },
-      "event_parameter/\"},\"StateMachineArn\":\"",
+      "event_parameter/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
       {
         "Ref": "LoadDataSubLoadDataStateMachine65360865"
       },
-      "\",\"Name.$\":\"States.Format('{}-{}', $.subExecutionNamePrefix, 'event_parameter')\"}}}},{\"StartAt\":\"LoadData - user\",\"States\":{\"LoadData - user\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
+      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'event_parameter')\"}}}},{\"StartAt\":\"LoadData - user\",\"States\":{\"LoadData - user\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
@@ -65,11 +65,11 @@
       {
         "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
       },
-      "user/\"},\"StateMachineArn\":\"",
+      "user/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
       {
         "Ref": "LoadDataSubLoadDataStateMachine65360865"
       },
-      "\",\"Name.$\":\"States.Format('{}-{}', $.subExecutionNamePrefix, 'user')\"}}}},{\"StartAt\":\"LoadData - item\",\"States\":{\"LoadData - item\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
+      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'user')\"}}}},{\"StartAt\":\"LoadData - item\",\"States\":{\"LoadData - item\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
@@ -81,11 +81,11 @@
       {
         "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
       },
-      "item/\"},\"StateMachineArn\":\"",
+      "item/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
       {
         "Ref": "LoadDataSubLoadDataStateMachine65360865"
       },
-      "\",\"Name.$\":\"States.Format('{}-{}', $.subExecutionNamePrefix, 'item')\"}}}}]},\"LoadData - Load Data To Redshift Completed\":{\"Type\":\"Pass\",\"Parameters\":{\"parallelLoadData.$\":\"$$\"},\"Next\":\"LoadData - Refresh materialized views\"},\"LoadData - Refresh materialized views\":{\"Next\":\"LoadData - Scan Metadata Async\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.refreshViewsOut\",\"ResultSelector\":{\"Payload.$\":\"$.Payload\"},\"Resource\":\"arn:",
+      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'item')\"}}}}]},\"LoadData - Load Data To Redshift Completed\":{\"Type\":\"Pass\",\"Parameters\":{\"parallelLoadData.$\":\"$$\"},\"Next\":\"LoadData - Refresh materialized views\"},\"LoadData - Refresh materialized views\":{\"Next\":\"LoadData - Scan Metadata Async\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2},{\"ErrorEquals\":[\"Lambda.TooManyRequestsException\"],\"IntervalSeconds\":3,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.refreshViewsOut\",\"ResultSelector\":{\"Payload.$\":\"$.Payload\"},\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
