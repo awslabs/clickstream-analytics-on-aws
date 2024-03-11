@@ -98,9 +98,9 @@ export interface IEventSegmentationItem {
   segmentEventRelationShip?: ERelationShip;
   subItemList: IEventSegmentationItem[];
   eventConditionRelationShip?: ERelationShip | null;
-  eventConditionList: IConditionItemType[];
   sequenceEventList: IAnalyticsItem[];
   userDoneEvent?: IAnalyticsItem | null;
+  userDoneEventConditionList: IConditionItemType[];
   userDoneEventCalculateMethod?: IAnalyticsItem | null;
   userDoneEventOperation?: SelectProps.Option | null;
   userDoneEventValue?: any;

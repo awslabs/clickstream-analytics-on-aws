@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { DateRangePickerProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import {
@@ -25,7 +28,6 @@ import {
   ERelationShip,
   IAnalyticsItem,
   IEventSegmentationObj,
-  SegmentationFilterDataType,
 } from '../AnalyticsType';
 
 export enum AnalyticsSegmentActionType {
@@ -40,15 +42,17 @@ export enum AnalyticsSegmentActionType {
   UpdateUserDoneEventCalculate = 'updateUserDoneEventCalculate',
   UpdateUserDoneEventOperation = 'updateUserDoneEventOperation',
   UpdateUserDoneEventValue = 'updateUserDoneEventValue',
+  AddEventFilterCondition = 'addEventFilterCondition',
+  ChangeEventFilterConditionRelation = 'changeEventFilterConditionRelation',
+  UpdateUserDoneEventConditionItem = 'updateUserDoneEventConditionItem',
+  UpdateUserDoneEventConditionOperator = 'updateUserDoneEventConditionOperator',
+  UpdateUserDoneEventConditionValue = 'updateUserDoneEventConditionValue',
+  RemoveUserDoneEventConditionItem = 'removeUserDoneEventConditionItem',
 
   AddFilterGroup = 'addFilterGroup',
   RemoveFilterGroup = 'removeFilterGroup',
   UpdateFilterGroupName = 'updateFilterGroupName',
   UpdateFilterGroupTimeRange = 'updateFilterGroupTimeRange',
-
-  AddEventFilterCondition = 'addEventFilterCondition',
-  UpdateEventFilterCondition = 'updateEventFilterCondition',
-  ChangeEventFilterConditionRelation = 'changeEventFilterConditionRelation',
 
   AddSequenceDoneEvent = 'addSequenceDoneEvent',
   AddSequenceEventFilterCondition = 'addSequenceEventFilterCondition',
@@ -109,6 +113,33 @@ export type UpdateUserDoneEventValue = {
   value: any;
 };
 
+export type UpdateUserDoneEventConditionItem = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionItem;
+  segmentProps: SegmentPropsData;
+  conditionIndex: number;
+  item: IAnalyticsItem | null;
+};
+
+export type UpdateUserDoneEventConditionOperator = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionOperator;
+  segmentProps: SegmentPropsData;
+  conditionIndex: number;
+  operator: SelectProps.Option | null;
+};
+
+export type UpdateUserDoneEventConditionValue = {
+  type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionValue;
+  segmentProps: SegmentPropsData;
+  conditionIndex: number;
+  value: string[];
+};
+
+export type RemoveUserDoneEventConditionItem = {
+  type: AnalyticsSegmentActionType.RemoveUserDoneEventConditionItem;
+  segmentProps: SegmentPropsData;
+  conditionIndex: number;
+};
+
 export type AddFilterGroup = {
   type: AnalyticsSegmentActionType.AddFilterGroup;
 };
@@ -141,12 +172,6 @@ export type ChangeEventFilterConditionRelation = {
   relation: ERelationShip;
 };
 
-export type UpdateEventFilterCondition = {
-  type: AnalyticsSegmentActionType.UpdateEventFilterCondition;
-  segmentProps: SegmentPropsData;
-  conditionList: SegmentationFilterDataType;
-};
-
 export type AddSequenceDoneEvent = {
   type: AnalyticsSegmentActionType.AddSequenceDoneEvent;
   segmentProps: SegmentPropsData;
@@ -174,13 +199,15 @@ export type AnalyticsSegmentAction =
   | UpdateUserDoneEventCalculate
   | UpdateUserDoneEventOperation
   | UpdateUserDoneEventValue
+  | AddEventFilterCondition
+  | ChangeEventFilterConditionRelation
+  | UpdateUserDoneEventConditionItem
+  | UpdateUserDoneEventConditionOperator
+  | UpdateUserDoneEventConditionValue
   | AddFilterGroup
   | RemoveFilterGroup
   | UpdateFilterGroupName
   | UpdateFilterGroupTimeRange
-  | AddEventFilterCondition
-  | ChangeEventFilterConditionRelation
-  | UpdateEventFilterCondition
   | AddSequenceDoneEvent
   | AddSequenceEventFilterCondition
   | ChangeSequenceEventFilterConditionRelation;
@@ -223,7 +250,7 @@ export const analyticsSegmentGroupReducer = (
       ] = {
         userEventType: null,
         segmentEventRelationShip: ERelationShip.OR,
-        eventConditionList: [],
+        userDoneEventConditionList: [],
         sequenceEventList: [],
         subItemList: [{ ...currentData }, { ...DEFAULT_SEGMENT_ITEM }],
       };
@@ -242,7 +269,7 @@ export const analyticsSegmentGroupReducer = (
         newState.subItemList[action.rootIndex] = {
           userEventType: null,
           segmentEventRelationShip: ERelationShip.AND,
-          eventConditionList: [],
+          userDoneEventConditionList: [],
           sequenceEventList: [],
           subItemList: [{ ...previousData }, { ...DEFAULT_SEGMENT_ITEM }],
         };
@@ -291,7 +318,7 @@ export const analyticsSegmentGroupReducer = (
           ].subItemList[action.segmentProps.currentIndex];
       }
       currentData.userEventType = action.userEventType;
-      currentData.eventConditionList = [];
+      currentData.userDoneEventConditionList = [];
       currentData.sequenceEventList =
         action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE
           ? [
@@ -388,15 +415,15 @@ export const analyticsSegmentGroupReducer = (
       if (action.segmentProps.level === 1) {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].eventConditionList.push({ ...DEFAULT_CONDITION_DATA });
+        ].userDoneEventConditionList.push({ ...DEFAULT_CONDITION_DATA });
       } else {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].eventConditionList.push(
-          {
-            ...DEFAULT_CONDITION_DATA,
-          }
-        );
+        ].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList.push({
+          ...DEFAULT_CONDITION_DATA,
+        });
       }
       return { ...newState };
     }
@@ -416,24 +443,54 @@ export const analyticsSegmentGroupReducer = (
       return { ...newState };
     }
 
-    case AnalyticsSegmentActionType.UpdateEventFilterCondition: {
-      // console.info(action);
+    case AnalyticsSegmentActionType.UpdateUserDoneEventConditionItem: {
       if (action.segmentProps.level === 1) {
-        // TODO
-        // newState.subItemList[action.rootIndex].subItemList[
-        //   action.currentIndex
-        // ] = action.conditionList;
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionOption =
+          action.item;
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionOption =
+          action.item;
       }
-      // if (action.level === 1) {
-      //   newState.subItemList[action.rootIndex].subItemList[
-      //     action.currentIndex
-      //   ].eventConditionList = action.conditionList;
-      // } else if (action.level === 2) {
-      //   newState.subItemList[action.rootIndex].subItemList[
-      //     action.parentIndex
-      //   ].subItemList[action.currentIndex].eventConditionList =
-      //     action.conditionList;
-      // }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEventConditionOperator: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionOperator =
+          action.operator;
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionOperator =
+          action.operator;
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserDoneEventConditionValue: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionValue =
+          action.value;
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[
+          action.segmentProps.currentIndex
+        ].userDoneEventConditionList[action.conditionIndex].conditionValue =
+          action.value;
+      }
       return { ...newState };
     }
 
@@ -457,8 +514,6 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.AddSequenceEventFilterCondition: {
-      console.info('AddSequenceEventFilterCondition:');
-      console.info('action.segmentProps:', action.segmentProps);
       if (action.segmentProps.level === 1) {
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex

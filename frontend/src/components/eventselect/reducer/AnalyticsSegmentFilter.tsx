@@ -11,11 +11,15 @@
  *  and limitations under the License.
  */
 
-import { Button } from '@cloudscape-design/components';
+import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ERelationShip, SegmentationFilterDataType } from '../AnalyticsType';
+import {
+  ERelationShip,
+  IAnalyticsItem,
+  SegmentationFilterDataType,
+} from '../AnalyticsType';
 import ConditionItem from '../ConditionItem';
 import RelationAnd from '../comps/RelationAnd';
 import RelationOr from '../comps/RelationOr';
@@ -28,6 +32,16 @@ interface SegmentationFilterProps {
   // For Segment Components
   addSegmentCondition?: () => void;
   changeSegmentConditionRelation?: (relation: ERelationShip) => void;
+  updateSegmentConditionItem?: (
+    index: number,
+    item: IAnalyticsItem | null
+  ) => void;
+  updateSegmentConditionOperator?: (
+    index: number,
+    operator: SelectProps.Option | null
+  ) => void;
+  updateSegmentConditionValue?: (index: number, value: string[]) => void;
+  removeSegmentConditionItem?: (index: number) => void;
 }
 
 const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
@@ -39,9 +53,12 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
     filterDataDispatch,
     maxSelectNum,
     hideAddButton,
-    // segmentProps,
     addSegmentCondition,
     changeSegmentConditionRelation,
+    updateSegmentConditionItem,
+    updateSegmentConditionOperator,
+    updateSegmentConditionValue,
+    removeSegmentConditionItem,
   } = props;
 
   return (
@@ -89,6 +106,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         type: 'removeEventCondition',
                         index: index,
                       });
+                      removeSegmentConditionItem?.(index);
                     }}
                     changeCurCategoryOption={(category) => {
                       filterDataDispatch({
@@ -96,6 +114,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         option: category,
                       });
+                      updateSegmentConditionItem?.(index, category);
                     }}
                     changeConditionOperator={(item) => {
                       filterDataDispatch({
@@ -103,6 +122,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         operator: item,
                       });
+                      updateSegmentConditionOperator?.(index, item);
                     }}
                     changeConditionValue={(value) => {
                       filterDataDispatch({
@@ -110,6 +130,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         value: value,
                       });
+                      updateSegmentConditionValue?.(index, value);
                     }}
                   />
                 );

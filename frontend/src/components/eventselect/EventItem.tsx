@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Select, SelectProps } from '@cloudscape-design/components';
+import { Select } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
@@ -32,7 +32,7 @@ interface EventItemProps {
   categoryOption: IAnalyticsItem | null;
   calcMethodOption?: IAnalyticsItem | null;
   calcMethodOptions?: IAnalyticsItem[];
-  changeCurCategoryOption: (category: SelectProps.Option | null) => void;
+  changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;

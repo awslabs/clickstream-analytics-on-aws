@@ -25,6 +25,7 @@ import {
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
 import React, { Dispatch, useMemo, useReducer, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Condition from './Condition';
 import EventSeqItem from './EventSeqItem';
 import { ConditionType, PRESET_PARAMETERS } from './mock_data';
@@ -51,6 +52,7 @@ interface ConditionGroupProps {
 const ConditionGroup: React.FC<ConditionGroupProps> = (
   props: ConditionGroupProps
 ) => {
+  const { t } = useTranslation();
   const { segmentDataDispatch, segmentProps, segmentData } = props;
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
@@ -124,7 +126,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                   });
                 }}
               >
-                Or
+                {t('button.or')}
               </Button>
             )}
           {segmentProps.parentData.segmentEventRelationShip ===
@@ -140,7 +142,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                   });
                 }}
               >
-                Or
+                {t('button.or')}
               </Button>
             )}
         </div>
@@ -174,8 +176,8 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
             maxWidth: `calc(100% - ${conditionWidth + 25}px)`,
           }}
         >
-          {segmentData.eventConditionList &&
-            segmentData.eventConditionList.length > 0 && (
+          {segmentData.userDoneEventConditionList &&
+            segmentData.userDoneEventConditionList.length > 0 && (
               <AnalyticsSegmentFilter
                 hideAddButton
                 filterDataState={{
@@ -183,20 +185,38 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                   conditionOptions: filterOptionData.conditionOptions,
                   conditionRelationShip:
                     segmentData.eventConditionRelationShip ?? ERelationShip.AND,
-                  data: segmentData.eventConditionList,
+                  data: segmentData.userDoneEventConditionList,
                 }}
                 filterDataDispatch={filterOptionDataDispatch}
-                addSegmentCondition={() => {
-                  segmentDataDispatch({
-                    type: AnalyticsSegmentActionType.AddEventFilterCondition,
-                    segmentProps,
-                  });
-                }}
                 changeSegmentConditionRelation={(relation) => {
                   segmentDataDispatch({
                     type: AnalyticsSegmentActionType.ChangeEventFilterConditionRelation,
                     segmentProps,
                     relation,
+                  });
+                }}
+                updateSegmentConditionItem={(conditionIndex, item) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionItem,
+                    segmentProps,
+                    conditionIndex,
+                    item,
+                  });
+                }}
+                updateSegmentConditionOperator={(conditionIndex, operator) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionOperator,
+                    conditionIndex,
+                    segmentProps,
+                    operator,
+                  });
+                }}
+                updateSegmentConditionValue={(conditionIndex, value) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateUserDoneEventConditionValue,
+                    segmentProps,
+                    conditionIndex,
+                    value,
                   });
                 }}
               />

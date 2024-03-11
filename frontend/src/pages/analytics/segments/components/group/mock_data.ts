@@ -299,14 +299,14 @@ export const CONDITION_LIST: SelectProps.Option[] = [
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   subItemList: [],
-  eventConditionList: [],
+  userDoneEventConditionList: [],
   sequenceEventList: [],
 };
 
 export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
   userEventType: null,
   segmentEventRelationShip: ERelationShip.OR,
-  eventConditionList: [],
+  userDoneEventConditionList: [],
   sequenceEventList: [],
   subItemList: [{ ...DEFAULT_SEGMENT_ITEM }],
   groupDateRange: null,

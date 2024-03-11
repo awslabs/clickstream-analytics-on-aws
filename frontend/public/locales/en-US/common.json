@@ -195,7 +195,8 @@
     "applyActionText": "Apply",
     "clear": "Clear",
     "fullWindowView": "Full window view",
-    "scanMetadata": "Scan metadata"
+    "scanMetadata": "Scan metadata",
+    "or": "Or"
   },
   "item": "item",
   "items": "items",
