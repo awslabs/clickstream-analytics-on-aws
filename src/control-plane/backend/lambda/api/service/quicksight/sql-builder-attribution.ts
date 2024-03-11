@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
 import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, USER_TABLE, buildAllConditionSql, buildColNameWithPrefix, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {

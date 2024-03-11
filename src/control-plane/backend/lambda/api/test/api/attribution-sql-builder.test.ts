@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { ExploreAnalyticsOperators } from '../../service/quicksight/sql-builder';
 import { buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from '../../service/quicksight/sql-builder-attribution';
 

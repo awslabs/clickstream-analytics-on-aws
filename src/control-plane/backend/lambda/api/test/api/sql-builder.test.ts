@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreAggregationMethod, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 

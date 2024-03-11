@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import {
   CreateAnalysisCommand,
@@ -43,7 +44,6 @@ import request from 'supertest';
 import { MOCK_TOKEN, quickSightUserMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, ExploreAnalyticsOperators, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';

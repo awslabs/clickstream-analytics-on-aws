@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataParameterType, MetadataSource } from '../common/explore-types';
+import { ConditionCategory, MetadataParameterType, MetadataSource } from '@aws/clickstream-base-lib';
 import { logger } from '../common/powertools';
 import { isEmpty } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../model/metadata';

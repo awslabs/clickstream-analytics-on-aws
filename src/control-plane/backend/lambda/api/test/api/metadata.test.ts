@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   SFNClient, StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
@@ -27,7 +28,6 @@ import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock, dictionaryMock } from './ddb-mock';
 import { BASE_STATUS, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { analyticsMetadataTable, clickStreamTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
-import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
