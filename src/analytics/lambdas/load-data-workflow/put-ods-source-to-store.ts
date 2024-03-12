@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, S3ObjectCreatedNotificationEventDetail } from 'aws-lambda';
@@ -82,7 +83,7 @@ export const handler = async (event: EventBridgeEvent<'Object Created', S3Object
     await putItem(tableName, s3Bucket, s3Object, s3ObjSize, jobStatus, timestamp);
   } else {
     logger.warn(`S3 file ${s3Object} is not matched with 
-      ${/partition_app=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\//} pattern
+      /${PARTITION_APP}=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\// pattern
       or ${S3_FILE_SUFFIX} suffix`);
   }
 };
@@ -125,7 +126,7 @@ export const putItem = async (tableName: string, s3Bucket: string, s3Object: str
 };
 
 function checkS3FileValidity(s3FileKey: string, appIdList: string[]) {
-  const regex = /partition_app=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\//;
+  const regex = `/${PARTITION_APP}=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\//`;
   const match = s3FileKey.match(regex);
   if (!match) {
     return false;
