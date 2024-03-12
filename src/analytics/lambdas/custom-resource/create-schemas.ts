@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -319,9 +319,14 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
-    //drop old views
+    //drop old materialized views
     for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
       sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
+    }
+
+    //drop old views
+    for (const view of CLICKSTREAM_DEPRECATED_VIEW_LIST) {
+      sqlStatements.push(`DROP VIEW IF EXISTS ${app}.${view};`);
     }
 
     sqlStatementsByApp.set(app, sqlStatements);
