@@ -55,6 +55,7 @@
     "@aws-sdk/client-cloudwatch-events": "^3.523.0",
     "@aws-sdk/client-dynamodb": "^3.523.0",
     "@aws-sdk/client-ec2": "^3.523.0",
+    "@aws-sdk/client-eventbridge": "^3.523.0",
     "@aws-sdk/client-iam": "^3.523.0",
     "@aws-sdk/client-kafka": "^3.523.0",
     "@aws-sdk/client-quicksight": "^3.523.0",

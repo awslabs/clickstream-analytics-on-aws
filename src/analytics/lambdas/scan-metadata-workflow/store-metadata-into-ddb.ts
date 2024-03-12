@@ -11,14 +11,21 @@
  *  and limitations under the License.
  */
 
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
-  DynamoDBClient,
-} from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, BatchWriteCommand, BatchWriteCommandInput, QueryCommandInput, QueryCommand } from '@aws-sdk/lib-dynamodb';
+  BatchWriteCommand,
+  BatchWriteCommandInput,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+  QueryCommandInput,
+} from '@aws-sdk/lib-dynamodb';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { parseDynamoDBTableARN } from '../../../common/utils';
 import { StoreMetadataBody } from '../../private/model';
-import { getRedshiftClient, executeStatementsWithWait, getRedshiftProps, getStatementResult } from '../redshift-data';
+import { executeStatementsWithWait, getRedshiftClient, getRedshiftProps, getStatementResult } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
@@ -148,7 +155,7 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[], 
       const item = await createUserPropertiesItem(record, ddbItemsMap, markedLatestMonthMap);
       ddbItemsMap.set(key, item);
     }
-  };
+  }
 
   putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
 }
@@ -296,17 +303,6 @@ async function queryMetadata(inputSql: string) {
     logger.error('Error when query metadata.', { err } );
     throw err;
   }
-}
-
-function parseDynamoDBTableARN(ddbArn: string) {
-  const arnComponents = ddbArn.split(':');
-  const region = arnComponents[3];
-  const tableName = arnComponents[5].split('/')[1];
-
-  return {
-    ddbRegion: region,
-    ddbTableName: tableName,
-  };
 }
 
 function convertToSet(inputString?: string) {

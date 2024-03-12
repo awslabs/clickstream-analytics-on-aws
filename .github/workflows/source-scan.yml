@@ -32,7 +32,7 @@ jobs:
         run: |-
           sed -n 1,12p .projenrc.js > $LICENSE_FILE && cat $LICENSE_FILE
           /tmp/license-check/license-header-checker -a -r -i node_modules,cdk.out,coverage $LICENSE_FILE . ts tsx js java
-          ([[ -z `git status -s` ]] || (echo "Found files violdate with license header" && exit 1))
+          ([[ -z `git status -s` ]] || (echo "Found files violate with license header" && exit 1))
   viperlight:
     name: pre-build scan
     runs-on: ubuntu-latest

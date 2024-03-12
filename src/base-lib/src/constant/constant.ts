@@ -351,6 +351,8 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX =
   'RedshiftDataApiRoleArn';
 export const OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX =
   'ScanMetadataWorkflowArn';
+export const OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX =
+  'UserSegmentsWorkflowArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
   'DataSourceArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =

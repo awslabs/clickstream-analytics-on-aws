@@ -733,6 +733,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
   },
   {
+    ParameterKey: 'SegmentsS3Prefix',
+    ParameterValue: 'clickstream/project_8888_8888/data/segments/',
+  },
+  {
     ParameterKey: 'LoadWorkflowBucket',
     ParameterValue: 'EXAMPLE_BUCKET',
   },
@@ -811,6 +815,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   {
     ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
     ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/analytics-metadata-table-name',
+  },
+  {
+    ParameterKey: 'ClickstreamMetadataDdbArn',
+    ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/click-stream-table-name',
   },
 ];
 
@@ -901,6 +909,10 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = merge
       ParameterKey: 'RedshiftServerlessRPU',
       ParameterValue: '8',
     },
+    {
+      ParameterKey: 'SegmentsS3Prefix',
+      ParameterValue: 'example/',
+    },
   ],
 );
 export const MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS = mergeParameters(
@@ -917,6 +929,10 @@ export const MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS =
     {
       ParameterKey: 'RedshiftDbUser',
       ParameterValue: 'clickstream',
+    },
+    {
+      ParameterKey: 'SegmentsS3Prefix',
+      ParameterValue: 'example/',
     },
   ],
 );
