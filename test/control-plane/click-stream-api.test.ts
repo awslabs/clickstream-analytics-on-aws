@@ -497,30 +497,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       PolicyDocument: {
         Statement: [
           {
-            Action: [
-              'logs:CreateLogDelivery',
-              'logs:GetLogDelivery',
-              'logs:UpdateLogDelivery',
-              'logs:DeleteLogDelivery',
-              'logs:ListLogDeliveries',
-              'logs:PutResourcePolicy',
-              'logs:DescribeResourcePolicies',
-              'logs:DescribeLogGroups',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-          {
-            Action: [
-              'xray:PutTraceSegments',
-              'xray:PutTelemetryRecords',
-              'xray:GetSamplingRules',
-              'xray:GetSamplingTargets',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-          {
             Action: 'lambda:InvokeFunction',
             Effect: 'Allow',
             Resource: [
@@ -545,6 +521,30 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 ],
               },
             ],
+          },
+          {
+            Action: [
+              'logs:CreateLogDelivery',
+              'logs:GetLogDelivery',
+              'logs:UpdateLogDelivery',
+              'logs:DeleteLogDelivery',
+              'logs:ListLogDeliveries',
+              'logs:PutResourcePolicy',
+              'logs:DescribeResourcePolicies',
+              'logs:DescribeLogGroups',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
           },
         ],
         Version: '2012-10-17',
@@ -1438,7 +1438,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":1,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1478,7 +1478,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}}},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":40,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1518,7 +1518,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":259200}',
+            '"}}}}}},"TimeoutSeconds":259200}',
           ],
         ],
       },
@@ -2015,7 +2015,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":1,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2055,7 +2055,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}}},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":40,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2095,7 +2095,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":259200}',
+            '"}}}}}},"TimeoutSeconds":259200}',
           ],
         ],
       },
