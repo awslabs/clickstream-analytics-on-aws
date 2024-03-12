@@ -209,7 +209,7 @@
     "errorProjectOrApp": "不存在的的项目或应用程序: ",
     "notSupportProjectOrApp": "当前项目或应用程序不支持分析工作坊: ",
     "metadataNotAllowEditError": "预置元数据不支持编辑",
-    "inputSpecialCharactersError": "不支持输入特殊字符"
+    "inputSpecialCharactersError": "不支持输入特殊字符（! @ # $ % ^ & * + = : ; ? ~ ' \" |）"
   },
   "operators": {
     "null": "空",

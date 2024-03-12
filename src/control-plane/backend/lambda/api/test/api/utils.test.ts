@@ -31,6 +31,7 @@ import {
 import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
+import { validSpecialCharacters } from '../../common/request-valid';
 import {
   validateDataProcessingInterval,
   validatePattern,
@@ -38,7 +39,7 @@ import {
   validateXSS,
 } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, filterDynamicPipelineTags, getAppRegistryApplicationArn, getStackPrefix, isEmpty, replaceSpecialCharacters } from '../../common/utils';
+import { containRule, corsStackInput, filterDynamicPipelineTags, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -765,38 +766,39 @@ describe('Network test', () => {
     invalidValues.forEach(v => expect(() => validateDataProcessingInterval(v)).toThrow(ClickStreamBadRequestError));
   });
 
-  it('Validate replace special characters', async () => {
-    expect(replaceSpecialCharacters('abc def ghi')).toEqual('abc def ghi');
-    expect(replaceSpecialCharacters('abc-def-ghi')).toEqual('abc-def-ghi');
-    expect(replaceSpecialCharacters('abc_def_ghi')).toEqual('abc_def_ghi');
-    expect(replaceSpecialCharacters('abc(def)ghi')).toEqual('abc(def)ghi');
+  it('Validate special characters', async () => {
+    expect(validSpecialCharacters('')).toEqual(true);
+    expect(validSpecialCharacters('abc def ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc-def-ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc_def_ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc(def)ghi')).toEqual(true);
 
-    expect(replaceSpecialCharacters('abc.def.ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc|def|ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc!def!ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc@def@ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc#def#ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc$def$ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc%def%ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc^def^ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc&def&ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc*def*ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc+def+ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc=def=ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc[def]ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc{def}ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc}def{ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc\def\ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc:def:ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc;def;ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc\'def\'ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc"def"ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc<def>ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc,def,ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc?def?ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc/def/ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc~def~ghi')).toEqual('abcdefghi');
-    expect(replaceSpecialCharacters('abc`def`ghi')).toEqual('abcdefghi');
+    expect(validSpecialCharacters('abc[def]ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc{def}ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc}def{ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc<def>ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc,def,ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc/def/ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc.def.ghi')).toEqual(true);
+
+    expect(validSpecialCharacters('abc|def|ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc!def!ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc@def@ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc#def#ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc$def$ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc%def%ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc^def^ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc&def&ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc*def*ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc+def+ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc=def=ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc:def:ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc;def;ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc\'def\'ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc"def"ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc?def?ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc~def~ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc`def`ghi')).toEqual(false);
   });
 
   it('Validate XSS', async () => {
