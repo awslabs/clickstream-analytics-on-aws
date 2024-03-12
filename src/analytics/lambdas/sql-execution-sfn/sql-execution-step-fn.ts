@@ -13,8 +13,8 @@
 
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
-import { exeucteBySqlorS3File, getRedshiftClient } from '../redshift-data';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
+import { exeucteBySqlorS3File, getRedshiftClient } from '../redshift-data';
 
 interface EventType {
   queryId?: string;
