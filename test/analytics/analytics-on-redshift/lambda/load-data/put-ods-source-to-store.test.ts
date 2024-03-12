@@ -63,6 +63,28 @@ describe('Lambda - put ODS event to DDB store', () => {
     },
   };
 
+  const s3ObjectCreatedEventWithInvalidAppId: EventBridgeEvent<'Object Created', S3ObjectCreatedNotificationEventDetail> = {
+    ...s3ObjectCreatedEvent,
+    detail: {
+      ...s3ObjectCreatedEvent.detail,
+      object: {
+        ...s3ObjectCreatedEvent.detail.object,
+        key: 'project1/ods_external_events/partition_app=app3/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.tmp',
+      },
+    },
+  };
+
+  const s3ObjectCreatedEventWithInvalidPartition: EventBridgeEvent<'Object Created', S3ObjectCreatedNotificationEventDetail> = {
+    ...s3ObjectCreatedEvent,
+    detail: {
+      ...s3ObjectCreatedEvent.detail,
+      object: {
+        ...s3ObjectCreatedEvent.detail.object,
+        key: 'project1/ods_external_events/partition_app=app1/partition_ye=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.tmp',
+      },
+    },
+  };
+
   beforeEach(() => {
     dynamoDBClientMock.reset();
   });
@@ -76,6 +98,18 @@ describe('Lambda - put ODS event to DDB store', () => {
   test('Don\'t put invalid ODS event source with unknown suffix to dynamodb', async () => {
     dynamoDBClientMock.on(PutCommand).resolvesOnce({});
     await handler(s3ObjectCreatedEventWithUnsupportedSuffix);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutCommand, 0);
+  });
+
+  test('Don\'t put invalid ODS event source with invalid appId to dynamodb', async () => {
+    dynamoDBClientMock.on(PutCommand).resolvesOnce({});
+    await handler(s3ObjectCreatedEventWithInvalidAppId);
+    expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutCommand, 0);
+  });
+
+  test('Don\'t put invalid ODS event source with invalid partition format to dynamodb', async () => {
+    dynamoDBClientMock.on(PutCommand).resolvesOnce({});
+    await handler(s3ObjectCreatedEventWithInvalidPartition);
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
 
