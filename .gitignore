@@ -51,7 +51,6 @@ src/data-pipeline/spark-etl/build
 src/data-pipeline/spark-etl/bin
 src/data-pipeline/spark-etl/?/
 code-coverage-results.md
-!/.projenrc.js
 /test-reports/
 junit.xml
 /coverage/
@@ -84,3 +83,4 @@ junit.xml
 !/.gitlab/ci-templates/postbuild-scan.yml
 !/.gitlab/ci-templates/cfn-nag.yml
 !/.gitlab/ci-templates/cfn-lint.yml
+!/.projenrc.js
