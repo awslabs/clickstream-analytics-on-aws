@@ -29,6 +29,7 @@ const ddbClient = new DynamoDBClient({
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
 const S3_FILE_SUFFIX = process.env.S3_FILE_SUFFIX;
 const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
+const APP_IDS = process.env.APP_IDS;
 
 /**
  * The lambda function try to put a item to Dynamodb table,
@@ -75,11 +76,14 @@ export const handler = async (event: EventBridgeEvent<'Object Created', S3Object
   const s3ObjSize = JSON.stringify(event.detail.object.size);
   let tableName = DYNAMODB_TABLE_NAME!;
   const jobStatus = JobStatus.JOB_NEW;
-  if (S3_FILE_SUFFIX == undefined || S3_FILE_SUFFIX.length == 0 || s3Object.endsWith(S3_FILE_SUFFIX)) {
+  const appIdList = APP_IDS?.split(',') || [];
+  if (checkS3FileValidity(s3Object, appIdList)) {
     logger.info(`${S3_FILE_SUFFIX}, put ${s3Object} with status ${jobStatus}.`);
     await putItem(tableName, s3Bucket, s3Object, s3ObjSize, jobStatus, timestamp);
   } else {
-    logger.warn(`S3 file suffix not support: ${s3Object}, only support ${S3_FILE_SUFFIX} `);
+    logger.warn(`S3 file ${s3Object} is not matched with 
+      ${/partition_app=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\//} pattern
+      or ${S3_FILE_SUFFIX} suffix`);
   }
 };
 
@@ -119,6 +123,23 @@ export const putItem = async (tableName: string, s3Bucket: string, s3Object: str
     throw err;
   }
 };
+
+function checkS3FileValidity(s3FileKey: string, appIdList: string[]) {
+  const regex = /partition_app=([^/]+)\/partition_year=\d{4}\/partition_month=\d{2}\/partition_day=\d{2}\//;
+  const match = s3FileKey.match(regex);
+  if (!match) {
+    return false;
+  }
+
+  const appId = match[1];
+  if (!appIdList.includes(appId)) {
+    return false;
+  }
+  if (S3_FILE_SUFFIX == undefined || S3_FILE_SUFFIX.length == 0 || s3FileKey.endsWith(S3_FILE_SUFFIX)) {
+    return true;
+  }
+  return false;
+}
 
 export function composeJobStatus(status: string, odsTableName?: string) {
   if (! odsTableName) {
