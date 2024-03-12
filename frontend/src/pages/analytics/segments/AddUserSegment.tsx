@@ -156,7 +156,6 @@ const AddUserSegments: React.FC = () => {
                           <SpaceBetween direction="horizontal" size="xs">
                             <Select
                               selectedOption={{ label: 'Daily', value: 'DAY' }}
-                              onChange={({ detail }) => console.info(detail)}
                               options={[
                                 { label: 'Daily', value: 'DAY' },
                                 { label: 'Monthly', value: 'MONTH' },
@@ -165,7 +164,6 @@ const AddUserSegments: React.FC = () => {
                             />
                             <Select
                               selectedOption={{ label: '8PM', value: '20' }}
-                              onChange={({ detail }) => console.info(detail)}
                               options={[
                                 { label: '1AM', value: '1' },
                                 { label: '12AM', value: '0' },
@@ -182,13 +180,7 @@ const AddUserSegments: React.FC = () => {
                           'analytics:segment.comp.expirationSettingsDesc'
                         )}
                       >
-                        <DatePicker
-                          onChange={({ detail }) => {
-                            console.info(detail);
-                          }}
-                          value={''}
-                          placeholder="YYYY/MM/DD"
-                        />
+                        <DatePicker value={''} placeholder="YYYY/MM/DD" />
                       </FormField>
                     </SpaceBetween>
                   </Container>

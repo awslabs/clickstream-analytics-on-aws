@@ -40,7 +40,6 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
         placeholder={t('analytics:labels.attributeSelectPlaceholder')}
         categoryOption={segmentData.userIsParamOption ?? null}
         changeCurCategoryOption={(paramOption) => {
-          console.info('changeCurCategoryOption');
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserIsParamOption,
             segmentProps,
