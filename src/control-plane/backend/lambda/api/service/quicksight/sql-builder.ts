@@ -1411,7 +1411,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
       || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     sql = `
-      ${dateGroupCol}as event_date,
+      ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
       'null' as custom_attr_id,
