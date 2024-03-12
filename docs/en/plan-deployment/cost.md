@@ -115,7 +115,7 @@ Key assumptions include
 
 | Daily data volume/RPS | Authors |  SPICE | Total cost (USD/Month) |
 | --------------------- | ------- |  ----- | ----- |
-| All size              | $48      |    0   | $48 |
+| All size              | $24      |    0   | $24 |
 
 !!! info "Note"
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.

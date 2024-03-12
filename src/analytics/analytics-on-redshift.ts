@@ -14,30 +14,57 @@
 import { join } from 'path';
 import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
-  Stack,
+  Arn,
+  ArnFormat,
+  Aws,
+  CfnResource,
+  CustomResource,
+  Fn,
   NestedStack,
   NestedStackProps,
-  Arn, ArnFormat, Aws, Fn, CustomResource, RemovalPolicy, CfnResource,
+  RemovalPolicy,
+  Stack,
 } from 'aws-cdk-lib';
-import { ITable, Table, AttributeType, BillingMode, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import {
-  SubnetSelection,
-  IVpc,
-} from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, IRole, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { AttributeType, BillingMode, ITable, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { AccountPrincipal, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
+import {
+  DYNAMODB_TABLE_INDEX_NAME,
+  REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
+  REDSHIFT_EVENT_TABLE_NAME,
+  REDSHIFT_ITEM_TABLE_NAME,
+  REDSHIFT_USER_TABLE_NAME,
+} from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, WorkflowBucketInfo, LoadDataConfig } from './private/model';
+import {
+  ClearExpiredEventsWorkflowData,
+  ExistingRedshiftServerlessProps,
+  LoadDataConfig,
+  NewRedshiftServerlessProps,
+  ProvisionedRedshiftProps,
+  ScanMetadataWorkflowData,
+  TablesODSSource,
+  WorkflowBucketInfo,
+} from './private/model';
 import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardResources } from '../common/cfn-nag';
+import { UserSegmentsWorkflow } from './private/segments/user-segments-workflow';
+import {
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention,
+  addCfnNagToStack,
+  ruleForLambdaVPCAndReservedConcurrentExecutions,
+  ruleRolePolicyWithWildcardResources,
+  ruleToSuppressRolePolicyWithHighSPCM,
+  ruleToSuppressRolePolicyWithWildcardResources,
+} from '../common/cfn-nag';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
@@ -48,6 +75,7 @@ export interface RedshiftOdsTables {
   readonly user: string;
   readonly item: string;
 }
+
 export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly vpc: IVpc;
   readonly subnetSelection: SubnetSelection;
@@ -64,6 +92,8 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
+  readonly clickstreamMetadataDdbTable: ITable;
+  readonly segmentsS3Prefix: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -73,6 +103,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
+  readonly userSegmentsWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -228,7 +259,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       workflowBucketInfo: props.workflowBucketInfo,
     });
 
-    this.sqlExecutionWorkflow =this.applicationSchema.sqlExecutionStepFunctions;
+    this.sqlExecutionWorkflow = this.applicationSchema.sqlExecutionStepFunctions;
 
     // for upgrading backward compatibility
     (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)
@@ -283,7 +314,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
-
 
     const loadDataProps = {
       projectId: props.projectId,
@@ -358,6 +388,24 @@ export class RedshiftAnalyticsStack extends NestedStack {
       });
     }
 
+    // User segments workflow
+    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'ClickstreamUserSegmentsWorkflow', {
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      pipelineS3Bucket: props.scanMetadataWorkflowData.pipelineS3Bucket,
+      segmentsS3Prefix: props.segmentsS3Prefix,
+    });
+    this.userSegmentsWorkflowArn = userSegmentsWorkflow.userSegmentsWorkflow.stateMachineArn;
+
     addCfnNag(this);
   }
 }
@@ -386,8 +434,7 @@ function createDDBStatusTable(scope: Construct, tableId: string): ITable {
   });
 
   return itemsTable;
-};
-
+}
 
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
@@ -421,7 +468,6 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithWildcardResources('Associate Role to Redshift', 'passRole'),
       ],
     },
-
     {
       paths_endswith: ['LoadDataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
@@ -431,7 +477,6 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithHighSPCM('LoadData'),
       ],
     },
-
     {
       paths_endswith: ['ScanMetadataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
@@ -441,14 +486,20 @@ function addCfnNag(stack: Stack) {
         ruleToSuppressRolePolicyWithHighSPCM('ScanMetadata'),
       ],
     },
-
     {
       paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
       ],
     },
-
+    {
+      paths_endswith: ['ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource',
+          'UserSegmentsStateMachine', 'logs/xray').rules_to_suppress,
+        ruleToSuppressRolePolicyWithHighSPCM('UserSegments'),
+      ],
+    },
   ]);
-
 }

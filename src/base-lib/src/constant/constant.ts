@@ -288,6 +288,8 @@ export const METADATA_EVENT_NAME_PATTERN = '[a-z][a-z0-9_]{0,64}';
 export const QUICKSIGHT_USER_ARN_PATTERN =
   '^$|^arn:aws(-cn|-us-gov)?:quicksight:[a-z0-9-]+:[0-9]{12}:user/([A-Za-z])[A-Za-z0-9]{4,63}/[A-Za-z0-9][A-Za-z0-9/_@.\\-]+[A-Za-z0-9]$';
 
+export const SPECIAL_CHARACTERS_PATTERN = '[\!\@\#\$\%\^\&\*\+\=\:\;\?\~\'\"\|\`]';
+
 // cloudformation parameters
 export const PARAMETER_GROUP_LABEL_VPC = 'VPC Information';
 export const PARAMETER_GROUP_LABEL_DOMAIN = 'Domain Information';
@@ -349,6 +351,8 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX =
   'RedshiftDataApiRoleArn';
 export const OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX =
   'ScanMetadataWorkflowArn';
+export const OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX =
+  'UserSegmentsWorkflowArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
   'DataSourceArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =

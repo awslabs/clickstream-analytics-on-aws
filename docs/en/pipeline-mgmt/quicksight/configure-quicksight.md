@@ -6,6 +6,11 @@ Once the data are processed and modeled by the data pipeline, you can enable the
 !!! info "Note"
     To enable this module, your AWS account needs to have subscription in QuickSight. If it hasn't, please follow this [sign up for Amazon QuickSight](https://docs.aws.amazon.com/quicksight/latest/user/signing-up.html) to create a subscription first.
 
+You need to set below configurations for Reporting. 
+
+  * **Create sample dashboard in QuickSight**: Enabling this feature will allow the solution to create sample dashboards in your QuickSight Account.
+
+    * **QuickSight user**: Select an admin user for the solution to create QuickSight resources. (Only required for AWS China Regions)
 
 
 

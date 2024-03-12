@@ -231,7 +231,7 @@ struct YourApp: App {
     [ClickstreamObjc addUserAttributes:userAttributes];
     ```
 
-当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
+当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的 API `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
 !!! info "重要提示"
 
@@ -245,7 +245,7 @@ struct YourApp: App {
 
     ```swift
     import Clickstream
-
+    
     let attributes: ClickstreamAttribute = [
         ClickstreamAnalytics.Item.ITEM_ID: "123",
         ClickstreamAnalytics.Item.CURRENCY: "USD",
@@ -287,6 +287,40 @@ struct YourApp: App {
 !!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+    
+    ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
+
+#### 手动记录 Screen View 事件
+
+默认情况下当 ViewController 回调 `viewDidAppear` 方法时 SDK 会自动记录预置的 `_screen_view` 事件。
+
+无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`  事件。
+
+- `SCREEN_NAME` 必需字段，屏幕的名称
+- `SCREEN_UNIQUE_ID` 可选字段，您 ViewController 或者 UIView 的唯一 ID。 如果未设置 SDK 将会获取当前 ViewController 的 hashValue 作为默认值。
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+    
+    ClickstreamAnalytics.recordEvent(ClickstreamAnalytics.EventName.SCREEN_VIEW, [
+        ClickstreamAnalytics.Attr.SCREEN_NAME: "HomeView",
+        ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID: "your screen uniqueId"
+    ])
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    @import Clickstream;
+    
+    NSDictionary *attributes = @{
+        Attr.SCREEN_NAME: @"HomeView",
+        Attr.SCREEN_UNIQUE_ID: @"your screen uniqueId"
+    };
+    [ClickstreamObjc recordEvent:EventName.SCREEN_VIEW :attributes];
+    ```
 
 #### 实时发送事件
 
@@ -484,16 +518,15 @@ Clickstream Swift SDK 支持以下数据类型：
 1. _session_id：我们通过uniqueId的后8个字符和当前毫秒值拼接来计算会话id，例如: dc7a7a18-20230905-131926703
 2. _session_duration： 我们通过 `_session_start_timestamp` 减去当前事件创建时间戳来计算会话持续时间，该属性将添加到会话期间的每个事件中。
 3. _session_number：当前设备的会话数的自动递增值，初始值为1
-4. Session timeout duration：默认为30分钟，可以通过[更新配置](#sdk_1) api来自定义。
+4. Session timeout duration：默认为 30 分钟，可以通过[更新配置](#sdk_1) API 来自定义。
 
 ### 屏幕浏览定义
 
 在Clickstream Swift SDK中，我们将 `_screen_view` 定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
 
 1. 之前没有设置过屏幕。
-2. 新的屏幕类名与之前的屏幕类名不同。
-3. 新的屏幕的路径与之前的屏幕的路径不同。
-4. 新的屏幕唯一id与之前的屏幕唯一id不同。
+2. 新的屏幕名称与之前的屏幕名称不同。
+3. 新的屏幕唯一 id 与之前的屏幕唯一 id 不同。
 
 该事件监听UIViewController的 `onViewDidAppear` 生命周期方法来判断屏幕切换。 为了跟踪屏幕浏览路径，我们使用 `_previous_screen_name` 、 `_previous_screen_id` 和 `_previous_screen_unique_id` 来关联前一个屏幕。 此外，屏幕浏览事件中还有一些其他属性。
 
@@ -501,6 +534,8 @@ Clickstream Swift SDK 支持以下数据类型：
 2. _entrances： 会话中的第一个屏幕浏览事件该值为 1，其他则为 0
 3. _previous_timestamp: 上一个 `screen_view` 事件的时间戳。
 4. _engagement_time_msec: 上个屏幕最后一次用户参与事件时长的毫秒数。
+
+当应用进入后台超过 30 分钟后再次打开之前页面时，会生成新的会话并清除之前的屏幕信息，然后发送新的 `_screen_view` 事件。
 
 ### 用户参与度定义
 
@@ -531,7 +566,6 @@ Clickstream Swift SDK 支持以下数据类型：
     "device_unique_id": "",
     "event_id": "91DA4BBE-933F-4DFA-A489-8AEFBC7A06D8",
     "event_type": "add_to_cart",
-    "hashCode": "63D7991D",
     "locale": "en_US",
     "make": "apple",
     "model": "iPhone 14 Pro",
@@ -579,7 +613,6 @@ Clickstream Swift SDK 支持以下数据类型：
 
 | 属性               | 数据类型    | 描述                       | 如何生成                                                                                                       | 用途和目的                    |
 |------------------|---------|--------------------------|------------------------------------------------------------------------------------------------------------|--------------------------|
-| hashCode         | String  | 事件对象的哈希码                 | 通过`String(format："%08X", hasher.combine(eventjson))`生成                                                     | 区分不同的事件                  |
 | app_id           | String  | 您应用的app id               | app id 是在您将应用程序注册到数据管道时由点击流解决方案生成的                                                                         | 区分不同app的事件               |
 | unique_id        | String  | 用户的唯一id                  | sdk第一次初始化时生成`UUID().uuidString`形式<br>如果用户注销然后登录新用户，它将被更改。 当用户在同一设备中重新登录到以前的用户时，unique_id 将重置为之前的 unique_id | 唯一id来标识不同的用户并关联登录和未登录的行为 |
 | device_id        | String  | 设备的唯一id                  | 通过`UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString`生成 <br>应用程序重新安装后将更改<br>           | 区分不同设备                   |
@@ -634,7 +667,7 @@ Clickstream Swift SDK 支持以下数据类型：
 
 | 属性名           | 数据类型     | 是否必需 | 描述        |
 |---------------|----------|------|-----------|
-| id            | string   | 否    | item的id   |
+| id            | string   | 是    | item的id   |
 | name          | string   | 否    | item的名称   |
 | brand         | string   | 否    | item的品牌   |
 | currency      | string   | 否    | item的货币   |

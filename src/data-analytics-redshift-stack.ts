@@ -13,40 +13,36 @@
 
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
   OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
-  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
   TABLE_NAME_EVENT,
   TABLE_NAME_EVENT_PARAMETER,
-  TABLE_NAME_USER,
   TABLE_NAME_ITEM,
-  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
+  TABLE_NAME_USER,
 } from '@aws/clickstream-base-lib';
-import {
-  Aspects,
-  CfnCondition,
-  CfnOutput,
-  CfnStack,
-  Fn,
-  Stack,
-  StackProps,
-} from 'aws-cdk-lib';
+import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
-import {
-  createStackParameters, RedshiftAnalyticsStackProps,
-} from './analytics/parameter';
+import { createStackParameters, RedshiftAnalyticsStackProps } from './analytics/parameter';
 import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
 import { RolePermissionBoundaryAspect } from './common/aspects';
-import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
+import {
+  addCfnNagForCfnResource,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention,
+  ruleRolePolicyWithWildcardResources,
+} from './common/cfn-nag';
+import { REDSHIFT_MODE } from './common/model';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
-import { REDSHIFT_MODE } from '../src/common/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -137,7 +133,8 @@ export function createRedshiftAnalyticsStack(
     loadDataConfig,
     workflowBucketInfo,
     mvRefreshInterval: props.redshift.mvRefreshInterval,
-
+    clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
+    segmentsS3Prefix: props.segmentsS3Prefix,
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
       topFrequentPropertiesLimit: props.scanMetadataConfiguration.topFrequentPropertiesLimit,
@@ -327,6 +324,23 @@ export function createRedshiftAnalyticsStack(
     description: 'Scan metadata workflow stepfunction arn',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
+
+  // Add user segments workflow arn in stack output
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+    value: redshiftProvisionedStack.userSegmentsWorkflowArn,
+    description: 'User segments workflow step function arn',
+    condition: isRedshiftProvisioned,
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+    value: newRedshiftServerlessStack.userSegmentsWorkflowArn,
+    description: 'User segments workflow step function arn',
+    condition: isNewRedshiftServerless,
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
+    value: redshiftExistingServerlessStack.userSegmentsWorkflowArn,
+    description: 'User segments workflow step function arn',
+    condition: isExistingRedshiftServerless,
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

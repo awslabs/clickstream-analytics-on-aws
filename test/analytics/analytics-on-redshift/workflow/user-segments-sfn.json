@@ -1,0 +1,52 @@
+{
+  "Fn::Join": [
+    "",
+    [
+      "{\"StartAt\":\"WorkflowTask-SegmentJobInit\",\"States\":{\"WorkflowTask-SegmentJobInit\":{\"Next\":\"WorkflowChoice-SegmentJobInit\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdasegmentjobinit6C85864A",
+          "Arn"
+        ]
+      },
+      "\",\"Payload.$\":\"$\"}},\"WorkflowChoice-SegmentJobInit\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.scheduleIsExpired\",\"BooleanEquals\":true,\"Next\":\"WorkflowEndState-Succeed\"}],\"Default\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowTask-StateMachineStatus\":{\"Next\":\"WorkflowChoice-StateMachineStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdastatemachinestatus9275028B",
+          "Arn"
+        ]
+      },
+      "\",\"Payload\":{\"stateMachineArn.$\":\"$$.StateMachine.Id\",\"input.$\":\"$\"}}},\"WorkflowWait-StateMachineStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-StateMachineStatus\"},\"WorkflowChoice-StateMachineStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.stateMachineStatus\",\"StringEquals\":\"IDLE\",\"Next\":\"WorkflowTask-ExecuteSegmentQuery\"}],\"Default\":\"WorkflowWait-StateMachineStatus\"},\"WorkflowTask-ExecuteSegmentQuery\":{\"Next\":\"WorkflowTask-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdaexecutesegmentqueryC9A84334",
+          "Arn"
+        ]
+      },
+      "\",\"Payload.$\":\"$\"}},\"WorkflowTask-SegmentJobStatus\":{\"Next\":\"WorkflowChoice-SegmentJobStatus\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+      {
+        "Ref": "AWS::Partition"
+      },
+      ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+      {
+        "Fn::GetAtt": [
+          "ClickstreamUserSegmentsWorkflowWorkflowLambdasegmentjobstatus78D7A101",
+          "Arn"
+        ]
+      },
+      "\",\"Payload.$\":\"$\"}},\"WorkflowWait-CheckJobStatus\":{\"Type\":\"Wait\",\"SecondsPath\":\"$.waitTimeInfo.waitTime\",\"Next\":\"WorkflowTask-SegmentJobStatus\"},\"WorkflowChoice-SegmentJobStatus\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Completed\",\"Next\":\"WorkflowEndState-Succeed\"},{\"Variable\":\"$.jobStatus\",\"StringEquals\":\"Failed\",\"Next\":\"WorkflowEndState-Fail\"}],\"Default\":\"WorkflowWait-CheckJobStatus\"},\"WorkflowEndState-Succeed\":{\"Type\":\"Succeed\"},\"WorkflowEndState-Fail\":{\"Type\":\"Fail\"}},\"Comment\":\"This state machine is responsible for creating and refreshing user segments.\"}"
+    ]
+  ]
+}

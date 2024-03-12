@@ -11,14 +11,13 @@
  *  and limitations under the License.
  */
 
-import {
-  DynamoDBClient,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, PutCommandInput } from '@aws-sdk/lib-dynamodb';
 import { getWorkflowInfoKey } from './check-metadata-workflow-start';
 import { logger } from '../../../common/powertools';
 import { putStringToS3 } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { parseDynamoDBTableARN } from '../../../common/utils';
 
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
@@ -92,15 +91,4 @@ async function updateProjectSummaryToDDB(lastJobStartTimestamp: number, lastScan
     },
   };
   await metaDataDDBDocClient.send(new PutCommand(request));
-}
-
-function parseDynamoDBTableARN(ddbArn: string) {
-  const arnComponents = ddbArn.split(':');
-  const region = arnComponents[3];
-  const tableName = arnComponents[5].split('/')[1];
-
-  return {
-    ddbRegion: region,
-    ddbTableName: tableName,
-  };
 }

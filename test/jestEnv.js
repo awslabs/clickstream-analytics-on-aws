@@ -49,10 +49,14 @@ process.env.ODS_EVENT_BUCKET_PREFIX='project1/raw/'
 process.env.REDSHIFT_ODS_TABLE_NAME='ods_external_events'
 process.env.REDSHIFT_ROLE = 'arn:aws:iam::xxxxxxxxxxxx:role/redshift-serverless-s3-copyrole'
 process.env.METADATA_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata';
+process.env.CLICKSTREAM_METADATA_DDB_ARN = 'arn:aws:dynamodb:us-east-1:123456789012:table/ClickStreamApiClickstreamMetadata';
 process.env.WORKFLOW_INFO_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:111122223333:table/ScanMetadataWorkflowInfo';
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
+process.env.APP_IDS = 'app1,app2'
+process.env.REDSHIFT_MODE = 'Serverless';
+process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'workgroup-test';
 
 // streaming ingestion
 process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'

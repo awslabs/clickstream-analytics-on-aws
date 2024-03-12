@@ -13,7 +13,7 @@
 
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-
+import { validSpecialCharacters } from '../../common/request-valid';
 
 export interface CheckParamsStatus {
   readonly success: boolean;
@@ -60,6 +60,12 @@ export class ReportingCheck {
         this.status = {
           success: false,
           message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
+        };
+      }
+      if (!validSpecialCharacters(this.params.chartTitle) || !validSpecialCharacters(this.params.chartSubTitle)) {
+        this.status = {
+          success: false,
+          message: 'The input cannot contain special characters(! @ # $ % ^ & * + = { } [ ] : ; < > , . ? ~ / \' " |).',
         };
       }
     }

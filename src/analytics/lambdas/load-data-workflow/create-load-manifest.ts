@@ -162,6 +162,21 @@ export const handler = async (event: CreateLoadManifestEvent, context: Context) 
     candidateItems = candidateItems.concat(processingAsCandidateItems);
   }
 
+  // reprocess files in JOB_ENQUEUE
+  let enqueueRecordResp = await queryItems(
+    tableName,
+    indexName,
+    odsEventBucketWithPrefix,
+    JobStatus.JOB_ENQUEUE,
+    undefined,
+    odsTableName,
+  );
+  if (enqueueRecordResp.Count > 0) {
+    const enqueueAsCandidateItems = enqueueRecordResp.Items.slice(0, queryResultLimit);
+    logger.info(`add ${enqueueAsCandidateItems.length} JOB_ENQUEUE files to candidateItems`);
+    candidateItems = candidateItems.concat(enqueueAsCandidateItems);
+  }
+
   logger.info('candidateItems.length: ' + candidateItems.length);
 
   const response = await doManifestFiles(odsTableName, candidateItems, queryResultLimit, tableName, requestId);
