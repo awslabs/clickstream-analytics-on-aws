@@ -85,9 +85,6 @@ export class UserSegmentsWorkflow extends Construct {
     });
     props.clickstreamMetadataDdbTable.grantReadWriteData(segmentJobInitFunc);
 
-    console.log('********************');
-    console.log(id);
-
     // Define task for checking state machine status
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
       lambdaFunction: this.constructNodejsFunction('state-machine-status', [
