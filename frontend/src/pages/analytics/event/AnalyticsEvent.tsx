@@ -115,6 +115,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
+  const [disableSwitchChart, setDisableSwitchChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
@@ -333,6 +334,24 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     }
   };
 
+  const switchChartType = () => {
+    const computeMethodOptions = eventDataState.map(
+      (item) => item.calculateMethodOption
+    );
+    const computeMethods: string[] = [];
+    for (const option of computeMethodOptions) {
+      if (option?.groupName) {
+        computeMethods.push(option.groupName);
+      } else if (option?.value) {
+        computeMethods.push(option.value);
+      }
+    }
+    const isCountOrAgg =
+      computeMethods.includes(ExploreComputeMethod.COUNT_PROPERTY) ||
+      computeMethods.includes(ExploreComputeMethod.AGGREGATION_PROPERTY);
+    setDisableSwitchChart(isCountOrAgg);
+  };
+
   const clickPreview = async () => {
     if (
       eventDataState.length === 0 ||
@@ -346,6 +365,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
+      switchChartType();
       setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
@@ -493,7 +513,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               }
               options={chartTypeOptions.map((obj) => ({
                 ...obj,
-                disabled: loadingChart,
+                disabled: loadingChart || disableSwitchChart,
               }))}
             />
           </div>
