@@ -66,10 +66,10 @@ export class UserSegmentsWorkflow extends Construct {
     super(scope, id);
 
     this.props = props;
-    this.userSegmentsWorkflow = this.createWorkflow(props);
+    this.userSegmentsWorkflow = this.createWorkflow(id, props);
   }
 
-  private createWorkflow(props: UserSegmentsWorkflowProps): IStateMachine {
+  private createWorkflow(id: string, props: UserSegmentsWorkflowProps): IStateMachine {
     // Define task for segment job initialization
     const segmentJobInitFunc = this.constructNodejsFunction('segment-job-init', [
       new PolicyStatement({
@@ -85,12 +85,15 @@ export class UserSegmentsWorkflow extends Construct {
     });
     props.clickstreamMetadataDdbTable.grantReadWriteData(segmentJobInitFunc);
 
+    console.log('********************');
+    console.log(id);
+
     // Define task for checking state machine status
     const stateMachineStatusTask = new LambdaInvoke(this, 'WorkflowTask-StateMachineStatus', {
       lambdaFunction: this.constructNodejsFunction('state-machine-status', [
         new PolicyStatement({
           actions: ['states:ListExecutions'],
-          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*`],
+          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:${id}StateMachine*`],
         }),
       ]),
       payload: TaskInput.fromObject({
