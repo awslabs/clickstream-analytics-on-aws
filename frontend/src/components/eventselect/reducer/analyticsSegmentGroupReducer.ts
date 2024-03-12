@@ -69,6 +69,8 @@ export enum AnalyticsSegmentActionType {
   UpdateSequenceEventFilterConditionValue = 'updateSequenceEventFilterConditionValue',
   RemoveSequenceEventFilterConditionOption = 'removeSequenceEventFilterConditionOption',
   ChangeSequenceEventFilterConditionRelation = 'changeSequenceEventFilterConditionRelation',
+
+  UpdateUserInGroup = 'updateUserInGroup',
 }
 
 export type ResetEventData = {
@@ -271,6 +273,12 @@ export type RemoveSequenceEventFilterConditionOption = {
   sequenceEventConditionIndex: number;
 };
 
+export type UpdateUserInGroup = {
+  type: AnalyticsSegmentActionType.UpdateUserInGroup;
+  segmentProps: SegmentPropsData;
+  group: SelectProps.Option;
+};
+
 export type AnalyticsSegmentAction =
   | ResetEventData
   | AddOrEventData
@@ -305,7 +313,8 @@ export type AnalyticsSegmentAction =
   | UpdateSequenceEventFilterConditionOption
   | UpdateSequenceEventFilterConditionOperation
   | UpdateSequenceEventFilterConditionValue
-  | RemoveSequenceEventFilterConditionOption;
+  | RemoveSequenceEventFilterConditionOption
+  | UpdateUserInGroup;
 
 export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
@@ -875,6 +884,20 @@ export const analyticsSegmentGroupReducer = (
         if (seqConditionList && seqConditionList.length > 0) {
           seqConditionList.splice(action.sequenceEventConditionIndex, 1);
         }
+      }
+      return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.UpdateUserInGroup: {
+      if (action.segmentProps.level === 1) {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.currentIndex
+        ].userInFilterGroup = action.group;
+      } else {
+        newState.subItemList[action.segmentProps.rootIndex].subItemList[
+          action.segmentProps.parentIndex
+        ].subItemList[action.segmentProps.currentIndex].userInFilterGroup =
+          action.group;
       }
       return { ...newState };
     }

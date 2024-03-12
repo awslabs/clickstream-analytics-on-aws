@@ -32,6 +32,7 @@ import EventSeqItem from './EventSeqItem';
 import { PRESET_PARAMETERS } from './mock_data';
 import UserDoneComp from './type/UserDoneComp';
 import UserDoneInSeq from './type/UserDoneInSeq';
+import UserInGroup from './type/UserInGroup';
 import UserIsComp from './type/UserIsComp';
 
 export interface SegmentPropsData {
@@ -84,6 +85,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
     );
   }, [segmentData.userEventType?.value]);
 
+  const isUserInGroup = useMemo(() => {
+    return (
+      segmentData.userEventType?.value === ConditionType.USER_IN_GROUP ||
+      segmentData.userEventType?.value === ConditionType.USER_NOT_IN_GROUP
+    );
+  }, [segmentData.userEventType?.value]);
+
   return (
     <div className="analytics-segment-group-item">
       <div className="flex flex-1 gap-5">
@@ -116,6 +124,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         )}
         {isDoneInSeqEvent && (
           <UserDoneInSeq
+            segmentData={segmentData}
+            segmentProps={segmentProps}
+            segmentDataDispatch={segmentDataDispatch}
+          />
+        )}
+        {isUserInGroup && (
+          <UserInGroup
             segmentData={segmentData}
             segmentProps={segmentProps}
             segmentDataDispatch={segmentDataDispatch}

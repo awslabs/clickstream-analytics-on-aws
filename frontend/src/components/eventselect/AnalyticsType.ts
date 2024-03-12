@@ -110,6 +110,7 @@ export interface IEventSegmentationItem {
   userIsValue?: any;
   userSequenceSession?: SelectProps.Option | null;
   userSequenceFlow?: SelectProps.Option | null;
+  userInFilterGroup?: SelectProps.Option | null;
 }
 
 export interface IEventSegmentationObj {

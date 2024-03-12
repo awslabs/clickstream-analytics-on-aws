@@ -323,3 +323,26 @@ export const CONDITION_STRING_OPERATORS: SelectProps.Options = [
   ANALYTICS_OPERATORS.contains,
   ANALYTICS_OPERATORS.not_contains,
 ];
+
+export const FILTER_GROUP_LIST = [
+  {
+    label: '用户分群组一',
+    value: 'user_group_1',
+  },
+  {
+    label: '用户分群组二',
+    value: 'user_group_2',
+  },
+  {
+    label: '用户分群组三',
+    value: 'user_group_3',
+  },
+  {
+    label: '用户分群组四',
+    value: 'user_group_4',
+  },
+  {
+    label: '用户分群组五',
+    value: 'user_group_5',
+  },
+];

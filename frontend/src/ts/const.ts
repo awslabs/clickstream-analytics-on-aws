@@ -460,6 +460,8 @@ export const CONDITION_LIST: SelectProps.Option[] = [
   },
   { label: '用户是', value: ConditionType.USER_IS },
   { label: '用户不是', value: ConditionType.USER_IS_NOT },
+  { label: '用户在分群组', value: ConditionType.USER_IN_GROUP },
+  { label: '用户不在分群组', value: ConditionType.USER_NOT_IN_GROUP },
 ];
 
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
