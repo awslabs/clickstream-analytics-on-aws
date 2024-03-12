@@ -53,6 +53,7 @@ process.env.WORKFLOW_INFO_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:1111222233
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
+process.env.APP_IDS = 'app1,app2'
 
 // streaming ingestion
 process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'

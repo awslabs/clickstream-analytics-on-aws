@@ -145,6 +145,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       environment: {
         PROJECT_ID: props.projectId,
         S3_FILE_SUFFIX: odsSource.fileSuffix,
+        APP_IDS: props.appIds,
         DYNAMODB_TABLE_NAME: taskTable.tableName,
         REDSHIFT_ODS_TABLE_NAME: redshiftTable,
       },
