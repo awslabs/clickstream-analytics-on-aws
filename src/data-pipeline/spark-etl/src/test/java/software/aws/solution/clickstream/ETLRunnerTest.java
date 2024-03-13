@@ -19,6 +19,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.model.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -587,22 +588,25 @@ class ETLRunnerTest extends BaseSparkTest {
         ETLRunnerConfig config = getRunnerConfig(transformers, "test_GTM_server_runner_parquet_v2");
         ETLRunner runner = new ETLRunner(spark, config);
         Dataset<Row> sourceDataset =
-                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all-with-ss.json")).getPath());
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-app1.json")).getPath());
 
         runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
 
         String outputPath = config.getOutputPath();
         System.out.println("outputPath:" + outputPath);
 
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT_V2.getTableName());
-        Dataset<Row> sessionDataset = spark.read().json(outputPath + ETLRunner.TableName.SESSION.getTableName());
-        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM_V2.getTableName());
-        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER_V2.getTableName());
+        Dataset<Row> eventDataset = spark.read().parquet(outputPath + ETLRunner.TableName.EVENT_V2.getTableName());
+        Dataset<Row> sessionDataset = spark.read().parquet(outputPath + ETLRunner.TableName.SESSION.getTableName());
+        Dataset<Row> itemDataset = spark.read().parquet(outputPath + ETLRunner.TableName.ITEM_V2.getTableName());
+        Dataset<Row> userDataset = spark.read().parquet(outputPath + ETLRunner.TableName.USER_V2.getTableName());
 
-        Assertions.assertTrue(eventDataset.count() > 0);
-        Assertions.assertTrue(sessionDataset.count() > 0);
-        Assertions.assertTrue(itemDataset.count() > 0);
-        Assertions.assertTrue(userDataset.count() > 0);
+        String eventV2Schema = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_parquet_v2.json");
+
+        Assertions.assertEquals(eventV2Schema, eventDataset.schema().prettyJson());
+        Assertions.assertTrue(eventDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(sessionDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(itemDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(userDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
     }
 
     public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name) {

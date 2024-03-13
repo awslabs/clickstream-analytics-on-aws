@@ -501,18 +501,28 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "ua",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "ip",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
     "name" : "created_time",
     "type" : "timestamp",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "partition_app",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "partition_year",
+    "type" : "integer",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "partition_month",
+    "type" : "integer",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "partition_day",
+    "type" : "integer",
     "nullable" : true,
     "metadata" : { }
   } ]

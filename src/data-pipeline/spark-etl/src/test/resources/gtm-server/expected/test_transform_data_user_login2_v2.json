@@ -22,5 +22,6 @@
     "process_job_id" : "test-job",
     "process_time" : "_PROCESS_TIME_"
   },
-  "app_id" : "GMTServerLogin2"
+  "app_id" : "GMTServerLogin2",
+  "created_time" : "_CREATED_TIME_"
 }

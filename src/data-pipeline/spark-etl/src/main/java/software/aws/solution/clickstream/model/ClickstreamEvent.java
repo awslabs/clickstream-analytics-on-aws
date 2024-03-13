@@ -25,6 +25,7 @@ import java.util.*;
 public class ClickstreamEvent {
     private Timestamp eventTimestamp;
     private String eventId;
+    private Long eventTimeMsec;
     private String eventName;
     private Double eventValue;
     private String eventValueCurrency;
@@ -126,6 +127,7 @@ public class ClickstreamEvent {
         ClickstreamEvent newCsEvent = new ClickstreamEvent();
         newCsEvent.setEventTimestamp(csEvent.getEventTimestamp());
         newCsEvent.setEventId(csEvent.getEventId());
+        newCsEvent.setEventTimeMsec(csEvent.getEventTimeMsec());
         newCsEvent.setEventName(csEvent.getEventName());
         newCsEvent.setEventValue(csEvent.getEventValue());
         newCsEvent.setEventValueCurrency(csEvent.getEventValueCurrency());
@@ -231,6 +233,7 @@ public class ClickstreamEvent {
         return new GenericRow(new Object[] {
                 eventTimestamp,
                 eventId,
+                eventTimeMsec,
                 eventName,
                 eventValue,
                 eventValueCurrency,

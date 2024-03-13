@@ -1,6 +1,7 @@
 {
   "event_timestamp" : "2023-09-21 01:54:26",
   "event_id" : "4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2",
+  "event_time_msec" : 1695261266814,
   "event_name" : "PDP Clicks",
   "event_value" : 0.0,
   "event_value_currency" : null,
@@ -126,5 +127,6 @@
     "rid" : "4a31fde2533e11dd2b0e7800720f6f86"
   },
   "ua" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-  "ip" : "70.123.241.83"
+  "ip" : "70.123.241.83",
+  "created_time" : "_CREATED_TIME_"
 }

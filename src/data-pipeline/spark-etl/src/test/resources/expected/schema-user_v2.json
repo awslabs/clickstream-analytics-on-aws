@@ -128,5 +128,10 @@
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
+  }, {
+    "name" : "created_time",
+    "type" : "timestamp",
+    "nullable" : true,
+    "metadata" : { }
   } ]
 }

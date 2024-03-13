@@ -1,6 +1,7 @@
 {
   "event_timestamp" : "2024-01-10 06:13:50",
   "event_id" : "55384aaeda62c5b20a462076ec59f3f5-0-1704867229-9",
+  "event_time_msec" : 1704867230000,
   "event_name" : "_user_engagement",
   "event_value" : 0.0,
   "event_value_currency" : null,

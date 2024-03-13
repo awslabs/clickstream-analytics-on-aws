@@ -21,6 +21,7 @@
     "events" : [ {
       "event_timestamp" : "2023-08-29 04:04:25",
       "event_id" : "43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11",
+      "event_time_msec" : 1693281865000,
       "event_name" : "_profile_set",
       "event_value" : 0.0,
       "event_value_currency" : null,
