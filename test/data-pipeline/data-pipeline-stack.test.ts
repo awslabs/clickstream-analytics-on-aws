@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER } from '@aws/clickstream-base-lib';
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
@@ -434,7 +434,7 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter TransformerAndEnrichClassNames', () => {
     template.hasParameter('TransformerAndEnrichClassNames', {
-      Default: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
+      Default: TRANSFORMER_AND_ENRICH_CLASS_NAMES,
       Type: 'String',
     });
   });
