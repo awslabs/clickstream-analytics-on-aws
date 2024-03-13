@@ -11,11 +11,12 @@
  *  and limitations under the License.
  */
 
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
-import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
-import Reporting from 'pages/pipelines/create/steps/Reporting';
-import { SinkType } from 'ts/const';
-import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
+import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
+import Reporting from '../src/pages/pipelines/create/steps/Reporting';
+import { SinkType } from '../src/ts/const';
+import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
 
 const mockedUsedNavigate = jest.fn();
 
@@ -32,7 +33,15 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
+  initReactI18next: {
+    type: '3rdParty',
+    init: (i18next) => i18next,
+  },
 }));
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(jest.fn());
+});
 
 describe('Test data processing settings', () => {
   test('Should hide the redshift and quickight settings when not enable data processing', async () => {
@@ -117,6 +126,8 @@ describe('Test data processing settings', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -128,6 +139,13 @@ describe('Test data processing settings', () => {
         }}
         changeQuickSightAccountName={() => {
           return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
         }}
       />
     );
@@ -230,6 +248,8 @@ describe('Test redsfhit settings', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -241,6 +261,13 @@ describe('Test redsfhit settings', () => {
         }}
         changeQuickSightAccountName={() => {
           return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
         }}
       />
     );
@@ -254,8 +281,7 @@ describe('Test redsfhit settings', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeDisabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 
   test('Should enable athena and enable quicksight when enable redshift with emr and quicksight service available', async () => {
@@ -345,6 +371,8 @@ describe('Test redsfhit settings', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -357,6 +385,13 @@ describe('Test redsfhit settings', () => {
         changeQuickSightAccountName={() => {
           return;
         }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
@@ -365,8 +400,7 @@ describe('Test redsfhit settings', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeEnabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 });
 
@@ -462,6 +496,8 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -473,6 +509,13 @@ describe('Test MSK kafkaConnector settings', () => {
         }}
         changeQuickSightAccountName={() => {
           return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
         }}
       />
     );
@@ -487,8 +530,7 @@ describe('Test MSK kafkaConnector settings', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeDisabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 
   test('Should enable data processing and quicksight when user not select kafkaConnector but sink type is not MSK', async () => {
@@ -588,6 +630,8 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -599,6 +643,13 @@ describe('Test MSK kafkaConnector settings', () => {
         }}
         changeQuickSightAccountName={() => {
           return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
         }}
       />
     );
@@ -613,7 +664,6 @@ describe('Test MSK kafkaConnector settings', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeEnabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 });

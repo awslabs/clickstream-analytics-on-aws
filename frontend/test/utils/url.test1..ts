@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { getSolutionVersion } from 'ts/url';
+import { getSolutionVersion } from '../../src/ts/url';
 
 describe('getSolutionVersion', () => {
   let originalGetItem: typeof localStorage.getItem;

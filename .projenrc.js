@@ -113,11 +113,11 @@ const depsForFrontendProject = [
   '@aws-sdk/client-s3@^3.353.0',
   '@aws-sdk/lib-storage@^3.353.0',
   '@aws-sdk/xhr-http-handler@^3.353.0',
-  '@babel/core@^7.16.0',
-  '@cloudscape-design/components@^3.0.294',
-  '@cloudscape-design/design-tokens@^3.0.22',
-  '@cloudscape-design/global-styles@^1.0.7',
-  '@cloudscape-design/collection-hooks@^1.0.7',
+  '@babel/core@^7.24.0',
+  '@cloudscape-design/components@^3.0.570',
+  '@cloudscape-design/design-tokens@^3.0.34',
+  '@cloudscape-design/global-styles@^1.0.24',
+  '@cloudscape-design/collection-hooks@^1.0.38',
   '@pmmmwh/react-refresh-webpack-plugin@^0.5.3',
   '@svgr/webpack@^5.5.0',
   'amazon-quicksight-embedding-sdk@^2.4.0',
@@ -171,6 +171,7 @@ const depsForFrontendProject = [
 ];
 
 const devDepsForFrontendProject = [
+  '@types/testing-library__jest-dom@^5.14.9',
   '@testing-library/jest-dom@^5.16.5',
   '@testing-library/react@^13.4.0',
   '@testing-library/user-event@^13.5.0',
@@ -383,8 +384,9 @@ const baseProject = new typescript.TypeScriptProject({
 baseProject.addFields({ version });
 
 const frontendTSConfig = {
-  include: ['src'],
+  include: ['src', 'test'],
   compilerOptions: {
+    rootDir: '.',
     moduleResolution: 'node',
     alwaysStrict: false,
     declaration: false,
@@ -433,10 +435,17 @@ const frontendProject = new typescript.TypeScriptProject({
   tsconfig: {
     ...frontendTSConfig,
   },
+  tsconfigDev: {
+    ...frontendTSConfig,
+    compilerOptions: {
+      ...frontendTSConfig.compilerOptions,
+      types: ['@types/testing-library__jest-dom', '@testing-library/jest-dom'],
+    },
+  },
   minNodeVersion,
   jestOptions: {
     jestConfig: {
-      roots: ['<rootDir>/src'],
+      roots: ['<rootDir>/src', '<rootDir>/test'],
       testEnvironment: 'jsdom',
       moduleDirectories: ['node_modules', 'src'],
       testMatch: [
@@ -449,6 +458,36 @@ const frontendProject = new typescript.TypeScriptProject({
       setupFilesAfterEnv: [
         '<rootDir>/src/setupTests.ts',
       ],
+      transform: {
+        '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/config/jest/babelTransform.js',
+        '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
+        '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': '<rootDir>/config/jest/fileTransform.js',
+      },
+      transformIgnorePatterns: [
+        '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+        '^.+\\.module\\.(css|sass|scss)$',
+      ],
+      moduleNameMapper: {
+        '^react-native$': 'react-native-web',
+        '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+      },
+      moduleFileExtensions: [
+        'web.js',
+        'js',
+        'web.ts',
+        'ts',
+        'web.tsx',
+        'tsx',
+        'json',
+        'web.jsx',
+        'jsx',
+        'node',
+      ],
+      watchPlugins: [
+        'jest-watch-typeahead/filename',
+        'jest-watch-typeahead/testname',
+      ],
+      resetMocks: true,
     },
   },
   packageManager: project.package.packageManager,

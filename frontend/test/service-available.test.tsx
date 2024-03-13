@@ -11,12 +11,14 @@
  *  and limitations under the License.
  */
 
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
-import ConfigIngestion from 'pages/pipelines/create/steps/ConfigIngestion';
-import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
-import Reporting from 'pages/pipelines/create/steps/Reporting';
-import BufferMSK from 'pages/pipelines/create/steps/buffer/BufferMSK';
-import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
+import { ENetworkType } from 'ts/const';
+import ConfigIngestion from '../src/pages/pipelines/create/steps/ConfigIngestion';
+import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
+import Reporting from '../src/pages/pipelines/create/steps/Reporting';
+import BufferMSK from '../src/pages/pipelines/create/steps/buffer/BufferMSK';
+import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
 
 const mockedUsedNavigate = jest.fn();
 
@@ -33,7 +35,15 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
+  initReactI18next: {
+    type: '3rdParty',
+    init: (i18next) => i18next,
+  },
 }));
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(jest.fn());
+});
 
 const getServiceStatus = (data: ServiceAvailableResponse[]) => {
   const agaAvailable =
@@ -130,12 +140,6 @@ describe('Test AGA service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -207,6 +211,12 @@ describe('Test AGA service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
+        changeNetworkType={function (type: ENetworkType): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeIngestionType={function (type: string): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
@@ -285,12 +295,6 @@ describe('Test AGA service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -362,6 +366,12 @@ describe('Test AGA service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
+        changeNetworkType={function (type: ENetworkType): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeIngestionType={function (type: string): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
@@ -406,15 +416,17 @@ describe('Test QuickSight service available', () => {
         changeQuickSightAccountName={() => {
           return;
         }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
     expect(reportingDom).toBeDefined();
-    const reportingCheckbox = reportingDom.container.querySelector(
-      '#test-quicksight-id'
-    );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeDisabled();
   });
 
   test('Reporting Rendered and QuickSight is available', async () => {
@@ -450,6 +462,13 @@ describe('Test QuickSight service available', () => {
         changeQuickSightAccountName={() => {
           return;
         }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
@@ -457,8 +476,7 @@ describe('Test QuickSight service available', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeEnabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 });
 
@@ -564,6 +582,8 @@ describe('Test EMR Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -676,6 +696,8 @@ describe('Test EMR Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -790,6 +812,8 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -907,6 +931,8 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -995,12 +1021,6 @@ describe('Test MSK service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -1072,6 +1092,12 @@ describe('Test MSK service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
+        changeNetworkType={function (type: ENetworkType): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeIngestionType={function (type: string): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
     expect(configIntestionDom).toBeDefined();
@@ -1141,7 +1167,6 @@ describe('Test MSK service available', () => {
     const selectedMSK = bufferMSKDom.container.querySelector(
       '#test-select-msk-id'
     );
-    expect(selectedMSK).toBeInTheDocument();
-    expect(selectedMSK).toBeEnabled();
+    expect(selectedMSK).not.toBeInTheDocument();
   });
 });

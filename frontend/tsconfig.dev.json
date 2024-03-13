@@ -26,6 +26,7 @@
     "strictPropertyInitialization": true,
     "stripInternal": true,
     "target": "ESNext",
+    "rootDir": ".",
     "moduleResolution": "node",
     "allowJs": true,
     "skipLibCheck": true,
@@ -35,12 +36,19 @@
     "noEmit": true,
     "baseUrl": "src",
     "paths": {},
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": [
+      "@types/testing-library__jest-dom",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
-    "src"
+    "src",
+    "test",
+    "src",
+    "test"
   ],
   "exclude": [
     "node_modules"

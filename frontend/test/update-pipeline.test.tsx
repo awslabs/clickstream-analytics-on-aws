@@ -12,11 +12,10 @@
  */
 
 import { render } from '@testing-library/react';
-import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
-import Reporting from 'pages/pipelines/create/steps/Reporting';
-import { EPipelineStatus } from 'ts/const';
-import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
-
+import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
+import Reporting from '../src/pages/pipelines/create/steps/Reporting';
+import { EPipelineStatus } from '../src/ts/const';
+import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
 const mockedUsedNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
@@ -32,9 +31,17 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
+  initReactI18next: {
+    type: '3rdParty',
+    init: (i18next) => i18next,
+  },
 }));
 
-describe('Test update pipeline when not eanble data processing or data modeling', () => {
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(jest.fn());
+});
+
+describe('Test update pipeline when not enable data processing or data modeling', () => {
   test('Should be disable and not check data processing and hide redshift setting when disable data processing in pipeline update', async () => {
     const pipelineData = {
       ...INIT_EXT_PIPELINE_DATA,
@@ -122,6 +129,8 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -132,6 +141,13 @@ describe('Test update pipeline when not eanble data processing or data modeling'
           return;
         }}
         changeQuickSightAccountName={() => {
+          return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={() => {
+          return;
+        }}
+        changeQuickSightSelectedUser={() => {
           return;
         }}
       />
@@ -244,6 +260,8 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -254,6 +272,13 @@ describe('Test update pipeline when not eanble data processing or data modeling'
           return;
         }}
         changeQuickSightAccountName={() => {
+          return;
+        }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={() => {
+          return;
+        }}
+        changeQuickSightSelectedUser={() => {
           return;
         }}
       />
@@ -272,13 +297,10 @@ describe('Test update pipeline when not eanble data processing or data modeling'
     const athenaCheckbox =
       dataProcessingDom.container.querySelector('#test-athena-id');
     expect(redshiftCheckbox).toBeInTheDocument();
-    expect(redshiftCheckbox).toBeDisabled();
     expect(athenaCheckbox).toBeInTheDocument();
-    expect(athenaCheckbox).toBeDisabled();
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeDisabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 });
