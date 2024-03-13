@@ -1,0 +1,59 @@
+{
+  "event_timestamp" : "2023-08-29 04:04:25",
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_properties" : {
+    "age" : {
+      "value" : "0",
+      "set_timestamp_micros" : null
+    },
+    "email" : {
+      "value" : "yxxxxn@example.com",
+      "set_timestamp_micros" : null
+    },
+    "firstName" : {
+      "value" : "",
+      "set_timestamp_micros" : null
+    },
+    "gender" : {
+      "value" : "",
+      "set_timestamp_micros" : null
+    },
+    "lastName" : {
+      "value" : "",
+      "set_timestamp_micros" : null
+    },
+    "persona" : {
+      "value" : "",
+      "set_timestamp_micros" : null
+    },
+    "user_id" : {
+      "value" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+      "set_timestamp_micros" : null
+    },
+    "username" : {
+      "value" : "NameL2",
+      "set_timestamp_micros" : null
+    }
+  },
+  "user_properties_json_str" : "{\"firstName\":{\"value\":\"\",\"set_timestamp_micros\":null},\"lastName\":{\"value\":\"\",\"set_timestamp_micros\":null},\"persona\":{\"value\":\"\",\"set_timestamp_micros\":null},\"gender\":{\"value\":\"\",\"set_timestamp_micros\":null},\"user_id\":{\"value\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\",\"set_timestamp_micros\":null},\"email\":{\"value\":\"yxxxxn@example.com\",\"set_timestamp_micros\":null},\"age\":{\"value\":\"0\",\"set_timestamp_micros\":null},\"username\":{\"value\":\"NameL2\",\"set_timestamp_micros\":null}}",
+  "first_touch_time_msec" : 1691481796000,
+  "first_visit_date" : "2023-08-08",
+  "first_referrer" : "https://tagassistant.google.com/",
+  "first_traffic_source" : "google",
+  "first_traffic_medium" : "organic",
+  "first_traffic_campaign" : null,
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : "search",
+  "first_app_install_source" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "testAllAppId1"
+}

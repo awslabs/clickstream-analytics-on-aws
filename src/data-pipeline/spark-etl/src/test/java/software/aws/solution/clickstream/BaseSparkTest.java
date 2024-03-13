@@ -14,11 +14,14 @@
 package software.aws.solution.clickstream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.*;
 import com.google.common.io.Resources;
+import lombok.extern.slf4j.*;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.jetbrains.annotations.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +38,11 @@ import java.util.zip.GZIPInputStream;
 import static java.util.Objects.requireNonNull;
 import static software.aws.solution.clickstream.ContextUtil.*;
 
+@Slf4j
 public class BaseSparkTest {
+    public static final String PROCESS_INFO = "process_info";
+    public static final String PROCESS_TIME = "process_time";
+    public static final String INPUT_FILE_NAME = "input_file_name";
     protected SparkSession spark;
 
     @BeforeAll
@@ -52,6 +59,16 @@ public class BaseSparkTest {
         String dbFile = new File(BaseSparkTest.class.getResource("/original_data.json").getPath())
                 .getParent() + "/GeoLite2-City.mmdb";
         System.out.println(dbFile);
+
+        String fileInTmp = "/tmp/GeoLite2-City.mmdb";
+        File fileInTmpObj = new File(fileInTmp);
+
+        if (fileInTmpObj.exists()) {
+            System.out.println("file already exists, skip download");
+           // copy file to dbFile
+            return copyFile(fileInTmp, dbFile);
+        }
+
         try (
                 FileOutputStream fs = new FileOutputStream(dbFile)
         ) {
@@ -67,6 +84,26 @@ public class BaseSparkTest {
                 fs.write(buffer, 0, byteRead);
             }
         } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        copyFile(dbFile, fileInTmp);
+        return dbFile;
+    }
+
+    private static String copyFile(String srcFile, String dbFile) {
+        System.out.println("copy file from " + srcFile + " to " + dbFile);
+        try {
+            InputStream in = new FileInputStream(srcFile);
+            OutputStream out = new FileOutputStream(dbFile);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -87,6 +124,8 @@ public class BaseSparkTest {
                 .master("local[*]")
                 .config("spark.driver.bindAddress", "127.0.0.1")
                 .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                .config("spark.sql.mapKeyDedupPolicy", "LAST_WIN")
+                .config("spark.sql.session.timeZone", "UTC")
                 .enableHiveSupport()
                 .getOrCreate();
         spark.sql("DROP DATABASE IF EXISTS " + dbName + " CASCADE");
@@ -107,9 +146,10 @@ public class BaseSparkTest {
     }
 
     public String resourceFileAsString(final String fileName) throws IOException {
-        ObjectMapper om = new ObjectMapper();
         String jsonStr = Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8).trim();
-        return om.readTree(jsonStr).toPrettyString();
+        ObjectMapper om = new ObjectMapper();
+        JsonNode node = om.readTree(jsonStr);
+        return node.toPrettyString();
     }
 
     public String resourceFileContent(final String fileName) throws IOException {
@@ -122,5 +162,26 @@ public class BaseSparkTest {
         ObjectMapper om = new ObjectMapper();
         rowsJson = om.readTree(rowsJson).toPrettyString();
         return rowsJson;
+    }
+
+    public String replaceInputFileName(String jsonStr) {
+        // replace  "input_file_name" : .*, with "input_file_name" : "_TEST_INPUT_FILE_NAME_"
+        return jsonStr.replaceAll("\"input_file_name\"\\s*:\\s*\".*?\",", "\"input_file_name\" : \"_TEST_INPUT_FILE_NAME_\",");
+    }
+
+    public String replaceProcessInfo(String jsonStr) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper();
+        JsonNode node = om.readTree(jsonStr);
+        if (node.hasNonNull(PROCESS_INFO)) {
+            ObjectNode processInfo = (ObjectNode) node.get(PROCESS_INFO);
+            if (processInfo.hasNonNull(PROCESS_TIME)) {
+                processInfo.put(PROCESS_TIME, "_PROCESS_TIME_");
+            }
+            if (processInfo.hasNonNull(INPUT_FILE_NAME)) {
+                String fileFullPath = processInfo.get(INPUT_FILE_NAME).asText();
+                processInfo.put(INPUT_FILE_NAME, Paths.get(fileFullPath).getFileName().toString());
+            }
+        }
+        return node.toPrettyString();
     }
 }
