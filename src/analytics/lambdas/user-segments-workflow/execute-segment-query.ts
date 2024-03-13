@@ -36,23 +36,15 @@ const ddbClient = new DynamoDBClient({
 });
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-const {
-  REDSHIFT_MODE,
-  REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  REDSHIFT_CLUSTER_IDENTIFIER,
-  REDSHIFT_DATABASE,
-  REDSHIFT_DB_USER,
-  REDSHIFT_DATA_API_ROLE,
-} = process.env;
 const { serverlessRedshiftProps, provisionedRedshiftProps } = getRedshiftProps(
-  REDSHIFT_MODE!,
-  REDSHIFT_DATABASE!,
-  REDSHIFT_DATA_API_ROLE!,
-  REDSHIFT_DB_USER!,
-  REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-  REDSHIFT_CLUSTER_IDENTIFIER!,
+  process.env.REDSHIFT_MODE!,
+  process.env.REDSHIFT_DATABASE!,
+  process.env.REDSHIFT_DATA_API_ROLE!,
+  process.env.REDSHIFT_DB_USER!,
+  process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
+  process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
 );
-const redshiftClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE!);
+const redshiftClient = getRedshiftClient(process.env.REDSHIFT_DATA_API_ROLE!);
 
 export const handler = async (event: ExecuteSegmentQueryEvent) => {
   try {
