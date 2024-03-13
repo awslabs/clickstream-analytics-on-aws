@@ -391,7 +391,7 @@ export enum SubnetType {
 
 export enum DataCollectionSDK {
   CLICKSTREAM = 'clickstream',
-  THIRDPARTY = ' ',
+  THIRDPARTY = 'thirdparty',
 }
 
 export enum FetchType {
