@@ -29,13 +29,13 @@ import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
 import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from 'ts/constant-ln';
 import {
   ConditionCategory,
+  ExploreAggregationMethod,
   ExploreAnalyticsOperators,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
-  MetadataParameterType,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -46,11 +46,13 @@ export const metadataEventsConvertToCategoryItemType = (
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryPresetItems: CategoryItemType = {
+    categoryId: 'preset',
     categoryName: i18n.t('analytics:labels.presetEvent'),
     categoryType: 'event',
     itemList: [],
   };
   const categoryCustomItems: CategoryItemType = {
+    categoryId: 'custom',
     categoryName: i18n.t('analytics:labels.customEvent'),
     categoryType: 'event',
     itemList: [],
@@ -88,6 +90,7 @@ export const pathNodesConvertToCategoryItemType = (
 ) => {
   const categoryItems: CategoryItemType[] = [];
   const categoryNodeItems: CategoryItemType = {
+    categoryId: 'node',
     categoryName: i18n.t('analytics:labels.pathNode'),
     categoryType: 'node',
     itemList: [],
@@ -124,31 +127,21 @@ export const parametersConvertToCategoryItemType = (
 ) => {
   //If parameters name are same
   patchSameName(userAttributeItems, parameterItems);
-  const categoryItems: CategoryItemType[] = [];
-  const categoryPublicEventItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.publicEventAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
-  const categoryPrivateEventItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.privateEventAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
-  const categoryUserItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.userAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
-  if (parameterItems) {
-    parameterItems.forEach((item) => {
-      if (item.parameterType === MetadataParameterType.PRIVATE) {
-        categoryPrivateEventItems.itemList.push(buildEventItem(item));
-      } else {
-        categoryPublicEventItems.itemList.push(buildEventItem(item));
-      }
-    });
+  const categoryItems: CategoryItemType[] = getCategories(parameterItems);
+  for (const parameter of parameterItems) {
+    const categoryItem = categoryItems.find(
+      (item) => item.categoryId === parameter.category
+    );
+    if (categoryItem) {
+      categoryItem.itemList.push(buildEventItem(parameter));
+    }
   }
+  const categoryUserItems: CategoryItemType = {
+    categoryId: 'user',
+    categoryName: i18n.t('analytics:category.user'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
   userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
       label: userAttributeDisplayname(item.displayName),
@@ -162,12 +155,194 @@ export const parametersConvertToCategoryItemType = (
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
   });
-  categoryItems.push(categoryPublicEventItems);
-  if (categoryPrivateEventItems.itemList.length > 0) {
-    categoryItems.push(categoryPrivateEventItems);
-  }
   categoryItems.push(categoryUserItems);
+  const otherIndex = categoryItems.findIndex(
+    (item) => item.categoryId === ConditionCategory.OTHER
+  );
+  if (otherIndex !== -1) {
+    categoryItems.push(categoryItems.splice(otherIndex, 1)[0]);
+  }
   return categoryItems;
+};
+
+const getCategories = (parameterItems: IMetadataEventParameter[]) => {
+  const categories: CategoryItemType[] = [];
+  for (const item of parameterItems) {
+    const category = item.category;
+    if (categories.find((c) => c.categoryId === category)) {
+      continue;
+    }
+    const categoryItem: CategoryItemType = {
+      categoryId: category,
+      categoryName: i18n.t(`analytics:category.${category}`) ?? category,
+      categoryType: 'attribute',
+      itemList: [],
+    };
+    categories.push(categoryItem);
+  }
+
+  return categories.sort((a, b) => a.categoryId.localeCompare(b.categoryId));
+};
+
+const _metadataValueType = (
+  valueType: MetadataValueType,
+  checkType: string
+) => {
+  if (
+    checkType === 'all' ||
+    (checkType === 'string' && valueType === MetadataValueType.STRING) ||
+    (checkType === 'number' && valueType !== MetadataValueType.STRING)
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const _getSubList = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[],
+  groupName: string,
+  type: string
+) => {
+  const targetParameters = parameterItems.filter((item) =>
+    _metadataValueType(item.valueType, type)
+  );
+  const targetAttributes = userAttributeItems.filter((item) =>
+    _metadataValueType(item.valueType, type)
+  );
+  const targetParametersAndAttributes = [
+    ...targetParameters,
+    ...targetAttributes,
+  ];
+  const subList: IAnalyticsItem[] = [];
+  for (const parameter of targetParametersAndAttributes) {
+    subList.push({
+      value: parameter.name,
+      label: parameter.displayName,
+      name: parameter.name,
+      valueType: parameter.valueType,
+      category: parameter.category,
+      groupName: groupName,
+      itemType: 'children',
+    } as IAnalyticsItem);
+  }
+  return subList;
+};
+
+export const getEventMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: i18n.t('analytics:options.userNumber') ?? 'User number',
+    },
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
+    },
+    {
+      label: defaultStr(i18n.t('analytics:countGroup')),
+      value: ExploreComputeMethod.COUNT_PROPERTY,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreComputeMethod.COUNT_PROPERTY,
+        'all'
+      ),
+    },
+    {
+      label: defaultStr(i18n.t('analytics:minGroup')),
+      value: ExploreAggregationMethod.MIN,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreAggregationMethod.MIN,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(i18n.t('analytics:maxGroup')),
+      value: ExploreAggregationMethod.MAX,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreAggregationMethod.MAX,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(i18n.t('analytics:sumGroup')),
+      value: ExploreAggregationMethod.SUM,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreAggregationMethod.SUM,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(i18n.t('analytics:avgGroup')),
+      value: ExploreAggregationMethod.AVG,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreAggregationMethod.AVG,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(i18n.t('analytics:medianGroup')),
+      value: ExploreAggregationMethod.MEDIAN,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        ExploreAggregationMethod.MEDIAN,
+        'number'
+      ),
+    },
+  ];
+  return computeMethodOptions;
+};
+
+export const getAttributionMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
+    },
+    {
+      label: defaultStr(i18n.t('analytics:sumGroup')),
+      value: ExploreComputeMethod.SUM_VALUE,
+      subList: [],
+    },
+  ];
+  const numberParameters = parameterItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberAttributes = userAttributeItems.filter(
+    (item) => item.valueType !== MetadataValueType.STRING
+  );
+  const numberParametersAndAttributes = [
+    ...numberParameters,
+    ...numberAttributes,
+  ];
+  for (const parameter of numberParametersAndAttributes) {
+    computeMethodOptions[1].subList?.push({
+      value: parameter.name,
+      label: parameter.displayName,
+      name: parameter.name,
+      valueType: parameter.valueType,
+      category: parameter.category,
+      groupName: ExploreComputeMethod.SUM_VALUE,
+      itemType: 'children',
+    } as IAnalyticsItem);
+  }
+  return computeMethodOptions;
 };
 
 function patchSameName(
@@ -295,6 +470,151 @@ export const validConditionItemType = (condition: IConditionItemType) => {
   );
 };
 
+export const getTouchPointsAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  const touchPoints: AttributionTouchPoint[] = [];
+  eventOptionData.forEach((item) => {
+    if (validEventAnalyticsItem(item)) {
+      const conditions: ICondition[] = [];
+      item.conditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
+            value: condition.conditionValue,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
+          };
+          conditions.push(conditionObj);
+        }
+      });
+
+      const touchPoint: AttributionTouchPoint = {
+        eventName: defaultStr(item.selectedEventOption?.name),
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
+      };
+      touchPoints.push(touchPoint);
+    }
+  });
+  return touchPoints;
+};
+
+export const getGoalAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  const conditions: ICondition[] = [];
+  goalData.conditionList.forEach((condition) => {
+    if (validConditionItemType(condition)) {
+      const conditionObj: ICondition = {
+        category: defaultStr(
+          condition.conditionOption?.category,
+          ConditionCategory.OTHER
+        ),
+        property: defaultStr(condition.conditionOption?.name),
+        operator: defaultStr(condition.conditionOperator?.value),
+        value: condition.conditionValue,
+        dataType: defaultStr(
+          condition.conditionOption?.valueType,
+          MetadataValueType.STRING
+        ),
+      };
+      conditions.push(conditionObj);
+    }
+  });
+  let groupColumn: IColumnAttribute | undefined;
+  if (goalData.calculateMethodOption?.name) {
+    groupColumn = {
+      category: defaultStr(
+        goalData.calculateMethodOption?.category,
+        ConditionCategory.OTHER
+      ),
+      property: defaultStr(goalData.calculateMethodOption?.name),
+      dataType: defaultStr(
+        goalData.calculateMethodOption?.valueType,
+        MetadataValueType.STRING
+      ),
+    };
+  }
+  return {
+    eventName: defaultStr(goalData.selectedEventOption?.name),
+    sqlCondition: {
+      conditions: conditions,
+      conditionOperator: goalData.conditionRelationShip,
+    },
+    groupColumn,
+  } as AttributionTouchPoint;
+};
+
+export const getTargetComputeMethod = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  if (
+    goalData.calculateMethodOption?.value === ExploreComputeMethod.EVENT_CNT
+  ) {
+    return ExploreComputeMethod.EVENT_CNT;
+  }
+  return ExploreComputeMethod.SUM_VALUE;
+};
+
+const _getComputeMethod = (groupName: string, value: string) => {
+  if (
+    groupName === ExploreAggregationMethod.MIN ||
+    groupName === ExploreAggregationMethod.MAX ||
+    groupName === ExploreAggregationMethod.SUM ||
+    groupName === ExploreAggregationMethod.AVG ||
+    groupName === ExploreAggregationMethod.MEDIAN
+  ) {
+    return ExploreComputeMethod.AGGREGATION_PROPERTY;
+  } else if (groupName === ExploreComputeMethod.COUNT_PROPERTY) {
+    return ExploreComputeMethod.COUNT_PROPERTY;
+  }
+  return value;
+};
+
+const _gatEventExtParameter = (
+  computeMethod: string,
+  computeMethodOption: IAnalyticsItem | null | undefined
+) => {
+  if (
+    computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY ||
+    computeMethod === ExploreComputeMethod.COUNT_PROPERTY
+  ) {
+    return {
+      targetProperty: {
+        category: defaultStr(
+          computeMethodOption?.category,
+          ConditionCategory.OTHER
+        ),
+        property: defaultStr(computeMethodOption?.value),
+        dataType: defaultStr(
+          computeMethodOption?.valueType,
+          MetadataValueType.STRING
+        ),
+      },
+      aggregationMethod: computeMethodOption?.groupName,
+    };
+  }
+  return undefined;
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
@@ -321,6 +641,14 @@ export const getEventAndConditions = (
         }
       });
 
+      const computeMethod = _getComputeMethod(
+        item.calculateMethodOption?.groupName ?? '',
+        item.calculateMethodOption?.value ?? ''
+      );
+      const eventExtParameter = _gatEventExtParameter(
+        computeMethod,
+        item.calculateMethodOption
+      );
       const eventAndCondition: IEventAndCondition = {
         eventName: defaultStr(
           item.selectedEventOption?.value?.split('#').pop()
@@ -329,10 +657,8 @@ export const getEventAndConditions = (
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
         },
-        computeMethod: defaultStr(
-          item.calculateMethodOption?.value,
-          ExploreComputeMethod.USER_ID_CNT
-        ),
+        computeMethod: computeMethod,
+        eventExtParameter: eventExtParameter,
       };
       eventAndConditions.push(eventAndCondition);
     }

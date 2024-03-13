@@ -592,10 +592,11 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   let baseSQL = _buildEventPropertyAnalysisBaseSql(eventNames, sqlParameters);
 
   let groupColSQL = '';
-
+  let groupBySQL = '';
   if (sqlParameters.groupCondition !== undefined) {
     const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupColSQL = `${colName}::varchar as ${colName},`;
+    groupBySQL = `${colName},`;
   }
 
   const computeMethodProps = getComputeMethodProps(sqlParameters);
@@ -605,7 +606,11 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
       if (!computeMethodProps.isSameAggregationMethod) {
         resultSql = resultSql.concat(`
           select 
-            *
+            event_date:: date,
+            event_name,
+            ${groupBySQL}
+            custom_attr_id,
+            "count/aggregation amount":: double precision
           from join_table
         `);
       } else {
@@ -617,7 +622,7 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
               custom_attr_id as id
             from join_table
             group by
-            day, event_name, ${groupColSQL} custom_attr_id
+            day, event_name, ${groupBySQL} custom_attr_id
         `);
       }
     } else {
@@ -630,13 +635,17 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
             custom_attr_id
           from join_table 
           group by
-          day, event_name, ${groupColSQL} x_id, custom_attr_id
+          day, event_name, ${groupBySQL} x_id, custom_attr_id
       `);
     }
   } else { // mixed method
     resultSql = resultSql.concat(`
         select 
-          *
+          event_date:: date,
+          event_name,
+          ${groupBySQL}
+          custom_attr_id,
+          "count/aggregation amount":: double precision
         from join_table
     `);
   }
@@ -1464,16 +1473,17 @@ function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCo
 
 function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string, dateGroupCol: string) {
   let sql = '';
-
+  let groupby = ',custom_attr_id';
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
       || eventAndCondition.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     sql = `
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      null as custom_attr_id,
-      count(distinct x_id) as "count/aggregation amount"
+      'null' as custom_attr_id,
+      count(distinct x_id)  as "count/aggregation amount"
     `;
+    groupby = '';
   } else if (eventAndCondition.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
     sql = `
       ${dateGroupCol} as event_date,
@@ -1483,16 +1493,21 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
       count(1) as "count/aggregation amount"
     `;
   } else {
+    let method = eventAndCondition.eventExtParameter!.aggregationMethod?.toUpperCase();
     sql = `
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      null as custom_attr_id,
-      ${eventAndCondition.eventExtParameter?.aggregationMethod}(custom_attr_id) as "count/aggregation amount"
+      'null' as custom_attr_id,
+      ${method}(custom_attr_id) as "count/aggregation amount"
     `;
+    groupby = '';
   }
 
-  return sql;
+  return {
+    sql,
+    groupby,
+  };
 }
 
 
@@ -1559,11 +1574,12 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
       }
 
       const idSql = _buildIDColumnSqlMixedMode(index, item);
+      const query = _buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn!);
 
       joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
       select 
-        ${_buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn)}
+        ${query.sql}
         from(
           select
             table_${index}.month
@@ -1576,7 +1592,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
           ${groupColSql}
           from table_${index}
         ) as union_table_${index}
-        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ,custom_attr_id
+        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ${query.groupby}
       `);
     }
   } else {

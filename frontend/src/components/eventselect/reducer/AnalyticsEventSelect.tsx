@@ -21,6 +21,7 @@ import {
   CategoryItemType,
   ERelationShip,
   IEventAnalyticsItem,
+  MultiSelectType,
 } from '../AnalyticsType';
 import ConditionItem from '../ConditionItem';
 import EventItem from '../EventItem';
@@ -38,6 +39,7 @@ interface EventsSelectProps {
   eventOptionList: CategoryItemType[];
   defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
+  enableChangeMultiSelect: MultiSelectType;
   enableChangeRelation: boolean;
   builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];

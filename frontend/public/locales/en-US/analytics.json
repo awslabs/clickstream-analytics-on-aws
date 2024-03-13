@@ -1,5 +1,26 @@
 {
   "analytics": "Analytics",
+  "countGroup": "COUNT by ...",
+  "countGroupLabel": "COUNT {{label}}",
+  "minGroup": "MIN by ...",
+  "minGroupLabel": "MIN by {{label}}",
+  "maxGroup": "MAX by ...",
+  "maxGroupLabel": "MAX by {{label}}",
+  "sumGroup": "SUM by ...",
+  "sumGroupLabel": "SUM by {{label}}",
+  "avgGroup": "AVG by ...",
+  "avgGroupLabel": "AVG by {{label}}",
+  "medianGroup": "MEDIAN by ...",
+  "medianGroupLabel": "MEDIAN by {{label}}",
+  "category": {
+    "app_info": "Application",
+    "device": "Device",
+    "event": "Event",
+    "geo": "Geography",
+    "other": "Other",
+    "traffic_source": "Traffic",
+    "user": "User"
+  },
   "dashboard": {
     "title": "Dashboards",
     "description": "You can view the out-of-the-box user life cycle dashboards here, and create a custom dashboard with exploration analysis.",

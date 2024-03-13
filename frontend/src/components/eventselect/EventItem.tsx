@@ -17,7 +17,10 @@ import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreComputeMethod } from 'ts/explore-types';
+import {
+  ExploreAggregationMethod,
+  ExploreComputeMethod,
+} from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
@@ -136,7 +139,15 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             )}
         </div>
         {isMultiSelect && (
-          <div className="second-select-option" title={calcMethodOption?.label}>
+          <>
+          <div className="second-select-option" title={calcMethodOption?.label}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setShowGroupSelectDropdown((prev) => !prev);
+              setShowDropdown(false);
+            }
+          }}
+          >
             <Select
               selectedOption={calcMethodOption ?? null}
               onChange={(e) => {
@@ -144,7 +155,70 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
               }}
               options={computeMethodOptions}
             />
-          </div>
+              {showGroupSelectDropdown && (
+                <GroupSelectContainer
+                  categories={calcMethodOptions ?? defaultComputeMethodOptions}
+                  selectedItem={calcMethodOption ?? null}
+                  changeSelectItem={(item) => {
+                    if (item) {
+                      const newItem: any = { ...item };
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreComputeMethod.COUNT_PROPERTY
+                      ) {
+                        newItem.label = t('analytics:countGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreAggregationMethod.MIN
+                      ) {
+                        newItem.label = t('analytics:minGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreAggregationMethod.MAX
+                      ) {
+                        newItem.label = t('analytics:maxGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreAggregationMethod.SUM
+                      ) {
+                        newItem.label = t('analytics:sumGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreAggregationMethod.AVG
+                      ) {
+                        newItem.label = t('analytics:avgGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      if (
+                        item.itemType === 'children' &&
+                        item.groupName === ExploreAggregationMethod.MEDIAN
+                      ) {
+                        newItem.label = t('analytics:medianGroupLabel', {
+                          label: item.label,
+                        });
+                      }
+                      changeCurCalcMethodOption?.(newItem);
+                    } else {
+                      changeCurCalcMethodOption?.(null);
+                    }
+                  }}
+                />
+              )}
+            </div>
+          </>
         )}
       </div>
       {showDropdown && (

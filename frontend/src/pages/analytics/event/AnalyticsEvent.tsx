@@ -30,7 +30,9 @@ import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
   INIT_SEGMENTATION_DATA,
+  MultiSelectType,
 } from 'components/eventselect/AnalyticsType';
 import AnalyticsEventSelect from 'components/eventselect/reducer/AnalyticsEventSelect';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
@@ -113,6 +115,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
+  const [disableSwitchChart, setDisableSwitchChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
@@ -131,7 +134,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
 
-  const defaultComputeMethodOption: SelectProps.Option = {
+  const defaultComputeMethodOption: IAnalyticsItem = {
     value: ExploreComputeMethod.EVENT_CNT,
     label: t('analytics:options.eventNumber') ?? 'Event number',
   };
@@ -324,6 +327,24 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     }
   };
 
+  const switchChartType = () => {
+    const computeMethodOptions = eventDataState.map(
+      (item) => item.calculateMethodOption
+    );
+    const computeMethods: string[] = [];
+    for (const option of computeMethodOptions) {
+      if (option?.groupName) {
+        computeMethods.push(option.groupName);
+      } else if (option?.value) {
+        computeMethods.push(option.value);
+      }
+    }
+    const isCountOrAgg =
+      computeMethods.includes(ExploreComputeMethod.COUNT_PROPERTY) ||
+      computeMethods.includes(ExploreComputeMethod.AGGREGATION_PROPERTY);
+    setDisableSwitchChart(isCountOrAgg);
+  };
+
   const clickPreview = async () => {
     if (
       eventDataState.length === 0 ||
@@ -337,6 +358,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
+      switchChartType();
       setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
@@ -429,6 +451,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 metadataUserAttributes={metadataUserAttributes}
                 enableChangeRelation={true}
                 isMultiSelect={true}
+                enableChangeMultiSelect={MultiSelectType.EVENT}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
@@ -483,7 +506,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               }
               options={chartTypeOptions.map((obj) => ({
                 ...obj,
-                disabled: loadingChart,
+                disabled: loadingChart || disableSwitchChart,
               }))}
             />
           </div>

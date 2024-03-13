@@ -37,7 +37,7 @@ import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
 import { ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
 import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, ExploreAggregationMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -881,9 +881,9 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
 }
 
 export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean, aggregationMthod?: string) : Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string, aggregationMthod?: string) : Visual {
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(grouppingColName !== undefined);
 
   const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -898,8 +898,19 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
   };
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  const fieldWells = visual.PivotTableVisual!.ChartConfiguration!.FieldWells!;
+
+  if (grouppingColName !== undefined) {
+    fieldWells.PivotTableAggregatedFieldWells!.Rows![1].CategoricalDimensionField!.Column!.ColumnName = grouppingColName;
+  }
+
   if (aggregationMthod !== undefined) {
-    const values = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Values!;
+    let method = aggregationMthod;
+    if (method === ExploreAggregationMethod.AVG) {
+      method = 'AVERAGE';
+    }
+    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
     values[0] = {
       NumericalMeasureField: {
         FieldId: uuidv4(),
@@ -908,29 +919,41 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
           ColumnName: 'id',
         },
         AggregationFunction: {
-          SimpleNumericalAggregation: aggregationMthod.toUpperCase() as SimpleNumericalAggregationFunction,
+          SimpleNumericalAggregation: method?.toUpperCase() as SimpleNumericalAggregationFunction,
         },
       },
     };
 
   } else {
-    const rows = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
+    const rows = fieldWells.PivotTableAggregatedFieldWells?.Rows!;
     rows.push({
       CategoricalDimensionField: {
         FieldId: uuidv4(),
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: 'custom_attr_id',
+          ColumnName: 'id',
         },
       },
     });
+
+    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
+    values[0] = {
+      CategoricalMeasureField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'custom_attr_id',
+        },
+        AggregationFunction: 'COUNT',
+      },
+    };
   }
 
   return visual;
 }
 
 export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
+  titleProps: DashboardTitleProps, grouppingColName?: string) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
     visualId,
@@ -945,13 +968,13 @@ export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMet
 
   const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
 
-  if (hasGrouping) {
+  if (grouppingColName !== undefined) {
     fieldWellGroupBy.push({
       CategoricalDimensionField: {
         FieldId: uuidv4(),
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: 'custom_attr_id',
+          ColumnName: grouppingColName,
         },
       },
     });
@@ -960,16 +983,6 @@ export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMet
   if (!computeMethodProps.isMixedMethod) {
     if (computeMethodProps.hasAggregationPropertyMethod) {
       if (!computeMethodProps.isSameAggregationMethod) {
-        fieldWellGroupBy.push({
-          CategoricalDimensionField: {
-            FieldId: uuidv4(),
-            Column: {
-              DataSetIdentifier: viewName,
-              ColumnName: 'custom_attr_id',
-            },
-          },
-        });
-
         fieldWellGroupBy.push({
           NumericalDimensionField: {
             FieldId: uuidv4(),

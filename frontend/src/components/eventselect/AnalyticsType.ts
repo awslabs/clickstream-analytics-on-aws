@@ -51,6 +51,7 @@ export interface IProjectSelectItem extends SelectProps.Option {
 }
 
 export interface CategoryItemType {
+  categoryId: string;
   categoryName: string;
   categoryType: string;
   itemList: IAnalyticsItem[];
@@ -147,3 +148,9 @@ export const INIT_SEGMENTATION_DATA: SegmentationFilterDataType = {
   conditionRelationShip: ERelationShip.AND,
   data: [DEFAULT_SEGMENTATION_DATA],
 };
+
+export enum MultiSelectType {
+  BASE = 'base',
+  EVENT = 'event',
+  ATTRIBUTION = 'attribution',
+}
