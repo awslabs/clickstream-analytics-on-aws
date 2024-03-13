@@ -55,5 +55,6 @@
     "process_job_id" : "test-job",
     "process_time" : "_PROCESS_TIME_"
   },
-  "app_id" : "testAllAppId1"
+  "app_id" : "testAllAppId1",
+  "created_time" : "_CREATED_TIME_"
 }

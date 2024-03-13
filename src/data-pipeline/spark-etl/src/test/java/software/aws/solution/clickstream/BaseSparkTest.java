@@ -25,6 +25,7 @@ import org.jetbrains.annotations.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import software.aws.solution.clickstream.model.*;
 
 import java.io.*;
 import java.net.URL;
@@ -181,6 +182,9 @@ public class BaseSparkTest {
                 String fileFullPath = processInfo.get(INPUT_FILE_NAME).asText();
                 processInfo.put(INPUT_FILE_NAME, Paths.get(fileFullPath).getFileName().toString());
             }
+        }
+        if (node.has(ModelV2.CREATED_TIME)) {
+            ((ObjectNode)node).put(ModelV2.CREATED_TIME, "_CREATED_TIME_");
         }
         return node.toPrettyString();
     }

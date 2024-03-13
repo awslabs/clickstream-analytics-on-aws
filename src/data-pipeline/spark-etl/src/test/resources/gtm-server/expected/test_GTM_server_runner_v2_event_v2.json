@@ -1,5 +1,6 @@
 {
   "app_id" : "testAllAppId1",
+  "created_time" : "_CREATED_TIME_",
   "custom_parameters" : {
     "Channel" : "Server",
     "TestBy" : "NameL",
@@ -53,6 +54,7 @@
   "device_ua_device" : "Mac",
   "event_id" : "43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11",
   "event_name" : "_profile_set",
+  "event_time_msec" : 1693281865000,
   "event_timestamp" : "2023-08-29T04:04:25.000Z",
   "event_value" : 0.0,
   "event_value_currency" : null,

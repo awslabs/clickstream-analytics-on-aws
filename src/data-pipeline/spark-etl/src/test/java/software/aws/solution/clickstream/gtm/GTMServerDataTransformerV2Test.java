@@ -21,14 +21,11 @@ import software.aws.solution.clickstream.*;
 
 import java.io.*;
 import java.sql.*;
-import java.text.*;
 import java.util.*;
-import java.util.Date;
 
 import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.DatasetUtil.YYYYMMDD;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.*;
 
 

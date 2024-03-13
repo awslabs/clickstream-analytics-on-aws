@@ -15,9 +15,11 @@ package software.aws.solution.clickstream.gtm;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.types.*;
 import software.aws.solution.clickstream.*;
 import software.aws.solution.clickstream.model.*;
 
+import java.sql.*;
 import java.time.*;
 import java.util.*;
 
@@ -72,7 +74,7 @@ public class GTMServerDataTransformerV2 {
                         lit(PROCESS_JOB_ID), lit(jobName),
                         lit(PROCESS_TIME), lit(Instant.now().toString())
                 ))
-        );
+        ).withColumn(ModelV2.CREATED_TIME, lit(new Timestamp(System.currentTimeMillis())).cast(DataTypes.TimestampType));
     }
 
     private static Dataset<Row> extractEvent(final Dataset<Row> convertedDataset) {

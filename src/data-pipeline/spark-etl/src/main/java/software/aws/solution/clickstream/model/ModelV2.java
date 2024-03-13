@@ -28,6 +28,7 @@ public final class ModelV2 {
     public static final String USER_PSEUDO_ID = "user_pseudo_id";
     public static final String USER_ID = "user_id";
     public static final String ITEM_ID = "item_id";
+    public static final String EVENT_TIME_MSEC = "event_time_msec";
     public static final String NAME = "name";
     public static final String BRAND = "brand";
     public static final String CURRENCY = "currency";
@@ -158,9 +159,8 @@ public final class ModelV2 {
     public static final String SESSION_CLID = "session_clid";
     public static final String SESSION_CHANNEL_GROUP = "session_channel_group";
     public static final String SESSION_SOURCE_CATEGORY = "session_source_category";
-
     public static final String PROCESS_INFO = "process_info";
-
+    public static final String CREATED_TIME = "created_time";
     public static final MapType STR_TO_STR_MAP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.StringType, true);
 
     public static final MapType USER_PROP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.createStructType(new StructField[] {
@@ -200,6 +200,7 @@ public final class ModelV2 {
     public static final StructType EVENT_TYPE = DataTypes.createStructType(new StructField[]{
             DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
             DataTypes.createStructField(EVENT_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(EVENT_TIME_MSEC, DataTypes.LongType, true),
             DataTypes.createStructField(EVENT_NAME, DataTypes.StringType, true),
             DataTypes.createStructField(EVENT_VALUE, DataTypes.DoubleType, true),
             DataTypes.createStructField(EVENT_VALUE_CURRENCY, DataTypes.StringType, true),

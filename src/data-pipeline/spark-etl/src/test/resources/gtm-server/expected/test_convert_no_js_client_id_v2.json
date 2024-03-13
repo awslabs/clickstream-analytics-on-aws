@@ -21,6 +21,7 @@
     "events" : [ {
       "event_timestamp" : "2023-11-20 07:04:34",
       "event_id" : "7aec82f779dc4d911c272e704aa5e68c-0-1700462767-22",
+      "event_time_msec" : 1700463874000,
       "event_name" : "product_exposure",
       "event_value" : 43.99,
       "event_value_currency" : "USD",

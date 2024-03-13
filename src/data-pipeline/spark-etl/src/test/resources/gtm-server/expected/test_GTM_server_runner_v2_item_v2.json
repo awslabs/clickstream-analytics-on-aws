@@ -1,4 +1,5 @@
 {
+  "created_time" : "_CREATED_TIME_",
   "event_id" : "25aefd4cb653fd0fcbac33e24fd3f0ba-0-1695261065-1",
   "event_name" : "select_item",
   "event_timestamp" : "2023-09-21T01:54:26.828Z",

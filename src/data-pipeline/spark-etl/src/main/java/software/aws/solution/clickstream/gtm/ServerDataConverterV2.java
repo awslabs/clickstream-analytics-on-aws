@@ -159,7 +159,7 @@ public class ServerDataConverterV2 {
                 gtmEvent.getGaSessionNumber() == null? "x" : gtmEvent.getGaSessionNumber());
 
         clickstreamEvent.setEventId(eventId);
-
+        clickstreamEvent.setEventTimeMsec(clickstreamEvent.getEventTimestamp().getTime());
         String eventName = mapEventName(gtmEvent);
         clickstreamEvent.setEventName(eventName);
         clickstreamEvent.setEventValue(gtmEvent.getValue());
