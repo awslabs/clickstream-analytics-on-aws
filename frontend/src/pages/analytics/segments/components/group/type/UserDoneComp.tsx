@@ -140,14 +140,6 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                           label: item.label,
                         });
                       }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreComputeMethod.AVG_VALUE
-                      ) {
-                        newItem.label = t('analytics:avgGroupLabel', {
-                          label: item.label,
-                        });
-                      }
                       segmentDataDispatch({
                         type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate,
                         segmentProps,
