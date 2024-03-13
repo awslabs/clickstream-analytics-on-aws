@@ -7830,7 +7830,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(e__session_id::varchar, 'null') as e__session_id_0
+          COALESCE(e__session_id::varchar, null) as e__session_id_0
         from
           base_data base
         where
@@ -7847,7 +7847,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(e__session_id::varchar, 'null') as e__session_id_1
+          COALESCE(e__session_id::varchar, null) as e__session_id_1
         from
           base_data base
         where
@@ -7860,7 +7860,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(e__session_id::varchar, 'null') as e__session_id_2
+          COALESCE(e__session_id::varchar, null) as e__session_id_2
         from
           base_data base
         where
@@ -8085,7 +8085,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0
+          COALESCE(geo_country::varchar, null) as geo_country_0
         from
           base_data base
         where
@@ -8102,7 +8102,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar, 'null') as geo_country_1
+          COALESCE(geo_country::varchar, null) as geo_country_1
         from
           base_data base
         where
@@ -8115,7 +8115,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar, 'null') as geo_country_2
+          COALESCE(geo_country::varchar, null) as geo_country_2
         from
           base_data base
         where
@@ -8335,7 +8335,7 @@ describe('SQL Builder test', () => {
           week,
           day,
           hour,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0,
+          COALESCE(geo_country::varchar, null) as geo_country_0,
           '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
@@ -9936,7 +9936,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0
+          COALESCE(geo_country::varchar, null) as geo_country_0
         from
           base_data base
         where
@@ -9955,7 +9955,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar, 'null') as geo_country_1
+          COALESCE(geo_country::varchar, null) as geo_country_1
         from
           base_data base
         where
@@ -9968,7 +9968,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar, 'null') as geo_country_2
+          COALESCE(geo_country::varchar, null) as geo_country_2
         from
           base_data base
         where
@@ -10318,7 +10318,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0
+          COALESCE(geo_country::varchar, null) as geo_country_0
         from
           base_data base
         where
@@ -10337,7 +10337,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar, 'null') as geo_country_1
+          COALESCE(geo_country::varchar, null) as geo_country_1
         from
           base_data base
         where
@@ -10354,7 +10354,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar, 'null') as geo_country_2
+          COALESCE(geo_country::varchar, null) as geo_country_2
         from
           base_data base
         where
@@ -11169,7 +11169,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(e_category::varchar, 'null') as e_category
+          COALESCE(e_category::varchar, null) as e_category
         from
           base_data base
         where
@@ -11187,7 +11187,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(e_category::varchar, 'null') as e_category
+          COALESCE(e_category::varchar, null) as e_category
         from
           base_data base
         where
@@ -11200,7 +11200,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(e_category::varchar, 'null') as e_category
+          COALESCE(e_category::varchar, null) as e_category
         from
           base_data base
         where
@@ -11453,7 +11453,7 @@ describe('SQL Builder test', () => {
           week,
           day,
           hour,
-          COALESCE(e_category::varchar, 'null') as e_category,
+          COALESCE(e_category::varchar, null) as e_category,
           '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
@@ -14226,7 +14226,7 @@ describe('SQL Builder test', () => {
           week,
           day,
           hour,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0,
+          COALESCE(geo_country::varchar, null) as geo_country_0,
           '1_' || event_name as event_name_0,
           event_timestamp as event_timestamp_0,
           event_id as event_id_0,
@@ -14447,7 +14447,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar, 'null') as geo_country_0
+          COALESCE(geo_country::varchar, null) as geo_country_0
         from
           base_data base
         where
@@ -14460,7 +14460,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar, 'null') as geo_country_1
+          COALESCE(geo_country::varchar, null) as geo_country_1
         from
           base_data base
         where
@@ -14473,7 +14473,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar, 'null') as geo_country_2
+          COALESCE(geo_country::varchar, null) as geo_country_2
         from
           base_data base
         where
@@ -16806,7 +16806,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
@@ -16829,7 +16829,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           MAX(custom_attr_id) as "count/aggregation amount"
         from
           (
@@ -16852,7 +16852,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           MEDIAN(custom_attr_id) as "count/aggregation amount"
         from
           (
@@ -17040,7 +17040,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
@@ -17446,7 +17446,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
@@ -17469,7 +17469,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -17492,7 +17492,7 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          'null' as custom_attr_id,
+          null as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -17583,205 +17583,205 @@ describe('SQL Builder test', () => {
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
-    base_data as (
-      select
-        event.event_id,
-        event.event_name,
-        event.event_timestamp,
-        COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-        u.user_id,
-        event.geo_country,
-        event.custom_parameters._session_duration::bigint as e__session_duration,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
-        TO_CHAR(
-          date_trunc('week', event.event_timestamp),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
-      from
-        shop.shop.event_v2 as event
-        join (
+        base_data as (
           select
-            user_pseudo_id,
-            user_id
+            event.event_id,
+            event.event_name,
+            event.event_timestamp,
+            COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
+            u.user_id,
+            event.geo_country,
+            event.custom_parameters._session_duration::bigint as e__session_duration,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
+            TO_CHAR(
+              date_trunc('week', event.event_timestamp),
+              'YYYY-MM-DD'
+            ) as week,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
           from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
-      where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
-        and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-    ),
-    table_0 as (
+            shop.shop.event_v2 as event
+            join (
+              select
+                user_pseudo_id,
+                user_id
+              from
+                shop.shop.user_m_view_v2 as iu
+            ) as u on event.user_pseudo_id = u.user_pseudo_id
+          where
+            DATE (event.event_timestamp) >= date '2023-10-01'
+            and DATE (event.event_timestamp) <= date '2025-10-10'
+            and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+        ),
+        table_0 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            geo_country as custom_attr_0,
+            event_name as event_name_0,
+            event_timestamp as event_timestamp_0,
+            event_id as event_id_0,
+            user_id as user_id_0,
+            user_pseudo_id as user_pseudo_id_0
+          from
+            base_data base
+          where
+            event_name = 'view_item'
+        ),
+        table_1 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            e__session_duration as custom_attr_1,
+            event_name as event_name_1,
+            event_timestamp as event_timestamp_1,
+            event_id as event_id_1,
+            user_id as user_id_1,
+            user_pseudo_id as user_pseudo_id_1
+          from
+            base_data base
+          where
+            event_name = 'view_item'
+        ),
+        table_2 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            e__session_duration as custom_attr_2,
+            event_name as event_name_2,
+            event_timestamp as event_timestamp_2,
+            event_id as event_id_2,
+            user_id as user_id_2,
+            user_pseudo_id as user_pseudo_id_2
+          from
+            base_data base
+          where
+            event_name = 'add_to_cart'
+        ),
+        table_3 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            null as custom_attr_3,
+            event_name as event_name_3,
+            event_timestamp as event_timestamp_3,
+            event_id as event_id_3,
+            user_id as user_id_3,
+            user_pseudo_id as user_pseudo_id_3
+          from
+            base_data base
+          where
+            event_name = 'purchase'
+        ),
+        join_table as (
+          select
+            DAY as event_date,
+            event_name,
+            custom_attr_id,
+            count(1) as "count/aggregation amount"
+          from
+            (
+              select
+                table_0.month,
+                table_0.week,
+                table_0.day,
+                table_0.hour,
+                1 || '_' || table_0.event_name_0 as event_name,
+                table_0.event_timestamp_0 as event_timestamp,
+                table_0.event_id_0 as x_id,
+                table_0.custom_attr_0 as custom_attr_id
+              from
+                table_0
+            ) as union_table_0
+          group by
+            DAY,
+            event_name,
+            custom_attr_id
+          union all
+          select
+            DAY as event_date,
+            event_name,
+            null as custom_attr_id,
+            SUM(custom_attr_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_1.month,
+                table_1.week,
+                table_1.day,
+                table_1.hour,
+                2 || '_' || table_1.event_name_1 as event_name,
+                table_1.event_timestamp_1 as event_timestamp,
+                table_1.event_id_1 as x_id,
+                table_1.custom_attr_1 as custom_attr_id
+              from
+                table_1
+            ) as union_table_1
+          group by
+            DAY,
+            event_name
+          union all
+          select
+            DAY as event_date,
+            event_name,
+            null as custom_attr_id,
+            MAX(custom_attr_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_2.month,
+                table_2.week,
+                table_2.day,
+                table_2.hour,
+                3 || '_' || table_2.event_name_2 as event_name,
+                table_2.event_timestamp_2 as event_timestamp,
+                table_2.event_id_2 as x_id,
+                table_2.custom_attr_2 as custom_attr_id
+              from
+                table_2
+            ) as union_table_2
+          group by
+            DAY,
+            event_name
+          union all
+          select
+            DAY as event_date,
+            event_name,
+            null as custom_attr_id,
+            count(distinct x_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_3.month,
+                table_3.week,
+                table_3.day,
+                table_3.hour,
+                4 || '_' || table_3.event_name_3 as event_name,
+                table_3.event_timestamp_3 as event_timestamp,
+                table_3.user_pseudo_id_3 as x_id,
+                table_3.custom_attr_3 as custom_attr_id
+              from
+                table_3
+            ) as union_table_3
+          group by
+            DAY,
+            event_name
+        )
       select
-        month,
-        week,
-        day,
-        hour,
-        geo_country as custom_attr_0,
-        event_name as event_name_0,
-        event_timestamp as event_timestamp_0,
-        event_id as event_id_0,
-        user_id as user_id_0,
-        user_pseudo_id as user_pseudo_id_0
-      from
-        base_data base
-      where
-        event_name = 'view_item'
-    ),
-    table_1 as (
-      select
-        month,
-        week,
-        day,
-        hour,
-        e__session_duration as custom_attr_1,
-        event_name as event_name_1,
-        event_timestamp as event_timestamp_1,
-        event_id as event_id_1,
-        user_id as user_id_1,
-        user_pseudo_id as user_pseudo_id_1
-      from
-        base_data base
-      where
-        event_name = 'view_item'
-    ),
-    table_2 as (
-      select
-        month,
-        week,
-        day,
-        hour,
-        e__session_duration as custom_attr_2,
-        event_name as event_name_2,
-        event_timestamp as event_timestamp_2,
-        event_id as event_id_2,
-        user_id as user_id_2,
-        user_pseudo_id as user_pseudo_id_2
-      from
-        base_data base
-      where
-        event_name = 'add_to_cart'
-    ),
-    table_3 as (
-      select
-        month,
-        week,
-        day,
-        hour,
-        null as custom_attr_3,
-        event_name as event_name_3,
-        event_timestamp as event_timestamp_3,
-        event_id as event_id_3,
-        user_id as user_id_3,
-        user_pseudo_id as user_pseudo_id_3
-      from
-        base_data base
-      where
-        event_name = 'purchase'
-    ),
-    join_table as (
-      select
-        DAY as event_date,
+        event_date::date,
         event_name,
         custom_attr_id,
-        count(1) as "count/aggregation amount"
+        "count/aggregation amount"::double precision
       from
-        (
-          select
-            table_0.month,
-            table_0.week,
-            table_0.day,
-            table_0.hour,
-            1 || '_' || table_0.event_name_0 as event_name,
-            table_0.event_timestamp_0 as event_timestamp,
-            table_0.event_id_0 as x_id,
-            table_0.custom_attr_0 as custom_attr_id
-          from
-            table_0
-        ) as union_table_0
-      group by
-        DAY,
-        event_name,
-        custom_attr_id
-      union all
-      select
-        DAY as event_date,
-        event_name,
-        null as custom_attr_id,
-        sum(custom_attr_id) as "count/aggregation amount"
-      from
-        (
-          select
-            table_1.month,
-            table_1.week,
-            table_1.day,
-            table_1.hour,
-            2 || '_' || table_1.event_name_1 as event_name,
-            table_1.event_timestamp_1 as event_timestamp,
-            table_1.event_id_1 as x_id,
-            table_1.custom_attr_1 as custom_attr_id
-          from
-            table_1
-        ) as union_table_1
-      group by
-        DAY,
-        event_name,
-        custom_attr_id
-      union all
-      select
-        DAY as event_date,
-        event_name,
-        null as custom_attr_id,
-        max(custom_attr_id) as "count/aggregation amount"
-      from
-        (
-          select
-            table_2.month,
-            table_2.week,
-            table_2.day,
-            table_2.hour,
-            3 || '_' || table_2.event_name_2 as event_name,
-            table_2.event_timestamp_2 as event_timestamp,
-            table_2.event_id_2 as x_id,
-            table_2.custom_attr_2 as custom_attr_id
-          from
-            table_2
-        ) as union_table_2
-      group by
-        DAY,
-        event_name,
-        custom_attr_id
-      union all
-      select
-        DAY as event_date,
-        event_name,
-        null as custom_attr_id,
-        count(distinct x_id) as "count/aggregation amount"
-      from
-        (
-          select
-            table_3.month,
-            table_3.week,
-            table_3.day,
-            table_3.hour,
-            4 || '_' || table_3.event_name_3 as event_name,
-            table_3.event_timestamp_3 as event_timestamp,
-            table_3.user_pseudo_id_3 as x_id,
-            table_3.custom_attr_3 as custom_attr_id
-          from
-            table_3
-        ) as union_table_3
-      group by
-        DAY,
-        event_name,
-        custom_attr_id
-    )
-  select
-    *
-  from
-    join_table
+        join_table
     `.trim().replace(/ /g, ''),
     );
   });
@@ -17850,223 +17850,223 @@ describe('SQL Builder test', () => {
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
-      base_data as (
-        select
-          event.event_id,
-          event.event_name,
-          event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
-          event.geo_country,
-          event.platform,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
-          TO_CHAR(
-            date_trunc('week', event.event_timestamp),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
-        from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-        where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-      ),
-      table_0 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          geo_country as custom_attr_0,
-          event_name as event_name_0,
-          event_timestamp as event_timestamp_0,
-          event_id as event_id_0,
-          user_id as user_id_0,
-          user_pseudo_id as user_pseudo_id_0,
-          platform as platform_0
-        from
-          base_data base
-        where
-          event_name = 'view_item'
-      ),
-      table_1 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          e__session_duration as custom_attr_1,
-          event_name as event_name_1,
-          event_timestamp as event_timestamp_1,
-          event_id as event_id_1,
-          user_id as user_id_1,
-          user_pseudo_id as user_pseudo_id_1,
-          platform as platform_1
-        from
-          base_data base
-        where
-          event_name = 'view_item'
-      ),
-      table_2 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          e__session_duration as custom_attr_2,
-          event_name as event_name_2,
-          event_timestamp as event_timestamp_2,
-          event_id as event_id_2,
-          user_id as user_id_2,
-          user_pseudo_id as user_pseudo_id_2,
-          platform as platform_2
-        from
-          base_data base
-        where
-          event_name = 'add_to_cart'
-      ),
-      table_3 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          null as custom_attr_3,
-          event_name as event_name_3,
-          event_timestamp as event_timestamp_3,
-          event_id as event_id_3,
-          user_id as user_id_3,
-          user_pseudo_id as user_pseudo_id_3,
-          platform as platform_3
-        from
-          base_data base
-        where
-          event_name = 'purchase'
-      ),
-      join_table as (
-        select
-          WEEK as event_date,
-          event_name,
-          platform,
-          custom_attr_id,
-          count(1) as "count/aggregation amount"
-        from
-          (
-            select
-              table_0.month,
-              table_0.week,
-              table_0.day,
-              table_0.hour,
-              1 || '_' || table_0.event_name_0 as event_name,
-              table_0.event_timestamp_0 as event_timestamp,
-              table_0.event_id_0 as x_id,
-              table_0.custom_attr_0 as custom_attr_id,
-              table_0.platform_0 as platform
-            from
-              table_0
-          ) as union_table_0
-        group by
-          WEEK,
-          event_name,
-          platform,
-          custom_attr_id
-        union all
-        select
-          WEEK as event_date,
-          event_name,
-          platform,
-          'null' as custom_attr_id,
-          SUM(custom_attr_id) as "count/aggregation amount"
-        from
-          (
-            select
-              table_1.month,
-              table_1.week,
-              table_1.day,
-              table_1.hour,
-              2 || '_' || table_1.event_name_1 as event_name,
-              table_1.event_timestamp_1 as event_timestamp,
-              table_1.event_id_1 as x_id,
-              table_1.custom_attr_1 as custom_attr_id,
-              table_1.platform_1 as platform
-            from
-              table_1
-          ) as union_table_1
-        group by
-          WEEK,
-          event_name,
-          platform
-        union all
-        select
-          WEEK as event_date,
-          event_name,
-          platform,
-          'null' as custom_attr_id,
-          MAX(custom_attr_id) as "count/aggregation amount"
-        from
-          (
-            select
-              table_2.month,
-              table_2.week,
-              table_2.day,
-              table_2.hour,
-              3 || '_' || table_2.event_name_2 as event_name,
-              table_2.event_timestamp_2 as event_timestamp,
-              table_2.event_id_2 as x_id,
-              table_2.custom_attr_2 as custom_attr_id,
-              table_2.platform_2 as platform
-            from
-              table_2
-          ) as union_table_2
-        group by
-          WEEK,
-          event_name,
-          platform
-        union all
-        select
-          WEEK as event_date,
-          event_name,
-          platform,
-          'null' as custom_attr_id,
-          count(distinct x_id) as "count/aggregation amount"
-        from
-          (
-            select
-              table_3.month,
-              table_3.week,
-              table_3.day,
-              table_3.hour,
-              4 || '_' || table_3.event_name_3 as event_name,
-              table_3.event_timestamp_3 as event_timestamp,
-              table_3.user_pseudo_id_3 as x_id,
-              table_3.custom_attr_3 as custom_attr_id,
-              table_3.platform_3 as platform
-            from
-              table_3
-          ) as union_table_3
-        group by
-          WEEK,
-          event_name,
-          platform
-      )
-    select
-      event_date:: date,
-      event_name,
-      platform,
-      custom_attr_id,
-      "count/aggregationamount":: double precision
-    from
-      join_table
+        base_data as (
+          select
+            event.event_id,
+            event.event_name,
+            event.event_timestamp,
+            COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
+            u.user_id,
+            event.geo_country,
+            event.platform,
+            event.custom_parameters._session_duration::bigint as e__session_duration,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
+            TO_CHAR(
+              date_trunc('week', event.event_timestamp),
+              'YYYY-MM-DD'
+            ) as week,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
+            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          from
+            shop.shop.event_v2 as event
+            join (
+              select
+                user_pseudo_id,
+                user_id
+              from
+                shop.shop.user_m_view_v2 as iu
+            ) as u on event.user_pseudo_id = u.user_pseudo_id
+          where
+            DATE (event.event_timestamp) >= date '2023-10-01'
+            and DATE (event.event_timestamp) <= date '2025-10-10'
+            and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+        ),
+        table_0 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            geo_country as custom_attr_0,
+            event_name as event_name_0,
+            event_timestamp as event_timestamp_0,
+            event_id as event_id_0,
+            user_id as user_id_0,
+            user_pseudo_id as user_pseudo_id_0,
+            platform as platform_0
+          from
+            base_data base
+          where
+            event_name = 'view_item'
+        ),
+        table_1 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            e__session_duration as custom_attr_1,
+            event_name as event_name_1,
+            event_timestamp as event_timestamp_1,
+            event_id as event_id_1,
+            user_id as user_id_1,
+            user_pseudo_id as user_pseudo_id_1,
+            platform as platform_1
+          from
+            base_data base
+          where
+            event_name = 'view_item'
+        ),
+        table_2 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            e__session_duration as custom_attr_2,
+            event_name as event_name_2,
+            event_timestamp as event_timestamp_2,
+            event_id as event_id_2,
+            user_id as user_id_2,
+            user_pseudo_id as user_pseudo_id_2,
+            platform as platform_2
+          from
+            base_data base
+          where
+            event_name = 'add_to_cart'
+        ),
+        table_3 as (
+          select
+            month,
+            week,
+            day,
+            hour,
+            null as custom_attr_3,
+            event_name as event_name_3,
+            event_timestamp as event_timestamp_3,
+            event_id as event_id_3,
+            user_id as user_id_3,
+            user_pseudo_id as user_pseudo_id_3,
+            platform as platform_3
+          from
+            base_data base
+          where
+            event_name = 'purchase'
+        ),
+        join_table as (
+          select
+            WEEK as event_date,
+            event_name,
+            platform,
+            custom_attr_id,
+            count(1) as "count/aggregation amount"
+          from
+            (
+              select
+                table_0.month,
+                table_0.week,
+                table_0.day,
+                table_0.hour,
+                1 || '_' || table_0.event_name_0 as event_name,
+                table_0.event_timestamp_0 as event_timestamp,
+                table_0.event_id_0 as x_id,
+                table_0.custom_attr_0 as custom_attr_id,
+                table_0.platform_0 as platform
+              from
+                table_0
+            ) as union_table_0
+          group by
+            WEEK,
+            event_name,
+            platform,
+            custom_attr_id
+          union all
+          select
+            WEEK as event_date,
+            event_name,
+            platform,
+            null as custom_attr_id,
+            SUM(custom_attr_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_1.month,
+                table_1.week,
+                table_1.day,
+                table_1.hour,
+                2 || '_' || table_1.event_name_1 as event_name,
+                table_1.event_timestamp_1 as event_timestamp,
+                table_1.event_id_1 as x_id,
+                table_1.custom_attr_1 as custom_attr_id,
+                table_1.platform_1 as platform
+              from
+                table_1
+            ) as union_table_1
+          group by
+            WEEK,
+            event_name,
+            platform
+          union all
+          select
+            WEEK as event_date,
+            event_name,
+            platform,
+            null as custom_attr_id,
+            MAX(custom_attr_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_2.month,
+                table_2.week,
+                table_2.day,
+                table_2.hour,
+                3 || '_' || table_2.event_name_2 as event_name,
+                table_2.event_timestamp_2 as event_timestamp,
+                table_2.event_id_2 as x_id,
+                table_2.custom_attr_2 as custom_attr_id,
+                table_2.platform_2 as platform
+              from
+                table_2
+            ) as union_table_2
+          group by
+            WEEK,
+            event_name,
+            platform
+          union all
+          select
+            WEEK as event_date,
+            event_name,
+            platform,
+            null as custom_attr_id,
+            count(distinct x_id) as "count/aggregation amount"
+          from
+            (
+              select
+                table_3.month,
+                table_3.week,
+                table_3.day,
+                table_3.hour,
+                4 || '_' || table_3.event_name_3 as event_name,
+                table_3.event_timestamp_3 as event_timestamp,
+                table_3.user_pseudo_id_3 as x_id,
+                table_3.custom_attr_3 as custom_attr_id,
+                table_3.platform_3 as platform
+              from
+                table_3
+            ) as union_table_3
+          group by
+            WEEK,
+            event_name,
+            platform
+        )
+      select
+        event_date::date,
+        event_name,
+        platform,
+        custom_attr_id,
+        "count/aggregation amount"::double precision
+      from
+        join_table
     `.trim().replace(/ /g, ''),
     );
   });
@@ -18310,7 +18310,7 @@ describe('SQL Builder test', () => {
           event_name,
           platform,
           null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -18329,15 +18329,14 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
         union all
         select
           WEEK as event_date,
           event_name,
           platform,
           null as custom_attr_id,
-          max(custom_attr_id) as "count/aggregation amount"
+          MAX(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -18356,8 +18355,7 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
         union all
         select
           WEEK as event_date,
@@ -18383,11 +18381,14 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
       )
     select
-      *
+      event_date::date,
+      event_name,
+      platform,
+      custom_attr_id,
+      "count/aggregation amount"::double precision
     from
       join_table
     `.trim().replace(/ /g, ''),

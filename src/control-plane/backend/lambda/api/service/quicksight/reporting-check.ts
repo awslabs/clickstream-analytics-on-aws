@@ -13,6 +13,7 @@
 
 import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
+import { validSpecialCharacters } from '../../common/request-valid';
 
 export interface CheckParamsStatus {
   readonly success: boolean;

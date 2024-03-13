@@ -32,6 +32,7 @@ import {
   QUICKSIGHT_DATASET_INFIX,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
+  ExploreAggregationMethod,
 } from '@aws/clickstream-base-lib';
 import {
   CreateDataSetCommandOutput, QuickSight,

@@ -1073,7 +1073,7 @@ function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: 
   let groupCol = '';
   let newColumnTemplate = columnTemplateForFunnelVisual;
   if (groupCondition !== undefined && groupCondition.applyTo !== 'FIRST') {
-    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null')`;
+    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null)`;
     newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(groupCondition)}####`;
   }
 
@@ -1083,7 +1083,7 @@ function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: 
       ,week
       ,day
       ,hour
-      ,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition)}_0
+      ,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null) as ${buildColNameWithPrefix(groupCondition)}_0
       ,${newColumnTemplate.replace(/####/g, '_0').replace(/%%%%/g, '\'1_\' || ')}
     `;
   } else {
@@ -1173,7 +1173,7 @@ function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, 
   let newColumnTemplate = columnTemplateForFunnelVisual;
 
   if (groupCondition !== undefined && !applyToFirst) {
-    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition)}`;
+    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null) as ${buildColNameWithPrefix(groupCondition)}`;
     newColumnTemplate += `${groupCol}`;
   }
 
@@ -1182,7 +1182,7 @@ function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, 
     ,week
     ,day
     ,hour
-    ${ applyToFirst ? `,COALESCE(${buildColNameWithPrefix(groupCondition!)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition!)}` : ''}
+    ${ applyToFirst ? `,COALESCE(${buildColNameWithPrefix(groupCondition!)}::varchar, null) as ${buildColNameWithPrefix(groupCondition!)}` : ''}
     ,${newColumnTemplate.replace(/####/g, '_0').replace(/%%%%/g, '\'1_\' || ')}
   `;
 
@@ -1393,7 +1393,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      'null' as custom_attr_id,
+      null as custom_attr_id,
       count(distinct x_id)  as "count/aggregation amount"
     `;
     groupby = '';
@@ -1411,7 +1411,7 @@ function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, gro
       ${dateGroupCol} as event_date,
       event_name,
       ${groupCol === '' ? '' : groupCol+','}
-      'null' as custom_attr_id,
+      null as custom_attr_id,
       ${method}(custom_attr_id) as "count/aggregation amount"
     `;
     groupby = '';
