@@ -405,17 +405,17 @@ function _getClassNameByVersion(dataCollectionSDK: DataCollectionSDK, id: string
     },
     {
       id: 'BUILT-IN-2',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'],
+      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
       className: 'software.aws.solution.clickstream.UAEnrichment',
     },
     {
       id: 'BUILT-IN-3',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'],
+      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
       className: 'software.aws.solution.clickstream.IPEnrichment',
     },
     {
       id: 'BUILT-IN-4',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'],
+      versions: ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
       className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
     },
   ];
