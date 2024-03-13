@@ -568,7 +568,7 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -586,7 +586,7 @@ export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParam
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -620,7 +620,7 @@ export const DATA_PROCESSING_PLUGIN2_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -638,7 +638,7 @@ export const DATA_PROCESSING_PLUGIN3_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -656,7 +656,7 @@ export const DATA_PROCESSING_THIRDPARTY_SDK_PLUGIN3_PARAMETERS = mergeParameters
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -678,7 +678,7 @@ export const DATA_PROCESSING_PLUGIN4_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
