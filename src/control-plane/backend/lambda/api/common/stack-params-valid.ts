@@ -157,7 +157,7 @@ const validateVpcEndpoint = (
   const invalidServices = checkVpcEndpoint(
     allSubnets,
     isolatedSubnetsAZ,
-    subnet.routeTable!,
+    subnet.routeTable,
     vpcEndpoints,
     securityGroupsRules,
     subnet,

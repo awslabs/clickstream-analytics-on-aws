@@ -37,7 +37,7 @@ interface BasicInformationProps {
   changeRegion: (region: SelectProps.Option) => void;
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
-  changeTags: (tag: TagEditorProps.Tag[]) => void;
+  changeTags: (tag: readonly TagEditorProps.Tag[]) => void;
   changeS3Bucket: (bucket: SelectProps.Option) => void;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;

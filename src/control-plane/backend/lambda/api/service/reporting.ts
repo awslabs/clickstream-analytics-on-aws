@@ -260,7 +260,7 @@ export class ReportingService {
       query.groupColumn, groupingConditionCol);
     const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
 
-    visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
+    visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
     const tableVisualProps = {
       sheetId: sheetId,
@@ -304,7 +304,7 @@ export class ReportingService {
     }
   };
 
-  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, grouppingColName?: string) {
+  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string) {
     const projectedColumns = ['event_date', 'event_name'];
     const datasetColumns: InputColumn[] = [
       {
@@ -317,13 +317,13 @@ export class ReportingService {
       },
     ];
 
-    if (grouppingColName != undefined) {
+    if (groupingColName != undefined) {
       datasetColumns.push({
-        Name: grouppingColName,
+        Name: groupingColName,
         Type: 'STRING',
       });
 
-      projectedColumns.push(grouppingColName);
+      projectedColumns.push(groupingColName);
     }
 
     if (!computeMethodProps.isMixedMethod) {
@@ -471,7 +471,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
       const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
 
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -494,22 +494,22 @@ export class ReportingService {
   };
 
   async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
-    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, grouppingColName?: string) {
+    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string) {
 
     let tableVisualDef: Visual;
     if (computeMethodProps.isSameAggregationMethod) {
       console.log('create pivot table for aggregation: ', computeMethodProps.aggregationMethodName);
       tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
-        , grouppingColName, computeMethodProps.aggregationMethodName);
+        , groupingColName, computeMethodProps.aggregationMethodName);
     } else if (
       (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
       ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
 
       logger.info('create pivot table for mix mode');
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, grouppingColName);
+      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, groupingColName);
     } else {
       logger.info('create normal table for mix mode');
-      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, grouppingColName);
+      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, groupingColName);
     }
 
     return tableVisualDef;
@@ -536,12 +536,12 @@ export class ReportingService {
 
       const computeMethodProps = getComputeMethodProps(sqlParameters);
 
-      let grouppingColName;
+      let groupingColName;
       if ( query.groupCondition !== undefined) {
-        grouppingColName = buildColNameWithPrefix(query.groupCondition);
+        groupingColName = buildColNameWithPrefix(query.groupCondition);
       }
 
-      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, grouppingColName);
+      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, groupingColName);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -580,7 +580,7 @@ export class ReportingService {
 
       const tableVisualId = uuidv4();
       const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
-        viewName, titleProps, query.groupColumn, grouppingColName);
+        viewName, titleProps, query.groupColumn, groupingColName);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -847,7 +847,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
       const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, hasGrouping);
 
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -880,7 +880,7 @@ export class ReportingService {
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
-        quickSight, awsAccountId!,
+        quickSight, awsAccountId,
         principals.publishUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
@@ -925,7 +925,7 @@ export class ReportingService {
       dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
       dashboardDef.Options!.WeekStart = DayOfWeek.MONDAY;
     } else {
-      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId, query.dashboardId);
       dashboardDef = dashboardDefProps.def;
       dashboardName = dashboardDefProps.name;
       if (dashboardDef.Options === undefined) {
@@ -969,13 +969,13 @@ export class ReportingService {
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      await this._publishNewVersionDashboard(quickSight, query, versionNumber!);
+      await this._publishNewVersionDashboard(quickSight, query, versionNumber);
 
       result = {
         dashboardId: query.dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: query.dashboardName,
-        dashboardVersion: Number.parseInt(versionNumber!),
+        dashboardVersion: versionNumber ? Number.parseInt(versionNumber) : 1,
         dashboardEmbedUrl: '',
         analysisId: query.analysisId,
         analysisArn: newAnalysis?.Arn!,
@@ -988,7 +988,7 @@ export class ReportingService {
   }
 
   private async _publishNewVersionDashboard(quickSight: QuickSight, query: any,
-    versionNumber: string) {
+    versionNumber: string | undefined) {
     let cnt = 0;
     for (const _i of Array(100).keys()) {
       cnt += 1;
@@ -996,7 +996,7 @@ export class ReportingService {
         const response = await quickSight.updateDashboardPublishedVersion({
           AwsAccountId: awsAccountId,
           DashboardId: query.dashboardId,
-          VersionNumber: Number.parseInt(versionNumber),
+          VersionNumber: versionNumber ? Number.parseInt(versionNumber) : undefined,
         });
 
         if (response.DashboardId) {
@@ -1238,7 +1238,7 @@ async function _cleanAnalyses(quickSight: QuickSight) {
         AnalysisId: analysisId,
         ForceDeleteWithoutRecovery: true,
       });
-      deletedAnalyses.push(analysisId!);
+      if (analysisId) {deletedAnalyses.push(analysisId);}
       logger.info(`analysis ${analysisSummary.Name} removed`);
     }
   }
@@ -1268,7 +1268,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
       });
-      deletedDashBoards.push(dashboardId!);
+      if (dashboardId) {deletedDashBoards.push(dashboardId);}
       logger.info(`dashboard ${dashboardSummary.Name} removed`);
     }
   }

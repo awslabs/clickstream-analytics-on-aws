@@ -71,8 +71,8 @@ interface ConfigIngestionProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
   changeNetworkType: (type: ENetworkType) => void;
-  changePublicSubnets: (subnets: SelectProps.Option[]) => void;
-  changePrivateSubnets: (subnets: SelectProps.Option[]) => void;
+  changePublicSubnets: (subnets: readonly SelectProps.Option[]) => void;
+  changePrivateSubnets: (subnets: readonly SelectProps.Option[]) => void;
   changeIngestionType: (type: string) => void;
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
@@ -354,7 +354,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 selectedAriaLabel="Selected"
                 statusType={ternary(loadingSubnet, 'loading', 'finished')}
                 onChange={(e) => {
-                  changePublicSubnets(e.detail.selectedOptions as any);
+                  changePublicSubnets(e.detail.selectedOptions);
                 }}
               />
             </FormField>
@@ -388,7 +388,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               selectedAriaLabel="Selected"
               statusType={ternary(loadingSubnet, 'loading', 'finished')}
               onChange={(e) => {
-                changePrivateSubnets(e.detail.selectedOptions as any);
+                changePrivateSubnets(e.detail.selectedOptions);
               }}
             />
           </FormField>

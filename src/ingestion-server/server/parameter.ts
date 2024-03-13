@@ -326,7 +326,7 @@ export function createV2StackParameters(scope: Construct) {
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
       scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
       projectIdParam: commonParameters.projectIdParam,
-      publicSubnets: commonParameters.netWorkProps.publicSubnets,
+      publicSubnets: commonParameters.netWorkProps.publicSubnets!,
     },
   );
 
@@ -366,7 +366,7 @@ export function createV2StackParameters(scope: Construct) {
     metadata,
     params: {
       vpcIdParam: commonParameters.netWorkProps.vpcId,
-      publicSubnetIdsParam: commonParameters.netWorkProps.publicSubnets,
+      publicSubnetIdsParam: commonParameters.netWorkProps.publicSubnets!, //NOSONAR cast is safe
       privateSubnetIdsParam: commonParameters.netWorkProps.privateSubnets,
       domainNameParam: commonParameters.domainNameParam,
       certificateArnParam: commonParameters.certificateArnParam,
@@ -680,6 +680,9 @@ function createCommonParameterGroups(props:
   publicSubnets?: CfnParameter;
 },
 ) {
+  const networkParamGroup = [props.vpcId.logicalId];
+  if (props.publicSubnets) {networkParamGroup.push(props.publicSubnets.logicalId);}
+  networkParamGroup.push(props.privateSubnets.logicalId);
   return [
     {
       Label: { default: 'Project' },
@@ -690,11 +693,7 @@ function createCommonParameterGroups(props:
 
     {
       Label: { default: PARAMETER_GROUP_LABEL_VPC },
-      Parameters: [
-        props.vpcId.logicalId,
-        props.publicSubnets!.logicalId,
-        props.privateSubnets.logicalId,
-      ],
+      Parameters: networkParamGroup,
     },
 
     {
@@ -752,6 +751,14 @@ function createCommonParameterLabels(props:
 },
 
 ) {
+  let publicLabel = {};
+  if (props.publicSubnets) {
+    publicLabel = {
+      [props.publicSubnets.logicalId]: {
+        default: PARAMETER_LABEL_PUBLIC_SUBNETS,
+      },
+    };
+  }
   return {
     [props.projectIdParam.logicalId]: {
       default: 'Project Id',
@@ -761,9 +768,7 @@ function createCommonParameterLabels(props:
       default: PARAMETER_LABEL_VPCID,
     },
 
-    [props.publicSubnets!.logicalId]: {
-      default: PARAMETER_LABEL_PUBLIC_SUBNETS,
-    },
+    ...publicLabel,
 
     [props.privateSubnets.logicalId]: {
       default: PARAMETER_LABEL_PRIVATE_SUBNETS,

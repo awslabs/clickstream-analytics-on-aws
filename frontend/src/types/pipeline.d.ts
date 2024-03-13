@@ -47,7 +47,7 @@ declare global {
     projectId: string;
     region: string;
     dataCollectionSDK: string;
-    tags: ITag[];
+    tags: readonly ITag[];
     network: {
       vpcId: string;
       publicSubnetIds: string[];
@@ -145,7 +145,7 @@ declare global {
         };
         newServerless: {
           network: {
-            vpcId: sring;
+            vpcId: string;
             subnetIds: string[];
             securityGroups: string[];
           };
@@ -186,9 +186,9 @@ declare global {
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
     selectedS3Bucket: SelectProps.Option | null;
-    selectedPublicSubnet: SelectProps.Option[];
+    selectedPublicSubnet: readonly SelectProps.Option[];
 
-    selectedPrivateSubnet: SelectProps.Option[];
+    selectedPrivateSubnet: readonly SelectProps.Option[];
     selectedCertificate: SelectProps.Option | null;
     selectedSecret: SelectProps.Option | null;
     mskCreateMethod: string;
@@ -226,8 +226,8 @@ declare global {
     redshiftType: string; // 'provisioned' | 'serverless';
     redshiftServerlessVPC: SelectProps.Option | null;
     redshiftBaseCapacity: SelectProps.Option | null;
-    redshiftServerlessSG: SelectProps.Option[];
-    redshiftServerlessSubnets: SelectProps.Option[];
+    redshiftServerlessSG: readonly SelectProps.Option[];
+    redshiftServerlessSubnets: readonly SelectProps.Option[];
     redshiftDataLoadValue: string;
     redshiftDataLoadUnit: SelectProps.Option | null;
 

@@ -1206,7 +1206,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
 
     const versionNumber = dashboard.VersionArn?.substring(dashboard.VersionArn?.lastIndexOf('/') + 1);
     logger.info(`quicksight versionNumber: ${versionNumber}`);
-    await publishNewVersionDashboard(quickSight, dashboardId, versionNumber!, commonParams.awsAccountId);
+    await publishNewVersionDashboard(quickSight, dashboardId, versionNumber ?? '1', commonParams.awsAccountId);
     logger.info('Publish new dashboard version finished.');
 
     await quickSight.updateDashboardPermissions({

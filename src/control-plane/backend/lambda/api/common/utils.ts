@@ -428,7 +428,7 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
 function checkVpcEndpoint(
   allSubnets: ClickStreamSubnet[],
   isolatedSubnetsAZ: string[],
-  routeTable: RouteTable,
+  routeTable: RouteTable | undefined,
   vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
   subnet: ClickStreamSubnet,
@@ -445,7 +445,7 @@ function checkVpcEndpoint(
     } else {
       const vpcEndpoint = vpcEndpoints[index];
       if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Gateway) {
-        if (!checkRoutesGatewayId(routeTable.Routes!, vpcEndpoint.VpcEndpointId!)) {
+        if (!checkRoutesGatewayId(routeTable?.Routes, vpcEndpoint.VpcEndpointId!)) {
           invalidServices.push({
             service: service,
             reason: 'The route of vpc endpoint need attached in the route table',
@@ -496,12 +496,14 @@ function checkInterfaceVPCEndpointSubnets(allSubnets: ClickStreamSubnet[], isola
   return true;
 }
 
-function checkRoutesGatewayId(routes: Route[], gatewayId: string) {
+function checkRoutesGatewayId(routes: Route[] | undefined, gatewayId: string) {
   let result = false;
-  for (let route of routes) {
-    if (route.GatewayId === gatewayId) {
-      result = true;
-      break;
+  if (routes) {
+    for (let route of routes) {
+      if (route.GatewayId === gatewayId) {
+        result = true;
+        break;
+      }
     }
   }
   return result;
