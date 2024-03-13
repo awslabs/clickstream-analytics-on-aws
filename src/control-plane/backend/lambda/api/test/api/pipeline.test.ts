@@ -3740,10 +3740,19 @@ describe('Pipeline test', () => {
       subnetsIsolated: true,
       update: true,
       updatePipeline: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
       },
     });
-    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
+      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
+      ).toBeTruthy();
+    });
     const res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
