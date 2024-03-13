@@ -1219,7 +1219,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_DATA_PROCESSING_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...S3_DATA_PROCESSING_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1351,7 +1354,10 @@ describe('Workflow test', () => {
       subnetsIsolated: true,
       subnetsCross3AZ: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2407,7 +2413,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',

@@ -295,8 +295,14 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string) 
       },
     );
     let count = 0;
-    while (!resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') &&
-    !resp.Dashboard?.Version?.Status?.endsWith('_FAILED') && count < 10) {
+
+    while (!resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') && count < 10) {
+
+      if (resp.Dashboard?.Version?.Status?.endsWith('_FAILED')) {
+        logger.info('create dashboard with errors:', { errors: resp.Dashboard?.Version.Errors });
+        return false;
+      }
+
       await sleep(1000);
       count++;
       resp = await quickSight.describeDashboard(
@@ -305,6 +311,8 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string) 
           DashboardId: dashboardId,
         },
       );
+      logger.info('Wait Dashboard status: ', { count, status: resp.Dashboard?.Version?.Status });
+      logger.info('Wait Dashboard error: ', { error: resp.Dashboard?.Version?.Errors });
     }
     const success = resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') ?? false;
     return success;

@@ -1,0 +1,20 @@
+{
+  "created_time" : "_CREATED_TIME_",
+  "process_info" : {
+    "ingest_time" : "2024-01-10T06:13:50Z",
+    "input_file_name" : "server-all-with-ss.json",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_",
+    "rid" : "55384aaeda62c5b20a462076ec59f3f5"
+  },
+  "session_campaign" : "direct",
+  "session_id" : "1704867229",
+  "session_number" : 9,
+  "session_source" : "direct",
+  "session_start_time_msec" : 1704867230837,
+  "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "partition_app" : "testAllAppId1",
+  "partition_year" : 2024,
+  "partition_month" : 1,
+  "partition_day" : 10
+}

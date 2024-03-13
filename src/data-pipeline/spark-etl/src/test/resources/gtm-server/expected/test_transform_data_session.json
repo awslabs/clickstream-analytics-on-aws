@@ -1,0 +1,27 @@
+{
+  "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "session_id" : "1704867229",
+  "user_id" : null,
+  "session_number" : 9,
+  "session_start_time_msec" : 1704867230837,
+  "session_source" : "direct",
+  "session_medium" : null,
+  "session_campaign" : "direct",
+  "session_content" : null,
+  "session_term" : null,
+  "session_campaign_id" : null,
+  "session_clid_platform" : null,
+  "session_clid" : null,
+  "session_channel_group" : null,
+  "session_source_category" : null,
+  "process_info" : {
+    "ingest_time" : "2024-01-10T06:13:50Z",
+    "input_file_name" : "test-convert-session-start.json",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_",
+    "rid" : "55384aaeda62c5b20a462076ec59f3f5"
+  },
+  "app_id" : "sessionStartAppId",
+  "event_timestamp" : "2024-01-10 06:13:50",
+  "created_time" : "_CREATED_TIME_"
+}

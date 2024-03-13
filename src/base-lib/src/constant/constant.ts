@@ -320,6 +320,10 @@ export const TABLE_NAME_EVENT = 'event';
 export const TABLE_NAME_EVENT_PARAMETER = 'event_parameter';
 export const TABLE_NAME_USER = 'user';
 export const TABLE_NAME_ITEM= 'item';
+export const TABLE_NAME_EVENT_V2 = 'event_v2';
+export const TABLE_NAME_ITEM_V2 = 'item_v2';
+export const TABLE_NAME_SESSION = 'session';
+export const TABLE_NAME_USER_V2 = 'user_v2';
 
 // the outputs of stacks
 export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';

@@ -1,0 +1,27 @@
+{
+  "event_timestamp" : "2023-08-29 04:04:25",
+  "user_pseudo_id" : "X-login-1690769179",
+  "user_id" : "x-0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_properties" : null,
+  "user_properties_json_str" : null,
+  "first_touch_time_msec" : 1693281865635,
+  "first_visit_date" : "2023-08-29",
+  "first_referrer" : null,
+  "first_traffic_source" : "direct",
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : "direct",
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "GMTServerLogin2",
+  "created_time" : "_CREATED_TIME_"
+}

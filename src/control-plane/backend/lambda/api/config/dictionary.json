@@ -58,7 +58,7 @@
           "zh-CN": "从 HTTP 请求标头的用户代理（User Agent)字符串中获取操作系统、设备和浏览器信息"
         },
         "builtIn": true,
-        "mainFunction": "software.aws.solution.clickstream.UAEnrichment",
+        "mainFunction": "software.aws.solution.clickstream.UAEnrichmentV2",
         "jarFile": "",
         "bindCount": 0,
         "pluginType": "Enrich",
@@ -78,7 +78,7 @@
           "zh-CN": "根据请求源 IP 获取位置信息（例如，城市、国家、地区）"
         },
         "builtIn": true,
-        "mainFunction": "software.aws.solution.clickstream.IPEnrichment",
+        "mainFunction": "software.aws.solution.clickstream.IPEnrichmentV2",
         "jarFile": "",
         "bindCount": 0,
         "pluginType": "Enrich",
@@ -98,7 +98,7 @@
           "zh-CN": "把GTM服务的数据格式，转换成数据仓库中的数据格式"
         },
         "builtIn": true,
-        "mainFunction": "software.aws.solution.clickstream.gtm.GTMServerDataTransformer",
+        "mainFunction": "software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2",
         "jarFile": "",
         "bindCount": 0,
         "pluginType": "Transform",

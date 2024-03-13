@@ -35,6 +35,7 @@ import {
   CategoryItemType,
   DEFAULT_EVENT_ITEM,
   INIT_SEGMENTATION_DATA,
+  MultiSelectType,
 } from 'components/eventselect/AnalyticsType';
 import AnalyticsEventSelect from 'components/eventselect/reducer/AnalyticsEventSelect';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
@@ -555,7 +556,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
-                  enableChangeMultiSelect={true}
+                  enableChangeMultiSelect={MultiSelectType.ATTRIBUTION}
                   isMultiSelect={true}
                   disableAddEvent={true}
                 />
@@ -630,7 +631,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={false}
-                  enableChangeMultiSelect={false}
+                  enableChangeMultiSelect={MultiSelectType.BASE}
                 />
               </SpaceBetween>
             </SpaceBetween>

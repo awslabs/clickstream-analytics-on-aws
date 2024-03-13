@@ -41,7 +41,7 @@ public class UAEnrichment {
 
     private static final Parser UA_PARSER = new Parser();
 
-    private static UDF1<String, Row> enrich() {
+    static UDF1<String, Row> enrich() {
         return value -> {
             Client client = UA_PARSER.parse(value);
             String uaBrowser = Optional.ofNullable(client.userAgent).map(a -> a.family).orElse(null);

@@ -40,7 +40,16 @@ export enum ExploreComputeMethod {
   USER_ID_CNT = 'USER_ID_CNT', // user_id
   EVENT_CNT = 'EVENT_CNT',
   SUM_VALUE = 'SUM_VALUE',
-  AVG_VALUE = 'AVG_VALUE',
+  COUNT_PROPERTY = 'COUNT_PROPERTY',
+  AGGREGATION_PROPERTY = 'AGGREGATION_PROPERTY',
+}
+
+export enum ExploreAggregationMethod {
+  MIN = 'min',
+  MAX = 'max',
+  SUM = 'sum',
+  AVG = 'avg',
+  MEDIAN = 'median',
 }
 
 export enum ExplorePathSessionDef {
@@ -102,14 +111,14 @@ export enum ExploreAnalyticsOperators {
 }
 
 export enum ConditionCategory {
-  USER_OUTER = 'user_outer',
-  USER = 'user',
-  EVENT = 'event',
-  DEVICE = 'device',
-  GEO = 'geo',
   APP_INFO = 'app_info',
-  TRAFFIC_SOURCE = 'traffic_source',
+  DEVICE = 'device',
+  EVENT = 'event',
+  GEO = 'geo',
   OTHER = 'other',
+  TRAFFIC_SOURCE = 'traffic_source',
+  USER = 'user',
+  USER_OUTER = 'user_outer',
 }
 
 export enum QuickSightChartType {

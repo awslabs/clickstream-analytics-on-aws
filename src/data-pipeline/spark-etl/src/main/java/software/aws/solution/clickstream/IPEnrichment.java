@@ -68,7 +68,7 @@ public class IPEnrichment {
         return ipEnrichDataset;
     }
 
-    private UDF2<String, String, Row> enrich() {
+    static UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
             GenericRow defaultRow = new GenericRow(
                     new Object[]{null, null, null, null, null, null, localeValue}

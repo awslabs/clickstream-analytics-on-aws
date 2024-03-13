@@ -17,6 +17,7 @@ import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import {
+  DataCollectionSDK,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
@@ -32,7 +33,7 @@ export const BASE_PIPELINE_ATTRIBUTES = {
   pipelineId: MOCK_PIPELINE_ID,
   region: 'ap-southeast-1',
   versionTag: 'latest',
-  dataCollectionSDK: 'clickstream',
+  dataCollectionSDK: DataCollectionSDK.CLICKSTREAM,
   status: {
     status: PipelineStatusType.ACTIVE,
     stackDetails: [],
@@ -838,7 +839,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
 
 export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE: IPipeline = {
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
-  dataCollectionSDK: 'thirdparty',
+  dataCollectionSDK: DataCollectionSDK.THIRDPARTY,
   dataProcessing: {
     dataFreshnessInHour: 7,
     scheduleExpression: 'rate(6 minutes)',

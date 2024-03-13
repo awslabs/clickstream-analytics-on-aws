@@ -19,6 +19,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.model.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -365,7 +366,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_etl_runner.json")).getPath());
         assertEquals(sourceDataset.count(), 4);
-        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
@@ -417,7 +418,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_empty_user.json")).getPath());
         assertEquals(sourceDataset.count(), 1);
-        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
@@ -450,7 +451,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_empty_user.json")).getPath());
         assertEquals(sourceDataset.count(), 1);
-        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
@@ -490,7 +491,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
-        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
 
         String outputPath = config.getOutputPath();
         System.out.println("outputPath:" + outputPath);
@@ -515,6 +516,97 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> params = eventParamDataset.filter(expr("event_param_int_value = 0 and event_param_key = '_session_start_timestamp'"));
         Assertions.assertTrue(params.count() == 0, "should not have _session_start_timestamp = 0");
 
+    }
+
+    @Test
+    public void test_GTM_server_runner_v2() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.test_GTM_server_runner_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_v2");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichmentV2");
+        transformers.add("software.aws.solution.clickstream.IPEnrichmentV2");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "GTM_server_transformer_v2");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all-with-ss.json")).getPath());
+
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
+
+        String outputPath = config.getOutputPath();
+        System.out.println("outputPath:" + outputPath);
+
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT_V2.getTableName());
+        Dataset<Row> sessionDataset = spark.read().json(outputPath + ETLRunner.TableName.SESSION.getTableName());
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM_V2.getTableName());
+        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER_V2.getTableName());
+
+        String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_v2_event_v2.json");
+        Assertions.assertEquals(expectedData1,
+                replaceProcessInfo(eventDataset.filter(col("event_id").equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11")).first().prettyJson()),
+                "test_GTM_server_runner_v2_event_v2");
+
+        String expectedData2 = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_v2_session.json");
+        Assertions.assertEquals(expectedData2,
+                // "session_id" : "1704867229"
+                replaceProcessInfo(sessionDataset.filter(col("session_id").equalTo("1704867229")).first().prettyJson()),
+                "test_GTM_server_runner_v2_session");
+
+        String expectedData3 = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_v2_item_v2.json");
+        Assertions.assertEquals(expectedData3,
+                replaceProcessInfo(itemDataset.filter(col("event_id").equalTo("25aefd4cb653fd0fcbac33e24fd3f0ba-0-1695261065-1")).first().prettyJson()),
+                "test_GTM_server_runner_v2_item_v2");
+
+        String expectedData4 = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_v2_user_v2.json");
+        Assertions.assertEquals(expectedData4,
+                replaceProcessInfo(userDataset.filter(col("user_pseudo_id").equalTo("/7Gsn6b5OMMiSyvc3j5JbSjBpN/hUnNDuzkSFtaMqhQ=.1695131921")).first().prettyJson()),
+                "test_GTM_server_runner_v2_user_v2");
+
+    }
+
+
+    @Test
+    public void test_GTM_server_runner_parquet_v2() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.test_GTM_server_runner_parquet_v2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/test_GTM_server_runner_parquet_v2");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichmentV2");
+        transformers.add("software.aws.solution.clickstream.IPEnrichmentV2");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "test_GTM_server_runner_parquet_v2");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-app1.json")).getPath());
+
+        runner.writeResultEventDataset(runner.executeTransformers(sourceDataset, transformers));
+
+        String outputPath = config.getOutputPath();
+        System.out.println("outputPath:" + outputPath);
+
+        Dataset<Row> eventDataset = spark.read().parquet(outputPath + ETLRunner.TableName.EVENT_V2.getTableName());
+        Dataset<Row> sessionDataset = spark.read().parquet(outputPath + ETLRunner.TableName.SESSION.getTableName());
+        Dataset<Row> itemDataset = spark.read().parquet(outputPath + ETLRunner.TableName.ITEM_V2.getTableName());
+        Dataset<Row> userDataset = spark.read().parquet(outputPath + ETLRunner.TableName.USER_V2.getTableName());
+
+        String eventV2Schema = this.resourceFileAsString("/gtm-server/expected/test_GTM_server_runner_parquet_v2.json");
+
+        Assertions.assertEquals(eventV2Schema, eventDataset.schema().prettyJson());
+        Assertions.assertTrue(eventDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(sessionDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(itemDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(userDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
     }
 
     public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name) {
@@ -544,6 +636,10 @@ class ETLRunnerTest extends BaseSparkTest {
         String dataFreshnessInHour = "72";
         int nDaysUser = 360 * 30;
         int nDaysItem = 360 * 30;
+
+        if (name.contains("parquet")) {
+            outPutFormat = "parquet";
+        }
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
                 new ETLRunnerConfig.TransformationConfig(

@@ -65,6 +65,7 @@ import {
 import {
   ClickStreamBadRequestError,
   CreateApplicationSchemasStatus,
+  DataCollectionSDK,
   ENetworkType,
   IngestionServerSinkBatchProps,
   IngestionServerSizeProps,
@@ -250,7 +251,7 @@ export interface IPipeline {
   readonly projectId: string;
   readonly pipelineId: string;
   readonly region: string;
-  readonly dataCollectionSDK: string;
+  readonly dataCollectionSDK: DataCollectionSDK;
   tags: ITag[];
 
   readonly network: NetworkProps;
