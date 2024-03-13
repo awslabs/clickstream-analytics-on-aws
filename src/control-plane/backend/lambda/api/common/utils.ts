@@ -397,7 +397,7 @@ function _getTransformerPluginInfoFromResources(
 
 function _getClassNameByVersion(dataCollectionSDK: DataCollectionSDK, id: string, curClassName: string, templateVersion: string) {
   const shortVersion = templateVersion?.split('-')[0];
-  const pluginClassNameWithVersion = [
+  const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
       versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'],
@@ -420,7 +420,7 @@ function _getClassNameByVersion(dataCollectionSDK: DataCollectionSDK, id: string
     },
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
-    for (let plugin of pluginClassNameWithVersion) {
+    for (let plugin of pluginHistoryClassNameWithVersion) {
       if (plugin.id === id && plugin.versions.includes(shortVersion)) {
         return plugin.className;
       }
