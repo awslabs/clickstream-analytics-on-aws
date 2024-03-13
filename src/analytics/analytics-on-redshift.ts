@@ -38,6 +38,10 @@ import {
   REDSHIFT_EVENT_TABLE_NAME,
   REDSHIFT_ITEM_TABLE_NAME,
   REDSHIFT_USER_TABLE_NAME,
+  REDSHIFT_EVENT_V2_TABLE_NAME,
+  REDSHIFT_ITEM_V2_TABLE_NAME,
+  REDSHIFT_USER_V2_TABLE_NAME,
+  REDSHIFT_SESSION_TABLE_NAME,
 } from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
@@ -74,6 +78,10 @@ export interface RedshiftOdsTables {
   readonly event_parameter: string;
   readonly user: string;
   readonly item: string;
+  readonly event_v2: string;
+  readonly item_v2: string;
+  readonly user_v2: string;
+  readonly session: string;
 }
 
 export interface RedshiftAnalyticsStackProps extends NestedStackProps {
@@ -239,6 +247,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
       user: REDSHIFT_USER_TABLE_NAME,
       item: REDSHIFT_ITEM_TABLE_NAME,
+      event_v2: REDSHIFT_EVENT_V2_TABLE_NAME,
+      item_v2: REDSHIFT_ITEM_V2_TABLE_NAME,
+      user_v2: REDSHIFT_USER_V2_TABLE_NAME,
+      session: REDSHIFT_SESSION_TABLE_NAME,
     };
 
     const functionEntry = join(
