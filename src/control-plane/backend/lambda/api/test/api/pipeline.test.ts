@@ -82,6 +82,7 @@ import {
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
   MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
   stackDetailsWithOutputs,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
@@ -1239,7 +1240,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-2',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichmentV2',
               name: 'UAEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1259,7 +1260,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-3',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichmentV2',
               name: 'IPEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1471,7 +1472,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-2',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichmentV2',
               name: 'UAEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1491,7 +1492,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-3',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichmentV2',
               name: 'IPEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1625,7 +1626,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-2',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichmentV2',
               name: 'UAEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1645,7 +1646,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-3',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichmentV2',
               name: 'IPEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1789,7 +1790,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-2',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichmentV2',
               name: 'UAEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -1809,7 +1810,7 @@ describe('Pipeline test', () => {
               },
               id: 'BUILT-IN-3',
               jarFile: '',
-              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichmentV2',
               name: 'IPEnrichment',
               operator: '',
               pluginType: 'Enrich',
@@ -3360,7 +3361,7 @@ describe('Pipeline test', () => {
       message: 'Pipeline updated.',
     });
   });
-  it('Update pipeline v1.0 on v1.1 control plane', async () => {
+  it('Update old pipeline on new control plane', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
@@ -3421,6 +3422,158 @@ describe('Pipeline test', () => {
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
+  it('Update old pipeline plugin on new control plane', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.0.0',
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+        ],
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
+        expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment',
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        dataProcessing: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW.dataProcessing,
+          enrichPlugin: ['BUILT-IN-2'],
+        },
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
+  it('Update new pipeline plugin on new control plane', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        templateVersion: FULL_SOLUTION_VERSION,
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: FULL_SOLUTION_VERSION },
+        ],
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[0].M.value.S === FULL_SOLUTION_VERSION &&
+        dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment',
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        dataProcessing: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW.dataProcessing,
+          enrichPlugin: ['BUILT-IN-2'],
+        },
+        templateVersion: FULL_SOLUTION_VERSION,
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: FULL_SOLUTION_VERSION },
+        ],
       });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -3588,10 +3741,77 @@ describe('Pipeline test', () => {
       subnetsIsolated: true,
       update: true,
       updatePipeline: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
       },
     });
-    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
+      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+    expect(snsMock).toHaveReceivedCommandTimes(CreateTopicCommand, 1);
+    expect(snsMock).toHaveReceivedCommandTimes(SNSTagResourceCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(EventTagResourceCommand, 1);
+    expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
+      Name: `ClickstreamTopicForCFN-${MOCK_PIPELINE_ID}`,
+    });
+    expect(snsMock).toHaveReceivedCommandWith(SNSTagResourceCommand, {
+      ResourceArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
+      Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
+      ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+  });
+  it('Upgrade pipeline with third-party plugin', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+        templateVersion: 'v1.0.0',
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+        ],
+      },
+    });
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
+      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
+      ).toBeTruthy();
+    });
     const res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);

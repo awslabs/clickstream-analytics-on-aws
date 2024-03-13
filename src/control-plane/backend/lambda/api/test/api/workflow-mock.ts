@@ -656,7 +656,7 @@ export const DATA_PROCESSING_THIRDPARTY_SDK_PLUGIN3_PARAMETERS = mergeParameters
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
