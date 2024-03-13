@@ -14,42 +14,84 @@
 import { CfnCondition, CfnParameter, Fn } from 'aws-cdk-lib';
 import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { Construct } from 'constructs';
-import { SINK_TYPE_MODE } from '../../common/model';
+import { SINK_TYPE_MODE, ECS_INFRA_TYPE_MODE } from '../../common/model';
 
 export function createS3ConditionsV2(scope: Construct, props: {
   sinkType: string;
+  ecsInfraConditions: any[];
 }) {
   const s3Condition = new CfnCondition(scope, 's3Condition', {
     expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_S3),
   });
-  return s3Condition;
+  const s3ConditionAndName: any[] = [];
+  props.ecsInfraConditions.forEach((ecsInfraCondition) => {
+    s3ConditionAndName.push(
+      {
+        conditions: [s3Condition, ecsInfraCondition.condition],
+        name: `${ecsInfraCondition.name}C`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+      },
+    );
+  });
+
+  return s3ConditionAndName;
 }
 
-
-export function createKinesisConditionsV2(props: {
-  provisionedStackStream: Stream;
-  onDemandStackStream: Stream;
-  provisionedStackCondition: CfnCondition;
-  onDemandStackCondition: CfnCondition;
-}) {
-  const kinesisConditionsAndProps = [
+export function createECSTypeCondition(
+  scope: Construct,
+  ecsInfraType: string,
+) {
+  const ecsEC2Condition = new CfnCondition(scope, 'ecsEC2Condition', {
+    expression: Fn.conditionEquals(ecsInfraType, ECS_INFRA_TYPE_MODE.EC2),
+  });
+  const ecsFargateCondition = new CfnCondition(scope, 'ecsFargateCondition', {
+    expression: Fn.conditionEquals(ecsInfraType, ECS_INFRA_TYPE_MODE.FARGATE),
+  });
+  const ecsInfraConditions = [
     {
-      condition: props.onDemandStackCondition,
-      name: 'K1',
-      serverProps: {
-        kinesisDataStreamArn: props.onDemandStackStream.streamArn,
-      },
+      condition: ecsEC2Condition,
+      name: 'E',
+      ecsInfraType: ECS_INFRA_TYPE_MODE.EC2,
     },
-
     {
-      condition: props.provisionedStackCondition,
-      name: 'K2',
-      serverProps: {
-        kinesisDataStreamArn: props.provisionedStackStream.streamArn,
-      },
+      condition: ecsFargateCondition,
+      name: 'F',
+      ecsInfraType: ECS_INFRA_TYPE_MODE.FARGATE,
     },
-
   ];
+  return ecsInfraConditions;
+}
+
+export function createKinesisConditionsV2(
+  props: {
+    provisionedStackStream: Stream;
+    onDemandStackStream: Stream;
+    provisionedStackCondition: CfnCondition;
+    onDemandStackCondition: CfnCondition;
+  },
+  ecsInfraConditions: any[],
+) {
+  const kinesisConditionsAndProps: any[] = [];
+  ecsInfraConditions.forEach((ecsInfraCondition) => {
+    kinesisConditionsAndProps.push(
+      {
+        conditions: [props.onDemandStackCondition, ecsInfraCondition.condition],
+        name: `${ecsInfraCondition.name}K1`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          kinesisDataStreamArn: props.onDemandStackStream.streamArn,
+        },
+      },
+      {
+        conditions: [props.provisionedStackCondition, ecsInfraCondition.condition],
+        name: `${ecsInfraCondition.name}K2`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          kinesisDataStreamArn: props.provisionedStackStream.streamArn,
+        },
+      },
+    );
+  });
   return kinesisConditionsAndProps;
 }
 
@@ -61,6 +103,7 @@ export function createMskConditionsV2(
     kafkaBrokersParam: CfnParameter;
     kafkaTopicParam: CfnParameter;
     sinkType: string;
+    ecsInfraConditions: any[];
   },
 ) {
   const mskClusterNameCondition = new CfnCondition(
@@ -98,59 +141,68 @@ export function createMskConditionsV2(
     expression: Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_MSK),
   });
 
-  const mskConditionServerPopsConfig = [
-    {
-      conditions: [
-        mskSecurityGroupIdCondition,
-        mskClusterNameCondition,
-        mskCondition,
-      ],
-      name: 'M11',
-      serverProps: {
-        mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
-        mskClusterName: props.mskClusterNameParam.valueAsString,
-      },
-    },
+  const mskConditionServerPopsConfig: any[] = [];
 
-    {
-      conditions: [
-        mskSecurityGroupIdCondition,
-        mskClusterNameConditionNeg,
-        mskCondition,
-      ],
-      name: 'M10',
-      serverProps: {
-        mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
-        mskClusterName: undefined,
+  props.ecsInfraConditions.forEach((ecsInfraCondition) => {
+    mskConditionServerPopsConfig.push(
+      {
+        conditions: [
+          mskSecurityGroupIdCondition,
+          mskClusterNameCondition,
+          mskCondition,
+          ecsInfraCondition.condition,
+        ],
+        name: `${ecsInfraCondition.name}M11`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
+          mskClusterName: props.mskClusterNameParam.valueAsString,
+        },
       },
-    },
 
-    {
-      conditions: [
-        mskSecurityGroupIdConditionNeg,
-        mskClusterNameCondition,
-        mskCondition,
-      ],
-      name: 'M01',
-      serverProps: {
-        mskSecurityGroupId: undefined,
-        mskClusterName: props.mskClusterNameParam.valueAsString,
+      {
+        conditions: [
+          mskSecurityGroupIdCondition,
+          mskClusterNameConditionNeg,
+          mskCondition,
+        ],
+        name: `${ecsInfraCondition.name}M10`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          mskSecurityGroupId: props.mskSecurityGroupIdParam.valueAsString,
+          mskClusterName: undefined,
+        },
       },
-    },
 
-    {
-      conditions: [
-        mskSecurityGroupIdConditionNeg,
-        mskClusterNameConditionNeg,
-        mskCondition,
-      ],
-      name: 'M00',
-      serverProps: {
-        mskSecurityGroupId: undefined,
-        mskClusterName: undefined,
+      {
+        conditions: [
+          mskSecurityGroupIdConditionNeg,
+          mskClusterNameCondition,
+          mskCondition,
+        ],
+        name: `${ecsInfraCondition.name}M01`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          mskSecurityGroupId: undefined,
+          mskClusterName: props.mskClusterNameParam.valueAsString,
+        },
       },
-    },
-  ];
+
+      {
+        conditions: [
+          mskSecurityGroupIdConditionNeg,
+          mskClusterNameConditionNeg,
+          mskCondition,
+        ],
+        name: `${ecsInfraCondition.name}M00`,
+        ecsInfraType: ecsInfraCondition.ecsInfraType,
+        serverProps: {
+          mskSecurityGroupId: undefined,
+          mskClusterName: undefined,
+        },
+      },
+    );
+  });
   return mskConditionServerPopsConfig;
 }
 

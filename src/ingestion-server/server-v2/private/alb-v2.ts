@@ -13,38 +13,26 @@
 
 import { Duration, CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { BaseService } from 'aws-cdk-lib/aws-ecs';
 import {
-  ApplicationListener,
   ApplicationProtocol,
   Protocol,
-  // ListenerCertificate,
   ApplicationLoadBalancer,
-  // ListenerAction,
   IpAddressType,
-  SslPolicy,
-  CfnListener,
   ApplicationTargetGroup,
-  ListenerAction,
   CfnLoadBalancer,
+  TargetType,
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
 import { RESOURCE_ID_PREFIX } from '../../server/ingestion-server';
 
 export const PROXY_PORT = 8088;
 
-function createECSTargets(scope : Construct, service: BaseService, proxyContainerName: string) {
+function createECSTargets(scope : Construct, vpc: IVpc) {
   const targetGroup = new ApplicationTargetGroup(scope, 'ECS', {
     protocol: ApplicationProtocol.HTTP,
-    vpc: service.cluster.vpc,
+    vpc: vpc,
     port: PROXY_PORT,
-    targets: [
-      service.loadBalancerTarget({
-        containerName: proxyContainerName,
-        containerPort: PROXY_PORT,
-      }),
-    ],
+    targetType: TargetType.IP,
     healthCheck: {
       enabled: true,
       protocol: Protocol.HTTP,
@@ -67,9 +55,9 @@ export interface ApplicationLoadBalancerProps {
   certificateArn: string;
   domainName: string;
   sg: SecurityGroup;
-  service: BaseService;
+  // service: BaseService;
   endpointPath: string;
-  httpContainerName: string;
+  // httpContainerName: string;
   ipAddressType: IpAddressType;
   protocol: string;
   ports: {
@@ -87,14 +75,12 @@ export interface ApplicationLoadBalancerProps {
 export class ApplicationLoadBalancerV2 extends Construct {
   public readonly alb: ApplicationLoadBalancer;
   public readonly targetGroup: ApplicationTargetGroup;
-  public readonly listener: ApplicationListener;
 
   constructor(scope: Construct, id: string, props: ApplicationLoadBalancerProps) {
     super(scope, id);
-    const { alb, targetGroup, listener } = createApplicationLoadBalancer(this, props);
+    const { alb, targetGroup } = createApplicationLoadBalancer(this, props);
     this.alb = alb;
     this.targetGroup = targetGroup;
-    this.listener = listener;
   }
 }
 
@@ -102,10 +88,6 @@ function createApplicationLoadBalancer(
   scope: Construct,
   props: ApplicationLoadBalancerProps,
 ) {
-  const httpPort = props.ports.http;
-  const httpsPort = props.ports.https;
-  const httpContainerName = props.httpContainerName;
-
   const alb = new ApplicationLoadBalancer(scope, `${RESOURCE_ID_PREFIX}alb`, {
     vpc: props.vpc,
     internetFacing: true,
@@ -163,62 +145,7 @@ function createApplicationLoadBalancer(
   cfnAlb.addPropertyOverride('Subnets',
     Fn.conditionIf(props.isPrivateSubnetsCondition.logicalId, Fn.split(',', props.privateSubnets), Fn.split(',', props.publicSubnets)));
 
-  const targetGroup = createECSTargets(scope, props.service, httpContainerName);
+  const targetGroup = createECSTargets(scope, props.vpc);
 
-  const httpListener = new ApplicationListener(scope, 'HttpListener', {
-    protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-    port: httpPort,
-    defaultTargetGroups: [targetGroup],
-    loadBalancer: alb,
-  });
-
-  const cfnListener = httpListener.node.defaultChild as CfnListener;
-  cfnListener.addPropertyOverride('Protocol',
-    Fn.conditionIf(props.isHttps.logicalId, ApplicationProtocol.HTTPS, ApplicationProtocol.HTTP).toString());
-
-  cfnListener.addPropertyOverride('Port',
-    Fn.conditionIf(props.isHttps.logicalId, httpsPort, httpPort).toString());
-
-  cfnListener.addPropertyOverride('SslPolicy',
-    Fn.conditionIf(props.isHttps.logicalId, SslPolicy.TLS12, Fn.ref('AWS::NoValue')));
-
-  cfnListener.addPropertyOverride('Certificates',
-    Fn.conditionIf(props.isHttps.logicalId, [{
-      CertificateArn: props.certificateArn,
-    }], Fn.ref('AWS::NoValue')));
-
-  addCfnNagSuppressRules(
-    httpListener.node.defaultChild as CfnListener,
-    [
-      {
-        id: 'W56',
-        reason:
-          'Using HTTP listener is by design',
-      },
-    ],
-  );
-
-  const httpRedirectListener = new ApplicationListener(scope, 'HttpRedirectListener', {
-    protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
-    port: httpPort,
-    defaultAction: ListenerAction.redirect({
-      protocol: ApplicationProtocol.HTTPS,
-      port: `${httpsPort}`,
-    }),
-    loadBalancer: alb,
-  });
-  (httpRedirectListener.node.defaultChild as CfnListener).cfnOptions.condition = props.isHttps;
-
-  addCfnNagSuppressRules(
-    httpRedirectListener.node.defaultChild as CfnListener,
-    [
-      {
-        id: 'W56',
-        reason:
-          'Using HTTP listener is by design',
-      },
-    ],
-  );
-
-  return { alb, targetGroup, listener: httpListener };
+  return { alb, targetGroup };
 }
