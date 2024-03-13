@@ -82,6 +82,7 @@ import {
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
   MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
   stackDetailsWithOutputs,
+  KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
@@ -3751,6 +3752,64 @@ describe('Pipeline test', () => {
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
         dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+    expect(snsMock).toHaveReceivedCommandTimes(CreateTopicCommand, 1);
+    expect(snsMock).toHaveReceivedCommandTimes(SNSTagResourceCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
+    expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(EventTagResourceCommand, 1);
+    expect(snsMock).toHaveReceivedCommandWith(CreateTopicCommand, {
+      Name: `ClickstreamTopicForCFN-${MOCK_PIPELINE_ID}`,
+    });
+    expect(snsMock).toHaveReceivedCommandWith(SNSTagResourceCommand, {
+      ResourceArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
+      Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
+    });
+    expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
+      ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
+      Tags: getDefaultTags(MOCK_PROJECT_ID),
+    });
+  });
+  it('Upgrade pipeline with third-party plugin', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE,
+        templateVersion: 'v1.0.0',
+        tags: [
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+        ],
+      },
+    });
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const pipelineStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[0].M.States.M.PipelineStacks.M;
+      const dataProcessingInput = pipelineStacks.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
+        expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
       ).toBeTruthy();
     });
     const res = await request(app)
