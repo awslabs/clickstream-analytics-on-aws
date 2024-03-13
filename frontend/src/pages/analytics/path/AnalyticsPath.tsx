@@ -37,6 +37,7 @@ import {
   DEFAULT_EVENT_ITEM,
   IAnalyticsItem,
   INIT_SEGMENTATION_DATA,
+  MultiSelectType,
 } from 'components/eventselect/AnalyticsType';
 import AnalyticsEventSelect from 'components/eventselect/reducer/AnalyticsEventSelect';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
@@ -738,7 +739,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
                 enableChangeRelation={true}
-                enableChangeMultiSelect={''}
+                enableChangeMultiSelect={MultiSelectType.BASE}
               />
 
               <div className="cs-analytics-config">

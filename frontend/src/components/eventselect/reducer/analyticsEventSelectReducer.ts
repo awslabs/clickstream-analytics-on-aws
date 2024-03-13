@@ -26,6 +26,7 @@ import {
   ERelationShip,
   IAnalyticsItem,
   IEventAnalyticsItem,
+  MultiSelectType,
 } from '../AnalyticsType';
 
 export type ResetEventData = {
@@ -94,7 +95,7 @@ export type ChangeCurCalcMethodOption = {
 
 export type ChangeCurCategoryOption = {
   type: 'changeCurCategoryOption';
-  enableChangeMultiSelect?: string;
+  enableChangeMultiSelect?: MultiSelectType;
   eventIndex: number;
   categoryOption: IAnalyticsItem | null;
   builtInMetadata?: IMetadataBuiltInList;
@@ -210,14 +211,14 @@ export const analyticsEventSelectReducer = (
       );
       newState[action.eventIndex].selectedEventOption = action.categoryOption;
       newState[action.eventIndex].conditionOptions = parameterOption;
-      if (action.enableChangeMultiSelect === 'attribution') {
+      if (action.enableChangeMultiSelect === MultiSelectType.ATTRIBUTION) {
         const calculateMethodOptions = getAttributionMethodOptions(
           action.metadataUserAttributes,
           eventParameters
         );
         newState[action.eventIndex].calculateMethodOptions =
           calculateMethodOptions;
-      } else if (action.enableChangeMultiSelect === 'event') {
+      } else if (action.enableChangeMultiSelect === MultiSelectType.EVENT) {
         const calculateMethodOptions = getEventMethodOptions(
           action.metadataUserAttributes,
           eventParameters
