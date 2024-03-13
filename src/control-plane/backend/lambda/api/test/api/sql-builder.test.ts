@@ -22095,8 +22095,8 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -22113,14 +22113,13 @@ describe('SQL Builder test', () => {
           ) as union_table_0
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          max(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          MAX(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -22137,14 +22136,13 @@ describe('SQL Builder test', () => {
           ) as union_table_1
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          median (custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          MEDIAN(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -22161,11 +22159,13 @@ describe('SQL Builder test', () => {
           ) as union_table_2
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
       )
     select
-      *
+      event_date:: date,
+      event_name,
+      custom_attr_id,
+      "count/aggregationamount":: double precision
     from
       join_table
     `.trim().replace(/ /g, ''),
@@ -22397,8 +22397,8 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -22415,8 +22415,7 @@ describe('SQL Builder test', () => {
           ) as union_table_1
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
@@ -22443,7 +22442,10 @@ describe('SQL Builder test', () => {
           custom_attr_id
       )
     select
-      *
+      event_date:: date,
+      event_name,
+      custom_attr_id,
+      "count/aggregationamount":: double precision
     from
       join_table
     `.trim().replace(/ /g, ''),
@@ -22908,8 +22910,8 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -22926,13 +22928,12 @@ describe('SQL Builder test', () => {
           ) as union_table_1
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
+          'null' as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -22950,13 +22951,12 @@ describe('SQL Builder test', () => {
           ) as union_table_2
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
+          'null' as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -22974,11 +22974,13 @@ describe('SQL Builder test', () => {
           ) as union_table_3
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
       )
     select
-      *
+      event_date:: date,
+      event_name,
+      custom_attr_id,
+      "count/aggregationamount":: double precision
     from
       join_table
     `.trim().replace(/ /g, ''),
@@ -23234,8 +23236,8 @@ describe('SQL Builder test', () => {
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -23252,14 +23254,13 @@ describe('SQL Builder test', () => {
           ) as union_table_1
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
-          max(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          MAX(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -23276,13 +23277,12 @@ describe('SQL Builder test', () => {
           ) as union_table_2
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
         union all
         select
           DAY as event_date,
           event_name,
-          null as custom_attr_id,
+          'null' as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -23300,11 +23300,13 @@ describe('SQL Builder test', () => {
           ) as union_table_3
         group by
           DAY,
-          event_name,
-          custom_attr_id
+          event_name
       )
     select
-      *
+      event_date:: date,
+      event_name,
+      custom_attr_id,
+      "count/aggregationamount":: double precision
     from
       join_table
     `.trim().replace(/ /g, ''),
@@ -23574,8 +23576,8 @@ describe('SQL Builder test', () => {
           WEEK as event_date,
           event_name,
           platform,
-          null as custom_attr_id,
-          sum(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          SUM(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -23594,15 +23596,14 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
         union all
         select
           WEEK as event_date,
           event_name,
           platform,
-          null as custom_attr_id,
-          max(custom_attr_id) as "count/aggregation amount"
+          'null' as custom_attr_id,
+          MAX(custom_attr_id) as "count/aggregation amount"
         from
           (
             select
@@ -23621,14 +23622,13 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
         union all
         select
           WEEK as event_date,
           event_name,
           platform,
-          null as custom_attr_id,
+          'null' as custom_attr_id,
           count(distinct x_id) as "count/aggregation amount"
         from
           (
@@ -23648,11 +23648,14 @@ describe('SQL Builder test', () => {
         group by
           WEEK,
           event_name,
-          platform,
-          custom_attr_id
+          platform
       )
     select
-      *
+      event_date:: date,
+      event_name,
+      platform,
+      custom_attr_id,
+      "count/aggregationamount":: double precision
     from
       join_table
     `.trim().replace(/ /g, ''),
