@@ -38,9 +38,31 @@ import {
   TABLE_NAME_EVENT,
   TABLE_NAME_EVENT_PARAMETER,
   TABLE_NAME_USER,
+<<<<<<< HEAD
   TABLE_NAME_ITEM,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from './common/constant';
+=======
+  TABLE_NAME_EVENT_V2,
+  TABLE_NAME_ITEM_V2,
+  TABLE_NAME_USER_V2,
+  TABLE_NAME_SESSION,
+} from '@aws/clickstream-base-lib';
+import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
+import { createStackParameters, RedshiftAnalyticsStackProps } from './analytics/parameter';
+import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
+import { RolePermissionBoundaryAspect } from './common/aspects';
+import {
+  addCfnNagForCfnResource,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention,
+  ruleRolePolicyWithWildcardResources,
+} from './common/cfn-nag';
+import { REDSHIFT_MODE } from './common/model';
+import { Parameters } from './common/parameters';
+>>>>>>> 2a5fa781 (chore(schema): load data to new table (#967))
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -105,6 +127,26 @@ export function createRedshiftAnalyticsStack(
     item: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    event_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    item_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    user_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    session: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_SESSION + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
   };

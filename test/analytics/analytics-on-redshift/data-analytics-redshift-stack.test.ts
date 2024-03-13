@@ -438,6 +438,26 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         prefix: 'project1/item/',
         fileSuffix: '.snappy',
       },
+      event_v2: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/event_v2/',
+        fileSuffix: '.snappy',
+      },
+      item_v2: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/item_v2/',
+        fileSuffix: '.snappy',
+      },
+      user_v2: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/user_v2/',
+        fileSuffix: '.snappy',
+      },
+      session: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/session/',
+        fileSuffix: '.snappy',
+      },
     },
     workflowBucketInfo: {
       s3Bucket: loadWorkflowS3Bucket,
@@ -1391,6 +1411,146 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       'item/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event_v2/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'item_v2/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'user_v2/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'session/*',
                     ],
                   ],
                 },

@@ -28,7 +28,9 @@ import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { DYNAMODB_TABLE_INDEX_NAME } from './private/constant';
+import {
+  DYNAMODB_TABLE_INDEX_NAME,
+} from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
@@ -37,7 +39,18 @@ import { createCustomResourceAssociateIAMRole } from './private/redshift-associa
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
+import { 
+  EVENT_SOURCE_LOAD_DATA_FLOW, 
+  REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
+  REDSHIFT_EVENT_TABLE_NAME,
+  REDSHIFT_ITEM_TABLE_NAME,
+  REDSHIFT_USER_TABLE_NAME,
+  REDSHIFT_EVENT_V2_TABLE_NAME,
+  REDSHIFT_ITEM_V2_TABLE_NAME,
+  REDSHIFT_USER_V2_TABLE_NAME,
+  REDSHIFT_SESSION_TABLE_NAME,  
+  SCAN_METADATA_WORKFLOW_PREFIX,
+} from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
@@ -47,6 +60,10 @@ export interface RedshiftOdsTables {
   readonly event_parameter: string;
   readonly user: string;
   readonly item: string;
+  readonly event_v2: string;
+  readonly item_v2: string;
+  readonly user_v2: string;
+  readonly session: string;
 }
 export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly vpc: IVpc;
@@ -208,6 +225,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
       user: REDSHIFT_USER_TABLE_NAME,
       item: REDSHIFT_ITEM_TABLE_NAME,
+      event_v2: REDSHIFT_EVENT_V2_TABLE_NAME,
+      item_v2: REDSHIFT_ITEM_V2_TABLE_NAME,
+      user_v2: REDSHIFT_USER_V2_TABLE_NAME,
+      session: REDSHIFT_SESSION_TABLE_NAME,
     };
 
     const functionEntry = join(

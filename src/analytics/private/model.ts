@@ -33,6 +33,10 @@ export interface TablesODSSource {
   readonly event_parameter: ODSSource;
   readonly user: ODSSource;
   readonly item: ODSSource;
+  readonly event_v2: ODSSource;
+  readonly item_v2: ODSSource;
+  readonly user_v2: ODSSource;
+  readonly session: ODSSource;
 }
 
 export type WorkflowBucketInfo = BucketInfo;
