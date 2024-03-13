@@ -308,6 +308,10 @@ export const TABLE_NAME_EVENT = 'event';
 export const TABLE_NAME_EVENT_PARAMETER = 'event_parameter';
 export const TABLE_NAME_USER = 'user';
 export const TABLE_NAME_ITEM= 'item';
+export const TABLE_NAME_EVENT_V2 = 'event_v2';
+export const TABLE_NAME_ITEM_V2 = 'item_v2';
+export const TABLE_NAME_SESSION = 'session';
+export const TABLE_NAME_USER_V2 = 'user_v2';
 
 // the outputs of stacks
 export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';
@@ -483,7 +487,14 @@ export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';
 export const REDSHIFT_USER_TABLE_NAME = 'user';
 export const REDSHIFT_ITEM_TABLE_NAME = 'item';
 
+export const REDSHIFT_EVENT_V2_TABLE_NAME = 'event_v2';
+export const REDSHIFT_ITEM_V2_TABLE_NAME = 'item_v2';
+export const REDSHIFT_USER_V2_TABLE_NAME = 'user_v2';
+export const REDSHIFT_SESSION_TABLE_NAME = 'session';
+
 export const REDSHIFT_TABLE_NAMES = [
   REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
   REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
+  REDSHIFT_EVENT_V2_TABLE_NAME, REDSHIFT_ITEM_V2_TABLE_NAME,
+  REDSHIFT_USER_V2_TABLE_NAME, REDSHIFT_SESSION_TABLE_NAME,
 ];

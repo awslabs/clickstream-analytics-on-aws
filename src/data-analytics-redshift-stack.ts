@@ -39,6 +39,10 @@ import {
   TABLE_NAME_EVENT_PARAMETER,
   TABLE_NAME_USER,
   TABLE_NAME_ITEM,
+  TABLE_NAME_EVENT_V2,
+  TABLE_NAME_ITEM_V2,
+  TABLE_NAME_USER_V2,
+  TABLE_NAME_SESSION,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
@@ -105,6 +109,26 @@ export function createRedshiftAnalyticsStack(
     item: {
       s3Bucket: props.dataSourceConfiguration.bucket,
       prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    event_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    item_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    user_v2: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER_V2 + '/',
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    session: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_SESSION + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
   };
