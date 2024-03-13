@@ -307,7 +307,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   if (pipeline.dataProcessing?.enrichPlugin) {
     for (let enrichPluginId of pipeline.dataProcessing?.enrichPlugin) {
       const { classNames, pluginJars, pluginFiles } = _getEnrichPluginInfo(
-        resources, enrichPluginId, pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
+        resources, pipeline.dataCollectionSDK, enrichPluginId, pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
       transformerAndEnrichClassNames.push(...classNames);
       s3PathPluginJars.push(...pluginJars);
       s3PathPluginFiles.push(...pluginFiles);
@@ -321,7 +321,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   };
 }
 
-function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: string, templateVersion: string) {
+function _getEnrichPluginInfo(resources: CPipelineResources, dataCollectionSDK: DataCollectionSDK, enrichPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -335,7 +335,7 @@ function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: str
     }
   }
   if (enrich?.mainFunction) {
-    classNames.push(_getClassNameByVersion(enrich?.id, enrich?.mainFunction, templateVersion));
+    classNames.push(_getClassNameByVersion(dataCollectionSDK, enrich?.id, enrich?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
@@ -349,7 +349,13 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
       const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
       if (defaultTransformer?.mainFunction) {
         transformerClassNames.push(
-          _getClassNameByVersion(defaultTransformer?.id, defaultTransformer?.mainFunction, pipeline.templateVersion ?? FULL_SOLUTION_VERSION));
+          _getClassNameByVersion(
+            pipeline.dataCollectionSDK,
+            defaultTransformer?.id,
+            defaultTransformer?.mainFunction,
+            pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+          ),
+        );
       }
     } else {
       throw new ClickStreamBadRequestError('Transform plugin is required.');
@@ -357,6 +363,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   } else {
     const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(
       resources,
+      pipeline.dataCollectionSDK,
       pipeline.dataProcessing?.transformPlugin,
       pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
     );
@@ -367,7 +374,9 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
 }
 
-function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string, templateVersion: string) {
+function _getTransformerPluginInfoFromResources(
+  resources: CPipelineResources, dataCollectionSDK: DataCollectionSDK,
+  transformPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -381,12 +390,12 @@ function _getTransformerPluginInfoFromResources(resources: CPipelineResources, t
     }
   }
   if (transform?.mainFunction) {
-    classNames.push(_getClassNameByVersion(transform?.id, transform?.mainFunction, templateVersion));
+    classNames.push(_getClassNameByVersion(dataCollectionSDK, transform?.id, transform?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
 
-function _getClassNameByVersion(id: string, curClassName: string, templateVersion: string) {
+function _getClassNameByVersion(dataCollectionSDK: DataCollectionSDK, id: string, curClassName: string, templateVersion: string) {
   const shortVersion = templateVersion?.split('-')[0];
   const pluginClassNameWithVersion = [
     {
@@ -412,10 +421,16 @@ function _getClassNameByVersion(id: string, curClassName: string, templateVersio
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
     for (let plugin of pluginClassNameWithVersion) {
-      if (plugin.id === id && plugin.versions.includes(shortVersion!)) {
+      if (plugin.id === id && plugin.versions.includes(shortVersion)) {
         return plugin.className;
       }
     }
+  }
+  if (dataCollectionSDK === DataCollectionSDK.CLICKSTREAM && id === 'BUILT-IN-2') {
+    return 'software.aws.solution.clickstream.UAEnrichment';
+  }
+  if (dataCollectionSDK === DataCollectionSDK.CLICKSTREAM && id === 'BUILT-IN-3') {
+    return 'software.aws.solution.clickstream.IPEnrichment';
   }
   return curClassName;
 }

@@ -3558,7 +3558,7 @@ describe('Pipeline test', () => {
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[0].M.value.S === FULL_SOLUTION_VERSION &&
-        dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2',
+        dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3750,7 +3750,7 @@ describe('Pipeline test', () => {
       expect(
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[1].M.value.S === FULL_SOLUTION_VERSION &&
-        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
+        dataProcessingInput.M.Parameters.L[12].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
       ).toBeTruthy();
     });
     const res = await request(app)
