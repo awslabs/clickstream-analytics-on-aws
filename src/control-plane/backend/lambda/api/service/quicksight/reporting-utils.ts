@@ -942,10 +942,9 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
       method = 'AVERAGE';
     }
     const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
-    const uuid1 = uuidv4();
     values[0] = {
       NumericalMeasureField: {
-        FieldId: uuid1,
+        FieldId: uuidv4(),
         Column: {
           DataSetIdentifier: viewName,
           ColumnName: 'id',
