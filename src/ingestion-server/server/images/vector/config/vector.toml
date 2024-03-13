@@ -3,7 +3,7 @@ type = "http_server"
 address = "0.0.0.0:8685"
 strict_path = false
 headers = [ "X_Uri", "X_User_Agent", "X_Forwarded_For", "X_Date", "X_Request_ID", "X_Method"]
-query_parameters = [ "platform", "appId", "compression", "fakeIp" ]
+query_parameters = [ "platform", "appId", "compression", "fakeIp", "debugView" ]
 method = "POST"
 encoding = "binary"
 
@@ -25,3 +25,21 @@ if get_env_var!("DEV_MODE") == "Yes" && !is_null(.fakeIp) {
 .ingest_time = to_unix_timestamp(now()) * 1000
 .server_ingest_time = to_unix_timestamp(now()) * 1000
 '''
+
+[transforms.debug_view]
+inputs = ["json_parser"]
+type   = "filter"
+condition = '.debugView == "Yes"'
+
+[sinks.s3_debug_view]
+inputs          = ["debug_view"]    
+type            = "aws_s3"
+region          = "%%AWS_REGION%%"
+bucket          = "%%AWS_DEBUG_VIEW_S3_BUCKET%%"
+key_prefix      = "%%AWS_DEBUG_VIEW_S3_PREFIX%%year=%Y/month=%m/day=%d/hour=%H/"
+compression     = "gzip"               # compress final objects
+framing.method  = "newline_delimited"  # new line delimited...
+encoding.codec  = "json"               # ...JSON
+batch.max_bytes = %%DEBUG_VIEW_S3_BATCH_MAX_BYTES%%
+batch.timeout_secs = %%DEBUG_VIEW_S3_BATCH_TIMEOUT_SECS%%
+acknowledgements.enabled = false

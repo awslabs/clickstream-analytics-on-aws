@@ -533,6 +533,10 @@ test('Check parameters for Kafka nested stack - has all parameters', () => {
     'DomainName',
     'Protocol',
     'EnableGlobalAccelerator',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
     (pk) => {
@@ -582,6 +586,10 @@ test('Check parameters for Kafka nested stack - has minimum parameters', () => {
     'DomainName',
     'Protocol',
     'EnableGlobalAccelerator',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -629,6 +637,10 @@ test('Check parameters for Kinesis nested stack - has all parameters', () => {
     'DomainName',
     'Protocol',
     'EnableGlobalAccelerator',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -676,6 +688,10 @@ test('Check parameters for Kinesis nested stack - has minimum parameters', () =>
     'DomainName',
     'Protocol',
     'EnableGlobalAccelerator',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(
@@ -726,6 +742,10 @@ test('Check parameters for S3 nested stack - has all parameters', () => {
     'S3DataPrefix',
     'S3BatchMaxBytes',
     'S3BatchTimeout',
+    'DebugViewS3Bucket',
+    'DebugViewS3Prefix',
+    'DebugViewS3BatchMaxBytes',
+    'DebugViewS3BatchTimeout',
   ];
 
   const templateParams = Object.keys(nestStack.Properties.Parameters).map(

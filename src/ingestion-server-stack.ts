@@ -84,6 +84,12 @@ export interface IngestionServerNestStackProps extends StackProps {
   readonly appIds: string;
   readonly clickStreamSDK: string;
 
+  // debug view parameters
+  readonly debugViewS3Prefix: string;
+  readonly debugViewS3BucketName: string;
+  readonly debugViewS3BatchTimeout: number;
+  readonly debugViewS3BatchMaxBytes: number;
+
   // authentication parameters
   readonly enableAuthentication?: string;
   readonly authenticationSecretArn?: string;
@@ -116,7 +122,7 @@ export class IngestionServerNestedStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-ing) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig } = createCommonResources(this, props);
+    const { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig, debugViewS3SinkConfig } = createCommonResources(this, props);
 
     let notificationsTopic;
 
@@ -206,6 +212,7 @@ export class IngestionServerNestedStack extends NestedStack {
       appIds: props.appIds,
       clickStreamSDK: props.clickStreamSDK,
       workerStopTimeout: props.workerStopTimeout,
+      debugViewS3SinkConfig,
     };
 
     const ingestionServer = new IngestionServer(
@@ -251,6 +258,10 @@ export function createCommonResources(scope : Construct, props: {
   s3Prefix?: string;
   batchMaxBytes?: number;
   batchTimeout?: number;
+  debugViewS3Prefix: string;
+  debugViewS3BucketName: string;
+  debugViewS3BatchTimeout: number;
+  debugViewS3BatchMaxBytes: number;
 },
 ) {
   // Vpc
@@ -305,7 +316,21 @@ export function createCommonResources(scope : Construct, props: {
       batchTimeoutSecs: props.batchTimeout,
     };
   }
-  return { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig };
+
+  const debugViewS3Bucket = Bucket.fromBucketName(
+    scope,
+    'from-debugViewS3Bucket',
+    props.debugViewS3BucketName,
+  );
+
+  const debugViewS3SinkConfig: S3SinkConfig = {
+    s3Bucket: debugViewS3Bucket,
+    s3Prefix: props.debugViewS3Prefix,
+    batchMaxBytes: props.debugViewS3BatchMaxBytes,
+    batchTimeoutSecs: props.debugViewS3BatchTimeout,
+  };
+
+  return { vpc, kafkaSinkConfig, kinesisSinkConfig, s3SinkConfig, debugViewS3SinkConfig };
 }
 
 export interface IngestionServerStackProps extends StackProps {
@@ -347,6 +372,7 @@ export class IngestionServerStack extends Stack {
         enableApplicationLoadBalancerAccessLogParam,
         logS3BucketParam,
         logS3PrefixParam,
+        debugViewS3Params,
         notificationsTopicArnParam,
         serverMinParam,
         serverMaxParam,
@@ -398,6 +424,10 @@ export class IngestionServerStack extends Stack {
       clickStreamSDK: clickStreamSDKParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       workerStopTimeout: workerStopTimeoutParam.valueAsNumber,
+      debugViewS3BucketName: debugViewS3Params.debugViewS3BucketParam.valueAsString,
+      debugViewS3Prefix: debugViewS3Params.debugViewS3PrefixParam.valueAsString,
+      debugViewS3BatchTimeout: debugViewS3Params.debugViewS3BatchTimeoutParam.valueAsNumber,
+      debugViewS3BatchMaxBytes: debugViewS3Params.debugViewS3BatchMaxBytesParam.valueAsNumber,
     };
 
     let nestStackProps = { ... nestStackCommonProps };
