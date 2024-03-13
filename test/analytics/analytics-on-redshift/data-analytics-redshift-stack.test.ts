@@ -746,14 +746,14 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     expect(nestedStack).toBeInstanceOf(RedshiftAnalyticsStack);
   });
 
-  test('Should has 4 StateMachines', () => {
+  test('Should has 5 StateMachines', () => {
     const templates = [
       Template.fromStack(stack.nestedStacks.redshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.redshiftProvisionedStack),
     ];
     for (const nestedTemplate of templates) {
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 4);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 5);
     }
   });
 
@@ -892,7 +892,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-
   test('Should has eventFlowODSEventProcessorLambdaSg', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
@@ -919,10 +918,10 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Should has LoadDataCreateLoadManifesteventRoleDefaultPolicy', () => {
+  test('Should has LoadDataCreateLoadManifestRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifesteventRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifestRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -937,7 +936,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifesteventRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifestRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -977,8 +976,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             LOG_LEVEL: 'WARN',
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
             PROJECT_ID: Match.anyValue(),
-            ODS_EVENT_BUCKET: Match.anyValue(),
-            ODS_EVENT_BUCKET_PREFIX: Match.anyValue(),
             DYNAMODB_TABLE_NAME: Match.anyValue(),
             DYNAMODB_TABLE_INDEX_NAME: Match.anyValue(),
           },
@@ -1015,8 +1012,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             LOG_LEVEL: 'WARN',
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
             PROJECT_ID: Match.anyValue(),
-            ODS_EVENT_BUCKET: Match.anyValue(),
-            ODS_EVENT_BUCKET_PREFIX: Match.anyValue(),
             DYNAMODB_TABLE_NAME: Match.anyValue(),
             DYNAMODB_TABLE_INDEX_NAME: Match.anyValue(),
           },
@@ -2047,9 +2042,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             MANIFEST_BUCKET: RefAnyValue,
-            MANIFEST_BUCKET_PREFIX: JoinAnyValue,
-            ODS_EVENT_BUCKET: RefAnyValue,
-            ODS_EVENT_BUCKET_PREFIX: JoinAnyValue,
+            MANIFEST_BUCKET_PREFIX: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
@@ -2103,9 +2096,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             MANIFEST_BUCKET: RefAnyValue,
-            MANIFEST_BUCKET_PREFIX: JoinAnyValue,
-            ODS_EVENT_BUCKET: RefAnyValue,
-            ODS_EVENT_BUCKET_PREFIX: JoinAnyValue,
+            MANIFEST_BUCKET_PREFIX: RefAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
@@ -2377,7 +2368,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: '',
             REDSHIFT_ROLE: {
               'Fn::GetAtt': [
@@ -2441,7 +2431,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: RefAnyValue,
             REDSHIFT_ROLE: {
               'Fn::GetAtt': [
@@ -2719,7 +2708,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: '',
             REDSHIFT_DATA_API_ROLE: RefAnyValue,
             POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
@@ -2776,7 +2764,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: RefAnyValue,
             REDSHIFT_DATA_API_ROLE: {
               'Fn::GetAtt': [

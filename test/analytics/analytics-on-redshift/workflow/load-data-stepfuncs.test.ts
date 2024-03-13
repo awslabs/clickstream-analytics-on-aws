@@ -21,6 +21,7 @@ describe('Load data workflow', () => {
   const stack = new DataAnalyticsRedshiftStack(app, 'redshiftserverlessstack', {});
   const newServerlessTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
   const loadDataStepFuncDef =readFileSync(__dirname + '/load-data-stepfuncs.json', 'utf8');
+  const loadDataSubStepFuncDef =readFileSync(__dirname + '/load-data-sub-stepfuncs.json', 'utf8');
 
   test('ClickstreamLoadDataWorkflow is created as expected', () => {
     const strCapture = new Capture();
@@ -38,5 +39,19 @@ describe('Load data workflow', () => {
     expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataStepFuncDef);
   });
 
+  test('ClickstreamLoadDataSubWorkflow is created as expected', () => {
+    const strCapture = new Capture();
 
+    newServerlessTemplate.hasResourceProperties('AWS::StepFunctions::StateMachine', {
+      DefinitionString: strCapture,
+      RoleArn: {
+        'Fn::GetAtt': [
+          'LoadDataSubLoadDataStateMachineRole5305FB89',
+          'Arn',
+        ],
+      },
+    });
+
+    expect(JSON.stringify(strCapture.asObject(), undefined, 2)).toEqual(loadDataSubStepFuncDef);
+  });
 });

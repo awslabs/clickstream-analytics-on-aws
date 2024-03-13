@@ -11,15 +11,13 @@
  *  and limitations under the License.
  */
 
-
-process.env.REDSHIFT_ODS_TABLE_NAME = 'test_me_table';
-process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/test_me_table/';
+process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/';
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
-import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/has-more-job-new';
+import { handler, HasMoreWorkEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/has-more-job-new';
 import { JobStatus } from '../../../../../src/analytics/private/constant';
 import { PARTITION_APP } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
@@ -27,6 +25,12 @@ import { getMockContext } from '../../../../common/lambda-context';
 const ddbClientMock = mockClient(DynamoDBClient);
 
 const context = getMockContext();
+
+const inputEvent: HasMoreWorkEvent = {
+  odsTableName: 'test_me_table',
+  odsSourceBucket: 's3://EXAMPLE-BUCKET-2',
+  odsSourcePrefix: 'project1/test/test_me_table/',
+};
 
 beforeEach(() => {
   ddbClientMock.reset();
@@ -82,7 +86,7 @@ test('Should get all JOB_NEW files', async () => {
     ],
   });
 
-  const response = await handler({}, context);
+  const response = await handler(inputEvent, context);
   expect(response).toEqual({
     processingFilesCount: {
       event: 1,
@@ -98,7 +102,7 @@ test('Should get all JOB_NEW files', async () => {
     ExclusiveStartKey: 'next1',
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'test_me_table#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/test_me_table/' },
+    ExpressionAttributeValues: { ':job_status': 'test_me_table#NEW', ':s3_uri': `s3://${inputEvent.odsSourceBucket}/${inputEvent.odsSourcePrefix}` },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',
@@ -110,7 +114,7 @@ test('Should get all JOB_NEW files', async () => {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'user#PROCESSING', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/user/' },
+    ExpressionAttributeValues: { ':job_status': 'user#PROCESSING', ':s3_uri': `s3://${inputEvent.odsSourceBucket}/project1/test/user/` },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',

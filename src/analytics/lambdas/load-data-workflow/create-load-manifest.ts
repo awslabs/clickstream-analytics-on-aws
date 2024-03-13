@@ -42,8 +42,6 @@ const s3Client = new S3Client({
 
 const MANIFEST_BUCKET = process.env.MANIFEST_BUCKET!;
 const MANIFEST_BUCKET_PREFIX = process.env.MANIFEST_BUCKET_PREFIX!;
-const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
-const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;
 const QUERY_RESULT_LIMIT = process.env.QUERY_RESULT_LIMIT!;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
@@ -61,6 +59,12 @@ const metrics = new Metrics({ namespace: MetricsNamespace.REDSHIFT_ANALYTICS, se
 metrics.addDimensions({
   ProjectId: PROJECT_ID,
 });
+
+export interface CreateLoadManifestEvent {
+  odsTableName: string;
+  odsSourceBucket: string;
+  odsSourcePrefix: string;
+}
 
 /**
 {
@@ -88,27 +92,30 @@ metrics.addDimensions({
  * @param context The context of lambda function.
  * @returns The list of manifest file.
  */
-export const handler = async (_event: any, context: Context) => {
+export const handler = async (event: CreateLoadManifestEvent, context: Context) => {
   const requestId = context.awsRequestId;
   const nowMillis = new Date().getTime(); //.getMilliseconds;
 
 
   logger.debug(`context.awsRequestId:${requestId}.`);
-  logger.debug('triggered by job', _event.detail);
   logger.info('nowMilis: ' + nowMillis);
 
   const tableName = DYNAMODB_TABLE_NAME;
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
 
+  const odsTableName = event.odsTableName;
+  const odsSourceBucket = event.odsSourceBucket;
+  const odsSourcePrefix = event.odsSourcePrefix;
+
   const queryResultLimit = parseInt(QUERY_RESULT_LIMIT);
 
-  const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}`;
+  const odsEventBucketWithPrefix = `${odsSourceBucket}/${odsSourcePrefix}`;
 
   let newMinFileTimestamp = nowMillis;
 
   // Get all items with status=NEW
   let candidateItems: Array<ODSEventItem> = [];
-  let newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined);
+  let newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, undefined, odsTableName);
   // all JOB_NEW count for metrics
   let allJobNewCount = newRecordResp.Count;
   logger.info('queryItems response count=' + newRecordResp.Count);
@@ -124,7 +131,14 @@ export const handler = async (_event: any, context: Context) => {
       candidateItems = candidateItems.concat(newRecordResp.Items);
     }
     if (newRecordResp.LastEvaluatedKey) {
-      newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, newRecordResp.LastEvaluatedKey);
+      newRecordResp = await queryItems(
+        tableName,
+        indexName,
+        odsEventBucketWithPrefix,
+        JobStatus.JOB_NEW,
+        newRecordResp.LastEvaluatedKey,
+        odsTableName,
+      );
       allJobNewCount += newRecordResp.Count;
     } else {
       break;
@@ -134,19 +148,55 @@ export const handler = async (_event: any, context: Context) => {
   logger.info(`allJobNewCount: ${allJobNewCount}, candidateItems.length: ${candidateItems.length}`);
 
   // reprocess files in JOB_PROCESSING
-  let processingRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, undefined);
+  let processingRecordResp = await queryItems(
+    tableName,
+    indexName,
+    odsEventBucketWithPrefix,
+    JobStatus.JOB_PROCESSING,
+    undefined,
+    odsTableName,
+  );
   if (processingRecordResp.Count > 0) {
     const processingAsCandidateItems = processingRecordResp.Items.slice(0, queryResultLimit);
     logger.info(`add ${processingAsCandidateItems.length} JOB_PROCESSING files to candidateItems`);
     candidateItems = candidateItems.concat(processingAsCandidateItems);
   }
 
+  // reprocess files in JOB_ENQUEUE
+  let enqueueRecordResp = await queryItems(
+    tableName,
+    indexName,
+    odsEventBucketWithPrefix,
+    JobStatus.JOB_ENQUEUE,
+    undefined,
+    odsTableName,
+  );
+  if (enqueueRecordResp.Count > 0) {
+    const enqueueAsCandidateItems = enqueueRecordResp.Items.slice(0, queryResultLimit);
+    logger.info(`add ${enqueueAsCandidateItems.length} JOB_ENQUEUE files to candidateItems`);
+    candidateItems = candidateItems.concat(enqueueAsCandidateItems);
+  }
+
   logger.info('candidateItems.length: ' + candidateItems.length);
 
-  const response = await doManifestFiles(candidateItems, queryResultLimit, tableName, requestId);
+  const response = await doManifestFiles(odsTableName, candidateItems, queryResultLimit, tableName, requestId);
 
-  const processInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, nowMillis);
-  const enQueueInfo = await queryJobCountAndMinTimestamp(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE, nowMillis);
+  const processInfo = await queryJobCountAndMinTimestamp(
+    odsTableName,
+    tableName,
+    indexName,
+    odsEventBucketWithPrefix,
+    JobStatus.JOB_PROCESSING,
+    nowMillis,
+  );
+  const enQueueInfo = await queryJobCountAndMinTimestamp(
+    odsTableName,
+    tableName,
+    indexName,
+    odsEventBucketWithPrefix,
+    JobStatus.JOB_ENQUEUE,
+    nowMillis,
+  );
   const minFileTimestamp = Math.min(newMinFileTimestamp, processInfo.minFileTimestamp, enQueueInfo.minFileTimestamp);
   const maxFileAgeSeconds = (nowMillis - minFileTimestamp) / 1000;
 
@@ -164,7 +214,7 @@ export const handler = async (_event: any, context: Context) => {
   return response;
 };
 
-const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
+const doManifestFiles = async (odsTableName: string, candidateItems: Array<ODSEventItem>,
   queryResultLimit: number, tableName: string, requestId: string) => {
   const groupedManifestItems: { [key: string]: ManifestItem[] } = {};
   const manifestFiles: ManifestBody[] = [];
@@ -176,7 +226,7 @@ const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
     logger.info('Queried candidate to be loaded length=' + itemsToBeLoaded.length);
 
     const updateItemsPromise = itemsToBeLoaded.map(
-      (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE));
+      (item: Record<string, NativeAttributeValue>) => updateItem(tableName, item.s3_uri, requestId, JobStatus.JOB_ENQUEUE, odsTableName));
     await Promise.all(updateItemsPromise);
 
     itemsToBeLoaded.forEach((item) => {
@@ -200,7 +250,7 @@ const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
     logger.debug('Dump to manifest from grouped manifest items', groupedManifestItems);
     for (const appId of Object.keys(groupedManifestItems)) {
       const entries = { entries: groupedManifestItems[appId] };
-      const manifestFile = await uploadFileToS3(MANIFEST_BUCKET, `${MANIFEST_BUCKET_PREFIX}manifest/`, `${appId}-${requestId}.manifest`,
+      const manifestFile = await uploadFileToS3(MANIFEST_BUCKET, `${MANIFEST_BUCKET_PREFIX}${odsTableName}/manifest/`, `${appId}-${requestId}.manifest`,
         JSON.stringify(entries));
       manifestFiles.push({
         appId: appId,
@@ -240,15 +290,21 @@ function getAppIdFromS3Object(s3Object: string) {
  * @param s3Object The sort key in the table.
  */
 
-export const queryItems = async (tableName: string, indexName: string, prefix: string, jobStatus: string, lastEvaluatedKey: any): Promise<{
+export const queryItems = async (
+  tableName: string,
+  indexName: string,
+  prefix: string,
+  jobStatus: string,
+  lastEvaluatedKey: any,
+  odsTableName?: string,
+): Promise<{
   Count: number;
   Items: ODSEventItem[];
   LastEvaluatedKey?: Record<string, NativeAttributeValue>;
 }> => {
   const s3UriPrefix = 's3://' + prefix;
 
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
-  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+  const qJobStatus = composeJobStatus(jobStatus, odsTableName);
 
   logger.info('queryItems() ', {
     tableName,
@@ -305,9 +361,8 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
  * @param jobStatus The status of job.
  * @returns The response of update item.
  */
-const updateItem = async (tableName: string, s3Uri: string, requestId: string, jobStatus: string) => {
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
-  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+const updateItem = async (tableName: string, s3Uri: string, requestId: string, jobStatus: string, odsTableName: string) => {
+  const qJobStatus = composeJobStatus(jobStatus, odsTableName);
 
   const params = {
     TableName: tableName,
@@ -373,6 +428,7 @@ const uploadFileToS3 = async (s3Bucket: string, s3Prefix: string, filename: stri
 };
 
 export async function queryJobCountAndMinTimestamp(
+  odsTableName: string,
   tableName: string,
   indexName: string,
   odsEventBucketWithPrefix: string,
@@ -381,7 +437,7 @@ export async function queryJobCountAndMinTimestamp(
 
   let minFileTimestamp = nowMillis;
   let jobNum = 0;
-  let jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, undefined);
+  let jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, undefined, odsTableName);
   if (jobResp.Count > 0) {
     minFileTimestamp = jobResp.Items[0].timestamp;
   }
@@ -390,7 +446,7 @@ export async function queryJobCountAndMinTimestamp(
     jobNum += jobResp.Count;
 
     if (jobResp.LastEvaluatedKey) {
-      jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, jobResp.LastEvaluatedKey);
+      jobResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, jobStatus, jobResp.LastEvaluatedKey, odsTableName);
     } else {
       break;
     }
