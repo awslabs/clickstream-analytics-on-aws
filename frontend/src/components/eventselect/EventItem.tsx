@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { Select } from '@cloudscape-design/components';
+import {
+  ExploreAggregationMethod,
+  ExploreComputeMethod,
+} from '@aws/clickstream-base-lib';
+import { Select, SelectProps } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';

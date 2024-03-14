@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataSource } from '@aws/clickstream-base-lib';
 import { Input } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
@@ -23,7 +24,6 @@ import { userAttributeDisplayname } from 'pages/analytics/analytics-utils';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { MetadataSource } from 'ts/explore-types';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,

@@ -175,7 +175,7 @@ export const parametersConvertToCategoryItemType = (
   });
   categoryItems.push(categoryUserItems);
   const otherIndex = categoryItems.findIndex(
-    (item) => item.categoryId === ConditionCategory.OTHER
+    (item) => item.categoryId === ConditionCategory.EVENT_OUTER
   );
   if (otherIndex !== -1) {
     categoryItems.push(categoryItems.splice(otherIndex, 1)[0]);
@@ -660,7 +660,7 @@ export const getTouchPointsAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -700,7 +700,7 @@ export const getGoalAndConditions = (
       const conditionObj: ICondition = {
         category: defaultStr(
           condition.conditionOption?.category,
-          ConditionCategory.OTHER
+          ConditionCategory.EVENT
         ),
         property: defaultStr(condition.conditionOption?.name),
         operator: defaultStr(condition.conditionOperator?.value),
@@ -718,7 +718,7 @@ export const getGoalAndConditions = (
     groupColumn = {
       category: defaultStr(
         goalData.calculateMethodOption?.category,
-        ConditionCategory.OTHER
+        ConditionCategory.EVENT
       ),
       property: defaultStr(goalData.calculateMethodOption?.name),
       dataType: defaultStr(
@@ -779,7 +779,7 @@ const _gatEventExtParameter = (
       targetProperty: {
         category: defaultStr(
           computeMethodOption?.category,
-          ConditionCategory.OTHER
+          ConditionCategory.EVENT_OUTER
         ),
         property: defaultStr(computeMethodOption?.value),
         dataType: defaultStr(
@@ -805,7 +805,7 @@ export const getEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -855,7 +855,7 @@ export const getPairEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT
             ),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
@@ -873,7 +873,7 @@ export const getPairEventAndConditions = (
           const conditionObj: ICondition = {
             category: defaultStr(
               condition.conditionOption?.category,
-              ConditionCategory.OTHER
+              ConditionCategory.EVENT
             ),
             property: defaultStr(condition.conditionOption?.name, ''),
             operator: defaultStr(condition.conditionOperator?.value, ''),
@@ -911,7 +911,7 @@ export const getPairEventAndConditions = (
             retentionJoinColumn: {
               category: defaultStr(
                 item.startEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+                ConditionCategory.EVENT
               ),
               property: defaultStr(item.startEventRelationAttribute?.name, ''),
               dataType: defaultStr(
@@ -930,7 +930,7 @@ export const getPairEventAndConditions = (
             retentionJoinColumn: {
               category: defaultStr(
                 item.revisitEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+                ConditionCategory.EVENT
               ),
               property: defaultStr(
                 item.revisitEventRelationAttribute?.name,
@@ -955,7 +955,7 @@ export const getGroupCondition = (
   groupApplyToFirst: boolean | null
 ) => {
   let groupingCondition: GroupingCondition = {
-    category: defaultStr(option?.category, ConditionCategory.OTHER),
+    category: defaultStr(option?.category, ConditionCategory.EVENT),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
@@ -980,7 +980,7 @@ export const getGlobalEventCondition = (
       const conditionObj: ICondition = {
         category: defaultStr(
           condition.conditionOption?.category,
-          ConditionCategory.OTHER
+          ConditionCategory.EVENT
         ),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),

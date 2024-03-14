@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { AttributionModelType, ConditionCategory, ExploreAnalyticsOperators, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import {
   CreateAnalysisCommand,
@@ -43,10 +44,9 @@ import request from 'supertest';
 import { MOCK_TOKEN, quickSightUserMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EventAndCondition, ExploreAnalyticsOperators, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
+import { EventAndCondition, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
@@ -621,7 +621,7 @@ describe('reporting test', () => {
       timeUnit: 'WK',
       groupColumn: 'week',
       groupCondition: {
-        category: ConditionCategory.EVENT,
+        category: ConditionCategory.EVENT_OUTER,
         property: 'platform',
         dataType: MetadataValueType.STRING,
       },
@@ -2485,7 +2485,7 @@ describe('reporting test', () => {
         eventName: `event${i}`,
       });
       globalEventConditions.conditions.push({
-        category: ConditionCategory.OTHER,
+        category: ConditionCategory.EVENT_OUTER,
         property: `atrri${i}`,
         operator: '=',
         value: ['Android'],
@@ -3249,7 +3249,7 @@ describe('reporting test', () => {
             sqlConditions: {
               conditions: [
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['Japan'],
@@ -3264,7 +3264,7 @@ describe('reporting test', () => {
             sqlConditions: {
               conditions: [
                 {
-                  category: ConditionCategory.GEO,
+                  category: ConditionCategory.EVENT_OUTER,
                   property: 'country',
                   operator: '=',
                   value: ['China'],
@@ -3380,7 +3380,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\''],
@@ -3403,7 +3403,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\''],
@@ -3450,7 +3450,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\'\''],
@@ -3473,7 +3473,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.GEO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'country',
                     operator: '=',
                     value: ['China\'\''],
@@ -3574,7 +3574,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.DEVICE,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'platform',
                     operator: ExploreAnalyticsOperators.CONTAINS,
                     value: ['%'],
@@ -3597,7 +3597,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.APP_INFO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'install_source',
                     operator: ExploreAnalyticsOperators.NOT_CONTAINS,
                     value: ['_'],
@@ -3644,7 +3644,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.DEVICE,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'platform',
                     operator: 'contains',
                     value: ['%'],
@@ -3667,7 +3667,7 @@ describe('reporting test', () => {
               sqlCondition: {
                 conditions: [
                   {
-                    category: ConditionCategory.APP_INFO,
+                    category: ConditionCategory.EVENT_OUTER,
                     property: 'install_source',
                     operator: 'not_contains',
                     value: ['_'],

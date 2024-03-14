@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IMetadataBuiltInList } from '@aws/clickstream-base-lib';
 import { SelectProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import {
@@ -18,7 +19,6 @@ import {
   getEventMethodOptions,
   parametersConvertToCategoryItemType,
 } from 'pages/analytics/analytics-utils';
-import { IMetadataBuiltInList } from 'ts/explore-types';
 import { getEventParameters } from 'ts/utils';
 import {
   DEFAULT_CONDITION_DATA,

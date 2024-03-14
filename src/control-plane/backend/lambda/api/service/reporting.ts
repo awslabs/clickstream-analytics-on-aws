@@ -13,7 +13,21 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import {
+  DASHBOARD_READER_PERMISSION_ACTIONS,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+  QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
+  ExploreLocales,
+  AnalysisType,
+  ExplorePathNodeType,
+  ExploreRequestAction,
+  ExploreTimeScopeType,
+  ExploreVisualName,
+  QuickSightChartType,
+  ExploreComputeMethod,
+
+} from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,7 +67,6 @@ import {
 } from './quicksight/reporting-utils';
 import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
-import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';

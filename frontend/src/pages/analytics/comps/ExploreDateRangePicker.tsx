@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ExploreGroupColumn } from '@aws/clickstream-base-lib';
 import {
   DateRangePicker,
   DateRangePickerProps,
@@ -20,7 +21,6 @@ import {
 import i18n from 'i18n';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreGroupColumn } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 
 export const DEFAULT_WEEK_RANGE: DateRangePickerProps.RelativeOption = {

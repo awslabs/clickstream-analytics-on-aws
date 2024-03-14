@@ -12,9 +12,15 @@
  */
 
 import {
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRequestAction,
+  IMetadataBuiltInList,
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
   SPECIAL_CHARACTERS_PATTERN,
+  QuickSightChartType,
 } from '@aws/clickstream-base-lib';
 import {
   Button,
@@ -50,14 +56,6 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExploreRequestAction,
-  ExploreGroupColumn,
-  QuickSightChartType,
-  IMetadataBuiltInList,
-} from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,

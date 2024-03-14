@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { IMetadataBuiltInList } from '@aws/clickstream-base-lib';
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
-import { IMetadataBuiltInList } from 'ts/explore-types';
 import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
   CategoryItemType,
