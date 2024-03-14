@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   UpdateCommand,
   QueryCommandInput,
@@ -20,7 +21,6 @@ import {
 import { DynamoDbStore } from './dynamodb-store';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
-import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, isEmpty, rawToAttribute, rawToEvent, rawToParameter } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription, ISummaryEventParameter } from '../../model/metadata';

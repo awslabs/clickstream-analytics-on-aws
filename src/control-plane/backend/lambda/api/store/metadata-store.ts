@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataValueType } from '../common/explore-types';
+import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
 import { IMetadataDisplay, IMetadataDisplayNameAndDescription, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {

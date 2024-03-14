@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { ConditionCategory, ExplorePathNodeType, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   SFNClient, StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
@@ -27,7 +28,6 @@ import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock, dictionaryMock } from './ddb-mock';
 import { BASE_STATUS, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { analyticsMetadataTable, clickStreamTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
-import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -604,7 +604,7 @@ describe('Metadata Event test', () => {
     expect(res.body.data.associatedParameters.length).toEqual(57);
     expect(res.body.data.associatedParameters).toContainEqual({
       appId: MOCK_APP_ID,
-      category: ConditionCategory.APP_INFO,
+      category: 'app_info',
       description: {
         'en-US': 'Store where applications are installed',
         'zh-CN': '安装应用程序的商店',
@@ -1188,7 +1188,7 @@ describe('Metadata Event test V2', () => {
       projectId: MOCK_PROJECT_ID,
       appId: MOCK_APP_ID,
       name: MOCK_EVENT_PARAMETER_NAME,
-      category: ConditionCategory.APP_INFO,
+      category: 'app_info',
       valueType: MetadataValueType.STRING,
       platform: [],
       displayName: {
@@ -1493,10 +1493,10 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.APP_INFO}&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=app_info&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.APP_INFO}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
+    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#app_info#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
     expect(res.body.data.month).toEqual('#202303');
     expect(res.body.data.associatedEvents.length).toEqual(17);
     expect(res.body.data.associatedEvents).toContainEqual({
@@ -1736,10 +1736,10 @@ describe('Metadata Event Attribute test', () => {
       Items: [
         {
           ...MOCK_EVENT_PARAMETER,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_page_view#${ConditionCategory.EVENT}#_page_title#${MetadataValueType.STRING}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_page_view#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_TITLE}#${MetadataValueType.STRING}`,
           month: '#202302',
           eventName: '_page_view',
-          name: '_page_title',
+          name: ExplorePathNodeType.PAGE_TITLE,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             valueEnum: [
@@ -1760,10 +1760,10 @@ describe('Metadata Event Attribute test', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_page_view#${ConditionCategory.EVENT}#_page_url#${MetadataValueType.STRING}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_page_view#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_URL}#${MetadataValueType.STRING}`,
           month: '#202302',
           eventName: '_page_view',
-          name: '_page_url',
+          name: ExplorePathNodeType.PAGE_URL,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             valueEnum: [
@@ -1780,10 +1780,10 @@ describe('Metadata Event Attribute test', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_screen_view#${ConditionCategory.EVENT}#_screen_name#${MetadataValueType.STRING}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_screen_view#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_NAME}#${MetadataValueType.STRING}`,
           month: '#202302',
           eventName: '_screen_view',
-          name: '_screen_name',
+          name: ExplorePathNodeType.SCREEN_NAME,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             valueEnum: [
@@ -1800,10 +1800,10 @@ describe('Metadata Event Attribute test', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_screen_view#${ConditionCategory.EVENT}#_screen_id#${MetadataValueType.STRING}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_screen_view#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_ID}#${MetadataValueType.STRING}`,
           month: '#202302',
           eventName: '_screen_view',
-          name: '_screen_id',
+          name: ExplorePathNodeType.SCREEN_ID,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             valueEnum: [
@@ -2134,8 +2134,8 @@ describe('Metadata Event Attribute test V2', () => {
       Items: [
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_page_title#${MetadataValueType.STRING}`,
-          name: '_page_title',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_TITLE}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.PAGE_TITLE,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_page_view', '_page_view1'],
@@ -2157,8 +2157,8 @@ describe('Metadata Event Attribute test V2', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_page_url#${MetadataValueType.STRING}`,
-          name: '_page_url',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.PAGE_URL}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.PAGE_URL,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_page_view', '_page_view1'],
@@ -2176,8 +2176,8 @@ describe('Metadata Event Attribute test V2', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_screen_name#${MetadataValueType.STRING}`,
-          name: '_screen_name',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_NAME}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.SCREEN_NAME,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],
@@ -2195,8 +2195,8 @@ describe('Metadata Event Attribute test V2', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_screen_id#${MetadataValueType.STRING}`,
-          name: '_screen_id',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${ExplorePathNodeType.SCREEN_ID}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.SCREEN_ID,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],

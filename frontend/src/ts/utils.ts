@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { ServerlessRedshiftRPUByRegionMapping } from '@aws/clickstream-base-lib';
+import {
+  IMetadataBuiltInList,
+  ServerlessRedshiftRPUByRegionMapping,
+} from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -26,7 +29,6 @@ import {
   ExecutionType,
   IUserRole,
 } from './const';
-import { IMetadataBuiltInList } from './explore-types';
 
 /**
  * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns

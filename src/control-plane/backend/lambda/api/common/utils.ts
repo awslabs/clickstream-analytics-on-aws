@@ -19,6 +19,8 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
+  ConditionCategory,
+  MetadataValueType,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -28,7 +30,6 @@ import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
-import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo, SolutionVersion } from './solution-info-ln';
@@ -860,7 +861,7 @@ function rawToParameter(metadataArray: IMetadataRaw[], associated: boolean): IMe
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
       eventNames: meta.summary.associatedEvents ?? [],
@@ -896,7 +897,7 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     return parameters;
   }
   for (let meta of metadataArray) {
-    const category = meta.category ?? ConditionCategory.OTHER;
+    const category = meta.category ?? ConditionCategory.EVENT_OUTER;
     const valueType = meta.valueType ?? MetadataValueType.STRING;
     const parameter: IMetadataEventParameter = {
       id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
@@ -950,7 +951,7 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
@@ -1012,7 +1013,7 @@ IMetadataEventParameter | undefined {
     eventName: '',
     hasData: lastDayData.hasData,
     platform: filteredMetadata[0].summary.platform ?? [],
-    category: filteredMetadata[0].category ?? ConditionCategory.OTHER,
+    category: filteredMetadata[0].category ?? ConditionCategory.EVENT_OUTER,
     valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
     associatedEvents: groupEvents,
@@ -1029,7 +1030,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };

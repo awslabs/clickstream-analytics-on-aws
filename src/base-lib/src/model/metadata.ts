@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../constant';
+
 
 export interface IMetadataRawValue {
   readonly value: string;
