@@ -36,10 +36,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
 import { ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
-import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 
 export interface VisualProps {
   readonly sheetId: string;

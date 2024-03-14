@@ -294,7 +294,8 @@ export class ReportingService {
       ColumnConfigurations: columnConfigurations,
     };
 
-    const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+    const result: CreateDashboardResult = await this.createDashboardVisuals(
+      sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
     return result;
   }
 
@@ -515,7 +516,7 @@ export class ReportingService {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(
+      const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
@@ -590,7 +591,7 @@ export class ReportingService {
       let tableVisualDef: Visual;
       if (computeMethodProps.isSameAggregationMethod) {
         tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn
-          , hasGrouping, computeMethodProps.aggregationMethodName!);
+          , hasGrouping, computeMethodProps.aggregationMethodName);
       } else if (
         (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
         ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
@@ -747,7 +748,7 @@ export class ReportingService {
         filterGroup: visualRelatedParams.filterGroup,
       };
 
-      const result: CreateDashboardResult = await this.create(
+      const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
@@ -870,7 +871,7 @@ export class ReportingService {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(
+      const result: CreateDashboardResult = await this.createDashboardVisuals(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
@@ -882,7 +883,7 @@ export class ReportingService {
     }
   };
 
-  private async create(sheetId: string, resourceName: string, query: any,
+  public async createDashboardVisuals(sheetId: string, resourceName: string, query: any,
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
