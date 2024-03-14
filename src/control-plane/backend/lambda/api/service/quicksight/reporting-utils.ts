@@ -35,8 +35,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
 import { PairEventAndCondition } from './sql-builder';
-import { DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
+import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -1154,61 +1154,6 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   }
 
   checkChain.DuplicatedEvent().NodesLimit();
-
-  return checkChain.status;
-}
-
-export function checkAttributionAnalysisParameter(params: any): CheckParamsStatus {
-
-  const checkChain = new ReportingCheck(params);
-  _checkCommonPartParameter(checkChain);
-
-  if (params.targetEventAndCondition === undefined
-    || params.modelType === undefined
-    || params.eventAndConditions === undefined
-    || params.timeWindowType === undefined
-  ) {
-    return {
-      success: false,
-      message: 'Missing required parameter.',
-    };
-  }
-
-  if (params.eventAndConditions.length < 1) {
-    return {
-      success: false,
-      message: 'At least specify 1 event for attribution analysis',
-    };
-  }
-
-  if (params.modelType === AttributionModelType.POSITION && (params.modelWeights === undefined || params.modelWeights.length < 1) ) {
-    return {
-      success: false,
-      message: 'missing weights for attribution analysis',
-    };
-  }
-
-  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds === undefined) {
-    return {
-      success: false,
-      message: 'missing time window parameter for attribution analysis',
-    };
-  }
-
-  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined
-    && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
-    return {
-      success: false,
-      message: 'time window too long for attribution analysis, max is 10 years',
-    };
-  }
-
-  if (params.computeMethod !== ExploreComputeMethod.EVENT_CNT && params.computeMethod !== ExploreComputeMethod.SUM_VALUE) {
-    return {
-      success: false,
-      message: 'unsupported compute method for attribution analysis',
-    };
-  }
 
   return checkChain.status;
 }

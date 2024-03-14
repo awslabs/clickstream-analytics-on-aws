@@ -1896,7 +1896,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
     `;
 
     let filterSql = '';
-    filterSql = buildConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
+    filterSql = getConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
     if (filterSql !== '') {
       filterSql = `and (${filterSql}) `;
     }

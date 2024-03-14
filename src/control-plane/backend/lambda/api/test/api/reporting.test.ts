@@ -2267,14 +2267,14 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-              allowDomain: 'https://example.com',
-              quickSight: {
-                dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-              },
-            },
-          });
+          allowDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+        },
+      });
 
-
+    console.log(res.body)
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
@@ -2288,7 +2288,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds.length).toEqual(2);
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
-    });
+  });
 
   afterAll((done) => {
     server.close();
