@@ -25,7 +25,6 @@ import { useSegmentContext } from 'context/SegmentContext';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from './ConditionGroup';
-import { MOCK_EVENT_LIST, PRESET_PARAMETERS } from './mock_data';
 
 interface EventSeqItemProps {
   conditionWidth: number;
@@ -44,13 +43,13 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
     sequenceEventData,
     conditionWidth,
   } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
 
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
     {
       ...INIT_SEGMENTATION_DATA,
-      conditionOptions: PRESET_PARAMETERS,
+      conditionOptions: segmentDataState.attributeOptions,
     }
   );
   return (
@@ -86,7 +85,7 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 }}
                 hasTab={true}
                 isMultiSelect={false}
-                categories={MOCK_EVENT_LIST}
+                categories={segmentDataState.eventOption}
                 loading={false}
               />
             </div>

@@ -22,11 +22,6 @@ import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
-import {
-  CONDITION_STRING_OPERATORS,
-  MOCK_EVENT_LIST,
-  MULTI_LEVEL_SELECT_OPTIONS,
-} from '../mock_data';
 
 interface UserDoneCompProps {
   segmentData: IEventSegmentationItem;
@@ -39,7 +34,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
 ) => {
   const { t } = useTranslation();
   const { segmentData, segmentProps, addNewEventCondition } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
 
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 
@@ -77,7 +72,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               }}
               hasTab={true}
               isMultiSelect={false}
-              categories={MOCK_EVENT_LIST}
+              categories={segmentDataState.eventOption}
             />
           </div>
         </div>
@@ -112,15 +107,14 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                 disabled={!segmentData.userDoneEvent}
                 selectedOption={
                   segmentData.userDoneEventCalculateMethod ??
-                  MULTI_LEVEL_SELECT_OPTIONS[0]
+                  segmentDataState.eventCalculateMethodOption[0]
                 }
               />
               {showGroupSelectDropdown && (
                 <GroupSelectContainer
-                  categories={MULTI_LEVEL_SELECT_OPTIONS}
+                  categories={segmentDataState.eventCalculateMethodOption}
                   selectedItem={
-                    segmentData.userDoneEventCalculateMethod ??
-                    MULTI_LEVEL_SELECT_OPTIONS[0]
+                    segmentData.userDoneEventCalculateMethod ?? null
                   }
                   changeSelectItem={(item) => {
                     if (item) {
@@ -142,7 +136,8 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                       segmentDataDispatch({
                         type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate,
                         segmentProps,
-                        calculate: MULTI_LEVEL_SELECT_OPTIONS[0],
+                        calculate:
+                          segmentDataState.eventCalculateMethodOption[0],
                       });
                     }
                   }}
@@ -166,9 +161,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               operation: e.detail.selectedOption,
             });
           }}
-          options={CONDITION_STRING_OPERATORS.map((e) => {
-            return { ...e, label: defaultStr(t(e.label ?? '')) };
-          })}
+          options={segmentDataState.eventOperationOptions}
         />
       </div>
 

@@ -20,7 +20,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
-import { CONDITION_STRING_OPERATORS, PRESET_PARAMETERS } from '../mock_data';
 
 interface UserIsCompProps {
   segmentData: IEventSegmentationItem;
@@ -29,7 +28,7 @@ interface UserIsCompProps {
 
 const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
   const { segmentData, segmentProps } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const { t } = useTranslation();
   return (
     <div className="flex gap-10">
@@ -46,7 +45,7 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
         }}
         hasTab={false}
         isMultiSelect={false}
-        categories={PRESET_PARAMETERS}
+        categories={segmentDataState.attributeOptions}
       />
       <Select
         placeholder={defaultStr(
@@ -60,9 +59,7 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
             operator: e.detail.selectedOption,
           });
         }}
-        options={CONDITION_STRING_OPERATORS.map((e) => {
-          return { ...e, label: defaultStr(t(e.label ?? '')) };
-        })}
+        options={segmentDataState.attributeOperationOptions}
       />
       <div>
         <Input

@@ -16,7 +16,13 @@ import {
   AnalyticsSegmentAction,
   analyticsSegmentGroupReducer,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import { ReactElement, createContext, useContext, useReducer } from 'react';
+import {
+  ReactElement,
+  createContext,
+  useContext,
+  useMemo,
+  useReducer,
+} from 'react';
 import { DEFAULT_SEGMENT_GROUP_DATA } from 'ts/const';
 
 interface SegmentContextType {
@@ -35,8 +41,13 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
     { ...DEFAULT_SEGMENT_GROUP_DATA }
   );
 
+  const contextValue = useMemo(
+    () => ({ segmentDataState, segmentDataDispatch }),
+    [segmentDataState, segmentDataDispatch]
+  );
+
   return (
-    <SegmentContext.Provider value={{ segmentDataState, segmentDataDispatch }}>
+    <SegmentContext.Provider value={contextValue}>
       {children}
     </SegmentContext.Provider>
   );

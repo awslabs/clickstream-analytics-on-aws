@@ -27,7 +27,6 @@ import { useTranslation } from 'react-i18next';
 import { ConditionType } from 'ts/const';
 import Condition from './Condition';
 import EventSeqItem from './EventSeqItem';
-import { PRESET_PARAMETERS } from './mock_data';
 import UserDoneComp from './type/UserDoneComp';
 import UserDoneInSeq from './type/UserDoneInSeq';
 import UserInGroup from './type/UserInGroup';
@@ -53,14 +52,14 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
 ) => {
   const { t } = useTranslation();
   const { segmentProps, segmentData } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
 
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
     {
       ...INIT_SEGMENTATION_DATA,
-      conditionOptions: PRESET_PARAMETERS,
+      conditionOptions: segmentDataState.attributeOptions,
     }
   );
 

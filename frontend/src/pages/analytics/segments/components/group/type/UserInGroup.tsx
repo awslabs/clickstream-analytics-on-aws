@@ -19,7 +19,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
-import { FILTER_GROUP_LIST } from '../mock_data';
 
 interface UserInGroupProps {
   segmentData: IEventSegmentationItem;
@@ -28,7 +27,7 @@ interface UserInGroupProps {
 
 const UserInGroup: React.FC<UserInGroupProps> = (props: UserInGroupProps) => {
   const { segmentData, segmentProps } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const { t } = useTranslation();
   return (
     <div className="flex gap-10">
@@ -42,7 +41,7 @@ const UserInGroup: React.FC<UserInGroupProps> = (props: UserInGroupProps) => {
             group: e.detail.selectedOption,
           });
         }}
-        options={FILTER_GROUP_LIST}
+        options={segmentDataState.userGroupOptions}
       />
     </div>
   );

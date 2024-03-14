@@ -24,6 +24,7 @@ import {
   DEFAULT_SEGMENT_ITEM,
 } from 'ts/const';
 import {
+  CategoryItemType,
   DEFAULT_CONDITION_DATA,
   ERelationShip,
   IAnalyticsItem,
@@ -31,6 +32,7 @@ import {
 } from '../AnalyticsType';
 
 export enum AnalyticsSegmentActionType {
+  SetSegmentData = 'setSegmentData',
   ResetSegmentData = 'resetSegmentData',
   AddOrEventData = 'addOrEventData',
   ConvertAndDataToOr = 'convertAndDataToOr',
@@ -71,10 +73,17 @@ export enum AnalyticsSegmentActionType {
   ChangeSequenceEventFilterConditionRelation = 'changeSequenceEventFilterConditionRelation',
 
   UpdateUserInGroup = 'updateUserInGroup',
+
+  SetEventOption = 'setEventOption',
 }
 
 export type ResetEventData = {
   type: AnalyticsSegmentActionType.ResetSegmentData;
+};
+
+export type SetSegmentData = {
+  type: AnalyticsSegmentActionType.SetSegmentData;
+  segmentData: IEventSegmentationObj;
 };
 
 export type AddOrEventData = {
@@ -279,7 +288,13 @@ export type UpdateUserInGroup = {
   group: SelectProps.Option;
 };
 
+export type SetEventOption = {
+  type: AnalyticsSegmentActionType.SetEventOption;
+  eventOption: CategoryItemType[];
+};
+
 export type AnalyticsSegmentAction =
+  | SetSegmentData
   | ResetEventData
   | AddOrEventData
   | ConvertAndDataToOr
@@ -314,7 +329,8 @@ export type AnalyticsSegmentAction =
   | UpdateSequenceEventFilterConditionOperation
   | UpdateSequenceEventFilterConditionValue
   | RemoveSequenceEventFilterConditionOption
-  | UpdateUserInGroup;
+  | UpdateUserInGroup
+  | SetEventOption;
 
 export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
@@ -328,6 +344,10 @@ export const analyticsSegmentGroupReducer = (
   switch (action.type) {
     case AnalyticsSegmentActionType.ResetSegmentData: {
       return { ...DEFAULT_SEGMENT_GROUP_DATA };
+    }
+
+    case AnalyticsSegmentActionType.SetSegmentData: {
+      return { ...action.segmentData };
     }
 
     // event and or logic
@@ -900,6 +920,10 @@ export const analyticsSegmentGroupReducer = (
           action.group;
       }
       return { ...newState };
+    }
+
+    case AnalyticsSegmentActionType.SetEventOption: {
+      return { ...newState, eventOption: action.eventOption };
     }
 
     default:
