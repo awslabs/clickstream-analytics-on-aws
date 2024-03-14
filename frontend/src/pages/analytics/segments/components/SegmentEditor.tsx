@@ -20,6 +20,7 @@ import {
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
 import React, { Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
 import SegmentItem from './group/SegmentItem';
 
 interface SegmentationFilterProps {
@@ -29,12 +30,13 @@ interface SegmentationFilterProps {
 const SegmentEditor: React.FC<SegmentationFilterProps> = (
   props: SegmentationFilterProps
 ) => {
+  const { t } = useTranslation();
   const { segmentDataState, segmentDataDispatch } = props;
   return (
     <div className="flex-v">
       {segmentDataState?.subItemList?.map((item, index) => {
         return (
-          <div key={identity(index)}>
+          <div data-testid="test-segment-item" key={identity(index)}>
             <SegmentItem
               segmentItemData={item}
               segmentDataDispatch={segmentDataDispatch}
@@ -55,6 +57,7 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
       })}
       <div className="mt-10">
         <Button
+          data-testid="test-add-filter-group"
           iconName="add-plus"
           onClick={() => {
             segmentDataDispatch({
@@ -62,7 +65,7 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
             });
           }}
         >
-          Filter group
+          {t('button.filterGroup')}
         </Button>
       </div>
       <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>

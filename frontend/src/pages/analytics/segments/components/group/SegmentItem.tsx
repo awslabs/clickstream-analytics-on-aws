@@ -18,6 +18,7 @@ import {
   AnalyticsSegmentActionType,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import React, { Dispatch } from 'react';
+import { useTranslation } from 'react-i18next';
 import { darkBackgroundColors } from 'ts/const';
 import ConditionTimeRange from './ConditionTimeRange';
 import RenderNestSegment from './RenderNestSegment';
@@ -31,6 +32,7 @@ interface SegmentItemProps {
 
 const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
   const { segmentItemData, segmentDataDispatch, index, hideRemove } = props;
+  const { t } = useTranslation();
   return (
     <div className="flex-v gap-5">
       <div className="cs-analytics-group-header-bg">
@@ -97,7 +99,7 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
               });
             }}
           >
-            And
+            {t('button.and')}
           </Button>
         </div>
       </div>

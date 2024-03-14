@@ -109,6 +109,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         })}
       >
         <div
+          role="none"
           className="flex-1 cs-dropdown-event-input"
           onClick={() => {
             setShowDropdown((prev) => !prev);
@@ -148,6 +149,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         {isMultiSelect && (
           <>
             <div
+              role="none"
               className="second-select-option"
               title={calcMethodOption?.label}
               onClick={() => {

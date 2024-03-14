@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExecutionType } from '../../src/ts/const';
+import { ExecutionType } from 'ts/const';
 import {
   extractAccountIdFromArn,
   generateCronDateRange,
@@ -20,7 +20,7 @@ import {
   validateAppId,
   validateEmails,
   validateProjectId,
-} from '../../src/ts/utils';
+} from 'ts/utils';
 
 global.crypto = {
   getRandomValues: <T extends ArrayBufferView | null>(buffer: T): T => {

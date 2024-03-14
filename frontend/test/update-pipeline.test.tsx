@@ -12,10 +12,10 @@
  */
 
 import { render } from '@testing-library/react';
-import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
-import Reporting from '../src/pages/pipelines/create/steps/Reporting';
-import { EPipelineStatus } from '../src/ts/const';
-import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
+import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
+import Reporting from 'pages/pipelines/create/steps/Reporting';
+import { EPipelineStatus } from 'ts/const';
+import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 const mockedUsedNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({

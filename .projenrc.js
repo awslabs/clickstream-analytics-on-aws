@@ -523,6 +523,7 @@ frontendProject.setScript('crabuild', 'node scripts/build.js');
 frontendProject.setScript('lint', 'eslint --ext .js,.ts,.jsx,.tsx src');
 frontendProject.setScript('format', 'npm run lint --fix & prettier --write \'src/**/*.{js,jsx,ts,tsx}\'');
 frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePatterns');
+frontendProject.setScript('test:coverage', 'node scripts/test.js --transformIgnorePatterns -coverage --watchAll=false --collectCoverageFrom=\'src/**/*.{ts,tsx}\'');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [

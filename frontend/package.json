@@ -16,7 +16,8 @@
     "start": "node scripts/start.js",
     "crabuild": "node scripts/build.js",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
-    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'"
+    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "test:coverage": "node scripts/test.js --transformIgnorePatterns -coverage --watchAll=false --collectCoverageFrom='src/**/*.{ts,tsx}'"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",

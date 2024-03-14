@@ -198,9 +198,11 @@
     "fullWindowView": "全窗口查看",
     "scanMetadata": "扫描元数据",
     "or": "或者",
+    "and": "并且",
     "event": "事件",
     "actions": "操作",
-    "createSegment": "创建分群"
+    "createSegment": "创建分群",
+    "filterGroup": "过滤组"
   },
   "item": "项目",
   "items": "项目",

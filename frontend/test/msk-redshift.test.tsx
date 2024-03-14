@@ -13,10 +13,10 @@
 
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
-import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
-import Reporting from '../src/pages/pipelines/create/steps/Reporting';
-import { SinkType } from '../src/ts/const';
-import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
+import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
+import Reporting from 'pages/pipelines/create/steps/Reporting';
+import { SinkType } from 'ts/const';
+import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 
 const mockedUsedNavigate = jest.fn();
 
@@ -44,7 +44,7 @@ beforeEach(() => {
 });
 
 describe('Test data processing settings', () => {
-  test('Should hide the redshift and quickight settings when not enable data processing', async () => {
+  test('Should hide the redshift and quicksight settings when not enable data processing', async () => {
     const pipelineData = {
       ...INIT_EXT_PIPELINE_DATA,
       enableDataProcessing: false,

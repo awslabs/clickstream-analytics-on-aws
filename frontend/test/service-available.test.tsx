@@ -13,11 +13,11 @@
 
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
-import ConfigIngestion from '../src/pages/pipelines/create/steps/ConfigIngestion';
-import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
-import Reporting from '../src/pages/pipelines/create/steps/Reporting';
-import BufferMSK from '../src/pages/pipelines/create/steps/buffer/BufferMSK';
-import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
+import ConfigIngestion from 'pages/pipelines/create/steps/ConfigIngestion';
+import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
+import Reporting from 'pages/pipelines/create/steps/Reporting';
+import BufferMSK from 'pages/pipelines/create/steps/buffer/BufferMSK';
+import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 
 const mockedUsedNavigate = jest.fn();
 
