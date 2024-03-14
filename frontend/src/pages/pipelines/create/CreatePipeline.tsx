@@ -2654,20 +2654,12 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           data.network.privateSubnetIds,
           []
         ),
-        type: defaultStr(
-          data.network.type,
-          ENetworkType.General
-        ) as ENetworkType,
       },
       bucket: {
         name: defaultStr(data.bucket?.name),
         prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
-        ingestionType: defaultStr(
-          data.ingestionServer.ingestionType,
-          EIngestionType.EC2
-        ) as EIngestionType,
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,
