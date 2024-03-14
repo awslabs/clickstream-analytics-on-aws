@@ -13,7 +13,6 @@
 
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
-import { ENetworkType } from 'ts/const';
 import ConfigIngestion from '../src/pages/pipelines/create/steps/ConfigIngestion';
 import DataProcessing from '../src/pages/pipelines/create/steps/DataProcessing';
 import Reporting from '../src/pages/pipelines/create/steps/Reporting';
@@ -23,7 +22,7 @@ import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
 const mockedUsedNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockedUsedNavigate,
 }));
 
@@ -188,6 +187,12 @@ describe('Test AGA service available', () => {
         changeAckownledge={() => {
           return;
         }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
+          return;
+        }}
         publicSubnetError={false}
         privateSubnetError={false}
         privateSubnetDiffWithPublicError={false}
@@ -211,12 +216,6 @@ describe('Test AGA service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
-        changeNetworkType={function (type: ENetworkType): void {
-          throw new Error('Function not implemented.');
-        }}
-        changeIngestionType={function (type: string): void {
-          throw new Error('Function not implemented.');
-        }}
       />
     );
 
@@ -343,6 +342,12 @@ describe('Test AGA service available', () => {
         changeAckownledge={() => {
           return;
         }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
+          return;
+        }}
         publicSubnetError={false}
         privateSubnetError={false}
         privateSubnetDiffWithPublicError={false}
@@ -366,12 +371,6 @@ describe('Test AGA service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
-        changeNetworkType={function (type: ENetworkType): void {
-          throw new Error('Function not implemented.');
-        }}
-        changeIngestionType={function (type: string): void {
-          throw new Error('Function not implemented.');
-        }}
       />
     );
 
@@ -1069,6 +1068,12 @@ describe('Test MSK service available', () => {
         changeAckownledge={() => {
           return;
         }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
+          return;
+        }}
         publicSubnetError={false}
         privateSubnetError={false}
         privateSubnetDiffWithPublicError={false}
@@ -1092,12 +1097,6 @@ describe('Test MSK service available', () => {
         bufferS3IntervalFormatError={false}
         bufferKDSModeEmptyError={false}
         bufferKDSShardNumFormatError={false}
-        changeNetworkType={function (type: ENetworkType): void {
-          throw new Error('Function not implemented.');
-        }}
-        changeIngestionType={function (type: string): void {
-          throw new Error('Function not implemented.');
-        }}
       />
     );
     expect(configIntestionDom).toBeDefined();

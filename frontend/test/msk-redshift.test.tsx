@@ -21,7 +21,7 @@ import { INIT_EXT_PIPELINE_DATA } from '../src/ts/init';
 const mockedUsedNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockedUsedNavigate,
 }));
 
@@ -386,11 +386,11 @@ describe('Test redsfhit settings', () => {
           return;
         }}
         quickSightUserEmptyError={false}
-        changeQuickSightDisabled={function (disabled: boolean): void {
-          throw new Error('Function not implemented.');
+        changeQuickSightDisabled={() => {
+          return;
         }}
-        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
-          throw new Error('Function not implemented.');
+        changeQuickSightSelectedUser={() => {
+          return;
         }}
       />
     );
@@ -645,11 +645,11 @@ describe('Test MSK kafkaConnector settings', () => {
           return;
         }}
         quickSightUserEmptyError={false}
-        changeQuickSightDisabled={function (disabled: boolean): void {
-          throw new Error('Function not implemented.');
+        changeQuickSightDisabled={() => {
+          return;
         }}
-        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
-          throw new Error('Function not implemented.');
+        changeQuickSightSelectedUser={() => {
+          return;
         }}
       />
     );
