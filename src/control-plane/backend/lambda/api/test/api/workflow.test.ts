@@ -440,11 +440,11 @@ describe('Workflow test', () => {
                             Region: 'ap-southeast-1',
                             Parameters: [
                               ...INGESTION_S3_FARGATE_PARAMETERS,
-                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
                               {
                                 ParameterKey: 'SinkType',
                                 ParameterValue: SINK_TYPE_MODE.SINK_TYPE_S3,
                               },
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
                             ],
                             StackName: `${getStackPrefix()}-Ingestion-s3-6666-6666`,
                             Tags: Tags,

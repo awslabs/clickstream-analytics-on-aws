@@ -297,7 +297,7 @@ function getKafkaTopic(pipeline: IPipeline): string {
 function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
-  let s3PathPluginFiles: string[] = [];
+  const s3PathPluginFiles: string[] = [];
   // Transformer
   const { transformerClassNames, transformerPluginJars, transformerPluginFiles } = _getTransformerPluginInfo(pipeline, resources);
   transformerAndEnrichClassNames.push(...transformerClassNames);
@@ -1101,7 +1101,10 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+function getAppRegistryApplicationArn(pipeline: IPipeline | undefined): string {
+  if (!pipeline) {
+    return '';
+  }
   return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
