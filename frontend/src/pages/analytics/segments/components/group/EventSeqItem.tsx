@@ -20,11 +20,9 @@ import {
 import EventItem from 'components/eventselect/EventItem';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch, useReducer } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from './ConditionGroup';
 import { MOCK_EVENT_LIST, PRESET_PARAMETERS } from './mock_data';
@@ -32,7 +30,6 @@ import { MOCK_EVENT_LIST, PRESET_PARAMETERS } from './mock_data';
 interface EventSeqItemProps {
   conditionWidth: number;
   sequenceEventIndex: number;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   sequenceEventData: IAnalyticsItem;
   segmentProps: SegmentPropsData;
 }
@@ -45,9 +42,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
     sequenceEventIndex,
     segmentProps,
     sequenceEventData,
-    segmentDataDispatch,
     conditionWidth,
   } = props;
+  const { segmentDataDispatch } = useSegmentContext();
+
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
     {

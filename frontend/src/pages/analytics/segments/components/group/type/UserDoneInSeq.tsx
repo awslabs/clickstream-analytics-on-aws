@@ -13,11 +13,9 @@
 
 import { Button, Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from '../ConditionGroup';
 
@@ -33,14 +31,15 @@ export const EVENT_SEQUENCE_FLOW_OPTION = [
 interface UserDoneInSeqProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
 }
 
 const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
   props: UserDoneInSeqProps
 ) => {
   const { t } = useTranslation();
-  const { segmentData, segmentProps, segmentDataDispatch } = props;
+  const { segmentData, segmentProps } = props;
+  const { segmentDataDispatch } = useSegmentContext();
+
   return (
     <div className="flex gap-5">
       <div>

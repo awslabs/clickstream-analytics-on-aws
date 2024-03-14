@@ -337,6 +337,15 @@
   "segment": {
     "title": "User Segments",
     "desc": "User Segments description",
+    "type": {
+      "userDone": "User has done",
+      "userNotDone": "User has not done",
+      "userIs": "User is",
+      "userIsNot": "User is not",
+      "doneInSequence": "User has done in sequence",
+      "userInGroup": "User in segment group",
+      "userNotInGroup": "User not in segment group"
+    },
     "comp": {
       "title": "Create Segment",
       "desc": "Create a segment by selecting the users that shared the same attributes of behaviors within a period of time.",
@@ -352,10 +361,13 @@
       "refreshMethodManual": "Manual",
       "refreshMethodAuto": "Automatic",
       "expirationSettings": "Expiration settings",
-      "expirationSettingsDesc": "Segment will become automatic refresh after the expiration date, Setting an expiration date for a segment avoid unnecessary cost when an segment is not being used. You can always update it back to Automatic refresh method.",
+      "expirationSettingsDesc": "Segment will become manual refresh after the expiration date, Setting an expiration date for a segment avoid unnecessary cost when an segment is not being used. You can always update it back to Automatic refresh method.",
       "filterGroup": "Filter group",
       "filterGroupDesc": "Users who meet the following conditions will be included in the segment.",
-      "provideDesc": "Provide a short description"
+      "provideDesc": "Provide a short description",
+      "selectUserGroup": "Please select user segment group",
+      "segmentDescPlaceholder": "Provide a short description",
+      "filterByTimeRange": "Filter by a date and time range"
     }
   }
 }

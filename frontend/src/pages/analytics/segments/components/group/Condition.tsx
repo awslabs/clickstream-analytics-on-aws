@@ -13,29 +13,26 @@
 
 import { Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch, useEffect, useRef } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CONDITION_LIST } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from './ConditionGroup';
 
 interface ConditionProps {
   segmentProps: SegmentPropsData;
   segmentData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   updateConditionWidth: (w: number) => void;
 }
 
 const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
-  const {
-    segmentData,
-    segmentProps,
-    segmentDataDispatch,
-    updateConditionWidth,
-  } = props;
+  const { segmentData, segmentProps, updateConditionWidth } = props;
+  const { t } = useTranslation();
   const selectRef = useRef<HTMLDivElement>(null);
+  const { segmentDataDispatch } = useSegmentContext();
+
   useEffect(() => {
     const calculateWidth = () => {
       if (selectRef.current) {
@@ -49,7 +46,10 @@ const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
   return (
     <div ref={selectRef}>
       <Select
-        selectedOption={segmentData.userEventType}
+        selectedOption={{
+          ...segmentData.userEventType,
+          label: defaultStr(t(segmentData.userEventType?.label ?? '')),
+        }}
         onChange={({ detail }) =>
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserEventType,
@@ -57,7 +57,9 @@ const Condition: React.FC<ConditionProps> = (props: ConditionProps) => {
             userEventType: detail.selectedOption,
           })
         }
-        options={CONDITION_LIST}
+        options={CONDITION_LIST.map((item) => {
+          return { label: defaultStr(t(item.label ?? '')), value: item.value };
+        })}
       />
     </div>
   );

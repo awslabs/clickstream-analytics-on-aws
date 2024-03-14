@@ -117,6 +117,14 @@ export interface IEventSegmentationItem {
 export interface IEventSegmentationObj {
   filterGroupRelationShip: ERelationShip;
   subItemList: IEventSegmentationItem[];
+  // select options
+  eventOption: CategoryItemType[];
+  eventCalculateMethodOption: IAnalyticsItem[];
+  conditionOptions: CategoryItemType[];
+  eventOperationOptions: SelectProps.Option[];
+  attributeOptions: CategoryItemType[];
+  attributeOperationOptions: SelectProps.Option[];
+  userGroupOptions: SelectProps.Option[];
 }
 
 export interface IRetentionAnalyticsItem {

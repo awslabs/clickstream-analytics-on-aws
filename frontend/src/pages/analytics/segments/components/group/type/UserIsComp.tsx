@@ -14,11 +14,9 @@
 import { Input, Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
@@ -27,11 +25,11 @@ import { CONDITION_STRING_OPERATORS, PRESET_PARAMETERS } from '../mock_data';
 interface UserIsCompProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
 }
 
 const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
-  const { segmentData, segmentProps, segmentDataDispatch } = props;
+  const { segmentData, segmentProps } = props;
+  const { segmentDataDispatch } = useSegmentContext();
   const { t } = useTranslation();
   return (
     <div className="flex gap-10">

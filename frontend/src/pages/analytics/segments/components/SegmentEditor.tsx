@@ -12,26 +12,17 @@
  */
 
 import { Button } from '@cloudscape-design/components';
-import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
-import React, { Dispatch } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import SegmentItem from './group/SegmentItem';
 
-interface SegmentationFilterProps {
-  segmentDataState: IEventSegmentationObj;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
-}
-const SegmentEditor: React.FC<SegmentationFilterProps> = (
-  props: SegmentationFilterProps
-) => {
+const SegmentEditor: React.FC = () => {
   const { t } = useTranslation();
-  const { segmentDataState, segmentDataDispatch } = props;
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   return (
     <div className="flex-v">
       {segmentDataState?.subItemList?.map((item, index) => {
@@ -39,7 +30,6 @@ const SegmentEditor: React.FC<SegmentationFilterProps> = (
           <div data-testid="test-segment-item" key={identity(index)}>
             <SegmentItem
               segmentItemData={item}
-              segmentDataDispatch={segmentDataDispatch}
               index={index}
               hideRemove={
                 segmentDataState.subItemList.length === 1 &&

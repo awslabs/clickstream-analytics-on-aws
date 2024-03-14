@@ -15,11 +15,9 @@ import { Button, Input, Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch, useEffect, useRef, useState } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
@@ -33,7 +31,6 @@ import {
 interface UserDoneCompProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   addNewEventCondition: () => void;
 }
 
@@ -41,12 +38,8 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   props: UserDoneCompProps
 ) => {
   const { t } = useTranslation();
-  const {
-    segmentData,
-    segmentProps,
-    segmentDataDispatch,
-    addNewEventCondition,
-  } = props;
+  const { segmentData, segmentProps, addNewEventCondition } = props;
+  const { segmentDataDispatch } = useSegmentContext();
 
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 

@@ -1,10 +1,3 @@
-import { SelectProps } from '@cloudscape-design/components';
-import {
-  ERelationShip,
-  IEventSegmentationItem,
-  IEventSegmentationObj,
-} from 'components/eventselect/AnalyticsType';
-
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -17,6 +10,13 @@ import {
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { SelectProps } from '@cloudscape-design/components';
+import {
+  ERelationShip,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
+
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
@@ -452,16 +452,31 @@ export enum ConditionType {
 }
 
 export const CONDITION_LIST: SelectProps.Option[] = [
-  { label: '用户做过', value: ConditionType.USER_DONE },
-  { label: '用户没做过', value: ConditionType.USER_NOT_DONE },
   {
-    label: '用户依次做过',
+    label: 'analytics:segment.type.userDone',
+    value: ConditionType.USER_DONE,
+  },
+  {
+    label: 'analytics:segment.type.userNotDone',
+    value: ConditionType.USER_NOT_DONE,
+  },
+  {
+    label: 'analytics:segment.type.doneInSequence',
     value: ConditionType.USER_DONE_IN_SEQUENCE,
   },
-  { label: '用户是', value: ConditionType.USER_IS },
-  { label: '用户不是', value: ConditionType.USER_IS_NOT },
-  { label: '用户在分群组', value: ConditionType.USER_IN_GROUP },
-  { label: '用户不在分群组', value: ConditionType.USER_NOT_IN_GROUP },
+  { label: 'analytics:segment.type.userIs', value: ConditionType.USER_IS },
+  {
+    label: 'analytics:segment.type.userIsNot',
+    value: ConditionType.USER_IS_NOT,
+  },
+  {
+    label: 'analytics:segment.type.userInGroup',
+    value: ConditionType.USER_IN_GROUP,
+  },
+  {
+    label: 'analytics:segment.type.userNotInGroup',
+    value: ConditionType.USER_NOT_IN_GROUP,
+  },
 ];
 
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
@@ -483,6 +498,13 @@ export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
 export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   filterGroupRelationShip: ERelationShip.AND,
   subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
+  eventOption: [],
+  eventCalculateMethodOption: [],
+  conditionOptions: [],
+  eventOperationOptions: [],
+  attributeOptions: [],
+  attributeOperationOptions: [],
+  userGroupOptions: [],
 };
 
 export const darkBackgroundColors = [

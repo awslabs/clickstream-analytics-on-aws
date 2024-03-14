@@ -16,17 +16,14 @@ import {
   DateRangePickerProps,
 } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 
 interface ConditionTimeRangeProps {
   segmentData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   groupIndex: number;
 }
 
@@ -34,7 +31,8 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
   props: ConditionTimeRangeProps
 ) => {
   const { t } = useTranslation();
-  const { segmentData, groupIndex, segmentDataDispatch } = props;
+  const { segmentData, groupIndex } = props;
+  const { segmentDataDispatch } = useSegmentContext();
 
   const isValidRange = (
     range: DateRangePickerProps.Value | null
@@ -128,7 +126,7 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
             return `${label} ${value.amount} ${unit}`;
           },
         }}
-        placeholder="Filter by a date and time range"
+        placeholder={defaultStr(t('analytics:segment.comp.filterByTimeRange'))}
       />
     </div>
   );

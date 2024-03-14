@@ -13,26 +13,27 @@
 
 import { Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
 import { FILTER_GROUP_LIST } from '../mock_data';
 
 interface UserInGroupProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
 }
 
 const UserInGroup: React.FC<UserInGroupProps> = (props: UserInGroupProps) => {
-  const { segmentData, segmentProps, segmentDataDispatch } = props;
+  const { segmentData, segmentProps } = props;
+  const { segmentDataDispatch } = useSegmentContext();
+  const { t } = useTranslation();
   return (
     <div className="flex gap-10">
       <Select
-        placeholder="请选择用户分群组"
+        placeholder={defaultStr(t('analytics:segment.comp.selectUserGroup'))}
         selectedOption={segmentData.userInFilterGroup ?? null}
         onChange={(e) => {
           segmentDataDispatch({

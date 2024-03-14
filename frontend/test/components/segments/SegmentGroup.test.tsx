@@ -12,10 +12,9 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
-import { ERelationShip } from 'components/eventselect/AnalyticsType';
-import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { SegmentProvider } from 'context/SegmentContext';
 import SegmentEditor from 'pages/analytics/segments/components/SegmentEditor';
-import { DEFAULT_FILTER_GROUP_ITEM } from 'ts/const';
+import { ReactElement } from 'react';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,35 +35,23 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
-const mockDispatch = jest.fn();
-
-const initSegmentState = {
-  filterGroupRelationShip: ERelationShip.AND,
-  subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
+const renderWithProvider = (component: ReactElement) => {
+  return render(<SegmentProvider>{component}</SegmentProvider>);
 };
 
 describe('SegmentEditor', () => {
   it('should render without errors', () => {
-    render(
-      <SegmentEditor
-        segmentDataState={initSegmentState}
-        segmentDataDispatch={jest.fn()}
-      />
-    );
+    renderWithProvider(<SegmentEditor />);
   });
 
   it('should call add filter group after click add filter group button', () => {
-    const { getByTestId, queryAllByTestId } = render(
-      <SegmentEditor
-        segmentDataState={initSegmentState}
-        segmentDataDispatch={mockDispatch}
-      />
+    const { getByTestId, queryAllByTestId } = renderWithProvider(
+      <SegmentEditor />
     );
-    const listItems = queryAllByTestId('test-segment-item');
+    let listItems = queryAllByTestId('test-segment-item');
     expect(listItems).toHaveLength(1);
     fireEvent.click(getByTestId('test-add-filter-group'));
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: AnalyticsSegmentActionType.AddFilterGroup,
-    });
+    listItems = queryAllByTestId('test-segment-item');
+    expect(listItems).toHaveLength(2);
   });
 });

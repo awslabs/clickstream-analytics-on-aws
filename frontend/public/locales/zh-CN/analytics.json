@@ -337,6 +337,15 @@
   "segment": {
     "title": "用户分群",
     "desc": "用户分群描述",
+    "type": {
+      "userDone": "用户做过",
+      "userNotDone": "用户没做过",
+      "userIs": "用户是",
+      "userIsNot": "用户不是",
+      "doneInSequence": "用户依次做过",
+      "userInGroup": "用户在分群组",
+      "userNotInGroup": "用户不在分群组"
+    },
     "comp": {
       "title": "创建分群",
       "desc": "通过选择一段时间内具有相同行为属性的用户来创建一个细分。",
@@ -352,10 +361,13 @@
       "refreshMethodManual": "手动",
       "refreshMethodAuto": "自动",
       "expirationSettings": "过期设置",
-      "expirationSettingsDesc": "分群在过期日期后将变为自动刷新，为分群设置过期日期可以避免在分群不使用时产生不必要的成本。您可以随时将其更新回自动刷新方法。",
+      "expirationSettingsDesc": "分群在过期日期后将变为手动刷新，为分群设置过期日期可以避免在分群不使用时产生不必要的成本。您可以随时将其更新回自动刷新方法。",
       "filterGroup": "过滤器组",
       "filterGroupDesc": "满足以下条件的用户将被包含在细分中。",
-      "provideDesc": "提供简短描述"
+      "provideDesc": "提供简短描述",
+      "selectUserGroup": "请选择用户分群组",
+      "segmentDescPlaceholder": "提供简短描述",
+      "filterByTimeRange": "按日期和时间范围过滤"
     }
   }
 }

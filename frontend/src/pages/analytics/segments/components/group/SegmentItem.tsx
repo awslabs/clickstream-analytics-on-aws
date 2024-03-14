@@ -13,26 +13,26 @@
 
 import { Button, Input } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
-import React, { Dispatch } from 'react';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { darkBackgroundColors } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import ConditionTimeRange from './ConditionTimeRange';
 import RenderNestSegment from './RenderNestSegment';
 
 interface SegmentItemProps {
   segmentItemData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   index: number;
   hideRemove?: boolean;
 }
 
 const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
-  const { segmentItemData, segmentDataDispatch, index, hideRemove } = props;
+  const { segmentItemData, index, hideRemove } = props;
+  const { segmentDataDispatch } = useSegmentContext();
   const { t } = useTranslation();
+
   return (
     <div className="flex-v gap-5">
       <div className="cs-analytics-group-header-bg">
@@ -46,7 +46,9 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
             </div>
             <div className="flex-1 m-w-300">
               <Input
-                placeholder="Provide a short description"
+                placeholder={defaultStr(
+                  t('analytics:segment.comp.segmentDescPlaceholder')
+                )}
                 value={segmentItemData.groupName ?? ''}
                 onChange={({ detail }) => {
                   segmentDataDispatch({
@@ -75,18 +77,13 @@ const SegmentItem: React.FC<SegmentItemProps> = (props: SegmentItemProps) => {
         </div>
       </div>
       <div className="flex-v gap-5 cs-analytics-group-content-bg">
-        <ConditionTimeRange
-          groupIndex={index}
-          segmentData={segmentItemData}
-          segmentDataDispatch={segmentDataDispatch}
-        />
+        <ConditionTimeRange groupIndex={index} segmentData={segmentItemData} />
         <div className="cs-analytics-dropdown">
           <RenderNestSegment
             level={1}
             parentIndex={index}
             rootIndex={index}
             segmentItemData={segmentItemData ?? []}
-            segmentDataDispatch={segmentDataDispatch}
           />
         </div>
         <div className="mt-10">

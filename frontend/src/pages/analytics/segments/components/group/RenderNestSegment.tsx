@@ -17,28 +17,21 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import RelationOr from 'components/eventselect/comps/RelationOr';
-import { AnalyticsSegmentAction } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { identity } from 'lodash';
-import React, { Dispatch } from 'react';
+import React from 'react';
 import ConditionGroup from './ConditionGroup';
 
 interface RenderNestSegmentProps {
   rootIndex: number;
   parentIndex: number;
   segmentItemData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   level: number;
 }
 const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
   props: RenderNestSegmentProps
 ) => {
-  const {
-    segmentItemData,
-    segmentDataDispatch,
-    level,
-    rootIndex,
-    parentIndex,
-  } = props;
+  const { segmentItemData, level, rootIndex, parentIndex } = props;
+
   return (
     <div className="flex flex-1 gap-10">
       {segmentItemData.subItemList.length > 1 && (
@@ -57,7 +50,6 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
               <RenderNestSegment
                 key={identity(index)}
                 segmentItemData={item}
-                segmentDataDispatch={segmentDataDispatch}
                 parentIndex={index}
                 rootIndex={rootIndex}
                 level={level + 1}
@@ -75,7 +67,6 @@ const RenderNestSegment: React.FC<RenderNestSegmentProps> = (
                 currentIndex: index,
                 parentData: segmentItemData,
               }}
-              segmentDataDispatch={segmentDataDispatch}
             />
           );
         })}

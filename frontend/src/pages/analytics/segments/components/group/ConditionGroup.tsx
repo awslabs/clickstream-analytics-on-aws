@@ -19,12 +19,10 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
-import {
-  AnalyticsSegmentAction,
-  AnalyticsSegmentActionType,
-} from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
-import React, { Dispatch, useMemo, useReducer, useState } from 'react';
+import React, { useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConditionType } from 'ts/const';
 import Condition from './Condition';
@@ -47,7 +45,6 @@ export interface SegmentPropsData {
 
 interface ConditionGroupProps {
   segmentData: IEventSegmentationItem;
-  segmentDataDispatch: Dispatch<AnalyticsSegmentAction>;
   segmentProps: SegmentPropsData;
 }
 
@@ -55,7 +52,9 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
   props: ConditionGroupProps
 ) => {
   const { t } = useTranslation();
-  const { segmentDataDispatch, segmentProps, segmentData } = props;
+  const { segmentProps, segmentData } = props;
+  const { segmentDataDispatch } = useSegmentContext();
+
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
     analyticsSegmentFilterReducer,
@@ -97,7 +96,6 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
       <div className="flex flex-1 gap-5">
         <Condition
           segmentData={segmentData}
-          segmentDataDispatch={segmentDataDispatch}
           updateConditionWidth={setConditionWidth}
           segmentProps={segmentProps}
         />
@@ -105,7 +103,6 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         {isDoneEvent && (
           <UserDoneComp
             segmentData={segmentData}
-            segmentDataDispatch={segmentDataDispatch}
             segmentProps={segmentProps}
             addNewEventCondition={() => {
               segmentDataDispatch({
@@ -116,25 +113,16 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           />
         )}
         {isUserIsEvent && (
-          <UserIsComp
-            segmentData={segmentData}
-            segmentProps={segmentProps}
-            segmentDataDispatch={segmentDataDispatch}
-          />
+          <UserIsComp segmentData={segmentData} segmentProps={segmentProps} />
         )}
         {isDoneInSeqEvent && (
           <UserDoneInSeq
             segmentData={segmentData}
             segmentProps={segmentProps}
-            segmentDataDispatch={segmentDataDispatch}
           />
         )}
         {isUserInGroup && (
-          <UserInGroup
-            segmentData={segmentData}
-            segmentProps={segmentProps}
-            segmentDataDispatch={segmentDataDispatch}
-          />
+          <UserInGroup segmentData={segmentData} segmentProps={segmentProps} />
         )}
         <div>
           {segmentProps.level === 1 &&
@@ -263,7 +251,6 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                 sequenceEventIndex={index}
                 sequenceEventData={item}
                 conditionWidth={conditionWidth}
-                segmentDataDispatch={segmentDataDispatch}
                 segmentProps={segmentProps}
               />
             );
