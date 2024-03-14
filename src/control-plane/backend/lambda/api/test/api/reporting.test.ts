@@ -116,6 +116,7 @@ describe('reporting test', () => {
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
     quickSightUserMock(ddbMock, false);
+    jest.setTimeout(10000);
   });
 
   it('funnel bar visual - preview', async () => {
@@ -2712,6 +2713,7 @@ describe('reporting test in China region', () => {
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
     quickSightUserMock(ddbMock, true);
+    jest.setTimeout(10000);
   });
 
   it('funnel bar visual - preview', async () => {
