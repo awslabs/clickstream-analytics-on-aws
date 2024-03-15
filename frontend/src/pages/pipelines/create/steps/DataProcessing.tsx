@@ -92,8 +92,8 @@ interface DataProcessingProps {
 
   changeRedshiftType: (type: string) => void;
   changeServerlessRedshiftVPC: (vpc: SelectProps.Option) => void;
-  changeSecurityGroup: (sg: SelectProps.Option[]) => void;
-  changeReshiftSubnets: (subnets: SelectProps.Option[]) => void;
+  changeSecurityGroup: (sg: readonly SelectProps.Option[]) => void;
+  changeRedshiftSubnets: (subnets: readonly SelectProps.Option[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
   changeDataLoadCronExp: (cron: string) => void;
@@ -134,7 +134,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeRedshiftType,
     changeServerlessRedshiftVPC,
     changeSecurityGroup,
-    changeReshiftSubnets,
+    changeRedshiftSubnets: changeReshiftSubnets,
     changeBaseCapacity,
     changeDBUser,
     dataProcessorIntervalCronInvalidError,
@@ -859,9 +859,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 'finished'
                               )}
                               onChange={(e) => {
-                                changeSecurityGroup(
-                                  e.detail.selectedOptions as any
-                                );
+                                changeSecurityGroup(e.detail.selectedOptions);
                               }}
                             />
                           </FormField>

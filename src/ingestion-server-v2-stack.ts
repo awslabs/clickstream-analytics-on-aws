@@ -212,7 +212,7 @@ export class IngestionServerStackV2 extends Stack {
     const nestStackCommonProps: IngestionServerNestStackProps = {
       vpcId: vpcIdParam.valueAsString,
       privateSubnetIds: privateSubnetIdsParam.valueAsString,
-      publicSubnetIds: publicSubnetIdsParam!.valueAsString,
+      publicSubnetIds: publicSubnetIdsParam.valueAsString,
       serverMin: serverMinParam.valueAsNumber,
       serverMax: serverMaxParam.valueAsNumber,
       warmPoolSize: warmPoolSizeParam.valueAsNumber,

@@ -323,7 +323,7 @@ export const isReportingDisabled = (
 
 // Validate subnets cross N AZs
 export const validateSubnetCrossInAZs = (
-  subnets: SelectProps.Option[],
+  subnets: readonly SelectProps.Option[],
   nAZ: number
 ) => {
   const subnetsAZs = subnets.map(
@@ -338,8 +338,8 @@ export const validateSubnetCrossInAZs = (
 
 // Validate Private Subnet in same AZ with Public Subnets
 export const validatePublicSubnetInSameAZWithPrivateSubnets = (
-  publicSubnets: SelectProps.Option[],
-  privateSubnets: SelectProps.Option[]
+  publicSubnets: readonly SelectProps.Option[],
+  privateSubnets: readonly SelectProps.Option[]
 ) => {
   const publicSubnetsAZs = publicSubnets.map(
     (element) => element?.description?.split(':')[0]
