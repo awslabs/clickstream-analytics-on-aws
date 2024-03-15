@@ -14,7 +14,7 @@
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, USER_TABLE, buildAllConditionSql, buildColNameWithPrefix, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EVENT_USER_VIEW, EventAndCondition, buildAllConditionSql, buildColNameWithPrefix, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
 import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
@@ -475,7 +475,6 @@ export function buildBaseDataForAttribution(eventNames: string[], sqlParameters:
   // build base data sql
   const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql,
     userColumnSql.columnsSql,
-    userColumnSql.columns,
     userConditionProps.userAttributes.length > 0,
   );
 
@@ -739,55 +738,20 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   };
 }
 
-function _getUserConditionSql(sqlParameters: AttributionSQLParameters,
-  userColumnSql: string, needJoinUserTable: boolean) {
-
-  let joinSql = '';
-  let idColumnsSql = '';
-
-  if (needJoinUserTable) {
-    joinSql = `
-      join 
-      (
-        select 
-          user_pseudo_id, 
-          ${userColumnSql}
-          user_id
-        from 
-          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} as iu
-      ) as u on event.user_pseudo_id= u.user_pseudo_id
-    `;
-    idColumnsSql = `
-      COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-      u.user_id,
-    `;
-
-  } else {
-    idColumnsSql = `
-      event.user_pseudo_id,
-      event.user_id,
-    `;
-  }
-
-  return {
-    joinSql,
-    idColumnsSql,
-  };
-}
-
 function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters, eventColumnSql: string,
-  userColumnSql: string, userColumns: string[], needJoinUserTable: boolean = false) {
+  userColumnSql: string, needJoinUserTable: boolean = false) {
 
   const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.', sqlParameters.timeWindowInSeconds);
   const eventNameClause = _buildEventNameClause(eventNames);
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
-  const { joinSql, idColumnsSql } = _getUserConditionSql(sqlParameters, userColumnSql, needJoinUserTable);
 
-  let userTableSql = userColumns.join(',');
-  if (userTableSql !== '') {
-    userTableSql += ',';
+  let tableName = '';
+  if (needJoinUserTable) {
+    tableName = EVENT_USER_VIEW;
+  } else {
+    tableName = EVENT_TABLE;
   }
 
   return `
@@ -796,13 +760,13 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: Attribution
         event.event_id,
         event.event_name,
         event.event_timestamp,
-        ${idColumnsSql}
+        event.user_pseudo_id,
+        event.user_id,
         ${eventColumnSql}
-        ${userTableSql}
+        ${userColumnSql}
         ${buildDateUnitsSql()}
       from
-        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
-        ${joinSql}
+        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${tableName} as event
       where
         ${eventDateSQL}
         ${eventNameClause}

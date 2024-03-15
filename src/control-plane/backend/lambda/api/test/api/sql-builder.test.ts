@@ -62,8 +62,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -72,14 +72,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -234,7 +227,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -389,7 +382,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -535,7 +528,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -704,8 +697,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -716,14 +709,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -917,8 +903,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -929,14 +915,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1198,8 +1177,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -1208,14 +1187,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1408,14 +1380,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1617,8 +1582,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -1629,14 +1594,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1837,8 +1795,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.session_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -1849,14 +1807,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -2028,8 +1979,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.session_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -2040,14 +1991,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -2240,8 +2184,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.session_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -2252,14 +2196,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -2434,8 +2371,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -2445,14 +2382,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -2679,8 +2609,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -2690,14 +2620,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -2943,8 +2866,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.screen_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -2954,14 +2877,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -3268,8 +3184,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           event.device_screen_width,
@@ -3281,14 +3197,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2024-02-15'
           and DATE (event.event_timestamp) <= date '2024-03-01'
@@ -3559,8 +3468,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -3571,14 +3480,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2024-02-15'
           and DATE (event.event_timestamp) <= date '2024-03-01'
@@ -3849,8 +3751,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           u.u__user_id,
@@ -3862,15 +3764,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_id::varchar as u__user_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2024-02-15'
           and DATE (event.event_timestamp) <= date '2024-03-01'
@@ -4141,8 +4035,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           event.custom_parameters._user_id::varchar as e__user_id,
@@ -4154,14 +4048,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-06-19'
           and DATE (event.event_timestamp) <= date '2023-06-22'
@@ -4399,15 +4286,15 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_city,
           event.device_mobile_brand_name,
           event.platform,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          event.custom_parameters._session_start_mesc::bigint as e__session_start_mesc,
-          event.custom_parameters._device_screen_height::bigint as e__device_screen_height,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.custom_parameters._session_start_mesc.value::bigint as e__session_start_mesc,
+          event.custom_parameters._device_screen_height.value::bigint as e__device_screen_height,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           u.u__user_country,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -4417,16 +4304,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.user_properties._user_country::varchar as u__user_country,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -4686,12 +4564,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -4700,15 +4578,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -5016,12 +4886,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -5030,15 +4900,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -5299,12 +5161,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -5313,15 +5175,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -5584,13 +5438,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -5599,15 +5453,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -5882,12 +5728,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -5896,15 +5742,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -6295,13 +6133,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -6310,15 +6148,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -6696,12 +6526,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -6710,15 +6540,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-20'
           and DATE (event.event_timestamp) <= date '2023-11-04'
@@ -7123,13 +6945,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.screen_name,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -7138,15 +6960,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -7410,7 +7224,7 @@ describe('SQL Builder test', () => {
         COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
         u.user_id,
         event.custom_parameters._session_id::varchar as e__session_id,
-        u.u__user_first_touch_timestamp,
+        iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
         TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
           date_trunc('week', event.event_timestamp),
@@ -7419,15 +7233,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
-        join (
-          select
-            user_pseudo_id,
-            iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-            user_id
-          from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -7600,10 +7406,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -7612,15 +7418,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -7793,10 +7591,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.custom_parameters._session_id::varchar as e__session_id,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -7805,15 +7603,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8048,10 +7838,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -8060,15 +7850,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8303,10 +8085,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -8315,15 +8097,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8522,7 +8296,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8585,9 +8359,9 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
-          u.u__user_first_touch_timestamp,
+          event.user_pseudo_id,
+          event.user_id,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -8596,15 +8370,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8691,7 +8457,7 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -8700,7 +8466,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8777,7 +8543,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8853,7 +8619,7 @@ describe('SQL Builder test', () => {
         event.user_id,
         event.platform,
         event.geo_country,
-        event.custom_parameters._session_duration::bigint as e__session_duration,
+        event.custom_parameters._session_duration.value::bigint as e__session_duration,
         TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
           date_trunc('week', event.event_timestamp),
@@ -8862,7 +8628,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -8934,8 +8700,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
           u.u__user_name,
@@ -8947,15 +8713,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_name::varchar as u__user_name,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9045,7 +8803,7 @@ describe('SQL Builder test', () => {
         u.user_id,
         event.platform,
         event.geo_country,
-        event.custom_parameters._session_duration::bigint as e__session_duration,
+        event.custom_parameters._session_duration.value::bigint as e__session_duration,
         u.u__first_visit_date,
         u.user_first_touch_timestamp,
         TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -9056,16 +8814,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
-        join (
-          select
-            user_pseudo_id,
-            iu.user_properties._first_visit_date::bigint as u__first_visit_date,
-            iu.user_first_touch_timestamp,
-            user_id
-          from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9124,8 +8873,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           u.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -9135,15 +8884,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.first_traffic_source,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9205,15 +8946,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
-        join (
-          select
-            user_pseudo_id,
-            iu.user_properties._user_name::varchar as u__user_name,
-            user_id
-          from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9291,12 +9024,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -9305,15 +9038,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9402,12 +9127,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           u.u__user_name,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -9417,16 +9142,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.user_properties._user_name::varchar as u__user_name,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9550,14 +9266,14 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           u.u__first_visit_time_msec,
           u.first_touch_time_msec,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -9566,17 +9282,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._first_visit_time_msec::bigint as u__first_visit_time_msec,
-              iu.first_touch_time_msec,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9709,10 +9415,10 @@ describe('SQL Builder test', () => {
         u.user_id,
         event.platform,
         event.geo_country,
-        event.custom_parameters._session_duration::bigint as e__session_duration,
+        event.custom_parameters._session_duration.value::bigint as e__session_duration,
         u.u__first_visit_date,
         u.first_touch_time_msec,
-        u.u__user_first_touch_timestamp,
+        iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
         u.u__user_name,
         TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
@@ -9722,18 +9428,7 @@ describe('SQL Builder test', () => {
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
         TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
       from
-        shop.shop.event_v2 as event
-        join (
-          select
-            user_pseudo_id,
-            iu.user_properties._first_visit_date::bigint as u__first_visit_date,
-            iu.first_touch_time_msec,
-            iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-            iu.user_properties._user_name::varchar as u__user_name,
-            user_id
-          from
-            shop.shop.user_m_view_v2 as iu
-        ) as u on event.user_pseudo_id = u.user_pseudo_id
+        shop.shop.clickstream_event_view_v3 as event
       where
         DATE (event.event_timestamp) >= date '2023-10-01'
         and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -9891,12 +9586,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -9905,15 +9600,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -10273,12 +9960,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -10287,15 +9974,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -10628,12 +10307,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -10642,15 +10321,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -10855,10 +10526,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -10867,15 +10538,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -11123,13 +10786,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.custom_parameters.category::varchar as e_category,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -11138,15 +10801,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -11412,13 +11067,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.custom_parameters.category::varchar as e_category,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -11427,15 +11082,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -11703,12 +11350,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -11717,15 +11364,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -11995,13 +11634,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -12010,15 +11649,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -12146,15 +11777,12 @@ describe('SQL Builder test', () => {
       eventAndConditions: [
         {
           eventName: 'view_item',
-          computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
           eventName: 'add_to_cart',
-          computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
       ],
       pathAnalysis: {
@@ -12185,7 +11813,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_attr_view_v2 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -12436,14 +12064,14 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
           event.screen_name,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -12452,15 +12080,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -12819,12 +12439,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -12833,15 +12453,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-24'
           and DATE (event.event_timestamp) <= date '2023-10-30'
@@ -13079,11 +12691,11 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -13093,13 +12705,6 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
           shopping.shopping.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shopping.shopping.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -13406,13 +13011,13 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__user_first_touch_timestamp,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -13421,15 +13026,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -13626,8 +13223,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           u.first_channel,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -13637,15 +13234,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -13785,8 +13374,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -13795,14 +13384,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.blog.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.blog.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.blog.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -14001,7 +13583,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.blog.event_v2 as event
+          shop.blog.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -14196,8 +13778,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -14207,14 +13789,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.blog.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.blog.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.blog.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -14412,8 +13987,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -14423,14 +13998,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.blog.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.blog.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.blog.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -14670,8 +14238,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -14680,14 +14248,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date_trunc('week', current_date - interval '0 weeks')
           and DATE (event.event_timestamp) <= CURRENT_DATE
@@ -14896,8 +14457,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
@@ -14908,14 +14469,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date_trunc('week', current_date - interval '-1 weeks')
           and DATE (event.event_timestamp) <= CURRENT_DATE
@@ -15166,12 +14720,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -15180,15 +14734,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -15433,12 +14979,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
           event.platform,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -15447,15 +14993,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -15667,12 +15205,12 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
           event.platform,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          iu.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -15681,15 +15219,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -15865,8 +15395,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.device_screen_height,
           u.first_channel,
@@ -15878,15 +15408,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-06-19'
           and DATE (event.event_timestamp) <= date '2023-06-22'
@@ -16136,7 +15658,7 @@ describe('SQL Builder test', () => {
       ],
 
     });
-
+console.log(sql);
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
@@ -16144,8 +15666,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.app_info_install_source,
           event.custom_parameters.project_category::varchar as e_project_category,
@@ -16158,15 +15680,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties.status::varchar as u_status,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-06-19'
           and DATE (event.event_timestamp) <= date '2023-06-22'
@@ -16383,7 +15897,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -16556,7 +16070,7 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.user_pseudo_id,
           event.user_id,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -16565,7 +16079,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -16736,7 +16250,7 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.user_pseudo_id,
           event.user_id,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -16745,7 +16259,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -16946,7 +16460,7 @@ describe('SQL Builder test', () => {
           event.user_pseudo_id,
           event.user_id,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -16955,7 +16469,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -17140,8 +16654,8 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
@@ -17151,14 +16665,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -17325,10 +16832,10 @@ describe('SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -17337,14 +16844,7 @@ describe('SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event 
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -17591,7 +17091,7 @@ describe('SQL Builder test', () => {
             COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
             u.user_id,
             event.geo_country,
-            event.custom_parameters._session_duration::bigint as e__session_duration,
+            event.custom_parameters._session_duration.value::bigint as e__session_duration,
             TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
               date_trunc('week', event.event_timestamp),
@@ -17600,14 +17100,7 @@ describe('SQL Builder test', () => {
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
           from
-            shop.shop.event_v2 as event
-            join (
-              select
-                user_pseudo_id,
-                user_id
-              from
-                shop.shop.user_m_view_v2 as iu
-            ) as u on event.user_pseudo_id = u.user_pseudo_id
+            shop.shop.clickstream_event_view_v3 as event   
           where
             DATE (event.event_timestamp) >= date '2023-10-01'
             and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -17859,7 +17352,7 @@ describe('SQL Builder test', () => {
             u.user_id,
             event.geo_country,
             event.platform,
-            event.custom_parameters._session_duration::bigint as e__session_duration,
+            event.custom_parameters._session_duration.value::bigint as e__session_duration,
             TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
               date_trunc('week', event.event_timestamp),
@@ -17868,14 +17361,7 @@ describe('SQL Builder test', () => {
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
           from
-            shop.shop.event_v2 as event
-            join (
-              select
-                user_pseudo_id,
-                user_id
-              from
-                shop.shop.user_m_view_v2 as iu
-            ) as u on event.user_pseudo_id = u.user_pseudo_id
+            shop.shop.clickstream_event_view_v3 as event   
           where
             DATE (event.event_timestamp) >= date '2023-10-01'
             and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -18169,7 +17655,7 @@ describe('SQL Builder test', () => {
             event.app_info_install_source,
             event.geo_country,
             event.platform,
-            event.custom_parameters._session_duration::bigint as e__session_duration,
+            event.custom_parameters._session_duration.value::bigint as e__session_duration,
             u.u_status,
             TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
@@ -18179,15 +17665,7 @@ describe('SQL Builder test', () => {
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
             TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
           from
-            shop.shop.event_v2 as event
-            join (
-              select
-                user_pseudo_id,
-                iu.user_properties.status::varchar as u_status,
-                user_id
-              from
-                shop.shop.user_m_view_v2 as iu
-            ) as u on event.user_pseudo_id = u.user_pseudo_id
+            shop.shop.clickstream_event_view_v3 as event 
           where
             DATE (event.event_timestamp) >= date '2023-10-01'
             and DATE (event.event_timestamp) <= date '2025-10-10'

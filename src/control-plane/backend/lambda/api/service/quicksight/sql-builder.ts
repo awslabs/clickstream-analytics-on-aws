@@ -186,8 +186,8 @@ export interface EventNonNestColProps {
   colList: string[];
 }
 
-export const EVENT_TABLE = 'event_v2';
-export const USER_TABLE = 'user_m_view_v2';
+export const EVENT_TABLE = 'clickstream_event_attr_view_v2';
+export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
 
 export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
 
@@ -1725,10 +1725,10 @@ export function buildColumnsSqlFromConditions(columns: ColumnAttribute[], prefix
     }
 
     if (col.category === ConditionCategory.USER) {
-      columnsSql += `${prefix}.user_properties.${col.property}::${_getSqlColumnType(col.dataType)} as u_${col.property},`;
+      columnsSql += `${prefix}.user_properties.${col.property}.value::${_getSqlColumnType(col.dataType)} as u_${col.property},`;
       columnList.push('u.u_' + col.property);
     } else if (col.category === ConditionCategory.EVENT) {
-      columnsSql += `${prefix}.custom_parameters.${col.property}::${_getSqlColumnType(col.dataType)} as e_${col.property},`;
+      columnsSql += `${prefix}.custom_parameters.${col.property}.value::${_getSqlColumnType(col.dataType)} as e_${col.property},`;
       columnList.push('event.e_' + col.property);
     } else if (col.category === ConditionCategory.USER_OUTER) {
       columnsSql += `${prefix}.${col.property},`;
@@ -1764,10 +1764,10 @@ export function _buildCommonPartSql(analyticsType: ExploreAnalyticsType, eventNa
 
   // build column sql from user condition
   const userConditionProps = _getUserConditionProps(analyticsType, sqlParameters);
-  const { columnsSql, columns } = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'iu');
+  const columnsSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'event').columnsSql;
 
   // build base data sql
-  const baseDataSql = _buildBaseEventDataSql(analyticsType, eventNames, sqlParameters, eventColumnSql, columnsSql, columns,
+  const baseDataSql = _buildBaseEventDataSql(analyticsType, eventNames, sqlParameters, eventColumnSql, columnsSql,
     userConditionProps.hasComputeMethodOnUserId || userConditionProps.userAttributes.length > 0,
   );
 
@@ -1838,46 +1838,10 @@ export function buildDateUnitsSql() {
   `;
 }
 
-function _getUserConditionSql(sqlParameters: SQLParameters, userColumnSql: string, needJoinUserTable: boolean) {
-
-  let joinSql = '';
-  let idColumnsSql = '';
-
-  if (needJoinUserTable) {
-    joinSql = `
-      join 
-      (
-        select 
-          user_pseudo_id, 
-          ${userColumnSql}
-          user_id
-        from 
-          ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} as iu
-      ) as u on event.user_pseudo_id= u.user_pseudo_id
-    `;
-    idColumnsSql = `
-      COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-      u.user_id,
-    `;
-
-  } else {
-    idColumnsSql = `
-      event.user_pseudo_id,
-      event.user_id,
-    `;
-  }
-
-  return {
-    joinSql,
-    idColumnsSql,
-  };
-}
-
 function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
   sqlParameters: SQLParameters,
   eventColumnSql: string,
   userColumnSql: string,
-  userColumnList: string[],
   needJoinUserTable: boolean = false,
 ) {
 
@@ -1887,11 +1851,11 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
-  const { joinSql, idColumnsSql } = _getUserConditionSql(sqlParameters, userColumnSql, needJoinUserTable);
-
-  let userTableSql = userColumnList.join(',');
-  if (userTableSql !== '') {
-    userTableSql += ',';
+  let tableName = '';
+  if (needJoinUserTable) {
+    tableName = EVENT_USER_VIEW;
+  } else {
+    tableName = EVENT_TABLE;
   }
 
   return `
@@ -1900,13 +1864,13 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
         event.event_id,
         event.event_name,
         event.event_timestamp,
-        ${idColumnsSql}
+        event.user_pseudo_id,
+        event.user_id,
         ${eventColumnSql}
-        ${userTableSql}
+        ${userColumnSql}
         ${buildDateUnitsSql()}
       from
-        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
-        ${joinSql}
+        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${tableName} as event
       where
         ${eventDateSQL}
         ${eventNameClause}
