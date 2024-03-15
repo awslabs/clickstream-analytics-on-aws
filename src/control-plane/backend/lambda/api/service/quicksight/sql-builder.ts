@@ -738,7 +738,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         a.event_id,
         a.event_timestamp,
         a.event_date,
-        case when (b.event_timestamp - a.event_timestamp < ${sqlParameters.pathAnalysis!.lagSeconds! * 1000} and b.event_timestamp - a.event_timestamp >=0) then 0 else 1 end as group_start
+        case when (b.event_timestamp - a.event_timestamp < ${sqlParameters.pathAnalysis!.lagSeconds!} * cast(1000 as bigint) and b.event_timestamp - a.event_timestamp >=0) then 0 else 1 end as group_start
       from data_1 a left join data_1 b 
         on a.user_pseudo_id = b.user_pseudo_id 
         and a.step_2 = b.step_1
@@ -995,7 +995,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         a.event_date,
         case
           when (
-            b.event_timestamp - a.event_timestamp < 3600000
+            b.event_timestamp - a.event_timestamp < ${sqlParameters.pathAnalysis?.lagSeconds!} * cast(1000 as bigint)
             and b.event_timestamp - a.event_timestamp >= 0
           ) then 0
           else 1
@@ -1224,7 +1224,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     }
 
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
-      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
+      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds} * cast(1000 as bigint) \n`);
     } else {
       joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
     }
@@ -1288,7 +1288,7 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
   }
 
   if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
-    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds} * cast(1000 as bigint) \n`);
   } else {
     joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
   }
@@ -1596,7 +1596,7 @@ function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParamete
   let sql = 'union_base_data as (';
   for (const [index, eventCondition] of sqlParameters.eventAndConditions!.entries()) {
     const eventName = eventCondition.eventName;
-    const conditionSql = getConditionSql(eventCondition.sqlCondition);
+    const conditionSql = buildConditionSql(eventCondition.sqlCondition);
 
     if (index > 0) {
       sql += 'union all';
@@ -2323,7 +2323,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
     `;
 
     let filterSql = '';
-    filterSql = getConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
+    filterSql = buildConditionSql(sqlParameters.eventAndConditions![index].sqlCondition);
     if (filterSql !== '') {
       filterSql = `and (${filterSql}) `;
     }
@@ -2344,7 +2344,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
 function _buildConditionSQLForRetention(eventName: string, sqlCondition: SQLCondition | undefined) {
 
   let sql = '';
-  sql = getConditionSql(sqlCondition);
+  sql = buildConditionSql(sqlCondition);
   if (sql !== '') {
     sql = `and (${sql}) `;
   }
@@ -2508,7 +2508,7 @@ function generateDateList(startDate: Date, endDate: Date): string[] {
   return dateList;
 }
 
-function getConditionSql(sqlCondition: SQLCondition | undefined) {
+export function buildConditionSql(sqlCondition: SQLCondition | undefined) {
   if (!sqlCondition) {
     return '';
   }
