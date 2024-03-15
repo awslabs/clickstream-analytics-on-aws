@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { logger } from '../../../common/powertools';
-import { SP_SCAN_METADATA, PROPERTY_ARRAY_TEMP_TABLE, USER_COLUMN_TEMP_TABLE } from '../../private/constant';
+import { SP_SCAN_METADATA, PROPERTY_ARRAY_TEMP_TABLE } from '../../private/constant';
 import { describeStatement, getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -62,7 +62,7 @@ export const handler = async (event: ScanMetadataEvent) => {
     insertPropertyTemplateTable(fileContent, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'event_property');
 
     const fileContentUser = readFileSync('/opt/user-v2.sql', 'utf-8');
-    insertPropertyTemplateTable(fileContentUser, propertyListSqlStatements, `${schema}.${USER_COLUMN_TEMP_TABLE}`, 'user_property');
+    insertPropertyTemplateTable(fileContentUser, propertyListSqlStatements, `${schema}.${PROPERTY_ARRAY_TEMP_TABLE}`, 'user_property');
 
     const propertyListQueryId = await executeStatements(
       redshiftDataApiClient, propertyListSqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
@@ -123,7 +123,7 @@ function insertPropertyTemplateTable(fileContent: string, sqlStatements: string[
   }
   if (values.length > 0) {
     values = values.slice(0, -2);
-    const insertPropertyArrayTempTable = `INSERT INTO ${tableName} (category, property_name, value_type) VALUES ${values};`;
+    const insertPropertyArrayTempTable = `INSERT INTO ${tableName} (category, property_name, value_type, property_type) VALUES ${values};`;
     sqlStatements.push(insertPropertyArrayTempTable);
   }
 }
