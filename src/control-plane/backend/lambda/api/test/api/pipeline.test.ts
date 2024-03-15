@@ -84,7 +84,6 @@ import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineServerProtocol, PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '../../common/constants-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
