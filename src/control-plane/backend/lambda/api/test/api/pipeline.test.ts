@@ -79,6 +79,7 @@ import {
   stackDetailsWithOutputs,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '../../common/constants-ln';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineServerProtocol, PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
