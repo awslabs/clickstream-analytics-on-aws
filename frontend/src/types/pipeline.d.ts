@@ -246,6 +246,16 @@ declare global {
     transformPluginChanged: boolean;
   }
 
+  interface CreateApplicationSchemasStatus {
+    readonly appId: string;
+    status?: string;
+    executionArn?: string;
+  }
+
+  interface IPipelineExtend {
+    createApplicationSchemasStatus: CreateApplicationSchemasStatus[];
+  }
+
   interface IAlarm {
     AlarmName: string;
     AlarmArn: string;

@@ -425,3 +425,9 @@ export enum IUserRole {
   ANALYST = 'Analyst',
   ANALYST_READER = 'AnalystReader',
 }
+
+export interface CreateApplicationSchemasStatus {
+  readonly appId: string;
+  status?: ExecutionStatus;
+  executionArn?: string;
+}

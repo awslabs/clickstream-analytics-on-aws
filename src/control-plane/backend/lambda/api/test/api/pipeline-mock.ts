@@ -993,6 +993,36 @@ export const BASE_STATUS = {
   },
 };
 
+export const stackDetailsWithOutputs = [
+  BASE_STATUS.stackDetails[0],
+  {
+    ...BASE_STATUS.stackDetails[1],
+    outputs: [
+      {
+        OutputKey: 'IngestionServerC000IngestionServerURL',
+        OutputValue: 'http://xxx/xxx',
+      },
+      {
+        OutputKey: 'IngestionServerC000IngestionServerDNS',
+        OutputValue: 'yyy/yyy',
+      },
+    ],
+  },
+  BASE_STATUS.stackDetails[2],
+  BASE_STATUS.stackDetails[3],
+  BASE_STATUS.stackDetails[4],
+  {
+    ...BASE_STATUS.stackDetails[5],
+    Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+    outputs: [
+      {
+        OutputKey: 'ObservabilityDashboardName',
+        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+      },
+    ],
+  },
+];
+
 export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
   status: {
