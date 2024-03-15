@@ -122,4 +122,7 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'user-m-view-v2.sql',
   },
+  {
+    sqlFile: 'session-m-view.sql',
+  },
 ];
