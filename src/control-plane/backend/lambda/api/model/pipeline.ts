@@ -35,6 +35,7 @@ import {
 } from '../common/constants';
 import {
   MULTI_APP_ID_PATTERN,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
@@ -48,6 +49,7 @@ import {
 } from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
+  CreateApplicationSchemasStatus,
   IngestionServerSinkBatchProps,
   IngestionServerSizeProps,
   KinesisStreamMode,
@@ -65,16 +67,12 @@ import {
   WorkflowVersion,
 } from '../common/types';
 import {
-  getPipelineStatusType,
   getStackName,
   getStackOutputFromPipelineStatus,
-  getStackPrefix,
   getStackTags,
   getStateMachineExecutionName,
   getUpdateTags,
   isEmpty,
-  mergeIntoPipelineTags,
-  mergeIntoStackTags,
 } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
@@ -84,7 +82,6 @@ import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicks
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
 import { getExecutionDetail, listExecutions } from '../store/aws/sfn';
-import { createTopicAndSubscribeSQSQueue } from '../store/aws/sns';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -1128,7 +1125,7 @@ export class CPipeline {
       });
     }
     const createApplicationSchemasStateMachine = getStackOutputFromPipelineStatus(
-      this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails,
+      this.pipeline.status,
       PipelineStackType.DATA_MODELING_REDSHIFT,
       OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX);
     if (!createApplicationSchemasStateMachine) {

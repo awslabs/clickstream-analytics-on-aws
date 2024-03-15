@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '@aws/clickstream-base-lib';
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
@@ -43,7 +42,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { DescribeExecutionCommand, ExecutionStatus, ListExecutionsCommand, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { CreateTopicCommand, SNSClient, TagResourceCommand as SNSTagResourceCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -78,12 +76,14 @@ import {
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
   MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+  stackDetailsWithOutputs,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineServerProtocol, PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '../../common/constants-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -2142,7 +2142,10 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-        stackDetails: stackDetails,
+        status: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          stackDetails: stackDetails,
+        },
       }],
     }).resolves({
       Items: [
