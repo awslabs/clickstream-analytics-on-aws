@@ -294,7 +294,7 @@ export const attributionVisualColumns: InputColumn[] = [
   },
 ];
 
-export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, publishUserArn: string,
+export const createDataSet = async (quickSight: QuickSight, awsAccountId: string | undefined, publishUserArn: string,
   dataSourceArn: string,
   props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
@@ -405,7 +405,7 @@ const _getDataSetId = (requestAction: ExploreRequestAction) : string => {
   return datasetId;
 };
 
-export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
+export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string | undefined, dashboardId: string)
 : Promise<DashboardDefProps> => {
   const dashboard = await quickSight.describeDashboardDefinition({
     AwsAccountId: awsAccountId,

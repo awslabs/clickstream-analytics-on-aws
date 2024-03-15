@@ -1307,7 +1307,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changePublicSubnets={(subnets) => {
+              changePublicSubnets={(subnets: readonly SelectProps.Option[]) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
                   return {
@@ -1322,7 +1322,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changePrivateSubnets={(subnets) => {
+              changePrivateSubnets={(
+                subnets: readonly SelectProps.Option[]
+              ) => {
                 setPrivateSubnetError(false);
                 setPrivateSubnetDiffWithPublicError(false);
                 setPipelineInfo((prev) => {
@@ -2127,7 +2129,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeReshiftSubnets={(subnets) => {
+              changeRedshiftSubnets={(subnets) => {
                 setRedshiftServerlessSubnetEmptyError(false);
                 setRedshiftServerlessSubnetInvalidError(false);
                 setPipelineInfo((prev) => {
