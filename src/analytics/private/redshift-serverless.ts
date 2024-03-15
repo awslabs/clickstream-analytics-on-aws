@@ -17,6 +17,7 @@ import { AccountPrincipal, IRole, PolicyDocument, PolicyStatement, Role } from '
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { CfnWorkgroup } from 'aws-cdk-lib/aws-redshiftserverless';
+import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { CreateMappingRoleUser, NewNamespaceCustomProperties, RedshiftServerlessWorkgroupProps } from './model';
@@ -189,7 +190,10 @@ export class RedshiftServerless extends Construct {
   }
 
   private createRedshiftMappingUserCustomResource(): CustomResource {
-    const eventHandler = this.createCreateMappingUserFunction();
+    const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
+    const handleCodePath = join(lambdaRootPath, 'create-redshift-user.ts');
+
+    const eventHandler = this.createCreateMappingUserFunction(handleCodePath);
     this.workgroupDefaultAdminRole.grantAssumeRole(eventHandler.grantPrincipal);
 
     const provider = new Provider(
@@ -200,9 +204,13 @@ export class RedshiftServerless extends Construct {
         logRetention: RetentionDays.ONE_WEEK,
       },
     );
+    const lambdaCodeAsset = new Asset(this, 'CreateRedshiftUserLambdaCodeAsset', {
+      path: handleCodePath,
+    });
 
     const customProps: CreateMappingRoleUser = {
       dataRoleName: this.redshiftDataAPIExecRole.roleName,
+      lambdaCodeHash: lambdaCodeAsset.assetHash,
       serverlessRedshiftProps: {
         workgroupName: this.workgroup.attrWorkgroupWorkgroupName,
         workgroupId: this.workgroup.attrWorkgroupWorkgroupId,
@@ -217,13 +225,9 @@ export class RedshiftServerless extends Construct {
 
     return cr;
   }
-  createCreateMappingUserFunction() {
-    const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
+  createCreateMappingUserFunction(lambdaCodePath: string) {
     const fn = new SolutionNodejsFunction(this, 'CreateUserFn', {
-      entry: join(
-        lambdaRootPath,
-        'create-redshift-user.ts',
-      ),
+      entry: lambdaCodePath,
       handler: 'handler',
       memorySize: 128,
       reservedConcurrentExecutions: 1,
