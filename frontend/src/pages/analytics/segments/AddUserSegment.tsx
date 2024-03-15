@@ -128,9 +128,6 @@ const AddUserSegments: React.FC = () => {
                         )}
                       >
                         <RadioGroup
-                          onChange={({ detail }) => {
-                            console.log(detail);
-                          }}
                           value="manual"
                           items={[
                             {

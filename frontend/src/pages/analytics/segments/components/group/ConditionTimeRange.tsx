@@ -18,6 +18,10 @@ import {
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
+import {
+  DEFAULT_MONTH_RANGE,
+  DEFAULT_WEEK_RANGE,
+} from 'pages/analytics/comps/ExploreDateRangePicker';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
@@ -26,6 +30,35 @@ interface ConditionTimeRangeProps {
   segmentData: IEventSegmentationItem;
   groupIndex: number;
 }
+
+const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
+  {
+    key: 'previous-1-day',
+    amount: 1,
+    unit: 'day',
+    type: 'relative',
+  },
+  DEFAULT_WEEK_RANGE,
+  {
+    key: 'previous-2-week',
+    amount: 2,
+    unit: 'week',
+    type: 'relative',
+  },
+  DEFAULT_MONTH_RANGE,
+  {
+    key: 'previous-3-months',
+    amount: 3,
+    unit: 'month',
+    type: 'relative',
+  },
+  {
+    key: 'previous-6-months',
+    amount: 6,
+    unit: 'month',
+    type: 'relative',
+  },
+];
 
 const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
   props: ConditionTimeRangeProps
@@ -71,32 +104,7 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
           });
         }}
         value={segmentData.groupDateRange?.value ?? null}
-        relativeOptions={[
-          {
-            key: 'previous-5-minutes',
-            amount: 5,
-            unit: 'minute',
-            type: 'relative',
-          },
-          {
-            key: 'previous-30-minutes',
-            amount: 30,
-            unit: 'minute',
-            type: 'relative',
-          },
-          {
-            key: 'previous-1-hour',
-            amount: 1,
-            unit: 'hour',
-            type: 'relative',
-          },
-          {
-            key: 'previous-6-hours',
-            amount: 6,
-            unit: 'hour',
-            type: 'relative',
-          },
-        ]}
+        relativeOptions={relativeOptions}
         isValidRange={isValidRange}
         i18nStrings={{
           relativeModeTitle: defaultStr(

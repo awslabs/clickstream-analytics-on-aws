@@ -202,7 +202,8 @@
     "event": "事件",
     "actions": "操作",
     "createSegment": "创建分群",
-    "filterGroup": "过滤组"
+    "filterGroup": "过滤组",
+    "duplicate": "复制"
   },
   "item": "项目",
   "items": "项目",

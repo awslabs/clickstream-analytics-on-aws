@@ -84,10 +84,16 @@ const UserSegments: React.FC = () => {
                     variant="h2"
                     actions={
                       <SpaceBetween direction="horizontal" size="xs">
+                        <Button iconName="refresh" />
                         <ButtonDropdown
                           items={[
                             {
                               text: defaultStr(t('button.viewDetails')),
+                              id: 'detail',
+                              disabled: false,
+                            },
+                            {
+                              text: defaultStr(t('button.duplicate')),
                               id: 'detail',
                               disabled: false,
                             },

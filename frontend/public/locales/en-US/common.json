@@ -202,7 +202,8 @@
     "event": "Event",
     "actions": "Actions",
     "createSegment": "Create Segment",
-    "filterGroup": "Filter group"
+    "filterGroup": "Filter group",
+    "duplicate": "Duplicate"
   },
   "item": "item",
   "items": "items",

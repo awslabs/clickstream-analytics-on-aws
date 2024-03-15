@@ -58,7 +58,6 @@ const SegmentEditor: React.FC = () => {
           {t('button.filterGroup')}
         </Button>
       </div>
-      <pre>{JSON.stringify(segmentDataState, null, 2)}</pre>
     </div>
   );
 };

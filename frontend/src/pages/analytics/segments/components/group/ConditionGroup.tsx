@@ -22,7 +22,7 @@ import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/an
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
-import React, { useMemo, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConditionType } from 'ts/const';
 import Condition from './Condition';
@@ -42,6 +42,13 @@ export interface SegmentPropsData {
   sequenceConditionIndex?: number;
 }
 
+enum EventTypes {
+  UserDoneEvent = 'userDoneEvent',
+  UserIsEvent = 'userIsEvent',
+  UserDoneInSeqEvent = 'userDoneInSeqEvent',
+  UserInGroup = 'userInGroup',
+}
+
 interface ConditionGroupProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
@@ -53,6 +60,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
   const { t } = useTranslation();
   const { segmentProps, segmentData } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+  const [eventType, setEventType] = useState(EventTypes.UserDoneEvent);
 
   const [conditionWidth, setConditionWidth] = useState(0);
   const [filterOptionData, filterOptionDataDispatch] = useReducer(
@@ -63,31 +71,27 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
     }
   );
 
-  const isDoneEvent = useMemo(() => {
-    return (
+  useEffect(() => {
+    if (
       segmentData.userEventType?.value === ConditionType.USER_DONE ||
       segmentData.userEventType?.value === ConditionType.USER_NOT_DONE
-    );
-  }, [segmentData.userEventType?.value]);
-
-  const isUserIsEvent = useMemo(() => {
-    return (
+    ) {
+      setEventType(EventTypes.UserDoneEvent);
+    } else if (
       segmentData.userEventType?.value === ConditionType.USER_IS ||
       segmentData.userEventType?.value === ConditionType.USER_IS_NOT
-    );
-  }, [segmentData.userEventType?.value]);
-
-  const isDoneInSeqEvent = useMemo(() => {
-    return (
+    ) {
+      setEventType(EventTypes.UserIsEvent);
+    } else if (
       segmentData.userEventType?.value === ConditionType.USER_DONE_IN_SEQUENCE
-    );
-  }, [segmentData.userEventType?.value]);
-
-  const isUserInGroup = useMemo(() => {
-    return (
+    ) {
+      setEventType(EventTypes.UserDoneInSeqEvent);
+    } else if (
       segmentData.userEventType?.value === ConditionType.USER_IN_GROUP ||
       segmentData.userEventType?.value === ConditionType.USER_NOT_IN_GROUP
-    );
+    ) {
+      setEventType(EventTypes.UserDoneEvent);
+    }
   }, [segmentData.userEventType?.value]);
 
   return (
@@ -99,7 +103,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
           segmentProps={segmentProps}
         />
 
-        {isDoneEvent && (
+        {eventType === EventTypes.UserDoneEvent && (
           <UserDoneComp
             segmentData={segmentData}
             segmentProps={segmentProps}
@@ -111,16 +115,16 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
             }}
           />
         )}
-        {isUserIsEvent && (
+        {eventType === EventTypes.UserIsEvent && (
           <UserIsComp segmentData={segmentData} segmentProps={segmentProps} />
         )}
-        {isDoneInSeqEvent && (
+        {eventType === EventTypes.UserDoneInSeqEvent && (
           <UserDoneInSeq
             segmentData={segmentData}
             segmentProps={segmentProps}
           />
         )}
-        {isUserInGroup && (
+        {eventType === EventTypes.UserInGroup && (
           <UserInGroup segmentData={segmentData} segmentProps={segmentProps} />
         )}
         <div>
@@ -178,7 +182,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
       </div>
 
-      {isDoneEvent && (
+      {eventType === EventTypes.UserDoneEvent && (
         <div
           className="cs-analytics-second-condition"
           style={{
@@ -241,7 +245,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
         </div>
       )}
 
-      {isDoneInSeqEvent && (
+      {eventType === EventTypes.UserDoneInSeqEvent && (
         <div className="flex-v gap-5">
           {segmentData.sequenceEventList.map((item, index) => {
             return (
