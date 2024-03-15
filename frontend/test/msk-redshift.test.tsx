@@ -106,7 +106,7 @@ describe('Test data processing settings', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -228,7 +228,7 @@ describe('Test redsfhit settings', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -351,7 +351,7 @@ describe('Test redsfhit settings', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -476,7 +476,7 @@ describe('Test MSK kafkaConnector settings', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -610,7 +610,7 @@ describe('Test MSK kafkaConnector settings', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {

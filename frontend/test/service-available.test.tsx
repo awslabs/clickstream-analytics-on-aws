@@ -561,7 +561,7 @@ describe('Test EMR Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -675,7 +675,7 @@ describe('Test EMR Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -791,7 +791,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -910,7 +910,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {

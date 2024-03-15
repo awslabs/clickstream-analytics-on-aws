@@ -109,7 +109,7 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -240,7 +240,7 @@ describe('Test update pipeline when not enable data processing or data modeling'
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
