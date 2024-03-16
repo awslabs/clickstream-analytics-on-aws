@@ -84,7 +84,6 @@ const UserSegments: React.FC = () => {
                     variant="h2"
                     actions={
                       <SpaceBetween direction="horizontal" size="xs">
-                        <Button iconName="refresh" />
                         <ButtonDropdown
                           items={[
                             {
