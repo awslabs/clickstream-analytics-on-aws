@@ -361,7 +361,7 @@
       "refreshMethodManual": "手动",
       "refreshMethodAuto": "自动",
       "expirationSettings": "过期设置",
-      "expirationSettingsDesc": "您可以通过设置分群的到期日期来避免不必要的成本，到期后该分段将停止自动刷新。",
+      "expirationSettingsDesc": "您可以通过设置分群的到期日期来避免不必要的成本，到期后该分群将停止自动刷新。",
       "filterGroup": "过滤器组",
       "filterGroupDesc": "满足以下条件的用户将被包含在分群中。",
       "provideDesc": "提供简短描述",
