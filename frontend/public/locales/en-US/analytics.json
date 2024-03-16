@@ -361,7 +361,7 @@
       "refreshMethodManual": "Manual",
       "refreshMethodAuto": "Automatic",
       "expirationSettings": "Expiration settings",
-      "expirationSettingsDesc": "Segment will become manual refresh after the expiration date, Setting an expiration date for a segment avoid unnecessary cost when an segment is not being used. You can always update it back to Automatic refresh method.",
+      "expirationSettingsDesc": "You can avoid unnecessary cost by setting expiration date for a segment after which the segment will stop auto refresh.",
       "filterGroup": "Filter group",
       "filterGroupDesc": "Users who meet the following conditions will be included in the segment.",
       "provideDesc": "Provide a short description",
