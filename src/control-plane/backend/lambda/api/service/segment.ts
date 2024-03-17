@@ -1,0 +1,158 @@
+/**
+ *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  with the License. A copy of the License is located at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
+ *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
+ *  and limitations under the License.
+ */
+
+import {
+  CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
+  OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
+  Segment,
+  SegmentJobTriggerType,
+} from '@aws/clickstream-base-lib';
+import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from '@aws-sdk/client-eventbridge';
+import { NextFunction, Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { PipelineStackType } from '../common/model-ln';
+import { logger } from '../common/powertools';
+import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
+import { ApiSuccess } from '../common/types';
+import { CPipeline } from '../model/pipeline';
+import { DynamoDBSegmentStore } from '../store/dynamodb/dynamodb-segment-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
+
+const segmentStore = new DynamoDBSegmentStore();
+const pipelineStore = new DynamoDbStore();
+const eventBridgeClient = new EventBridgeClient({
+  ...aws_sdk_client_common_config,
+  region: process.env.AWS_REGION,
+});
+
+export class SegmentServ {
+  public async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const segment = this.constructSegmentFromInput(req, res);
+
+      // Create EventBridge rule
+      if (segment.refreshSchedule.cron !== 'Manual' && !!segment.refreshSchedule.cronExpression) {
+        // Get segments workflow state machine arn
+        const workflowArn = await this.getSegmentsWorkflowSfnArn(segment);
+        if (!workflowArn) {
+          return next(new Error('No segment workflow state machine is found.'));
+        }
+
+        const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}SegmentJob-${segment.name}`;
+        const rule = await eventBridgeClient.send(new PutRuleCommand({
+          Name: ruleName,
+          Description: `For scheduled job of segment ${segment.segmentId}`,
+          ScheduleExpression: segment.refreshSchedule.cronExpression,
+          State: segment.refreshSchedule.expireAfter > Date.now() ? 'ENABLED' : 'DISABLED',
+        }));
+
+        await eventBridgeClient.send(new PutTargetsCommand({
+          Rule: ruleName,
+          Targets: [
+            {
+              Arn: workflowArn,
+              Id: 'SegmentsWorkflowStateMachine',
+              Input: JSON.stringify({
+                appId: segment.appId,
+                segmentId: segment.segmentId,
+                trigger: SegmentJobTriggerType.SCHEDULED,
+              }),
+              RoleArn: 'arn:aws:iam::012870276471:role/cloudfront-s3-control-pla-ClickStreamApiApiFunction-8gZF0tDAKaUr', // TODO: get api function role
+            },
+          ],
+        }));
+        logger.info('Create EventBridge rule ' + ruleName);
+
+        segment.eventBridgeRuleArn = rule.RuleArn;
+      }
+
+      // Save segment setting to DDB
+      const id = await segmentStore.create(segment);
+      logger.info('Create new segment setting, id: ' + id);
+
+      return res.status(201).json(new ApiSuccess({ id }, 'Segment created successfully.'));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  public async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { appId } = req.query;
+      const segments = await segmentStore.list(appId as string);
+
+      return res.status(200).json(new ApiSuccess(segments));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  public async get(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { appId } = req.query;
+      const { segmentId } = req.params;
+      const segment = await segmentStore.get(appId as string, segmentId as string);
+
+      console.log(segment);
+      return res.status(200).json(new ApiSuccess(segment));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  public async listJobs(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { segmentId } = req.params;
+      const segmentJobs = await segmentStore.listJobs(segmentId as string);
+
+      return res.status(200).json(new ApiSuccess(segmentJobs));
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  private constructSegmentFromInput(req: Request, res: Response): Segment {
+    const now = Date.now();
+    const input = req.body;
+    const operator = res.get('X-Click-Stream-Operator') ?? 'Unknown operator';
+
+    return {
+      segmentId: uuidv4(),
+      segmentType: input.segmentType,
+      name: input.name,
+      description: input.description ?? '',
+      projectId: input.projectId,
+      appId: input.appId,
+      createBy: operator,
+      createAt: now,
+      lastUpdateBy: operator,
+      lastUpdateAt: now,
+      refreshSchedule: input.refreshSchedule,
+      criteria: input.criteria,
+      eventBridgeRuleArn: '',
+    };
+  }
+
+  private async getSegmentsWorkflowSfnArn(segment: Segment) {
+    const pipelines = await pipelineStore.listPipeline(segment.projectId, 'latest', 'asc');
+    if (pipelines.length === 0) {
+      throw new Error(`Pipeline for ${segment.projectId} is not found`);
+    }
+    const pipeline = new CPipeline(pipelines[0]);
+    const outputs = pipeline.getStackOutputBySuffixes(PipelineStackType.DATA_MODELING_REDSHIFT, [
+      OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
+    ]);
+
+    return outputs.get(OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX);
+  }
+}

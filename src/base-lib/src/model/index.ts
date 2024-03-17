@@ -11,5 +11,4 @@
  *  and limitations under the License.
  */
 
-export * from './constant';
-export * from './model';
+export * from './segment';
