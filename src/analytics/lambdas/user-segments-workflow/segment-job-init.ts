@@ -11,6 +11,12 @@
  *  and limitations under the License.
  */
 
+import {
+  SegmentDdbItem,
+  SegmentJobStatus,
+  SegmentJobStatusItem,
+  SegmentJobTriggerType,
+} from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DisableRuleCommand, EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
@@ -18,12 +24,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { formatDate, parseDynamoDBTableARN } from '../../../common/utils';
-import {
-  SegmentDdbItem,
-  SegmentJobStatus,
-  SegmentJobStatusItem,
-  SegmentJobTriggerType,
-} from '../../private/segments/segments-model';
 
 interface SegmentJobInitEvent {
   appId: string;
