@@ -7,7 +7,7 @@ AS
 SELECT  s.event_timestamp
        ,s.user_pseudo_id
        ,s.session_id
-       ,MAX(s.session_number) session_number
+       ,MAX(session_number) session_number
        ,MAX(user_id) user_id
        ,MAX(session_start_time_msec) session_start_time_msec
        ,MAX(session_source) session_source
