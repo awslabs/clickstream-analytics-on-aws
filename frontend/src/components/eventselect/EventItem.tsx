@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Select, SelectProps } from '@cloudscape-design/components';
+import { Select } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
@@ -35,7 +35,7 @@ interface EventItemProps {
   categoryOption: IAnalyticsItem | null;
   calcMethodOption?: IAnalyticsItem | null;
   calcMethodOptions?: IAnalyticsItem[];
-  changeCurCategoryOption: (category: SelectProps.Option | null) => void;
+  changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;
@@ -109,6 +109,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         })}
       >
         <div
+          role="none"
           className="flex-1 cs-dropdown-event-input"
           onClick={() => {
             setShowDropdown((prev) => !prev);
@@ -148,6 +149,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         {isMultiSelect && (
           <>
             <div
+              role="none"
               className="second-select-option"
               title={calcMethodOption?.label}
               onClick={() => {

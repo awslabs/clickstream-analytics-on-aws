@@ -16,7 +16,8 @@
     "start": "node scripts/start.js",
     "crabuild": "node scripts/build.js",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
-    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'"
+    "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "test:coverage": "node scripts/test.js --transformIgnorePatterns -coverage --watchAll=false --collectCoverageFrom='src/**/*.{ts,tsx}'"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
@@ -28,6 +29,7 @@
     "@types/node": "^18",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
+    "@types/testing-library__jest-dom": "^5.14.9",
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "babel-jest": "^27.4.2",
@@ -66,11 +68,11 @@
     "@aws-sdk/lib-storage": "^3.353.0",
     "@aws-sdk/xhr-http-handler": "^3.353.0",
     "@aws/clickstream-base-lib": "workspace:*",
-    "@babel/core": "^7.16.0",
-    "@cloudscape-design/collection-hooks": "^1.0.7",
-    "@cloudscape-design/components": "^3.0.294",
-    "@cloudscape-design/design-tokens": "^3.0.22",
-    "@cloudscape-design/global-styles": "^1.0.7",
+    "@babel/core": "^7.24.0",
+    "@cloudscape-design/collection-hooks": "^1.0.38",
+    "@cloudscape-design/components": "^3.0.570",
+    "@cloudscape-design/design-tokens": "^3.0.34",
+    "@cloudscape-design/global-styles": "^1.0.24",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@svgr/webpack": "^5.5.0",
     "amazon-quicksight-embedding-sdk": "^2.4.0",
@@ -130,7 +132,8 @@
   "version": "1.2.0",
   "jest": {
     "roots": [
-      "<rootDir>/src"
+      "<rootDir>/src",
+      "<rootDir>/test"
     ],
     "testEnvironment": "jsdom",
     "moduleDirectories": [
@@ -149,6 +152,42 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.ts"
     ],
+    "transform": {
+      "^.+\\.[t]sx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.dev.json"
+        }
+      ],
+      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
+      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
+      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
+    },
+    "transformIgnorePatterns": [
+      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
+      "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "moduleNameMapper": {
+      "^react-native$": "react-native-web",
+      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
+    },
+    "moduleFileExtensions": [
+      "web.js",
+      "js",
+      "web.ts",
+      "ts",
+      "web.tsx",
+      "tsx",
+      "json",
+      "web.jsx",
+      "jsx",
+      "node"
+    ],
+    "watchPlugins": [
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname"
+    ],
+    "resetMocks": true,
     "clearMocks": true,
     "collectCoverage": true,
     "coverageReporters": [
@@ -176,15 +215,7 @@
           "outputDirectory": "test-reports"
         }
       ]
-    ],
-    "transform": {
-      "^.+\\.[t]sx?$": [
-        "ts-jest",
-        {
-          "tsconfig": "tsconfig.dev.json"
-        }
-      ]
-    }
+    ]
   },
   "types": "lib/index.d.ts",
   "browserslist": {

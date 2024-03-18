@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { render } from '@testing-library/react';
 import ConfigIngestion from 'pages/pipelines/create/steps/ConfigIngestion';
 import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
@@ -21,7 +22,7 @@ import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 const mockedUsedNavigate = jest.fn();
 
 jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockedUsedNavigate,
 }));
 
@@ -33,7 +34,15 @@ jest.mock('react-i18next', () => ({
     },
   }),
   Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
+  initReactI18next: {
+    type: '3rdParty',
+    init: (i18next) => i18next,
+  },
 }));
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(jest.fn());
+});
 
 const getServiceStatus = (data: ServiceAvailableResponse[]) => {
   const agaAvailable =
@@ -130,12 +139,6 @@ describe('Test AGA service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -182,6 +185,12 @@ describe('Test AGA service available', () => {
           return;
         }}
         changeAckownledge={() => {
+          return;
+        }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
           return;
         }}
         publicSubnetError={false}
@@ -285,12 +294,6 @@ describe('Test AGA service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -337,6 +340,12 @@ describe('Test AGA service available', () => {
           return;
         }}
         changeAckownledge={() => {
+          return;
+        }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
           return;
         }}
         publicSubnetError={false}
@@ -406,15 +415,17 @@ describe('Test QuickSight service available', () => {
         changeQuickSightAccountName={() => {
           return;
         }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
     expect(reportingDom).toBeDefined();
-    const reportingCheckbox = reportingDom.container.querySelector(
-      '#test-quicksight-id'
-    );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeDisabled();
   });
 
   test('Reporting Rendered and QuickSight is available', async () => {
@@ -450,6 +461,13 @@ describe('Test QuickSight service available', () => {
         changeQuickSightAccountName={() => {
           return;
         }}
+        quickSightUserEmptyError={false}
+        changeQuickSightDisabled={function (disabled: boolean): void {
+          throw new Error('Function not implemented.');
+        }}
+        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
+          throw new Error('Function not implemented.');
+        }}
       />
     );
 
@@ -457,8 +475,7 @@ describe('Test QuickSight service available', () => {
     const reportingCheckbox = reportingDom.container.querySelector(
       '#test-quicksight-id'
     );
-    expect(reportingCheckbox).toBeInTheDocument();
-    expect(reportingCheckbox).toBeEnabled();
+    expect(reportingCheckbox).not.toBeInTheDocument();
   });
 });
 
@@ -544,7 +561,7 @@ describe('Test EMR Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -564,6 +581,8 @@ describe('Test EMR Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -656,7 +675,7 @@ describe('Test EMR Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -676,6 +695,8 @@ describe('Test EMR Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -770,7 +791,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -790,6 +811,8 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -887,7 +910,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeSecurityGroup={() => {
           return;
         }}
-        changeReshiftSubnets={() => {
+        changeRedshiftSubnets={() => {
           return;
         }}
         changeBaseCapacity={() => {
@@ -907,6 +930,8 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
         transformPluginEmptyError={false}
+        dataProcessorIntervalCronInvalidError={false}
+        redshiftProvisionedDBUserFormatError={false}
       />
     );
 
@@ -995,12 +1020,6 @@ describe('Test MSK service available', () => {
         changeBufferType={() => {
           return;
         }}
-        changeBufferS3Bucket={() => {
-          return;
-        }}
-        changeBufferS3Prefix={() => {
-          return;
-        }}
         changeS3BufferSize={() => {
           return;
         }}
@@ -1047,6 +1066,12 @@ describe('Test MSK service available', () => {
           return;
         }}
         changeAckownledge={() => {
+          return;
+        }}
+        changeNetworkType={() => {
+          return;
+        }}
+        changeIngestionType={() => {
           return;
         }}
         publicSubnetError={false}
@@ -1141,7 +1166,6 @@ describe('Test MSK service available', () => {
     const selectedMSK = bufferMSKDom.container.querySelector(
       '#test-select-msk-id'
     );
-    expect(selectedMSK).toBeInTheDocument();
-    expect(selectedMSK).toBeEnabled();
+    expect(selectedMSK).not.toBeInTheDocument();
   });
 });

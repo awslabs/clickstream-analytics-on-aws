@@ -11,9 +11,11 @@
  *  and limitations under the License.
  */
 
-/* eslint @typescript-eslint/no-unused-expressions: "off" */
-import * as ReactDOM from 'react-dom';
+import App from 'App';
+import { createRoot } from 'react-dom/client';
 
 it('renders without crashing', () => {
-  ReactDOM;
+  const div = document.createElement('div');
+  const root = createRoot(div);
+  root.render(<App />);
 });

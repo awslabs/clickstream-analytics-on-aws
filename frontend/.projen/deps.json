@@ -45,6 +45,11 @@
       "type": "build"
     },
     {
+      "name": "@types/testing-library__jest-dom",
+      "version": "^5.14.9",
+      "type": "build"
+    },
+    {
       "name": "@types/uuid",
       "version": "^9.0.0",
       "type": "build"
@@ -222,27 +227,27 @@
     },
     {
       "name": "@babel/core",
-      "version": "^7.16.0",
+      "version": "^7.24.0",
       "type": "runtime"
     },
     {
       "name": "@cloudscape-design/collection-hooks",
-      "version": "^1.0.7",
+      "version": "^1.0.38",
       "type": "runtime"
     },
     {
       "name": "@cloudscape-design/components",
-      "version": "^3.0.294",
+      "version": "^3.0.570",
       "type": "runtime"
     },
     {
       "name": "@cloudscape-design/design-tokens",
-      "version": "^3.0.22",
+      "version": "^3.0.34",
       "type": "runtime"
     },
     {
       "name": "@cloudscape-design/global-styles",
-      "version": "^1.0.7",
+      "version": "^1.0.24",
       "type": "runtime"
     },
     {

@@ -17,6 +17,7 @@
     "registerApp": "Register Application",
     "alarms": "Alarms",
     "users": "Users",
+    "analytics": "Data Analytics",
     "analyticsStudio": "Analytics Studio",
     "dashboard": "Dashboard",
     "realtime": "Realtime",
@@ -36,6 +37,7 @@
       "explore": "Explore",
       "analyzes": "Analyzes",
       "metadata": "Metadata",
+      "segments": "Segments",
       "data-management": "Data Management"
     },
     "operation": "Operation",
@@ -194,7 +196,14 @@
     "applyActionText": "Apply",
     "clear": "Clear",
     "fullWindowView": "Full window view",
-    "scanMetadata": "Scan metadata"
+    "scanMetadata": "Scan metadata",
+    "or": "Or",
+    "and": "And",
+    "event": "Event",
+    "actions": "Actions",
+    "createSegment": "Create Segment",
+    "filterGroup": "Filter group",
+    "duplicate": "Duplicate"
   },
   "item": "item",
   "items": "items",
