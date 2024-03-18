@@ -189,6 +189,10 @@ export interface SegmentJobStatusItem {
   segmentSessionNumber: number;
   totalSessionNumber: number;
   sampleData: object[];
+
+  // GSI
+  prefix: string;
+  createAt: number;
 }
 
 export enum SegmentJobStatus {

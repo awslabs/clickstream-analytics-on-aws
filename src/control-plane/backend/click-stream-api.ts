@@ -12,7 +12,11 @@
  */
 
 import path from 'path';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
+import {
+  CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX,
+  QUICKSIGHT_RESOURCE_NAME_PREFIX,
+  SCAN_METADATA_WORKFLOW_PREFIX,
+} from '@aws/clickstream-base-lib';
 import {
   CfnResource,
   Duration,
@@ -339,6 +343,7 @@ export class ClickStreamApiConstruct extends Construct {
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
         IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
+        API_FUNCTION_LAMBDA_ROLE: role.roleArn,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
@@ -403,6 +408,15 @@ export class ClickStreamApiConstruct extends Construct {
               service: 'states',
               region: '*',
               resourceName: `${SCAN_METADATA_WORKFLOW_PREFIX}*`,
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            }, Stack.of(this),
+          ),
+          Arn.format(
+            {
+              resource: 'stateMachine',
+              service: 'states',
+              region: '*',
+              resourceName: `${CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX}*`,
               arnFormat: ArnFormat.COLON_RESOURCE_NAME,
             }, Stack.of(this),
           ),
