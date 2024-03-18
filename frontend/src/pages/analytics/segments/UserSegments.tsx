@@ -25,7 +25,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
 
 interface UserSegmentItem {
@@ -38,6 +38,7 @@ interface UserSegmentItem {
 const UserSegments: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { projectId, appId } = useParams();
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
@@ -115,7 +116,9 @@ const UserSegments: React.FC = () => {
                           iconName="add-plus"
                           variant="primary"
                           onClick={() => {
-                            navigate('/analytics/segments/add');
+                            navigate(
+                              `/analytics/${projectId}/app/${appId}/segments/add`
+                            );
                           }}
                         >
                           {t('button.createSegment')}

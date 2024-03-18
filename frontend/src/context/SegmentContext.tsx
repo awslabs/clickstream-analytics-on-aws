@@ -11,19 +11,23 @@
  *  and limitations under the License.
  */
 
+import { Spinner } from '@cloudscape-design/components';
 import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
   analyticsSegmentGroupReducer,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import {
   ReactElement,
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
 } from 'react';
 import { DEFAULT_SEGMENT_GROUP_DATA } from 'ts/const';
+import { useUserEventParameter } from './AnalyticsEventsContext';
 
 interface SegmentContextType {
   segmentDataState: IEventSegmentationObj;
@@ -36,6 +40,8 @@ const SegmentContext = createContext<SegmentContextType>(
 export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
+  const { data, loading } = useUserEventParameter();
+
   const [segmentDataState, segmentDataDispatch] = useReducer(
     analyticsSegmentGroupReducer,
     { ...DEFAULT_SEGMENT_GROUP_DATA }
@@ -45,6 +51,19 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
     () => ({ segmentDataState, segmentDataDispatch }),
     [segmentDataState, segmentDataDispatch]
   );
+
+  useEffect(() => {
+    if (data.categoryEvents) {
+      segmentDataDispatch({
+        type: AnalyticsSegmentActionType.SetEventOption,
+        eventOption: data.categoryEvents,
+      });
+    }
+  }, [data]);
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <SegmentContext.Provider value={contextValue}>
@@ -56,7 +75,7 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
 export const useSegmentContext = (): SegmentContextType => {
   const context = useContext(SegmentContext);
   if (context === undefined) {
-    throw new Error('useMainContext must be used within a MainProvider');
+    throw new Error('useSegmentContext must be used within a SegmentProvider');
   }
   return context;
 };
