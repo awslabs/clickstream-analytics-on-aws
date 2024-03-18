@@ -1,5 +1,3 @@
-import { SelectProps } from '@cloudscape-design/components';
-
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -12,6 +10,13 @@ import { SelectProps } from '@cloudscape-design/components';
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { SelectProps } from '@cloudscape-design/components';
+import {
+  ERelationShip,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
+
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
@@ -433,3 +438,84 @@ export enum ENetworkType {
   General = 'General',
   Private = 'Private',
 }
+
+// For segment selection
+
+export enum ConditionType {
+  USER_DONE = 'USER_DONE',
+  USER_NOT_DONE = 'USER_NOT_DONE',
+  USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
+  USER_IS = 'USER_IS',
+  USER_IS_NOT = 'USER_IS_NOT',
+  USER_IN_GROUP = 'USER_IN_GROUP',
+  USER_NOT_IN_GROUP = 'USER_NOT_IN_GROUP',
+}
+
+export const CONDITION_LIST: SelectProps.Option[] = [
+  {
+    label: 'analytics:segment.type.userDone',
+    value: ConditionType.USER_DONE,
+  },
+  {
+    label: 'analytics:segment.type.userNotDone',
+    value: ConditionType.USER_NOT_DONE,
+  },
+  {
+    label: 'analytics:segment.type.doneInSequence',
+    value: ConditionType.USER_DONE_IN_SEQUENCE,
+  },
+  { label: 'analytics:segment.type.userIs', value: ConditionType.USER_IS },
+  {
+    label: 'analytics:segment.type.userIsNot',
+    value: ConditionType.USER_IS_NOT,
+  },
+  {
+    label: 'analytics:segment.type.userInGroup',
+    value: ConditionType.USER_IN_GROUP,
+  },
+  {
+    label: 'analytics:segment.type.userNotInGroup',
+    value: ConditionType.USER_NOT_IN_GROUP,
+  },
+];
+
+export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
+  userEventType: CONDITION_LIST[0],
+  subItemList: [],
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+};
+
+export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
+  userEventType: null,
+  segmentEventRelationShip: ERelationShip.OR,
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+  subItemList: [{ ...DEFAULT_SEGMENT_ITEM }],
+  groupDateRange: null,
+};
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
+  filterGroupRelationShip: ERelationShip.AND,
+  subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
+  eventOption: [],
+  eventCalculateMethodOption: [],
+  conditionOptions: [],
+  eventOperationOptions: [],
+  attributeOptions: [],
+  attributeOperationOptions: [],
+  userGroupOptions: [],
+};
+
+export const darkBackgroundColors = [
+  '#033160',
+  '#A82A0C',
+  '#037F0C',
+  '#1D3557',
+  '#780000',
+  '#0B3C5D',
+  '#F13C20',
+  '#343A40',
+  '#10316B',
+  '#8D0801',
+];

@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import {
   ConditionCategory,
   MetadataPlatform,
@@ -44,6 +47,10 @@ export interface IAnalyticsItem extends SelectProps.Option {
   groupName?: string;
   itemType?: string;
   subList?: IAnalyticsItem[];
+  // for segment sequence event filter
+  sequenceEventOption?: IAnalyticsItem | null;
+  filterGroupRelationShip?: ERelationShip;
+  sequenceEventConditionFilterList?: IConditionItemType[];
 }
 
 export interface IProjectSelectItem extends SelectProps.Option {
@@ -83,6 +90,41 @@ export interface IEventAnalyticsItem {
   hasTab?: boolean;
   isMultiSelect?: boolean;
   enableChangeRelation?: boolean;
+}
+
+// for segment group
+export interface IEventSegmentationItem {
+  groupDateRange?: DateRangePickerProps.ChangeDetail | null;
+  groupName?: string;
+  userEventType: IAnalyticsItem | null;
+  segmentEventRelationShip?: ERelationShip;
+  subItemList: IEventSegmentationItem[];
+  eventConditionRelationShip?: ERelationShip | null;
+  sequenceEventList: IAnalyticsItem[];
+  userDoneEvent?: IAnalyticsItem | null;
+  userDoneEventConditionList: IConditionItemType[];
+  userDoneEventCalculateMethod?: IAnalyticsItem | null;
+  userDoneEventOperation?: SelectProps.Option | null;
+  userDoneEventValue?: any;
+  userIsParamOption?: IAnalyticsItem | null;
+  userISOperator?: SelectProps.Option | null;
+  userIsValue?: any;
+  userSequenceSession?: SelectProps.Option | null;
+  userSequenceFlow?: SelectProps.Option | null;
+  userInFilterGroup?: SelectProps.Option | null;
+}
+
+export interface IEventSegmentationObj {
+  filterGroupRelationShip: ERelationShip;
+  subItemList: IEventSegmentationItem[];
+  // select options
+  eventOption: CategoryItemType[];
+  eventCalculateMethodOption: IAnalyticsItem[];
+  conditionOptions: CategoryItemType[];
+  eventOperationOptions: SelectProps.Option[];
+  attributeOptions: CategoryItemType[];
+  attributeOperationOptions: SelectProps.Option[];
+  userGroupOptions: SelectProps.Option[];
 }
 
 export interface IRetentionAnalyticsItem {

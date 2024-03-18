@@ -36,7 +36,7 @@ interface ConditionItemProps {
   conditionOptions: CategoryItemType[];
   removeConditionItem: () => void;
   changeConditionOperator: (value: SelectProps.Option | null) => void;
-  changeCurCategoryOption: (category: SelectProps.Option | null) => void;
+  changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeConditionValue: (value: string[]) => void;
   loading?: boolean;
   disableValidate?: boolean;
