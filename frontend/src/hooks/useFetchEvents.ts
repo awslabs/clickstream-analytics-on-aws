@@ -34,7 +34,7 @@ export interface EventDataType {
   metaDataUserAttributes: IMetadataUserAttribute[];
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
-  builtInData?: IMetadataBuiltInList;
+  builtInMetaData?: IMetadataBuiltInList;
 }
 
 const getAllBuiltInMetadata = async () => {
@@ -107,23 +107,18 @@ const getUserAttributes = async (projectId, appId) => {
 const listAllAttributes = async (projectId, appId) => {
   try {
     const parameters = await getAllParameters(projectId, appId);
-    // setMetadataEventParameters(parameters ?? []);
     const publicParameters = parameters?.filter(
       (item) => item.parameterType === MetadataParameterType.PUBLIC
     );
     const userAttributes = await getUserAttributes(projectId, appId);
-    // setMetadataUserAttributes(data.items);
     const conditionOptions = parametersConvertToCategoryItemType(
       userAttributes,
       publicParameters ?? []
     );
-    // setPresetParameters(conditionOptions);
     const groupOptions = parametersConvertToCategoryItemType(
       userAttributes,
       parameters ?? []
     );
-    console.info('groupOptions:', groupOptions);
-    // setGroupParameters(groupOptions);
     return {
       metaDataEventParameters: parameters,
       metaDataUserAttributes: userAttributes,
@@ -152,12 +147,11 @@ function useFetchEvents() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [eventData, attributeData, builtInData] = await Promise.all([
+        const [eventData, attributeData, builtInMetaData] = await Promise.all([
           listMetadataEvents(projectId, appId),
           listAllAttributes(projectId, appId),
           getAllBuiltInMetadata(),
         ]);
-        console.info(eventData, attributeData, builtInData);
         setData({
           metaDataEvents: eventData?.metaDataEvents ?? [],
           categoryEvents: eventData?.categoryEvents ?? [],
@@ -165,7 +159,7 @@ function useFetchEvents() {
           metaDataUserAttributes: attributeData?.metaDataUserAttributes ?? [],
           presetParameters: attributeData?.presetParameters ?? [],
           groupParameters: attributeData?.groupParameters ?? [],
-          builtInData: builtInData,
+          builtInMetaData: builtInMetaData,
         });
       } catch (err) {
         setError(err as Error);

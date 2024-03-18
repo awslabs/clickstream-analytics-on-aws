@@ -16,6 +16,7 @@ import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { useSegmentContext } from 'context/SegmentContext';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,8 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   const { t } = useTranslation();
   const { segmentData, segmentProps, addNewEventCondition } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+  const { data: eventData } = useUserEventParameter();
+  console.info('eventData:', eventData);
 
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 
@@ -68,6 +71,10 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                   type: AnalyticsSegmentActionType.UpdateUserDoneEvent,
                   segmentProps,
                   event: item,
+                  metaDataEventParameters: eventData.metaDataEventParameters,
+                  metaDataEvents: eventData.metaDataEvents,
+                  metaDataUserAttributes: eventData.metaDataUserAttributes,
+                  builtInMetaData: eventData.builtInMetaData,
                 });
               }}
               hasTab={true}

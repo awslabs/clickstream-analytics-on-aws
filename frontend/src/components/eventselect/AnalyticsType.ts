@@ -112,6 +112,8 @@ export interface IEventSegmentationItem {
   userSequenceSession?: SelectProps.Option | null;
   userSequenceFlow?: SelectProps.Option | null;
   userInFilterGroup?: SelectProps.Option | null;
+  // Options
+  eventAttributeOption?: CategoryItemType[];
 }
 
 export interface IEventSegmentationObj {
@@ -122,7 +124,6 @@ export interface IEventSegmentationObj {
   eventCalculateMethodOption: IAnalyticsItem[];
   conditionOptions: CategoryItemType[];
   eventOperationOptions: SelectProps.Option[];
-  attributeOptions: CategoryItemType[];
   attributeOperationOptions: SelectProps.Option[];
   userGroupOptions: SelectProps.Option[];
 }

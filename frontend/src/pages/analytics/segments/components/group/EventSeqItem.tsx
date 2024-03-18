@@ -49,7 +49,6 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
     analyticsSegmentFilterReducer,
     {
       ...INIT_SEGMENTATION_DATA,
-      conditionOptions: segmentDataState.attributeOptions,
     }
   );
   return (

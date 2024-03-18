@@ -502,7 +502,6 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   eventCalculateMethodOption: [],
   conditionOptions: [],
   eventOperationOptions: [],
-  attributeOptions: [],
   attributeOperationOptions: [],
   userGroupOptions: [],
 };

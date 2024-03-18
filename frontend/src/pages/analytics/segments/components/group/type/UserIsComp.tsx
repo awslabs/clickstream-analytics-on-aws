@@ -45,7 +45,7 @@ const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
         }}
         hasTab={false}
         isMultiSelect={false}
-        categories={segmentDataState.attributeOptions}
+        categories={[]}
       />
       <Select
         placeholder={defaultStr(
