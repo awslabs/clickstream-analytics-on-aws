@@ -15,7 +15,8 @@ import {
   ConditionNumericOperator,
   ConditionOperator,
   ParameterDataType,
-  ParameterType, SCHEDULE_EXPRESSION_PATTERN,
+  ParameterType,
+  SCHEDULE_EXPRESSION_PATTERN,
   SegmentFilterConditionType,
   SegmentFilterEventMetricType,
 } from '@aws/clickstream-base-lib';
@@ -32,6 +33,153 @@ router_segment.post(
   '',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
+    ...commonValidationsForSegment(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.create(req, res, next);
+  },
+);
+
+// List segments of an app
+router_segment.get(
+  '',
+  validate([
+    query('appId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.list(req, res, next);
+  },
+);
+
+// Get segment by appId and segmentId
+router_segment.get(
+  '/:segmentId',
+  validate([
+    param('segmentId').isString().notEmpty(),
+    query('appId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.get(req, res, next);
+  },
+);
+
+// Update segment
+router_segment.patch(
+  '/:segmentId',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('id').notEmpty(),
+    body('type').notEmpty(),
+    body('segmentId').notEmpty(),
+    ...commonValidationsForSegment(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.update(req, res, next);
+  },
+);
+
+// Delete segment
+router_segment.delete(
+  '/:segmentId',
+  validate([
+    param('segmentId').isString().notEmpty(),
+    query('appId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.delete(req, res, next);
+  },
+);
+
+// List segment jobs
+router_segment.get(
+  '/:segmentId/jobs',
+  validate([
+    param('segmentId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.listJobs(req, res, next);
+  },
+);
+
+// Get segment sample data
+router_segment.get(
+  '/:segmentId/sampleData',
+  validate([
+    param('segmentId').isString().notEmpty(),
+    query('jobRunId').optional().isString(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.getSampleData(req, res, next);
+  },
+);
+
+// Refresh segment
+router_segment.get(
+  '/:segmentId/refresh',
+  validate([
+    param('segmentId').isString().notEmpty(),
+    query('appId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.refreshSegment(req, res, next);
+  },
+);
+
+// Get presigned url for segment export
+router_segment.get(
+  '/:segmentId/jobs/:jobRunId/exportS3Url',
+  validate([
+    param('segmentId').isString().notEmpty(),
+    param('jobRunId').isString().notEmpty(),
+  ]),
+  async (req: Request, res: Response, next: NextFunction) => {
+    return segmentServ.getExportS3Url(req, res, next);
+  },
+);
+
+/**
+ * Validate refreshSchedule.cronExpression
+ * @param value
+ */
+function validateRefreshScheduleCronExpression(value: any) {
+  if (typeof value !== 'string') {
+    return Promise.reject('cronExpression should be string type.');
+  }
+
+  const regex = new RegExp(SCHEDULE_EXPRESSION_PATTERN);
+  const match = value.match(regex);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: cronExpression ${value} does not match ${SCHEDULE_EXPRESSION_PATTERN}.`);
+  }
+  return true;
+}
+
+/**
+ * Validate metricCondition.inputValue, which can be number, or number array with two elements
+ * @param value
+ */
+function validateMetricConditionInputValue(value: any) {
+  if (Array.isArray(value)) {
+    return value.every(item => typeof item === 'number') && value.length === 2 && value[0] <= value[1]; // number range
+  } else {
+    return typeof value === 'number';
+  }
+}
+
+/**
+ * Validate parameterCondition.inputValue type, which can be number | number[] | string | string[]
+ * @param value
+ */
+function validateParameterConditionInputValue(value: any) {
+  if (Array.isArray(value)) {
+    return value.every(item => typeof item === 'number' || typeof item === 'string');
+  } else {
+    return typeof value === 'number' || typeof value === 'string';
+  }
+}
+
+function commonValidationsForSegment() {
+  return [
     body('segmentType').isIn(['User', 'Session', 'Event']),
     body('name').notEmpty().trim(),
     body('description').isString().trim(),
@@ -104,86 +252,5 @@ router_segment.post(
           return false;
       }
     }),
-  ]),
-  async (req: Request, res: Response, next: NextFunction) => {
-    return segmentServ.create(req, res, next);
-  },
-);
-
-// List segments of an app
-router_segment.get(
-  '',
-  validate([
-    query('appId').isString().notEmpty(),
-  ]),
-  async (req: Request, res: Response, next: NextFunction) => {
-    return segmentServ.list(req, res, next);
-  },
-);
-
-// Get segment by appId and segmentId
-router_segment.get(
-  '/:segmentId',
-  validate([
-    param('segmentId').isString().notEmpty(),
-    query('appId').isString().notEmpty(),
-  ]),
-  async (req: Request, res: Response, next: NextFunction) => {
-    return segmentServ.get(req, res, next);
-  },
-);
-
-// List segment jobs
-router_segment.get(
-  '/:segmentId/jobs',
-  validate([
-    param('segmentId').isString().notEmpty(),
-  ]),
-  async (req: Request, res: Response, next: NextFunction) => {
-    return segmentServ.listJobs(req, res, next);
-  },
-);
-
-
-
-
-/**
- * Validate refreshSchedule.cronExpression
- * @param value
- */
-function validateRefreshScheduleCronExpression(value: any) {
-  if (typeof value !== 'string') {
-    return Promise.reject('cronExpression should be string type.');
-  }
-
-  const regex = new RegExp(SCHEDULE_EXPRESSION_PATTERN);
-  const match = value.match(regex);
-  if (!match || value !== match[0]) {
-    return Promise.reject(`Validation error: cronExpression ${value} does not match ${SCHEDULE_EXPRESSION_PATTERN}.`);
-  }
-  return true;
-}
-
-/**
- * Validate metricCondition.inputValue, which can be number, or number array with two elements
- * @param value
- */
-function validateMetricConditionInputValue(value: any) {
-  if (Array.isArray(value)) {
-    return value.every(item => typeof item === 'number') && value.length === 2 && value[0] <= value[1]; // number range
-  } else {
-    return typeof value === 'number';
-  }
-}
-
-/**
- * Validate parameterCondition.inputValue type, which can be number | number[] | string | string[]
- * @param value
- */
-function validateParameterConditionInputValue(value: any) {
-  if (Array.isArray(value)) {
-    return value.every(item => typeof item === 'number' || typeof item === 'string');
-  } else {
-    return typeof value === 'number' || typeof value === 'string';
-  }
+  ];
 }

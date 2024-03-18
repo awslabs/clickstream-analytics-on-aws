@@ -94,6 +94,8 @@ export const handler = async (event: SegmentJobInitEvent) => {
       segmentSessionNumber: 0,
       totalSessionNumber: 0,
       sampleData: [],
+      prefix: `SEGMENT_JOB_FOR#${segmentId}`,
+      createAt: Date.now(),
     };
     await ddbDocClient.send(new PutCommand({
       TableName: ddbTableName,
