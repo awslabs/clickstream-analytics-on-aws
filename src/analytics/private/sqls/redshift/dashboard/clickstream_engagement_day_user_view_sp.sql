@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_dashboard_engagement_day_user_view_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_day_user_view_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-    DELETE FROM {{dbName}}.{{schema}}.clickstream_dashboard_engagement_day_user_view where event_date = day;
+    DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_day_user_view where event_date = day;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_engagement_day_user_view (
+    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_day_user_view (
         event_date,
         event_cnt,
         view_cnt

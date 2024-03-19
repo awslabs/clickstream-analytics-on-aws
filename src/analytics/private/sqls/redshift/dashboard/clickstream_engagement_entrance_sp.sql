@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_entrance_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-    DELETE FROM {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance where event_date = day;
+    DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_entrance where event_date = day;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance (
+    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -27,7 +27,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance (
+    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -47,7 +47,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance (
+    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -67,7 +67,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_engagement_entrance (
+    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,

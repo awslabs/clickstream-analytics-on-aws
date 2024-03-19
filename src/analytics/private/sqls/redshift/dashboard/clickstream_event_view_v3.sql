@@ -136,7 +136,7 @@ SELECT
   CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
   CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator
 FROM 
-    {{dbName}}.{{schema}}..event_v2 as e
+    {{dbName}}.{{schema}}.event_v2 as e
 JOIN 
     {{dbName}}.{{schema}}.session_m_view as s ON e.user_pseudo_id = s.user_pseudo_id AND e.session_id = s.session_id
 JOIN 

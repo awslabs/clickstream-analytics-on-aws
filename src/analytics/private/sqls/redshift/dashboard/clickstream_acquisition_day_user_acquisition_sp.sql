@@ -1,11 +1,11 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition_sp(day date) 
+CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition_sp(day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition where event_date = day;
+DELETE FROM {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition where event_date = day;
 
 drop table if exists event_traffic_tmp_tb;
 create temp table event_traffic_tmp_tb as (
@@ -29,7 +29,7 @@ create temp table event_traffic_tmp_tb as (
 );
 
 -- first_traffic_source
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -72,7 +72,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_source/medium
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -116,7 +116,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_medium
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -159,7 +159,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_campaign
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -203,7 +203,7 @@ GROUP BY
 
 
 -- first_traffic_clid_platform
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -247,7 +247,7 @@ GROUP BY
 
 
 -- first_traffic_channel_group,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -291,7 +291,7 @@ GROUP BY
 
 
 -- first_app_install_source
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -335,7 +335,7 @@ GROUP BY
 
 
 -- session_source,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -378,7 +378,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_medium,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -421,7 +421,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_source/medium,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -466,7 +466,7 @@ GROUP BY
 
 
 -- session_campaign,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -509,7 +509,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_clid_platform,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -552,7 +552,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_channel_group
-INSERT INTO {{dbName}}.{{schema}}.clickstream_dashboard_day_user_acquisition (
+INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
