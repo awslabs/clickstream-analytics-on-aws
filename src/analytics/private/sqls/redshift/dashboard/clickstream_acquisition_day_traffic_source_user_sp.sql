@@ -1,19 +1,19 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_acquisition_day_traffic_source_user_sp(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_acquisition_day_traffic_source_user_sp(day date) 
 LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-  DELETE FROM {{dbName}}.{{schema}}.clickstream_acquisition_day_traffic_source_user where event_date = day;
+  DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_day_traffic_source_user where event_date = day;
 
-  INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_traffic_source_user (event_date, platform, first_traffic_source, user_count)
+  INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_traffic_source_user (event_date, platform, first_traffic_source, user_count)
   select 
     event_date,
     platform,
     first_traffic_source,
     count(distinct merged_user_id) as user_count
-  from {{dbName}}.{{schema}}.{{baseView}}
+  from {{database_name}}.{{schema}}.{{baseView}}
   where event_date = day
   group by 1,2,3
   ;

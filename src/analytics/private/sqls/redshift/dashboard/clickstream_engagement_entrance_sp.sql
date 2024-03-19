@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_entrance_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_engagement_entrance_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-    DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_entrance where event_date = day;
+    DELETE FROM {{database_name}}.{{schema}}.clickstream_engagement_entrance where event_date = day;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -18,7 +18,7 @@ BEGIN
       'page_tile' as aggregation_type,
       page_view_page_title as aggregation_dim,
       count(1) as entrance_cnt
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
       event_date = day
       and event_name = '_page_view'
@@ -27,7 +27,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -38,7 +38,7 @@ BEGIN
       'page_url_path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
       count(1) as entrance_cnt
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
       event_date = day
       and event_name = '_page_view'
@@ -47,7 +47,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -58,7 +58,7 @@ BEGIN
       'screen_name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
       count(1) as entrance_cnt
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
       event_date = day
       and event_name = '_screen_view'
@@ -67,7 +67,7 @@ BEGIN
     group by 1, 2, 3
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_entrance (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -78,7 +78,7 @@ BEGIN
       'screen_class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
       count(1) as entrance_cnt
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
       event_date = day
       and event_name = '_screen_view'

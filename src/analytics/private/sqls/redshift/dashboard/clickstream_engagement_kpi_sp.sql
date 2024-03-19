@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_kpi_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_engagement_kpi_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_kpi where event_date = day;
+DELETE FROM {{database_name}}.{{schema}}.clickstream_engagement_kpi where event_date = day;
 
-INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_kpi (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_kpi (
     event_date, 
     avg_session_per_user, 
     avg_engagement_time_per_session,
@@ -24,7 +24,7 @@ WITH tmp1 AS (
          OR MAX(session_duration) > 10000  THEN 1 ELSE 0 
         END AS session_indicator
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE
         event_date = day
     GROUP BY 

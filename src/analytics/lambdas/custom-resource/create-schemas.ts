@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST, CLICKSTREAM_EVENT_VIEW_NAME } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -314,10 +314,14 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      timezone: 'UTC', //todo: get from props
+      baseView: CLICKSTREAM_EVENT_VIEW_NAME,
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName);
+      if(viewDef.grantToBIUser === undefined || viewDef.grantToBIUser !== 'false') {
+        views.push(viewDef.viewName);
+      }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));

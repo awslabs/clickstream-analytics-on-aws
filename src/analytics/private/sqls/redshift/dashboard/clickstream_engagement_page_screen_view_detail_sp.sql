@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-    DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail where event_date = day;
+    DELETE FROM {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail where event_date = day;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -22,13 +22,13 @@ BEGIN
       event_id,
       user_engagement_time_msec,
       merged_user_id
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
         event_date = day
     and event_name = '_page_view'
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -43,13 +43,13 @@ BEGIN
       event_id,
       user_engagement_time_msec,
       merged_user_id
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
         event_date = day
     and event_name = '_page_view'
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -64,13 +64,13 @@ BEGIN
       event_id,
       user_engagement_time_msec,
       merged_user_id
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
         event_date = day
     and event_name = '_screen_view'
     ;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -85,7 +85,7 @@ BEGIN
       event_id,
       user_engagement_time_msec,
       merged_user_id
-    from {{dbName}}.{{schema}}.{{baseView}}
+    from {{database_name}}.{{schema}}.{{baseView}}
     where 
         event_date = day
     and event_name = '_screen_view'
