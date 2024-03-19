@@ -479,6 +479,18 @@ export const CONDITION_LIST: SelectProps.Option[] = [
   },
 ];
 
+export const enumToSelectOptions = (
+  enumObj: {
+    [s: string]: string;
+  },
+  prefix: string
+): SelectProps.Option[] => {
+  return Object.entries(enumObj).map(([key, value]) => ({
+    label: `analytics:segment.${prefix}.${value}`,
+    value,
+  }));
+};
+
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   subItemList: [],

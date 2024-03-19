@@ -111,10 +111,12 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               }}
             >
               <Select
+                placeholder={defaultStr(
+                  t('analytics:segment.calculateOption.NUMBER_OF_TOTAL')
+                )}
                 disabled={!segmentData.userDoneEvent}
                 selectedOption={
-                  segmentData.userDoneEventCalculateMethod ??
-                  segmentDataState.eventCalculateMethodOption[0]
+                  segmentData.userDoneEventCalculateMethod ?? null
                 }
               />
               {showGroupSelectDropdown && (

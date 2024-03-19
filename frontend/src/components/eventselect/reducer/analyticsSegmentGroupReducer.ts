@@ -490,6 +490,8 @@ export const analyticsSegmentGroupReducer = (
       }
       currentData.userDoneEvent = action.event;
       currentData.eventAttributeOption = parameterOption;
+      currentData.userDoneEventCalculateMethod =
+        newState.eventCalculateMethodOption[0];
       return { ...newState };
     }
 

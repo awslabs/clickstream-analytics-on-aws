@@ -12,7 +12,11 @@
  */
 
 import { Spinner } from '@cloudscape-design/components';
-import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
+import {
+  ConditionNumericOperator,
+  IEventSegmentationObj,
+  SegmentFilterEventMetricType,
+} from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
   AnalyticsSegmentActionType,
@@ -26,7 +30,9 @@ import {
   useMemo,
   useReducer,
 } from 'react';
-import { DEFAULT_SEGMENT_GROUP_DATA } from 'ts/const';
+import { useTranslation } from 'react-i18next';
+import { DEFAULT_SEGMENT_GROUP_DATA, enumToSelectOptions } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import { useUserEventParameter } from './AnalyticsEventsContext';
 
 interface SegmentContextType {
@@ -41,10 +47,24 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
   const { data, loading } = useUserEventParameter();
-
+  const { t } = useTranslation();
   const [segmentDataState, segmentDataDispatch] = useReducer(
     analyticsSegmentGroupReducer,
-    { ...DEFAULT_SEGMENT_GROUP_DATA }
+    {
+      ...DEFAULT_SEGMENT_GROUP_DATA,
+      eventCalculateMethodOption: enumToSelectOptions(
+        SegmentFilterEventMetricType,
+        'calculateOption'
+      ).map((item) => {
+        return { label: defaultStr(t(item.label ?? '')), value: item.value };
+      }),
+      eventOperationOptions: enumToSelectOptions(
+        ConditionNumericOperator,
+        'calculateOperator'
+      ).map((item) => {
+        return { label: defaultStr(t(item.label ?? '')), value: item.value };
+      }),
+    }
   );
 
   const contextValue = useMemo(

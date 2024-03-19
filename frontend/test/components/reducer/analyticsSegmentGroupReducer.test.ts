@@ -51,7 +51,6 @@ describe('analyticsSegmentGroupReducer', () => {
         eventCalculateMethodOption: [],
         conditionOptions: [],
         eventOperationOptions: [],
-        attributeOptions: [],
         attributeOperationOptions: [],
         userGroupOptions: [],
       },
@@ -150,6 +149,9 @@ describe('analyticsSegmentGroupReducer', () => {
         currentIndex: 0,
         parentData: {} as any,
       },
+      metaDataEventParameters: [],
+      metaDataEvents: [],
+      metaDataUserAttributes: [],
       event: MOCK_EVENT_LIST[0].itemList[0],
     };
     const newState = analyticsSegmentGroupReducer(initialState, action);

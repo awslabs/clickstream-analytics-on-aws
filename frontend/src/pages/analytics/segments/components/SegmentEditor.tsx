@@ -16,13 +16,39 @@ import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SegmentItem from './group/SegmentItem';
 
 const SegmentEditor: React.FC = () => {
   const { t } = useTranslation();
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+  const [filteredData, setFilteredData] = useState<any>({});
+
+  const filterDataRecursively = (data: any, excludeKeys: string[]): any => {
+    if (Array.isArray(data)) {
+      return data.map((item) => filterDataRecursively(item, excludeKeys));
+    } else if (typeof data === 'object' && data !== null) {
+      return Object.keys(data).reduce((acc, key) => {
+        if (!excludeKeys.includes(key)) {
+          acc[key] = filterDataRecursively(data[key], excludeKeys);
+        }
+        return acc;
+      }, {});
+    }
+    return data;
+  };
+
+  useEffect(() => {
+    const newFilteredData = filterDataRecursively(segmentDataState, [
+      'eventOption',
+      'eventAttributeOption',
+      'values',
+      'eventCalculateMethodOption',
+    ]);
+    setFilteredData(newFilteredData);
+  }, [segmentDataState]);
+
   return (
     <div className="flex-v">
       {segmentDataState?.subItemList?.map((item, index) => {
@@ -58,6 +84,7 @@ const SegmentEditor: React.FC = () => {
           {t('button.filterGroup')}
         </Button>
       </div>
+      <pre>{JSON.stringify(filteredData, null, 2)}</pre>
     </div>
   );
 };
