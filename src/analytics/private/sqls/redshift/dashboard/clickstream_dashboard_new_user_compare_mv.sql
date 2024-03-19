@@ -8,7 +8,7 @@ with tmp as (
     event_date_hour,
     platform,
     SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_count
-  from {{dbName}}.{{schema}}.clickstream_event_view_v3 
+  from {{dbName}}.{{schema}}.{{baseView}} 
   where event_timestamp >= DATE_TRUNC('hour', CONVERT_TIMEZONE('{{timezone}}', GETDATE() - INTERVAL '3 days'))
   group by 1,2
 )
