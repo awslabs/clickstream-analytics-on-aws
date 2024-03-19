@@ -107,6 +107,7 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-cloudwatch-events',
   '@aws-sdk/client-eventbridge',
   '@aws-sdk/lib-dynamodb',
+  '@aws-sdk/s3-request-presigner',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const depsForFrontendProject = [

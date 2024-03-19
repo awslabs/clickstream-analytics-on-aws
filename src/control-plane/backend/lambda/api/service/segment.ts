@@ -11,22 +11,26 @@
  *  and limitations under the License.
  */
 
-import { DeleteRuleCommand } from '@aws-sdk/client-cloudwatch-events';
-import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from '@aws-sdk/client-eventbridge';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
   OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
   Segment,
   SegmentDdbItem,
+  SegmentJobStatus,
   SegmentJobTriggerType,
 } from '@aws/clickstream-base-lib';
+import { DeleteRuleCommand } from '@aws-sdk/client-cloudwatch-events';
+import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from '@aws-sdk/client-eventbridge';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { NextFunction, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, BucketPrefix } from '../common/types';
+import { getBucketPrefix } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { DynamoDBSegmentStore } from '../store/dynamodb/dynamodb-segment-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -40,6 +44,9 @@ const eventBridgeClient = new EventBridgeClient({
 const sfnClient = new SFNClient({
   ...aws_sdk_client_common_config,
   region: process.env.AWS_REGION,
+});
+const s3Client = new S3Client({
+  ...aws_sdk_client_common_config,
 });
 
 const API_FUNCTION_LAMBDA_ROLE = process.env.API_FUNCTION_LAMBDA_ROLE;
@@ -205,12 +212,27 @@ export class SegmentServ {
   public async getExportS3Url(req: Request, res: Response, next: NextFunction) {
     try {
       const { segmentId, jobRunId } = req.params;
+      const { projectId, appId } = req.query;
       const jobDetail = await segmentStore.getSampleData(segmentId as string, jobRunId as string | undefined);
       if (!jobDetail) {
         return res.status(400).send(new ApiFail(`Segment job status for segmentId: ${segmentId}, jobRunId: ${jobRunId} is not found.`));
       }
+      if (jobDetail.jobStatus !== SegmentJobStatus.COMPLETED) {
+        return res.status(400).send(new ApiFail(`Segment job for segmentId: ${segmentId}, jobRunId: ${jobRunId} is not in COMPLETED status.`));
+      }
 
-      return res.status(200).json(new ApiSuccess({ presignedUrl: 's3://' }, 'Generate presigned URL successfully.'));
+      const pipelines = await pipelineStore.listPipeline(projectId as string, 'latest', 'asc');
+      if (pipelines.length === 0) {
+        return res.status(400).send(new ApiFail(`Pipeline for ${projectId} is not found`));
+      }
+
+      // @ts-ignore https://github.com/aws/aws-sdk-js-v3/issues/4451
+      const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
+        Bucket: pipelines[0].bucket.name,
+        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/output.csv`,
+      }), { expiresIn: 600 });
+
+      return res.status(200).json(new ApiSuccess({ presignedUrl }, 'Generate presigned URL successfully.'));
     } catch (error) {
       return next(error);
     }
