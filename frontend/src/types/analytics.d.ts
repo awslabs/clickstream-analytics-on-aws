@@ -155,11 +155,17 @@ declare global {
 
   type IRetentionJoinColumn = ColumnAttribute;
 
+  interface IEventExtParameter {
+    readonly targetProperty: IColumnAttribute;
+    readonly aggregationMethod?: ExploreAggregationMethod;
+  }
+
   interface IEventAndCondition {
     readonly eventName: string;
     readonly sqlCondition?: ISQLCondition;
     readonly retentionJoinColumn?: IRetentionJoinColumn;
     readonly computeMethod?: ExploreComputeMethod;
+    readonly eventExtParameter?: IEventExtParameter;
   }
 
   interface ISQLCondition {

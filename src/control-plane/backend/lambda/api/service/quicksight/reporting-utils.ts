@@ -28,17 +28,18 @@ import {
   ColumnConfiguration,
   SheetDefinition,
   GeoSpatialDataRole,
+  SimpleNumericalAggregationFunction,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
-import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
+import { ReportingCheck } from './reporting-check';
+import { ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
 import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, ExploreAggregationMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
-
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -159,6 +160,11 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+}
+
+export type MustacheEventTableAnalysisType = MustacheBaseType & {
+  dateDimFieldId: string;
+  nameDimFieldId: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -643,7 +649,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
         FieldId: fieldId,
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: eventName,
+          ColumnName: `${index+1}_${eventName}`,
         },
       },
     });
@@ -663,7 +669,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
         FieldId: fieldIdRate,
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: `${eventName}_rate`,
+          ColumnName: `${index+1}_${eventName}_rate`,
         },
         FormatConfiguration: {
           FormatConfiguration: {
@@ -874,6 +880,197 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
+export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string, aggregationMthod?: string) : Visual {
+
+  const props = _getMultipleVisualProps(grouppingColName !== undefined);
+
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    catDimFieldId: uuidv4(),
+    catMeasureFieldId: uuidv4(),
+    dateGranularity: groupColumn,
+    title: titleProps.tableTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
+  };
+
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  const fieldWells = visual.PivotTableVisual!.ChartConfiguration!.FieldWells!;
+
+  if (grouppingColName !== undefined) {
+    fieldWells.PivotTableAggregatedFieldWells!.Rows![1].CategoricalDimensionField!.Column!.ColumnName = grouppingColName;
+  }
+
+  if (aggregationMthod !== undefined) {
+    let method = aggregationMthod;
+    if (method === ExploreAggregationMethod.AVG) {
+      method = 'AVERAGE';
+    }
+    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
+    values[0] = {
+      NumericalMeasureField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'id',
+        },
+        AggregationFunction: {
+          SimpleNumericalAggregation: method?.toUpperCase() as SimpleNumericalAggregationFunction,
+        },
+      },
+    };
+
+  } else {
+    const rows = fieldWells.PivotTableAggregatedFieldWells?.Rows!;
+    rows.push({
+      CategoricalDimensionField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'id',
+        },
+      },
+    });
+
+    const values = fieldWells.PivotTableAggregatedFieldWells?.Values!;
+    values[0] = {
+      CategoricalMeasureField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: 'custom_attr_id',
+        },
+        AggregationFunction: 'COUNT',
+      },
+    };
+  }
+
+  return visual;
+}
+
+export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, grouppingColName?: string) : Visual {
+  const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json'), 'utf8');
+  const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    nameDimFieldId: uuidv4(),
+    title: titleProps.tableTitle,
+    subTitle: titleProps.subTitle,
+  };
+
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
+
+  if (grouppingColName !== undefined) {
+    fieldWellGroupBy.push({
+      CategoricalDimensionField: {
+        FieldId: uuidv4(),
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: grouppingColName,
+        },
+      },
+    });
+  }
+
+  if (!computeMethodProps.isMixedMethod) {
+    if (computeMethodProps.hasAggregationPropertyMethod) {
+      if (!computeMethodProps.isSameAggregationMethod) {
+        fieldWellGroupBy.push({
+          NumericalDimensionField: {
+            FieldId: uuidv4(),
+            Column: {
+              DataSetIdentifier: viewName,
+              ColumnName: 'count/aggregation amount',
+            },
+          },
+        });
+
+      } else {
+        fieldWellGroupBy.push({
+          NumericalDimensionField: {
+            FieldId: uuidv4(),
+            Column: {
+              DataSetIdentifier: viewName,
+              ColumnName: 'custom_attr_id',
+            },
+          },
+        });
+      }
+    } else {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+    }
+  } else {
+    if (computeMethodProps.isCountMixedMethod) {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+    } else {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'custom_attr_id',
+          },
+        },
+      });
+
+      fieldWellGroupBy.push({
+        NumericalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'count/aggregation amount',
+          },
+        },
+      });
+    }
+  }
+  return visual;
+}
+
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json'), 'utf8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
@@ -935,6 +1132,33 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+}
+
+export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
+
+  let hasEventAttribute = false;
+  const eventAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
+  for (const eventCondition of eventAndConditions) {
+    if (eventCondition.sqlCondition?.conditions !== undefined) {
+      const allAttribute = buildConditionProps(eventCondition.sqlCondition?.conditions);
+      hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+      eventAttributes.push(...allAttribute.eventAttributes);
+
+      hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+      eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
+    }
+  }
+
+  return {
+    hasEventAttribute,
+    hasEventNonNestAttribute,
+    eventAttributes,
+    eventNonNestAttributes,
+  };
+
 }
 
 function findElementByPath(jsonData: any, path: string): any {
@@ -1036,6 +1260,8 @@ export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
     unit = 'WEEK';
   } else if (timeUnit == ExploreRelativeTimeUnit.MM) {
     unit = 'MONTH';
+  } else if (timeUnit == ExploreRelativeTimeUnit.YY) {
+    unit = 'YEAR';
   }
   return unit;
 }
@@ -1046,6 +1272,26 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
   }
 
   return resourceName;
+}
+
+export function getMondayOfLastNWeeks(currentDate: Date, cnt: number): Date {
+  const dayOfWeek = currentDate.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+  const daysSinceLastMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Calculate days since last Monday
+  const startDateOfLastNWeeks = new Date(currentDate);
+  startDateOfLastNWeeks.setDate(currentDate.getDate() - (cnt*7) - daysSinceLastMonday);
+  return startDateOfLastNWeeks;
+}
+
+export function getFirstDayOfLastNMonths(currentDate: Date, n: number): Date {
+  const lastNMonths = new Date(currentDate);
+  lastNMonths.setMonth(currentDate.getMonth() - n); // Subtract n months and add 1 to get the first day of the month
+  lastNMonths.setDate(1); // Set the day to the first day of the month
+  return lastNMonths;
+}
+
+export function getFirstDayOfLastNYears(currentDate: Date, cnt: number): Date {
+  const currentYear = currentDate.getFullYear();
+  return new Date(currentYear - cnt, 0, 1);
 }
 
 export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {
@@ -1085,13 +1331,8 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
 
 export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.specifyJoinColumn === undefined
     || params.eventAndConditions === undefined
@@ -1135,31 +1376,15 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  const checkResult = _checkDuplicatedEvent(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
-  }
+  checkChain.NodesLimit();
 
-  const checkNodesLimit = _checkNodesLimit(params);
-  if (checkNodesLimit !== undefined ) {
-    return checkNodesLimit;
-  }
-
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.eventAndConditions === undefined
     || params.groupColumn === undefined
@@ -1178,25 +1403,13 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  const checkResult = _checkDuplicatedEvent(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
-  }
-
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.eventAndConditions === undefined
     || params.pathAnalysis === undefined
@@ -1241,21 +1454,13 @@ export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
-  return {
-    success,
-    message,
-  };
+  return checkChain.status;
 }
 
 export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus {
 
-  let success = true;
-  let message = 'OK';
-
-  const commonCheckResult = _checkCommonPartParameter(params);
-  if (commonCheckResult !== undefined ) {
-    return commonCheckResult;
-  }
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
 
   if (params.pairEventAndConditions === undefined
     || (params.pairEventAndConditions !== undefined && params.pairEventAndConditions.length < 1)
@@ -1279,10 +1484,52 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
     return retentionJoinColumnResult;
   }
 
-  return {
-    success,
-    message,
+  return checkChain.status;
+}
+
+export function encodeQueryValueForSql(params: SQLParameters) {
+  if (params.eventAndConditions !== undefined) {
+    for (const item of (params.eventAndConditions)) {
+      _encodeFilterValue(item.sqlCondition?.conditions);
+      item.eventName = _encodeSqlSpecialChars(item.eventName);
+    }
+  }
+
+  _encodeFilterValue(params.globalEventCondition?.conditions);
+
+  if (params.pairEventAndConditions !== undefined) {
+    for (const item of (params.pairEventAndConditions)) {
+      _encodeFilterValue(item.startEvent.sqlCondition?.conditions);
+      _encodeFilterValue(item.backEvent.sqlCondition?.conditions);
+
+      item.startEvent.eventName = _encodeSqlSpecialChars(item.startEvent.eventName);
+      item.backEvent.eventName = _encodeSqlSpecialChars(item.backEvent.eventName);
+    }
+  }
+}
+
+function _encodeFilterValue(conditions: Condition[] | undefined) {
+  if (conditions !== undefined) {
+    for (const condition of conditions) {
+      if (condition.dataType === MetadataValueType.STRING) {
+        let values = [];
+        for (const [index, value] of condition.value.entries()) {
+          values[index] = _encodeSqlSpecialChars(value);
+        }
+        condition.value = values;
+      }
+    }
+  }
+}
+
+function _encodeSqlSpecialChars(input: string): string {
+  const sqlSpecialChars: { [key: string]: string } = {
+    "'": "''",
   };
+
+  const encodedString = input.replace(/\'/g, (match) => sqlSpecialChars[match]);
+
+  return encodedString;
 }
 
 function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition[]): CheckParamsStatus | void {
@@ -1300,139 +1547,16 @@ function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition
   }
 }
 
-function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
-
-  if ( params.viewName === undefined
-    || params.projectId === undefined
-    || params.pipelineId === undefined
-    || params.appId === undefined
-    || params.computeMethod === undefined
-    || params.dashboardCreateParameters === undefined
-  ) {
-    return {
-      success: false,
-      message: 'Required parameter is not provided.',
-    };
-  }
-
-  if (params.action !== ExploreRequestAction.PREVIEW && params.action !== ExploreRequestAction.PUBLISH) {
-    return {
-      success: false,
-      message: 'Invalid request action.',
-    };
-  } else if (params.action === ExploreRequestAction.PUBLISH) {
-    if (params.chartTitle === undefined
-      || params.chartTitle === ''
-      || params.dashboardId === undefined
-      || params.sheetId === undefined
-    ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
-      };
-    }
-  }
-
-  if (params.groupCondition !== undefined && params.groupCondition.property === '') {
-    return {
-      success: false,
-      message: '\'property\' attribute of grouping condition is empty.',
-    };
-  }
-
-  if (params.groupCondition !== undefined && params.groupCondition.dataType !== MetadataValueType.STRING) {
-    return {
-      success: false,
-      message: 'Grouping function is not supported on no-string attribute.',
-    };
-  }
-
-  const filterCheckResult = _checkCondition(params);
-  if (filterCheckResult !== undefined ) {
-    return filterCheckResult;
-  }
-
-  const checkResult = _checkTimeParameters(params);
-  if (checkResult !== undefined ) {
-    return checkResult;
-  }
-
+function _checkCommonPartParameter(checkChain: ReportingCheck) {
+  checkChain
+    .CommonParameterRequired()
+    .GroupCondition()
+    .FilterTypeAndValue()
+    .Condition()
+    .TimeParameters()
+    .TimeLargeThan10Years();
 }
 
-function _getRetentionAnalysisConditions(params: any) {
-
-  const allPairConditions:Condition[] = [];
-  const pairEventAndConditions = params.pairEventAndConditions;
-  if (pairEventAndConditions !== undefined) {
-    for (const pairCondition of pairEventAndConditions) {
-      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
-        allPairConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
-      }
-      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
-        allPairConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
-      }
-    }
-  }
-
-  return allPairConditions;
-}
-
-function _checkCondition(params: any): CheckParamsStatus | void {
-
-  const allConditions:Condition[] = [];
-  const eventAndConditions = params.eventAndConditions;
-  if (eventAndConditions !== undefined) {
-    for (const eventCondition of eventAndConditions) {
-      if (eventCondition.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...eventCondition.sqlCondition.conditions);
-      }
-    }
-  }
-
-  const globalEventCondition = params.globalEventCondition;
-  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
-    allConditions.push(...globalEventCondition.conditions);
-  }
-
-  allConditions.push(..._getRetentionAnalysisConditions(params));
-
-  for (const condition of allConditions) {
-
-    if (condition.category === undefined
-      || condition.property === undefined || condition.property === ''
-      ||condition.operator === undefined || condition.operator === ''
-      || condition.value === undefined) {
-
-      return {
-        success: false,
-        message: 'Incomplete filter conditions.',
-      };
-    }
-  }
-}
-
-function _checkTimeParameters(params: any): CheckParamsStatus | void {
-  if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
-    return {
-      success: false,
-      message: 'Invalid parameter [timeScopeType].',
-    };
-  } else if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
-    if (params.timeStart === undefined || params.timeEnd === undefined ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [timeStart, timeEnd].',
-      };
-    }
-  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
-    if (params.lastN === undefined || params.timeUnit === undefined ) {
-      return {
-        success: false,
-        message: 'At least missing one of following parameters [lastN, timeUnit].',
-      };
-    }
-  }
-}
 
 function _getMultipleVisualProps(hasGrouping: boolean) {
   let suffix = '';
@@ -1446,49 +1570,4 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
     suffix,
     smalMultiplesFieldId,
   };
-}
-
-function _checkDuplicatedEvent(params: any): CheckParamsStatus | void {
-
-  const conditions = params.eventAndConditions as EventAndCondition[];
-  const eventNames: string[] = [];
-  for (const condition of conditions) {
-
-    if (eventNames.includes(condition.eventName)) {
-      return {
-        success: false,
-        message: 'Duplicated event.',
-      };
-    } else {
-      eventNames.push(condition.eventName);
-    }
-  }
-}
-
-function _checkNodesLimit(params: any): CheckParamsStatus | void {
-
-  const eventAndConditions = params.eventAndConditions as EventAndCondition[];
-  if (eventAndConditions?.length > 10) {
-    return {
-      success: false,
-      message: 'The maximum number of event conditions is 10.',
-    };
-  }
-
-  const globalEventCondition = params.globalEventCondition as SQLCondition;
-  if (globalEventCondition?.conditions?.length > 10) {
-    return {
-      success: false,
-      message: 'The maximum number of global filter conditions is 10.',
-    };
-  }
-
-  const pairEventAndConditions = params.pairEventAndConditions as PairEventAndCondition[];
-  if (pairEventAndConditions?.length > 5) {
-    return {
-      success: false,
-      message: 'The maximum number of pair event conditions is 5.',
-    };
-  }
-
 }

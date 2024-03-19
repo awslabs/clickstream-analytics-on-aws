@@ -82,10 +82,6 @@
                   {
                       "FieldId": "{{dateDimFieldId}}",
                       "Visibility": "VISIBLE"
-                  },
-                  {
-                      "FieldId": "{{catMeasureFieldId}}",
-                      "Visibility": "VISIBLE"
                   }
               ]
           }

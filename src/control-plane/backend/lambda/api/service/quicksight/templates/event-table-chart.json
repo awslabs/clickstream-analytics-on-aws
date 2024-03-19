@@ -1,0 +1,86 @@
+{
+  "TableVisual": {
+      "VisualId":"{{visualId}}",
+        "Title":{
+            "FormatText": {
+                "PlainText": "{{title}}"
+            },
+            "Visibility":"VISIBLE"
+        },
+        "Subtitle":{
+            "FormatText": {
+                "PlainText": "{{subTitle}}"
+            },
+            "Visibility":"VISIBLE"
+        },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "TableAggregatedFieldWells": {
+                  "GroupBy": [
+                        {
+                            "CategoricalDimensionField": {
+                              "FieldId": "{{nameDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_name"
+                              }
+                            }
+                        },
+                        {
+                          "DateDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              }
+                          }
+                        }
+                  ],
+                  "Values": []
+              }
+          },
+          "SortConfiguration": {
+              "RowSort": [
+                {
+                    "FieldId": "{{nameDimFieldId}}",
+                    "SortBy": {
+                        "Field": {
+                            "FieldId": "{{nameDimFieldId}}",
+                            "Direction": "ASC"
+                        }
+                    }
+                },
+                {
+                    "FieldId": "{{dateDimFieldId}}",
+                    "SortBy": {
+                        "Field": {
+                            "FieldId": "{{dateDimFieldId}}",
+                            "Direction": "DESC"
+                        }
+                    }
+                }
+              ]
+          },
+          "TableOptions": {
+              "HeaderStyle": {
+                  "TextWrap": "WRAP",
+                  "Height": 25
+              }
+          },
+          "FieldOptions": {
+            "SelectedFieldOptions": [
+                {
+                  "FieldId": "{{nameDimFieldId}}",
+                  "Visibility": "VISIBLE"
+                },
+                {
+                    "FieldId": "{{dateDimFieldId}}",
+                    "Visibility": "VISIBLE"
+                }
+            ],
+            "Order": []
+        }
+      },
+      "Actions": []
+  }
+}
