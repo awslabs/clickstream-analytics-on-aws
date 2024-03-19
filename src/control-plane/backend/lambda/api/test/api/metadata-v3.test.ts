@@ -11,12 +11,14 @@
  *  and limitations under the License.
  */
 
+import { join } from 'path';
 import {
   DynamoDBDocumentClient,
   GetCommand,
   QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
+import mockfs from 'mock-fs';
 import request from 'supertest';
 import { MOCK_APP_ID, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_USER_ATTRIBUTE_NAME } from './ddb-mock';
 import { displayDataMock, mockPipeline, MOCK_EVENT_PARAMETER_V2, MOCK_USER_ATTRIBUTE_V2 } from './metadata-mock';
@@ -25,9 +27,16 @@ import { ConditionCategory, MetadataParameterType, MetadataSource, MetadataValue
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
+
 const ddbMock = mockClient(DynamoDBDocumentClient);
+const eventMockPath = join(__dirname, '../../common/sqls/redshift/event-v2.sql');
+const userMockPath = join(__dirname, '../../common/sqls/redshift/user-v2.sql');
+const eventPath = join(__dirname, '../../../../../../analytics/private/sqls/redshift/event-v2.sql');
+const userPath = join(__dirname, '../../../../../../analytics/private/sqls/redshift/user-v2.sql');
+
 
 describe('Metadata Event test V3', () => {
+
   beforeEach(() => {
     process.env.METADATA_CACHE = 'false';
     ddbMock.reset();
@@ -36,6 +45,13 @@ describe('Metadata Event test V3', () => {
       .useFakeTimers()
       .setSystemTime(new Date('2023-03-02'));
     mockPipeline(ddbMock, 'v1.1.6');
+    mockfs({
+      [eventMockPath]: mockfs.load(eventPath),
+      [userMockPath]: mockfs.load(userPath),
+    });
+  });
+  afterEach(() => {
+    mockfs.restore();
   });
   it('Get preset event when no data in DDB v3', async () => {
     ddbMock.on(GetCommand, {
@@ -134,6 +150,13 @@ describe('Metadata Event Attribute test V3', () => {
       .useFakeTimers()
       .setSystemTime(new Date('2023-03-02'));
     mockPipeline(ddbMock, 'v1.1.6');
+    mockfs({
+      [eventMockPath]: mockfs.load(eventPath),
+      [userMockPath]: mockfs.load(userPath),
+    });
+  });
+  afterEach(() => {
+    mockfs.restore();
   });
   it('Get metadata event attribute list when no data in DDB v3', async () => {
     ddbMock.on(QueryCommand, {
@@ -330,6 +353,13 @@ describe('Metadata User Attribute test V3', () => {
     ddbMock.reset();
     displayDataMock(ddbMock);
     mockPipeline(ddbMock, 'v1.1.6');
+    mockfs({
+      [eventMockPath]: mockfs.load(eventPath),
+      [userMockPath]: mockfs.load(userPath),
+    });
+  });
+  afterEach(() => {
+    mockfs.restore();
   });
   it('Get metadata user attribute list v3', async () => {
     ddbMock.on(QueryCommand, {
