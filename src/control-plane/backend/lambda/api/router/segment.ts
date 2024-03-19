@@ -131,6 +131,8 @@ router_segment.get(
   validate([
     param('segmentId').isString().notEmpty(),
     param('jobRunId').isString().notEmpty(),
+    query('projectId').isString().notEmpty(),
+    query('appId').isString().notEmpty()
   ]),
   async (req: Request, res: Response, next: NextFunction) => {
     return segmentServ.getExportS3Url(req, res, next);

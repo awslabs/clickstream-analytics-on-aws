@@ -48,8 +48,9 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/client-kinesis under the Apache-2.0
 @aws-sdk/credential-providers under the Apache-2.0
 @aws-sdk/lib-dynamodb under the Apache-2.0
-@aws-sdk/util-dynamodb under the Apache-2.0
+@aws-sdk/s3-request-presigner under the Apache-2.0
 @aws-sdk/types under the Apache-2.0
+@aws-sdk/util-dynamodb under the Apache-2.0
 @smithy/node-http-handler under the Apache-2.0
 @smithy/util-stream-node under the Apache-2.0
 @types/aws-lambda under the MIT

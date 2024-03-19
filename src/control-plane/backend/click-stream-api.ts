@@ -449,6 +449,7 @@ export class ClickStreamApiConstruct extends Construct {
           'redshift-serverless:GetNamespace',
           'redshift-data:BatchExecuteStatement',
           's3:ListBucket',
+          's3:GetObject',
           'ds:AuthorizeApplication',
           'ds:UnauthorizeApplication',
           'ds:CheckAlias',
