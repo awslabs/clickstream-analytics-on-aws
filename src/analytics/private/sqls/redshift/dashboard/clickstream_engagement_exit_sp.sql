@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_engagement_exit_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_engagement_exit_sp (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-    DELETE FROM {{dbName}}.{{schema}}.clickstream_engagement_exit where event_date = day;
+    DELETE FROM {{database_name}}.{{schema}}.clickstream_engagement_exit where event_date = day;
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_exit (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_exit (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -19,7 +19,7 @@ BEGIN
         screen_view_screen_name,
         ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY event_timestamp DESC) AS rk
       FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         event_name = '_screen_view'
         and screen_view_screen_name is not null
@@ -43,7 +43,7 @@ BEGIN
       1,2,3;
 
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_exit (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_exit (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -55,7 +55,7 @@ BEGIN
         screen_view_screen_id,
         ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY event_timestamp DESC) AS rk
       FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         event_name = '_screen_view'
         and screen_view_screen_id is not null
@@ -79,7 +79,7 @@ BEGIN
       1,2,3;
 
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_exit (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_exit (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -91,7 +91,7 @@ BEGIN
         page_view_page_title,
         ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY event_timestamp DESC) AS rk
       FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         event_name = '_page_view'
         and page_view_page_title is not null
@@ -115,7 +115,7 @@ BEGIN
       1,2,3;
 
 
-    INSERT INTO {{dbName}}.{{schema}}.clickstream_engagement_exit (
+    INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_exit (
         event_date,
         aggregation_type,
         aggregation_dim,
@@ -127,7 +127,7 @@ BEGIN
         page_view_page_url_path,
         ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY event_timestamp DESC) AS rk
       FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         event_name = '_page_view'
         and page_view_page_url_path is not null

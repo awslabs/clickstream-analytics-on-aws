@@ -1,11 +1,11 @@
-CREATE OR REPLACE PROCEDURE {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition_sp(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition_sp(day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition where event_date = day;
+DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition where event_date = day;
 
 drop table if exists event_traffic_tmp_tb;
 create temp table event_traffic_tmp_tb as (
@@ -21,7 +21,7 @@ create temp table event_traffic_tmp_tb as (
         END AS session_indicator,
         MAX(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS new_user_indicator
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE
         event_date = day
     GROUP BY 
@@ -29,7 +29,7 @@ create temp table event_traffic_tmp_tb as (
 );
 
 -- first_traffic_source
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -47,7 +47,7 @@ with tmp2 AS (
         platform,
         MAX(first_traffic_source) AS first_traffic_source
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -72,7 +72,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_source/medium
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -91,7 +91,7 @@ with tmp2 AS (
         MAX(first_traffic_source) AS first_traffic_source,
         MAX(first_traffic_medium) AS first_traffic_medium
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -116,7 +116,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_medium
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -134,7 +134,7 @@ with tmp2 AS (
         platform,
         MAX(first_traffic_medium) AS first_traffic_medium
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -159,7 +159,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- first_traffic_campaign
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -177,7 +177,7 @@ with tmp2 AS (
         platform,
         MAX(first_traffic_campaign) AS first_traffic_campaign
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -203,7 +203,7 @@ GROUP BY
 
 
 -- first_traffic_clid_platform
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -221,7 +221,7 @@ with tmp2 AS (
         platform,
         MAX(first_traffic_clid_platform) AS first_traffic_clid_platform
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -247,7 +247,7 @@ GROUP BY
 
 
 -- first_traffic_channel_group,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -265,7 +265,7 @@ with tmp2 AS (
         platform,
         MAX(first_traffic_channel_group) AS first_traffic_channel_group
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -291,7 +291,7 @@ GROUP BY
 
 
 -- first_app_install_source
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -309,7 +309,7 @@ with tmp2 AS (
         platform,
         MAX(first_app_install_source) AS first_app_install_source
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -335,7 +335,7 @@ GROUP BY
 
 
 -- session_source,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -353,7 +353,7 @@ with tmp2 AS (
         platform,
         MAX(session_source) AS session_source
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -378,7 +378,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_medium,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -396,7 +396,7 @@ with tmp2 AS (
         platform,
         MAX(session_medium) AS session_medium
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -421,7 +421,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_source/medium,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -440,7 +440,7 @@ with tmp2 AS (
         MAX(session_source) AS session_source,
         MAX(session_medium) AS session_medium
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -466,7 +466,7 @@ GROUP BY
 
 
 -- session_campaign,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -484,7 +484,7 @@ with tmp2 AS (
         platform,
         MAX(session_campaign) AS session_campaign
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -509,7 +509,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_clid_platform,
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -527,7 +527,7 @@ with tmp2 AS (
         platform,
         MAX(session_clid_platform) AS session_clid_platform
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 
@@ -552,7 +552,7 @@ GROUP BY
     1, 2, 3, 4;
 
 -- session_channel_group
-INSERT INTO {{dbName}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -570,7 +570,7 @@ with tmp2 AS (
         platform,
         MAX(session_channel_group) AS session_channel_group
     FROM 
-        {{dbName}}.{{schema}}.{{baseView}}
+        {{database_name}}.{{schema}}.{{baseView}}
     WHERE 
         event_date = day
     GROUP BY 

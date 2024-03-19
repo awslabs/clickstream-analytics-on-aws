@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{dbName}}.{{schema}}.clickstream_acquisition_active_user_compare_mv
+CREATE MATERIALIZED VIEW {{database_name}}.{{schema}}.clickstream_acquisition_active_user_compare_mv
 BACKUP YES
 AUTO REFRESH NO
 SORTKEY(event_date_hour, platform)
@@ -8,7 +8,7 @@ with tmp as (
     event_date_hour,
     platform,
     COUNT(distinct merged_user_id) as active_user_count,
-  from {{dbName}}.{{schema}}.{{baseView}} 
+  from {{database_name}}.{{schema}}.{{baseView}} 
   where event_timestamp >= DATE_TRUNC('hour', CONVERT_TIMEZONE('{{timezone}}', GETDATE() - INTERVAL '3 days'))
   group by 1,2
 )
