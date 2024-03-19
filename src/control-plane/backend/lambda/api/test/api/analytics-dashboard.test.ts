@@ -102,7 +102,7 @@ describe('Analytics dashboard test', () => {
     expect(res.body.success).toEqual(true);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
-    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
