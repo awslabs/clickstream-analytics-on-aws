@@ -948,17 +948,6 @@ export class ReportingService {
       result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
         query, dashboardCreateParameters, sheetId);
     } else {
-      //update QuickSight analysis
-      let newAnalysis;
-      if (query.analysisId) {
-        newAnalysis = await quickSight.updateAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: query.analysisId,
-          Name: query.analysisName,
-          Definition: dashboard as AnalysisDefinition,
-        });
-      }
-
       //update QuickSight dashboard
       const newDashboard = await quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
@@ -978,7 +967,7 @@ export class ReportingService {
         dashboardVersion: versionNumber ? Number.parseInt(versionNumber) : 1,
         dashboardEmbedUrl: '',
         analysisId: query.analysisId,
-        analysisArn: newAnalysis?.Arn!,
+        analysisArn: '',
         analysisName: query.analysisName,
         sheetId,
         visualIds: [],
