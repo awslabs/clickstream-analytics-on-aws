@@ -40,8 +40,13 @@
       "device_time_zone_offset_seconds" : null,
       "device_ua_browser" : null,
       "device_ua_browser_version" : null,
+      "device_ua_os" : null,
+      "device_ua_os_version" : null,
       "device_ua_device" : null,
       "device_ua_device_category" : null,
+      "device_ua" : {
+        "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200"
+      },
       "device_screen_width" : 3440,
       "device_screen_height" : 1440,
       "device_viewport_width" : null,
@@ -65,35 +70,38 @@
       "traffic_source_category" : "search",
       "user_first_touch_time_msec" : null,
       "app_package_id" : null,
-      "app_id" : "GMTServer1",
       "app_version" : null,
       "app_title" : null,
       "app_install_source" : null,
       "platform" : "Web",
       "project_id" : "test_project_id_gtm_server",
-      "screen_name" : null,
-      "screen_id" : null,
-      "screen_unique_id" : null,
-      "previous_screen_name" : null,
-      "previous_screen_id" : null,
-      "previous_screen_unique_id" : null,
-      "page_referrer" : "https://tagassistant.google.com/",
-      "page_referrer_title" : null,
-      "page_title" : "Retail Demo Store",
-      "page_url" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745",
-      "page_url_path" : null,
-      "page_url_query_parameters" : {
+      "app_id" : "GMTServer1",
+      "screen_view_screen_name" : null,
+      "screen_view_screen_id" : null,
+      "screen_view_screen_unique_id" : null,
+      "screen_view_previous_screen_name" : null,
+      "screen_view_previous_screen_id" : null,
+      "screen_view_previous_screen_unique_id" : null,
+      "screen_view_previous_time_msec" : null,
+      "screen_view_engagement_time_msec" : null,
+      "screen_view_entrances" : null,
+      "page_view_page_referrer" : "https://tagassistant.google.com/",
+      "page_view_page_referrer_title" : null,
+      "page_view_previous_time_msec" : null,
+      "page_view_engagement_time_msec" : null,
+      "page_view_page_title" : "Retail Demo Store",
+      "page_view_page_url" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745",
+      "page_view_page_url_path" : null,
+      "page_view_page_url_query_parameters" : {
         "gtm_debug" : "1691481790745"
       },
-      "hostname" : "d3mpqdtjegq8im.cloudfront.net",
-      "latest_referrer" : null,
-      "latest_referrer_host" : null,
+      "page_view_hostname" : "d3mpqdtjegq8im.cloudfront.net",
+      "page_view_latest_referrer" : null,
+      "page_view_latest_referrer_host" : null,
+      "page_view_entrances" : null,
       "app_start_is_first_time" : null,
-      "previous_view_time_msec" : null,
-      "previous_view_engagement_time_msec" : null,
-      "entrances" : null,
-      "previous_app_version" : null,
-      "previous_os_version" : null,
+      "upgrade_previous_app_version" : null,
+      "upgrade_previous_os_version" : null,
       "search_key" : null,
       "search_term" : null,
       "outbound_link_classes" : null,
@@ -111,26 +119,68 @@
       "scroll_engagement_time_msec" : null,
       "sdk_error_code" : null,
       "sdk_error_message" : null,
-      "sdk_exception_message" : null,
-      "sdk_exception_stack" : null,
       "sdk_version" : null,
       "sdk_name" : null,
-      "custom_parameters_json_str" : "{\"x-sst-system_properties\":\"{\\\"uc\\\":\\\"US\\\",\\\"ngs\\\":\\\"1\\\",\\\"gse\\\":null,\\\"gcd\\\":null,\\\"tft\\\":0,\\\"consent\\\":null,\\\"request_start_time_ms\\\":null}\",\"screen_resolution\":\"3440x1440\",\"x-ga-page_id\":\"616150298\",\"client_id\":\"rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179\",\"ip_override\":\"52.94.133.137\",\"x-ga-system_properties\":\"{\\\"dbg\\\":\\\"1\\\",\\\"fid\\\":null,\\\"ee\\\":false,\\\"fv\\\":null,\\\"ss\\\":null}\",\"client_hints\":\"{\\\"architecture\\\":null,\\\"bitness\\\":null,\\\"full_version_list\\\":null,\\\"mobile\\\":false,\\\"model\\\":null,\\\"platform\\\":\\\"\\\\\\\"macOS\\\\\\\"\\\",\\\"platform_version\\\":null,\\\"wow64\\\":false,\\\"brands\\\":[{\\\"brand\\\":\\\"Not/A)Brand\\\",\\\"version\\\":\\\"99\\\"},{\\\"brand\\\":\\\"Microsoft Edge\\\",\\\"version\\\":\\\"115\\\"},{\\\"brand\\\":\\\"Chromium\\\",\\\"version\\\":\\\"115\\\"}]}\",\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je3820\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"807802863.1690769179\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200\",\"x-ga-measurement_id\":\"G-000000001\",\"x-ga-request_count\":\"1\"}",
+      "app_exception_message" : null,
+      "app_exception_stack" : null,
+      "custom_parameters_json_str" : "{\"x-sst-system_properties\":{\"uc\":\"US\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":null},\"screen_resolution\":\"3440x1440\",\"x-ga-page_id\":616150298,\"client_id\":\"rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179\",\"ip_override\":\"52.94.133.137\",\"x-ga-system_properties\":{\"dbg\":\"1\",\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":null},\"client_hints\":{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]},\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je3820\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"807802863.1690769179\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200\",\"x-ga-measurement_id\":\"G-000000001\",\"x-ga-request_count\":1}",
       "custom_parameters" : {
-        "client_hints" : "{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]}",
-        "client_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
-        "ip_override" : "52.94.133.137",
-        "screen_resolution" : "3440x1440",
-        "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200",
-        "x-ga-gtm_version" : "45je3820",
-        "x-ga-js_client_id" : "807802863.1690769179",
-        "x-ga-measurement_id" : "G-000000001",
-        "x-ga-mp2-seg" : "1",
-        "x-ga-page_id" : "616150298",
-        "x-ga-protocol_version" : "2",
-        "x-ga-request_count" : "1",
-        "x-ga-system_properties" : "{\"dbg\":\"1\",\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":null}",
-        "x-sst-system_properties" : "{\"uc\":\"US\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":null}"
+        "client_hints" : {
+          "value" : "{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]}",
+          "type" : "object"
+        },
+        "client_id" : {
+          "value" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+          "type" : "string"
+        },
+        "ip_override" : {
+          "value" : "52.94.133.137",
+          "type" : "string"
+        },
+        "screen_resolution" : {
+          "value" : "3440x1440",
+          "type" : "string"
+        },
+        "user_agent" : {
+          "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200",
+          "type" : "string"
+        },
+        "x-ga-gtm_version" : {
+          "value" : "45je3820",
+          "type" : "string"
+        },
+        "x-ga-js_client_id" : {
+          "value" : "807802863.1690769179",
+          "type" : "string"
+        },
+        "x-ga-measurement_id" : {
+          "value" : "G-000000001",
+          "type" : "string"
+        },
+        "x-ga-mp2-seg" : {
+          "value" : "1",
+          "type" : "string"
+        },
+        "x-ga-page_id" : {
+          "value" : "616150298",
+          "type" : "number"
+        },
+        "x-ga-protocol_version" : {
+          "value" : "2",
+          "type" : "string"
+        },
+        "x-ga-request_count" : {
+          "value" : "1",
+          "type" : "number"
+        },
+        "x-ga-system_properties" : {
+          "value" : "{\"dbg\":\"1\",\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":null}",
+          "type" : "object"
+        },
+        "x-sst-system_properties" : {
+          "value" : "{\"uc\":\"US\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":null}",
+          "type" : "object"
+        }
       },
       "process_info" : {
         "ingest_time" : "2023-08-08T08:03:16Z",
@@ -161,7 +211,8 @@
       "first_traffic_category" : "search",
       "first_app_install_source" : null,
       "process_info" : null,
-      "app_id" : "GMTServer1"
+      "app_id" : "GMTServer1",
+      "event_name" : "_page_view"
     },
     "items" : [ ]
   }

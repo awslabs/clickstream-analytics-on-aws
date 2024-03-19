@@ -13,69 +13,27 @@
 
 package software.aws.solution.clickstream.gtm;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
-import software.aws.solution.clickstream.*;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.util.*;
 
-import java.sql.*;
-import java.time.*;
 import java.util.*;
 
-import static org.apache.spark.sql.functions.coalesce;
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.explode;
-import static org.apache.spark.sql.functions.expr;
-import static org.apache.spark.sql.functions.first;
-import static org.apache.spark.sql.functions.input_file_name;
-import static org.apache.spark.sql.functions.lit;
-import static org.apache.spark.sql.functions.map;
-import static org.apache.spark.sql.functions.map_concat;
-import static org.apache.spark.sql.functions.max;
-import static org.apache.spark.sql.functions.max_by;
-import static org.apache.spark.sql.functions.min;
-import static org.apache.spark.sql.functions.min_by;
-import static org.apache.spark.sql.functions.struct;
-
-import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
-import static software.aws.solution.clickstream.DatasetUtil.addSchemaToMap;
-import static software.aws.solution.clickstream.DatasetUtil.readDatasetFromPath;
-import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPath;
-import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
-import static software.aws.solution.clickstream.MaxLengthTransformerV2.runMaxLengthTransformerForEventV2;
-import static software.aws.solution.clickstream.MaxLengthTransformerV2.runMaxLengthTransformerForItemV2;
-import static software.aws.solution.clickstream.MaxLengthTransformerV2.runMaxLengthTransformerForSession;
-import static software.aws.solution.clickstream.MaxLengthTransformerV2.runMaxLengthTransformerForUserV2;
-import static software.aws.solution.clickstream.model.ModelV2.PROCESS_INFO;
-import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
+import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
+import static software.aws.solution.clickstream.util.DatasetUtil.*;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.*;
+import static software.aws.solution.clickstream.TransformerV3.*;
+import static software.aws.solution.clickstream.model.ModelV2.*;
 
 
 @Slf4j
 public class GTMServerDataTransformerV2 {
-    public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
+    public static final String TABLE_VERSION_SUFFIX_V2 = "_v2";
     public static final String ETL_GTM_USER_V2_PROPS = "etl_gtm_user_v2_props";
-    public static final String INPUT_FILE_NAME = "input_file_name";
-    public static final String PROCESS_JOB_ID = "process_job_id";
-    public static final String PROCESS_TIME = "process_time";
     ServerDataConverterV2 serverDataConverterV2 = new ServerDataConverterV2();
-
-    private static Dataset<Row> addProcessInfo(final Dataset<Row> dataset) {
-        String jobName = ContextUtil.getJobName();
-        return dataset.withColumn(PROCESS_INFO, coalesce(
-                map_concat(
-                        col(PROCESS_INFO),
-                        map(
-                                lit(PROCESS_JOB_ID), lit(jobName),
-                                lit(PROCESS_TIME), lit(Instant.now().toString())
-                        )),
-                map(
-                        lit(PROCESS_JOB_ID), lit(jobName),
-                        lit(PROCESS_TIME), lit(Instant.now().toString())
-                ))
-        ).withColumn(ModelV2.CREATED_TIME, lit(new Timestamp(System.currentTimeMillis())).cast(DataTypes.TimestampType));
-    }
 
     private static Dataset<Row> extractEvent(final Dataset<Row> convertedDataset) {
         Dataset<Row> eventDataset = convertedDataset.select(explode(expr("dataOut.events")).alias("event"))
@@ -220,13 +178,13 @@ public class GTMServerDataTransformerV2 {
         List<DatasetUtil.TableInfo> l = new ArrayList<>();
 
         l.add(new DatasetUtil.TableInfo(
-                ETL_GTM_USER_V2_PROPS, TABLE_VERSION_SUFFIX_V1, userKeepDays
+                ETL_GTM_USER_V2_PROPS, TABLE_VERSION_SUFFIX_V2, userKeepDays
         ));
 
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
 
-    public Map<ETLRunner.TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
+    public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
         Dataset<Row> datasetWithFileName = dataset.withColumn(INPUT_FILE_NAME, input_file_name());
         Dataset<Row> convertedDataset = serverDataConverterV2.transform(datasetWithFileName);
         convertedDataset.cache();
@@ -242,12 +200,12 @@ public class GTMServerDataTransformerV2 {
         log.info("userDataset count:" + userDataset.count());
         log.info("sessionDataset count:" + sessionDataset.count());
 
-        Map<ETLRunner.TableName, Dataset<Row>> result = new EnumMap<>(ETLRunner.TableName.class);
+        Map<TableName, Dataset<Row>> result = new EnumMap<>(TableName.class);
         // table name -> dataset
-        result.put(ETLRunner.TableName.EVENT_V2, eventDataset);
-        result.put(ETLRunner.TableName.ITEM_V2, itemDataset);
-        result.put(ETLRunner.TableName.USER_V2, userDataset);
-        result.put(ETLRunner.TableName.SESSION, sessionDataset);
+        result.put(TableName.EVENT_V2, eventDataset);
+        result.put(TableName.ITEM_V2, itemDataset);
+        result.put(TableName.USER_V2, userDataset);
+        result.put(TableName.SESSION, sessionDataset);
         return result;
 
     }
@@ -266,7 +224,7 @@ public class GTMServerDataTransformerV2 {
         log.info("newUserAggDataset count: {}", newUserAggDataset.count());
 
         String tableName = ETL_GTM_USER_V2_PROPS;
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(userDataset, tableName, TABLE_VERSION_SUFFIX_V1);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserAggDataset, tableName, TABLE_VERSION_SUFFIX_V2);
         log.info("tableName: {}", tableName);
         log.info("pathInfo - incremental: " + pathInfo.getIncremental() + ", full: " + pathInfo.getFull());
 
@@ -310,7 +268,8 @@ public class GTMServerDataTransformerV2 {
                         col(ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP),
                         col(ModelV2.FIRST_TRAFFIC_CATEGORY),
                         col(ModelV2.FIRST_APP_INSTALL_SOURCE),
-                        col(ModelV2.PROCESS_INFO)
+                        col(ModelV2.PROCESS_INFO),
+                        lit(null).cast(DataTypes.StringType).alias(ModelV2.EVENT_NAME)
                 );
 
         log.info("extractUser return userDatasetFinal count: {}", userDatasetFinal.count());
@@ -378,6 +337,4 @@ public class GTMServerDataTransformerV2 {
         mergeIncrementalTables(sparkSession);
         return dataset.drop(ModelV2.UA, ModelV2.IP);
     }
-
-
 }

@@ -5,38 +5,46 @@
   "user_properties" : {
     "age" : {
       "value" : "19",
-      "set_timestamp_micros" : null
+      "type" : "number",
+      "set_time_msec" : null
     },
     "email" : {
       "value" : "yxxxxn@example.com",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "firstName" : {
       "value" : "LoginName",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "gender" : {
       "value" : "M",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "lastName" : {
       "value" : "LoginTest",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "persona" : {
       "value" : "",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "user_id" : {
       "value" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     },
     "username" : {
       "value" : "NameL2",
-      "set_timestamp_micros" : null
+      "type" : "string",
+      "set_time_msec" : null
     }
   },
-  "user_properties_json_str" : "{\"firstName\":{\"value\":\"LoginName\",\"set_timestamp_micros\":null},\"lastName\":{\"value\":\"LoginTest\",\"set_timestamp_micros\":null},\"persona\":{\"value\":\"\",\"set_timestamp_micros\":null},\"gender\":{\"value\":\"M\",\"set_timestamp_micros\":null},\"user_id\":{\"value\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\",\"set_timestamp_micros\":null},\"email\":{\"value\":\"yxxxxn@example.com\",\"set_timestamp_micros\":null},\"age\":{\"value\":\"19\",\"set_timestamp_micros\":null},\"username\":{\"value\":\"NameL2\",\"set_timestamp_micros\":null}}",
+  "user_properties_json_str" : "{\"firstName\":{\"set_time_msec\":null,\"value\":\"LoginName\"},\"lastName\":{\"set_time_msec\":null,\"value\":\"LoginTest\"},\"persona\":{\"set_time_msec\":null,\"value\":\"\"},\"gender\":{\"set_time_msec\":null,\"value\":\"M\"},\"user_id\":{\"set_time_msec\":null,\"value\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\"},\"email\":{\"set_time_msec\":null,\"value\":\"yxxxxn@example.com\"},\"age\":{\"set_time_msec\":null,\"value\":19},\"username\":{\"set_time_msec\":null,\"value\":\"NameL2\"}}",
   "first_touch_time_msec" : 1693281865635,
   "first_visit_date" : "2023-08-29",
   "first_referrer" : null,
@@ -56,5 +64,6 @@
     "process_time" : "_PROCESS_TIME_"
   },
   "app_id" : "GMTServerLogin",
+  "event_name" : null,
   "created_time" : "_CREATED_TIME_"
 }

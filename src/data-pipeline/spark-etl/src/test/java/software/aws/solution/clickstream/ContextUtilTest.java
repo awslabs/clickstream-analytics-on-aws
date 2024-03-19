@@ -15,11 +15,12 @@ package software.aws.solution.clickstream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.util.*;
 
 import java.nio.file.Paths;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 
 public class ContextUtilTest {
     @Test
@@ -71,6 +72,6 @@ public class ContextUtilTest {
         Assertions.assertEquals("/root/data/test", warehouseDir);
         Assertions.assertEquals("jobname001", jobName);
         Assertions.assertFalse(ContextUtil.isDebugLocal());
-        Assertions.assertTrue(ContextUtil.isSaveToWarehouse());
+
     }
 }

@@ -22,8 +22,8 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
-import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 
 class UAEnrichmentTest extends BaseSparkTest {
 

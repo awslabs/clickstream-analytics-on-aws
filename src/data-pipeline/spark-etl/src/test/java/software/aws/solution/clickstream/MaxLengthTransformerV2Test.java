@@ -17,6 +17,7 @@ package software.aws.solution.clickstream;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.transformer.*;
 
 import java.io.*;
 

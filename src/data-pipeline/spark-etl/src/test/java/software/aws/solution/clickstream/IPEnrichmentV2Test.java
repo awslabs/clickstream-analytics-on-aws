@@ -20,7 +20,7 @@ import software.aws.solution.clickstream.model.*;
 import java.io.*;
 
 import static java.util.Objects.*;
-import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 class IPEnrichmentV2Test extends BaseSparkTest {
 

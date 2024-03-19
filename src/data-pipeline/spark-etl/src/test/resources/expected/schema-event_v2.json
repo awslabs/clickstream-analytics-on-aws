@@ -106,6 +106,16 @@
     "nullable" : true,
     "metadata" : { }
   }, {
+    "name" : "device_ua_os",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "device_ua_os_version",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "device_ua_device",
     "type" : "string",
     "nullable" : true,
@@ -113,6 +123,16 @@
   }, {
     "name" : "device_ua_device_category",
     "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "device_ua",
+    "type" : {
+      "type" : "map",
+      "keyType" : "string",
+      "valueType" : "string",
+      "valueContainsNull" : true
+    },
     "nullable" : true,
     "metadata" : { }
   }, {
@@ -231,11 +251,6 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "app_id",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
     "name" : "app_version",
     "type" : "string",
     "nullable" : true,
@@ -261,62 +276,92 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "screen_name",
+    "name" : "app_id",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "screen_id",
+    "name" : "screen_view_screen_name",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "screen_unique_id",
+    "name" : "screen_view_screen_id",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "previous_screen_name",
+    "name" : "screen_view_screen_unique_id",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "previous_screen_id",
+    "name" : "screen_view_previous_screen_name",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "previous_screen_unique_id",
+    "name" : "screen_view_previous_screen_id",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_referrer",
+    "name" : "screen_view_previous_screen_unique_id",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_referrer_title",
+    "name" : "screen_view_previous_time_msec",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "screen_view_engagement_time_msec",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "screen_view_entrances",
+    "type" : "boolean",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "page_view_page_referrer",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_title",
+    "name" : "page_view_page_referrer_title",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_url",
+    "name" : "page_view_previous_time_msec",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "page_view_engagement_time_msec",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "page_view_page_title",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_url_path",
+    "name" : "page_view_page_url",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "page_url_query_parameters",
+    "name" : "page_view_page_url_path",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "page_view_page_url_query_parameters",
     "type" : {
       "type" : "map",
       "keyType" : "string",
@@ -326,18 +371,23 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "hostname",
+    "name" : "page_view_hostname",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "latest_referrer",
+    "name" : "page_view_latest_referrer",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "latest_referrer_host",
+    "name" : "page_view_latest_referrer_host",
     "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "page_view_entrances",
+    "type" : "boolean",
     "nullable" : true,
     "metadata" : { }
   }, {
@@ -346,27 +396,12 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "previous_view_time_msec",
-    "type" : "long",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "previous_view_engagement_time_msec",
-    "type" : "long",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "entrances",
-    "type" : "boolean",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "previous_app_version",
+    "name" : "upgrade_previous_app_version",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "previous_os_version",
+    "name" : "upgrade_previous_os_version",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
@@ -456,22 +491,22 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "sdk_exception_message",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "sdk_exception_stack",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
     "name" : "sdk_version",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
     "name" : "sdk_name",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "app_exception_message",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "app_exception_stack",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
@@ -485,7 +520,20 @@
     "type" : {
       "type" : "map",
       "keyType" : "string",
-      "valueType" : "string",
+      "valueType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "value",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "type",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
       "valueContainsNull" : true
     },
     "nullable" : true,

@@ -1,0 +1,86 @@
+{
+  "event_timestamp" : "2023-04-24 06:51:49",
+  "user_pseudo_id" : "uuid1-9844af32",
+  "user_id" : "p3121211",
+  "user_properties" : {
+    "_first_referer" : {
+      "value" : "_first_referer 001",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_first_traffic_medium" : {
+      "value" : "_first_traffic_medium 001",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_first_traffic_source" : {
+      "value" : "_first_traffic_source 001",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_first_traffic_source_type" : {
+      "value" : "_first_traffic_source_type 001",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_age" : {
+      "value" : "20",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_first_touch_timestamp" : {
+      "value" : "1667877267895",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_id" : {
+      "value" : "p3121211",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_ltv_currency" : {
+      "value" : "USD",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_ltv_revenue" : {
+      "value" : "123.45",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_name" : {
+      "value" : "testName-3",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "device_xx" : {
+      "value" : "device_xx_vv",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    }
+  },
+  "user_properties_json_str" : "{\"_first_traffic_source\":{\"set_time_msec\":1667877566697,\"value\":\"_first_traffic_source 001\"},\"_user_ltv_revenue\":{\"set_time_msec\":1667877566697,\"value\":123.45},\"_user_first_touch_timestamp\":{\"set_time_msec\":1667877566697,\"value\":1667877267895},\"_first_traffic_source_type\":{\"set_time_msec\":1667877566697,\"value\":\"_first_traffic_source_type 001\"},\"_user_ltv_currency\":{\"set_time_msec\":1667877566697,\"value\":\"USD\"},\"device_xx\":{\"set_time_msec\":1667877566697,\"value\":\"device_xx_vv\"},\"_user_id\":{\"set_time_msec\":1667877566697,\"value\":\"p3121211\"},\"_user_name\":{\"set_time_msec\":1667877566697,\"value\":\"testName-3\"},\"_first_referer\":{\"set_time_msec\":1667877566697,\"value\":\"_first_referer 001\"},\"_first_traffic_medium\":{\"set_time_msec\":1667877566697,\"value\":\"_first_traffic_medium 001\"},\"_user_age\":{\"set_time_msec\":1667877566697,\"value\":20}}",
+  "first_touch_time_msec" : 1667877267895,
+  "first_visit_date" : "2022-11-08",
+  "first_referrer" : "http://myhost.com/_page_referer_003",
+  "first_traffic_source" : "TSS",
+  "first_traffic_medium" : "TSM",
+  "first_traffic_campaign" : null,
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : "C001",
+  "process_info" : {
+    "first_event_name" : "_first_open",
+    "latest_event_name" : "_profile_set",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "uba-app",
+  "event_name" : null,
+  "created_time" : "_CREATED_TIME_"
+}

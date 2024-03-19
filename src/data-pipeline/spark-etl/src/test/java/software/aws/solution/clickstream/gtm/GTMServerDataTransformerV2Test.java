@@ -18,15 +18,16 @@ import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.*;
+import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 
 @Slf4j
@@ -39,12 +40,14 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_convert_event_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-single.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
 
-        Dataset<Row> eventDataset = datasetMap.get(ETLRunner.TableName.EVENT_V2);
+        Dataset<Row> eventDataset = datasetMap.get(TableName.EVENT_V2);
         String eventSchema = eventDataset.schema().prettyJson().replaceAll("\"nullable\" : false,", "\"nullable\" : true,");
         String expectedSchema = this.resourceFileAsString("/expected/schema-event_v2.json").replaceAll("\"nullable\" : false,", "\"nullable\" : true,");
         Assertions.assertEquals(expectedSchema, eventSchema);
@@ -56,11 +59,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_convert_item_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-items.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> itemDataset = datasetMap.get(ETLRunner.TableName.ITEM_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> itemDataset = datasetMap.get(TableName.ITEM_V2);
 
         String eventSchema = itemDataset.schema().prettyJson().replaceAll("\"nullable\" : false,", "\"nullable\" : true,");
 
@@ -76,11 +81,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_convert_item_is_empty_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-single.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> itemDataset = datasetMap.get(ETLRunner.TableName.ITEM_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> itemDataset = datasetMap.get(TableName.ITEM_V2);
 
         Assertions.assertEquals(0, itemDataset.count());
     }
@@ -92,11 +99,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_convert_user_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> userDataset = datasetMap.get(ETLRunner.TableName.USER_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> userDataset = datasetMap.get(TableName.USER_V2);
         String eventSchema = userDataset.schema().prettyJson().replaceAll("\"nullable\" : false,", "\"nullable\" : true,");
 
         String expectedSchema = this.resourceFileAsString("/expected/schema-user_v2.json");
@@ -110,11 +119,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_convert_session/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-single.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> eventParamDataset = datasetMap.get(ETLRunner.TableName.SESSION);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> eventParamDataset = datasetMap.get(TableName.SESSION);
         String eventSchema = eventParamDataset.schema().prettyJson().replaceAll("\"nullable\" : false,", "\"nullable\" : true,");
         String expectedSchema = this.resourceFileAsString("/expected/schema-session.json");
         Assertions.assertEquals(expectedSchema, eventSchema);
@@ -127,17 +138,18 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "true");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_post_transform/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
         Map<String, StructType> schemaMap = DatasetUtil.getSchemaMap();
 
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_v2_props_full_v1"));
-        Assertions.assertNotNull(schemaMap.get("/tmp/warehouse/etl_gtm_user_v2_props_incremental_v1"));
+        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/etl_gtm_user_v2_props_full_v2"));
+        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/etl_gtm_user_v2_props_incremental_v2"));
 
-        Dataset<Row> eventDataset = transformer.postTransform(datasetMap.get(ETLRunner.TableName.EVENT_V2));
+        Dataset<Row> eventDataset = transformer.postTransform(datasetMap.get(TableName.EVENT_V2));
         Assertions.assertTrue(eventDataset.count() > 1);
     }
 
@@ -149,19 +161,20 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty("force.merge", "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_event_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
 
         String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event_v2.json");
 
-        datasetMap.get(ETLRunner.TableName.EVENT_V2).select("event_id").show(100, false);
+        datasetMap.get(TableName.EVENT_V2).select("event_id").show(100, false);
 
-        Assertions.assertEquals(expectedData1, replaceProcessInfo(datasetMap.get(ETLRunner.TableName.EVENT_V2).filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2'")).first().prettyJson()), "event is correct");
+        Assertions.assertEquals(expectedData1, replaceProcessInfo(datasetMap.get(TableName.EVENT_V2).filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2'")).first().prettyJson()), "event is correct");
 
-        Dataset<Row> eventDataset = transformer.postTransform(datasetMap.get(ETLRunner.TableName.EVENT_V2));
+        Dataset<Row> eventDataset = transformer.postTransform(datasetMap.get(TableName.EVENT_V2));
         String expectedDataPost = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event_post_v2.json");
         Assertions.assertEquals(expectedDataPost, replaceProcessInfo(eventDataset.filter(expr("event_id='4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2'")).first().prettyJson()), "event post is correct");
 
@@ -174,16 +187,17 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty("force.merge", "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_event_brand_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-brand.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
 
-        datasetMap.get(ETLRunner.TableName.EVENT_V2).select("event_id").show(100, false);
+        datasetMap.get(TableName.EVENT_V2).select("event_id").show(100, false);
 
         String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_brand_v2.json");
-        Assertions.assertEquals(expectedData1, replaceProcessInfo(datasetMap.get(ETLRunner.TableName.EVENT_V2).filter(expr("event_id='43cc3b89d7dfccbc2c906eb125ea25dbbrand-0-1693281535-11'")).first().prettyJson()));
+        Assertions.assertEquals(expectedData1, replaceProcessInfo(datasetMap.get(TableName.EVENT_V2).filter(expr("event_id='43cc3b89d7dfccbc2c906eb125ea25dbbrand-0-1693281535-11'")).first().prettyJson()));
     }
 
     @Test
@@ -192,15 +206,16 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_session/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-session-start.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
 
-        datasetMap.get(ETLRunner.TableName.SESSION).select("session_id", "session_number", "user_pseudo_id").show(100, false);
+        datasetMap.get(TableName.SESSION).select("session_id", "session_number", "user_pseudo_id").show(100, false);
 
-        Dataset<Row> resultDataset = datasetMap.get(ETLRunner.TableName.SESSION).filter(expr("session_id='1704867229' and session_number=9"));
+        Dataset<Row> resultDataset = datasetMap.get(TableName.SESSION).filter(expr("session_id='1704867229' and session_number=9"));
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_session.json");
         Assertions.assertEquals(expectedData, replaceProcessInfo(resultDataset.first().prettyJson()));
@@ -214,13 +229,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_item_v2/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_item_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> resultDataset = datasetMap.get(ETLRunner.TableName.ITEM_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> resultDataset = datasetMap.get(TableName.ITEM_V2);
         resultDataset.select("item_id", "event_timestamp").show(100, false);
         //  |CTF-28015231-16005642|2023-09-21 09:54:26.828|
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_item_v2.json");
@@ -235,12 +250,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> resultDataset = datasetMap.get(ETLRunner.TableName.USER_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> resultDataset = datasetMap.get(TableName.USER_V2);
 
         resultDataset = resultDataset.filter(col("user_pseudo_id").equalTo("rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179"));
 
@@ -256,12 +272,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_login_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> resultDataset = datasetMap.get(ETLRunner.TableName.USER_V2).filter(col("user_id").equalTo("0eb41e46-2373-4883-8daf-e1975ccb3821"));
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> resultDataset = datasetMap.get(TableName.USER_V2).filter(col("user_id").equalTo("0eb41e46-2373-4883-8daf-e1975ccb3821"));
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_login_v2.json");
         Assertions.assertEquals(expectedData, replaceProcessInfo(resultDataset.first().prettyJson()));
@@ -286,12 +303,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login2_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_login2_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login2.json")).getPath());
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
 
-        Dataset<Row> resultDataset = datasetMap.get(ETLRunner.TableName.USER_V2);
+        Dataset<Row> resultDataset = datasetMap.get(TableName.USER_V2);
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_login2_v2.json");
         Assertions.assertEquals(expectedData, replaceProcessInfo(resultDataset.first().prettyJson()), "test_transform_data_user_login2_v2.json");
@@ -304,7 +322,8 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login2.json")).getPath());
         transformer.transform(dataset);
@@ -314,7 +333,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         DatasetUtil.getSchemaMap().forEach((k, v) -> {
             log.info("{} -> {}", k, v.prettyJson());
         });
-        Dataset<Row> incrementalUserDataset = DatasetUtil.readDatasetFromPath(spark, "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/etl_gtm_user_v2_props_incremental_v1", year100);
+        Dataset<Row> incrementalUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/etl_gtm_user_v2_props_incremental_v2", year100);
         String expectedDataInc = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_incremental_v2.json");
 
         Assertions.assertEquals(expectedDataInc,
@@ -323,7 +342,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
                         .replaceAll("\"update_date\" : \"\\d+\",", "\"update_date\" : \"_YYYYMMDD_\","),
                 "test_transform_data_user_incremental_v2.json");
 
-        Dataset<Row> fullUserDataset = DatasetUtil.readDatasetFromPath(spark, "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/etl_gtm_user_v2_props_full_v1", year100);
+        Dataset<Row> fullUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/etl_gtm_user_v2_props_full_v2", year100);
         Assertions.assertTrue(fullUserDataset.count() > 0);
 
     }
@@ -334,12 +353,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_with_session_start_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_with_session_start_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session-start.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> eventDataset = datasetMap.get(ETLRunner.TableName.EVENT_V2);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> eventDataset = datasetMap.get(TableName.EVENT_V2);
 
         Assertions.assertEquals(2, eventDataset.count());
 
@@ -354,12 +374,13 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_with_session_v2/");
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_with_session_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session-start.json")).getPath());
 
-        Map<ETLRunner.TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
-        Dataset<Row> sessionDataset = datasetMap.get(ETLRunner.TableName.SESSION);
+        Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
+        Dataset<Row> sessionDataset = datasetMap.get(TableName.SESSION);
 
         Assertions.assertEquals(1, sessionDataset.count());
 
