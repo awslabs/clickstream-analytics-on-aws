@@ -131,5 +131,34 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'session-m-view.sql',
   },
-
+  {
+    sqlFile: 'fn-combine-json-list.sql',
+  },
+  {
+    sqlFile: 'fn-parse-utm-from-url.sql',
+  },
+  {
+    sqlFile: 'fn-rm-object-props.sql',
+  },
+  {
+    sqlFile: 'fn-transform-event-custom-props.sql',
+  },
+  {
+    sqlFile: 'fn-transform-user-custom-props.sql',
+  },
+  {
+    sqlFile: 'sp-migrate-event-to-v2.sql',
+  },
+  {
+    sqlFile: 'sp-migrate-item-to-v2.sql',
+  },
+  {
+    sqlFile: 'sp-migrate-user-to-v2.sql',
+  },
+  {
+    sqlFile: 'sp-migrate-session-to-v2.sql',
+  },
+  {
+    sqlFile: 'sp-migrate-all-to-v2.sql',
+  },
 ];
