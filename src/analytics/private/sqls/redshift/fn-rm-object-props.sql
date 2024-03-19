@@ -11,3 +11,4 @@ for prop in props_list.split(","):
 return json.dumps(d)
 
 $$ language plpythonu;
+

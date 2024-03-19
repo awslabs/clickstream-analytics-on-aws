@@ -259,7 +259,7 @@ ELSE
                     e1.event_id = e2.event_id
             )
             AND event_timestamp >= n_days_ago_msec
-            -- LIMIT 100000000
+            LIMIT 100000000
     );
     
     SELECT

@@ -329,4 +329,4 @@ CALL {{schema}}.sp_clickstream_log_non_atomic(log_name, 'error', 'error message:
 
 END;
 
-$ $
+$$

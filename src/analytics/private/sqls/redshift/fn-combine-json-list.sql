@@ -16,3 +16,4 @@ for d in list_of_dicts:
 return json.dumps(combined_dict)
 
 $$ language plpythonu;
+
