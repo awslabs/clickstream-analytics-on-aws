@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{dbName}}.{{schema}}.clickstream_dashboard_day_user_view_cnt_mv
+CREATE MATERIALIZED VIEW {{dbName}}.{{schema}}.clickstream_acquisition_day_user_view_cnt_mv
 BACKUP YES
 AUTO REFRESH NO
 SORTKEY(event_date, platform)
