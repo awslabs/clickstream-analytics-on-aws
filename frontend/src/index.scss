@@ -699,12 +699,15 @@ ul.menu-list li.checkbox-item {
         border-radius: 8px;
         z-index: 99;
         opacity: 0;
+        visibility: hidden;
         transition: opacity 0.5s ease-in-out;
         transition-delay: 0.5s;
       }
       &:hover {
         .custom-popover {
           opacity: 1;
+          visibility: visible;
+          transition-delay: 0s;
         }
       }
     }

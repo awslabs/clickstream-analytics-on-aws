@@ -46,6 +46,7 @@ const SegmentEditor: React.FC = () => {
       'values',
       'eventOperationOptions',
       'eventCalculateMethodOption',
+      'userIsAttributeOptions',
     ]);
     setFilteredData(newFilteredData);
   }, [segmentDataState]);
