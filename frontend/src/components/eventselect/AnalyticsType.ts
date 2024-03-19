@@ -145,8 +145,8 @@ export interface IEventSegmentationObj {
   subItemList: IEventSegmentationItem[];
   // select options
   eventOption: CategoryItemType[];
-  conditionOptions: CategoryItemType[];
   eventOperationOptions: SelectProps.Option[];
+  userIsAttributeOptions: CategoryItemType[];
   attributeOperationOptions: SelectProps.Option[];
   userGroupOptions: SelectProps.Option[];
 }

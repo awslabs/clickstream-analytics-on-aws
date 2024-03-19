@@ -86,7 +86,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
       segmentData.userEventType?.value === ConditionType.USER_IN_GROUP ||
       segmentData.userEventType?.value === ConditionType.USER_NOT_IN_GROUP
     ) {
-      setEventType(EventTypes.UserDoneEvent);
+      setEventType(EventTypes.UserInGroup);
     }
   }, [segmentData.userEventType?.value]);
 

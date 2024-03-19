@@ -355,7 +355,7 @@
       "MIN_OF_EVENT_PARAMETER": "Find the minimum by {{type}} (MIN)",
       "MAX_OF_EVENT_PARAMETER": "Find the maximum by {{type}} (MAX)",
       "AVG_OF_EVENT_PARAMETER": "Average by {{type}} (AVG)",
-      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Find the count of distinct {{type}} (COUNT(DISTINCT))"
+      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Count of distinct {{type}} (COUNT(DISTINCT))"
     },
     "calculateOperator": {
       "=": "=",

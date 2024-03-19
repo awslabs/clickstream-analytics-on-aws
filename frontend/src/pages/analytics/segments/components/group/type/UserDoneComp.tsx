@@ -96,7 +96,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
         />
       </div>
 
-      <div className="cs-analytics-dropdown">
+      <div>
         <div className="cs-dropdown-input" ref={wrapperRef}>
           <div className="dropdown-input-column">
             <div

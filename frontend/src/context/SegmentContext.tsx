@@ -21,6 +21,7 @@ import {
   AnalyticsSegmentActionType,
   analyticsSegmentGroupReducer,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { parametersConvertToUserCategoryItemType } from 'pages/analytics/analytics-utils';
 import {
   ReactElement,
   createContext,
@@ -31,7 +32,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_SEGMENT_GROUP_DATA, enumToSelectOptions } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, getEventParameters } from 'ts/utils';
 import { useUserEventParameter } from './AnalyticsEventsContext';
 
 interface SegmentContextType {
@@ -70,6 +71,14 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
       segmentDataDispatch({
         type: AnalyticsSegmentActionType.SetEventOption,
         eventOption: data.categoryEvents,
+        userIsAttributeOptions: parametersConvertToUserCategoryItemType(
+          data.metaDataUserAttributes,
+          getEventParameters(
+            data.metaDataEventParameters,
+            data.metaDataEvents,
+            data.builtInMetaData
+          )
+        ),
       });
     }
   }, [data]);

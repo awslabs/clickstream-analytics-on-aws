@@ -166,6 +166,35 @@ export const parametersConvertToCategoryItemType = (
   return categoryItems;
 };
 
+export const parametersConvertToUserCategoryItemType = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  patchSameName(userAttributeItems, parameterItems);
+  const categoryItems: CategoryItemType[] = [];
+  const categoryUserItems: CategoryItemType = {
+    categoryId: 'user',
+    categoryName: i18n.t('analytics:category.user'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  userAttributeItems.forEach((item) => {
+    categoryUserItems.itemList.push({
+      label: userAttributeDisplayname(item.displayName),
+      name: item.name,
+      value: item.id,
+      description: item.description,
+      metadataSource: item.metadataSource,
+      valueType: item.valueType,
+      category: item.category,
+      values: item.values,
+      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+    });
+  });
+  categoryItems.push(categoryUserItems);
+  return categoryItems;
+};
+
 const getCategories = (parameterItems: IMetadataEventParameter[]) => {
   const categories: CategoryItemType[] = [];
   for (const item of parameterItems) {

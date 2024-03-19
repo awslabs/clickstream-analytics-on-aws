@@ -302,6 +302,7 @@ export type UpdateUserInGroup = {
 export type SetEventOption = {
   type: AnalyticsSegmentActionType.SetEventOption;
   eventOption: CategoryItemType[];
+  userIsAttributeOptions: CategoryItemType[];
 };
 
 export type AnalyticsSegmentAction =
@@ -953,7 +954,11 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.SetEventOption: {
-      return { ...newState, eventOption: action.eventOption };
+      return {
+        ...newState,
+        eventOption: action.eventOption,
+        userIsAttributeOptions: action.userIsAttributeOptions,
+      };
     }
 
     default:
