@@ -53,23 +53,21 @@ export class MetadataEventServ {
 
   private async listRawEvents(projectId: string, appId: string, associated: boolean, metadataVersion: MetadataVersionType) {
     let rawEvents: IMetadataEvent[] = [];
-    if (metadataVersion === MetadataVersionType.V2) {
-      rawEvents = await metadataStore.listEventsV2(projectId, appId);
-    } else {
+    if (metadataVersion === MetadataVersionType.V1) {
       rawEvents = await metadataStore.listEvents(projectId, appId);
       if (associated) {
         const eventParameters = await metadataStore.listEventParameters(projectId, appId);
         rawEvents = groupAssociatedEventParametersByName(rawEvents, eventParameters);
       }
+    } else {
+      rawEvents = await metadataStore.listEventsV2(projectId, appId, metadataVersion);
     }
     return rawEvents;
   }
 
   private async getRawEvent(projectId: string, appId: string, name: string, metadataVersion: MetadataVersionType) {
     let event: IMetadataEvent | undefined;
-    if (metadataVersion === MetadataVersionType.V2) {
-      event = await metadataStore.getEventV2(projectId, appId, name);
-    } else {
+    if (metadataVersion === MetadataVersionType.V1) {
       event = await metadataStore.getEvent(projectId, appId, name);
       if (!event) {
         return event;
@@ -77,6 +75,8 @@ export class MetadataEventServ {
       let eventParameters = await metadataStore.listEventParameters(projectId, appId);
       eventParameters = groupByParameterByName(eventParameters, name);
       event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
+    } else {
+      event = await metadataStore.getEventV2(projectId, appId, name, metadataVersion);
     }
     return event;
   }
@@ -90,7 +90,7 @@ export class MetadataEventServ {
         return res.status(400).json(new ApiFail('The current version does not support.'));
       }
       let events = await this.listRawEvents(projectId, appId, associated, metadataVersion);
-      events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
+      events = await metadataDisplay.patch(projectId, appId, events, metadataVersion) as IMetadataEvent[];
       return res.json(new ApiSuccess({
         totalCount: events.length,
         items: events,
@@ -112,7 +112,7 @@ export class MetadataEventServ {
       if (!event) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
+      event = (await metadataDisplay.patch(projectId, appId, [event], metadataVersion) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
       next(error);
@@ -166,11 +166,11 @@ interface IPathNodes {
 export class MetadataEventParameterServ {
   private async listRawParameters(projectId: string, appId: string, metadataVersion: MetadataVersionType) {
     let rawEventParameters: IMetadataEventParameter[] = [];
-    if (metadataVersion === MetadataVersionType.V2) {
-      rawEventParameters = await metadataStore.listEventParametersV2(projectId, appId);
-    } else {
+    if (metadataVersion === MetadataVersionType.V1) {
       const results = await metadataStore.listEventParameters(projectId, appId);
       rawEventParameters = groupByParameterByName(results);
+    } else {
+      rawEventParameters = await metadataStore.listEventParametersV2(projectId, appId, metadataVersion);
     }
     return rawEventParameters;
   }
@@ -178,10 +178,10 @@ export class MetadataEventParameterServ {
   private async getRawEventParameter(projectId: string, appId: string,
     name: string, category: ConditionCategory, type: MetadataValueType, metadataVersion: MetadataVersionType) {
     let parameter: IMetadataEventParameter | undefined;
-    if (metadataVersion === MetadataVersionType.V2) {
-      parameter = await metadataStore.getEventParameterV2(projectId, appId, name, category, type);
-    } else {
+    if (metadataVersion === MetadataVersionType.V1) {
       parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
+    } else {
+      parameter = await metadataStore.getEventParameterV2(projectId, appId, name, category, type, metadataVersion);
     }
     return parameter;
   }
@@ -231,7 +231,7 @@ export class MetadataEventParameterServ {
         return res.status(400).json(new ApiFail('The current version does not support.'));
       }
       const parameters = await this.listRawParameters(projectId, appId, metadataVersion);
-      const results = await metadataDisplay.patch(projectId, appId, parameters) as IMetadataEventParameter[];
+      const results = await metadataDisplay.patch(projectId, appId, parameters, metadataVersion) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,
         items: results,
@@ -252,7 +252,7 @@ export class MetadataEventParameterServ {
       if (!parameter) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      parameter = (await metadataDisplay.patch(projectId, appId, [parameter]) as IMetadataEventParameter[])[0];
+      parameter = (await metadataDisplay.patch(projectId, appId, [parameter], metadataVersion) as IMetadataEventParameter[])[0];
       return res.json(new ApiSuccess(parameter));
     } catch (error) {
       next(error);
@@ -261,7 +261,7 @@ export class MetadataEventParameterServ {
 
   public async builtInMetadata(_req: any, res: any, next: any) {
     try {
-      const results = await metadataDisplay.getBuiltList();
+      const results = await metadataDisplay.getBuiltList(MetadataVersionType.V3);
       return res.json(new ApiSuccess(results));
     } catch (error) {
       next(error);
@@ -272,10 +272,10 @@ export class MetadataEventParameterServ {
 export class MetadataUserAttributeServ {
   private async listRawUserAttributes(projectId: string, appId: string, metadataVersion: MetadataVersionType) {
     let rawUserAttributes: IMetadataUserAttribute[] = [];
-    if (metadataVersion === MetadataVersionType.V2) {
-      rawUserAttributes = await metadataStore.listUserAttributesV2(projectId, appId);
-    } else {
+    if (metadataVersion === MetadataVersionType.V1) {
       rawUserAttributes = await metadataStore.listUserAttributes(projectId, appId);
+    } else {
+      rawUserAttributes = await metadataStore.listUserAttributesV2(projectId, appId, metadataVersion);
     }
     return rawUserAttributes;
   };
@@ -288,7 +288,7 @@ export class MetadataUserAttributeServ {
         return res.status(400).json(new ApiFail('The current version does not support.'));
       }
       const attributes = await this.listRawUserAttributes(projectId, appId, metadataVersion);
-      const results = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
+      const results = await metadataDisplay.patch(projectId, appId, attributes, metadataVersion) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
         items: results,

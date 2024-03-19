@@ -12,8 +12,9 @@
  */
 
 import { ConditionCategory, MetadataParameterType, MetadataSource } from '@aws/clickstream-base-lib';
+import { MetadataVersionType } from '../common/model-ln';
 import { logger } from '../common/powertools';
-import { isEmpty } from '../common/utils';
+import { isEmpty, readMetadataFromSqlFile } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
@@ -40,12 +41,15 @@ export class CMetadataDisplay {
     return this.displays;
   }
 
-  public async getBuiltList() {
+  public async getBuiltList(version: MetadataVersionType) {
     if (!this.builtList) {
       const dic = await store.getDictionary('MetadataBuiltInList');
       if (dic) {
         this.builtList = dic.data as IMetadataBuiltInList;
       }
+    }
+    if (version === MetadataVersionType.V3) {
+      readMetadataFromSqlFile(this.builtList);
     }
     return this.builtList;
   }
@@ -111,7 +115,7 @@ export class CMetadataDisplay {
         parameter.displayName = matchParameter.displayName;
         parameter.description = matchParameter.description;
         parameter.metadataSource = MetadataSource.PRESET;
-        parameter.parameterType = MetadataParameterType.PRIVATE;
+        parameter.parameterType = MetadataParameterType.PUBLIC;
       }
     }
     if (!matchParameter) {
@@ -121,7 +125,7 @@ export class CMetadataDisplay {
         parameter.displayName = matchParameter.displayName;
         parameter.description = matchParameter.description;
         parameter.metadataSource = MetadataSource.PRESET;
-        parameter.parameterType = MetadataParameterType.PRIVATE;
+        parameter.parameterType = MetadataParameterType.PUBLIC;
       }
     }
     if (!matchParameter) {
@@ -162,10 +166,10 @@ export class CMetadataDisplay {
 
   public async patch(projectId: string, appId: string,
     metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[],
-    eventName?: string) {
+    version: MetadataVersionType, eventName?: string) {
     try {
       await this.getDisplay(projectId, appId);
-      await this.getBuiltList();
+      await this.getBuiltList(version);
       for (let metadata of metadataArray) {
         const prefix = metadata.prefix.split('#')[0];
         switch (prefix) {
