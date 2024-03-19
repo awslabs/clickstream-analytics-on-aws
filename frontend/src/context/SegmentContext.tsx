@@ -15,7 +15,6 @@ import { Spinner } from '@cloudscape-design/components';
 import {
   ConditionNumericOperator,
   IEventSegmentationObj,
-  SegmentFilterEventMetricType,
 } from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
@@ -52,12 +51,6 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
     analyticsSegmentGroupReducer,
     {
       ...DEFAULT_SEGMENT_GROUP_DATA,
-      eventCalculateMethodOption: enumToSelectOptions(
-        SegmentFilterEventMetricType,
-        'calculateOption'
-      ).map((item) => {
-        return { label: defaultStr(t(item.label ?? '')), value: item.value };
-      }),
       eventOperationOptions: enumToSelectOptions(
         ConditionNumericOperator,
         'calculateOperator'

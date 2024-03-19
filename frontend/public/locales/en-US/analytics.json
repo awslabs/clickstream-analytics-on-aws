@@ -351,11 +351,11 @@
       "NUMBER_OF_TIMES_PER_DAY": "Number of times per day",
       "NUMBER_OF_CONSECUTIVE_DAYS": "Distribution of days",
       "NUMBER_OF_DAYS_HAVING_EVENT": "Number of consecutive days",
-      "SUM_OF_EVENT_PARAMETER": "Sum by... (SUM)",
-      "MIN_OF_EVENT_PARAMETER": "Find the minimum by... (MIN)",
-      "MAX_OF_EVENT_PARAMETER": "Find the maximum by... (MAX)",
-      "AVG_OF_EVENT_PARAMETER": "Average by... (AVG)",
-      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Find the count of distinct... (COUNT(DISTINCT))"
+      "SUM_OF_EVENT_PARAMETER": "Sum by {{type}} (SUM)",
+      "MIN_OF_EVENT_PARAMETER": "Find the minimum by {{type}} (MIN)",
+      "MAX_OF_EVENT_PARAMETER": "Find the maximum by {{type}} (MAX)",
+      "AVG_OF_EVENT_PARAMETER": "Average by {{type}} (AVG)",
+      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Find the count of distinct {{type}} (COUNT(DISTINCT))"
     },
     "calculateOperator": {
       "=": "=",

@@ -128,7 +128,7 @@ export interface IEventSegmentationItem {
   userDoneEventConditionList: IConditionItemType[];
   userDoneEventCalculateMethod?: IAnalyticsItem | null;
   userDoneEventOperation?: SelectProps.Option | null;
-  userDoneEventValue?: any;
+  userDoneEventValue?: Array<string>;
   userIsParamOption?: IAnalyticsItem | null;
   userISOperator?: SelectProps.Option | null;
   userIsValue?: any;
@@ -137,6 +137,7 @@ export interface IEventSegmentationItem {
   userInFilterGroup?: SelectProps.Option | null;
   // Options
   eventAttributeOption?: CategoryItemType[];
+  eventCalculateMethodOption?: IAnalyticsItem[];
 }
 
 export interface IEventSegmentationObj {
@@ -144,7 +145,6 @@ export interface IEventSegmentationObj {
   subItemList: IEventSegmentationItem[];
   // select options
   eventOption: CategoryItemType[];
-  eventCalculateMethodOption: IAnalyticsItem[];
   conditionOptions: CategoryItemType[];
   eventOperationOptions: SelectProps.Option[];
   attributeOperationOptions: SelectProps.Option[];

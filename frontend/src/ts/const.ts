@@ -511,7 +511,6 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   filterGroupRelationShip: ERelationShip.AND,
   subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
   eventOption: [],
-  eventCalculateMethodOption: [],
   conditionOptions: [],
   eventOperationOptions: [],
   attributeOperationOptions: [],

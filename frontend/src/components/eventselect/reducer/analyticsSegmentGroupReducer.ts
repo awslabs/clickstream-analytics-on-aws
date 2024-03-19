@@ -16,7 +16,10 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
-import { parametersConvertToCategoryItemType } from 'pages/analytics/analytics-utils';
+import {
+  getSegmentEventMethodOptions,
+  parametersConvertToCategoryItemType,
+} from 'pages/analytics/analytics-utils';
 import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import {
   ConditionType,
@@ -129,7 +132,7 @@ export type UpdateUserDoneEvent = {
 export type UpdateUserDoneEventCalculate = {
   type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate;
   segmentProps: SegmentPropsData;
-  calculate: IAnalyticsItem;
+  calculate?: IAnalyticsItem;
 };
 
 export type UpdateUserDoneEventOperation = {
@@ -141,7 +144,7 @@ export type UpdateUserDoneEventOperation = {
 export type UpdateUserDoneEventValue = {
   type: AnalyticsSegmentActionType.UpdateUserDoneEventValue;
   segmentProps: SegmentPropsData;
-  value: any;
+  value: Array<string>;
 };
 
 export type AddEventFilterCondition = {
@@ -477,6 +480,10 @@ export const analyticsSegmentGroupReducer = (
         action.metaDataUserAttributes,
         eventParameters
       );
+      const calculateMethodOptions = getSegmentEventMethodOptions(
+        action.metaDataUserAttributes,
+        eventParameters
+      );
       // set current event
       let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
@@ -490,8 +497,8 @@ export const analyticsSegmentGroupReducer = (
       }
       currentData.userDoneEvent = action.event;
       currentData.eventAttributeOption = parameterOption;
-      currentData.userDoneEventCalculateMethod =
-        newState.eventCalculateMethodOption[0];
+      currentData.eventCalculateMethodOption = calculateMethodOptions;
+      currentData.userDoneEventCalculateMethod = calculateMethodOptions[0];
       return { ...newState };
     }
 
