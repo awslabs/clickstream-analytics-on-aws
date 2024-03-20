@@ -10,11 +10,12 @@ DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_country_new_use
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user (event_date, geo_country, user_count)
 select 
   event_date,
+  platform,
   geo_country,
   count(distinct new_user_indicator) as user_count
 from {{database_name}}.{{schema}}.{{baseView}}
 where event_date = day
-group by 1,2
+group by 1,2,3
 ;
 
 EXCEPTION WHEN OTHERS THEN
