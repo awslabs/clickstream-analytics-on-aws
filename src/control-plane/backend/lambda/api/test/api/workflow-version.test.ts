@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Parameter } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
@@ -54,6 +55,7 @@ import {
   MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
   REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
   mergeParameters,
+  removeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION } from '../../common/constants';
 // eslint-disable-next-line import/order
@@ -170,6 +172,25 @@ const DataProcessingStack = {
   Type: 'Stack',
 };
 
+// const DataProcessingStackV1 = {
+//   ...DataProcessingStack,
+//   Data: {
+//     ...DataProcessingStack.Data,
+//     Input: {
+//       ...DataProcessingStack.Data.Input,
+//       Parameters: mergeParameters(
+//         DataProcessingStack.Data.Input.Parameters,
+//         [
+//           {
+//             ParameterKey: 'TransformerAndEnrichClassNames',
+//             ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+//           },
+//         ],
+//       ),
+//     },
+//   },
+// };
+
 const DataModelingRedshiftStack = {
   Data: {
     Callback: {
@@ -259,6 +280,18 @@ const ServiceCatalogAppRegistryStack = {
   Next: 'PipelineStacks',
   Type: 'Stack',
 };
+
+function removeParametersFromStack(stack: any, parameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Parameters = removeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
+
+function mergeParametersFromStack(stack: any, parameters: Parameter[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Parameters = mergeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
 
 describe('Workflow test with pipeline version', () => {
   beforeEach(() => {
@@ -361,38 +394,65 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: IngestionStack,
+                      Ingestion: removeParametersFromStack(IngestionStack, [
+                        {
+                          ParameterKey: 'AppRegistryApplicationArn.#',
+                        },
+                      ],
+                      ),
                     },
                   },
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: {
-                        ...DataProcessingStack,
-                        Data: {
-                          ...DataProcessingStack.Data,
-                          Input: {
-                            ...DataProcessingStack.Data.Input,
-                            Parameters: mergeParameters(
-                              DataProcessingStack.Data.Input.Parameters,
-                              [
-                                {
-                                  ParameterKey: 'TransformerAndEnrichClassNames',
-                                  ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                                },
-                              ],
-                            ),
+                      DataProcessing: removeParametersFromStack(
+                        mergeParametersFromStack(
+                          DataProcessingStack, [
+                            {
+                              ParameterKey: 'TransformerAndEnrichClassNames',
+                              ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                            },
+                          ],
+                        ),
+                        [
+                          {
+                            ParameterKey: 'AppRegistryApplicationArn.#',
                           },
+                        ],
+                      ),
+                      DataModelingRedshift: removeParametersFromStack(
+                        DataModelingRedshiftStack,
+                        [
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'AppRegistryApplicationArn.#',
+                          },
+                        ],
+                      ),
+                      Reporting: removeParametersFromStack(ReportingStack, [
+                        {
+                          ParameterKey: 'AppRegistryApplicationArn.#',
                         },
-                      },
-                      DataModelingRedshift: DataModelingRedshiftStack,
-                      Reporting: ReportingStack,
+                      ],
+                      ),
                     },
                   },
                   {
                     StartAt: 'Metrics',
                     States: {
-                      Metrics: MetricsStack,
+                      Metrics: removeParametersFromStack(MetricsStack, [
+                        {
+                          ParameterKey: 'AppRegistryApplicationArn.#',
+                        },
+                      ]),
                     },
                   },
                 ],
@@ -440,25 +500,24 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: {
-                        ...DataProcessingStack,
-                        Data: {
-                          ...DataProcessingStack.Data,
-                          Input: {
-                            ...DataProcessingStack.Data.Input,
-                            Parameters: mergeParameters(
-                              DataProcessingStack.Data.Input.Parameters,
-                              [
-                                {
-                                  ParameterKey: 'TransformerAndEnrichClassNames',
-                                  ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                                },
-                              ],
-                            ),
-                          },
+                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                         },
-                      },
-                      DataModelingRedshift: DataModelingRedshiftStack,
+                      ],
+                      ),
+                      DataModelingRedshift: removeParametersFromStack(
+                        DataModelingRedshiftStack,
+                        [
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                        ],
+                      ),
                       Reporting: ReportingStack,
                     },
                   },
@@ -513,24 +572,13 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: {
-                        ...DataProcessingStack,
-                        Data: {
-                          ...DataProcessingStack.Data,
-                          Input: {
-                            ...DataProcessingStack.Data.Input,
-                            Parameters: mergeParameters(
-                              DataProcessingStack.Data.Input.Parameters,
-                              [
-                                {
-                                  ParameterKey: 'TransformerAndEnrichClassNames',
-                                  ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                                },
-                              ],
-                            ),
-                          },
+                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                         },
-                      },
+                      ],
+                      ),
                       DataModelingRedshift: DataModelingRedshiftStack,
                       Reporting: ReportingStack,
                     },
@@ -586,24 +634,13 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: {
-                        ...DataProcessingStack,
-                        Data: {
-                          ...DataProcessingStack.Data,
-                          Input: {
-                            ...DataProcessingStack.Data.Input,
-                            Parameters: mergeParameters(
-                              DataProcessingStack.Data.Input.Parameters,
-                              [
-                                {
-                                  ParameterKey: 'TransformerAndEnrichClassNames',
-                                  ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                                },
-                              ],
-                            ),
-                          },
+                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
                         },
-                      },
+                      ],
+                      ),
                       DataModelingRedshift: DataModelingRedshiftStack,
                       Reporting: ReportingStack,
                     },

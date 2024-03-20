@@ -83,6 +83,7 @@ import {
   WorkflowVersion,
 } from '../common/types';
 import {
+  getAppRegistryStackTags,
   getPipelineStatusType,
   getStackName,
   getStackOutputFromPipelineStatus,
@@ -910,7 +911,7 @@ export class CPipeline {
           StackName: appRegistryStackName,
           TemplateURL: appRegistryTemplateURL,
           Parameters: appRegistryParameters,
-          Tags: this.stackTags ? [...this.stackTags] : undefined,
+          Tags: getAppRegistryStackTags(this.stackTags),
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket,

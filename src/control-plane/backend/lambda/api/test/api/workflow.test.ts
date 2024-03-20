@@ -193,7 +193,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(S3_INGESTION_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...S3_INGESTION_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -304,6 +307,7 @@ describe('Workflow test', () => {
         ...S3_INGESTION_PIPELINE.network,
         type: ENetworkType.Private,
       },
+      templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -415,6 +419,7 @@ describe('Workflow test', () => {
         ...S3_INGESTION_PIPELINE.ingestionServer,
         ingestionType: IngestionType.Fargate,
       },
+      templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -531,6 +536,7 @@ describe('Workflow test', () => {
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(S3_INGESTION_PIPELINE),
       region: 'cn-north-1',
+      templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -636,7 +642,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(KAFKA_INGESTION_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...KAFKA_INGESTION_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -741,7 +750,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -875,6 +887,7 @@ describe('Workflow test', () => {
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(MSK_WITH_CONNECTOR_INGESTION_PIPELINE),
       region: 'cn-north-1',
+      templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -1002,7 +1015,10 @@ describe('Workflow test', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline(cloneDeep(KINESIS_ON_DEMAND_INGESTION_PIPELINE));
+    const pipeline: CPipeline = new CPipeline(cloneDeep({
+      ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    }));
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1114,6 +1130,7 @@ describe('Workflow test', () => {
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_PROVISIONED_INGESTION_PIPELINE),
       region: 'cn-north-1',
+      templateVersion: FULL_SOLUTION_VERSION,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -4757,7 +4774,10 @@ describe('Workflow test with boundary', () => {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
     });
-    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...S3_INGESTION_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -4842,7 +4862,7 @@ describe('Workflow test with boundary', () => {
                       },
                     ],
                     StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
-                    Tags: Tags,
+                    Tags: InitTags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },

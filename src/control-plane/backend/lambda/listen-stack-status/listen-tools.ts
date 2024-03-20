@@ -21,8 +21,8 @@ import { BuiltInTagKeys, ExecutionDetail, PipelineStackType, PipelineStatusDetai
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { CFN_TOPIC_PREFIX } from '../api/common/constants';
+import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
 import { getStackPrefix } from '../api/common/utils';
-import { getAllStackNames } from '../api/common/workflow-utils';
 
 const MAX_RETRY_COUNT = 3;
 
@@ -151,7 +151,7 @@ export async function updatePipelineStackStatus(
         logger.error('Failed to get pipeline: ', { projectId, pipelineId });
         throw new Error('Failed to get pipeline');
       }
-      const stackNames = getAllStackNames(pipeline.workflow.Workflow);
+      const stackNames = getWorkflowStacks(pipeline.workflow.Workflow);
       const newStackDetails = getNewStackDetails(curStackDetail, pipeline.stackDetails ?? [], stackNames);
       success = await updateStackStatusWithOptimisticLocking(projectId, pipelineId, newStackDetails, pipeline.updateAt);
       retryCount += 1;
@@ -205,6 +205,22 @@ export function getVersionFromTags(tags: Tag[] | undefined) {
     version = versionTag[0].Value ?? '';
   }
   return version;
+}
+
+export function getWorkflowStacks(state: WorkflowState): string[] {
+  let res: string[] = [];
+  if (state.Type === WorkflowStateType.PARALLEL) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      for (let key of Object.keys(branch.States)) {
+        res = res.concat(getWorkflowStacks(branch.States[key]));
+      }
+    }
+  } else if (state.Type === WorkflowStateType.STACK) {
+    if (state.Data?.Input.StackName) {
+      res.push(state.Data?.Input.StackName);
+    }
+  }
+  return res;
 }
 
 export const getTopicArn = (region: string, pipelineId: string) => {

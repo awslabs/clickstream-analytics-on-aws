@@ -43,7 +43,8 @@ import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName } from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
-import { isSupportVersion } from '../common/parameter-reflect';
+import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
+import { SolutionInfo } from '../common/solution-info-ln';
 import {
   validateDataProcessingInterval,
   validatePattern,
@@ -509,6 +510,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
@@ -711,6 +713,7 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
@@ -916,6 +919,7 @@ export class CDataProcessingStack extends JSONObject {
   @JSONObject.custom( (stack:CDataProcessingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
@@ -932,6 +936,7 @@ export class CDataProcessingStack extends JSONObject {
     });
   }
 }
+
 export class CDataModelingStack extends JSONObject {
 
   public static editAllowedList(): string[] {
@@ -1037,6 +1042,7 @@ export class CDataModelingStack extends JSONObject {
     validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
     return defaultValue;
   })
+  @supportVersions([SolutionInfo.V1_1_6, '*'])
     SegmentsS3Prefix?: string;
 
   @JSONObject.optional('')
@@ -1228,6 +1234,7 @@ export class CDataModelingStack extends JSONObject {
     const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
     return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`;
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     ClickstreamAnalyticsMetadataDdbArn?: string;
 
   @JSONObject.optional('')
@@ -1235,12 +1242,14 @@ export class CDataModelingStack extends JSONObject {
     const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
     return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`;
   })
+  @supportVersions([SolutionInfo.V1_1_6, '*'])
     ClickstreamMetadataDdbArn?: string;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
@@ -1402,6 +1411,7 @@ export class CReportingStack extends JSONObject {
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
@@ -1436,6 +1446,7 @@ export class CAthenaStack extends JSONObject {
     AthenaEventTable?: string;
 
   @JSONObject.optional('')
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional(undefined)
@@ -1492,6 +1503,7 @@ export class CMetricsStack extends JSONObject {
     Version?: string;
 
   @JSONObject.optional('')
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional(undefined)

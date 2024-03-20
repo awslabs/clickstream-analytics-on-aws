@@ -12,9 +12,8 @@
  */
 
 import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
-import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, stackPrefix, updatePipelineStackStatus } from './listen-tools';
+import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, getWorkflowStacks, stackPrefix, updatePipelineStackStatus } from './listen-tools';
 import { logger } from '../../../../common/powertools';
-import { getAllStackNames } from '../api/common/workflow-utils';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
   const eventBody = event.Records[0].body;
@@ -45,7 +44,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
   }
 
   const projectId = pipeline.projectId;
-  const stackNames = getAllStackNames(pipeline.workflow.Workflow);
+  const stackNames = getWorkflowStacks(pipeline.workflow.Workflow);
   const newStackDetails = getNewStackDetails(stackDetail, pipeline.stackDetails ?? [], stackNames);
   await updatePipelineStackStatus(projectId, pipelineId, stackDetail, newStackDetails, pipeline.updateAt);
 };

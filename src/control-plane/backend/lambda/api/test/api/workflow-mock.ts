@@ -12,12 +12,13 @@
  */
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
+import { cloneDeep } from 'lodash';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { getStackPrefix } from '../../common/utils';
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
-  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const parameters = cloneDeep(base);
   const keys = parameters.map(p => p.ParameterKey);
   for (let att of attach) {
     if (keys.indexOf(att.ParameterKey) > -1) {
@@ -30,9 +31,23 @@ export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   return parameters;
 }
 
+export function removeParameters(base: Parameter[], attach: Parameter[]) {
+  // Deep Copy
+  const parameters = cloneDeep(base);
+  const keys = parameters.map(p => p.ParameterKey);
+  for (let att of attach) {
+    if (keys.indexOf(att.ParameterKey) > -1) {
+      const index = keys.indexOf(att.ParameterKey);
+      parameters.splice(index, 1);
+      keys.splice(index, 1);
+    }
+  }
+  return parameters;
+}
+
 export function replaceParameters(base: Parameter[], search: Parameter, replace: Parameter) {
   // Deep Copy
-  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const parameters = cloneDeep(base);
   const indexOfObject = parameters.findIndex((object) => {
     return object.ParameterKey === search.ParameterKey;
   });

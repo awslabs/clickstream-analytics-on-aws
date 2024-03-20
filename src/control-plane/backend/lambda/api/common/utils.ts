@@ -26,6 +26,7 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
@@ -1215,6 +1216,18 @@ function getDefaultTags(projectId: string) {
   return tags;
 }
 
+function getAppRegistryStackTags(stackTags: Tag[] | undefined): Tag[] {
+  if (!stackTags) {
+    return [];
+  }
+  const tags = cloneDeep(stackTags);
+  const index = tags.findIndex(tag => tag.Key?.startsWith('#'));
+  if (index !== -1) {
+    tags.splice(index, 1);
+  }
+  return tags;
+}
+
 /**
  * Merge one tag into stackTags
  * @param stackTags stack tags array, could be undefined
@@ -1476,4 +1489,5 @@ export {
   getLocalDateISOString,
   getSinkType,
   defaultValueFunc,
+  getAppRegistryStackTags,
 };
