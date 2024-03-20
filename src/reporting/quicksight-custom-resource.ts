@@ -446,7 +446,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$endDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -486,7 +486,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$endDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -531,7 +531,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$endDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -626,7 +626,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$endDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -671,7 +671,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$endDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -696,12 +696,12 @@ export function createQuicksightCustomResource(
         ],
         dateTimeDatasetParameter: [
           {
-            name: 'startDate13',
+            name: 'startDate14',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: futureDate,
           },
           {
-            name: 'endDate13',
+            name: 'endDate14',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: futureDate,
           },
