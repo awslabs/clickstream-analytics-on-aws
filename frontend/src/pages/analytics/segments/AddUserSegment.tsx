@@ -25,6 +25,7 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { createSegment } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -54,6 +55,11 @@ const AddUserSegments: React.FC = () => {
     },
   ];
 
+  const addUserSegments = async () => {
+    console.info('addUserSegments');
+    await createSegment();
+  };
+
   return (
     <div className="flex">
       <AnalyticsNavigation activeHref={`/analytics/segments`} />
@@ -80,7 +86,14 @@ const AddUserSegments: React.FC = () => {
                     >
                       {t('button.cancel')}
                     </Button>
-                    <Button variant="primary">{t('button.save')}</Button>
+                    <Button
+                      onClick={() => {
+                        addUserSegments();
+                      }}
+                      variant="primary"
+                    >
+                      {t('button.save')}
+                    </Button>
                   </SpaceBetween>
                 }
               >
