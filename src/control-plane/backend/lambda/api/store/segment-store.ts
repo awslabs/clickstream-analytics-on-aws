@@ -11,5 +11,14 @@
  *  and limitations under the License.
  */
 
-export * from './constant';
-export * from './model';
+import { Segment, SegmentDdbItem } from '@aws/clickstream-base-lib';
+
+export interface SegmentStore {
+  create: (segment: Segment) => Promise<string>;
+  list: (segmentId: string) => any;
+  get: (appId: string, segmentId: string) => any;
+  update: (segmentDdbItem: SegmentDdbItem) => Promise<string>;
+  delete: (appId: string, segmentId: string) => Promise<void>;
+  listJobs: (segmentId: string, limit?: number) => any;
+  getSampleData: (segmentId: string, jobRunId?: string) => any;
+}

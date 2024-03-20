@@ -25,6 +25,7 @@ import { router_pipeline } from './router/pipeline';
 import { router_plugin } from './router/plugin';
 import { router_project } from './router/project';
 import { router_reporting } from './router/reporting';
+import { router_segment } from './router/segment';
 import { router_user } from './router/user';
 
 const app: express.Express = express();
@@ -57,6 +58,7 @@ app.use('/api/plugin', router_plugin);
 app.use('/api/metadata', router_metadata);
 app.use('/api/reporting', router_reporting);
 app.use('/api/user', router_user);
+app.use('/api/segments', router_segment);
 
 // Implement the “catch-all” errorHandler function
 app.use(errorHandler);

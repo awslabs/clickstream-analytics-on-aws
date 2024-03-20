@@ -241,6 +241,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/s3-request-presigner",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/types",
       "version": "^3.523.0",
       "type": "runtime"
