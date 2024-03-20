@@ -49,7 +49,7 @@ export class CMetadataDisplay {
       }
     }
     if (version === MetadataVersionType.V3) {
-      readMetadataFromSqlFile(this.builtList);
+      this.builtList = readMetadataFromSqlFile(this.builtList);
     }
     return this.builtList;
   }
