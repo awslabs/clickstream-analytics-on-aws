@@ -19,6 +19,7 @@ BEGIN
     from {{database_name}}.{{schema}}.{{baseView}}
     where event_date = day
     group by 1
+    ;
 
 EXCEPTION WHEN OTHERS THEN
     RAISE INFO 'error message: %', SQLERRM;

@@ -17,8 +17,6 @@ import {
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_ITEM_VIEW_PLACEHOLDER,
   CLICKSTREAM_ITEM_VIEW_NAME,
-  CLICKSTREAM_EVENT_ATTR_VIEW_NAME,
-  CLICKSTREAM_EVENT_ATTR_VIEW_PLACEHOLDER,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -27,7 +25,6 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
 import {
-  clickstream_event_attr_view_columns,
   clickstream_event_view_columns,
   clickstream_item_view_columns,
 } from './private/dataset-col-def';
@@ -57,10 +54,8 @@ export function createQuicksightCustomResource(
 
   const databaseName = props.databaseName;
   const eventViewProjectedColumns: string[] = [];
-  const eventAttrViewProjectedColumns: string[] = [];
   const itemViewProjectedColumns: string[] = [];
   clickstream_event_view_columns.map( item => eventViewProjectedColumns.push(item.Name!));
-  clickstream_event_attr_view_columns.map( item => eventAttrViewProjectedColumns.push(item.Name!));
   clickstream_item_view_columns.map( item => itemViewProjectedColumns.push(item.Name!));
   
   const dashboardDefProps: QuickSightDashboardDefProps = {
@@ -103,39 +98,6 @@ export function createQuicksightCustomResource(
           },
         ],
         projectedColumns: eventViewProjectedColumns,
-      },
-      {
-        tableName: CLICKSTREAM_EVENT_ATTR_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_ATTR_VIEW_NAME} where event_timestamp >= <<$startDate>> and event_timestamp < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
-        columns: clickstream_event_attr_view_columns,
-        dateTimeDatasetParameter: [
-          {
-            name: 'startDate',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: tenYearsAgo,
-          },
-          {
-            name: 'endDate',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
-          },
-        ],
-        tagColumnOperations: [
-          {
-            columnName: 'geo_country',
-            columnGeographicRoles: ['COUNTRY'],
-          },
-          {
-            columnName: 'geo_city',
-            columnGeographicRoles: ['CITY'],
-          },
-          {
-            columnName: 'geo_region',
-            columnGeographicRoles: ['STATE'],
-          },
-        ],
-        projectedColumns: eventAttrViewProjectedColumns,
       },
       {
         tableName: CLICKSTREAM_ITEM_VIEW_PLACEHOLDER,
