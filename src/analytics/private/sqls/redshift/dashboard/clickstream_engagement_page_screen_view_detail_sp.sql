@@ -9,6 +9,7 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         user_id,
@@ -17,6 +18,7 @@ BEGIN
     )
     select 
       event_date,
+      platform,
       'page_title' as aggregation_type,
       page_view_page_title as aggregation_dim,
       event_id,
@@ -30,6 +32,7 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         user_id,
@@ -38,6 +41,7 @@ BEGIN
     )
     select 
       event_date,
+      platform,
       'page_url_path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
       event_id,
@@ -51,6 +55,7 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         user_id,
@@ -59,6 +64,7 @@ BEGIN
     )
     select 
       event_date,
+      platform,
       'screen_name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
       event_id,
@@ -72,6 +78,7 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_page_screen_view_detail (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         user_id,
@@ -80,6 +87,7 @@ BEGIN
     )
     select 
       event_date,
+      platform,
       'screen_class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
       event_id,
