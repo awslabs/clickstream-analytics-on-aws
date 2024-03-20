@@ -1443,9 +1443,12 @@ function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined):
   }
   const event_parameters = readAndIterateFile(join(__dirname, './sqls/redshift/event-v2.sql'));
   const user_attributes = readAndIterateFile(join(__dirname, './sqls/redshift/user-v2.sql'));
-  builtInList.PresetEventParameters = event_parameters;
-  builtInList.PublicEventParameters = [];
-  builtInList.PresetUserAttributes = user_attributes;
+  builtInList = {
+    ...builtInList,
+    PresetEventParameters: event_parameters,
+    PublicEventParameters: [],
+    PresetUserAttributes: user_attributes,
+  };
   return builtInList;
 }
 
@@ -1463,7 +1466,7 @@ function readAndIterateFile(filePath: string): any[] {
     }
     return metadata;
   } catch (error) {
-    logger.warn('readAndIterateFile error', { error });
+    logger.warn('readAndIterateFile error', { error, filePath });
     return [];
   }
 }
