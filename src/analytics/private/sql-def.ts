@@ -26,8 +26,8 @@ import {
   CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP, 
   CLICKSTREAM_ENGAGEMENT_ENTRANCE, 
   CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP, 
-  CLICKSTREAM_ENGAGEMENT_EXIT, 
-  CLICKSTREAM_ENGAGEMENT_EXIT_SP, 
+  // CLICKSTREAM_ENGAGEMENT_EXIT, 
+  // CLICKSTREAM_ENGAGEMENT_EXIT_SP, 
   CLICKSTREAM_ENGAGEMENT_KPI, 
   CLICKSTREAM_ENGAGEMENT_KPI_SP, 
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW, 
@@ -73,9 +73,9 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE
   },
-  {
-    viewName: CLICKSTREAM_ENGAGEMENT_EXIT
-  },
+  // {
+  //   viewName: CLICKSTREAM_ENGAGEMENT_EXIT
+  // },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_KPI
   },
@@ -106,10 +106,10 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP,
     grantToBIUser: 'false'
   },
-  {
-    viewName: CLICKSTREAM_ENGAGEMENT_EXIT_SP,
-    grantToBIUser: 'false'
-  },
+  // {
+  //   viewName: CLICKSTREAM_ENGAGEMENT_EXIT_SP,
+  //   grantToBIUser: 'false'
+  // },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_KPI_SP,
     grantToBIUser: 'false'

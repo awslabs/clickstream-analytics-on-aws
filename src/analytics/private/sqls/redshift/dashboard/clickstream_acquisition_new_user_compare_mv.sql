@@ -1,7 +1,7 @@
 CREATE MATERIALIZED VIEW {{database_name}}.{{schema}}.clickstream_acquisition_new_user_compare_mv
 BACKUP YES
-AUTO REFRESH NO
 SORTKEY(event_date_hour, platform)
+AUTO REFRESH NO
 AS 
 with tmp as (
   select 
