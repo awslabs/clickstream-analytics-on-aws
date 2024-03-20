@@ -15,7 +15,7 @@ BEGIN
     )
     select 
     event_date,
-    platform
+    platform,
     count(distinct event_id) as event_cnt,
     count(distinct view_event_indicator) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
