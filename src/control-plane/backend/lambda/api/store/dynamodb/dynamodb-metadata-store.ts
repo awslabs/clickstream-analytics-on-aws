@@ -350,9 +350,9 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (!dic) {
       return [];
     }
-    const builtInList = dic.data as IMetadataBuiltInList;
+    let builtInList = dic.data as IMetadataBuiltInList;
     if (version === MetadataVersionType.V3) {
-      readMetadataFromSqlFile(builtInList);
+      builtInList = readMetadataFromSqlFile(builtInList);
     }
     switch (type) {
       case 'EVENT':
