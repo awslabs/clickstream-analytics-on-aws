@@ -20,6 +20,7 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
+import { getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -50,6 +51,10 @@ const UserSegments: React.FC = () => {
   ];
 
   const listAllSegments = async () => {
+    if (projectId && appId) {
+      const segmentData = await getSegmentsList({ projectId, appId });
+      console.info('segmentData:', segmentData);
+    }
     return [];
   };
 
@@ -65,8 +70,10 @@ const UserSegments: React.FC = () => {
   ];
 
   useEffect(() => {
-    listAllSegments();
-  }, []);
+    if (projectId && appId) {
+      listAllSegments();
+    }
+  }, [projectId, appId]);
 
   return (
     <div className="flex">
