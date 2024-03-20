@@ -43,6 +43,14 @@ import {
   CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_EXIT,
   CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
+  CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER,
+  CLICKSTREAM_RETENTION_USER_NEW_RETURN,
+  CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER,
+  CLICKSTREAM_RETENTION_EVENT_OVERTIME,
+  CLICKSTREAM_RETENTION_DAU_WAU,
+  CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
+  CLICKSTREAM_DEVICE_CRASH_RATE,
+  CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -711,6 +719,162 @@ export function createQuicksightCustomResource(
           'aggregation_type',
           'aggregation_dim',
           'exit_cnt',
+        ],
+      },
+
+      //Retention Sheet
+      {
+        tableName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_USER_NEW_RETURN} where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate15',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate15',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'user_type',
+          'user_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_EVENT_OVERTIME} where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'event_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate16',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate16',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'event_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_DAU_WAU} where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'merged_user_id',
+            Type: 'STRING',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate17',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate17',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'merged_user_id',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'merged_user_id',
+            Type: 'STRING',
+          },
+          {
+            Name: 'crashed_user_id',
+            Type: 'STRING',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate18',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate18',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'merged_user_id',
+          'crashed_user_id'
         ],
       },
     ],

@@ -424,6 +424,14 @@ export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL = 'clickstream_engag
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP = 'clickstream_engagement_page_screen_view_detail_sp';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP = 'clickstream_engagement_page_screen_view_sp';
 
+export const CLICKSTREAM_RETENTION_USER_NEW_RETURN = 'clickstream_retention_user_new_return';
+export const CLICKSTREAM_RETENTION_DAU_WAU = 'clickstream_retention_dau_wau';
+export const CLICKSTREAM_RETENTION_EVENT_OVERTIME = 'clickstream_retention_event_overtime';
+export const CLICKSTREAM_DEVICE_CRASH_RATE = 'clickstream_device_crash_rate';
+export const CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP = 'clickstream_retention_user_new_return_sp';
+export const CLICKSTREAM_RETENTION_DAU_WAU_SP = 'clickstream_retention_dau_wau_sp';
+export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP = 'clickstream_retention_event_overtime_sp';
+export const CLICKSTREAM_DEVICE_CRASH_RATE_SP = 'clickstream_device_crash_rate_sp';
 
 export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
 export const CLICKSTREAM_ITEM_VIEW_PLACEHOLDER = 'Item_View';
@@ -440,6 +448,11 @@ export const CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER = 'Exit';
 export const CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER = 'Engagement_KPI';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER = 'Page_Screen_View';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER = 'Page_Screen_View_Detail';
+
+export const CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER = 'User_New_Return';
+export const CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER = 'DAU_WAU';
+export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER = 'Event_Overtime';
+export const CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER = 'Crash_Rate';
 
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
   'clickstream_session_view_v1',

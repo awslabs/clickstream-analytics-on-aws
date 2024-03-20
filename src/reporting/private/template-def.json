@@ -371,6 +371,94 @@
             ]
         },
         "ColumnGroupSchemaList": []
+      },
+      {
+        "Placeholder": "User_New_Return",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+              {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_type",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_cnt",
+                "DataType": "INTEGER"
+              }
+            ]
+        },
+        "ColumnGroupSchemaList": []
+      },
+      {
+        "Placeholder": "DAU_WAU",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+              {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "merged_user_id",
+                "DataType": "STRING"
+              }
+            ]
+        },
+        "ColumnGroupSchemaList": []
+      },
+      {
+        "Placeholder": "Event_Overtime",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+              {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "event_cnt",
+                "DataType": "INTEGER"
+              }
+            ]
+        },
+        "ColumnGroupSchemaList": []
+      },
+      {
+        "Placeholder": "Crash_Rate",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+              {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "merged_user_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "crashed_user_id",
+                "DataType": "STRING"
+              }
+            ]
+        },
+        "ColumnGroupSchemaList": []
       }
     ],
     "Sheets": [
