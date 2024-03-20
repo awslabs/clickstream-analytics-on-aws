@@ -21,6 +21,7 @@ import EventItem from 'components/eventselect/EventItem';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { useSegmentContext } from 'context/SegmentContext';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,13 +45,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
     conditionWidth,
   } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
-
-  const [filterOptionData, filterOptionDataDispatch] = useReducer(
-    analyticsSegmentFilterReducer,
-    {
-      ...INIT_SEGMENTATION_DATA,
-    }
-  );
+  const { data: eventData } = useUserEventParameter();
+  const filterOptionDataDispatch = useReducer(analyticsSegmentFilterReducer, {
+    ...INIT_SEGMENTATION_DATA,
+  })[1];
   return (
     <div>
       <div>
@@ -80,6 +78,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                       sequenceEventIndex: sequenceEventIndex,
                     },
                     event: item,
+                    metaDataEventParameters: eventData.metaDataEventParameters,
+                    metaDataEvents: eventData.metaDataEvents,
+                    metaDataUserAttributes: eventData.metaDataUserAttributes,
+                    builtInMetaData: eventData.builtInMetaData,
                   });
                 }}
                 hasTab={true}
@@ -133,7 +135,8 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
               hideAddButton
               filterDataState={{
                 enableChangeRelation: true,
-                conditionOptions: filterOptionData.conditionOptions,
+                conditionOptions:
+                  sequenceEventData.sequenceEventAttributeOption ?? [],
                 conditionRelationShip:
                   sequenceEventData.filterGroupRelationShip ??
                   ERelationShip.AND,

@@ -50,6 +50,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   // for segment sequence event filter
   sequenceEventOption?: IAnalyticsItem | null;
   filterGroupRelationShip?: ERelationShip;
+  sequenceEventAttributeOption?: CategoryItemType[];
   sequenceEventConditionFilterList?: IConditionItemType[];
 }
 

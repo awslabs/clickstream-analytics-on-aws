@@ -247,6 +247,11 @@ export type UpdateSequenceDoneEvent = {
   type: AnalyticsSegmentActionType.UpdateSequenceDoneEvent;
   segmentProps: SegmentPropsData;
   event: IAnalyticsItem | null;
+  // for attribute option
+  metaDataEventParameters: IMetadataEventParameter[];
+  metaDataEvents: IMetadataEvent[];
+  metaDataUserAttributes: IMetadataUserAttribute[];
+  builtInMetaData?: IMetadataBuiltInList;
 };
 
 export type RemoveSequenceDoneEvent = {
@@ -736,19 +741,31 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.UpdateSequenceDoneEvent: {
-      if (action.segmentProps.level === 1) {
+      // Calculate the event attribute option by selected event
+      const eventParameters = getEventParameters(
+        action.metaDataEventParameters,
+        action.metaDataEvents,
+        action.builtInMetaData,
+        action.event?.name
+      );
+      const parameterOption = parametersConvertToCategoryItemType(
+        action.metaDataUserAttributes,
+        eventParameters
+      );
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventOption = action.event;
-      } else {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventOption = action.event;
+        ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ];
       }
+      currentData.sequenceEventOption = action.event;
+      currentData.sequenceEventAttributeOption = parameterOption;
       return { ...newState };
     }
 

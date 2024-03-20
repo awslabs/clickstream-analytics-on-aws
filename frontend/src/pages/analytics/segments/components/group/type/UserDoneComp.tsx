@@ -39,7 +39,6 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   const { segmentData, segmentProps, addNewEventCondition } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const { data: eventData } = useUserEventParameter();
-  console.info('eventData:', eventData);
 
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 

@@ -58,11 +58,7 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
       <div>
         <Select
           options={EVENT_SEQUENCE_SESSION_OPTION}
-          selectedOption={
-            segmentData.userSequenceSession ??
-            null ??
-            EVENT_SEQUENCE_SESSION_OPTION[0]
-          }
+          selectedOption={segmentData.userSequenceSession ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateSequenceSessionType,
@@ -75,9 +71,7 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
       <div>
         <Select
           options={EVENT_SEQUENCE_FLOW_OPTION}
-          selectedOption={
-            segmentData.userSequenceFlow ?? EVENT_SEQUENCE_FLOW_OPTION[0]
-          }
+          selectedOption={segmentData.userSequenceFlow ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateSequenceFlowType,
