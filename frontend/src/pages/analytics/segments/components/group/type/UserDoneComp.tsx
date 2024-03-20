@@ -11,11 +11,9 @@
  *  and limitations under the License.
  */
 
+import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
 import { Button, Input, Select } from '@cloudscape-design/components';
-import {
-  ConditionNumericOperator,
-  IEventSegmentationItem,
-} from 'components/eventselect/AnalyticsType';
+import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';

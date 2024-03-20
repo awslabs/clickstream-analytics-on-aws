@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Segment } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -94,27 +95,9 @@ export interface IEventAnalyticsItem {
 }
 
 // for segment group
-// ToDo Replace(remove) this with base-lib
-export enum SegmentFilterEventMetricType {
-  NUMBER_OF_TOTAL = 'NUMBER_OF_TOTAL',
-  NUMBER_OF_TIMES_PER_DAY = 'NUMBER_OF_TIMES_PER_DAY',
-  NUMBER_OF_CONSECUTIVE_DAYS = 'NUMBER_OF_CONSECUTIVE_DAYS',
-  NUMBER_OF_DAYS_HAVING_EVENT = 'NUMBER_OF_DAYS_HAVING_EVENT',
-  SUM_OF_EVENT_PARAMETER = 'SUM_OF_EVENT_PARAMETER',
-  MIN_OF_EVENT_PARAMETER = 'MIN_OF_EVENT_PARAMETER',
-  MAX_OF_EVENT_PARAMETER = 'MAX_OF_EVENT_PARAMETER',
-  AVG_OF_EVENT_PARAMETER = 'AVG_OF_EVENT_PARAMETER',
-  NUMBER_OF_DISTINCT_EVENT_PARAMETER = 'NUMBER_OF_DISTINCT_EVENT_PARAMETER',
-}
-
-export enum ConditionNumericOperator {
-  EQUAL = '=',
-  NOT_EQUAL = '<>',
-  GREATER_THAN = '>',
-  GREATER_THAN_OR_EQUAL = '>=',
-  LESS_THAN = '<',
-  LESS_THAN_OR_EQUAL = '<=',
-  BETWEEN = 'between',
+export interface ExtendSegment extends Segment {
+  // [key: string]: any;
+  id: string;
 }
 
 export interface IEventSegmentationItem {

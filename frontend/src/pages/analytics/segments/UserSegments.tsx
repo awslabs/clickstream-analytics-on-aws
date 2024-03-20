@@ -25,9 +25,11 @@ import { getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 
 const renderName = (name: string) => {
@@ -71,7 +73,7 @@ const UserSegments: React.FC = () => {
       id: 'createAt',
       header: 'Create At',
       cell: (e: Segment) => {
-        return e.createAt;
+        return moment(e.createAt).format(TIME_FORMAT) || '-';
       },
     },
   ];
@@ -88,7 +90,6 @@ const UserSegments: React.FC = () => {
       }
       setLoadingData(false);
     }
-    return [];
   };
 
   const breadcrumbItems = [
