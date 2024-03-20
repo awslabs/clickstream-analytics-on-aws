@@ -139,7 +139,7 @@ export interface IMetadataBuiltInList {
     displayName: IMetadataDisplayNameAndDescription;
     description: IMetadataDisplayNameAndDescription;
   }>;
-  PresetEventParameters: Array<{
+  readonly PresetEventParameters: Array<{
     name: string;
     eventName?: string;
     category: ConditionCategory;
@@ -147,14 +147,14 @@ export interface IMetadataBuiltInList {
     displayName: IMetadataDisplayNameAndDescription;
     description: IMetadataDisplayNameAndDescription;
   }>;
-  PublicEventParameters: Array<{
+  readonly PublicEventParameters: Array<{
     name: string;
     dataType: MetadataValueType;
     category: ConditionCategory;
     displayName: IMetadataDisplayNameAndDescription;
     description: IMetadataDisplayNameAndDescription;
   }>;
-  PresetUserAttributes: Array<{
+  readonly PresetUserAttributes: Array<{
     name: string;
     dataType: MetadataValueType;
     category: ConditionCategory;
