@@ -9,6 +9,7 @@ DELETE FROM {{database_name}}.{{schema}}.clickstream_engagement_kpi where event_
 
 INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_kpi (
     event_date, 
+    platform,
     avg_session_per_user, 
     avg_engagement_time_per_session,
     avg_engagement_time_per_user
@@ -16,6 +17,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_kpi (
 WITH tmp1 AS (
     SELECT
         day:: date as event_date,
+        platform,
         session_id,
         merged_user_id,
         SUM(user_engagement_time_msec) AS user_engagement_time_msec,
@@ -28,15 +30,16 @@ WITH tmp1 AS (
     WHERE
         event_date = day
     GROUP BY 
-        event_date, session_id, merged_user_id
+        1,2,3,4
 )
 select 
   event_date,
+  platform,
   sum(session_indicator)/count(distinct merged_user_id) as avg_session_per_user,
   sum(user_engagement_time_msec)::double precision/sum(session_indicator)/1000/60 as avg_engagement_time_per_session,
   sum(user_engagement_time_msec)::double precision/count(distinct merged_user_id)/1000/60 avg_engagement_time_per_user
 from tmp1
-group by 1
+group by 1,2
 ;
 
 EXCEPTION WHEN OTHERS THEN

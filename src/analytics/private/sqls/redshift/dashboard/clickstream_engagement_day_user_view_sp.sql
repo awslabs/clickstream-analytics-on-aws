@@ -9,16 +9,18 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_day_user_view (
         event_date,
+        platform,
         event_cnt,
         view_cnt
     )
     select 
     event_date,
+    platform
     count(distinct event_id) as event_cnt,
     count(distinct view_event_indicator) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
     where event_date = day
-    group by 1
+    group by 1,2
     ;
 
 EXCEPTION WHEN OTHERS THEN

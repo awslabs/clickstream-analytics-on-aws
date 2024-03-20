@@ -9,12 +9,14 @@ BEGIN
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         entrance_cnt
     )
     select 
       event_date,
+      platform,
       'page_tile' as aggregation_type,
       page_view_page_title as aggregation_dim,
       count(1) as entrance_cnt
@@ -24,17 +26,19 @@ BEGIN
       and event_name = '_page_view'
       and page_view_entrances
       and page_view_page_title is not null
-    group by 1, 2, 3
+    group by 1, 2, 3, 4
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         entrance_cnt
     )
     select 
       event_date,
+      platform,
       'page_url_path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
       count(1) as entrance_cnt
@@ -44,17 +48,19 @@ BEGIN
       and event_name = '_page_view'
       and page_view_entrances
       and page_view_page_url_path is not null
-    group by 1, 2, 3
+    group by 1, 2, 3, 4
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         entrance_cnt
     )
     select 
       event_date,
+      platform,
       'screen_name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
       count(1) as entrance_cnt
@@ -64,17 +70,19 @@ BEGIN
       and event_name = '_screen_view'
       and page_view_entrances
       and screen_view_screen_name is not null
-    group by 1, 2, 3
+    group by 1, 2, 3, 4
     ;
 
     INSERT INTO {{database_name}}.{{schema}}.clickstream_engagement_entrance (
         event_date,
+        platform,
         aggregation_type,
         aggregation_dim,
         entrance_cnt
     )
     select 
       event_date,
+      platform,
       'screen_class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
       count(1) as entrance_cnt
@@ -84,7 +92,7 @@ BEGIN
       and event_name = '_screen_view'
       and page_view_entrances
       and screen_view_screen_id is not null
-    group by 1, 2, 3
+    group by 1, 2, 3, 4
     ;
 
 EXCEPTION WHEN OTHERS THEN
