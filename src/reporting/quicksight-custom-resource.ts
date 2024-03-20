@@ -411,6 +411,10 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'geo_country',
             Type: 'STRING',
           },
