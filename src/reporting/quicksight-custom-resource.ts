@@ -17,6 +17,32 @@ import {
   CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_ITEM_VIEW_PLACEHOLDER,
   CLICKSTREAM_ITEM_VIEW_NAME,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
+  CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV,
+  CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV,
+  CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
+  CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV,
+  CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
+  CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
+  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
+  CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_KPI,
+  CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW,
+  CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL,
+  CLICKSTREAM_ENGAGEMENT_ENTRANCE,
+  CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_EXIT,
+  CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -66,19 +92,20 @@ export function createQuicksightCustomResource(
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
     dataSets: [
+      //Base View
       {
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_timestamp >= <<$startDate>> and event_timestamp < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_date >= <<$startDate01>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))`,
         columns: clickstream_event_view_columns,
         dateTimeDatasetParameter: [
           {
-            name: 'startDate',
+            name: 'startDate01',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: tenYearsAgo,
           },
           {
-            name: 'endDate',
+            name: 'endDate01',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: futureDate,
           },
@@ -104,21 +131,560 @@ export function createQuicksightCustomResource(
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ITEM_VIEW_NAME}`,
         columns: clickstream_item_view_columns,
+        projectedColumns: itemViewProjectedColumns,
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV} where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'merged_user_id',
+            Type: 'STRING',
+          },
+          {
+            Name: 'new_user_count',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'view_count',
+            Type: 'INTEGER',
+          }
+        ],
         dateTimeDatasetParameter: [
           {
-            name: 'startDate',
+            name: 'startDate02',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: tenYearsAgo,
           },
           {
-            name: 'endDate',
+            name: 'endDate02',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: futureDate,
           },
         ],
-        projectedColumns: itemViewProjectedColumns,
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'merged_user_id',
+          'new_user_count',
+          'view_count',
+        ],
       },
-      
+
+      //Acquisition Sheet
+      {
+        tableName: CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV} where event_date_hour >= <<$startDate03>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate03>>))`,
+        columns: [
+          {
+            Name: 'event_date_hour',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'active_user_count',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate03',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate03',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date_hour',
+          'platform',
+          'active_user_count',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV} where event_date_hour >= <<$startDate04>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate04>>))`,
+        columns: [
+          {
+            Name: 'event_date_hour',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'new_user_count',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate04',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate04',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date_hour',
+          'platform',
+          'new_user_count',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER} where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'first_traffic_source',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_count',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate05',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate05',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'first_traffic_source',
+          'user_count',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV} where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate06>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate06>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'first_traffic_source',
+            Type: 'STRING',
+          },
+          {
+            Name: 'merged_user_id',
+            Type: 'STRING',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'endDate06',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'first_traffic_source',
+          'merged_user_id',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION} where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'new_user_cnt',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'session_cnt',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'engagement_session_cnt',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'engagement_rate',
+            Type: 'DECIMAL',
+          },
+          {
+            Name: 'avg_user_engagement_time_msec',
+            Type: 'DECIMAL',
+          },
+          {
+            Name: 'event_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate07',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate07',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'aggregation_type',
+          'aggregation_dim',
+          'platform',
+          'new_user_cnt',
+          'session_cnt',
+          'engagement_session_cnt',
+          'engagement_rate',
+          'avg_user_engagement_time_msec',
+          'event_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER} where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'geo_country',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate08',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate08',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'geo_country',
+          'user_cnt',
+        ],
+      },
+
+      //Engagement Sheet
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW} where event_date >= <<$endDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'event_cnt',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'view_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate09',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate09',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'event_cnt',
+          'view_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_KPI} where event_date >= <<$endDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'avg_session_per_user',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'avg_engagement_time_per_session',
+            Type: 'DECIMAL',
+          },
+          {
+            Name: 'avg_engagement_time_per_user',
+            Type: 'DECIMAL',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate10',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate10',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'avg_session_per_user',
+          'avg_engagement_time_per_session',
+          'avg_engagement_time_per_user',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW} where event_date >= <<$endDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
+            Name: 'view_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate11',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate11',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'aggregation_type',
+          'aggregation_dim',
+          'view_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate12>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_id',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_engagement_time_msec',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'event_id',
+            Type: 'STRING',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'endDate12',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'aggregation_type',
+          'aggregation_dim',
+          'user_id',
+          'user_engagement_time_msec',
+          'event_id',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_ENTRANCE} where event_date >= <<$endDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
+            Name: 'entrance_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate13',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate13',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'aggregation_type',
+          'aggregation_dim',
+          'entrance_cnt',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EXIT} where event_date >= <<$endDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
+            Name: 'exit_cnt',
+            Type: 'INTEGER',
+          }
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate13',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+          {
+            name: 'endDate13',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'aggregation_type',
+          'aggregation_dim',
+          'exit_cnt',
+        ],
+      },
     ],
   };
 
