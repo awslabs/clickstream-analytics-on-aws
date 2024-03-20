@@ -245,6 +245,14 @@
         "ColumnGroupSchemaList": []
       },
       {
+        "Placeholder": "Item_View",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+            ]
+        },
+        "ColumnGroupSchemaList": []
+      },
+      {
         "Placeholder": "Page_Screen_View",
         "DataSetSchema": {
             "ColumnSchemaList": [
