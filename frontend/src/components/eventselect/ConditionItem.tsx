@@ -34,12 +34,13 @@ import EventItem from './EventItem';
 interface ConditionItemProps {
   item: IConditionItemType;
   conditionOptions: CategoryItemType[];
-  removeConditionItem: () => void;
+  removeConditionItem?: () => void;
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeConditionValue: (value: string[]) => void;
   loading?: boolean;
   disableValidate?: boolean;
+  hideRemove?: boolean;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (
@@ -56,6 +57,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeConditionValue,
     loading,
     disableValidate,
+    hideRemove,
   } = props;
 
   const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
@@ -162,7 +164,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
   ];
 
   return (
-    <div className="cs-analytics-condition-item">
+    <div className="cs-analytics-condition-item flex gap-5">
       <div className="condition-event">
         <EventItem
           disableValidate={disableValidate}
@@ -267,17 +269,19 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             </div>
           )}
       </div>
-      <div className="remove-item">
-        <div className="remove-item-icon">
-          <Button
-            onClick={() => {
-              removeConditionItem();
-            }}
-            variant="link"
-            iconName="close"
-          />
+      {!hideRemove && (
+        <div className="remove-item">
+          <div className="remove-item-icon">
+            <Button
+              onClick={() => {
+                removeConditionItem?.();
+              }}
+              variant="link"
+              iconName="close"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

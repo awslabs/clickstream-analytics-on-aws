@@ -22,6 +22,7 @@ import {
   IConditionItemType,
   IEventAnalyticsItem,
   IRetentionAnalyticsItem,
+  SegmentFilterEventMetricType,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import i18n from 'i18n';
@@ -162,6 +163,35 @@ export const parametersConvertToCategoryItemType = (
   if (otherIndex !== -1) {
     categoryItems.push(categoryItems.splice(otherIndex, 1)[0]);
   }
+  return categoryItems;
+};
+
+export const parametersConvertToUserCategoryItemType = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  patchSameName(userAttributeItems, parameterItems);
+  const categoryItems: CategoryItemType[] = [];
+  const categoryUserItems: CategoryItemType = {
+    categoryId: 'user',
+    categoryName: i18n.t('analytics:category.user'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  userAttributeItems.forEach((item) => {
+    categoryUserItems.itemList.push({
+      label: userAttributeDisplayname(item.displayName),
+      name: item.name,
+      value: item.id,
+      description: item.description,
+      metadataSource: item.metadataSource,
+      valueType: item.valueType,
+      category: item.category,
+      values: item.values,
+      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+    });
+  });
+  categoryItems.push(categoryUserItems);
   return categoryItems;
 };
 
@@ -342,6 +372,112 @@ export const getAttributionMethodOptions = (
       itemType: 'children',
     } as IAnalyticsItem);
   }
+  return computeMethodOptions;
+};
+
+export const getSegmentEventMethodOptions = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  const computeMethodOptions: IAnalyticsItem[] = [
+    {
+      value: SegmentFilterEventMetricType.NUMBER_OF_TOTAL,
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.NUMBER_OF_TOTAL')
+      ),
+    },
+    {
+      value: SegmentFilterEventMetricType.NUMBER_OF_TIMES_PER_DAY,
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.NUMBER_OF_TIMES_PER_DAY')
+      ),
+    },
+    {
+      value: SegmentFilterEventMetricType.NUMBER_OF_CONSECUTIVE_DAYS,
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.NUMBER_OF_CONSECUTIVE_DAYS')
+      ),
+    },
+    {
+      value: SegmentFilterEventMetricType.NUMBER_OF_DAYS_HAVING_EVENT,
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.NUMBER_OF_DAYS_HAVING_EVENT')
+      ),
+    },
+    {
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.SUM_OF_EVENT_PARAMETER', {
+          type: '...',
+        })
+      ),
+      value: SegmentFilterEventMetricType.SUM_OF_EVENT_PARAMETER,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        SegmentFilterEventMetricType.SUM_OF_EVENT_PARAMETER,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.MIN_OF_EVENT_PARAMETER', {
+          type: '...',
+        })
+      ),
+      value: SegmentFilterEventMetricType.MIN_OF_EVENT_PARAMETER,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        SegmentFilterEventMetricType.MIN_OF_EVENT_PARAMETER,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.MAX_OF_EVENT_PARAMETER', {
+          type: '...',
+        })
+      ),
+      value: SegmentFilterEventMetricType.MAX_OF_EVENT_PARAMETER,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        SegmentFilterEventMetricType.MAX_OF_EVENT_PARAMETER,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(
+        i18n.t('analytics:segment.calculateOption.AVG_OF_EVENT_PARAMETER', {
+          type: '...',
+        })
+      ),
+      value: SegmentFilterEventMetricType.AVG_OF_EVENT_PARAMETER,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        SegmentFilterEventMetricType.AVG_OF_EVENT_PARAMETER,
+        'number'
+      ),
+    },
+    {
+      label: defaultStr(
+        i18n.t(
+          'analytics:segment.calculateOption.NUMBER_OF_DISTINCT_EVENT_PARAMETER',
+          {
+            type: '...',
+          }
+        )
+      ),
+      value: SegmentFilterEventMetricType.NUMBER_OF_DISTINCT_EVENT_PARAMETER,
+      subList: _getSubList(
+        userAttributeItems,
+        parameterItems,
+        SegmentFilterEventMetricType.NUMBER_OF_DISTINCT_EVENT_PARAMETER,
+        'number'
+      ),
+    },
+  ];
   return computeMethodOptions;
 };
 

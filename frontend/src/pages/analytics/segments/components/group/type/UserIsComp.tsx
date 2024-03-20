@@ -11,14 +11,11 @@
  *  and limitations under the License.
  */
 
-import { Input, Select } from '@cloudscape-design/components';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
+import ConditionItem from 'components/eventselect/ConditionItem';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
 
 interface UserIsCompProps {
@@ -29,54 +26,41 @@ interface UserIsCompProps {
 const UserIsComp: React.FC<UserIsCompProps> = (props: UserIsCompProps) => {
   const { segmentData, segmentProps } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
-  const { t } = useTranslation();
+
   return (
-    <div className="flex gap-10">
-      <EventItem
-        type="attribute"
-        placeholder={t('analytics:labels.attributeSelectPlaceholder')}
-        categoryOption={segmentData.userIsParamOption ?? null}
+    <div className="flex">
+      <ConditionItem
+        hideRemove
+        item={{
+          eventType: 'attribute',
+          conditionOption: segmentData.userIsParamOption ?? null,
+          conditionOperator: segmentData.userISOperator ?? null,
+          conditionValue: segmentData.userIsValue,
+        }}
+        conditionOptions={segmentDataState.userIsAttributeOptions ?? []}
         changeCurCategoryOption={(paramOption) => {
+          console.info(paramOption);
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserIsParamOption,
             segmentProps,
             paramOption,
           });
         }}
-        hasTab={false}
-        isMultiSelect={false}
-        categories={segmentDataState.attributeOptions}
-      />
-      <Select
-        placeholder={defaultStr(
-          t('analytics:labels.operatorSelectPlaceholder')
-        )}
-        selectedOption={segmentData.userISOperator ?? null}
-        onChange={(e) => {
+        changeConditionOperator={(operator) => {
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateUserIsOperator,
             segmentProps,
-            operator: e.detail.selectedOption,
+            operator,
           });
         }}
-        options={segmentDataState.attributeOperationOptions}
+        changeConditionValue={(value) => {
+          segmentDataDispatch({
+            type: AnalyticsSegmentActionType.UpdateUserIsValue,
+            segmentProps,
+            value: value,
+          });
+        }}
       />
-      <div>
-        <Input
-          type="number"
-          placeholder={defaultStr(
-            t('analytics:labels.conditionValuePlaceholder')
-          )}
-          value={segmentData.userIsValue ?? null}
-          onChange={(e) => {
-            segmentDataDispatch({
-              type: AnalyticsSegmentActionType.UpdateUserIsValue,
-              segmentProps,
-              value: e.detail.value,
-            });
-          }}
-        />
-      </div>
     </div>
   );
 };

@@ -50,6 +50,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   // for segment sequence event filter
   sequenceEventOption?: IAnalyticsItem | null;
   filterGroupRelationShip?: ERelationShip;
+  sequenceEventAttributeOption?: CategoryItemType[];
   sequenceEventConditionFilterList?: IConditionItemType[];
 }
 
@@ -93,6 +94,29 @@ export interface IEventAnalyticsItem {
 }
 
 // for segment group
+// ToDo Replace(remove) this with base-lib
+export enum SegmentFilterEventMetricType {
+  NUMBER_OF_TOTAL = 'NUMBER_OF_TOTAL',
+  NUMBER_OF_TIMES_PER_DAY = 'NUMBER_OF_TIMES_PER_DAY',
+  NUMBER_OF_CONSECUTIVE_DAYS = 'NUMBER_OF_CONSECUTIVE_DAYS',
+  NUMBER_OF_DAYS_HAVING_EVENT = 'NUMBER_OF_DAYS_HAVING_EVENT',
+  SUM_OF_EVENT_PARAMETER = 'SUM_OF_EVENT_PARAMETER',
+  MIN_OF_EVENT_PARAMETER = 'MIN_OF_EVENT_PARAMETER',
+  MAX_OF_EVENT_PARAMETER = 'MAX_OF_EVENT_PARAMETER',
+  AVG_OF_EVENT_PARAMETER = 'AVG_OF_EVENT_PARAMETER',
+  NUMBER_OF_DISTINCT_EVENT_PARAMETER = 'NUMBER_OF_DISTINCT_EVENT_PARAMETER',
+}
+
+export enum ConditionNumericOperator {
+  EQUAL = '=',
+  NOT_EQUAL = '<>',
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUAL = '>=',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUAL = '<=',
+  BETWEEN = 'between',
+}
+
 export interface IEventSegmentationItem {
   groupDateRange?: DateRangePickerProps.ChangeDetail | null;
   groupName?: string;
@@ -105,13 +129,16 @@ export interface IEventSegmentationItem {
   userDoneEventConditionList: IConditionItemType[];
   userDoneEventCalculateMethod?: IAnalyticsItem | null;
   userDoneEventOperation?: SelectProps.Option | null;
-  userDoneEventValue?: any;
+  userDoneEventValue?: Array<string>;
   userIsParamOption?: IAnalyticsItem | null;
   userISOperator?: SelectProps.Option | null;
   userIsValue?: any;
   userSequenceSession?: SelectProps.Option | null;
   userSequenceFlow?: SelectProps.Option | null;
   userInFilterGroup?: SelectProps.Option | null;
+  // Options
+  eventAttributeOption?: CategoryItemType[];
+  eventCalculateMethodOption?: IAnalyticsItem[];
 }
 
 export interface IEventSegmentationObj {
@@ -119,10 +146,8 @@ export interface IEventSegmentationObj {
   subItemList: IEventSegmentationItem[];
   // select options
   eventOption: CategoryItemType[];
-  eventCalculateMethodOption: IAnalyticsItem[];
-  conditionOptions: CategoryItemType[];
   eventOperationOptions: SelectProps.Option[];
-  attributeOptions: CategoryItemType[];
+  userIsAttributeOptions: CategoryItemType[];
   attributeOperationOptions: SelectProps.Option[];
   userGroupOptions: SelectProps.Option[];
 }

@@ -16,6 +16,10 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
+import {
+  getSegmentEventMethodOptions,
+  parametersConvertToCategoryItemType,
+} from 'pages/analytics/analytics-utils';
 import { SegmentPropsData } from 'pages/analytics/segments/components/group/ConditionGroup';
 import {
   ConditionType,
@@ -23,6 +27,8 @@ import {
   DEFAULT_SEGMENT_GROUP_DATA,
   DEFAULT_SEGMENT_ITEM,
 } from 'ts/const';
+import { IMetadataBuiltInList } from 'ts/explore-types';
+import { getEventParameters } from 'ts/utils';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -116,12 +122,17 @@ export type UpdateUserDoneEvent = {
   type: AnalyticsSegmentActionType.UpdateUserDoneEvent;
   segmentProps: SegmentPropsData;
   event: IAnalyticsItem | null;
+  // for attribute option
+  metaDataEventParameters: IMetadataEventParameter[];
+  metaDataEvents: IMetadataEvent[];
+  metaDataUserAttributes: IMetadataUserAttribute[];
+  builtInMetaData?: IMetadataBuiltInList;
 };
 
 export type UpdateUserDoneEventCalculate = {
   type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate;
   segmentProps: SegmentPropsData;
-  calculate: IAnalyticsItem;
+  calculate?: IAnalyticsItem;
 };
 
 export type UpdateUserDoneEventOperation = {
@@ -133,7 +144,7 @@ export type UpdateUserDoneEventOperation = {
 export type UpdateUserDoneEventValue = {
   type: AnalyticsSegmentActionType.UpdateUserDoneEventValue;
   segmentProps: SegmentPropsData;
-  value: any;
+  value: Array<string>;
 };
 
 export type AddEventFilterCondition = {
@@ -236,6 +247,11 @@ export type UpdateSequenceDoneEvent = {
   type: AnalyticsSegmentActionType.UpdateSequenceDoneEvent;
   segmentProps: SegmentPropsData;
   event: IAnalyticsItem | null;
+  // for attribute option
+  metaDataEventParameters: IMetadataEventParameter[];
+  metaDataEvents: IMetadataEvent[];
+  metaDataUserAttributes: IMetadataUserAttribute[];
+  builtInMetaData?: IMetadataBuiltInList;
 };
 
 export type RemoveSequenceDoneEvent = {
@@ -291,6 +307,7 @@ export type UpdateUserInGroup = {
 export type SetEventOption = {
   type: AnalyticsSegmentActionType.SetEventOption;
   eventOption: CategoryItemType[];
+  userIsAttributeOptions: CategoryItemType[];
 };
 
 export type AnalyticsSegmentAction =
@@ -458,6 +475,22 @@ export const analyticsSegmentGroupReducer = (
 
     // user done or not done event
     case AnalyticsSegmentActionType.UpdateUserDoneEvent: {
+      // Calculate the event attribute option by selected event
+      const eventParameters = getEventParameters(
+        action.metaDataEventParameters,
+        action.metaDataEvents,
+        action.builtInMetaData,
+        action.event?.name
+      );
+      const parameterOption = parametersConvertToCategoryItemType(
+        action.metaDataUserAttributes,
+        eventParameters
+      );
+      const calculateMethodOptions = getSegmentEventMethodOptions(
+        action.metaDataUserAttributes,
+        eventParameters
+      );
+      // set current event
       let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
@@ -469,6 +502,9 @@ export const analyticsSegmentGroupReducer = (
           ].subItemList[action.segmentProps.currentIndex];
       }
       currentData.userDoneEvent = action.event;
+      currentData.eventAttributeOption = parameterOption;
+      currentData.eventCalculateMethodOption = calculateMethodOptions;
+      currentData.userDoneEventCalculateMethod = calculateMethodOptions[0];
       return { ...newState };
     }
 
@@ -705,19 +741,31 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.UpdateSequenceDoneEvent: {
-      if (action.segmentProps.level === 1) {
+      // Calculate the event attribute option by selected event
+      const eventParameters = getEventParameters(
+        action.metaDataEventParameters,
+        action.metaDataEvents,
+        action.builtInMetaData,
+        action.event?.name
+      );
+      const parameterOption = parametersConvertToCategoryItemType(
+        action.metaDataUserAttributes,
+        eventParameters
+      );
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventOption = action.event;
-      } else {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventOption = action.event;
+        ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ];
       }
+      currentData.sequenceEventOption = action.event;
+      currentData.sequenceEventAttributeOption = parameterOption;
       return { ...newState };
     }
 
@@ -923,7 +971,11 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.SetEventOption: {
-      return { ...newState, eventOption: action.eventOption };
+      return {
+        ...newState,
+        eventOption: action.eventOption,
+        userIsAttributeOptions: action.userIsAttributeOptions,
+      };
     }
 
     default:

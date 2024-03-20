@@ -12,14 +12,17 @@
  */
 
 import { Button, Input, Select } from '@cloudscape-design/components';
-import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
+import {
+  ConditionNumericOperator,
+  IEventSegmentationItem,
+} from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { useSegmentContext } from 'context/SegmentContext';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from '../ConditionGroup';
 
@@ -35,6 +38,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   const { t } = useTranslation();
   const { segmentData, segmentProps, addNewEventCondition } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+  const { data: eventData } = useUserEventParameter();
 
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 
@@ -68,6 +72,10 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                   type: AnalyticsSegmentActionType.UpdateUserDoneEvent,
                   segmentProps,
                   event: item,
+                  metaDataEventParameters: eventData.metaDataEventParameters,
+                  metaDataEvents: eventData.metaDataEvents,
+                  metaDataUserAttributes: eventData.metaDataUserAttributes,
+                  builtInMetaData: eventData.builtInMetaData,
                 });
               }}
               hasTab={true}
@@ -87,7 +95,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
         />
       </div>
 
-      <div className="cs-analytics-dropdown">
+      <div>
         <div className="cs-dropdown-input" ref={wrapperRef}>
           <div className="dropdown-input-column">
             <div
@@ -104,28 +112,30 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               }}
             >
               <Select
+                placeholder={defaultStr(
+                  t('analytics:segment.calculateOption.NUMBER_OF_TOTAL')
+                )}
                 disabled={!segmentData.userDoneEvent}
                 selectedOption={
-                  segmentData.userDoneEventCalculateMethod ??
-                  segmentDataState.eventCalculateMethodOption[0]
+                  segmentData.userDoneEventCalculateMethod ?? null
                 }
               />
               {showGroupSelectDropdown && (
                 <GroupSelectContainer
-                  categories={segmentDataState.eventCalculateMethodOption}
+                  categories={segmentData.eventCalculateMethodOption ?? []}
                   selectedItem={
                     segmentData.userDoneEventCalculateMethod ?? null
                   }
                   changeSelectItem={(item) => {
                     if (item) {
                       const newItem: any = { ...item };
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreComputeMethod.SUM_VALUE
-                      ) {
-                        newItem.label = t('analytics:sumGroupLabel', {
-                          label: item.label,
-                        });
+                      if (item.itemType === 'children') {
+                        newItem.label = t(
+                          `analytics:segment.calculateOption.${item.groupName}`,
+                          {
+                            type: item.label,
+                          }
+                        );
                       }
                       segmentDataDispatch({
                         type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate,
@@ -136,8 +146,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                       segmentDataDispatch({
                         type: AnalyticsSegmentActionType.UpdateUserDoneEventCalculate,
                         segmentProps,
-                        calculate:
-                          segmentDataState.eventCalculateMethodOption[0],
+                        calculate: segmentData.eventCalculateMethodOption?.[0],
                       });
                     }
                   }}
@@ -166,20 +175,61 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
       </div>
 
       <div>
-        <Input
-          type="number"
-          placeholder={defaultStr(
-            t('analytics:labels.conditionValuePlaceholder')
-          )}
-          value={segmentData.userDoneEventValue ?? null}
-          onChange={(e) => {
-            segmentDataDispatch({
-              type: AnalyticsSegmentActionType.UpdateUserDoneEventValue,
-              segmentProps,
-              value: e.detail.value,
-            });
-          }}
-        />
+        {segmentData.userDoneEventOperation?.value ===
+        ConditionNumericOperator.BETWEEN ? (
+          <div className="align-center flex gap-5" style={{ width: 200 }}>
+            <Input
+              type="number"
+              placeholder={defaultStr(
+                t('analytics:labels.conditionValuePlaceholder')
+              )}
+              value={segmentData.userDoneEventValue?.[0] ?? ''}
+              onChange={(e) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateUserDoneEventValue,
+                  segmentProps,
+                  value: [
+                    e.detail.value,
+                    segmentData.userDoneEventValue?.[1] ?? '',
+                  ],
+                });
+              }}
+            />
+            <div>-</div>
+            <Input
+              type="number"
+              placeholder={defaultStr(
+                t('analytics:labels.conditionValuePlaceholder')
+              )}
+              value={segmentData.userDoneEventValue?.[1] ?? ''}
+              onChange={(e) => {
+                segmentDataDispatch({
+                  type: AnalyticsSegmentActionType.UpdateUserDoneEventValue,
+                  segmentProps,
+                  value: [
+                    segmentData.userDoneEventValue?.[0] ?? '',
+                    e.detail.value,
+                  ],
+                });
+              }}
+            />
+          </div>
+        ) : (
+          <Input
+            type="number"
+            placeholder={defaultStr(
+              t('analytics:labels.conditionValuePlaceholder')
+            )}
+            value={segmentData.userDoneEventValue?.[0] ?? ''}
+            onChange={(e) => {
+              segmentDataDispatch({
+                type: AnalyticsSegmentActionType.UpdateUserDoneEventValue,
+                segmentProps,
+                value: [e.detail.value, ''],
+              });
+            }}
+          />
+        )}
       </div>
     </>
   );

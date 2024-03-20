@@ -346,6 +346,26 @@
       "userInGroup": "用户在分群组",
       "userNotInGroup": "用户不在分群组"
     },
+    "calculateOption": {
+      "NUMBER_OF_TOTAL": "总次数 (PV)",
+      "NUMBER_OF_TIMES_PER_DAY": "每日次数",
+      "NUMBER_OF_CONSECUTIVE_DAYS": "天数分布",
+      "NUMBER_OF_DAYS_HAVING_EVENT": "连续天数",
+      "SUM_OF_EVENT_PARAMETER": "按{{type}}求和 (SUM)",
+      "MIN_OF_EVENT_PARAMETER": "按{{type}}求最小值 (MIN)",
+      "MAX_OF_EVENT_PARAMETER": "按{{type}}求最大值 (MAX)",
+      "AVG_OF_EVENT_PARAMETER": "按{{type}}求平均值 (SUM/PV)",
+      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "按{{type}}求去重数 (COUNT(DISTINCT))"
+    },
+    "calculateOperator": {
+      "=": "=",
+      "<>": "≠",
+      ">": ">",
+      ">=": ">=",
+      "<": "<",
+      "<=": "<",
+      "between": "范围"
+    },
     "comp": {
       "title": "创建分群",
       "desc": "通过选择一段时间内具有相同行为属性的用户来创建一个分群。",
