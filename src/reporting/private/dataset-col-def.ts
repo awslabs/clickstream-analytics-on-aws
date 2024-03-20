@@ -14,21 +14,13 @@
 import { InputColumn } from '@aws-sdk/client-quicksight';
 
 
-export const clickstream_event_attr_view_columns: InputColumn[] = [
+export const clickstream_event_view_columns: InputColumn[] = [
   {
     "Name": "event_timestamp",
     "Type": "DATETIME"
   },
   {
     "Name": "event_id",
-    "Type": "STRING"
-  },
-  {
-    "Name": "user_pseudo_id",
-    "Type": "STRING"
-  },
-  {
-    "Name": "session_id",
     "Type": "STRING"
   },
   {
@@ -40,9 +32,14 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
     "Type": "STRING"
   },
   {
-    "Name": "platform",
+    "Name": "user_pseudo_id",
     "Type": "STRING"
   },
+  {
+    "Name": "session_id",
+    "Type": "STRING"
+  },
+  
   {
     "Name": "event_value",
     "Type": "DECIMAL"
@@ -102,6 +99,14 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
   {
     "Name": "device_time_zone_offset_seconds",
     "Type": "INTEGER"
+  },
+  {
+    "Name": "device_ua_os",
+    "Type": "STRING"
+  },
+  {
+    "Name": "device_ua_os_version",
+    "Type": "STRING"
   },
   {
     "Name": "device_ua_browser",
@@ -212,10 +217,6 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
     "Type": "STRING"
   },
   {
-    "Name": "app_id",
-    "Type": "STRING"
-  },
-  {
     "Name": "app_version",
     "Type": "STRING"
   },
@@ -232,83 +233,103 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
     "Type": "STRING"
   },
   {
-    "Name": "screen_name",
+    "Name": "platform",
     "Type": "STRING"
   },
   {
-    "Name": "screen_id",
+    "Name": "app_id",
     "Type": "STRING"
   },
   {
-    "Name": "screen_unique_id",
+    "Name": "screen_view_screen_name",
     "Type": "STRING"
   },
   {
-    "Name": "previous_screen_name",
+    "Name": "screen_view_screen_id",
     "Type": "STRING"
   },
   {
-    "Name": "previous_screen_id",
+    "Name": "screen_view_screen_unique_id",
     "Type": "STRING"
   },
   {
-    "Name": "previous_screen_unique_id",
+    "Name": "screen_view_previous_screen_name",
     "Type": "STRING"
   },
   {
-    "Name": "page_referrer",
+    "Name": "screen_view_previous_screen_id",
     "Type": "STRING"
   },
   {
-    "Name": "page_referrer_title",
+    "Name": "screen_view_previous_screen_unique_id",
     "Type": "STRING"
   },
   {
-    "Name": "page_title",
+    "Name": "screen_view_previous_time_msec",
+    "Type": "INTEGER"
+  },
+  {
+    "Name": "screen_view_engagement_time_msec",
+    "Type": "INTEGER"
+  },
+  {
+    "Name": "screen_view_entrances",
+    "Type": "BOOLEAN"
+  },
+  {
+    "Name": "page_view_page_referrer",
     "Type": "STRING"
   },
   {
-    "Name": "page_url",
+    "Name": "page_view_page_referrer_title",
     "Type": "STRING"
   },
   {
-    "Name": "page_url_path",
+    "Name": "page_view_previous_time_msec",
+    "Type": "INTEGER"
+  },
+  {
+    "Name": "page_view_engagement_time_msec",
+    "Type": "INTEGER"
+  },
+  {
+    "Name": "page_view_page_title",
     "Type": "STRING"
   },
   {
-    "Name": "hostname",
+    "Name": "page_view_page_url",
     "Type": "STRING"
   },
   {
-    "Name": "latest_referrer",
+    "Name": "page_view_page_url_path",
     "Type": "STRING"
   },
   {
-    "Name": "latest_referrer_host",
+    "Name": "page_view_hostname",
     "Type": "STRING"
+  },
+  {
+    "Name": "page_view_latest_referrer",
+    "Type": "STRING"
+  },
+  {
+    "Name": "page_view_latest_referrer_host",
+    "Type": "STRING"
+  },
+  {
+    "Name": "page_view_entrances",
+    "Type": "BOOLEAN"
   },
   {
     "Name": "app_start_is_first_time",
     "Type": "BOOLEAN"
   },
   {
-    "Name": "previous_view_time_msec",
-    "Type": "INTEGER"
-  },
-  {
-    "Name": "previous_view_engagement_time_msec",
-    "Type": "INTEGER"
-  },
-  {
-    "Name": "entrances",
-    "Type": "BOOLEAN"
-  },
-  {
-    "Name": "previous_app_version",
+    "Name": "upgrade_previous_app_version",
     "Type": "STRING"
   },
   {
-    "Name": "previous_os_version",
+    "Name": "upgrade_previous_os_version",
     "Type": "STRING"
   },
   {
@@ -356,19 +377,19 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
     "Type": "STRING"
   },
   {
-    "Name": "sdk_exception_message",
-    "Type": "STRING"
-  },
-  {
-    "Name": "sdk_exception_stack",
-    "Type": "STRING"
-  },
-  {
     "Name": "sdk_version",
     "Type": "STRING"
   },
   {
     "Name": "sdk_name",
+    "Type": "STRING"
+  },
+  {
+    "Name": "app_exception_message",
+    "Type": "STRING"
+  },
+  {
+    "Name": "app_exception_stack",
     "Type": "STRING"
   },
   {
@@ -426,12 +447,7 @@ export const clickstream_event_attr_view_columns: InputColumn[] = [
   {
     "Name": "session_source_category",
     "Type": "STRING"
-  }  
-
-];
-
-export const clickstream_event_view_columns: InputColumn[] = [
-  ...clickstream_event_attr_view_columns,
+  },
   {
     "Name": "user_id",
     "Type": "STRING"
@@ -495,7 +511,35 @@ export const clickstream_event_view_columns: InputColumn[] = [
   {
     "Name": "user_properties_json_str",
     "Type": "STRING"
-  }  
+  },
+  {
+    "Name": "event_date",
+    "Type": "DATETIME"
+  },
+  {
+    "Name": "event_date_hour",
+    "Type": "DATETIME"
+  },
+  {
+    "Name": "merged_user_id",
+    "Type": "STRING"
+  },
+  {
+    "Name": "latest_user_id",
+    "Type": "STRING"
+  },
+  {
+    "Name": "new_user_indicator",
+    "Type": "STRING"
+  },
+  {
+    "Name": "view_session_indicator",
+    "Type": "STRING"
+  },
+  {
+    "Name": "view_event_indicator",
+    "Type": "STRING"
+  }
 ];
 
 export const clickstream_item_view_columns: InputColumn[] = [
