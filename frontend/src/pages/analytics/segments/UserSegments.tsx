@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Segment } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Button,
@@ -24,36 +25,68 @@ import { getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
 
-interface UserSegmentItem {
-  id: string;
-  name: string;
-  desc: string;
-  createAt: string;
-}
+const renderName = (name: string) => {
+  return (
+    <div className="clickstream-link-style">
+      <Link to="/">{name}</Link>
+    </div>
+  );
+};
 
 const UserSegments: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId, appId } = useParams();
+  const [loadingData, setLoadingData] = useState(false);
+  const [segmentList, setSegmentList] = useState<Segment[]>([]);
+
   const COLUMN_DEFINITIONS = [
     {
-      id: 'id',
-      header: 'ID',
-      cell: (e: UserSegmentItem) => {
-        return e.id;
+      id: 'name',
+      header: 'Name',
+      cell: (e: Segment) => {
+        return renderName(e.name);
+      },
+    },
+    {
+      id: 'description',
+      header: 'Description',
+      cell: (e: Segment) => {
+        return e.description;
+      },
+    },
+    {
+      id: 'refreshSchedule',
+      header: 'Refresh Schedule',
+      cell: (e: Segment) => {
+        return e.refreshSchedule.cronExpression;
+      },
+    },
+    {
+      id: 'createAt',
+      header: 'Create At',
+      cell: (e: Segment) => {
+        return e.createAt;
       },
     },
   ];
 
   const listAllSegments = async () => {
     if (projectId && appId) {
-      const segmentData = await getSegmentsList({ projectId, appId });
-      console.info('segmentData:', segmentData);
+      setLoadingData(true);
+      const segmentRes: ApiResponse<Segment[]> = await getSegmentsList({
+        projectId,
+        appId,
+      });
+      if (segmentRes.success) {
+        setSegmentList(segmentRes.data);
+      }
+      setLoadingData(false);
     }
     return [];
   };
@@ -87,6 +120,7 @@ const UserSegments: React.FC = () => {
               header={<Header>{t('nav.analytics.segments')}</Header>}
             >
               <Table
+                loading={loadingData}
                 header={
                   <Header
                     variant="h2"
@@ -139,7 +173,7 @@ const UserSegments: React.FC = () => {
                 }
                 variant="container"
                 columnDefinitions={COLUMN_DEFINITIONS}
-                items={[]}
+                items={segmentList}
               />
             </ContentLayout>
           }

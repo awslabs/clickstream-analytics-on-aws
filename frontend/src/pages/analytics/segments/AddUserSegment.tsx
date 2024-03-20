@@ -32,12 +32,13 @@ import HelpInfo from 'components/layouts/HelpInfo';
 import { SegmentProvider } from 'context/SegmentContext';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
+  const { projectId, appId } = useParams();
   const navigate = useNavigate();
 
   const breadcrumbItems = [
@@ -46,12 +47,12 @@ const AddUserSegments: React.FC = () => {
       href: '/',
     },
     {
-      text: t('breadCrumb.users'),
-      href: '/user',
+      text: t('breadCrumb.segments'),
+      href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text: t('breadCrumb.users'),
-      href: '/add',
+      text: t('breadCrumb.createSegment'),
+      href: '',
     },
   ];
 
