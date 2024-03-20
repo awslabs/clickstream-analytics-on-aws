@@ -193,6 +193,10 @@
                 "DataType": "DATETIME"
               },
               {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
                 "Name": "event_cnt",
                 "DataType": "INTEGER"
               },
@@ -211,6 +215,10 @@
               {
                 "Name": "event_date",
                 "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
               },
               {
                 "Name": "avg_session_per_user",
@@ -245,6 +253,10 @@
                 "DataType": "DATETIME"
               },
               {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
                 "Name": "aggregation_type",
                 "DataType": "STRING"
               },
@@ -267,6 +279,10 @@
               {
                 "Name": "event_date",
                 "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
               },
               {
                 "Name": "aggregation_type",
@@ -301,6 +317,10 @@
                 "DataType": "DATETIME"
               },
               {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
                 "Name": "aggregation_type",
                 "DataType": "STRING"
               },
@@ -323,6 +343,10 @@
               {
                 "Name": "event_date",
                 "DataType": "DATETIME"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
               },
               {
                 "Name": "aggregation_type",

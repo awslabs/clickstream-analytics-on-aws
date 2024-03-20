@@ -133,6 +133,8 @@ export function createQuicksightCustomResource(
         columns: clickstream_item_view_columns,
         projectedColumns: itemViewProjectedColumns,
       },
+
+      //Acquisition Sheet
       {
         tableName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
@@ -179,8 +181,6 @@ export function createQuicksightCustomResource(
           'view_count',
         ],
       },
-
-      //Acquisition Sheet
       {
         tableName: CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
@@ -453,6 +453,10 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'event_cnt',
             Type: 'INTEGER',
           },
@@ -487,6 +491,10 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_date',
             Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
           },
           {
             Name: 'avg_session_per_user',
@@ -530,6 +538,10 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'aggregation_type',
             Type: 'STRING',
           },
@@ -569,6 +581,10 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_date',
             Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
           },
           {
             Name: 'aggregation_type',
@@ -617,6 +633,10 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'aggregation_type',
             Type: 'STRING',
           },
@@ -656,6 +676,10 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_date',
             Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
           },
           {
             Name: 'aggregation_type',
