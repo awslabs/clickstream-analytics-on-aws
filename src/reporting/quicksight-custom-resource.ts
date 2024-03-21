@@ -205,6 +205,10 @@ export function createQuicksightCustomResource(
           {
             Name: 'active_user_count',
             Type: 'INTEGER',
+          },
+          {
+            Name: 'previous_active_user_count',
+            Type: 'INTEGER',
           }
         ],
         dateTimeDatasetParameter: [
@@ -223,6 +227,7 @@ export function createQuicksightCustomResource(
           'event_date_hour',
           'platform',
           'active_user_count',
+          'previous_active_user_count',
         ],
       },
       {
@@ -242,6 +247,11 @@ export function createQuicksightCustomResource(
             Name: 'new_user_count',
             Type: 'INTEGER',
           }
+          ,
+          {
+            Name: 'previous_new_user_count',
+            Type: 'INTEGER',
+          }
         ],
         dateTimeDatasetParameter: [
           {
@@ -259,6 +269,7 @@ export function createQuicksightCustomResource(
           'event_date_hour',
           'platform',
           'new_user_count',
+          'previous_new_user_count',
         ],
       },
       {
@@ -427,7 +438,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'user_cnt',
+            Name: 'user_count',
             Type: 'INTEGER',
           }
         ],
@@ -445,6 +456,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'geo_country',
           'user_cnt',
         ],
@@ -487,6 +499,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'event_cnt',
           'view_cnt',
         ],
@@ -531,6 +544,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'avg_session_per_user',
           'avg_engagement_time_per_session',
           'avg_engagement_time_per_user',
@@ -576,6 +590,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'aggregation_type',
           'aggregation_dim',
           'view_cnt',
@@ -624,6 +639,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'aggregation_type',
           'aggregation_dim',
           'user_id',
@@ -671,6 +687,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'aggregation_type',
           'aggregation_dim',
           'entrance_cnt',
@@ -716,6 +733,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'aggregation_type',
           'aggregation_dim',
           'exit_cnt',
