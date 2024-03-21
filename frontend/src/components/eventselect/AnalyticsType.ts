@@ -96,8 +96,10 @@ export interface IEventAnalyticsItem {
 
 // for segment group
 export interface ExtendSegment extends Segment {
-  // [key: string]: any;
-  id: string;
+  refreshType: 'manual' | 'auto' | 'custom';
+  autoRefreshOption: SelectProps.Option | null;
+  autoRefreshDayOption: SelectProps.Option | null;
+  expireDate: string;
 }
 
 export interface IEventSegmentationItem {

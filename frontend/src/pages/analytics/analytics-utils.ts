@@ -1049,3 +1049,47 @@ export const userAttributeDisplayname = (displayName: string) => {
     ConditionCategory.USER
   );
 };
+
+export const generateDayTimesOption = () => {
+  const options: SelectProps.Option[] = [];
+  for (let i = 0; i < 24; i++) {
+    const label = `${i === 0 ? 12 : i > 12 ? i - 12 : i}${
+      i < 12 ? 'AM' : 'PM'
+    }`;
+    const value = `${i < 10 ? '0' : ''}${i}:00`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const generateWeekDayOptions = () => {
+  const options: SelectProps.Option[] = [];
+  for (let i = 0; i < 7; i++) {
+    const label = moment().day(i).format('dddd');
+    const value = `${i}`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const generateMonthDayOptions = () => {
+  const suffixes: string[] = ['th', 'st', 'nd', 'rd'];
+  const options: SelectProps.Option[] = [];
+  for (let i = 1; i <= 31; i++) {
+    const suffix = suffixes[i % 10 < 4 ? Math.min(i % 10, 3) : 0];
+    const label = `${i}${i < 4 || i > 20 ? suffix : 'th'}`;
+    const value = `${i}`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const getAutoRefreshDayOptionsByType = (type: string) => {
+  if (type === 'Daily') {
+    return generateDayTimesOption();
+  } else if (type === 'Weekly') {
+    return generateWeekDayOptions();
+  } else if (type === 'Monthly') {
+    return generateMonthDayOptions();
+  }
+};

@@ -25,9 +25,11 @@ import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { SegmentProvider } from 'context/SegmentContext';
-import React, { useState } from 'react';
+import { omit } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
+import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
 
@@ -36,7 +38,6 @@ const AddUserSegments: React.FC = () => {
   const { projectId, appId } = useParams();
   const navigate = useNavigate();
   const [segmentObject, setSegmentObject] = useState<ExtendSegment>({
-    id: '',
     segmentId: '',
     segmentType: 'User',
     name: '',
@@ -56,6 +57,11 @@ const AddUserSegments: React.FC = () => {
       filterGroups: [],
       operator: 'and',
     },
+    // extends fields
+    refreshType: 'manual',
+    autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
+    autoRefreshDayOption: null,
+    expireDate: '',
   });
 
   const breadcrumbItems = [
@@ -76,12 +82,27 @@ const AddUserSegments: React.FC = () => {
   const [loadingCreate, setLoadingCreate] = useState(false);
 
   const addUserSegments = async () => {
-    console.info('addUserSegments');
-    setLoadingCreate(true);
-    await createSegment();
-    setLoadingCreate(false);
-    navigate(`/analytics/test_magic_project_gpvz/app/shopping/segments`);
+    try {
+      console.info('addUserSegments');
+      setLoadingCreate(true);
+      await createSegment(
+        omit(segmentObject, [
+          'refreshType',
+          'autoRefreshOption',
+          'autoRefreshDayOption',
+          'expireDate',
+        ])
+      );
+      setLoadingCreate(false);
+      navigate(`/analytics/test_magic_project_gpvz/app/shopping/segments`);
+    } catch (error) {
+      setLoadingCreate(false);
+    }
   };
+
+  useEffect(() => {
+    console.info('segmentObject:', segmentObject);
+  }, [segmentObject]);
 
   return (
     <div className="flex">

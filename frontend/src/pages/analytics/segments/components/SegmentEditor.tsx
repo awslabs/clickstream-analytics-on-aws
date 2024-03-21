@@ -27,8 +27,10 @@ import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
+import { getAutoRefreshDayOptionsByType } from 'pages/analytics/analytics-utils';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentItem from './group/SegmentItem';
 
@@ -111,7 +113,25 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
             description={t('analytics:segment.comp.refreshMethodDesc')}
           >
             <RadioGroup
-              value="manual"
+              value={segmentObject.refreshType}
+              onChange={(e) => {
+                updateSegmentObject('refreshType', e.detail.value);
+                if (e.detail.value === 'manual') {
+                  updateSegmentObject('autoRefreshOption', null);
+                  updateSegmentObject('autoRefreshDayOption', null);
+                } else {
+                  updateSegmentObject(
+                    'autoRefreshOption',
+                    SEGMENT_AUTO_REFRESH_OPTIONS[0]
+                  );
+                  updateSegmentObject(
+                    'autoRefreshDayOption',
+                    getAutoRefreshDayOptionsByType(
+                      SEGMENT_AUTO_REFRESH_OPTIONS[0].value ?? ''
+                    )?.[0]
+                  );
+                }
+              }}
               items={[
                 {
                   value: 'manual',
@@ -123,33 +143,77 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 },
               ]}
             />
-            <div className="mt-10">
-              <SpaceBetween direction="horizontal" size="xs">
-                <Select
-                  selectedOption={{ label: 'Daily', value: 'DAY' }}
-                  options={[
-                    { label: 'Daily', value: 'DAY' },
-                    { label: 'Monthly', value: 'MONTH' },
-                    { label: 'Custom(Cron)', value: 'CRON' },
-                  ]}
-                />
-                <Select
-                  selectedOption={{ label: '8PM', value: '20' }}
-                  options={[
-                    { label: '1AM', value: '1' },
-                    { label: '12AM', value: '0' },
-                    { label: '8PM', value: '20' },
-                  ]}
-                />
-              </SpaceBetween>
-            </div>
+            {segmentObject.refreshType === 'auto' && (
+              <div className="mt-10">
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Select
+                    selectedOption={segmentObject.autoRefreshOption}
+                    options={SEGMENT_AUTO_REFRESH_OPTIONS}
+                    onChange={(e) => {
+                      updateSegmentObject(
+                        'autoRefreshOption',
+                        e.detail.selectedOption
+                      );
+                      updateSegmentObject(
+                        'autoRefreshDayOption',
+                        getAutoRefreshDayOptionsByType(
+                          e.detail.selectedOption.value ?? ''
+                        )?.[0]
+                      );
+                      updateSegmentObject('refreshSchedule', {
+                        ...segmentObject.refreshSchedule,
+                        cron: e.detail.selectedOption.value,
+                      });
+                    }}
+                  />
+                  {segmentObject.autoRefreshOption?.value === 'Custom' ? (
+                    <Input
+                      value={segmentObject.refreshSchedule.cronExpression ?? ''}
+                      onChange={(e) => {
+                        updateSegmentObject('refreshSchedule', {
+                          ...segmentObject.refreshSchedule,
+                          cronExpression: e.detail.value,
+                        });
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <Select
+                        selectedOption={segmentObject.autoRefreshDayOption}
+                        options={getAutoRefreshDayOptionsByType(
+                          segmentObject.autoRefreshOption?.value ?? ''
+                        )}
+                        onChange={(e) => {
+                          updateSegmentObject(
+                            'autoRefreshDayOption',
+                            e.detail.selectedOption
+                          );
+                        }}
+                      />
+                    </>
+                  )}
+                </SpaceBetween>
+              </div>
+            )}
           </FormField>
 
           <FormField
             label={t('analytics:segment.comp.expirationSettings')}
             description={t('analytics:segment.comp.expirationSettingsDesc')}
           >
-            <DatePicker value={''} placeholder="YYYY/MM/DD" />
+            <DatePicker
+              value={segmentObject.expireDate}
+              isDateEnabled={(date) => date.getTime() > new Date().getTime()}
+              onChange={(e) => {
+                updateSegmentObject('expireDate', e.detail.value);
+                updateSegmentObject('refreshSchedule', {
+                  ...segmentObject.refreshSchedule,
+                  expireAfter:
+                    new Date(e.detail.value).getTime() - new Date().getTime(),
+                });
+              }}
+              placeholder="YYYY/MM/DD"
+            />
           </FormField>
         </SpaceBetween>
       </Container>
