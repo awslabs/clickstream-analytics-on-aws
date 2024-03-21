@@ -69,7 +69,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       redshiftBIUsernamePrefix: biUserNamePrefix,
       reportingViewsDef,
       schemaDefs,
-      lastModifiedTime: 1699345775001,
+      schemaHash: '123456789',
     },
   };
 
@@ -373,13 +373,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   });
 
-  test('Updated schemas and views in Redshift provisioned cluster with same lastModifiedTime', async () => {
+  test('Updated schemas and views in Redshift provisioned cluster with same lastSchemaHash', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash;
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 
@@ -398,9 +398,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash;
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 
@@ -413,13 +413,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 2);
   });
 
-  test('Updated schemas and views in Redshift provisioned cluster with lastModifiedTime changed', async () => {
+  test('Updated schemas and views in Redshift provisioned cluster with last schema hash changed', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime + 1;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash + '1';
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 

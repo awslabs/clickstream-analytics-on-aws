@@ -134,7 +134,7 @@ function getNewAddedAppIdList(event: CdkCustomResourceEvent): string[] {
   const requestType = event.RequestType;
   const props = event.ResourceProperties as ResourcePropertiesType;
   const appIdList = splitString(props.appIds ?? '');
-  const lastModifiedTime = props.lastModifiedTime;
+  const schemaHash = props.schemaHash;
   const isUpdate = requestType == 'Update';
 
   const applyAllAppSql = process.env.APPLY_ALL_APP_SQL === 'true';
@@ -144,9 +144,9 @@ function getNewAddedAppIdList(event: CdkCustomResourceEvent): string[] {
   if (isUpdate && !applyAllAppSql) {
     const oldAppIds = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).appIds;
     const oldAppIdList = splitString(oldAppIds ?? '');
-    const oldLastModifiedTime = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).lastModifiedTime;
-    logger.info('getNewAddedAppIdList()', { requestType, oldAppIdList, oldLastModifiedTime, appIdList, lastModifiedTime });
-    if (lastModifiedTime === oldLastModifiedTime) {
+    const oldSchemaHash = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).schemaHash;
+    logger.info('getNewAddedAppIdList()', { requestType, oldAppIdList, oldSchemaHash, appIdList, schemaHash });
+    if (schemaHash === oldSchemaHash) {
       newAddedAppIdList = [];
       for (const appId of appIdList) {
         if (!oldAppIdList.includes(appId)) {

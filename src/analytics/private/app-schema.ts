@@ -11,13 +11,12 @@
  *  and limitations under the License.
  */
 
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '@aws/clickstream-base-lib';
 import { Duration, CustomResource, Arn, ArnFormat, Stack, RemovalPolicy } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -104,7 +103,7 @@ export abstract class RedshiftSQLExecution extends Construct {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
-      lastModifiedTime: this.getLatestTimestampForDirectory(props.codePath),
+      schemaHash: this.getCodeHashByDirectory(props.codePath),
       ...crProps,
     };
 
@@ -154,19 +153,11 @@ export abstract class RedshiftSQLExecution extends Construct {
     return fn;
   }
 
-  private getLatestTimestampForDirectory(directory: string): number {
-    let latestTimestamp = 0;
-
-    const files = readdirSync(directory);
-    files.forEach(file => {
-      const filePath = join(directory, file);
-      const stats = statSync(filePath);
-      if (stats.isFile()) {
-        latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
-      } else {latestTimestamp = Math.max(this.getLatestTimestampForDirectory(filePath), latestTimestamp);}
+  private getCodeHashByDirectory(directory: string): string {
+    const codesAsset = new Asset(this, 'app-schema-asset', {
+      path: directory,
     });
-
-    return latestTimestamp;
+    return codesAsset.assetHash;
   }
 }
 

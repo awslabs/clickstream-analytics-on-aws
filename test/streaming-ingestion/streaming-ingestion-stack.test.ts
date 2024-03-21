@@ -963,7 +963,7 @@ describe('resources in nested redshift stacks', () => {
           workgroupName: RefAnyValue,
           databaseName: RefAnyValue,
         },
-        lastModifiedTime: Match.anyValue(),
+        schemaHash: Match.anyValue(),
         projectId: RefAnyValue,
         appIds: RefAnyValue,
         databaseName: RefAnyValue,
