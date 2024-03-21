@@ -15,7 +15,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_device_crash_rate (
 )
 select 
   event_date,
-  platfrom,
+  platform,
   merged_user_id,
   case when event_name = '_app_exeption' then merged_user_id else null end as crashed_user_id
 from {{database_name}}.{{schema}}.{{baseView}}

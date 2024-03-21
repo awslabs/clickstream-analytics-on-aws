@@ -7,7 +7,7 @@ BEGIN
 
 DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user where event_date = day;
 
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user (event_date, geo_country, user_count)
+INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user (event_date, platform, geo_country, user_count)
 select 
   event_date,
   platform,
