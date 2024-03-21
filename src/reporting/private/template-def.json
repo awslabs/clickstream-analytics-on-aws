@@ -19,6 +19,10 @@
               {
                 "Name": "new_user_count",
                 "DataType": "INTEGER"
+              },
+              {
+                "Name": "view_count",
+                "DataType": "INTEGER"
               }
             ]
         },
@@ -39,6 +43,10 @@
               {
                 "Name": "active_user_count",
                 "DataType": "INTEGER"
+              },
+              {
+                "Name": "previous_active_user_count",
+                "DataType": "INTEGER"
               }
             ]
         },
@@ -58,6 +66,10 @@
               },
               {
                 "Name": "new_user_count",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "previous_new_user_count",
                 "DataType": "INTEGER"
               }
             ]
@@ -240,6 +252,530 @@
         "Placeholder": "Event_View",
         "DataSetSchema": {
             "ColumnSchemaList": [
+              {
+                "Name": "event_timestamp",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "event_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "event_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "event_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_pseudo_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "event_value",
+                "DataType": "DECIMAL"
+              },
+              {
+                "Name": "event_value_currency",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "event_bundle_sequence_id",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "ingest_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "device_mobile_brand_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_mobile_model_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_manufacturer",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_carrier",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_network_type",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_operating_system",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_operating_system_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_vendor_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_advertising_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_system_language",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_time_zone_offset_seconds",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "device_ua_os",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_ua_os_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_ua_browser",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_ua_browser_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_ua_device",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_ua_device_category",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "device_screen_width",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "device_screen_height",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "device_viewport_width",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "device_viewport_height",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "geo_continent",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_sub_continent",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_country",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_region",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_metro",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_city",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "geo_locale",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_source",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_medium",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_campaign",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_content",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_term",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_campaign_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_clid_platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_clid",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_channel_group",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "traffic_source_category",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_first_touch_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "app_package_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_title",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_install_source",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "project_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_screen_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_screen_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_screen_unique_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_previous_screen_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_previous_screen_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_previous_screen_unique_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "screen_view_previous_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "screen_view_engagement_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "screen_view_entrances",
+                "DataType": "BOOLEAN"
+              },
+              {
+                "Name": "page_view_page_referrer",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_page_referrer_title",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_previous_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "page_view_engagement_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "page_view_page_title",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_page_url",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_page_url_path",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_hostname",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_latest_referrer",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_latest_referrer_host",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "page_view_entrances",
+                "DataType": "BOOLEAN"
+              },
+              {
+                "Name": "app_start_is_first_time",
+                "DataType": "BOOLEAN"
+              },
+              {
+                "Name": "upgrade_previous_app_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "upgrade_previous_os_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "search_key",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "search_term",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "outbound_link_classes",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "outbound_link_domain",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "outbound_link_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "outbound_link_url",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "outbound_link",
+                "DataType": "BOOLEAN"
+              },
+              {
+                "Name": "user_engagement_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "scroll_engagement_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "sdk_error_code",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "sdk_error_message",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "sdk_version",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "sdk_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_exception_message",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "app_exception_stack",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "custom_parameters_json_str",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_duration",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "session_number",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "session_start_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "session_source",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_medium",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_campaign",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_content",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_term",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_campaign_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_clid_platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_clid",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_channel_group",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "session_source_category",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_touch_time_msec",
+                "DataType": "INTEGER"
+              },
+              {
+                "Name": "first_visit_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "first_referrer",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_category",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_source",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_medium",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_campaign",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_content",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_term",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_campaign_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_clid_platform",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_clid",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_traffic_channel_group",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "first_app_install_source",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_properties_json_str",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "event_date",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "event_date_hour",
+                "DataType": "DATETIME"
+              },
+              {
+                "Name": "merged_user_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "latest_user_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "new_user_indicator",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "view_session_indicator",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "view_event_indicator",
+                "DataType": "STRING"
+              }
             ]
         },
         "ColumnGroupSchemaList": []
@@ -248,6 +784,66 @@
         "Placeholder": "Item_View",
         "DataSetSchema": {
             "ColumnSchemaList": [
+              {
+                "Name": "item_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "brand",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "currency",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "price",
+                "DataType": "DECIMAL"
+              },
+              {
+                "Name": "quantity",
+                "DataType": "DECIMAL"
+              },
+              {
+                "Name": "creative_name",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "creative_slot",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "location_id",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "category",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "category2",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "category3",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "category4",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "category5",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "custom_parameters_json_str",
+                "DataType": "STRING"
+              }
             ]
         },
         "ColumnGroupSchemaList": []
