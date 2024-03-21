@@ -19,6 +19,7 @@ BEGIN
   ;
 
 EXCEPTION WHEN OTHERS THEN
+    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_acquisition_day_traffic_source_user', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;
 $$;

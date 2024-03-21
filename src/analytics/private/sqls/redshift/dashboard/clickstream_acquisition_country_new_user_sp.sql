@@ -19,6 +19,7 @@ group by 1,2,3
 ;
 
 EXCEPTION WHEN OTHERS THEN
+    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_acquisition_country_new_user', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$;

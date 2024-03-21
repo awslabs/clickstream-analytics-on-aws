@@ -100,6 +100,7 @@ BEGIN
     ;
 
 EXCEPTION WHEN OTHERS THEN
+    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_engagement_page_screen_view_detail', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$

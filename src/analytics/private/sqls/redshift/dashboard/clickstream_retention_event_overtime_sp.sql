@@ -22,6 +22,7 @@ group by 1,2
 ;
 
 EXCEPTION WHEN OTHERS THEN
+    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_retention_event_overtime', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$

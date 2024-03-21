@@ -598,6 +598,7 @@ GROUP BY
 DROP TABLE IF EXISTS event_traffic_tmp_tb;
 
 EXCEPTION WHEN OTHERS THEN
+    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_acquisition_day_user_acquisition', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$;
