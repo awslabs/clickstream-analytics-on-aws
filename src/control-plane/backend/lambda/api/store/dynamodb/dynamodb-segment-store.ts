@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { Segment, SegmentDdbItem, SegmentJobStatus } from '@aws/clickstream-base-lib';
+import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { clickStreamTableName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { logger } from '../../common/powertools';

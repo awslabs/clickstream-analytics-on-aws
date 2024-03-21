@@ -27,20 +27,20 @@ export interface Segment {
   eventBridgeRuleArn?: string;
 }
 
-interface RefreshSchedule {
+export interface RefreshSchedule {
   cron: 'Manual' | 'Daily' | 'Weekly' | 'Monthly' | 'Custom';
   cronExpression?: string;
   expireAfter: number; // timestamp
 }
 
-type FilterOperator = 'and' | 'or';
+export type FilterOperator = 'and' | 'or';
 
-interface SegmentCriteria {
+export interface SegmentCriteria {
   filterGroups: SegmentFilterGroup[];
   operator: FilterOperator;
 }
 
-interface SegmentFilterGroup {
+export interface SegmentFilterGroup {
   description?: string;
   startDate?: string;
   endDate?: string;
@@ -49,14 +49,14 @@ interface SegmentFilterGroup {
   operator: FilterOperator;
 }
 
-type SegmentFilter = UserSegmentFilter; // Add "SessionSegmentFilter" and "EventSegmentFilter" in the future
+export type SegmentFilter = UserSegmentFilter; // Add "SessionSegmentFilter" and "EventSegmentFilter" in the future
 
-interface UserSegmentFilter {
+export interface UserSegmentFilter {
   conditions: UserSegmentFilterCondition[];
   operator: FilterOperator;
 }
 
-type UserSegmentFilterCondition =
+export type UserSegmentFilterCondition =
   UserEventCondition
   | EventsInSequenceCondition
   | UserAttributeCondition
@@ -69,14 +69,14 @@ export enum SegmentFilterConditionType {
   UserInSegmentCondition = 'UserInSegmentCondition',
 }
 
-interface UserEventCondition {
+export interface UserEventCondition {
   conditionType: SegmentFilterConditionType.UserEventCondition;
   hasDone: boolean;
   event: EventWithParameter;
   metricCondition: MetricCondition;
 }
 
-interface EventsInSequenceCondition {
+export interface EventsInSequenceCondition {
   conditionType: SegmentFilterConditionType.EventsInSequenceCondition;
   hasDone: boolean;
   events: EventWithParameter[];
@@ -84,25 +84,25 @@ interface EventsInSequenceCondition {
   isDirectlyFollow: boolean;
 }
 
-interface UserAttributeCondition {
+export interface UserAttributeCondition {
   conditionType: SegmentFilterConditionType.UserAttributeCondition;
   hasAttribute: boolean;
   attributeCondition: ParameterCondition;
 }
 
-interface UserInSegmentCondition {
+export interface UserInSegmentCondition {
   conditionType: SegmentFilterConditionType.UserInSegmentCondition;
   isInSegment: boolean;
   segmentId: string;
 }
 
-interface EventWithParameter {
+export interface EventWithParameter {
   eventName: string;
   eventParameterConditions?: ParameterCondition[];
   operator?: FilterOperator;
 }
 
-interface ParameterCondition {
+export interface ParameterCondition {
   parameterType: ParameterType;
   parameterName: string;
   dataType: ParameterDataType;
@@ -110,7 +110,7 @@ interface ParameterCondition {
   inputValue: number | number[] | string | string[];
 }
 
-interface MetricCondition {
+export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
   conditionOperator: ConditionNumericOperator;
   inputValue: number | number[];
@@ -120,7 +120,7 @@ interface MetricCondition {
 }
 
 export enum ParameterType {
-  PREDEFINED = 'Predefined',
+  PRESET = 'Preset',
   CUSTOM = 'Custom',
 }
 

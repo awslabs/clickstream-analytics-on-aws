@@ -132,7 +132,7 @@ router_segment.get(
     param('segmentId').isString().notEmpty(),
     param('jobRunId').isString().notEmpty(),
     query('projectId').isString().notEmpty(),
-    query('appId').isString().notEmpty()
+    query('appId').isString().notEmpty(),
   ]),
   async (req: Request, res: Response, next: NextFunction) => {
     return segmentServ.getExportS3Url(req, res, next);
@@ -189,7 +189,7 @@ function commonValidationsForSegment() {
     body('appId').notEmpty(),
     body('refreshSchedule.cron').isIn(['Manual', 'Daily', 'Weekly', 'Monthly', 'Custom']),
     body('refreshSchedule.cronExpression').optional().custom(validateRefreshScheduleCronExpression),
-    body('refreshSchedule.expireAfter').isNumeric(),
+    body('refreshSchedule.expireAfter').optional().isNumeric(),
     body('criteria.operator').isIn(['and', 'or']),
     body('criteria.filterGroups').isArray({ min: 1 }),
     body('criteria.filterGroups.*.description').optional().isString(),

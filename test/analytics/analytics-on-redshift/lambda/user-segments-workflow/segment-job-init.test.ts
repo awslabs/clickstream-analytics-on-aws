@@ -11,12 +11,13 @@
  *  and limitations under the License.
  */
 
+import { SegmentJobStatus, SegmentJobTriggerType } from '@aws/clickstream-base-lib';
 import { DisableRuleCommand, EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-init';
 import 'aws-sdk-client-mock-jest';
-import { SegmentJobStatus, SegmentJobTriggerType } from '../../../../../src/analytics/private/segments/segments-model';
+
 import { formatDate } from '../../../../../src/common/utils';
 
 describe('User segments workflow segment-job-init lambda tests', () => {
@@ -54,6 +55,8 @@ describe('User segments workflow segment-job-init lambda tests', () => {
     segmentSessionNumber: 0,
     totalSessionNumber: 0,
     sampleData: [],
+    prefix: 'SEGMENT_JOB_FOR#segment-id',
+    createAt: expect.any(Number),
   };
 
   beforeEach(() => {

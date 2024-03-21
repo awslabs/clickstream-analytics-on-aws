@@ -19,8 +19,13 @@ import {
   SegmentJobStatus,
   SegmentJobTriggerType,
 } from '@aws/clickstream-base-lib';
-import { DeleteRuleCommand } from '@aws-sdk/client-cloudwatch-events';
-import { EventBridgeClient, PutRuleCommand, PutTargetsCommand } from '@aws-sdk/client-eventbridge';
+import {
+  DeleteRuleCommand,
+  EventBridgeClient,
+  PutRuleCommand,
+  PutTargetsCommand,
+  RemoveTargetsCommand,
+} from '@aws-sdk/client-eventbridge';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -129,10 +134,8 @@ export class SegmentServ {
         updatedItem.eventBridgeRuleArn = rule.RuleArn;
       }
       // Clean up EventBridge rule when cron type is set to Manual
-      if (refreshSchedule.cron === 'Manual' && !!segmentDdbItem.eventBridgeRuleArn) {
-        await eventBridgeClient.send(new DeleteRuleCommand({
-          Name: `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}SegmentJob-${segmentId}`,
-        }));
+      if (refreshSchedule.cron === 'Manual' && segmentDdbItem.eventBridgeRuleArn !== '') {
+        await this.deleteEventBridgeRule(segmentId);
         updatedItem.eventBridgeRuleArn = '';
       }
 
@@ -150,6 +153,16 @@ export class SegmentServ {
     try {
       const { segmentId } = req.params;
       const { appId } = req.query;
+      const segment = await segmentStore.get(appId as string, segmentId as string);
+      if (!segment) {
+        return res.status(400).send(new ApiFail(`Segment with id ${segmentId} is not found`));
+      }
+
+      // Clean up EventBridge rule
+      if (segment.eventBridgeRuleArn !== '') {
+        await this.deleteEventBridgeRule(segmentId);
+      }
+
       await segmentStore.delete(appId as string, segmentId as string);
 
       return res.status(200).send(new ApiSuccess({ segmentId }, 'Segment deleted successfully.'));
@@ -280,7 +293,7 @@ export class SegmentServ {
       throw new Error('Segment workflow state machine is not found.');
     }
 
-    const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}SegmentJob-${segment.segmentId}`;
+    const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}${segment.segmentId}`;
     const rule = await eventBridgeClient.send(new PutRuleCommand({
       Name: ruleName,
       Description: `For scheduled job of segment ${segment.name} (${segment.segmentId})`,
@@ -306,5 +319,19 @@ export class SegmentServ {
     logger.info('Put EventBridge rule ' + ruleName);
 
     return rule;
+  }
+
+  private async deleteEventBridgeRule(segmentId: string) {
+    const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}${segmentId}`;
+    await eventBridgeClient.send(new RemoveTargetsCommand({
+      Rule: ruleName,
+      Ids: ['SegmentsWorkflowStateMachine'],
+    }));
+
+    await eventBridgeClient.send(new DeleteRuleCommand({
+      Name: ruleName,
+    }));
+
+    logger.info('Clean up EventBridge rule ' + ruleName);
   }
 }

@@ -13,6 +13,7 @@
 
 import path from 'path';
 import {
+  CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
   CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   SCAN_METADATA_WORKFLOW_PREFIX,
@@ -462,6 +463,7 @@ export class ClickStreamApiConstruct extends Construct {
           's3:GetBucketPolicy',
           'route53:ListHostedZones',
           'iam:ListRoles',
+          'iam:PassRole',
           'iam:ListServerCertificates',
           'iam:GetContextKeysForCustomPolicy',
           'iam:SimulateCustomPolicy',
@@ -550,6 +552,16 @@ export class ClickStreamApiConstruct extends Construct {
         ],
         actions: [
           'sts:AssumeRole',
+        ],
+      }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}*`,
+        ],
+        actions: [
+          'events:RemoveTargets',
+          'events:DeleteRule',
         ],
       }),
     ];
