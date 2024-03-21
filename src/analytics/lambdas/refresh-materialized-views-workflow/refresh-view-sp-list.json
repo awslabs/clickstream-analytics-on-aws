@@ -1,0 +1,26 @@
+[
+  {
+      "name": "user_m_max_view",
+      "type": "MV",
+      "parameters": [
+
+      ]
+  },
+  {
+      "name": "user_m_view",
+      "type": "MV",
+      "parameters": [
+
+      ]
+  },
+  {
+      "name": "item_m_view",
+      "type": "SP",
+      "parameters": [
+          {
+              "name": "day",
+              "type": "date"
+          }
+      ]
+  }
+]

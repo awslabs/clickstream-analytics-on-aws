@@ -207,6 +207,7 @@ export type MustacheParamType = {
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
+  table_refresh_mv_sp_status: string;
   table_ods_events: string;
   user_bi?: string;
 

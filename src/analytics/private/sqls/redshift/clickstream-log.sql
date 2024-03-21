@@ -5,3 +5,4 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_clickstream_log}} (
     log_msg varchar(256),
     log_date TIMESTAMP default getdate()
 );
+

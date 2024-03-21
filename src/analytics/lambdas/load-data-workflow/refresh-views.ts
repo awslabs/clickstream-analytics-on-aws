@@ -11,35 +11,29 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME } from '@aws/clickstream-base-lib';
 import { Context } from 'aws-lambda';
-
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { checkLoadStatus } from './check-load-status';
 import { logger } from '../../../common/powertools';
-
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { sleep } from '../../../common/utils';
-import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
-const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
+const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
+
+const sfnClient = new SFNClient({
+  region: REGION,
+  ...aws_sdk_client_common_config,
+});
+
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const APP_IDS = process.env.APP_IDS!;
 const SLEEP_SEC = process.env.SLEEP_SEC?? '30';
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3BucketPrefix = process.env.PIPELINE_S3_BUCKET_PREFIX!;
-
-const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
+const stateMachineArn = process.env.REFRESH_STATE_MACHINE_ARN!;
 
 export const handler = async (_e: any, _c: Context) => {
-
-  const redshiftProps = getRedshiftProps(
-    process.env.REDSHIFT_MODE!,
-    REDSHIFT_DATABASE,
-    REDSHIFT_DATA_API_ROLE_ARN,
-    process.env.REDSHIFT_DB_USER!,
-    process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-    process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
-  );
 
   const appIds = APP_IDS.split(',');
   const queryIds: string[] = [];
@@ -53,21 +47,18 @@ export const handler = async (_e: any, _c: Context) => {
       const refreshInfo = await getMVRefreshInfoFromS3(pipelineS3BucketPrefix, REDSHIFT_DATABASE, schema);
 
       if (refreshInfo === undefined || Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000) {
-        const sqlStatementForApp = `
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_VIEW_NAME};
-        `;
 
-        const sqlStatements = sqlStatementForApp.split(';').map(s => s.trim()).filter(s => s.length > 0);
-        logger.info('sqlStatements', { sqlStatements });
-        const queryId = await executeStatements(
-          redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-        if (queryId) {
-          queryIds.push(queryId);
-        }
+        const input = JSON.stringify({
+          refreshDate: getCurrentDateString(),
+        });
+    
+        // 创建 StartExecutionCommand
+        const startExecutionCommand = new StartExecutionCommand({
+          stateMachineArn,
+          input,
+        });
+        
+        await sfnClient.send(startExecutionCommand);
 
         logger.info(`Refresh mv for app: ${schema} finished`);
 
@@ -123,4 +114,8 @@ async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix
 
 export function getMVRefreshInfoKey(bucketPrefix: string, projectId: string, appId: string) {
   return `${bucketPrefix}refresh-mv-info/${projectId}/${appId}/refresh-time-info.json`;
+}
+
+function getCurrentDateString() {
+  return new Date().toISOString().replace(/:/g, '-').replace(/\./g, '-').replace('T', '-').replace('Z', '');
 }
