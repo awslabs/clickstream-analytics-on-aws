@@ -274,7 +274,7 @@ export const clickstream_event_view_columns: InputColumn[] = [
   },
   {
     "Name": "screen_view_entrances",
-    "Type": "BOOLEAN"
+    "Type": "STRING"
   },
   {
     "Name": "page_view_page_referrer",
@@ -318,11 +318,11 @@ export const clickstream_event_view_columns: InputColumn[] = [
   },
   {
     "Name": "page_view_entrances",
-    "Type": "BOOLEAN"
+    "Type": "STRING"
   },
   {
     "Name": "app_start_is_first_time",
-    "Type": "BOOLEAN"
+    "Type": "STRING"
   },
   {
     "Name": "upgrade_previous_app_version",
@@ -358,7 +358,7 @@ export const clickstream_event_view_columns: InputColumn[] = [
   },
   {
     "Name": "outbound_link",
-    "Type": "BOOLEAN"
+    "Type": "STRING"
   },
   {
     "Name": "user_engagement_time_msec",

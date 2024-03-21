@@ -458,7 +458,7 @@ export function createQuicksightCustomResource(
           'event_date',
           'platform',
           'geo_country',
-          'user_cnt',
+          'user_count',
         ],
       },
 
@@ -519,7 +519,7 @@ export function createQuicksightCustomResource(
           },
           {
             Name: 'avg_session_per_user',
-            Type: 'INTEGER',
+            Type: 'DECIMAL',
           },
           {
             Name: 'avg_engagement_time_per_session',
