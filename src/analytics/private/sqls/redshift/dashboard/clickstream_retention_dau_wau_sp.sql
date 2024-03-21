@@ -10,7 +10,7 @@ DELETE FROM {{database_name}}.{{schema}}.clickstream_retention_dau_wau where eve
 INSERT INTO {{database_name}}.{{schema}}.clickstream_retention_dau_wau (
   event_date, 
   platform, 
-  user_count
+  merged_user_id
 )
 select 
   event_date,

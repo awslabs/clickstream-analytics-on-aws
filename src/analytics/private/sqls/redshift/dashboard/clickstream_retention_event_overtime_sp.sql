@@ -10,12 +10,12 @@ DELETE FROM {{database_name}}.{{schema}}.clickstream_retention_event_overtime wh
 INSERT INTO {{database_name}}.{{schema}}.clickstream_retention_event_overtime (
 event_date, 
 platform, 
-user_count
+event_cnt
 )
 select 
   event_date,
   platform,
-  count(distinct event_id) as event_count
+  count(distinct event_id) as event_cnt
 from {{database_name}}.{{schema}}.{{baseView}}
 where event_date = day
 group by 1,2

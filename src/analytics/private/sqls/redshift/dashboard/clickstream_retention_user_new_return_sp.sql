@@ -7,7 +7,7 @@ BEGIN
 
 DELETE FROM {{database_name}}.{{schema}}.clickstream_retention_user_new_return where event_date = day;
 
-INSERT INTO {{database_name}}.{{schema}}.clickstream_retention_user_new_return (event_date, platform, user_type, user_count)
+INSERT INTO {{database_name}}.{{schema}}.clickstream_retention_user_new_return (event_date, platform, user_type, user_cnt)
 select 
   event_date,
   platform,
