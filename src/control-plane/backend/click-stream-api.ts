@@ -463,7 +463,6 @@ export class ClickStreamApiConstruct extends Construct {
           's3:GetBucketPolicy',
           'route53:ListHostedZones',
           'iam:ListRoles',
-          'iam:PassRole',
           'iam:ListServerCertificates',
           'iam:GetContextKeysForCustomPolicy',
           'iam:SimulateCustomPolicy',
@@ -565,6 +564,13 @@ export class ClickStreamApiConstruct extends Construct {
         ],
       }),
     ];
-    return createLambdaRole(this, 'ApiFunctionRole', deployInVpc, apiFunctionPolicyStatements);
+
+    const role = createLambdaRole(this, 'ApiFunctionRole', deployInVpc, apiFunctionPolicyStatements);
+    role.addToPolicy(new PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [role.roleArn],
+    }));
+
+    return role;
   }
 }

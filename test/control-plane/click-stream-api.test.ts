@@ -951,7 +951,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               's3:GetBucketPolicy',
               'route53:ListHostedZones',
               'iam:ListRoles',
-              'iam:PassRole',
               'iam:ListServerCertificates',
               'iam:GetContextKeysForCustomPolicy',
               'iam:SimulateCustomPolicy',
@@ -1221,6 +1220,16 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   },
                   ':rule/Clickstream-SegmentJobRule-*',
                 ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
               ],
             },
           },
@@ -2615,7 +2624,6 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               's3:GetBucketPolicy',
               'route53:ListHostedZones',
               'iam:ListRoles',
-              'iam:PassRole',
               'iam:ListServerCertificates',
               'iam:GetContextKeysForCustomPolicy',
               'iam:SimulateCustomPolicy',
@@ -2885,6 +2893,16 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
                   },
                   ':rule/Clickstream-SegmentJobRule-*',
                 ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
               ],
             },
           },

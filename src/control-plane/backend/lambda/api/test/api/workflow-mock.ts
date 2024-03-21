@@ -734,7 +734,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'SegmentsS3Prefix',
-    ParameterValue: 'clickstream/project_8888_8888/data/segments/',
+    ParameterValue: 'clickstream/project_8888_8888/data/segments-output/',
   },
   {
     ParameterKey: 'LoadWorkflowBucket',
