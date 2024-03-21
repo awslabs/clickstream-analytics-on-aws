@@ -20,7 +20,10 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { createSegment } from 'apis/segments';
-import { ExtendSegment } from 'components/eventselect/AnalyticsType';
+import {
+  ExtendSegment,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -29,9 +32,13 @@ import { omit } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
+import {
+  DEFAULT_SEGMENT_GROUP_DATA,
+  SEGMENT_AUTO_REFRESH_OPTIONS,
+} from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
+import { convertUISegmentObjectToAPIObject } from '../analytics-utils';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
@@ -63,6 +70,10 @@ const AddUserSegments: React.FC = () => {
     autoRefreshDayOption: null,
     expireDate: '',
   });
+  const [segmentDataState, setSegmentDataState] =
+    useState<IEventSegmentationObj>({
+      ...DEFAULT_SEGMENT_GROUP_DATA,
+    });
 
   const breadcrumbItems = [
     {
@@ -86,16 +97,23 @@ const AddUserSegments: React.FC = () => {
       console.info('addUserSegments');
       setLoadingCreate(true);
       await createSegment(
-        omit(segmentObject, [
-          'refreshType',
-          'autoRefreshOption',
-          'autoRefreshDayOption',
-          'expireDate',
-        ])
+        omit(
+          {
+            ...segmentObject,
+            criteria: convertUISegmentObjectToAPIObject(segmentDataState),
+          },
+          [
+            'refreshType',
+            'autoRefreshOption',
+            'autoRefreshDayOption',
+            'expireDate',
+          ]
+        )
       );
       setLoadingCreate(false);
       navigate(`/analytics/test_magic_project_gpvz/app/shopping/segments`);
     } catch (error) {
+      console.info(error);
       setLoadingCreate(false);
     }
   };
@@ -144,6 +162,7 @@ const AddUserSegments: React.FC = () => {
                 >
                   <SegmentEditor
                     segmentObject={segmentObject}
+                    updateSegmentState={setSegmentDataState}
                     updateSegmentObject={(key, value) => {
                       setSegmentObject((prev) => {
                         return {

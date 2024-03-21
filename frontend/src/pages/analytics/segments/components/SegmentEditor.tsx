@@ -22,7 +22,10 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { ExtendSegment } from 'components/eventselect/AnalyticsType';
+import {
+  ExtendSegment,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
@@ -37,13 +40,14 @@ import SegmentItem from './group/SegmentItem';
 interface SegmentEditorProps {
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
+  updateSegmentState: (segment: IEventSegmentationObj) => void;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
   props: SegmentEditorProps
 ) => {
   const { t } = useTranslation();
-  const { segmentObject, updateSegmentObject } = props;
+  const { segmentObject, updateSegmentObject, updateSegmentState } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const [filteredData, setFilteredData] = useState<any>({});
 
@@ -72,6 +76,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
       'sequenceEventAttributeOption',
     ]);
     setFilteredData(newFilteredData);
+    updateSegmentState(segmentDataState);
   }, [segmentDataState]);
 
   return (

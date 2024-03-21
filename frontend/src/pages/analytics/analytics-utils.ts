@@ -24,6 +24,8 @@ import {
   IAnalyticsItem,
   IConditionItemType,
   IEventAnalyticsItem,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
   IRetentionAnalyticsItem,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
@@ -1092,4 +1094,21 @@ export const getAutoRefreshDayOptionsByType = (type: string) => {
   } else if (type === 'Monthly') {
     return generateMonthDayOptions();
   }
+};
+
+export const convertUISegmentObjectToAPIObject: any = (
+  segmentUIObject: IEventSegmentationObj
+) => {
+  const convertSegmentItem = (items: IEventSegmentationItem[]) => {
+    const itemList = [];
+    for (const item in items) {
+      console.info(item);
+    }
+    return itemList;
+  };
+  const segmentAPIObject = {
+    filterGroups: convertSegmentItem(segmentUIObject.subItemList),
+    operator: 'and',
+  };
+  return segmentAPIObject;
 };
