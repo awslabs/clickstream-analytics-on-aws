@@ -172,25 +172,6 @@ const DataProcessingStack = {
   Type: 'Stack',
 };
 
-// const DataProcessingStackV1 = {
-//   ...DataProcessingStack,
-//   Data: {
-//     ...DataProcessingStack.Data,
-//     Input: {
-//       ...DataProcessingStack.Data.Input,
-//       Parameters: mergeParameters(
-//         DataProcessingStack.Data.Input.Parameters,
-//         [
-//           {
-//             ParameterKey: 'TransformerAndEnrichClassNames',
-//             ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-//           },
-//         ],
-//       ),
-//     },
-//   },
-// };
-
 const DataModelingRedshiftStack = {
   Data: {
     Callback: {
