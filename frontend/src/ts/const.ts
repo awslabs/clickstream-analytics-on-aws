@@ -491,6 +491,13 @@ export const enumToSelectOptions = (
   }));
 };
 
+export const SEGMENT_AUTO_REFRESH_OPTIONS = [
+  { label: 'Daily', value: 'Daily' },
+  { label: 'Weekly', value: 'Weekly' },
+  { label: 'Monthly', value: 'Monthly' },
+  { label: 'Custom(Cron)', value: 'Custom' },
+];
+
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   subItemList: [],

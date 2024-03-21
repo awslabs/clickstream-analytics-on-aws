@@ -11,23 +11,40 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
+import {
+  ConditionNumericOperator,
+  ConditionOperator,
+  EventsInSequenceCondition,
+  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+  ParameterCondition,
+  ParameterDataType,
+  SegmentCriteria,
+  SegmentFilter,
+  SegmentFilterConditionType,
+  SegmentFilterEventMetricType,
+  SegmentFilterGroup,
+  UserAttributeCondition,
+  UserInSegmentCondition,
+  UserSegmentFilterCondition,
+} from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
 import {
   CategoryItemType,
+  ERelationShip,
   IAnalyticsItem,
   IConditionItemType,
   IEventAnalyticsItem,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
   IRetentionAnalyticsItem,
-  SegmentFilterEventMetricType,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import i18n from 'i18n';
 import moment from 'moment';
-import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
+import { ConditionType, DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
 import {
   ConditionCategory,
   ExploreAggregationMethod,
@@ -1046,4 +1063,222 @@ export const userAttributeDisplayname = (displayName: string) => {
     ConditionCategory.USER_OUTER,
     ConditionCategory.USER
   );
+};
+
+export const generateDayTimesOption = () => {
+  const options: SelectProps.Option[] = [];
+  for (let i = 0; i < 24; i++) {
+    const label = `${i === 0 ? 12 : i > 12 ? i - 12 : i}${
+      i < 12 ? 'AM' : 'PM'
+    }`;
+    const value = `${i < 10 ? '0' : ''}${i}:00`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const generateWeekDayOptions = () => {
+  const options: SelectProps.Option[] = [];
+  for (let i = 0; i < 7; i++) {
+    const label = moment().day(i).format('dddd');
+    const value = `${i}`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const generateMonthDayOptions = () => {
+  const suffixes: string[] = ['th', 'st', 'nd', 'rd'];
+  const options: SelectProps.Option[] = [];
+  for (let i = 1; i <= 31; i++) {
+    const suffix = suffixes[i % 10 < 4 ? Math.min(i % 10, 3) : 0];
+    const label = `${i}${i < 4 || i > 20 ? suffix : 'th'}`;
+    const value = `${i}`;
+    options.push({ label, value });
+  }
+  return options;
+};
+
+export const getAutoRefreshDayOptionsByType = (type: string) => {
+  if (type === 'Daily') {
+    return generateDayTimesOption();
+  } else if (type === 'Weekly') {
+    return generateWeekDayOptions();
+  } else if (type === 'Monthly') {
+    return generateMonthDayOptions();
+  }
+};
+
+const convertAttributeList = (
+  attributeList: IConditionItemType[]
+): ParameterCondition[] => {
+  const eventConditionList: ParameterCondition[] = [];
+  for (const attribute of attributeList) {
+    const eventCondition: ParameterCondition = {
+      parameterType: attribute.conditionOption?.metadataSource as any,
+      parameterName: attribute.conditionOption?.value ?? '',
+      conditionOperator: attribute.conditionOperator?.value as any,
+      inputValue: attribute.conditionValue,
+      dataType: attribute.conditionOption?.valueType as any,
+    };
+    eventConditionList.push(eventCondition);
+  }
+  return eventConditionList;
+};
+
+const ConvertUserDoneEvent = (
+  item: IEventSegmentationItem
+): UserSegmentFilterCondition => {
+  return {
+    conditionType: SegmentFilterConditionType.UserEventCondition,
+    hasDone: item.userEventType?.value === ConditionType.USER_DONE,
+    event: {
+      eventName: item.userDoneEvent?.value ?? '',
+      eventParameterConditions: convertAttributeList(
+        item.userDoneEventConditionList
+      ),
+      operator: item.eventConditionRelationShip as any,
+    },
+    metricCondition: {
+      metricType: item.userDoneEventCalculateMethod
+        ?.value as SegmentFilterEventMetricType,
+      conditionOperator: item.userDoneEventOperation
+        ?.value as ConditionNumericOperator,
+      inputValue: item.userDoneEventValue?.map(Number) ?? [],
+      parameterType: item.userDoneEvent?.metadataSource as any,
+      parameterName: item.userDoneEventCalculateMethod?.name,
+      dataType: ParameterDataType.INTEGER,
+    },
+  };
+};
+
+const ConvertUserIsEvent = (
+  item: IEventSegmentationItem
+): UserAttributeCondition => {
+  return {
+    conditionType: SegmentFilterConditionType.UserAttributeCondition,
+    hasAttribute: item.userEventType?.value === ConditionType.USER_IS,
+    attributeCondition: {
+      parameterType: item.userIsParamOption?.metadataSource as any,
+      parameterName: item.userIsParamOption?.value ?? '',
+      dataType: ParameterDataType.INTEGER,
+      conditionOperator: ConditionOperator.BEGIN_WITH,
+      inputValue: [],
+    },
+  };
+};
+
+const convertUserDoneInSeqItem = (
+  item: IEventSegmentationItem
+): EventsInSequenceCondition => {
+  return {
+    conditionType: SegmentFilterConditionType.EventsInSequenceCondition,
+    hasDone: true,
+    events: [],
+    isInOneSession: false,
+    isDirectlyFollow: false,
+  };
+};
+
+const convertUserInSegment = (
+  item: IEventSegmentationItem
+): UserInSegmentCondition => {
+  return {
+    conditionType: SegmentFilterConditionType.UserInSegmentCondition,
+    isInSegment: item.userEventType?.value === ConditionType.USER_IN_GROUP,
+    segmentId: '',
+  };
+};
+
+const convertEventItem = (item: IEventSegmentationItem) => {
+  let tmpItem = {} as UserSegmentFilterCondition;
+  if (
+    item.userEventType?.value === ConditionType.USER_DONE ||
+    item.userEventType?.value === ConditionType.USER_NOT_DONE
+  ) {
+    tmpItem = ConvertUserDoneEvent(item);
+  } else if (
+    item.userDoneEvent?.value === ConditionType.USER_IS ||
+    item.userDoneEvent?.value === ConditionType.USER_IS_NOT
+  ) {
+    tmpItem = ConvertUserIsEvent(item);
+  } else if (
+    item.userDoneEvent?.value === ConditionType.USER_DONE_IN_SEQUENCE
+  ) {
+    tmpItem = convertUserDoneInSeqItem(item);
+  } else {
+    tmpItem = convertUserInSegment(item);
+  }
+  return tmpItem;
+};
+
+const convertSegmentItems = (
+  relationship: ERelationShip,
+  items: IEventSegmentationItem[]
+): SegmentFilter[] => {
+  const filterList: SegmentFilter[] = [];
+  const conditionList: UserSegmentFilterCondition[] = [];
+  // Determine group level of the object. If the relationship is and, it is two levels, otherwise it is one level.
+  if (relationship === ERelationShip.OR) {
+    for (const item of items) {
+      conditionList.push(convertEventItem(item));
+    }
+    filterList.push({
+      conditions: conditionList,
+      operator: 'or',
+    });
+  } else {
+    // Determine current data has subItem list, If has, it is two levels, otherwise it is one level.
+    for (const item of items) {
+      if (item.subItemList.length > 0) {
+        const subConditionList: UserSegmentFilterCondition[] = [];
+        for (const subItem of item.subItemList) {
+          subConditionList.push(convertEventItem(subItem));
+        }
+        filterList.push({
+          conditions: subConditionList,
+          operator: 'or',
+        });
+      } else {
+        filterList.push({
+          conditions: [convertEventItem(item)],
+          operator: 'or',
+        });
+      }
+    }
+  }
+  return filterList;
+};
+
+export const convertUISegmentObjectToAPIObject = (
+  segmentUIObject: IEventSegmentationObj
+): SegmentCriteria => {
+  const convertSegmentFilterGroup = (items: IEventSegmentationItem[]) => {
+    const itemList: SegmentFilterGroup[] = [];
+    for (const group of items) {
+      itemList.push({
+        description: group.groupName,
+        startDate:
+          group.groupDateRange?.value?.type === 'absolute'
+            ? group.groupDateRange?.value?.startDate
+            : '',
+        endDate:
+          group.groupDateRange?.value?.type === 'absolute'
+            ? group.groupDateRange?.value?.endDate
+            : '',
+        relativeDateRange: '', //TODO
+        filters: convertSegmentItems(
+          group.segmentEventRelationShip ?? ERelationShip.OR,
+          group.subItemList
+        ),
+        operator: 'and',
+      });
+    }
+    return itemList;
+  };
+  const segmentAPIObject: SegmentCriteria = {
+    filterGroups: convertSegmentFilterGroup(segmentUIObject.subItemList),
+    operator: 'and',
+  };
+  return segmentAPIObject;
 };

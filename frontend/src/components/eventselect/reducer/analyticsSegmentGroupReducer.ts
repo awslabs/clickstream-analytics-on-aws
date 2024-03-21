@@ -429,6 +429,11 @@ export const analyticsSegmentGroupReducer = (
           action.segmentProps.currentIndex,
           1
         );
+        if (action.segmentProps.parentData.subItemList.length === 2) {
+          newState.subItemList[
+            action.segmentProps.rootIndex
+          ].segmentEventRelationShip = ERelationShip.OR;
+        }
       } else if (action.segmentProps.level === 2) {
         if (action.segmentProps.parentData.subItemList.length === 2) {
           // convert to and

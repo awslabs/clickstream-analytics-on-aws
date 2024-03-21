@@ -11,11 +11,9 @@
  *  and limitations under the License.
  */
 
-import { Spinner } from '@cloudscape-design/components';
-import {
-  ConditionNumericOperator,
-  IEventSegmentationObj,
-} from 'components/eventselect/AnalyticsType';
+import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
+import { Container, Spinner } from '@cloudscape-design/components';
+import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
   AnalyticsSegmentActionType,
@@ -84,7 +82,11 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
   }, [data]);
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <Container>
+        <Spinner />
+      </Container>
+    );
   }
 
   return (

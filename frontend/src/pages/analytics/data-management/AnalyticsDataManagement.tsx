@@ -119,15 +119,13 @@ const AnalyticsDataManagement: React.FC = () => {
                 type: StateActionType.SHOW_HELP_PANEL,
                 payload: HelpPanelType.ANALYTICS_METADATA,
               });
+            } else if (!e.detail.open) {
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
-              if (!e.detail.open) {
-                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-              } else {
-                dispatch?.({
-                  type: StateActionType.SHOW_HELP_PANEL,
-                  payload: state?.helpPanelType,
-                });
-              }
+              dispatch?.({
+                type: StateActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
             }
           }}
           tools={<HelpInfo />}
