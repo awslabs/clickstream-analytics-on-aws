@@ -157,10 +157,6 @@
               "DataType": "INTEGER"
             },
             {
-              "Name": "engagement_rate",
-              "DataType": "DECIMAL"
-            },
-            {
               "Name": "avg_user_engagement_time_msec",
               "DataType": "DECIMAL"
             },
@@ -1068,24 +1064,6 @@
           "ParameterControls": [
               {
                   "DateTimePicker": {
-                      "ParameterControlId": "0fd53197-c058-4be1-b357-2bdca5dce2fe",
-                      "Title": "End Date",
-                      "SourceParameterName": "endDate",
-                      "DisplayOptions": {
-                          "TitleOptions": {
-                              "Visibility": "VISIBLE",
-                              "FontConfiguration": {
-                                  "FontSize": {
-                                      "Relative": "MEDIUM"
-                                  }
-                              }
-                          },
-                          "DateTimeFormat": "YYYY/MM/DD"
-                      }
-                  }
-              },
-              {
-                  "DateTimePicker": {
                       "ParameterControlId": "eba4d811-927e-4b70-803a-9d867f6b0fc4",
                       "Title": "Start Date",
                       "SourceParameterName": "startDate",
@@ -1101,7 +1079,25 @@
                           "DateTimeFormat": "YYYY/MM/DD"
                       }
                   }
-              }
+              },
+              {
+                "DateTimePicker": {
+                    "ParameterControlId": "0fd53197-c058-4be1-b357-2bdca5dce2fe",
+                    "Title": "End Date",
+                    "SourceParameterName": "endDate",
+                    "DisplayOptions": {
+                        "TitleOptions": {
+                            "Visibility": "VISIBLE",
+                            "FontConfiguration": {
+                                "FontSize": {
+                                    "Relative": "MEDIUM"
+                                }
+                            }
+                        },
+                        "DateTimeFormat": "YYYY/MM/DD"
+                    }
+                }
+            }
           ],
           "FilterControls": [
               {
@@ -1824,10 +1820,7 @@
                                               "FieldId": "LogicalTable1.engagement_rate.4.1711007596698",
                                               "Column": {
                                                   "DataSetIdentifier": "Day_User_Acquisition",
-                                                  "ColumnName": "engagement_rate"
-                                              },
-                                              "AggregationFunction": {
-                                                  "SimpleNumericalAggregation": "AVERAGE"
+                                                  "ColumnName": "Engagement Rate"
                                               }
                                           }
                                       },
@@ -1988,7 +1981,7 @@
                                   "ElementId": "5c45384b-4d4f-4ae1-b40c-4ad6bb6a2bb1",
                                   "ElementType": "FILTER_CONTROL",
                                   "ColumnIndex": 0,
-                                  "ColumnSpan": 13,
+                                  "ColumnSpan": 8,
                                   "RowIndex": 24,
                                   "RowSpan": 3
                               },
@@ -2059,24 +2052,6 @@
           "ParameterControls": [
               {
                   "DateTimePicker": {
-                      "ParameterControlId": "1a4797d2-cb81-4885-9f71-90f100a6790b",
-                      "Title": "End Date",
-                      "SourceParameterName": "endDate",
-                      "DisplayOptions": {
-                          "TitleOptions": {
-                              "Visibility": "VISIBLE",
-                              "FontConfiguration": {
-                                  "FontSize": {
-                                      "Relative": "MEDIUM"
-                                  }
-                              }
-                          },
-                          "DateTimeFormat": "YYYY/MM/DD"
-                      }
-                  }
-              },
-              {
-                  "DateTimePicker": {
                       "ParameterControlId": "9a748323-89a0-4110-b52f-d3d857d9ed71",
                       "Title": "Start Date",
                       "SourceParameterName": "startDate",
@@ -2092,7 +2067,25 @@
                           "DateTimeFormat": "YYYY/MM/DD"
                       }
                   }
-              }
+              },
+              {
+                "DateTimePicker": {
+                    "ParameterControlId": "1a4797d2-cb81-4885-9f71-90f100a6790b",
+                    "Title": "End Date",
+                    "SourceParameterName": "endDate",
+                    "DisplayOptions": {
+                        "TitleOptions": {
+                            "Visibility": "VISIBLE",
+                            "FontConfiguration": {
+                                "FontSize": {
+                                    "Relative": "MEDIUM"
+                                }
+                            }
+                        },
+                        "DateTimeFormat": "YYYY/MM/DD"
+                    }
+                }
+            }
           ],
           "FilterControls": [
               {
@@ -3242,7 +3235,7 @@
                                   "ElementId": "8d3bafea-01b1-4a87-a7dd-b1b9d6235797",
                                   "ElementType": "FILTER_CONTROL",
                                   "ColumnIndex": 0,
-                                  "ColumnSpan": 17,
+                                  "ColumnSpan": 8,
                                   "RowIndex": 31,
                                   "RowSpan": 3
                               },
@@ -3303,7 +3296,7 @@
                       "GridLayout": {
                           "Elements": [
                               {
-                                  "ElementId": "1a4797d2-cb81-4885-9f71-90f100a6790b",
+                                  "ElementId": "9a748323-89a0-4110-b52f-d3d857d9ed71",
                                   "ElementType": "PARAMETER_CONTROL",
                                   "ColumnIndex": 0,
                                   "ColumnSpan": 2,
@@ -3311,7 +3304,7 @@
                                   "RowSpan": 1
                               },
                               {
-                                  "ElementId": "9a748323-89a0-4110-b52f-d3d857d9ed71",
+                                  "ElementId": "1a4797d2-cb81-4885-9f71-90f100a6790b",
                                   "ElementType": "PARAMETER_CONTROL",
                                   "ColumnIndex": 2,
                                   "ColumnSpan": 2,
@@ -4506,7 +4499,12 @@
           "DataSetIdentifier": "Page_Screen_View_Detail",
           "Name": "View / User",
           "Expression": "count(1) / distinct_count({user_id})"
-      }
+      },
+      {
+        "DataSetIdentifier": "Day_User_Acquisition",
+        "Name": "Engagement Rate",
+        "Expression": "sum({engagement_session_cnt})/sum({session_cnt})"
+     }
   ],
   "ParameterDeclarations": [
       {
