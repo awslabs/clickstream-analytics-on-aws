@@ -424,6 +424,12 @@ describe('Workflow test with pipeline version', () => {
                         DataModelingRedshiftStack,
                         [
                           {
+                            ParameterKey: 'PipelineS3Bucket',
+                          },
+                          {
+                            ParameterKey: 'PipelineS3Prefix',
+                          },
+                          {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
@@ -438,6 +444,9 @@ describe('Workflow test with pipeline version', () => {
                         ],
                       ),
                       Reporting: removeParametersFromStack(ReportingStack, [
+                        {
+                          ParameterKey: 'QuickSightOwnerPrincipalParam',
+                        },
                         {
                           ParameterKey: 'AppRegistryApplicationArn.#',
                         },

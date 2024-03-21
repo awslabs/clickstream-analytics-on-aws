@@ -1018,6 +1018,7 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
     return stack._pipeline?.dataProcessing?.pipelineBucket.name ?? stack._pipeline?.bucket.name;
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     PipelineS3Bucket?: string;
 
   @JSONObject.optional('')
@@ -1030,6 +1031,7 @@ export class CDataModelingStack extends JSONObject {
     validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
     return defaultValue;
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     PipelineS3Prefix?: string;
 
   @JSONObject.optional('')
@@ -1328,6 +1330,7 @@ export class CReportingStack extends JSONObject {
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
     return stack._resources?.quickSightUser?.publishUserArn ?? '';
   })
+  @supportVersions([SolutionInfo.V1_1_0, '*'])
     QuickSightOwnerPrincipalParam?: string;
 
   @JSONObject.optional('')
