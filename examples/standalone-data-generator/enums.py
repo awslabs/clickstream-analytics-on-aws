@@ -114,16 +114,58 @@ browser_ua = WeightedArray([
     ('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 5)])
 
 browser_make = WeightedArray([('Chrome', 30), ('Safari', 20), ('Firefox', 10), ('Opera', 2), ('Edge', 8), ('IE', 5)])
-latest_referrer = WeightedArray(
-    [(('https://google.com/search?q=shopping', 'google.com'), 25),
-     (('https://www.baidu.com/s?wd=shopping', 'baidu.com'), 15),
-     (('https://www.amazon.com/?k=shopping', 'amazon.com'), 10), (('', ''), 80)])
 web_screens = WeightedArray(
     [((1080, 1920), 26.7), ((1600, 2560), 20.3), ((1920, 3072), 12.3), ((1440, 2560), 8.3), ((2160, 3840), 3.87),
      ((768, 1366), 1.3), ((900, 1600), 2.3)])
 web_viewport = WeightedArray(
     [((980, 1920), 26.7), ((1500, 2560), 20.3), ((1820, 3072), 12.3), ((1340, 2560), 8.3), ((2060, 3840), 3.87),
      ((668, 1366), 1.3), ((800, 1600), 2.3)])
+
+is_from_other_site = WeightedArray([(True, 30), (False, 0)])
+utm_source = WeightedArray(
+    [(('google', 'google_search'), 28), (('amazon', 'amazon_video_ads'), 20), (('facebook', 'facebook_newsfeed'), 13),
+     (('twitter', 'twitter_timeline'), 10), (('linkedin', 'linkedin_profile'), 9),
+     (('instagram', 'instagram_story'), 7), (('youtube', 'youtube_video'), 6), (('bing', 'bing_search'), 4),
+     (('pinterest', 'pinterest_board'), 2), (('baidu', 'baidu_search'), 1)])
+
+utm_medium = WeightedArray(
+    [('cpc', 28), ('banner', 20), ('email', 15), ('social', 12), ('affiliate', 10), ('retargeting', 6),
+     ('display', 4), ('native', 3), ('video', 1), ('sponsored', 1)])
+
+utm_campaign = WeightedArray(
+    [('summer_sale', 25), ('new_product_launch', 19), ('holiday_specials', 16), ('newsletter_signup', 13),
+     ('brand_awareness', 10), ('black_friday_deals', 7), ('welcome_offer', 4), ('customer_loyalty_program', 3),
+     ('webinar_promotion', 2), ('year_end_clearance', 1)])
+
+utm_term = WeightedArray(
+    [('consumer_analytics_software', 23), ('luxury_handbags', 18), ('online_certification_courses', 16),
+     ('fitness_trackers', 13), ('sustainable_clothing', 11), ('smart_home_devices', 8), ('car_rental', 5),
+     ('organic_coffee_beans', 3), ('travel_insurance', 2), ('vegan_snacks', 1)])
+
+utm_content = WeightedArray(
+    [('logo_link', 24), ('textlink', 17), ('cta_button', 15), ('banner_img', 13), ('sidebar_ad', 11),
+     ('footer_link', 9), ('email_header', 5), ('video_ad', 3), ('text_ad', 2), ('product_image', 1)])
+
+utm_id = WeightedArray(
+    [('20786192103', 24), ('1000000234', 17), ('campaign_12345', 15), ('ad_56789', 13), ('promo_98765', 11),
+     ('event_54321', 9), ('abc_123', 5), ('abcdefghij', 3), ('unique_id_001', 2), ('9988776655', 1)])
+
+
+def get_latest_referrer():
+    from_other_site = is_from_other_site.get_random_item()
+    if from_other_site:
+        random_utm_source = utm_source.get_random_item()
+        referrer_host = random_utm_source[0] + ".com"
+        referrer_url = "https://" + referrer_host + "?utm_id=" + utm_id.get_random_item() \
+                       + "&utm_source=" + random_utm_source[0] \
+                       + "&utm_source_platform=" + random_utm_source[1] \
+                       + "&utm_medium=" + utm_medium.get_random_item() \
+                       + "&utm_campaign=" + utm_campaign.get_random_item() \
+                       + "&utm_term=" + utm_term.get_random_item() \
+                       + "&utm_content=" + utm_content.get_random_item()
+        return referrer_url, referrer_host
+    else:
+        return "", ""
 
 
 def get_model_for_brand(brand):
@@ -207,14 +249,14 @@ product_category = WeightedArray(
     [(Category.BOOK, 5), (Category.TOOLS, 3), (Category.FOOD_SERVICE, 2), (Category.CODE_DISPENSED, 1),
      (Category.BEAUTY, 1), (Category.FOOTWEAR, 1), (Category.OUTDOORS, 2), (Category.JEWELRY, 1)])
 
-main_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
-detail_page_scroll_times = WeightedArray([(0, 50), (1, 50)])
-category_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
-search_times = WeightedArray([(1, 50), (2, 25), (3, 5)])
+main_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 5)])
+detail_page_scroll_times = WeightedArray([(0, 50), (1, 10)])
+category_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 5)])
+search_times = WeightedArray([(1, 50), (2, 10), (3, 2)])
 add_to_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
 remove_from_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
 
-screen_view_times = WeightedArray([(0, 5), (10, 20), (20, 25), (30, 15), (40, 6), (50, 3)])
+screen_view_times = WeightedArray([(0, 50), (10, 20), (20, 10), (30, 5), (40, 2), (50, 1)])
 
 
 # user enum
