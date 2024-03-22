@@ -13,7 +13,7 @@
 
 import { join } from 'path';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
-import { Duration, Stack } from 'aws-cdk-lib';
+import { Duration, Stack, CfnResource } from 'aws-cdk-lib';
 
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Runtime, Tracing, Function } from 'aws-cdk-lib/aws-lambda';
@@ -24,6 +24,7 @@ import { Construct } from 'constructs';
 
 import { RoleUtil } from './utils-role';
 
+import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
@@ -103,7 +104,6 @@ export class LambdaUtil {
         securityGroups: [securityGroupForLambda],
         role: lambdaRole,
         entry: join(__dirname, '..', 'lambda', 'partition-syncer', 'index.ts'),
-        reservedConcurrentExecutions: 1,
         environment: {
           SOURCE_S3_BUCKET_NAME: this.props.sourceS3Bucket.bucketName,
           SOURCE_S3_PREFIX: this.props.sourceS3Prefix,
@@ -121,9 +121,14 @@ export class LambdaUtil {
         memorySize: 256,
       },
     );
+    addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
+      {
+        id: 'W92',
+        reason: 'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
+      },
+    ]);
     return fn;
   }
-
 
   public createEmrJobSubmitterLambda(
     glueDB: Database,
