@@ -24,7 +24,7 @@ BEGIN
     where 
       event_date = day
       and event_name = '_page_view'
-      and page_view_entrances
+      and page_view_entrances = 'true'
       and page_view_page_title is not null
     group by 1, 2, 3, 4
     ;
@@ -46,7 +46,7 @@ BEGIN
     where 
       event_date = day
       and event_name = '_page_view'
-      and page_view_entrances
+      and page_view_entrances = 'true'
       and page_view_page_url_path is not null
     group by 1, 2, 3, 4
     ;
@@ -68,7 +68,7 @@ BEGIN
     where 
       event_date = day
       and event_name = '_screen_view'
-      and page_view_entrances
+      and page_view_entrances = 'true'
       and screen_view_screen_name is not null
     group by 1, 2, 3, 4
     ;
@@ -90,7 +90,7 @@ BEGIN
     where 
       event_date = day
       and event_name = '_screen_view'
-      and page_view_entrances
+      and page_view_entrances = 'true'
       and screen_view_screen_id is not null
     group by 1, 2, 3, 4
     ;
