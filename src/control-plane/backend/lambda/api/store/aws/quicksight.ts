@@ -31,6 +31,7 @@ import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
+import { SolutionInfo, parseVersion } from '../../common/solution-info-ln';
 import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
@@ -57,8 +58,7 @@ export const registerClickstreamUser = async () => {
       UserRole: UserRole.ADMIN,
       SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
     });
-    const clickstreamUserArn = await getClickstreamUserArn();
-    return clickstreamUserArn;
+    return;
   } catch (err) {
     logger.error('Register Clickstream User Error.', { err });
     throw err;
@@ -140,6 +140,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   userArn: string,
   allowedDomain: string,
+  templateVersion: string,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -148,14 +149,10 @@ export const generateEmbedUrlForRegisteredUser = async (
     const quickSight = sdkClient.QuickSight({
       region: region,
     });
-    const arns = await getClickstreamUserArn();
-    let embedUserArn = arns.publishUserArn;
-    if (region.startsWith('cn')) {
-      embedUserArn = userArn;
-    }
+    const arns = await getClickstreamUserArn(templateVersion, userArn);
     let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
       AwsAccountId: awsAccountId,
-      UserArn: embedUserArn,
+      UserArn: arns.publishUserArn,
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
@@ -269,15 +266,41 @@ export const describeClickstreamAccountSubscription = async () => {
 export interface QuickSightUserArns {
   publishUserArn: string;
   publishUserName: string;
+  exploreUserArn: string;
+  exploreUserName: string;
 }
 
-export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
+export const getClickstreamUserArn = async (templateVersion: string, userArn: string): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
+  const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
-  const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const publishUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
-  const publishUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
-  return { publishUserArn, publishUserName };
+  const partition = isChinaRegion ? 'aws-cn' : 'aws';
+  const publishUserName = isChinaRegion ? userArn?.split('/').pop() :
+    `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
+  const publishUserArn = isChinaRegion ? userArn :
+    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+
+  const shortVersion = parseVersion(templateVersion).short;
+  if (shortVersion > SolutionInfo.V1_1_4) {
+    // remove explore user
+    return {
+      publishUserArn: publishUserArn ?? '',
+      publishUserName: publishUserName ?? '',
+      exploreUserArn: publishUserArn ?? '',
+      exploreUserName: publishUserName ?? '',
+    };
+  }
+
+  const exploreUserName = isChinaRegion ? userArn?.split('/').pop() :
+    `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
+  const exploreUserArn = isChinaRegion ? userArn :
+    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  return {
+    publishUserArn: publishUserArn ?? '',
+    publishUserName: publishUserName ?? '',
+    exploreUserArn: exploreUserArn ?? '',
+    exploreUserName: exploreUserName ?? '',
+  };
 };
 
 export const waitDashboardSuccess = async (region: string, dashboardId: string) => {
@@ -323,9 +346,11 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string) 
 export const createPublishDashboard = async (
   dashboard: IDashboard,
   defaultDataSourceArn: string,
+  templateVersion: string,
+  userArn: string,
 ): Promise<any> => {
   try {
-    const principals = await getClickstreamUserArn();
+    const principals = await getClickstreamUserArn(templateVersion, userArn);
     const quickSight = sdkClient.QuickSight({
       region: dashboard.region,
     });
@@ -581,6 +606,8 @@ export const checkFolder = async (
   region: string,
   projectId: string,
   appId: string,
+  templateVersion: string,
+  userArn: string,
   dashboardId?: string,
 ) => {
   try {
@@ -590,7 +617,7 @@ export const checkFolder = async (
     const folderId = getQuickSightFolderId(projectId, appId);
     const exist = await existFolder(region, folderId);
     if (!exist) {
-      const principals = await getClickstreamUserArn();
+      const principals = await getClickstreamUserArn(templateVersion, userArn);
       const folderRes = await quickSight.createFolder({
         AwsAccountId: awsAccountId,
         FolderId: folderId,

@@ -28,6 +28,7 @@ import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import {
+  BucketLocationConstraint,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
@@ -42,13 +43,16 @@ import 'aws-sdk-client-mock-jest';
 import {
   MOCK_PROJECT_ID,
   createPipelineMock,
+  createPipelineMockForBJSRegion,
   dictionaryMock,
 } from './ddb-mock';
 import {
-  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+  KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE, KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN,
 } from './pipeline-mock';
 import {
   APPREGISTRY_APPLICATION_ARN_PARAMETER,
+  APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
   BASE_METRICS_PARAMETERS,
   DATA_PROCESSING_PLUGIN3_PARAMETERS,
   INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
@@ -142,8 +146,30 @@ const IngestionStack = {
         APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
-      Tags: Tags,
+      Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+const IngestionStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Ingestion-kinesis-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
     },
   },
   End: true,
@@ -164,8 +190,30 @@ const DataProcessingStack = {
         APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
-      Tags: Tags,
+      Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+    },
+  },
+  Next: 'DataModelingRedshift',
+  Type: 'Stack',
+};
+
+const DataProcessingStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataProcessing-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
     },
   },
   Next: 'DataModelingRedshift',
@@ -186,8 +234,30 @@ const DataModelingRedshiftStack = {
         APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
-      Tags: Tags,
+      Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+    },
+  },
+  Next: 'Reporting',
+  Type: 'Stack',
+};
+
+const DataModelingRedshiftStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-DataModelingRedshift-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
     },
   },
   Next: 'Reporting',
@@ -208,8 +278,30 @@ const ReportingStack = {
         APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Reporting-6666-6666`,
-      Tags: Tags,
+      Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+const ReportingStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Reporting-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
     },
   },
   End: true,
@@ -230,8 +322,30 @@ const MetricsStack = {
         APPREGISTRY_APPLICATION_ARN_PARAMETER,
       ],
       StackName: `${getStackPrefix()}-Metrics-6666-6666`,
-      Tags: Tags,
+      Tags: InitTags,
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+    },
+  },
+  End: true,
+  Type: 'Stack',
+};
+
+const MetricsStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        ...BASE_METRICS_PARAMETERS,
+        APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+      ],
+      StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
     },
   },
   End: true,
@@ -262,6 +376,30 @@ const ServiceCatalogAppRegistryStack = {
   Type: 'Stack',
 };
 
+const ServiceCatalogAppRegistryStackCn = {
+  Data: {
+    Callback: {
+      BucketName: 'TEST_EXAMPLE_BUCKET',
+      BucketPrefix: 'clickstream/workflow/main-3333-3333',
+    },
+    Input: {
+      Action: 'Create',
+      Region: 'cn-north-1',
+      Parameters: [
+        {
+          ParameterKey: 'ProjectId',
+          ParameterValue: 'project_8888_8888',
+        },
+      ],
+      StackName: `${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666`,
+      Tags: InitTags,
+      TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
+    },
+  },
+  Next: 'PipelineStacks',
+  Type: 'Stack',
+};
+
 function removeParametersFromStack(stack: any, parameters: Parameter[]) {
   const newStack = cloneDeep(stack);
   newStack.Data.Input.Parameters = removeParameters(newStack.Data.Input.Parameters, parameters);
@@ -271,6 +409,12 @@ function removeParametersFromStack(stack: any, parameters: Parameter[]) {
 function mergeParametersFromStack(stack: any, parameters: Parameter[]) {
   const newStack = cloneDeep(stack);
   newStack.Data.Input.Parameters = mergeParameters(newStack.Data.Input.Parameters, parameters);
+  return newStack;
+}
+
+function setTagsToStack(stack: any, tags: any[]) {
+  const newStack = cloneDeep(stack);
+  newStack.Data.Input.Tags = tags;
   return newStack;
 }
 
@@ -319,21 +463,21 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: IngestionStack,
+                      Ingestion: setTagsToStack(IngestionStack, Tags),
                     },
                   },
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: DataProcessingStack,
-                      DataModelingRedshift: DataModelingRedshiftStack,
-                      Reporting: ReportingStack,
+                      DataProcessing: setTagsToStack(DataProcessingStack, Tags),
+                      DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
+                      Reporting: setTagsToStack(ReportingStack, Tags),
                     },
                   },
                   {
                     StartAt: 'Metrics',
                     States: {
-                      Metrics: MetricsStack,
+                      Metrics: setTagsToStack(MetricsStack, Tags),
                     },
                   },
                 ],
@@ -508,6 +652,84 @@ describe('Workflow test with pipeline version', () => {
                           },
                         ],
                       ),
+                      Reporting: mergeParametersFromStack(ReportingStack, [
+                        {
+                          ParameterKey: 'QuickSightOwnerPrincipalParam',
+                          ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                        },
+                      ],
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStack,
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+
+  it('Generate workflow v1.1.5', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      noVpcEndpoint: true,
+    });
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
+      templateVersion: SolutionInfo.V1_1_5,
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStack,
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        },
+                      ],
+                      ),
+                      DataModelingRedshift: removeParametersFromStack(
+                        DataModelingRedshiftStack,
+                        [
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                        ],
+                      ),
                       Reporting: ReportingStack,
                     },
                   },
@@ -593,17 +815,49 @@ describe('Workflow test with pipeline version', () => {
     };
     expect(wf).toEqual(expected);
   });
+});
 
-  it('Generate workflow v1.2.0', async () => {
+describe('Workflow test with pipeline version in China region', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+    kafkaMock.reset();
+    redshiftMock.reset();
+    redshiftServerlessMock.reset();
+    sfnMock.reset();
+    secretsManagerMock.reset();
+    ec2Mock.reset();
+    quickSightMock.reset();
+    s3Mock.reset();
+    iamMock.reset();
+    cloudWatchEventsMock.reset();
+    snsMock.reset();
+    process.env.AWS_REGION='cn-north-1';
+  });
+
+  afterEach(() => {
+    process.env.AWS_REGION=undefined;
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+
+  it('Generate workflow current version in China region', async () => {
     dictionaryMock(ddbMock);
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
       noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
     });
+    createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
-      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
-      templateVersion: SolutionInfo.V1_2_0,
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN),
+      templateVersion: FULL_SOLUTION_VERSION,
+      region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -618,34 +872,384 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'Ingestion',
                     States: {
-                      Ingestion: IngestionStack,
+                      Ingestion: setTagsToStack(IngestionStackCn, Tags),
                     },
                   },
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
-                        {
-                          ParameterKey: 'TransformerAndEnrichClassNames',
-                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                        },
-                      ],
-                      ),
-                      DataModelingRedshift: DataModelingRedshiftStack,
-                      Reporting: ReportingStack,
+                      DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
+                      DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
+                      Reporting: mergeParametersFromStack(
+                        setTagsToStack(ReportingStackCn, Tags),
+                        [
+                          {
+                            ParameterKey: 'QuickSightUserParam',
+                            ParameterValue: 'GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightOwnerPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                        ]),
                     },
                   },
                   {
                     StartAt: 'Metrics',
                     States: {
-                      Metrics: MetricsStack,
+                      Metrics: setTagsToStack(MetricsStackCn, Tags),
                     },
                   },
                 ],
                 End: true,
                 Type: 'Parallel',
               },
-              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStack,
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+
+  it('Generate workflow v1.0.0 in China region', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
+    });
+    createPipelineMockForBJSRegion(s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE),
+      templateVersion: SolutionInfo.V1_0_0,
+      region: 'cn-north-1',
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: removeParametersFromStack(IngestionStackCn, [
+                        {
+                          ParameterKey: 'AppRegistryApplicationArn',
+                        },
+                      ],
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: removeParametersFromStack(
+                        mergeParametersFromStack(
+                          DataProcessingStackCn, [
+                            {
+                              ParameterKey: 'TransformerAndEnrichClassNames',
+                              ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                            },
+                          ],
+                        ),
+                        [
+                          {
+                            ParameterKey: 'AppRegistryApplicationArn',
+                          },
+                        ],
+                      ),
+                      DataModelingRedshift: removeParametersFromStack(
+                        {
+                          Data: DataModelingRedshiftStackCn.Data,
+                          End: true,
+                          Type: 'Stack',
+                        },
+                        [
+                          {
+                            ParameterKey: 'PipelineS3Bucket',
+                          },
+                          {
+                            ParameterKey: 'PipelineS3Prefix',
+                          },
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                          {
+                            ParameterKey: 'AppRegistryApplicationArn',
+                          },
+                        ],
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: removeParametersFromStack(MetricsStackCn, [
+                        {
+                          ParameterKey: 'AppRegistryApplicationArn',
+                        },
+                      ]),
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+
+  it('Generate workflow v1.1.0 in China region', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
+    });
+    createPipelineMockForBJSRegion(s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE),
+      templateVersion: SolutionInfo.V1_1_0,
+      region: 'cn-north-1',
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStackCn,
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: DataProcessingStackCn,
+                      DataModelingRedshift: removeParametersFromStack(
+                        {
+                          Data: DataModelingRedshiftStackCn.Data,
+                          End: true,
+                          Type: 'Stack',
+                        },
+                        [
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                        ],
+                      ),
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStackCn,
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+
+  it('Generate workflow v1.1.5 in China region', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
+    });
+    createPipelineMockForBJSRegion(s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN),
+      templateVersion: SolutionInfo.V1_1_5,
+      region: 'cn-north-1',
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStackCn,
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: DataProcessingStackCn,
+                      DataModelingRedshift: removeParametersFromStack(
+                        DataModelingRedshiftStackCn,
+                        [
+                          {
+                            ParameterKey: 'SegmentsS3Prefix',
+                          },
+                          {
+                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                          },
+                        ],
+                      ),
+                      Reporting: mergeParametersFromStack(ReportingStackCn, [
+                        {
+                          ParameterKey: 'QuickSightUserParam',
+                          ParameterValue: 'GCRUser',
+                        },
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                        },
+                        {
+                          ParameterKey: 'QuickSightOwnerPrincipalParam',
+                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                        },
+                      ]),
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStackCn,
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+
+  it('Generate workflow v1.1.6 in China region', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
+    });
+    createPipelineMockForBJSRegion(s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN),
+      templateVersion: SolutionInfo.V1_1_6,
+      region: 'cn-north-1',
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'ServiceCatalogAppRegistry',
+            States: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: IngestionStackCn,
+                    },
+                  },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: DataProcessingStackCn,
+                      DataModelingRedshift: DataModelingRedshiftStackCn,
+                      Reporting: mergeParametersFromStack(ReportingStackCn, [
+                        {
+                          ParameterKey: 'QuickSightUserParam',
+                          ParameterValue: 'GCRUser',
+                        },
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                        },
+                        {
+                          ParameterKey: 'QuickSightOwnerPrincipalParam',
+                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                        },
+                      ]),
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: MetricsStackCn,
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: ServiceCatalogAppRegistryStackCn,
             },
           },
         ],

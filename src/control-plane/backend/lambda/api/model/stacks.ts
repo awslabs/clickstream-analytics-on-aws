@@ -1328,7 +1328,7 @@ export class CReportingStack extends JSONObject {
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
-    return stack._resources?.quickSightUser?.publishUserArn ?? '';
+    return stack._resources?.quickSightUser?.exploreUserArn ?? '';
   })
   @supportVersions([SolutionInfo.V1_1_0, '*'])
     QuickSightOwnerPrincipalParam?: string;

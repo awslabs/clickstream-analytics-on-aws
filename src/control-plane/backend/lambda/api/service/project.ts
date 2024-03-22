@@ -14,6 +14,7 @@
 import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
+import { FULL_SOLUTION_VERSION } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
@@ -71,7 +72,14 @@ export class ProjectServ {
       }
       // check folder and move preset dashboard to folder
       const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
-      await checkFolder(pipeline.region, projectId, appId, presetAppDashboard?.id);
+      await checkFolder(
+        pipeline.region,
+        projectId,
+        appId,
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+        presetAppDashboard?.id,
+      );
       const result = await listDashboardsByApp(pipeline.region, projectId, appId);
       const items = paginateData(result, true, pageSize, pageNumber);
       return res.json(new ApiSuccess({
@@ -106,7 +114,12 @@ export class ProjectServ {
       if (dashboard.sheets.length === 0) {
         return res.status(400).json(new ApiFail('Dashboard sheets is required.'));
       }
-      await createPublishDashboard(dashboard, defaultDataSourceArn);
+      await createPublishDashboard(
+        dashboard,
+        defaultDataSourceArn,
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       return res.status(201).json(new ApiSuccess({ id: dashboardId }, 'Dashboard created.'));
     } catch (error) {
       next(error);
@@ -130,6 +143,7 @@ export class ProjectServ {
         pipeline.region,
         pipeline.reporting?.quickSight?.user ?? '',
         allowedDomain,
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
         dashboardId,
       );
       if (embed && embed.EmbedUrl) {
@@ -196,6 +210,7 @@ export class ProjectServ {
         latestPipeline.region,
         latestPipeline.reporting?.quickSight?.user ?? '',
         allowedDomain,
+        latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION,
       );
       return res.json(new ApiSuccess(embed));
     } catch (error) {

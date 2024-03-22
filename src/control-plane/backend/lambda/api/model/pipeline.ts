@@ -100,7 +100,7 @@ import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
-import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
+import { QuickSightUserArns, getClickstreamUserArn, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
 import { getExecutionDetail, listExecutions } from '../store/aws/sfn';
@@ -416,11 +416,11 @@ export class CPipeline {
 
     this._checkParametersAllowEdit(editedParameters);
 
-    this._overwriteParameters(editedParameters, oldPipeline);
+    this._overwriteParameters(editedParameters);
 
   }
 
-  private _overwriteParameters(editedParameters: EditedPath[], oldPipeline: IPipeline): void {
+  private _overwriteParameters(editedParameters: EditedPath[]): void {
     const editKeys: string[] = editedParameters.map((p: EditedPath) => p[0]);
     const editStacks: string[] = [];
     const editParameters: StackUpdateParameter[] = [];
@@ -428,10 +428,6 @@ export class CPipeline {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
       const parameterValue = editedParameters.find((p: EditedPath) => p[0] === key)?.[2];
-      if (stackName.startsWith(`${getStackPrefix()}-${PipelineStackType.REPORTING}`) &&
-      !oldPipeline.region.startsWith('cn')) {
-        continue; // skip reporting stack
-      }
       if (!editStacks.includes(stackName)) {
         editStacks.push(stackName);
       }
@@ -599,6 +595,7 @@ export class CPipeline {
     };
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
+    this.pipeline.workflow = this.stackManager.getWorkflow();
     this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
@@ -683,21 +680,15 @@ export class CPipeline {
     }
 
     if (this.pipeline.reporting) {
-      if (this.pipeline.region.startsWith('cn')) {
-        this.resources = {
-          ...this.resources,
-          quickSightUser: {
-            publishUserArn: this.pipeline.reporting.quickSight?.user ?? '',
-            publishUserName: this.pipeline.reporting.quickSight?.user?.split('/').pop() ?? '',
-          },
-        };
-      } else {
-        const quickSightUser = await registerClickstreamUser();
-        this.resources = {
-          ...this.resources,
-          quickSightUser: quickSightUser,
-        };
-      }
+      await registerClickstreamUser();
+      const quickSightUser = await getClickstreamUserArn(
+        this.pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        this.pipeline.reporting.quickSight?.user ?? '',
+      );
+      this.resources = {
+        ...this.resources,
+        quickSightUser: quickSightUser,
+      };
     }
   }
 
@@ -922,13 +913,14 @@ export class CPipeline {
     };
 
     // Add awsApplication tag to start viewing the cost, security, and operational metrics for the application
-    const awsApplicationTag: Tag = {
-      Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
-      Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
-    };
-    mergeIntoStackTags(this.stackTags, awsApplicationTag);
-    mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
-
+    if (this.pipeline.templateVersion === FULL_SOLUTION_VERSION) {
+      const awsApplicationTag: Tag = {
+        Key: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+        Value: `#.${appRegistryStackName}.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+      };
+      mergeIntoStackTags(this.stackTags, awsApplicationTag);
+      mergeIntoPipelineTags(this.pipeline.tags, awsApplicationTag); // Save tag to pipeline tags for persistence
+    }
     return {
       Type: WorkflowStateType.PARALLEL,
       End: true,
