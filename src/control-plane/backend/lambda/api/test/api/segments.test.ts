@@ -59,7 +59,7 @@ describe('Segments test', () => {
     expect(res.body.message).toEqual('Segment created successfully.');
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutTargetsCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
@@ -161,6 +161,7 @@ describe('Segments test', () => {
   });
 
   test('Update segment, change from auto refresh to manual trigger', async () => {
+    mockPipeline();
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -182,6 +183,7 @@ describe('Segments test', () => {
     expect(res.body.message).toEqual('Segment updated successfully.');
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 1);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
@@ -218,7 +220,7 @@ describe('Segments test', () => {
     expect(res.body.message).toEqual('Segment updated successfully.');
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutRuleCommand, 1);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutTargetsCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
@@ -252,7 +254,7 @@ describe('Segments test', () => {
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(PutTargetsCommand, 1);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 0);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
@@ -311,6 +313,7 @@ describe('Segments test', () => {
   });
 
   test('Delete segment successfully', async () => {
+    mockPipeline();
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
@@ -329,6 +332,7 @@ describe('Segments test', () => {
     expect(res.body.message).toEqual('Segment deleted successfully.');
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 1);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
   });
 
@@ -351,6 +355,7 @@ describe('Segments test', () => {
     expect(res.body.message).toEqual(`Segment with id ${MOCK_SEGMENT_ID} is not found`);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 0);
     expect(eventBridgeClientMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
@@ -421,7 +426,7 @@ describe('Segments test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.body.success).toEqual(true);
     expect(res.body.message).toEqual('Run segment refresh job successfully.');
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
   });

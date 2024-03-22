@@ -35,6 +35,8 @@ export interface RefreshSchedule {
 
 export type FilterOperator = 'and' | 'or';
 
+export type TimeUnit = 'hour' | 'day' | 'week' | 'month';
+
 export interface SegmentCriteria {
   filterGroups: SegmentFilterGroup[];
   operator: FilterOperator;
@@ -42,9 +44,11 @@ export interface SegmentCriteria {
 
 export interface SegmentFilterGroup {
   description?: string;
+  isRelativeDateRange: boolean;
   startDate?: string;
   endDate?: string;
-  relativeDateRange?: string; // TODO: expression
+  lastN?: number;
+  timeUnit?: TimeUnit;
   filters: SegmentFilter[];
   operator: FilterOperator;
 }

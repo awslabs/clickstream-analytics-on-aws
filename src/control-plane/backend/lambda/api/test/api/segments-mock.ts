@@ -29,6 +29,7 @@ export const MOCK_CREATE_USER_SEGMENT_SETTING_INPUT = {
     operator: 'and',
     filterGroups: [
       {
+        isRelativeDateRange: false,
         startDate: '2024-01-01',
         endDate: '2024-01-10',
         operator: 'and',
@@ -93,8 +94,9 @@ export const MOCK_CREATE_USER_SEGMENT_SETTING_INPUT = {
         ],
       },
       {
-        startDate: '2024-01-01',
-        endDate: '2024-01-10',
+        isRelativeDateRange: true,
+        lastN: 7,
+        timeUnit: 'day',
         operator: 'and',
         filters: [
           {

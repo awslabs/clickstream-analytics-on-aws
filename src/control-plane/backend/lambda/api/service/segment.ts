@@ -42,14 +42,7 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const segmentStore = new DynamoDBSegmentStore();
 const pipelineStore = new DynamoDbStore();
-const eventBridgeClient = new EventBridgeClient({
-  ...aws_sdk_client_common_config,
-  region: process.env.AWS_REGION,
-});
-const sfnClient = new SFNClient({
-  ...aws_sdk_client_common_config,
-  region: process.env.AWS_REGION,
-});
+
 const s3Client = new S3Client({
   ...aws_sdk_client_common_config,
 });
@@ -135,7 +128,7 @@ export class SegmentServ {
       }
       // Clean up EventBridge rule when cron type is set to Manual
       if (refreshSchedule.cron === 'Manual' && segmentDdbItem.eventBridgeRuleArn !== '') {
-        await this.deleteEventBridgeRule(segmentId);
+        await this.deleteEventBridgeRule(segmentDdbItem.projectId, segmentId);
         updatedItem.eventBridgeRuleArn = '';
       }
 
@@ -160,7 +153,7 @@ export class SegmentServ {
 
       // Clean up EventBridge rule
       if (segment.eventBridgeRuleArn !== '') {
-        await this.deleteEventBridgeRule(segmentId);
+        await this.deleteEventBridgeRule(segment.projectId, segmentId);
       }
 
       await segmentStore.delete(appId as string, segmentId as string);
@@ -207,6 +200,8 @@ export class SegmentServ {
       if (!workflowArn) {
         return res.status(400).send(new ApiFail('Segment workflow state machine is not found.'));
       }
+
+      const sfnClient = await this.createSFNClient(segment.projectId);
       await sfnClient.send(new StartExecutionCommand({
         stateMachineArn: workflowArn,
         input: JSON.stringify({
@@ -273,6 +268,33 @@ export class SegmentServ {
     };
   }
 
+  private async getPipelineRegion(projectId: string) {
+    const pipelines = await pipelineStore.listPipeline(projectId, 'latest', 'asc');
+    if (pipelines.length === 0) {
+      throw new Error(`Pipeline for ${projectId} is not found`);
+    }
+
+    return pipelines[0].region;
+  }
+
+  private async createEventBridgeClient(projectId: string) {
+    const region = await this.getPipelineRegion(projectId);
+
+    return new EventBridgeClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+  }
+
+  private async createSFNClient(projectId: string) {
+    const region = await this.getPipelineRegion(projectId);
+
+    return new SFNClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+  }
+
   private async getSegmentsWorkflowSfnArn(segment: Segment) {
     const pipelines = await pipelineStore.listPipeline(segment.projectId, 'latest', 'asc');
     if (pipelines.length === 0) {
@@ -293,6 +315,7 @@ export class SegmentServ {
       throw new Error('Segment workflow state machine is not found.');
     }
 
+    const eventBridgeClient = await this.createEventBridgeClient(segment.projectId);
     const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}${segment.segmentId}`;
     const rule = await eventBridgeClient.send(new PutRuleCommand({
       Name: ruleName,
@@ -321,7 +344,8 @@ export class SegmentServ {
     return rule;
   }
 
-  private async deleteEventBridgeRule(segmentId: string) {
+  private async deleteEventBridgeRule(projectId: string, segmentId: string) {
+    const eventBridgeClient = await this.createEventBridgeClient(projectId);
     const ruleName = `${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}${segmentId}`;
     await eventBridgeClient.send(new RemoveTargetsCommand({
       Rule: ruleName,
