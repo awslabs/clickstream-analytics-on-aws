@@ -398,6 +398,11 @@ export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
 
 
+export const CLICKSTREAM_USER_M_VIEW_NAME = 'clickstream_user_m_view_v2';
+export const CLICKSTREAM_USER_M_MAX_VIEW_NAME = 'clickstream_user_m_max_view_v2';
+
+export const CLICKSTREAM_SESSION_M_VIEW_NAME = 'clickstream_session_m_view';
+export const CLICKSTREAM_SESSION_M_MAX_VIEW_NAME = 'clickstream_session_m_max_view';
 
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v3';
 export const CLICKSTREAM_ITEM_VIEW_NAME = 'clickstream_item_view_v1';

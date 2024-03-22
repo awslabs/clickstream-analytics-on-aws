@@ -91,7 +91,7 @@ export function createQuicksightCustomResource(
   const itemViewProjectedColumns: string[] = [];
   clickstream_event_view_columns.map( item => eventViewProjectedColumns.push(item.Name!));
   clickstream_item_view_columns.map( item => itemViewProjectedColumns.push(item.Name!));
-  
+
   const dashboardDefProps: QuickSightDashboardDefProps = {
     analysisName: 'Clickstream Analysis',
     dashboardName: 'Clickstream Dashboard',
@@ -167,7 +167,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'view_count',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -209,7 +209,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'previous_active_user_count',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -251,7 +251,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'previous_new_user_count',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -292,7 +292,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'user_count',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -333,7 +333,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'merged_user_id',
             Type: 'STRING',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -393,7 +393,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -440,7 +440,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'user_count',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -483,7 +483,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'view_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -528,7 +528,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'avg_engagement_time_per_user',
             Type: 'DECIMAL',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -574,7 +574,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'view_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -628,7 +628,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_id',
             Type: 'STRING',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -671,7 +671,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'entrance_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -717,7 +717,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'exit_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -761,7 +761,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'user_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -798,7 +798,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_cnt',
             Type: 'INTEGER',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -834,7 +834,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'merged_user_id',
             Type: 'STRING',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -874,7 +874,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'crashed_user_id',
             Type: 'STRING',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -892,7 +892,7 @@ export function createQuicksightCustomResource(
           'event_date',
           'platform',
           'merged_user_id',
-          'crashed_user_id'
+          'crashed_user_id',
         ],
       },
     ],
