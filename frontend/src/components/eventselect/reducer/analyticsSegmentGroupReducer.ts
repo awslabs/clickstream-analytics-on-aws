@@ -408,14 +408,28 @@ export const analyticsSegmentGroupReducer = (
         let previousData = cloneDeep(newState.subItemList[action.rootIndex]);
         if (previousData.subItemList.length === 1) {
           previousData = previousData.subItemList[0];
+          newState.subItemList[action.rootIndex] = {
+            ...newState.subItemList[action.rootIndex],
+            segmentEventRelationShip: ERelationShip.AND,
+            subItemList: [{ ...previousData }, { ...DEFAULT_SEGMENT_ITEM }],
+          };
+        } else {
+          const preGroupData = previousData.subItemList;
+          newState.subItemList[action.rootIndex] = {
+            ...newState.subItemList[action.rootIndex],
+            segmentEventRelationShip: ERelationShip.AND,
+            subItemList: [
+              {
+                segmentEventRelationShip: ERelationShip.OR,
+                subItemList: preGroupData,
+                userEventType: null,
+                sequenceEventList: [],
+                userDoneEventConditionList: [],
+              },
+              { ...DEFAULT_SEGMENT_ITEM },
+            ],
+          };
         }
-        newState.subItemList[action.rootIndex] = {
-          userEventType: null,
-          segmentEventRelationShip: ERelationShip.AND,
-          userDoneEventConditionList: [],
-          sequenceEventList: [],
-          subItemList: [{ ...previousData }, { ...DEFAULT_SEGMENT_ITEM }],
-        };
       } else {
         newState.subItemList[action.rootIndex].subItemList.push(
           DEFAULT_SEGMENT_ITEM
@@ -514,6 +528,7 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
+      console.info('calculateMethodOptions:', calculateMethodOptions);
       currentData.userDoneEvent = action.event;
       currentData.eventAttributeOption = parameterOption;
       currentData.eventCalculateMethodOption = calculateMethodOptions;
@@ -582,19 +597,20 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.AddEventFilterCondition: {
-      if (action.segmentProps.level === 1) {
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].userDoneEventConditionList.push({ ...DEFAULT_CONDITION_DATA });
-      } else {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[
-          action.segmentProps.currentIndex
-        ].userDoneEventConditionList.push({
-          ...DEFAULT_CONDITION_DATA,
-        });
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.userDoneEventConditionList.push({
+        ...DEFAULT_CONDITION_DATA,
+      });
+      currentData.eventConditionRelationShip = ERelationShip.AND;
       return { ...newState };
     }
 
@@ -736,7 +752,6 @@ export const analyticsSegmentGroupReducer = (
       const newEvent: IAnalyticsItem = {
         name: '',
         sequenceEventOption: null,
-        filterGroupRelationShip: ERelationShip.AND,
         sequenceEventConditionFilterList: [],
       };
       if (action.segmentProps.level === 1) {
@@ -832,19 +847,23 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.AddSequenceEventFilterCondition: {
-      if (action.segmentProps.level === 1) {
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventConditionFilterList?.push({ ...DEFAULT_CONDITION_DATA });
-      } else {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
-          action.segmentProps.sequenceEventIndex ?? 0
-        ].sequenceEventConditionFilterList?.push({ ...DEFAULT_CONDITION_DATA });
+        ].sequenceEventList[action.segmentProps.sequenceEventIndex ?? 0];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex].sequenceEventList[
+            action.segmentProps.sequenceEventIndex ?? 0
+          ];
       }
+      currentData.filterGroupRelationShip = ERelationShip.AND;
+      currentData.sequenceEventConditionFilterList?.push({
+        ...DEFAULT_CONDITION_DATA,
+      });
+
       return { ...newState };
     }
 

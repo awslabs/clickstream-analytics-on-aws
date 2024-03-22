@@ -18,7 +18,6 @@ import {
   EventWithParameter,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   ParameterCondition,
-  ParameterDataType,
   SegmentCriteria,
   SegmentFilter,
   SegmentFilterConditionType,
@@ -271,6 +270,7 @@ const _getSubList = (
       valueType: parameter.valueType,
       category: parameter.category,
       groupName: groupName,
+      metadataSource: parameter.metadataSource,
       itemType: 'children',
     } as IAnalyticsItem);
   }
@@ -1124,7 +1124,7 @@ const convertAttributeList = (
   for (const attribute of attributeList) {
     const eventCondition: ParameterCondition = {
       parameterType: attribute.conditionOption?.metadataSource as any,
-      parameterName: attribute.conditionOption?.value ?? '',
+      parameterName: attribute.conditionOption?.name ?? '',
       conditionOperator: attribute.conditionOperator?.value as any,
       inputValue: attribute.conditionValue,
       dataType: attribute.conditionOption?.valueType as any,
@@ -1137,11 +1137,16 @@ const convertAttributeList = (
 const ConvertUserDoneEvent = (
   item: IEventSegmentationItem
 ): UserSegmentFilterCondition => {
+  console.info(item);
+  console.info(
+    'item.userDoneEventCalculateMethod:',
+    item.userDoneEventCalculateMethod
+  );
   return {
     conditionType: SegmentFilterConditionType.UserEventCondition,
     hasDone: item.userEventType?.value === ConditionType.USER_DONE,
     event: {
-      eventName: item.userDoneEvent?.value ?? '',
+      eventName: item.userDoneEvent?.name ?? '',
       eventParameterConditions: convertAttributeList(
         item.userDoneEventConditionList
       ),
@@ -1153,9 +1158,15 @@ const ConvertUserDoneEvent = (
       conditionOperator: item.userDoneEventOperation
         ?.value as ConditionNumericOperator,
       inputValue: item.userDoneEventValue?.map(Number) ?? [],
-      parameterType: item.userDoneEvent?.metadataSource as any,
-      parameterName: item.userDoneEventCalculateMethod?.name,
-      dataType: ParameterDataType.INTEGER,
+      parameterType:
+        item.userDoneEventCalculateMethod?.itemType === 'children'
+          ? (item.userDoneEventCalculateMethod?.metadataSource as any)
+          : undefined,
+      parameterName:
+        item.userDoneEventCalculateMethod?.itemType === 'children'
+          ? item.userDoneEventCalculateMethod?.name
+          : undefined,
+      dataType: MetadataValueType.INTEGER as any,
     },
   };
 };
@@ -1168,7 +1179,7 @@ const ConvertUserIsEvent = (
     hasAttribute: item.userEventType?.value === ConditionType.USER_IS,
     attributeCondition: {
       parameterType: item.userIsParamOption?.metadataSource as any,
-      parameterName: item.userIsParamOption?.value ?? '',
+      parameterName: item.userIsParamOption?.name ?? '',
       dataType: item.userIsParamOption?.valueType as any,
       conditionOperator: item.userISOperator?.value as ConditionOperator,
       inputValue: item.userIsValue,
@@ -1182,11 +1193,11 @@ const convertUserDoneInSeqItem = (
   const tmpEventList: EventWithParameter[] = [];
   for (const event of item.sequenceEventList) {
     tmpEventList.push({
-      eventName: event.sequenceEventOption?.value ?? '',
+      eventName: event.sequenceEventOption?.name ?? '',
       eventParameterConditions: convertAttributeList(
         event.sequenceEventConditionFilterList ?? []
       ),
-      operator: item.eventConditionRelationShip as any,
+      operator: event.filterGroupRelationShip as any,
     });
   }
   return {

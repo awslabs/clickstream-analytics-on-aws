@@ -28,17 +28,9 @@ import HelpInfo from 'components/layouts/HelpInfo';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
-
-const renderName = (name: string) => {
-  return (
-    <div className="clickstream-link-style">
-      <Link to="/">{name}</Link>
-    </div>
-  );
-};
 
 const UserSegments: React.FC = () => {
   const { t } = useTranslation();
@@ -52,7 +44,7 @@ const UserSegments: React.FC = () => {
       id: 'name',
       header: 'Name',
       cell: (e: Segment) => {
-        return renderName(e.name);
+        return e.name;
       },
     },
     {
@@ -122,6 +114,7 @@ const UserSegments: React.FC = () => {
             >
               <Table
                 loading={loadingData}
+                selectionType="single"
                 header={
                   <Header
                     variant="h2"

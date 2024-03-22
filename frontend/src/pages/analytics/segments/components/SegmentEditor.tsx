@@ -216,8 +216,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 updateSegmentObject('expireDate', e.detail.value);
                 updateSegmentObject('refreshSchedule', {
                   ...segmentObject.refreshSchedule,
-                  expireAfter:
-                    new Date(e.detail.value).getTime() - new Date().getTime(),
+                  expireAfter: new Date(e.detail.value).getTime(),
                 });
               }}
               placeholder="YYYY/MM/DD"
