@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
-import { 
-  // CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, 
-  // CLICKSTREAM_DEPRECATED_VIEW_LIST, 
-  CLICKSTREAM_EVENT_VIEW_NAME 
+import {
+  // CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
+  // CLICKSTREAM_DEPRECATED_VIEW_LIST,
+  CLICKSTREAM_EVENT_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
@@ -323,7 +323,7 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      if(viewDef.grantToBIUser === undefined || viewDef.grantToBIUser !== 'false') {
+      if (viewDef.grantToBIUser === undefined || viewDef.grantToBIUser !== 'false') {
         views.push(viewDef.viewName);
       }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
