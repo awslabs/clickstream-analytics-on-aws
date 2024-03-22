@@ -135,6 +135,8 @@ export interface IEventSegmentationObj {
   userIsAttributeOptions: CategoryItemType[];
   attributeOperationOptions: SelectProps.Option[];
   userGroupOptions: SelectProps.Option[];
+  eventSessionOptions: SelectProps.Option[];
+  eventFlowOptions: SelectProps.Option[];
 }
 
 export interface IRetentionAnalyticsItem {

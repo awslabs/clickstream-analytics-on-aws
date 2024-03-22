@@ -308,6 +308,7 @@ export type SetEventOption = {
   type: AnalyticsSegmentActionType.SetEventOption;
   eventOption: CategoryItemType[];
   userIsAttributeOptions: CategoryItemType[];
+  segmentGroupList: SelectProps.Option[];
 };
 
 export type AnalyticsSegmentAction =
@@ -470,11 +471,18 @@ export const analyticsSegmentGroupReducer = (
         action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE
           ? [
               {
-                name: 'Sequence Event 1',
+                name: '',
                 sequenceEventConditionFilterList: [],
               },
             ]
           : [];
+      if (action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE) {
+        currentData.userSequenceSession = state.eventSessionOptions[0];
+        currentData.userSequenceFlow = state.eventFlowOptions[0];
+      } else {
+        currentData.userSequenceSession = null;
+        currentData.userSequenceFlow = null;
+      }
       return { ...newState };
     }
 
@@ -980,6 +988,7 @@ export const analyticsSegmentGroupReducer = (
         ...newState,
         eventOption: action.eventOption,
         userIsAttributeOptions: action.userIsAttributeOptions,
+        userGroupOptions: action.segmentGroupList,
       };
     }
 

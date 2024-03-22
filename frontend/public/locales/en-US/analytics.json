@@ -337,6 +337,12 @@
   "segment": {
     "title": "User Segments",
     "desc": "User Segments description",
+    "options": {
+      "withInSession": "Within a session",
+      "withOutSession": "Without a session",
+      "directlyFollow": "Directly followed",
+      "indirectlyFollow": "Indirectly followed"
+    },
     "type": {
       "userDone": "User has done",
       "userNotDone": "User has not done",

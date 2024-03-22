@@ -337,6 +337,12 @@
   "segment": {
     "title": "用户分群",
     "desc": "用户分群描述",
+    "options": {
+      "withInSession": "在同一个会话",
+      "withOutSession": "不在同一个会话",
+      "directlyFollow": "直接关联",
+      "indirectlyFollow": "间接关联"
+    },
     "type": {
       "userDone": "用户做过",
       "userNotDone": "用户没做过",

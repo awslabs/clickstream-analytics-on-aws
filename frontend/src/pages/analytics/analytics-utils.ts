@@ -15,6 +15,7 @@ import {
   ConditionNumericOperator,
   ConditionOperator,
   EventsInSequenceCondition,
+  EventWithParameter,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   ParameterCondition,
   ParameterDataType,
@@ -1065,6 +1066,7 @@ export const userAttributeDisplayname = (displayName: string) => {
   );
 };
 
+// for segment group
 export const generateDayTimesOption = () => {
   const options: SelectProps.Option[] = [];
   for (let i = 0; i < 24; i++) {
@@ -1161,9 +1163,9 @@ const ConvertUserIsEvent = (
     attributeCondition: {
       parameterType: item.userIsParamOption?.metadataSource as any,
       parameterName: item.userIsParamOption?.value ?? '',
-      dataType: ParameterDataType.INTEGER,
-      conditionOperator: ConditionOperator.BEGIN_WITH,
-      inputValue: [],
+      dataType: item.userIsParamOption?.valueType as any,
+      conditionOperator: item.userISOperator?.value as ConditionOperator,
+      inputValue: item.userIsValue,
     },
   };
 };
@@ -1171,12 +1173,22 @@ const ConvertUserIsEvent = (
 const convertUserDoneInSeqItem = (
   item: IEventSegmentationItem
 ): EventsInSequenceCondition => {
+  const tmpEventList: EventWithParameter[] = [];
+  for (const event of item.sequenceEventList) {
+    tmpEventList.push({
+      eventName: event.sequenceEventOption?.value ?? '',
+      eventParameterConditions: convertAttributeList(
+        event.sequenceEventConditionFilterList ?? []
+      ),
+      operator: item.eventConditionRelationShip as any,
+    });
+  }
   return {
     conditionType: SegmentFilterConditionType.EventsInSequenceCondition,
     hasDone: true,
-    events: [],
-    isInOneSession: false,
-    isDirectlyFollow: false,
+    events: tmpEventList,
+    isInOneSession: item.userSequenceSession?.value === 'true',
+    isDirectlyFollow: item.userSequenceFlow?.value === 'true',
   };
 };
 
@@ -1186,7 +1198,7 @@ const convertUserInSegment = (
   return {
     conditionType: SegmentFilterConditionType.UserInSegmentCondition,
     isInSegment: item.userEventType?.value === ConditionType.USER_IN_GROUP,
-    segmentId: '',
+    segmentId: item.userInFilterGroup?.value ?? '',
   };
 };
 
@@ -1198,12 +1210,12 @@ const convertEventItem = (item: IEventSegmentationItem) => {
   ) {
     tmpItem = ConvertUserDoneEvent(item);
   } else if (
-    item.userDoneEvent?.value === ConditionType.USER_IS ||
-    item.userDoneEvent?.value === ConditionType.USER_IS_NOT
+    item.userEventType?.value === ConditionType.USER_IS ||
+    item.userEventType?.value === ConditionType.USER_IS_NOT
   ) {
     tmpItem = ConvertUserIsEvent(item);
   } else if (
-    item.userDoneEvent?.value === ConditionType.USER_DONE_IN_SEQUENCE
+    item.userEventType?.value === ConditionType.USER_DONE_IN_SEQUENCE
   ) {
     tmpItem = convertUserDoneInSeqItem(item);
   } else {

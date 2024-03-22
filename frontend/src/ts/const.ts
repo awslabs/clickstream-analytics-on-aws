@@ -522,6 +522,8 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   eventOperationOptions: [],
   attributeOperationOptions: [],
   userGroupOptions: [],
+  eventSessionOptions: [],
+  eventFlowOptions: [],
 };
 
 export const darkBackgroundColors = [

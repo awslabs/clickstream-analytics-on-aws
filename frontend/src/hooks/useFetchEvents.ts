@@ -11,12 +11,15 @@
  *  and limitations under the License.
  */
 
+import { Segment } from '@aws/clickstream-base-lib';
+import { SelectProps } from '@cloudscape-design/components';
 import {
   getBuiltInMetadata,
   getMetadataEventsList,
   getMetadataParametersList,
   getMetadataUserAttributesList,
 } from 'apis/analytics';
+import { getSegmentsList } from 'apis/segments';
 import { CategoryItemType } from 'components/eventselect/AnalyticsType';
 import {
   metadataEventsConvertToCategoryItemType,
@@ -35,7 +38,22 @@ export interface EventDataType {
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
   builtInMetaData?: IMetadataBuiltInList;
+  segmentGroupList?: SelectProps.Option[];
 }
+
+const listAllSegments = async (projectId, appId) => {
+  try {
+    const segmentRes: ApiResponse<Segment[]> = await getSegmentsList({
+      projectId,
+      appId,
+    });
+    if (segmentRes.success) {
+      return segmentRes.data;
+    }
+  } catch (error) {
+    return [];
+  }
+};
 
 const getAllBuiltInMetadata = async () => {
   try {
@@ -147,11 +165,13 @@ function useFetchEvents() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [eventData, attributeData, builtInMetaData] = await Promise.all([
-          listMetadataEvents(projectId, appId),
-          listAllAttributes(projectId, appId),
-          getAllBuiltInMetadata(),
-        ]);
+        const [eventData, attributeData, builtInMetaData, segmentGroupList] =
+          await Promise.all([
+            listMetadataEvents(projectId, appId),
+            listAllAttributes(projectId, appId),
+            getAllBuiltInMetadata(),
+            listAllSegments(projectId, appId),
+          ]);
         setData({
           metaDataEvents: eventData?.metaDataEvents ?? [],
           categoryEvents: eventData?.categoryEvents ?? [],
@@ -160,6 +180,12 @@ function useFetchEvents() {
           presetParameters: attributeData?.presetParameters ?? [],
           groupParameters: attributeData?.groupParameters ?? [],
           builtInMetaData: builtInMetaData,
+          segmentGroupList: segmentGroupList?.map((item) => {
+            return {
+              label: item.name,
+              value: item.segmentId,
+            };
+          }),
         });
       } catch (err) {
         setError(err as Error);
@@ -167,7 +193,6 @@ function useFetchEvents() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 

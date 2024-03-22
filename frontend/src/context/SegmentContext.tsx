@@ -56,6 +56,20 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
       ).map((item) => {
         return { label: defaultStr(t(item.label ?? '')), value: item.value };
       }),
+      eventSessionOptions: [
+        { label: t('analytics:segment.options.withInSession'), value: 'true' },
+        {
+          label: t('analytics:segment.options.withOutSession'),
+          value: 'false',
+        },
+      ],
+      eventFlowOptions: [
+        { label: t('analytics:segment.options.directlyFollow'), value: 'true' },
+        {
+          label: t('analytics:segment.options.indirectlyFollow'),
+          value: 'false',
+        },
+      ],
     }
   );
 
@@ -77,6 +91,7 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
             data.builtInMetaData
           )
         ),
+        segmentGroupList: data.segmentGroupList ?? [],
       });
     }
   }, [data]);
