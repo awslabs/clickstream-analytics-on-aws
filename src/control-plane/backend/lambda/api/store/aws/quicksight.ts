@@ -11,17 +11,15 @@
  *  and limitations under the License.
  */
 
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   IdentityType,
   UserRole,
   GenerateEmbedUrlForRegisteredUserCommandInput,
   CreateDashboardCommandInput,
-  CreateAnalysisCommandInput,
   CreateDataSetCommandInput,
   DataSetImportMode,
   SheetDefinition,
-  AnalysisDefinition,
   ResourceNotFoundException,
   MemberType,
   FolderType,
@@ -402,20 +400,6 @@ export const createPublishDashboard = async (
       ],
     };
     await quickSight.createDashboard(dashboardInput);
-    const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
-    const analysisInput: CreateAnalysisCommandInput = {
-      AwsAccountId: awsAccountId,
-      AnalysisId: analysisId,
-      Name: dashboard.name,
-      Definition: dashboardDefinition as AnalysisDefinition,
-      Permissions: [
-        {
-          Principal: principals.publishUserArn,
-          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-        },
-      ],
-    };
-    await quickSight.createAnalysis(analysisInput);
     await quickSight.createFolderMembership({
       AwsAccountId: awsAccountId,
       FolderId: getQuickSightFolderId(dashboard.projectId, dashboard.appId),

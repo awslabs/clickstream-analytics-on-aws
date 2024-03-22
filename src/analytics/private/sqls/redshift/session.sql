@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS {{schema}}.session (
+    event_timestamp timestamp not null,
     user_pseudo_id varchar(255) not null,
     session_id varchar(255) not null,
     user_id varchar(255),
@@ -16,4 +17,4 @@ CREATE TABLE IF NOT EXISTS {{schema}}.session (
     session_source_category varchar(255),
     process_info super,
     created_time timestamp DEFAULT getdate()
-) BACKUP YES DISTSTYLE EVEN SORTKEY (user_pseudo_id, session_id);
+) BACKUP YES DISTSTYLE EVEN SORTKEY (user_pseudo_id, session_id, event_timestamp);
