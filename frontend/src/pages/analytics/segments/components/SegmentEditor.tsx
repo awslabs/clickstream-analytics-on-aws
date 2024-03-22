@@ -22,16 +22,13 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import {
-  ExtendSegment,
-  IEventSegmentationObj,
-} from 'components/eventselect/AnalyticsType';
+import { ExtendSegment } from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
 import { getAutoRefreshDayOptionsByType } from 'pages/analytics/analytics-utils';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
@@ -40,44 +37,14 @@ import SegmentItem from './group/SegmentItem';
 interface SegmentEditorProps {
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
-  updateSegmentState: (segment: IEventSegmentationObj) => void;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
   props: SegmentEditorProps
 ) => {
   const { t } = useTranslation();
-  const { segmentObject, updateSegmentObject, updateSegmentState } = props;
+  const { segmentObject, updateSegmentObject } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
-  const [filteredData, setFilteredData] = useState<any>({});
-
-  const filterDataRecursively = (data: any, excludeKeys: string[]): any => {
-    if (Array.isArray(data)) {
-      return data.map((item) => filterDataRecursively(item, excludeKeys));
-    } else if (typeof data === 'object' && data !== null) {
-      return Object.keys(data).reduce((acc, key) => {
-        if (!excludeKeys.includes(key)) {
-          acc[key] = filterDataRecursively(data[key], excludeKeys);
-        }
-        return acc;
-      }, {});
-    }
-    return data;
-  };
-
-  useEffect(() => {
-    const newFilteredData = filterDataRecursively(segmentDataState, [
-      'eventOption',
-      'eventAttributeOption',
-      'values',
-      'eventOperationOptions',
-      'eventCalculateMethodOption',
-      'userIsAttributeOptions',
-      'sequenceEventAttributeOption',
-    ]);
-    setFilteredData(newFilteredData);
-    updateSegmentState(segmentDataState);
-  }, [segmentDataState]);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -182,20 +149,18 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                       }}
                     />
                   ) : (
-                    <>
-                      <Select
-                        selectedOption={segmentObject.autoRefreshDayOption}
-                        options={getAutoRefreshDayOptionsByType(
-                          segmentObject.autoRefreshOption?.value ?? ''
-                        )}
-                        onChange={(e) => {
-                          updateSegmentObject(
-                            'autoRefreshDayOption',
-                            e.detail.selectedOption
-                          );
-                        }}
-                      />
-                    </>
+                    <Select
+                      selectedOption={segmentObject.autoRefreshDayOption}
+                      options={getAutoRefreshDayOptionsByType(
+                        segmentObject.autoRefreshOption?.value ?? ''
+                      )}
+                      onChange={(e) => {
+                        updateSegmentObject(
+                          'autoRefreshDayOption',
+                          e.detail.selectedOption
+                        );
+                      }}
+                    />
                   )}
                 </SpaceBetween>
               </div>
@@ -230,7 +195,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
           </Header>
         }
       >
-        <div style={{ paddingBottom: 300 }}>
+        <div>
           <div className="flex-v">
             {segmentDataState?.subItemList?.map((item, index) => {
               return (
@@ -265,7 +230,6 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 {t('button.filterGroup')}
               </Button>
             </div>
-            <pre>{JSON.stringify(filteredData, null, 2)}</pre>
           </div>
         </div>
       </Container>

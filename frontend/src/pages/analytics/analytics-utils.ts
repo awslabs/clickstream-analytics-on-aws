@@ -1071,7 +1071,7 @@ export const generateDayTimesOption = () => {
   const options: SelectProps.Option[] = [];
   for (let i = 0; i < 24; i++) {
     const label = `${i === 0 ? 12 : i > 12 ? i - 12 : i}${
-      i < 12 ? 'AM' : 'PM'
+      i < 12 ? ' AM' : ' PM'
     }`;
     const value = `${i < 10 ? '0' : ''}${i}:00`;
     options.push({ label, value });

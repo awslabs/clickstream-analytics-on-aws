@@ -683,6 +683,7 @@ ul.menu-list li.checkbox-item {
     }
   }
   .cs-dropdown-input {
+    position: relative;
     .cs-dropdown-event-input {
       [class^='awsui_dropdown-'] {
         opacity: 0 !important;

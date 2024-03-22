@@ -27,13 +27,21 @@ interface DropDownContainerProps {
   selectedItem: IAnalyticsItem | null;
   changeSelectItem: (item: IAnalyticsItem) => void;
   loading?: boolean;
+  showDropdownAtTop?: boolean;
 }
 
 const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
   const { t } = useTranslation();
-  const { hasTab, categories, selectedItem, changeSelectItem, loading } = props;
+  const {
+    hasTab,
+    categories,
+    selectedItem,
+    changeSelectItem,
+    loading,
+    showDropdownAtTop,
+  } = props;
   const [categoryType, setCategoryType] = useState<string>('event');
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [curPreviewOption, setCurPreviewOption] = useState<IAnalyticsItem>();
@@ -61,7 +69,10 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
   }, [categories, selectedItem]);
 
   return (
-    <div className="cs-dropdown-pop">
+    <div
+      className="cs-dropdown-pop"
+      style={{ bottom: showDropdownAtTop ? '100%' : undefined }}
+    >
       <div className="cs-dropdown-pop-wrapper">
         <div className="cs-dropdown-pop-container">
           <div className="cs-dropdown-container">

@@ -37,7 +37,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   const { segmentData, segmentProps, addNewEventCondition } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const { data: eventData } = useUserEventParameter();
-
+  const [showDropdownAtTop, setShowDropdownAtTop] = useState(false);
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
 
   function useOutsideAlerter(ref: any) {
@@ -55,6 +55,19 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
   }
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef);
+
+  const handleClickEvent = () => {
+    if (!wrapperRef.current) return;
+    const element: any = wrapperRef.current;
+    const distanceToBottom =
+      window.innerHeight - element.getBoundingClientRect().bottom;
+    console.info('distanceToBottom:', distanceToBottom);
+    if (distanceToBottom < 350) {
+      setShowDropdownAtTop(true);
+    } else {
+      setShowDropdownAtTop(false);
+    }
+  };
 
   return (
     <>
@@ -102,11 +115,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               title={segmentData.userDoneEventCalculateMethod?.label}
               onClick={() => {
                 setShowGroupSelectDropdown((prev) => !prev);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setShowGroupSelectDropdown((prev) => !prev);
-                }
+                handleClickEvent();
               }}
             >
               <Select
@@ -120,6 +129,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
               />
               {showGroupSelectDropdown && (
                 <GroupSelectContainer
+                  showDropdownAtTop={showDropdownAtTop}
                   categories={segmentData.eventCalculateMethodOption ?? []}
                   selectedItem={
                     segmentData.userDoneEventCalculateMethod ?? null
