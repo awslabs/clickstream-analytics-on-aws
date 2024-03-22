@@ -99,7 +99,6 @@ export class LambdaUtil {
         securityGroups: [securityGroupForLambda],
         role: lambdaRole,
         entry: join(__dirname, '..', 'lambda', 'partition-syncer', 'index.ts'),
-        reservedConcurrentExecutions: 1,
         environment: {
           SOURCE_S3_BUCKET_NAME: this.props.sourceS3Bucket.bucketName,
           SOURCE_S3_PREFIX: this.props.sourceS3Prefix,
