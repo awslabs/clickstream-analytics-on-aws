@@ -446,7 +446,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate08',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate08',
@@ -489,7 +489,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate09',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate09',
@@ -534,7 +534,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate10',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate10',
@@ -580,7 +580,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate11',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate11',
@@ -677,7 +677,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate13',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate13',
@@ -723,7 +723,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate14',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate14',
@@ -767,7 +767,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate15',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate15',
@@ -804,7 +804,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate16',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate16',
@@ -840,7 +840,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate17',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate17',
@@ -880,7 +880,7 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate18',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate18',
