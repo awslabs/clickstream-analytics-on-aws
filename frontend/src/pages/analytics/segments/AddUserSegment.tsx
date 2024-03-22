@@ -57,7 +57,6 @@ const AddUserSegments: React.FC = () => {
     lastUpdateAt: 0,
     refreshSchedule: {
       cron: 'Manual',
-      cronExpression: '',
       expireAfter: 0,
     },
     criteria: {
@@ -70,9 +69,10 @@ const AddUserSegments: React.FC = () => {
     autoRefreshDayOption: null,
     expireDate: '',
   });
-  const [segmentDataState] = useState<IEventSegmentationObj>({
-    ...DEFAULT_SEGMENT_GROUP_DATA,
-  });
+  const [segmentDataState, setSegmentDataState] =
+    useState<IEventSegmentationObj>({
+      ...DEFAULT_SEGMENT_GROUP_DATA,
+    });
 
   const breadcrumbItems = [
     {
@@ -161,6 +161,7 @@ const AddUserSegments: React.FC = () => {
                 >
                   <SegmentEditor
                     segmentObject={segmentObject}
+                    updateSegmentState={setSegmentDataState}
                     updateSegmentObject={(key, value) => {
                       setSegmentObject((prev) => {
                         return {

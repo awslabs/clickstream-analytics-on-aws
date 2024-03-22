@@ -22,13 +22,19 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { ExtendSegment } from 'components/eventselect/AnalyticsType';
+import {
+  ExtendSegment,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
 import { identity } from 'lodash';
-import { getAutoRefreshDayOptionsByType } from 'pages/analytics/analytics-utils';
-import React from 'react';
+import {
+  convertCronExpByTimeRange,
+  getAutoRefreshDayOptionsByType,
+} from 'pages/analytics/analytics-utils';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
@@ -37,14 +43,19 @@ import SegmentItem from './group/SegmentItem';
 interface SegmentEditorProps {
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
+  updateSegmentState: (segment: IEventSegmentationObj) => void;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
   props: SegmentEditorProps
 ) => {
   const { t } = useTranslation();
-  const { segmentObject, updateSegmentObject } = props;
+  const { segmentObject, updateSegmentObject, updateSegmentState } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+
+  useEffect(() => {
+    updateSegmentState(segmentDataState);
+  }, [segmentDataState]);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -91,15 +102,28 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 if (e.detail.value === 'manual') {
                   updateSegmentObject('autoRefreshOption', null);
                   updateSegmentObject('autoRefreshDayOption', null);
+                  updateSegmentObject('refreshSchedule', {
+                    cron: 'Manual',
+                    cronExpression: undefined,
+                    expireAfter: segmentObject.refreshSchedule.expireAfter,
+                  });
                 } else {
-                  updateSegmentObject(
-                    'autoRefreshOption',
-                    SEGMENT_AUTO_REFRESH_OPTIONS[0]
-                  );
+                  const defaultDailyOption = SEGMENT_AUTO_REFRESH_OPTIONS[0];
+                  updateSegmentObject('autoRefreshOption', defaultDailyOption);
+                  updateSegmentObject('refreshSchedule', {
+                    cron: defaultDailyOption.value,
+                    cronExpression: convertCronExpByTimeRange(
+                      defaultDailyOption,
+                      getAutoRefreshDayOptionsByType(
+                        defaultDailyOption.value ?? ''
+                      )?.[0].value ?? ''
+                    ),
+                    expireAfter: segmentObject.refreshSchedule.expireAfter,
+                  });
                   updateSegmentObject(
                     'autoRefreshDayOption',
                     getAutoRefreshDayOptionsByType(
-                      SEGMENT_AUTO_REFRESH_OPTIONS[0].value ?? ''
+                      defaultDailyOption.value ?? ''
                     )?.[0]
                   );
                 }
@@ -135,11 +159,18 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                       updateSegmentObject('refreshSchedule', {
                         ...segmentObject.refreshSchedule,
                         cron: e.detail.selectedOption.value,
+                        cronExpression: convertCronExpByTimeRange(
+                          e.detail.selectedOption,
+                          getAutoRefreshDayOptionsByType(
+                            e.detail.selectedOption.value ?? ''
+                          )?.[0]?.value ?? ''
+                        ),
                       });
                     }}
                   />
                   {segmentObject.autoRefreshOption?.value === 'Custom' ? (
                     <Input
+                      placeholder="cron(15 10 * * ? *)"
                       value={segmentObject.refreshSchedule.cronExpression ?? ''}
                       onChange={(e) => {
                         updateSegmentObject('refreshSchedule', {
@@ -159,6 +190,13 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                           'autoRefreshDayOption',
                           e.detail.selectedOption
                         );
+                        updateSegmentObject('refreshSchedule', {
+                          ...segmentObject.refreshSchedule,
+                          cronExpression: convertCronExpByTimeRange(
+                            segmentObject.autoRefreshOption,
+                            e.detail.selectedOption.value ?? ''
+                          ),
+                        });
                       }}
                     />
                   )}

@@ -909,9 +909,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 'finished'
                               )}
                               onChange={(e) => {
-                                changeReshiftSubnets(
-                                  e.detail.selectedOptions as any
-                                );
+                                changeReshiftSubnets(e.detail.selectedOptions);
                               }}
                             />
                           </FormField>

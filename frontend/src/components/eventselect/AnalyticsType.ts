@@ -97,7 +97,7 @@ export interface IEventAnalyticsItem {
 // for segment group
 export interface ExtendSegment extends Segment {
   refreshType: 'manual' | 'auto' | 'custom';
-  autoRefreshOption: SelectProps.Option | null;
+  autoRefreshOption: SelectProps.Option;
   autoRefreshDayOption: SelectProps.Option | null;
   expireDate: string;
 }

@@ -40,11 +40,14 @@ export interface SegmentCriteria {
   operator: FilterOperator;
 }
 
+export type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
 export interface SegmentFilterGroup {
   description?: string;
   startDate?: string;
   endDate?: string;
-  relativeDateRange?: string; // TODO: expression
+  isRelativeDateRange: boolean;
+  lastN?: number;
+  timeUnit?: TimeUnit;
   filters: SegmentFilter[];
   operator: FilterOperator;
 }

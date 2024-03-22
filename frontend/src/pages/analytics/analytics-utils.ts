@@ -1070,10 +1070,16 @@ export const userAttributeDisplayname = (displayName: string) => {
 export const generateDayTimesOption = () => {
   const options: SelectProps.Option[] = [];
   for (let i = 0; i < 24; i++) {
-    const label = `${i === 0 ? 12 : i > 12 ? i - 12 : i}${
-      i < 12 ? ' AM' : ' PM'
-    }`;
-    const value = `${i < 10 ? '0' : ''}${i}:00`;
+    let hourLabel;
+    if (i === 0) {
+      hourLabel = 12;
+    } else if (i > 12) {
+      hourLabel = i - 12;
+    } else {
+      hourLabel = i;
+    }
+    const label = `${hourLabel}${i < 12 ? ' AM' : ' PM'}`;
+    const value = `${i}`;
     options.push({ label, value });
   }
   return options;
@@ -1083,7 +1089,7 @@ export const generateWeekDayOptions = () => {
   const options: SelectProps.Option[] = [];
   for (let i = 0; i < 7; i++) {
     const label = moment().day(i).format('dddd');
-    const value = `${i}`;
+    const value = `${label.toUpperCase().substring(0, 3)}`;
     options.push({ label, value });
   }
   return options;
@@ -1203,7 +1209,7 @@ const convertUserInSegment = (
 };
 
 const convertEventItem = (item: IEventSegmentationItem) => {
-  let tmpItem = {} as UserSegmentFilterCondition;
+  let tmpItem;
   if (
     item.userEventType?.value === ConditionType.USER_DONE ||
     item.userEventType?.value === ConditionType.USER_NOT_DONE
@@ -1273,12 +1279,20 @@ export const convertUISegmentObjectToAPIObject = (
         startDate:
           group.groupDateRange?.value?.type === 'absolute'
             ? group.groupDateRange?.value?.startDate
-            : '',
+            : undefined,
         endDate:
           group.groupDateRange?.value?.type === 'absolute'
             ? group.groupDateRange?.value?.endDate
-            : '',
-        relativeDateRange: '', //TODO
+            : undefined,
+        isRelativeDateRange: group.groupDateRange?.value?.type === 'relative',
+        timeUnit:
+          group.groupDateRange?.value?.type === 'relative'
+            ? group.groupDateRange?.value?.unit
+            : undefined,
+        lastN:
+          group.groupDateRange?.value?.type === 'relative'
+            ? group.groupDateRange?.value?.amount
+            : undefined,
         filters: convertSegmentItems(
           group.segmentEventRelationShip ?? ERelationShip.OR,
           group.subItemList
@@ -1293,4 +1307,19 @@ export const convertUISegmentObjectToAPIObject = (
     operator: 'and',
   };
   return segmentAPIObject;
+};
+
+export const convertCronExpByTimeRange = (
+  timeUnit: SelectProps.Option,
+  specificTime: string
+) => {
+  const cronStr = '';
+  if (timeUnit.value === 'Daily') {
+    return `cron(${specificTime} 0 * * ? *)`;
+  } else if (timeUnit.value === 'Weekly') {
+    return `cron(0 0 ? * ${specificTime} *)`;
+  } else if (timeUnit.value === 'Monthly') {
+    return `cron(0 0 ${specificTime} * ? *)`;
+  }
+  return cronStr;
 };
