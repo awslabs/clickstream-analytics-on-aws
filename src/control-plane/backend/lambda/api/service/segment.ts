@@ -43,10 +43,6 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const segmentStore = new DynamoDBSegmentStore();
 const pipelineStore = new DynamoDbStore();
 
-const s3Client = new S3Client({
-  ...aws_sdk_client_common_config,
-});
-
 const API_FUNCTION_LAMBDA_ROLE = process.env.API_FUNCTION_LAMBDA_ROLE;
 export const SEGMENT_JOBS_LIST_LIMIT = 30;
 
@@ -233,6 +229,10 @@ export class SegmentServ {
       if (pipelines.length === 0) {
         return res.status(400).send(new ApiFail(`Pipeline for ${projectId} is not found`));
       }
+      const s3Client = new S3Client({
+        ...aws_sdk_client_common_config,
+        region: pipelines[0].region,
+      });
 
       // @ts-ignore https://github.com/aws/aws-sdk-js-v3/issues/4451
       const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
