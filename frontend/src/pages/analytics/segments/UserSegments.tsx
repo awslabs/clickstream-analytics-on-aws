@@ -21,7 +21,7 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
-import { getSegmentsList } from 'apis/segments';
+import { deleteSegment, getSegmentsList } from 'apis/segments';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -36,8 +36,22 @@ const UserSegments: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId, appId } = useParams();
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.name'),
+      href: '/',
+    },
+    {
+      text: t('nav.analytics.segments'),
+      href: '/analytics/segments',
+    },
+  ];
+
   const [loadingData, setLoadingData] = useState(false);
   const [segmentList, setSegmentList] = useState<Segment[]>([]);
+  const [disableAction, setDisableAction] = useState(true);
+  const [selectedSegment, setSelectedSegment] = useState<Segment[]>([]);
+  const [loadingDelete, setLoadingDelete] = useState(false);
 
   const COLUMN_DEFINITIONS = [
     {
@@ -84,22 +98,35 @@ const UserSegments: React.FC = () => {
     }
   };
 
-  const breadcrumbItems = [
-    {
-      text: t('breadCrumb.name'),
-      href: '/',
-    },
-    {
-      text: t('nav.analytics.segments'),
-      href: '/analytics/segments',
-    },
-  ];
+  const confirmDeleteSegments = async () => {
+    if (projectId && appId) {
+      setLoadingDelete(true);
+      const segmentRes: ApiResponse<Segment[]> = await deleteSegment({
+        segmentId: selectedSegment[0].segmentId,
+        projectId,
+        appId,
+      });
+      if (segmentRes.success) {
+        listAllSegments();
+      }
+      setLoadingDelete(false);
+      setSelectedSegment([]);
+    }
+  };
 
   useEffect(() => {
     if (projectId && appId) {
       listAllSegments();
     }
   }, [projectId, appId]);
+
+  useEffect(() => {
+    if (selectedSegment.length > 0) {
+      setDisableAction(false);
+    } else {
+      setDisableAction(true);
+    }
+  }, [selectedSegment]);
 
   return (
     <div className="flex">
@@ -114,6 +141,10 @@ const UserSegments: React.FC = () => {
             >
               <Table
                 loading={loadingData}
+                onSelectionChange={(e) => {
+                  setSelectedSegment(e.detail.selectedItems);
+                }}
+                selectedItems={selectedSegment}
                 selectionType="single"
                 header={
                   <Header
@@ -121,26 +152,32 @@ const UserSegments: React.FC = () => {
                     actions={
                       <SpaceBetween direction="horizontal" size="xs">
                         <ButtonDropdown
+                          onItemClick={(e) => {
+                            if (e.detail.id === 'delete') {
+                              confirmDeleteSegments();
+                            }
+                          }}
+                          loading={loadingDelete}
                           items={[
                             {
                               text: defaultStr(t('button.viewDetails')),
                               id: 'detail',
-                              disabled: false,
+                              disabled: disableAction,
                             },
                             {
                               text: defaultStr(t('button.duplicate')),
-                              id: 'detail',
-                              disabled: false,
+                              id: 'duplicate',
+                              disabled: disableAction,
                             },
                             {
                               text: defaultStr(t('button.edit')),
                               id: 'edit',
-                              disabled: false,
+                              disabled: disableAction,
                             },
                             {
                               text: defaultStr(t('button.delete')),
                               id: 'delete',
-                              disabled: true,
+                              disabled: disableAction,
                             },
                           ]}
                         >

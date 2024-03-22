@@ -26,3 +26,15 @@ export const createSegment = async (segmentObj: Segment) => {
   const result: any = await apiRequest('post', `/segments`, segmentObj);
   return result;
 };
+
+export const deleteSegment = async (params: {
+  segmentId: string;
+  appId: string;
+  projectId: string;
+}) => {
+  const result: any = await apiRequest(
+    'delete',
+    `/segments/${params.segmentId}?appId=${params.appId}&projectId=${params.projectId}`
+  );
+  return result;
+};
