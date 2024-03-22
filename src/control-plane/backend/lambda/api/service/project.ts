@@ -23,7 +23,7 @@ import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPip
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
+import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -139,11 +139,14 @@ export class ProjectServ {
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found.'));
       }
+      const principals = await getClickstreamUserArn(
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       const embed = await generateEmbedUrlForRegisteredUser(
         pipeline.region,
-        pipeline.reporting?.quickSight?.user ?? '',
+        principals.publishUserArn,
         allowedDomain,
-        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
         dashboardId,
       );
       if (embed && embed.EmbedUrl) {
@@ -198,19 +201,21 @@ export class ProjectServ {
     try {
       const { projectId } = req.params;
       const { allowedDomain } = req.query;
-      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
+      const pipeline = await this.getPipelineByProjectId(projectId);
+      if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const latestPipeline = latestPipelines[0];
-      if (!latestPipeline.reporting?.quickSight?.accountName) {
+      if (!pipeline.reporting?.quickSight?.accountName) {
         return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
       }
+      const principals = await getClickstreamUserArn(
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       const embed = await generateEmbedUrlForRegisteredUser(
-        latestPipeline.region,
-        latestPipeline.reporting?.quickSight?.user ?? '',
+        pipeline.region,
+        principals.publishUserArn,
         allowedDomain,
-        latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION,
       );
       return res.json(new ApiSuccess(embed));
     } catch (error) {

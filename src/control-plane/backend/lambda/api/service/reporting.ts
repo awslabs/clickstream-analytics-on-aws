@@ -1053,16 +1053,19 @@ export class ReportingService {
     });
 
     //create QuickSight dashboard
+    const dashboardPermissions = [
+      {
+        Principal: props.principals.exploreUserArn,
+        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
+      },
+    ];
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newDashboard = await props.quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
       Name: `${props.resourceName}`,
       Definition: props.dashboard,
-      Permissions: [{
-        Principal: props.principals.publishUserArn,
-        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
-      }],
+      Permissions: dashboardPermissions,
     });
 
     let dashboardEmbedUrl = '';
@@ -1071,9 +1074,8 @@ export class ReportingService {
       if (dashboardSuccess) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
           props.dashboardCreateParameters.region,
-          props.principals.publishUserArn,
+          props.principals.exploreUserArn,
           props.dashboardCreateParameters.allowedDomain,
-          props.templateVersion,
           dashboardId,
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;

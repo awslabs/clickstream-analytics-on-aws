@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   IdentityType,
   UserRole,
@@ -140,7 +140,6 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   userArn: string,
   allowedDomain: string,
-  templateVersion: string,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -149,10 +148,9 @@ export const generateEmbedUrlForRegisteredUser = async (
     const quickSight = sdkClient.QuickSight({
       region: region,
     });
-    const arns = await getClickstreamUserArn(templateVersion, userArn);
     let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
       AwsAccountId: awsAccountId,
-      UserArn: arns.publishUserArn,
+      UserArn: userArn,
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
@@ -618,18 +616,31 @@ export const checkFolder = async (
     const exist = await existFolder(region, folderId);
     if (!exist) {
       const principals = await getClickstreamUserArn(templateVersion, userArn);
+      let folderPermissions = [
+        {
+          Principal: principals.publishUserArn,
+          Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+        },
+      ];
+      if (principals.exploreUserArn !== principals.publishUserArn) {
+        folderPermissions = [
+          {
+            Principal: principals.publishUserArn,
+            Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+          },
+          {
+            Principal: principals.exploreUserArn,
+            Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+          },
+        ];
+      };
       const folderRes = await quickSight.createFolder({
         AwsAccountId: awsAccountId,
         FolderId: folderId,
         Name: getQuickSightFolderName(projectId, appId),
         FolderType: FolderType.SHARED,
         SharingModel: SharingModel.ACCOUNT,
-        Permissions: [
-          {
-            Principal: principals.publishUserArn,
-            Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
-          },
-        ],
+        Permissions: folderPermissions,
       });
       if (dashboardId) {
         await quickSight.createFolderMembership({
