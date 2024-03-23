@@ -533,6 +533,7 @@ export const analyticsSegmentGroupReducer = (
       currentData.eventAttributeOption = parameterOption;
       currentData.eventCalculateMethodOption = calculateMethodOptions;
       currentData.userDoneEventCalculateMethod = calculateMethodOptions[0];
+      currentData.userDoneEventConditionList = [];
       return { ...newState };
     }
 
@@ -794,6 +795,7 @@ export const analyticsSegmentGroupReducer = (
       }
       currentData.sequenceEventOption = action.event;
       currentData.sequenceEventAttributeOption = parameterOption;
+      currentData.sequenceEventConditionFilterList = [];
       return { ...newState };
     }
 

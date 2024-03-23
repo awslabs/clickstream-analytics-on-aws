@@ -20,7 +20,7 @@ import {
 } from '@cloudscape-design/components';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
@@ -60,16 +60,32 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     hideRemove,
   } = props;
 
-  const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
-  const [values, setValues] = useState<string[]>([]);
+  const [valueOptions, setValueOptions] = useState<SelectProps.Options>(
+    item.conditionOption?.values?.map((item) => {
+      return {
+        value: item.value,
+        label: item.displayValue,
+      };
+    }) ?? []
+  );
+  const [values, setValues] = useState<string[]>(item.conditionValue ?? []);
   const [labelValues, setLabelValues] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
 
-  const setConditionValues = (values: string[], labelValues: string[]) => {
-    setLabelValues(labelValues);
+  const setConditionValues = (values: string[]) => {
     setValues(values);
     changeConditionValue(values);
   };
+
+  useEffect(() => {
+    setLabelValues(
+      values.map(
+        (item: string) =>
+          valueOptions.find((ele: SelectProps.Option) => ele.value === item)
+            ?.label ?? item
+      )
+    );
+  }, [values]);
 
   const setCurOptions = (item: IAnalyticsItem | null) => {
     if (!item) {
@@ -83,7 +99,6 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         };
       });
       setValueOptions(options);
-      setLabelValues([]);
       setValues([]);
       changeConditionValue([]);
     }
@@ -163,6 +178,25 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.not_in,
   ];
 
+  const addNewOption = (inputValue: string) => {
+    if (
+      !values.includes(inputValue) &&
+      !valueOptions.find(
+        (item: SelectProps.Option) => item.value === inputValue
+      )
+    ) {
+      setValueOptions((prev) => {
+        return [
+          ...prev,
+          {
+            label: inputValue,
+            value: inputValue,
+          },
+        ];
+      });
+    }
+  };
+
   return (
     <div className="cs-analytics-condition-item flex gap-5">
       <div className="condition-event">
@@ -216,30 +250,29 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                   setInputValue(detail.value);
                 }}
                 onSelect={({ detail }) => {
-                  setConditionValues(
-                    [...values, detail.value],
-                    [
-                      ...labelValues,
-                      detail.selectedOption?.label ?? detail.value,
-                    ]
-                  );
+                  if (values.includes(detail.value)) {
+                    return;
+                  }
+                  setConditionValues([...values, detail.value]);
                   setInputValue('');
                 }}
                 onKeyDown={({ detail }) => {
                   if (inputValue && detail.key === 'Enter') {
-                    setConditionValues(
-                      [...values, inputValue],
-                      [...labelValues, inputValue]
-                    );
+                    if (values.includes(inputValue)) {
+                      return;
+                    }
+                    addNewOption(inputValue);
+                    setConditionValues([...values, inputValue]);
                     setInputValue('');
                   }
                 }}
                 onBlur={() => {
                   if (inputValue) {
-                    setConditionValues(
-                      [...values, inputValue],
-                      [...labelValues, inputValue]
-                    );
+                    if (values.includes(inputValue)) {
+                      return;
+                    }
+                    addNewOption(inputValue);
+                    setConditionValues([...values, inputValue]);
                     setInputValue('');
                   }
                 }}
@@ -252,8 +285,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
               <TokenGroup
                 onDismiss={({ detail: { itemIndex } }) => {
                   setConditionValues(
-                    values.filter((item, eIndex) => eIndex !== itemIndex),
-                    labelValues.filter((item, eIndex) => eIndex !== itemIndex)
+                    values.filter((item, eIndex) => eIndex !== itemIndex)
                   );
                 }}
                 items={labelValues.map((value) => ({ label: value }))}
