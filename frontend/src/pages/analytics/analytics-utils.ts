@@ -1153,8 +1153,11 @@ const ConvertUserDoneEvent = (
       operator: item.eventConditionRelationShip as any,
     },
     metricCondition: {
-      metricType: item.userDoneEventCalculateMethod
-        ?.value as SegmentFilterEventMetricType,
+      metricType: (item.userDoneEventCalculateMethod?.itemType === 'children'
+        ? item.userDoneEventCalculateMethod.groupName
+        : defaultStr(
+            item.userDoneEventCalculateMethod?.value
+          )) as SegmentFilterEventMetricType,
       conditionOperator: item.userDoneEventOperation
         ?.value as ConditionNumericOperator,
       inputValue: item.userDoneEventValue?.map(Number) ?? [],
