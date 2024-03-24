@@ -100,6 +100,9 @@ export interface ExtendSegment extends Segment {
   autoRefreshOption: SelectProps.Option;
   autoRefreshDayOption: SelectProps.Option | null;
   expireDate: string;
+  // validation
+  nameError?: string;
+  cronError?: string;
 }
 
 export interface IEventSegmentationItem {
@@ -124,6 +127,10 @@ export interface IEventSegmentationItem {
   // Options
   eventAttributeOption?: CategoryItemType[];
   eventCalculateMethodOption?: IAnalyticsItem[];
+  // validation
+  userDoneEventError?: string;
+  userDoneEventValueError?: string;
+  userDoneEventOperatorError?: string;
 }
 
 export interface IEventSegmentationObj {

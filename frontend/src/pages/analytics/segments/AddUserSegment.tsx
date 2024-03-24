@@ -91,7 +91,41 @@ const AddUserSegments: React.FC = () => {
 
   const [loadingCreate, setLoadingCreate] = useState(false);
 
+  const validateSegmentName = () => {
+    if (!segmentObject.name.trim()) {
+      setSegmentObject((prev) => {
+        return {
+          ...prev,
+          nameError: defaultStr(t('analytics:segment.valid.nameEmptyError')),
+        };
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validateCronExpression = () => {
+    if (!segmentObject.refreshSchedule?.cronExpression?.trim()) {
+      setSegmentObject((prev) => {
+        return {
+          ...prev,
+          cronError: defaultStr(t('analytics:segment.valid.cronEmptyError')),
+        };
+      });
+      return false;
+    }
+    return true;
+  };
+
   const addUserSegments = async () => {
+    // validate segment input
+    if (!validateSegmentName()) {
+      return;
+    }
+    if (!validateCronExpression()) {
+      return;
+    }
+
     try {
       console.info('addUserSegments');
       setLoadingCreate(true);
@@ -106,6 +140,8 @@ const AddUserSegments: React.FC = () => {
             'autoRefreshOption',
             'autoRefreshDayOption',
             'expireDate',
+            'nameError',
+            'cronError',
           ]
         )
       );
@@ -118,8 +154,8 @@ const AddUserSegments: React.FC = () => {
   };
 
   useEffect(() => {
-    console.info('segmentObject:', segmentObject);
-  }, [segmentObject]);
+    console.info('segmentDataState:', segmentDataState);
+  }, [segmentDataState]);
 
   return (
     <div className="flex">

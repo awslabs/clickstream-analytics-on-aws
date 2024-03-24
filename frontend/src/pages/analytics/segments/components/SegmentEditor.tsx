@@ -68,13 +68,17 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
           <FormField
             label={t('analytics:segment.comp.segmentName')}
             description={t('analytics:segment.comp.segmentNameDesc')}
+            errorText={t(defaultStr(segmentObject.nameError))}
           >
             <Input
               value={segmentObject.name}
               placeholder={defaultStr(
                 t('analytics:segment.comp.segmentNamePlaceholder')
               )}
-              onChange={(e) => updateSegmentObject('name', e.detail.value)}
+              onChange={(e) => {
+                updateSegmentObject('name', e.detail.value);
+                updateSegmentObject('nameError', '');
+              }}
             />
           </FormField>
           <FormField
@@ -139,66 +143,85 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
                 },
               ]}
             />
+
             {segmentObject.refreshType === 'auto' && (
               <div className="mt-10">
                 <SpaceBetween direction="horizontal" size="xs">
-                  <Select
-                    selectedOption={segmentObject.autoRefreshOption}
-                    options={SEGMENT_AUTO_REFRESH_OPTIONS}
-                    onChange={(e) => {
-                      updateSegmentObject(
-                        'autoRefreshOption',
-                        e.detail.selectedOption
-                      );
-                      updateSegmentObject(
-                        'autoRefreshDayOption',
-                        getAutoRefreshDayOptionsByType(
-                          e.detail.selectedOption.value ?? ''
-                        )?.[0]
-                      );
-                      updateSegmentObject('refreshSchedule', {
-                        ...segmentObject.refreshSchedule,
-                        cron: e.detail.selectedOption.value,
-                        cronExpression: convertCronExpByTimeRange(
-                          e.detail.selectedOption,
-                          getAutoRefreshDayOptionsByType(
-                            e.detail.selectedOption.value ?? ''
-                          )?.[0]?.value ?? ''
-                        ),
-                      });
-                    }}
-                  />
-                  {segmentObject.autoRefreshOption?.value === 'Custom' ? (
-                    <Input
-                      placeholder="cron(15 10 * * ? *)"
-                      value={segmentObject.refreshSchedule.cronExpression ?? ''}
-                      onChange={(e) => {
-                        updateSegmentObject('refreshSchedule', {
-                          ...segmentObject.refreshSchedule,
-                          cronExpression: e.detail.value,
-                        });
-                      }}
-                    />
-                  ) : (
+                  <FormField>
                     <Select
-                      selectedOption={segmentObject.autoRefreshDayOption}
-                      options={getAutoRefreshDayOptionsByType(
-                        segmentObject.autoRefreshOption?.value ?? ''
-                      )}
+                      selectedOption={segmentObject.autoRefreshOption}
+                      options={SEGMENT_AUTO_REFRESH_OPTIONS}
                       onChange={(e) => {
+                        updateSegmentObject('cronError', '');
+                        updateSegmentObject(
+                          'autoRefreshOption',
+                          e.detail.selectedOption
+                        );
                         updateSegmentObject(
                           'autoRefreshDayOption',
-                          e.detail.selectedOption
+                          getAutoRefreshDayOptionsByType(
+                            e.detail.selectedOption.value ?? ''
+                          )?.[0]
                         );
                         updateSegmentObject('refreshSchedule', {
                           ...segmentObject.refreshSchedule,
+                          cron: e.detail.selectedOption.value,
                           cronExpression: convertCronExpByTimeRange(
-                            segmentObject.autoRefreshOption,
-                            e.detail.selectedOption.value ?? ''
+                            e.detail.selectedOption,
+                            getAutoRefreshDayOptionsByType(
+                              e.detail.selectedOption.value ?? ''
+                            )?.[0]?.value ?? ''
                           ),
                         });
+                        if (e.detail.selectedOption.value === 'Custom') {
+                          updateSegmentObject('refreshSchedule', {
+                            ...segmentObject.refreshSchedule,
+                            cronExpression: '',
+                          });
+                        }
                       }}
                     />
+                  </FormField>
+                  {segmentObject.autoRefreshOption?.value === 'Custom' ? (
+                    <FormField
+                      errorText={t(defaultStr(segmentObject.cronError))}
+                    >
+                      <Input
+                        placeholder="cron(15 10 * * ? *)"
+                        value={
+                          segmentObject.refreshSchedule.cronExpression ?? ''
+                        }
+                        onChange={(e) => {
+                          updateSegmentObject('refreshSchedule', {
+                            ...segmentObject.refreshSchedule,
+                            cronExpression: e.detail.value,
+                          });
+                          updateSegmentObject('cronError', '');
+                        }}
+                      />
+                    </FormField>
+                  ) : (
+                    <FormField>
+                      <Select
+                        selectedOption={segmentObject.autoRefreshDayOption}
+                        options={getAutoRefreshDayOptionsByType(
+                          segmentObject.autoRefreshOption?.value ?? ''
+                        )}
+                        onChange={(e) => {
+                          updateSegmentObject(
+                            'autoRefreshDayOption',
+                            e.detail.selectedOption
+                          );
+                          updateSegmentObject('refreshSchedule', {
+                            ...segmentObject.refreshSchedule,
+                            cronExpression: convertCronExpByTimeRange(
+                              segmentObject.autoRefreshOption,
+                              e.detail.selectedOption.value ?? ''
+                            ),
+                          });
+                        }}
+                      />
+                    </FormField>
                   )}
                 </SpaceBetween>
               </div>

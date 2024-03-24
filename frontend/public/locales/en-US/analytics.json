@@ -394,6 +394,14 @@
       "selectUserGroup": "Please select user segment group",
       "segmentDescPlaceholder": "Provide a short description",
       "filterByTimeRange": "Filter by a date and time range"
+    },
+    "valid": {
+      "nameEmptyError": "Please input segment name.",
+      "cronEmptyError": "Please input cron expression.",
+      "selectEvent": "Please select event",
+      "selectAttribute": "Please select attribute",
+      "valueError": "Please input value",
+      "valueBetweenError": "Max value can not be less than min value"
     }
   }
 }
