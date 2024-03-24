@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Segment } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -50,6 +51,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   // for segment sequence event filter
   sequenceEventOption?: IAnalyticsItem | null;
   filterGroupRelationShip?: ERelationShip;
+  sequenceEventAttributeOption?: CategoryItemType[];
   sequenceEventConditionFilterList?: IConditionItemType[];
 }
 
@@ -93,6 +95,16 @@ export interface IEventAnalyticsItem {
 }
 
 // for segment group
+export interface ExtendSegment extends Segment {
+  refreshType: 'manual' | 'auto' | 'custom';
+  autoRefreshOption: SelectProps.Option;
+  autoRefreshDayOption: SelectProps.Option | null;
+  expireDate: string;
+  // validation
+  nameError?: string;
+  cronError?: string;
+}
+
 export interface IEventSegmentationItem {
   groupDateRange?: DateRangePickerProps.ChangeDetail | null;
   groupName?: string;
@@ -105,13 +117,20 @@ export interface IEventSegmentationItem {
   userDoneEventConditionList: IConditionItemType[];
   userDoneEventCalculateMethod?: IAnalyticsItem | null;
   userDoneEventOperation?: SelectProps.Option | null;
-  userDoneEventValue?: any;
+  userDoneEventValue?: Array<string>;
   userIsParamOption?: IAnalyticsItem | null;
   userISOperator?: SelectProps.Option | null;
   userIsValue?: any;
   userSequenceSession?: SelectProps.Option | null;
   userSequenceFlow?: SelectProps.Option | null;
   userInFilterGroup?: SelectProps.Option | null;
+  // Options
+  eventAttributeOption?: CategoryItemType[];
+  eventCalculateMethodOption?: IAnalyticsItem[];
+  // validation
+  userDoneEventError?: string;
+  userDoneEventValueError?: string;
+  userDoneEventOperatorError?: string;
 }
 
 export interface IEventSegmentationObj {
@@ -119,12 +138,12 @@ export interface IEventSegmentationObj {
   subItemList: IEventSegmentationItem[];
   // select options
   eventOption: CategoryItemType[];
-  eventCalculateMethodOption: IAnalyticsItem[];
-  conditionOptions: CategoryItemType[];
   eventOperationOptions: SelectProps.Option[];
-  attributeOptions: CategoryItemType[];
+  userIsAttributeOptions: CategoryItemType[];
   attributeOperationOptions: SelectProps.Option[];
   userGroupOptions: SelectProps.Option[];
+  eventSessionOptions: SelectProps.Option[];
+  eventFlowOptions: SelectProps.Option[];
 }
 
 export interface IRetentionAnalyticsItem {

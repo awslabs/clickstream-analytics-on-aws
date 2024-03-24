@@ -683,6 +683,7 @@ ul.menu-list li.checkbox-item {
     }
   }
   .cs-dropdown-input {
+    position: relative;
     .cs-dropdown-event-input {
       [class^='awsui_dropdown-'] {
         opacity: 0 !important;
@@ -699,12 +700,15 @@ ul.menu-list li.checkbox-item {
         border-radius: 8px;
         z-index: 99;
         opacity: 0;
+        visibility: hidden;
         transition: opacity 0.5s ease-in-out;
         transition-delay: 0.5s;
       }
       &:hover {
         .custom-popover {
           opacity: 1;
+          visibility: visible;
+          transition-delay: 0s;
         }
       }
     }
@@ -801,8 +805,6 @@ ul.menu-list li.checkbox-item {
     .cs-analytics-condition-item {
       margin-top: 10px;
       padding: 0 5px;
-      display: flex;
-      gap: 5px;
       .condition-event {
         width: 120px;
         flex-shrink: 0;
@@ -1014,7 +1016,8 @@ ul.menu-list li.checkbox-item {
       &.group-select {
         min-width: 240px;
         .item-container {
-          width: 240px !important;
+          width: 260px !important;
+          height: 330px !important;
         }
         .group-select-sub-list {
           width: 200px;

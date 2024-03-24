@@ -12,6 +12,7 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
+import { EventsParameterProvider } from 'context/AnalyticsEventsContext';
 import { SegmentProvider } from 'context/SegmentContext';
 import SegmentEditor from 'pages/analytics/segments/components/SegmentEditor';
 import { ReactElement } from 'react';
@@ -36,7 +37,11 @@ jest.mock('react-i18next', () => ({
 }));
 
 const renderWithProvider = (component: ReactElement) => {
-  return render(<SegmentProvider>{component}</SegmentProvider>);
+  return render(
+    <EventsParameterProvider>
+      <SegmentProvider>{component}</SegmentProvider>
+    </EventsParameterProvider>
+  );
 };
 
 describe('SegmentEditor', () => {

@@ -48,10 +48,8 @@ describe('analyticsSegmentGroupReducer', () => {
         filterGroupRelationShip: ERelationShip.AND,
         subItemList: [],
         eventOption: [],
-        eventCalculateMethodOption: [],
-        conditionOptions: [],
         eventOperationOptions: [],
-        attributeOptions: [],
+        userIsAttributeOptions: [],
         attributeOperationOptions: [],
         userGroupOptions: [],
       },
@@ -150,6 +148,9 @@ describe('analyticsSegmentGroupReducer', () => {
         currentIndex: 0,
         parentData: {} as any,
       },
+      metaDataEventParameters: [],
+      metaDataEvents: [],
+      metaDataUserAttributes: [],
       event: MOCK_EVENT_LIST[0].itemList[0],
     };
     const newState = analyticsSegmentGroupReducer(initialState, action);
@@ -207,10 +208,12 @@ describe('analyticsSegmentGroupReducer', () => {
         currentIndex: 0,
         parentData: {} as any,
       },
-      value: 10,
+      value: ['10'],
     };
     const newState = analyticsSegmentGroupReducer(initialState, action);
-    expect(newState.subItemList[0].subItemList[0].userDoneEventValue).toBe(10);
+    expect(newState.subItemList[0].subItemList[0].userDoneEventValue?.[0]).toBe(
+      '10'
+    );
   });
 
   it('should handle UpdateUserIsParamOption', () => {

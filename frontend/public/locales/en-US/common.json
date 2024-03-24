@@ -23,6 +23,8 @@
     "realtime": "Realtime",
     "explore": "Explore",
     "analyzes": "Analyzes",
+    "segments": "Segments",
+    "createSegment": "Create Segment",
     "data-management": "Data Management"
   },
   "nav": {
