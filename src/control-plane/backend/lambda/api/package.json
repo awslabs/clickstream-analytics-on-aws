@@ -14,7 +14,7 @@
     "upgrade": "pnpm dlx projen upgrade",
     "watch": "pnpm dlx projen watch",
     "projen": "pnpm dlx projen",
-    "dev": "nodemon --watch 'src' -e ts --exec 'ts-node' ./index.ts",
+    "dev": "nodemon --watch '**/*.ts' -e ts --exec 'ts-node' ./index.ts",
     "ncc-build": "tsc && ncc build dist/index.js -o ncc",
     "start": "pnpm run ncc-build && node ncc/index.js"
   },

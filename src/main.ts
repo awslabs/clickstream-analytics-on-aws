@@ -108,7 +108,7 @@ if (!(/true/i).test(app.node.tryGetContext('ignoreWebConsoleSynth'))) {
   ];
 
   stackSuppressions([
-    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+    new CloudFrontControlPlaneStack(app, app.node.tryGetContext('standardControlPlaneStackName') ?? 'cloudfront-s3-control-plane-stack-global', {
       synthesizer: synthesizer(),
     }),
     new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
