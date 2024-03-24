@@ -89,7 +89,6 @@ def get_exit_app_events(user, event):
             exception_event["attributes"]["_exception_message"] = exception[0]
             exception_event["attributes"]["_exception_stack"] = exception[1]
             events.append(ShoppingApp.get_final_event(user, EventType.APP_EXCEPTION, exception_event))
-            print("record exception event")
     # user engagement
     engagement_time = user.current_timestamp - user.current_page_start_time
     if engagement_time > 1000:
