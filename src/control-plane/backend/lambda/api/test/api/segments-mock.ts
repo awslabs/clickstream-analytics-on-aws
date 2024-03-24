@@ -48,15 +48,15 @@ export const MOCK_CREATE_USER_SEGMENT_SETTING_INPUT = {
                       parameterName: '_session_duration',
                       dataType: 'int',
                       conditionOperator: '>=',
-                      inputValue: 30000,
+                      inputValue: ['30000'],
                     },
                   ],
                   operator: 'and',
                 },
-                metricType: {
-                  metricName: 'NUMBER_OF_TOTAL',
+                metricCondition: {
+                  metricType: 'NUMBER_OF_TOTAL',
                   conditionOperator: '>=',
-                  inputValue: 20,
+                  inputValue: [20, 0],
                 },
               },
               {
@@ -82,7 +82,7 @@ export const MOCK_CREATE_USER_SEGMENT_SETTING_INPUT = {
                         parameterName: '_session_duration',
                         dataType: 'int',
                         conditionOperator: '>=',
-                        inputValue: 30000,
+                        inputValue: ['30000'],
                       },
                     ],
                     operator: 'and',
