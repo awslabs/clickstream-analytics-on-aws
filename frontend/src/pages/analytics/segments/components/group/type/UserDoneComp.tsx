@@ -13,6 +13,7 @@
 
 import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
 import { Button, Input, Select } from '@cloudscape-design/components';
+import ErrorText from 'components/common/ErrorText';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';
 import GroupSelectContainer from 'components/eventselect/GroupSelectContainer';
@@ -74,25 +75,32 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
       <div className="cs-analytics-dropdown">
         <div className="cs-analytics-parameter">
           <div className="flex-1">
-            <EventItem
-              type="event"
-              placeholder={t('analytics:labels.eventSelectPlaceholder')}
-              categoryOption={segmentData.userDoneEvent ?? null}
-              changeCurCategoryOption={(item) => {
-                segmentDataDispatch({
-                  type: AnalyticsSegmentActionType.UpdateUserDoneEvent,
-                  segmentProps,
-                  event: item,
-                  metaDataEventParameters: eventData.metaDataEventParameters,
-                  metaDataEvents: eventData.metaDataEvents,
-                  metaDataUserAttributes: eventData.metaDataUserAttributes,
-                  builtInMetaData: eventData.builtInMetaData,
-                });
-              }}
-              hasTab={true}
-              isMultiSelect={false}
-              categories={segmentDataState.eventOption}
-            />
+            <div>
+              <EventItem
+                type="event"
+                placeholder={t('analytics:labels.eventSelectPlaceholder')}
+                categoryOption={segmentData.userDoneEvent ?? null}
+                changeCurCategoryOption={(item) => {
+                  segmentDataDispatch({
+                    type: AnalyticsSegmentActionType.UpdateUserDoneEvent,
+                    segmentProps,
+                    event: item,
+                    metaDataEventParameters: eventData.metaDataEventParameters,
+                    metaDataEvents: eventData.metaDataEvents,
+                    metaDataUserAttributes: eventData.metaDataUserAttributes,
+                    builtInMetaData: eventData.builtInMetaData,
+                  });
+                }}
+                hasTab={true}
+                isMultiSelect={false}
+                categories={segmentDataState.eventOption}
+              />
+              {segmentData.userDoneEventError && (
+                <ErrorText
+                  text={`${t(defaultStr(segmentData.userDoneEventError))}`}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

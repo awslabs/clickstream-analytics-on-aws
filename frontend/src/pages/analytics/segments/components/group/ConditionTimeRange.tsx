@@ -96,7 +96,6 @@ const ConditionTimeRange: React.FC<ConditionTimeRangeProps> = (
     <div>
       <DateRangePicker
         onChange={({ detail }) => {
-          console.log(detail.value);
           segmentDataDispatch({
             type: AnalyticsSegmentActionType.UpdateFilterGroupTimeRange,
             index: groupIndex,

@@ -1137,11 +1137,6 @@ const convertAttributeList = (
 const ConvertUserDoneEvent = (
   item: IEventSegmentationItem
 ): UserSegmentFilterCondition => {
-  console.info(item);
-  console.info(
-    'item.userDoneEventCalculateMethod:',
-    item.userDoneEventCalculateMethod
-  );
   return {
     conditionType: SegmentFilterConditionType.UserEventCondition,
     hasDone: item.userEventType?.value === ConditionType.USER_DONE,

@@ -398,10 +398,10 @@
     "valid": {
       "nameEmptyError": "Please input segment name.",
       "cronEmptyError": "Please input cron expression.",
-      "selectEvent": "Please select event",
-      "selectAttribute": "Please select attribute",
-      "valueError": "Please input value",
-      "valueBetweenError": "Max value can not be less than min value"
+      "eventEmptyError": "Please select event",
+      "attributeEmptyError": "Please select attribute",
+      "eventValueError": "Please input value",
+      "eventValueBetweenError": "Max value can not be less than min value"
     }
   }
 }

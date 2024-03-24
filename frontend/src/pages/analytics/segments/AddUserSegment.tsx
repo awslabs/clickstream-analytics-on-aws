@@ -13,37 +13,24 @@
 
 import {
   AppLayout,
-  Button,
   ContentLayout,
-  Form,
   Header,
-  SpaceBetween,
 } from '@cloudscape-design/components';
-import { createSegment } from 'apis/segments';
-import {
-  ExtendSegment,
-  IEventSegmentationObj,
-} from 'components/eventselect/AnalyticsType';
+import { ExtendSegment } from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { SegmentProvider } from 'context/SegmentContext';
-import { omit } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
-import {
-  DEFAULT_SEGMENT_GROUP_DATA,
-  SEGMENT_AUTO_REFRESH_OPTIONS,
-} from 'ts/const';
+import { useParams } from 'react-router-dom';
+import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
-import { convertUISegmentObjectToAPIObject } from '../analytics-utils';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
-  const navigate = useNavigate();
   const [segmentObject, setSegmentObject] = useState<ExtendSegment>({
     segmentId: '',
     segmentType: 'User',
@@ -69,10 +56,6 @@ const AddUserSegments: React.FC = () => {
     autoRefreshDayOption: null,
     expireDate: '',
   });
-  const [segmentDataState, setSegmentDataState] =
-    useState<IEventSegmentationObj>({
-      ...DEFAULT_SEGMENT_GROUP_DATA,
-    });
 
   const breadcrumbItems = [
     {
@@ -88,74 +71,6 @@ const AddUserSegments: React.FC = () => {
       href: '',
     },
   ];
-
-  const [loadingCreate, setLoadingCreate] = useState(false);
-
-  const validateSegmentName = () => {
-    if (!segmentObject.name.trim()) {
-      setSegmentObject((prev) => {
-        return {
-          ...prev,
-          nameError: defaultStr(t('analytics:segment.valid.nameEmptyError')),
-        };
-      });
-      return false;
-    }
-    return true;
-  };
-
-  const validateCronExpression = () => {
-    if (!segmentObject.refreshSchedule?.cronExpression?.trim()) {
-      setSegmentObject((prev) => {
-        return {
-          ...prev,
-          cronError: defaultStr(t('analytics:segment.valid.cronEmptyError')),
-        };
-      });
-      return false;
-    }
-    return true;
-  };
-
-  const addUserSegments = async () => {
-    // validate segment input
-    if (!validateSegmentName()) {
-      return;
-    }
-    if (!validateCronExpression()) {
-      return;
-    }
-
-    try {
-      console.info('addUserSegments');
-      setLoadingCreate(true);
-      await createSegment(
-        omit(
-          {
-            ...segmentObject,
-            criteria: convertUISegmentObjectToAPIObject(segmentDataState),
-          },
-          [
-            'refreshType',
-            'autoRefreshOption',
-            'autoRefreshDayOption',
-            'expireDate',
-            'nameError',
-            'cronError',
-          ]
-        )
-      );
-      setLoadingCreate(false);
-      navigate(`/analytics/test_magic_project_gpvz/app/shopping/segments`);
-    } catch (error) {
-      console.info(error);
-      setLoadingCreate(false);
-    }
-  };
-
-  useEffect(() => {
-    console.info('segmentDataState:', segmentDataState);
-  }, [segmentDataState]);
 
   return (
     <div className="flex">
@@ -173,41 +88,17 @@ const AddUserSegments: React.FC = () => {
               }
             >
               <SegmentProvider>
-                <Form
-                  actions={
-                    <SpaceBetween direction="horizontal" size="xs">
-                      <Button
-                        onClick={() => {
-                          navigate(-1);
-                        }}
-                      >
-                        {t('button.cancel')}
-                      </Button>
-                      <Button
-                        loading={loadingCreate}
-                        onClick={() => {
-                          addUserSegments();
-                        }}
-                        variant="primary"
-                      >
-                        {t('button.save')}
-                      </Button>
-                    </SpaceBetween>
-                  }
-                >
-                  <SegmentEditor
-                    segmentObject={segmentObject}
-                    updateSegmentState={setSegmentDataState}
-                    updateSegmentObject={(key, value) => {
-                      setSegmentObject((prev) => {
-                        return {
-                          ...prev,
-                          [key]: value,
-                        };
-                      });
-                    }}
-                  />
-                </Form>
+                <SegmentEditor
+                  segmentObject={segmentObject}
+                  updateSegmentObject={(key, value) => {
+                    setSegmentObject((prev) => {
+                      return {
+                        ...prev,
+                        [key]: value,
+                      };
+                    });
+                  }}
+                />
               </SegmentProvider>
             </ContentLayout>
           }

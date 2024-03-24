@@ -28,16 +28,19 @@ import {
   DEFAULT_SEGMENT_ITEM,
 } from 'ts/const';
 import { IMetadataBuiltInList } from 'ts/explore-types';
-import { getEventParameters } from 'ts/utils';
+import { getEventParameters, ternary } from 'ts/utils';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   ERelationShip,
   IAnalyticsItem,
+  IEventSegmentationItem,
   IEventSegmentationObj,
 } from '../AnalyticsType';
 
 export enum AnalyticsSegmentActionType {
+  ValidateSegmentObject = 'validateSegmentObject',
+
   SetSegmentData = 'setSegmentData',
   ResetSegmentData = 'resetSegmentData',
   AddOrEventData = 'addOrEventData',
@@ -82,6 +85,10 @@ export enum AnalyticsSegmentActionType {
 
   SetEventOption = 'setEventOption',
 }
+
+export type ValidateSegmentObject = {
+  type: AnalyticsSegmentActionType.ValidateSegmentObject;
+};
 
 export type ResetEventData = {
   type: AnalyticsSegmentActionType.ResetSegmentData;
@@ -312,6 +319,7 @@ export type SetEventOption = {
 };
 
 export type AnalyticsSegmentAction =
+  | ValidateSegmentObject
   | SetSegmentData
   | ResetEventData
   | AddOrEventData
@@ -354,6 +362,41 @@ export type AnalyticsDispatchFunction = (
   action: AnalyticsSegmentAction
 ) => void;
 
+export const checkHasErrorProperties = (
+  items: IEventSegmentationItem[],
+  errors: string[] = []
+) => {
+  items.forEach((item) => {
+    if (item.subItemList && item.subItemList.length > 0) {
+      checkHasErrorProperties(item.subItemList, errors);
+    } else {
+      if (item.userDoneEventError) {
+        errors.push('error');
+      }
+    }
+  });
+  return errors;
+};
+
+export const checkSegmentAndSetError = (obj: IEventSegmentationItem[]) => {
+  for (const item of obj) {
+    if (item.subItemList.length > 0) {
+      checkSegmentAndSetError(item.subItemList);
+    } else {
+      if (
+        item.userEventType?.value === ConditionType.USER_DONE ||
+        item.userEventType?.value === ConditionType.USER_NOT_DONE
+      ) {
+        item.userDoneEventError = ternary(
+          item.userDoneEvent?.value,
+          '',
+          'analytics:segment.valid.eventEmptyError'
+        );
+      }
+    }
+  }
+};
+
 export const analyticsSegmentGroupReducer = (
   state: IEventSegmentationObj,
   action: AnalyticsSegmentAction
@@ -366,6 +409,12 @@ export const analyticsSegmentGroupReducer = (
 
     case AnalyticsSegmentActionType.SetSegmentData: {
       return { ...action.segmentData };
+    }
+
+    case AnalyticsSegmentActionType.ValidateSegmentObject: {
+      // check user don event
+      checkSegmentAndSetError(newState.subItemList);
+      return { ...newState };
     }
 
     // event and or logic
@@ -528,7 +577,7 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
-      console.info('calculateMethodOptions:', calculateMethodOptions);
+      currentData.userDoneEventError = '';
       currentData.userDoneEvent = action.event;
       currentData.eventAttributeOption = parameterOption;
       currentData.eventCalculateMethodOption = calculateMethodOptions;
@@ -608,10 +657,17 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
-      currentData.userDoneEventConditionList.push({
-        ...DEFAULT_CONDITION_DATA,
-      });
-      currentData.eventConditionRelationShip = ERelationShip.AND;
+      if (!currentData.userDoneEvent?.value) {
+        // valid user select event
+        currentData.userDoneEventError =
+          'analytics:segment.valid.eventEmptyError';
+      } else {
+        currentData.userDoneEventConditionList.push({
+          ...DEFAULT_CONDITION_DATA,
+        });
+        currentData.eventConditionRelationShip = ERelationShip.AND;
+      }
+
       return { ...newState };
     }
 
