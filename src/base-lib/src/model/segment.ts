@@ -35,7 +35,7 @@ export interface RefreshSchedule {
 
 export type FilterOperator = 'and' | 'or';
 
-export type TimeUnit = 'hour' | 'day' | 'week' | 'month';
+export type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
 
 export interface SegmentCriteria {
   filterGroups: SegmentFilterGroup[];
@@ -130,7 +130,7 @@ export enum ParameterType {
 
 export enum ParameterDataType {
   STRING = 'string',
-  INTEGER = 'integer',
+  INTEGER = 'int',
   DOUBLE = 'double',
   FLOAT = 'float',
 }
@@ -145,10 +145,9 @@ export enum ConditionOperator {
   LESS_THAN = '<',
   LESS_THAN_OR_EQUAL = '<=',
   IN = 'in',
-  NOT_IN = 'not in',
+  NOT_IN = 'not_in',
   CONTAINS = 'contains',
-  NOT_CONTAINS = 'not contains',
-  BEGIN_WITH = 'begin with',
+  NOT_CONTAINS = 'not_contains',
 }
 
 export enum ConditionNumericOperator {

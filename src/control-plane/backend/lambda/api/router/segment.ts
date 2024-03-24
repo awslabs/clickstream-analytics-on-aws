@@ -19,9 +19,10 @@ import {
   SCHEDULE_EXPRESSION_PATTERN,
   SegmentFilterConditionType,
   SegmentFilterEventMetricType,
+  SegmentFilterGroup,
 } from '@aws/clickstream-base-lib';
 import { NextFunction, Request, Response, Router } from 'express';
-import { body, param, query } from 'express-validator';
+import { body, param, query, ValidationChain, validationResult } from 'express-validator';
 import { isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { SegmentServ } from '../service/segment';
 
@@ -157,27 +158,19 @@ function validateRefreshScheduleCronExpression(value: any) {
 }
 
 /**
- * Validate metricCondition.inputValue, which can be number, or number array with two elements
+ * Validate metricCondition.inputValue, which is a number array with two elements
  * @param value
  */
 function validateMetricConditionInputValue(value: any) {
-  if (Array.isArray(value)) {
-    return value.every(item => typeof item === 'number') && value.length === 2 && value[0] <= value[1]; // number range
-  } else {
-    return typeof value === 'number';
-  }
+  return Array.isArray(value) && value.every(item => typeof item === 'number') && value.length === 2;
 }
 
 /**
- * Validate parameterCondition.inputValue type, which can be number | number[] | string | string[]
+ * Validate parameterCondition.inputValue type, which is a string array
  * @param value
  */
 function validateParameterConditionInputValue(value: any) {
-  if (Array.isArray(value)) {
-    return value.every(item => typeof item === 'number' || typeof item === 'string');
-  } else {
-    return typeof value === 'number' || typeof value === 'string';
-  }
+  return Array.isArray(value) && value.every(item => typeof item === 'string');
 }
 
 function commonValidationsForSegment() {
@@ -203,58 +196,79 @@ function commonValidationsForSegment() {
     body('criteria.filterGroups.*.filters.*.operator').isIn(['and', 'or']),
     body('criteria.filterGroups.*.filters.*.conditions').isArray({ min: 1 }),
     body('criteria.filterGroups.*.filters.*.conditions.*.conditionType').isIn(Object.values(SegmentFilterConditionType)),
-    // Dynamically apply validation rules based on conditionType
-    body('criteria.filterGroups.*.filters.*.conditions.*').custom(value => {
-      switch (value.conditionType) {
-        case SegmentFilterConditionType.UserEventCondition:
-          return [
-            body('hasDone').isBoolean(),
-            body('event.eventName').isString(),
-            body('event.operator').optional().isIn(['and', 'or']),
-            body('event.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
-            body('event.eventParameterConditions.*.parameterName').isString(),
-            body('event.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
-            body('event.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
-            body('event.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
-            body('metricCondition.metricType').isIn(Object.values(SegmentFilterEventMetricType)),
-            body('metricCondition.conditionOperator').isIn(Object.values(ConditionNumericOperator)),
-            body('metricCondition.inputValue').custom(validateMetricConditionInputValue),
-            body('metricCondition.parameterType').optional().isIn(Object.values(ParameterType)),
-            body('metricCondition.parameterName').optional().isString(),
-            body('metricCondition.dataType').optional().isIn(Object.values(ParameterDataType)),
-          ];
-        case SegmentFilterConditionType.EventsInSequenceCondition:
-          return [
-            body('events').isArray({ min: 1 }),
-            body('events.*.eventName').isString(),
-            body('events.*.operator').optional().isIn(['and', 'or']),
-            body('events.*.eventParameterConditions').optional().isArray(),
-            body('events.*.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
-            body('events.*.eventParameterConditions.*.parameterName').isString(),
-            body('events.*.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
-            body('events.*.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
-            body('events.*.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
-            body('isInOneSession').isBoolean(),
-            body('isDirectlyFollow').isBoolean(),
-          ];
-        case SegmentFilterConditionType.UserAttributeCondition:
-          return [
-            body('hasAttribute').isBoolean(),
-            body('attributeCondition').isObject(),
-            body('attributeCondition.parameterType').isIn(Object.values(ParameterType)),
-            body('attributeCondition.parameterName').isString(),
-            body('attributeCondition.dataType').isIn(Object.values(ParameterDataType)),
-            body('attributeCondition.conditionOperator').isIn(Object.values(ConditionOperator)),
-            body('attributeCondition.inputValue').custom(validateParameterConditionInputValue),
-          ];
-        case SegmentFilterConditionType.UserInSegmentCondition:
-          return [
-            body('segmentId').isString(),
-            body('isInSegment').isBoolean(),
-          ];
-        default:
-          return false;
-      }
+    // Apply validation rules to filter conditions based on conditionType
+    body('criteria').custom(async (criteria, { req }) => {
+      const filterGroups: SegmentFilterGroup[] = criteria.filterGroups;
+      filterGroups.forEach((filterGroup, filterGroupIndex) => {
+        const filters = filterGroup.filters;
+        filters.forEach((filter, filterIndex) => {
+          const conditions = filter.conditions;
+          conditions.forEach(async (condition, conditionIndex) => {
+            const path = `criteria.filterGroups[${filterGroupIndex}].filters[${filterIndex}].conditions[${conditionIndex}].`;
+            let validations: ValidationChain[] = [];
+            switch (condition.conditionType) {
+              case SegmentFilterConditionType.UserEventCondition:
+                validations = [
+                  body(path + 'hasDone').isBoolean(),
+                  body(path + 'event.eventName').notEmpty(),
+                  body(path + 'event.operator').optional().isIn(['and', 'or']),
+                  body(path + 'event.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'event.eventParameterConditions.*.parameterName').notEmpty(),
+                  body(path + 'event.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
+                  body(path + 'event.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'event.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
+                  body(path + 'metricCondition.metricType').isIn(Object.values(SegmentFilterEventMetricType)),
+                  body(path + 'metricCondition.conditionOperator').isIn(Object.values(ConditionNumericOperator)),
+                  body(path + 'metricCondition.inputValue').custom(validateMetricConditionInputValue),
+                  body(path + 'metricCondition.parameterType').optional().isIn(Object.values(ParameterType)),
+                  body(path + 'metricCondition.parameterName').optional().isString(),
+                  body(path + 'metricCondition.dataType').optional().isIn(Object.values(ParameterDataType)),
+                ];
+                break;
+              case SegmentFilterConditionType.EventsInSequenceCondition:
+                validations = [
+                  body(path + 'hasDone').isBoolean(),
+                  body(path + 'events').isArray({ min: 1 }),
+                  body(path + 'events.*.eventName').notEmpty(),
+                  body(path + 'events.*.operator').optional().isIn(['and', 'or']),
+                  body(path + 'events.*.eventParameterConditions').optional().isArray(),
+                  body(path + 'events.*.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'events.*.eventParameterConditions.*.parameterName').notEmpty(),
+                  body(path + 'events.*.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
+                  body(path + 'events.*.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'events.*.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
+                  body(path + 'isInOneSession').isBoolean(),
+                  body(path + 'isDirectlyFollow').isBoolean(),
+                ];
+                break;
+              case SegmentFilterConditionType.UserAttributeCondition:
+                validations = [
+                  body(path + 'hasAttribute').isBoolean(),
+                  body(path + 'attributeCondition').isObject(),
+                  body(path + 'attributeCondition.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'attributeCondition.parameterName').notEmpty(),
+                  body(path + 'attributeCondition.dataType').isIn(Object.values(ParameterDataType)),
+                  body(path + 'attributeCondition.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'attributeCondition.inputValue').custom(validateParameterConditionInputValue),
+                ];
+                break;
+              case SegmentFilterConditionType.UserInSegmentCondition:
+                validations = [
+                  body(path + 'segmentId').notEmpty(),
+                  body(path + 'isInSegment').isBoolean(),
+                ];
+                break;
+              default:
+                return Promise.reject('Invalid segment filter condition type');
+            }
+
+            await Promise.all(validations.map(validation => validation.run(req)));
+          });
+        });
+      });
+
+      const errors = validationResult(req);
+      return errors.isEmpty() ? true : Promise.reject(errors.array());
     }),
   ];
 }

@@ -52,7 +52,9 @@ export class DynamoDBSegmentStore implements SegmentStore {
         ExpressionAttributeValues: {
           ':id': appId,
           ':segmentPrefix': 'SEGMENT_SETTING#',
+          ':d': false,
         },
+        FilterExpression: 'deleted = :d',
       }));
 
       return response.Items;
