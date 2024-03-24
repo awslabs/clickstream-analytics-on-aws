@@ -230,7 +230,7 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixes.set(BucketPrefix.LOAD_WORKFLOW, `clickstream/${projectId}/data/load-workflow/`);
     prefixes.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
     prefixes.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
-    prefixes.set(BucketPrefix.SEGMENTS, `clickstream/${projectId}/data/segments/`);
+    prefixes.set(BucketPrefix.SEGMENTS, `clickstream/${projectId}/data/segments-output/`);
     return prefixes.get(key) ?? '';
   }
   return value!;

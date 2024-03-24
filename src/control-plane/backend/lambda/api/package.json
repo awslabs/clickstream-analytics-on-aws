@@ -70,6 +70,7 @@
     "@aws-sdk/client-sts": "^3.523.0",
     "@aws-sdk/credential-providers": "^3.523.0",
     "@aws-sdk/lib-dynamodb": "^3.523.0",
+    "@aws-sdk/s3-request-presigner": "^3.523.0",
     "@aws-sdk/types": "^3.523.0",
     "@aws-sdk/util-dynamodb": "^3.523.0",
     "@aws/clickstream-base-lib": "workspace:*",

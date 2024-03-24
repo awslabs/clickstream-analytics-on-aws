@@ -436,6 +436,8 @@ export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
+export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWorkflowStateMachine';
+export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',

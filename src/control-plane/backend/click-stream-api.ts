@@ -12,7 +12,12 @@
  */
 
 import path from 'path';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
+import {
+  CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
+  CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX,
+  QUICKSIGHT_RESOURCE_NAME_PREFIX,
+  SCAN_METADATA_WORKFLOW_PREFIX,
+} from '@aws/clickstream-base-lib';
 import {
   CfnResource,
   Duration,
@@ -339,6 +344,7 @@ export class ClickStreamApiConstruct extends Construct {
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
         IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
+        API_FUNCTION_LAMBDA_ROLE: role.roleArn,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
@@ -406,6 +412,15 @@ export class ClickStreamApiConstruct extends Construct {
               arnFormat: ArnFormat.COLON_RESOURCE_NAME,
             }, Stack.of(this),
           ),
+          Arn.format(
+            {
+              resource: 'stateMachine',
+              service: 'states',
+              region: '*',
+              resourceName: `${CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX}*`,
+              arnFormat: ArnFormat.COLON_RESOURCE_NAME,
+            }, Stack.of(this),
+          ),
         ],
         actions: [
           'states:StartExecution',
@@ -435,6 +450,7 @@ export class ClickStreamApiConstruct extends Construct {
           'redshift-serverless:GetNamespace',
           'redshift-data:BatchExecuteStatement',
           's3:ListBucket',
+          's3:GetObject',
           'ds:AuthorizeApplication',
           'ds:UnauthorizeApplication',
           'ds:CheckAlias',
@@ -537,7 +553,24 @@ export class ClickStreamApiConstruct extends Construct {
           'sts:AssumeRole',
         ],
       }),
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}*`,
+        ],
+        actions: [
+          'events:RemoveTargets',
+          'events:DeleteRule',
+        ],
+      }),
     ];
-    return createLambdaRole(this, 'ApiFunctionRole', deployInVpc, apiFunctionPolicyStatements);
+
+    const role = createLambdaRole(this, 'ApiFunctionRole', deployInVpc, apiFunctionPolicyStatements);
+    role.addToPolicy(new PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [role.roleArn],
+    }));
+
+    return role;
   }
 }

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-interface Segment {
+export interface Segment {
   segmentId: string;
   segmentType: 'User' | 'Session' | 'Event';
   name: string;
@@ -23,60 +23,64 @@ interface Segment {
   lastUpdateBy: string;
   lastUpdateAt: number;
   refreshSchedule: RefreshSchedule;
-  eventBridgeRuleArn?: string;
   criteria: SegmentCriteria;
+  eventBridgeRuleArn?: string;
 }
 
-interface RefreshSchedule {
+export interface RefreshSchedule {
   cron: 'Manual' | 'Daily' | 'Weekly' | 'Monthly' | 'Custom';
   cronExpression?: string;
   expireAfter: number; // timestamp
 }
 
-type FilterOperator = 'and' | 'or';
+export type FilterOperator = 'and' | 'or';
 
-interface SegmentCriteria {
+export type TimeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+
+export interface SegmentCriteria {
   filterGroups: SegmentFilterGroup[];
   operator: FilterOperator;
 }
 
-interface SegmentFilterGroup {
+export interface SegmentFilterGroup {
   description?: string;
+  isRelativeDateRange: boolean;
   startDate?: string;
   endDate?: string;
-  relativeDateRange?: string; // TODO: expression
+  lastN?: number;
+  timeUnit?: TimeUnit;
   filters: SegmentFilter[];
   operator: FilterOperator;
 }
 
-type SegmentFilter = UserSegmentFilter; // Add "SessionSegmentFilter" and "EventSegmentFilter" in the future
+export type SegmentFilter = UserSegmentFilter; // Add "SessionSegmentFilter" and "EventSegmentFilter" in the future
 
-interface UserSegmentFilter {
+export interface UserSegmentFilter {
   conditions: UserSegmentFilterCondition[];
   operator: FilterOperator;
 }
 
-type UserSegmentFilterCondition =
+export type UserSegmentFilterCondition =
   UserEventCondition
   | EventsInSequenceCondition
   | UserAttributeCondition
   | UserInSegmentCondition;
 
-enum SegmentFilterConditionType {
-  UserEventCondition,
-  EventsInSequenceCondition,
-  UserAttributeCondition,
-  UserInSegmentCondition,
+export enum SegmentFilterConditionType {
+  UserEventCondition = 'UserEventCondition',
+  EventsInSequenceCondition = 'EventsInSequenceCondition',
+  UserAttributeCondition = 'UserAttributeCondition',
+  UserInSegmentCondition = 'UserInSegmentCondition',
 }
 
-interface UserEventCondition {
+export interface UserEventCondition {
   conditionType: SegmentFilterConditionType.UserEventCondition;
   hasDone: boolean;
   event: EventWithParameter;
   metricCondition: MetricCondition;
 }
 
-interface EventsInSequenceCondition {
+export interface EventsInSequenceCondition {
   conditionType: SegmentFilterConditionType.EventsInSequenceCondition;
   hasDone: boolean;
   events: EventWithParameter[];
@@ -84,49 +88,54 @@ interface EventsInSequenceCondition {
   isDirectlyFollow: boolean;
 }
 
-interface UserAttributeCondition {
+export interface UserAttributeCondition {
   conditionType: SegmentFilterConditionType.UserAttributeCondition;
+  hasAttribute: boolean;
   attributeCondition: ParameterCondition;
 }
 
-interface UserInSegmentCondition {
+export interface UserInSegmentCondition {
   conditionType: SegmentFilterConditionType.UserInSegmentCondition;
   isInSegment: boolean;
   segmentId: string;
 }
 
-interface EventWithParameter {
+export interface EventWithParameter {
   eventName: string;
   eventParameterConditions?: ParameterCondition[];
+  operator?: FilterOperator;
 }
 
-interface ParameterCondition {
+export interface ParameterCondition {
   parameterType: ParameterType;
   parameterName: string;
   dataType: ParameterDataType;
   conditionOperator: ConditionOperator;
-  inputValue: number | string;
+  inputValue: number | number[] | string | string[];
 }
 
-interface MetricCondition {
+export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
-  conditionOperator: ConditionOperator;
-  inputValue: number;
+  conditionOperator: ConditionNumericOperator;
+  inputValue: number | number[];
+  parameterType?: ParameterType;
+  parameterName?: string;
+  dataType?: ParameterDataType;
 }
 
-enum ParameterType {
-  PREDEFINED = 'predefined',
-  CUSTOM = 'custom',
+export enum ParameterType {
+  PRESET = 'Preset',
+  CUSTOM = 'Custom',
 }
 
-enum ParameterDataType {
+export enum ParameterDataType {
   STRING = 'string',
-  INTEGER = 'integer',
+  INTEGER = 'int',
   DOUBLE = 'double',
   FLOAT = 'float',
 }
 
-enum ConditionOperator {
+export enum ConditionOperator {
   NULL = 'is null',
   NOT_NULL = 'is not null',
   EQUAL = '=',
@@ -136,30 +145,37 @@ enum ConditionOperator {
   LESS_THAN = '<',
   LESS_THAN_OR_EQUAL = '<=',
   IN = 'in',
-  NOT_IN = ' not in',
+  NOT_IN = 'not_in',
   CONTAINS = 'contains',
-  NOT_CONTAINS = 'not contains',
-  BEGIN_WITH = 'begin with',
+  NOT_CONTAINS = 'not_contains',
 }
 
-enum SegmentFilterEventMetricType {
-  NUMBER_OF_TOTAL,
-  NUMBER_OF_TIMES_PER_DAY,
-  NUMBER_OF_CONSECUTIVE_DAYS,
-  NUBMER_OF_DAYS_HAVING_EVENT,
-  SUM_OF_EVENT_PARAMETER,
-  MIN_OF_EVENT_PARAMETER,
-  MAX_OF_EVENT_PARAMETER,
-  AVG_OF_EVENT_PARAMETER,
-  NUMBER_OF_DISTINCT_EVENT_PARAMETER,
+export enum ConditionNumericOperator {
+  EQUAL = '=',
+  NOT_EQUAL = '<>',
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUAL = '>=',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUAL = '<=',
+  BETWEEN = 'between',
+}
+
+export enum SegmentFilterEventMetricType {
+  NUMBER_OF_TOTAL = 'NUMBER_OF_TOTAL',
+  NUMBER_OF_TIMES_PER_DAY = 'NUMBER_OF_TIMES_PER_DAY',
+  NUMBER_OF_CONSECUTIVE_DAYS = 'NUMBER_OF_CONSECUTIVE_DAYS',
+  NUMBER_OF_DAYS_HAVING_EVENT = 'NUMBER_OF_DAYS_HAVING_EVENT',
+  SUM_OF_EVENT_PARAMETER = 'SUM_OF_EVENT_PARAMETER',
+  MIN_OF_EVENT_PARAMETER = 'MIN_OF_EVENT_PARAMETER',
+  MAX_OF_EVENT_PARAMETER = 'MAX_OF_EVENT_PARAMETER',
+  AVG_OF_EVENT_PARAMETER = 'AVG_OF_EVENT_PARAMETER',
+  NUMBER_OF_DISTINCT_EVENT_PARAMETER = 'NUMBER_OF_DISTINCT_EVENT_PARAMETER',
 }
 
 export interface SegmentDdbItem extends Segment {
   id: string;
   type: string;
   deleted: boolean;
-  eventBridgeRuleArn?: string;
-  lastJobRunId?: string;
 }
 
 export interface SegmentJobStatusItem {
@@ -176,6 +192,10 @@ export interface SegmentJobStatusItem {
   segmentSessionNumber: number;
   totalSessionNumber: number;
   sampleData: object[];
+
+  // GSI
+  prefix: string;
+  createAt: number;
 }
 
 export enum SegmentJobStatus {

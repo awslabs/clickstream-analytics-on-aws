@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SegmentJobStatus } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { StatusString } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
@@ -19,7 +20,6 @@ import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { parseDynamoDBTableARN } from '../../../common/utils';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
-import { SegmentJobStatus } from '../../private/segments/segments-model';
 import { describeStatement, getRedshiftClient } from '../redshift-data';
 
 export interface SegmentJobStatusEvent extends ExecuteSegmentQueryOutput {

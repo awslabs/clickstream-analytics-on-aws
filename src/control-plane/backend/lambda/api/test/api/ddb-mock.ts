@@ -54,6 +54,8 @@ const MOCK_EVENT_PARAMETER_NAME = 'install_source';
 const MOCK_USER_ATTRIBUTE_NAME = '_user_id';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
 const MOCK_USER_ID = 'fake@example.com';
+const MOCK_SEGMENT_ID = 'segment_uuid';
+const MOCK_SEGMENT_JOB_ID = 'segment_job_uuid';
 
 export const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowLogDeliveryPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
@@ -1026,6 +1028,8 @@ export {
   MOCK_USER_ATTRIBUTE_NAME,
   MOCK_DASHBOARD_ID,
   MOCK_USER_ID,
+  MOCK_SEGMENT_ID,
+  MOCK_SEGMENT_JOB_ID,
   tokenMock,
   tokenMockTwice,
   userMock,
