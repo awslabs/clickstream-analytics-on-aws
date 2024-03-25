@@ -27,19 +27,55 @@ export class SolutionInfo {
   static SOLUTION_VERSION_SHORT = parseVersion(SolutionInfo.SOLUTION_VERSION).short;
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
   static SOLUTION_TYPE = 'AWS-Solutions';
+}
 
-  static VER_1_0_0 = 'v1.0.0';
-  static VER_1_0_1 = 'v1.0.1';
-  static VER_1_0_2 = 'v1.0.2';
-  static VER_1_0_3 = 'v1.0.3';
-  static VER_1_1_0 = 'v1.1.0';
-  static VER_1_1_1 = 'v1.1.1';
-  static VER_1_1_2 = 'v1.1.2';
-  static VER_1_1_3 = 'v1.1.3';
-  static VER_1_1_4 = 'v1.1.4';
-  static VER_1_1_5 = 'v1.1.5';
-  static VER_1_1_6 = 'v1.1.6';
-  static VER_1_2_0 = 'v1.2.0';
+export class SolutionVersion {
+  public static readonly V_1_0_0 = SolutionVersion.Of('v1.0.0');
+  public static readonly V_1_0_1 = SolutionVersion.Of('v1.0.1');
+  public static readonly V_1_0_2 = SolutionVersion.Of('v1.0.2');
+  public static readonly V_1_0_3 = SolutionVersion.Of('v1.0.3');
+  public static readonly V_1_1_0 = SolutionVersion.Of('v1.1.0');
+  public static readonly V_1_1_1 = SolutionVersion.Of('v1.1.1');
+  public static readonly V_1_1_2 = SolutionVersion.Of('v1.1.2');
+  public static readonly V_1_1_3 = SolutionVersion.Of('v1.1.3');
+  public static readonly V_1_1_4 = SolutionVersion.Of('v1.1.4');
+  public static readonly V_1_1_5 = SolutionVersion.Of('v1.1.5');
+  public static readonly V_1_1_6 = SolutionVersion.Of('v1.1.6');
+  public static readonly V_1_2_0 = SolutionVersion.Of('v1.2.0');
+  public static readonly ANY = SolutionVersion.Of('*');
+
+  /**
+   * Create a new SolutionVersion with an arbitrary version.
+   *
+   * @param fullVersion the full version string,
+   *   for example "v1.2.0-dev-main-202402080321-9d2dae7c"
+   */
+  public static Of(fullVersion: string): SolutionVersion {
+    return new SolutionVersion(fullVersion);
+  }
+
+  /** The full version string, for example:
+   * "v1.2.0-dev-main-202402080321-9d2dae7c"
+   * "v1.1.5-202403071513"
+   * "v1.1.0"
+   * */
+  public readonly fullVersion: string;
+  /** The short version string, for example, "v1.1.0". */
+  public readonly shortVersion: string;
+  /** The build id string, for example, "dev-main-202402080321-9d2dae7c". */
+  public readonly buildId: string;
+
+  private constructor(fullVersion: string) {
+    if (fullVersion === '*') {
+      this.fullVersion = fullVersion;
+      this.shortVersion = fullVersion;
+      this.buildId = '';
+    } else {
+      this.fullVersion = fullVersion;
+      this.shortVersion = parseVersion(fullVersion).short;
+      this.buildId = parseVersion(fullVersion).buildId ?? '';
+    }
+  }
 }
 
 export function parseVersion(version: string): VersionProps {

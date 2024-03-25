@@ -18,4 +18,5 @@ test ('parse solution version', () => {
     .toEqual('(Version v1.1.0)(Build dev-main-202311081606-58f342d5)');
 
   expect(versionDetail('v1.1.0')).toEqual('(Version v1.1.0)');
+  expect(versionDetail('v1.1.0-202311081606')).toEqual('(Version v1.1.0)(Build 202311081606)');
 });

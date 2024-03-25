@@ -31,7 +31,7 @@ import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
-import { SolutionInfo, parseVersion } from '../../common/solution-info-ln';
+import { SolutionVersion, parseVersion } from '../../common/solution-info-ln';
 import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
@@ -279,7 +279,7 @@ export const getClickstreamUserArn = async (templateVersion: string, userArn: st
     `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
 
   const shortVersion = parseVersion(templateVersion).short;
-  if (shortVersion > SolutionInfo.VER_1_1_4) {
+  if (shortVersion > SolutionVersion.V_1_1_4.shortVersion) {
     // remove explore user
     return {
       publishUserArn: publishUserArn ?? '',

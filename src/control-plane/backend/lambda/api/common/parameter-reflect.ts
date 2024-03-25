@@ -12,13 +12,13 @@
  */
 
 import { JSONObject } from 'ts-json-object';
-import { parseVersion } from './solution-info-ln';
+import { SolutionVersion, parseVersion } from './solution-info-ln';
 
 export const __supportVersionsKey: Symbol = Symbol('supportVersions');
 
 export type ValueWithVersionFn = (stack: JSONObject) => any;
 
-export function supportVersions(versions: string[]) {
+export function supportVersions(versions: SolutionVersion[]) {
   return function(target:any, key:string) : void | any {
     Reflect.defineMetadata(__supportVersionsKey, versions, target, key);
   };
@@ -26,17 +26,17 @@ export function supportVersions(versions: string[]) {
 
 export function isSupportVersion(stack: JSONObject, key: string, version: string) : boolean {
   const shortVersion = parseVersion(version).short;
-  const versions = Reflect.getMetadata(__supportVersionsKey, Object.getPrototypeOf(stack), key);
+  const versions = Reflect.getMetadata(__supportVersionsKey, Object.getPrototypeOf(stack), key) as SolutionVersion[];
   let startVersion = '';
   let endVersion = '';
   if (!versions || versions.length == 0) {
     return true;
   } else if (versions.length == 1) {
-    startVersion = versions[0];
-    endVersion = versions[0];
+    startVersion = versions[0].shortVersion;
+    endVersion = versions[0].shortVersion;
   } else if (versions.length > 1) {
-    startVersion = versions[0];
-    endVersion = versions[1];
+    startVersion = versions[0].shortVersion;
+    endVersion = versions[1].shortVersion;
   }
   const startCheck = startVersion === '*' || shortVersion >= startVersion;
   const endCheck = endVersion === '*' || shortVersion <= endVersion;

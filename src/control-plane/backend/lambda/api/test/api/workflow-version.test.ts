@@ -65,7 +65,7 @@ import { FULL_SOLUTION_VERSION } from '../../common/constants';
 // eslint-disable-next-line import/order
 import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '@aws/clickstream-base-lib';
 import { BuiltInTagKeys } from '../../common/model-ln';
-import { SolutionInfo } from '../../common/solution-info-ln';
+import { SolutionInfo, SolutionVersion } from '../../common/solution-info-ln';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
@@ -504,7 +504,7 @@ describe('Workflow test with pipeline version', () => {
     });
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_0_0,
+      templateVersion: SolutionVersion.V_1_0_0.fullVersion,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -613,7 +613,7 @@ describe('Workflow test with pipeline version', () => {
     });
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_1_0,
+      templateVersion: SolutionVersion.V_1_1_0.fullVersion,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -691,7 +691,7 @@ describe('Workflow test with pipeline version', () => {
     });
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_1_5,
+      templateVersion: SolutionVersion.V_1_1_5.fullVersion,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -763,7 +763,7 @@ describe('Workflow test with pipeline version', () => {
     });
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_1_6,
+      templateVersion: SolutionVersion.V_1_1_6.fullVersion,
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -932,7 +932,7 @@ describe('Workflow test with pipeline version in China region', () => {
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_0_0,
+      templateVersion: SolutionVersion.V_1_0_0.fullVersion,
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -1041,7 +1041,7 @@ describe('Workflow test with pipeline version in China region', () => {
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE),
-      templateVersion: SolutionInfo.VER_1_1_0,
+      templateVersion: SolutionVersion.V_1_1_0.fullVersion,
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -1115,7 +1115,7 @@ describe('Workflow test with pipeline version in China region', () => {
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN),
-      templateVersion: SolutionInfo.VER_1_1_5,
+      templateVersion: SolutionVersion.V_1_1_5.fullVersion,
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
@@ -1199,7 +1199,7 @@ describe('Workflow test with pipeline version in China region', () => {
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...cloneDeep(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN),
-      templateVersion: SolutionInfo.VER_1_1_6,
+      templateVersion: SolutionVersion.V_1_1_6.fullVersion,
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
