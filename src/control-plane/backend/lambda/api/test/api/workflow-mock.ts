@@ -758,7 +758,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'ClearExpiredEventsRetentionRangeDays',
-    ParameterValue: '365',
+    ParameterValue: '180',
   },
   {
     ParameterKey: 'RedshiftMode',

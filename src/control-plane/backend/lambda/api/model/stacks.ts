@@ -924,6 +924,13 @@ export class CDataModelingStack extends JSONObject {
 
   @JSONObject.optional(365)
   @JSONObject.gte(1)
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    const dataRange = stack._pipeline?.dataModeling?.redshift?.dataRange;
+    if (!dataRange) {
+      return 365;
+    }
+    return Math.floor(dataRange / 24 / 60);
+  })
     ClearExpiredEventsRetentionRangeDays?: number;
 
   @JSONObject.optional(REDSHIFT_MODE.NEW_SERVERLESS)
