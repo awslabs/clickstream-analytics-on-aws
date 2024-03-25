@@ -62,7 +62,6 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
     const element: any = wrapperRef.current;
     const distanceToBottom =
       window.innerHeight - element.getBoundingClientRect().bottom;
-    console.info('distanceToBottom:', distanceToBottom);
     if (distanceToBottom < 350) {
       setShowDropdownAtTop(true);
     } else {

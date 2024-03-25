@@ -18,13 +18,13 @@ export const getSegmentsList = async (params: {
   projectId: string;
   appId: string;
 }) => {
-  const result: any = await apiRequest('get', `/segments`, params);
-  return result;
+  return (await apiRequest('get', `/segments`, params)) as ApiResponse<
+    Segment[]
+  >;
 };
 
 export const createSegment = async (segmentObj: Segment) => {
-  const result: any = await apiRequest('post', `/segments`, segmentObj);
-  return result;
+  return await apiRequest('post', `/segments`, segmentObj);
 };
 
 export const deleteSegment = async (params: {
@@ -32,9 +32,8 @@ export const deleteSegment = async (params: {
   appId: string;
   projectId: string;
 }) => {
-  const result: any = await apiRequest(
+  return (await apiRequest(
     'delete',
     `/segments/${params.segmentId}?appId=${params.appId}&projectId=${params.projectId}`
-  );
-  return result;
+  )) as ApiResponse<{ segmentId: string }>;
 };

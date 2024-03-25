@@ -86,31 +86,39 @@ const UserSegments: React.FC = () => {
 
   const listAllSegments = async () => {
     if (projectId && appId) {
-      setLoadingData(true);
-      const segmentRes: ApiResponse<Segment[]> = await getSegmentsList({
-        projectId,
-        appId,
-      });
-      if (segmentRes.success) {
-        setSegmentList(segmentRes.data);
+      try {
+        setLoadingData(true);
+        const segmentRes: ApiResponse<Segment[]> = await getSegmentsList({
+          projectId,
+          appId,
+        });
+        if (segmentRes.success) {
+          setSegmentList(segmentRes.data);
+        }
+        setLoadingData(false);
+      } catch (error) {
+        setLoadingData(false);
       }
-      setLoadingData(false);
     }
   };
 
   const confirmDeleteSegments = async () => {
     if (projectId && appId) {
-      setLoadingDelete(true);
-      const segmentRes: ApiResponse<Segment[]> = await deleteSegment({
-        segmentId: selectedSegment[0].segmentId,
-        projectId,
-        appId,
-      });
-      if (segmentRes.success) {
-        listAllSegments();
+      try {
+        setLoadingDelete(true);
+        const segmentRes = await deleteSegment({
+          segmentId: selectedSegment[0].segmentId,
+          projectId,
+          appId,
+        });
+        if (segmentRes.success) {
+          listAllSegments();
+        }
+        setLoadingDelete(false);
+        setSelectedSegment([]);
+      } catch (error) {
+        setLoadingDelete(false);
       }
-      setLoadingDelete(false);
-      setSelectedSegment([]);
     }
   };
 

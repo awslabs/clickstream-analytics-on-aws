@@ -105,7 +105,6 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     const element: any = wrapperRef.current;
     const distanceToBottom =
       window.innerHeight - element.getBoundingClientRect().bottom;
-    console.info('distanceToBottom:', distanceToBottom);
     if (distanceToBottom < 350) {
       setShowDropdownAtTop(true);
     } else {
