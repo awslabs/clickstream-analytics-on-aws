@@ -370,12 +370,67 @@ export const checkHasErrorProperties = (
     if (item.subItemList && item.subItemList.length > 0) {
       checkHasErrorProperties(item.subItemList, errors);
     } else {
-      if (item.userDoneEventError) {
+      if (
+        item.userDoneEventError ||
+        item.userDoneEventOperatorError ||
+        item.userDoneEventValueError ||
+        item.groupEmptyError
+      ) {
         errors.push('error');
+      } else if (item.sequenceEventList.length > 0) {
+        for (const seqEvent of item.sequenceEventList) {
+          if (seqEvent.seqEventEmptyError) {
+            errors.push('error');
+          }
+        }
       }
     }
   });
   return errors;
+};
+
+const setUserDoneEventError = (item: IEventSegmentationItem) => {
+  item.userDoneEventError = ternary(
+    item.userDoneEvent?.value,
+    '',
+    'analytics:segment.valid.eventEmptyError'
+  );
+  item.userDoneEventOperatorError = ternary(
+    item.userDoneEventOperation?.value,
+    '',
+    'analytics:segment.valid.eventOperatorEmptyError'
+  );
+  item.userDoneEventValueError = ternary(
+    item.userDoneEventValue && item.userDoneEventValue?.[0] !== '',
+    '',
+    'analytics:segment.valid.eventValueEmptyError'
+  );
+  if (item.userDoneEventOperation?.value === 'between') {
+    item.userDoneEventValueError = ternary(
+      item.userDoneEventValue &&
+        item.userDoneEventValue?.[1] > item.userDoneEventValue?.[0],
+      '',
+      'analytics:segment.valid.eventValueBetweenError'
+    );
+  }
+};
+
+const setUserInSeqEventError = (item: IEventSegmentationItem) => {
+  for (const seqItem of item.sequenceEventList) {
+    seqItem.seqEventEmptyError = ternary(
+      seqItem?.sequenceEventOption?.value,
+      '',
+      'analytics:segment.valid.eventEmptyError'
+    );
+  }
+};
+
+const setUserInGroupError = (item: IEventSegmentationItem) => {
+  item.groupEmptyError = ternary(
+    item.userInFilterGroup?.value,
+    '',
+    'analytics:segment.valid.groupEmptyError'
+  );
 };
 
 export const checkSegmentAndSetError = (obj: IEventSegmentationItem[]) => {
@@ -387,11 +442,16 @@ export const checkSegmentAndSetError = (obj: IEventSegmentationItem[]) => {
         item.userEventType?.value === ConditionType.USER_DONE ||
         item.userEventType?.value === ConditionType.USER_NOT_DONE
       ) {
-        item.userDoneEventError = ternary(
-          item.userDoneEvent?.value,
-          '',
-          'analytics:segment.valid.eventEmptyError'
-        );
+        setUserDoneEventError(item);
+      } else if (
+        item.userEventType?.value === ConditionType.USER_DONE_IN_SEQUENCE
+      ) {
+        setUserInSeqEventError(item);
+      } else if (
+        item.userEventType?.value === ConditionType.USER_IN_GROUP ||
+        item.userEventType?.value === ConditionType.USER_NOT_IN_GROUP
+      ) {
+        setUserInGroupError(item);
       }
     }
   }
@@ -493,7 +553,7 @@ export const analyticsSegmentGroupReducer = (
           action.segmentProps.currentIndex,
           1
         );
-        if (action.segmentProps.parentData.subItemList.length === 2) {
+        if (action.segmentProps.parentData.subItemList?.length === 2) {
           newState.subItemList[
             action.segmentProps.rootIndex
           ].segmentEventRelationShip = ERelationShip.OR;
@@ -528,21 +588,24 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.userDoneEventError = '';
+      currentData.userDoneEventOperatorError = '';
+      currentData.userDoneEventValueError = '';
+      currentData.groupEmptyError = '';
       currentData.userEventType = action.userEventType;
       currentData.userDoneEventConditionList = [];
-      currentData.sequenceEventList =
-        action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE
-          ? [
-              {
-                name: '',
-                sequenceEventConditionFilterList: [],
-              },
-            ]
-          : [];
       if (action.userEventType.value === ConditionType.USER_DONE_IN_SEQUENCE) {
+        currentData.sequenceEventList = [
+          {
+            name: '',
+            sequenceEventConditionFilterList: [],
+            seqEventEmptyError: '',
+          },
+        ];
         currentData.userSequenceSession = state.eventSessionOptions[0];
         currentData.userSequenceFlow = state.eventFlowOptions[0];
       } else {
+        currentData.sequenceEventList = [];
         currentData.userSequenceSession = null;
         currentData.userSequenceFlow = null;
       }
@@ -612,6 +675,7 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.userDoneEventOperatorError = '';
       currentData.userDoneEventOperation = action.operation;
       return { ...newState };
     }
@@ -627,6 +691,7 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.parentIndex
           ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.userDoneEventValueError = '';
       currentData.userDoneEventValue = action.value;
       return { ...newState };
     }
@@ -849,6 +914,7 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.sequenceEventIndex ?? 0
           ];
       }
+      currentData.seqEventEmptyError = '';
       currentData.sequenceEventOption = action.event;
       currentData.sequenceEventAttributeOption = parameterOption;
       currentData.sequenceEventConditionFilterList = [];
@@ -917,10 +983,16 @@ export const analyticsSegmentGroupReducer = (
             action.segmentProps.sequenceEventIndex ?? 0
           ];
       }
-      currentData.filterGroupRelationShip = ERelationShip.AND;
-      currentData.sequenceEventConditionFilterList?.push({
-        ...DEFAULT_CONDITION_DATA,
-      });
+      console.info('currentData:', currentData);
+      if (!currentData.sequenceEventOption?.value) {
+        currentData.seqEventEmptyError =
+          'analytics:segment.valid.eventEmptyError';
+      } else {
+        currentData.filterGroupRelationShip = ERelationShip.AND;
+        currentData.sequenceEventConditionFilterList?.push({
+          ...DEFAULT_CONDITION_DATA,
+        });
+      }
 
       return { ...newState };
     }
@@ -1047,16 +1119,18 @@ export const analyticsSegmentGroupReducer = (
     }
 
     case AnalyticsSegmentActionType.UpdateUserInGroup: {
-      if (action.segmentProps.level === 1) {
+      let currentData =
         newState.subItemList[action.segmentProps.rootIndex].subItemList[
           action.segmentProps.currentIndex
-        ].userInFilterGroup = action.group;
-      } else {
-        newState.subItemList[action.segmentProps.rootIndex].subItemList[
-          action.segmentProps.parentIndex
-        ].subItemList[action.segmentProps.currentIndex].userInFilterGroup =
-          action.group;
+        ];
+      if (action.segmentProps.level === 2) {
+        currentData =
+          newState.subItemList[action.segmentProps.rootIndex].subItemList[
+            action.segmentProps.parentIndex
+          ].subItemList[action.segmentProps.currentIndex];
       }
+      currentData.groupEmptyError = '';
+      currentData.userInFilterGroup = action.group;
       return { ...newState };
     }
 

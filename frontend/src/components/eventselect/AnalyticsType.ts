@@ -53,6 +53,8 @@ export interface IAnalyticsItem extends SelectProps.Option {
   filterGroupRelationShip?: ERelationShip;
   sequenceEventAttributeOption?: CategoryItemType[];
   sequenceEventConditionFilterList?: IConditionItemType[];
+  // for validation
+  seqEventEmptyError?: string;
 }
 
 export interface IProjectSelectItem extends SelectProps.Option {
@@ -129,8 +131,9 @@ export interface IEventSegmentationItem {
   eventCalculateMethodOption?: IAnalyticsItem[];
   // validation
   userDoneEventError?: string;
-  userDoneEventValueError?: string;
   userDoneEventOperatorError?: string;
+  userDoneEventValueError?: string;
+  groupEmptyError?: string;
 }
 
 export interface IEventSegmentationObj {

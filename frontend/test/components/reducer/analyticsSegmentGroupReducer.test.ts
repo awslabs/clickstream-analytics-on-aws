@@ -52,6 +52,8 @@ describe('analyticsSegmentGroupReducer', () => {
         userIsAttributeOptions: [],
         attributeOperationOptions: [],
         userGroupOptions: [],
+        eventSessionOptions: [],
+        eventFlowOptions: [],
       },
     };
     const newState = analyticsSegmentGroupReducer(initialState, action);

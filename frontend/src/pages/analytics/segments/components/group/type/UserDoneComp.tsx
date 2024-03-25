@@ -188,6 +188,11 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
           }}
           options={segmentDataState.eventOperationOptions}
         />
+        {segmentData.userDoneEventOperatorError && (
+          <ErrorText
+            text={`${t(defaultStr(segmentData.userDoneEventOperatorError))}`}
+          />
+        )}
       </div>
 
       <div>
@@ -244,6 +249,11 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
                 value: [e.detail.value, ''],
               });
             }}
+          />
+        )}
+        {segmentData.userDoneEventValueError && (
+          <ErrorText
+            text={`${t(defaultStr(segmentData.userDoneEventValueError))}`}
           />
         )}
       </div>

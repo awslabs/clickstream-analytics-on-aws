@@ -399,9 +399,11 @@
       "nameEmptyError": "Please input segment name.",
       "cronEmptyError": "Please input cron expression.",
       "eventEmptyError": "Please select event",
+      "eventOperatorEmptyError": "Please select operator",
+      "eventValueEmptyError": "Please input value",
+      "eventValueBetweenError": "Max value can not be less than min value",
       "attributeEmptyError": "Please select attribute",
-      "eventValueError": "Please input value",
-      "eventValueBetweenError": "Max value can not be less than min value"
+      "groupEmptyError": "Please select filter group"
     }
   }
 }

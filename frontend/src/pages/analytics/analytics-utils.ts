@@ -1060,6 +1060,9 @@ export const getLngFromLocalStorage = () => {
 };
 
 export const userAttributeDisplayname = (displayName: string) => {
+  if (typeof displayName !== 'string') {
+    return '';
+  }
   return displayName.replace(
     ConditionCategory.USER_OUTER,
     ConditionCategory.USER

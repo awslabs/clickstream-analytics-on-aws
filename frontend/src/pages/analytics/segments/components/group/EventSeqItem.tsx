@@ -12,6 +12,7 @@
  */
 
 import { Button } from '@cloudscape-design/components';
+import ErrorText from 'components/common/ErrorText';
 import {
   ERelationShip,
   IAnalyticsItem,
@@ -25,6 +26,7 @@ import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { useSegmentContext } from 'context/SegmentContext';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from './ConditionGroup';
 
 interface EventSeqItemProps {
@@ -54,7 +56,7 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
       <div>
         <div className="cs-analytics-dropdown">
           <div
-            className="analytics-segment-sequence-event flex gap-5 align-center"
+            className="analytics-segment-sequence-event flex gap-5 align-start"
             style={{
               position: 'relative',
               marginTop: 5,
@@ -89,6 +91,13 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 categories={segmentDataState.eventOption}
                 loading={false}
               />
+              {sequenceEventData.seqEventEmptyError && (
+                <ErrorText
+                  text={`${t(
+                    defaultStr(sequenceEventData.seqEventEmptyError)
+                  )}`}
+                />
+              )}
             </div>
             <div>
               <Button

@@ -24,7 +24,7 @@ import { SegmentProvider } from 'context/SegmentContext';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
+import { INIT_SEGMENT_OBJ } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
 
@@ -32,29 +32,9 @@ const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [segmentObject, setSegmentObject] = useState<ExtendSegment>({
-    segmentId: '',
-    segmentType: 'User',
-    name: '',
-    description: '',
+    ...INIT_SEGMENT_OBJ,
     projectId: defaultStr(projectId),
     appId: defaultStr(appId),
-    createBy: '',
-    createAt: 0,
-    lastUpdateBy: '',
-    lastUpdateAt: 0,
-    refreshSchedule: {
-      cron: 'Manual',
-      expireAfter: 0,
-    },
-    criteria: {
-      filterGroups: [],
-      operator: 'and',
-    },
-    // extends fields
-    refreshType: 'manual',
-    autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
-    autoRefreshDayOption: null,
-    expireDate: '',
   });
 
   const breadcrumbItems = [

@@ -12,6 +12,7 @@
  */
 
 import { Select } from '@cloudscape-design/components';
+import ErrorText from 'components/common/ErrorText';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
 import { useSegmentContext } from 'context/SegmentContext';
@@ -30,7 +31,7 @@ const UserInGroup: React.FC<UserInGroupProps> = (props: UserInGroupProps) => {
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
   const { t } = useTranslation();
   return (
-    <div className="flex gap-10">
+    <div>
       <Select
         placeholder={defaultStr(t('analytics:segment.comp.selectUserGroup'))}
         selectedOption={segmentData.userInFilterGroup ?? null}
@@ -43,6 +44,9 @@ const UserInGroup: React.FC<UserInGroupProps> = (props: UserInGroupProps) => {
         }}
         options={segmentDataState.userGroupOptions}
       />
+      {segmentData.groupEmptyError && (
+        <ErrorText text={`${t(defaultStr(segmentData.groupEmptyError))}`} />
+      )}
     </div>
   );
 };

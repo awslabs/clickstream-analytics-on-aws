@@ -161,38 +161,39 @@ function useFetchEvents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [eventData, attributeData, builtInMetaData, segmentGroupList] =
+        await Promise.all([
+          listMetadataEvents(projectId, appId),
+          listAllAttributes(projectId, appId),
+          getAllBuiltInMetadata(),
+          listAllSegments(projectId, appId),
+        ]);
+      setData({
+        metaDataEvents: eventData?.metaDataEvents ?? [],
+        categoryEvents: eventData?.categoryEvents ?? [],
+        metaDataEventParameters: attributeData?.metaDataEventParameters ?? [],
+        metaDataUserAttributes: attributeData?.metaDataUserAttributes ?? [],
+        presetParameters: attributeData?.presetParameters ?? [],
+        groupParameters: attributeData?.groupParameters ?? [],
+        builtInMetaData: builtInMetaData,
+        segmentGroupList: segmentGroupList?.map((item) => {
+          return {
+            label: item.name,
+            value: item.segmentId,
+          };
+        }),
+      });
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [eventData, attributeData, builtInMetaData, segmentGroupList] =
-          await Promise.all([
-            listMetadataEvents(projectId, appId),
-            listAllAttributes(projectId, appId),
-            getAllBuiltInMetadata(),
-            listAllSegments(projectId, appId),
-          ]);
-        setData({
-          metaDataEvents: eventData?.metaDataEvents ?? [],
-          categoryEvents: eventData?.categoryEvents ?? [],
-          metaDataEventParameters: attributeData?.metaDataEventParameters ?? [],
-          metaDataUserAttributes: attributeData?.metaDataUserAttributes ?? [],
-          presetParameters: attributeData?.presetParameters ?? [],
-          groupParameters: attributeData?.groupParameters ?? [],
-          builtInMetaData: builtInMetaData,
-          segmentGroupList: segmentGroupList?.map((item) => {
-            return {
-              label: item.name,
-              value: item.segmentId,
-            };
-          }),
-        });
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
