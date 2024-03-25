@@ -868,6 +868,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       Role: {
         'Fn::GetAtt': [lambdaRoleKey, 'Arn'],
       },
+      ReservedConcurrentExecutions: Match.absent(),
     });
   });
 
