@@ -534,8 +534,11 @@ ul.menu-list li.checkbox-item {
 .iframe-explore {
   width: 100%;
   border: 0px;
-  overflow: "hidden";
-  min-height: 150px;
+  overflow: 'hidden';
+  min-height: 100vh;
+  &.fixed-height {
+    height: 100vh;
+  }
 }
 
 .cs-analytics-config {

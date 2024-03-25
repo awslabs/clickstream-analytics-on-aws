@@ -35,22 +35,28 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
     const embeddingContext = await createEmbeddingContext();
     switch (embedType) {
       case 'dashboard':
-        await embeddingContext.embedDashboard({
-          url: embedUrl,
-          container: `#EmbedId`,
-          resizeHeightOnSizeChangedEvent: true,
-          height: '100%',
-          width: '100%',
-        });
+        await embeddingContext.embedDashboard(
+          {
+            url: embedUrl,
+            container: `#EmbedId`,
+            resizeHeightOnSizeChangedEvent: true,
+          },
+          {
+            locale: i18n.language,
+          }
+        );
         break;
       case 'visual':
-        await embeddingContext.embedVisual({
-          url: embedUrl,
-          container: `#EmbedId`,
-          resizeHeightOnSizeChangedEvent: true,
-          height: '100%',
-          width: '100%',
-        });
+        await embeddingContext.embedVisual(
+          {
+            url: embedUrl,
+            container: `#EmbedId`,
+            resizeHeightOnSizeChangedEvent: true,
+          },
+          {
+            locale: i18n.language,
+          }
+        );
         break;
       case 'console':
         await embeddingContext.embedConsole(
@@ -58,8 +64,6 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             url: embedUrl,
             container: `#EmbedId`,
             resizeHeightOnSizeChangedEvent: true,
-            height: '1000',
-            width: '100%',
           },
           {
             locale: i18n.language,
@@ -78,7 +82,14 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   }, [embedUrl]);
 
   return (
-    <div id="EmbedId" className="iframe-explore">
+    <div
+      id="EmbedId"
+      className={
+        embedType === 'console'
+          ? 'iframe-explore fixed-height'
+          : 'iframe-explore'
+      }
+    >
       {embedUrl === '' && (
         <div>
           <Box
