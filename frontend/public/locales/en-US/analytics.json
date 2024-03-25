@@ -351,8 +351,8 @@
     "calculateOption": {
       "NUMBER_OF_TOTAL": "Total number (PV)",
       "NUMBER_OF_TIMES_PER_DAY": "Number of times per day",
-      "NUMBER_OF_CONSECUTIVE_DAYS": "Distribution of days",
-      "NUMBER_OF_DAYS_HAVING_EVENT": "Number of consecutive days",
+      "NUMBER_OF_CONSECUTIVE_DAYS": "Number of consecutive days",
+      "NUMBER_OF_DAYS_HAVING_EVENT": "Distribution of days",
       "SUM_OF_EVENT_PARAMETER": "Sum by {{type}} (SUM)",
       "MIN_OF_EVENT_PARAMETER": "Find the minimum by {{type}} (MIN)",
       "MAX_OF_EVENT_PARAMETER": "Find the maximum by {{type}} (MAX)",

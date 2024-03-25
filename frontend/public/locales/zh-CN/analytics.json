@@ -351,8 +351,8 @@
     "calculateOption": {
       "NUMBER_OF_TOTAL": "总次数 (PV)",
       "NUMBER_OF_TIMES_PER_DAY": "每日次数",
-      "NUMBER_OF_CONSECUTIVE_DAYS": "天数分布",
-      "NUMBER_OF_DAYS_HAVING_EVENT": "连续天数",
+      "NUMBER_OF_CONSECUTIVE_DAYS": "连续天数",
+      "NUMBER_OF_DAYS_HAVING_EVENT": "天数分布",
       "SUM_OF_EVENT_PARAMETER": "按{{type}}求和 (SUM)",
       "MIN_OF_EVENT_PARAMETER": "按{{type}}求最小值 (MIN)",
       "MAX_OF_EVENT_PARAMETER": "按{{type}}求最大值 (MAX)",
