@@ -559,11 +559,13 @@ const apiProject = new typescript.TypeScriptProject({
     exclude: ['dist'],
     compilerOptions: {
       emitDecoratorMetadata: true,
+      experimentalDecorators: true,
     },
   },
   tsconfigDev: {
     compilerOptions: {
       emitDecoratorMetadata: true,
+      experimentalDecorators: true,
     },
   },
   packageManager: project.package.packageManager,

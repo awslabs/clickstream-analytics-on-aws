@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   IdentityType,
   UserRole,
@@ -31,6 +31,7 @@ import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
+import { SolutionVersion } from '../../common/solution-info-ln';
 import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
@@ -57,8 +58,7 @@ export const registerClickstreamUser = async () => {
       UserRole: UserRole.ADMIN,
       SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
     });
-    const clickstreamUserArn = await getClickstreamUserArn();
-    return clickstreamUserArn;
+    return;
   } catch (err) {
     logger.error('Register Clickstream User Error.', { err });
     throw err;
@@ -148,14 +148,9 @@ export const generateEmbedUrlForRegisteredUser = async (
     const quickSight = sdkClient.QuickSight({
       region: region,
     });
-    const arns = await getClickstreamUserArn();
-    let embedUserArn = arns.publishUserArn;
-    if (region.startsWith('cn')) {
-      embedUserArn = userArn;
-    }
     let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
       AwsAccountId: awsAccountId,
-      UserArn: embedUserArn,
+      UserArn: userArn,
       AllowedDomains: [allowedDomain],
       ExperienceConfiguration: {},
     };
@@ -269,15 +264,40 @@ export const describeClickstreamAccountSubscription = async () => {
 export interface QuickSightUserArns {
   publishUserArn: string;
   publishUserName: string;
+  exploreUserArn: string;
+  exploreUserName: string;
 }
 
-export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
+export const getClickstreamUserArn = async (templateVersion: SolutionVersion, userArn: string): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
+  const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
-  const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const publishUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
-  const publishUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
-  return { publishUserArn, publishUserName };
+  const partition = isChinaRegion ? 'aws-cn' : 'aws';
+  const publishUserName = isChinaRegion ? userArn?.split('/').pop() :
+    `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
+  const publishUserArn = isChinaRegion ? userArn :
+    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+
+  if (templateVersion.greaterThan(SolutionVersion.V_1_1_4)) {
+    // remove explore user
+    return {
+      publishUserArn: publishUserArn ?? '',
+      publishUserName: publishUserName ?? '',
+      exploreUserArn: publishUserArn ?? '',
+      exploreUserName: publishUserName ?? '',
+    };
+  }
+
+  const exploreUserName = isChinaRegion ? userArn?.split('/').pop() :
+    `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
+  const exploreUserArn = isChinaRegion ? userArn :
+    `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  return {
+    publishUserArn: publishUserArn ?? '',
+    publishUserName: publishUserName ?? '',
+    exploreUserArn: exploreUserArn ?? '',
+    exploreUserName: exploreUserName ?? '',
+  };
 };
 
 export const waitDashboardSuccess = async (region: string, dashboardId: string) => {
@@ -323,9 +343,11 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string) 
 export const createPublishDashboard = async (
   dashboard: IDashboard,
   defaultDataSourceArn: string,
+  templateVersion: string,
+  userArn: string,
 ): Promise<any> => {
   try {
-    const principals = await getClickstreamUserArn();
+    const principals = await getClickstreamUserArn(SolutionVersion.Of(templateVersion), userArn);
     const quickSight = sdkClient.QuickSight({
       region: dashboard.region,
     });
@@ -581,6 +603,8 @@ export const checkFolder = async (
   region: string,
   projectId: string,
   appId: string,
+  templateVersion: string,
+  userArn: string,
   dashboardId?: string,
 ) => {
   try {
@@ -590,19 +614,32 @@ export const checkFolder = async (
     const folderId = getQuickSightFolderId(projectId, appId);
     const exist = await existFolder(region, folderId);
     if (!exist) {
-      const principals = await getClickstreamUserArn();
+      const principals = await getClickstreamUserArn(SolutionVersion.Of(templateVersion), userArn);
+      let folderPermissions = [
+        {
+          Principal: principals.publishUserArn,
+          Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+        },
+      ];
+      if (principals.exploreUserArn !== principals.publishUserArn) {
+        folderPermissions = [
+          {
+            Principal: principals.publishUserArn,
+            Actions: FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS,
+          },
+          {
+            Principal: principals.exploreUserArn,
+            Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
+          },
+        ];
+      };
       const folderRes = await quickSight.createFolder({
         AwsAccountId: awsAccountId,
         FolderId: folderId,
         Name: getQuickSightFolderName(projectId, appId),
         FolderType: FolderType.SHARED,
         SharingModel: SharingModel.ACCOUNT,
-        Permissions: [
-          {
-            Principal: principals.publishUserArn,
-            Actions: FOLDER_OWNER_PERMISSION_ACTIONS,
-          },
-        ],
+        Permissions: folderPermissions,
       });
       if (dashboardId) {
         await quickSight.createFolderMembership({

@@ -86,6 +86,7 @@ import {
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
+import { SolutionVersion } from '../../common/solution-info-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
@@ -3283,9 +3284,9 @@ describe('Pipeline test', () => {
       updatePipeline: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
         region: 'cn-north-1',
-        templateVersion: 'v1.0.0',
+        templateVersion: SolutionVersion.V_1_1_4.fullVersion,
         tags: [
-          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: SolutionVersion.V_1_1_4.fullVersion },
         ],
       },
       bucket: {
@@ -3324,12 +3325,13 @@ describe('Pipeline test', () => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
-        expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
-        expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_1_4.fullVersion &&
+        expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_1_4.fullVersion &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'GCRUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
       ).toBeTruthy();
     });
+    process.env.AWS_REGION = 'cn-north-1';
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
@@ -3341,6 +3343,7 @@ describe('Pipeline test', () => {
             enableApplicationLoadBalancerAccessLog: false,
           },
         },
+        templateVersion: SolutionVersion.V_1_1_4.fullVersion,
         region: 'cn-north-1',
         reporting: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW.reporting,
@@ -3360,6 +3363,7 @@ describe('Pipeline test', () => {
       success: true,
       message: 'Pipeline updated.',
     });
+    process.env.AWS_REGION = undefined;
   });
   it('Update old pipeline on new control plane', async () => {
     tokenMock(ddbMock, false);

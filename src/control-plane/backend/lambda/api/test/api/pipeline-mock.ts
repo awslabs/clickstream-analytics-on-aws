@@ -932,6 +932,16 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline
   },
 };
 
+export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+  reporting: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+      user: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+    },
+  },
+};
+
 export const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [

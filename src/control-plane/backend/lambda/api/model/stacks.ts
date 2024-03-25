@@ -43,6 +43,8 @@ import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName } from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
+import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
+import { SolutionVersion } from '../common/solution-info-ln';
 import {
   validateDataProcessingInterval,
   validatePattern,
@@ -74,10 +76,10 @@ import {
   isEmpty,
 } from '../common/utils';
 
-export function getStackParameters(stack: JSONObject): Parameter[] {
+export function getStackParameters(stack: JSONObject, version: SolutionVersion): Parameter[] {
   const parameters: Parameter[] = [];
   Object.entries(stack).forEach(([k, v]) => {
-    if (!k.startsWith('_') && v !== undefined) {
+    if (isSupportVersion(stack, k, version) && !k.startsWith('_') && v !== undefined) {
       let key = k;
       if (v && typeof v === 'string' && v.startsWith('#.')) {
         key = `${k}.#`;
@@ -137,159 +139,230 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.required
     _pipeline?: IPipeline;
 
-  @JSONObject.optional
+  @JSONObject.required
     _resources?: CPipelineResources;
 
-  @JSONObject.required
+  @JSONObject.optional('No')
+  @JSONObject.custom( (stack :CIngestionServerStack, _key:string, _value:any) => {
+    return stack._resources?.project?.environment == ProjectEnvironment.DEV ? 'Yes' : 'No';
+  })
     DevMode?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('No')
+  @JSONObject.custom( (stack :CIngestionServerStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataCollectionSDK == DataCollectionSDK.CLICKSTREAM ? 'Yes' : 'No';
+  })
     ClickStreamSDK?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId;
+  })
     ProjectId?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, _key:string, _value:any) => {
+    return stack._resources?.appIds?.join(',');
+  })
     AppIds?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, VPC_ID_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.vpcId;
+    validatePattern(key, VPC_ID_PATTERN, defaultValue);
+    return defaultValue;
   })
     VpcId?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack :CIngestionServerStack, key:string, value:any) => {
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, key:string, _value:any) => {
+    let defaultValue = stack._pipeline?.network.publicSubnetIds.join(',');
     if (stack._pipeline?.network.type === ENetworkType.Private) {
-      return stack._pipeline?.network.privateSubnetIds.join(',');
+      defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
     }
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     PublicSubnetIds?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack :CIngestionServerStack, key:string, value:any) => {
-    if (isEmpty(value)) {
-      value = stack.PublicSubnetIds;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, key:string, _value:any) => {
+    let defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
+    if (isEmpty(defaultValue)) {
+      defaultValue = stack._pipeline?.network.publicSubnetIds.join(',');
     }
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     PrivateSubnetIds?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CIngestionServerStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.protocol;
+  })
     Protocol?: PipelineServerProtocol;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    const defaultValue = stack._pipeline?.ingestionServer.domain?.domainName;
     if (stack.Protocol == PipelineServerProtocol.HTTPS) {
-      validatePattern(key, DOMAIN_NAME_PATTERN, value);
+      validatePattern(key, DOMAIN_NAME_PATTERN, defaultValue);
     }
-    return stack.Protocol == PipelineServerProtocol.HTTPS ? value : '';
+    return stack.Protocol == PipelineServerProtocol.HTTPS ? defaultValue : '';
   })
     DomainName?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.domain?.certificateArn ?? '';
+  })
     ACMCertificateArn?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.serverEndpointPath;
+  })
     ServerEndpointPath?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (_stack :CIngestionServerStack, key:string, value:any) => {
-    if (!isEmpty(value)) {
-      validatePattern(key, CORS_PATTERN, value);
-      value = corsStackInput(value);
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    const defaultValue = stack._pipeline?.ingestionServer.loadBalancer.serverCorsOrigin;
+    if (!isEmpty(defaultValue)) {
+      validatePattern(key, CORS_PATTERN, defaultValue);
+      return corsStackInput(defaultValue ?? '');
     }
-    return value;
+    return defaultValue;
   })
     ServerCorsOrigin?: string;
 
-  @JSONObject.required
+  @JSONObject.optional(0)
   @JSONObject.gt(0)
-  @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, value:number) => {
-    if (value === 1) {
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    const defaultValue = stack._pipeline?.ingestionServer.size.serverMax ?? 0;
+    if (defaultValue <= 1) {
       throw new ClickStreamBadRequestError('ServerMax must be greater than 1.');
     }
-    return value;
+    return defaultValue;
   })
     ServerMax?: number;
 
-  @JSONObject.required
+  @JSONObject.optional(0)
   @JSONObject.gt(0)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:number) => {
-    if (stack.ServerMax && stack.ServerMax < value) {
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    const defaultValue = stack._pipeline?.ingestionServer.size.serverMin ?? 0;
+    if (stack.ServerMax && stack.ServerMax < defaultValue) {
       throw new ClickStreamBadRequestError('ServerMax must greater than or equal ServerMin.');
     }
-    return value;
+    return defaultValue;
   })
     ServerMin?: number;
 
   @JSONObject.optional(0)
   @JSONObject.gte(0)
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.size.warmPoolSize ?? 0;
+  })
     WarmPoolSize?: number;
 
   @JSONObject.optional(50)
   @JSONObject.gte(0)
   @JSONObject.lte(100)
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.size.scaleOnCpuUtilizationPercent ?? 50;
+  })
     ScaleOnCpuUtilizationPercent?: number;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.notificationsTopicArn ?? '';
+  })
     NotificationsTopicArn?: string;
 
   @JSONObject.optional('No')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.enableGlobalAccelerator ? 'Yes' : 'No';
+  })
     EnableGlobalAccelerator?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.authenticationSecretArn ?? '';
+  })
     AuthenticationSecretArn?: string;
 
   @JSONObject.optional('No')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.authenticationSecretArn ? 'Yes' : 'No';
+  })
     EnableAuthentication?: string;
 
   @JSONObject.optional('No')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No';
+  })
     EnableApplicationLoadBalancerAccessLog?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.loadBalancer.logS3Bucket?.name ?? stack._pipeline?.bucket.name;
+  })
     LogS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack: any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.LOGS_ALB,
+      stack._pipeline?.ingestionServer.loadBalancer.logS3Bucket?.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     LogS3Prefix?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value : undefined;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.S3) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.name ?? stack._pipeline?.bucket.name;
   })
     S3DataBucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
-      validatePattern(key, S3_PREFIX_PATTERN, value);
-      return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.S3) {
+      return undefined;
     }
-    return undefined;
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_BUFFER,
+      stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix);
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     S3DataPrefix?: string;
 
   @JSONObject.optional(30000000)
   @JSONObject.gte(1000000)
   @JSONObject.lte(50000000)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:number) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value * 1000 * 1000 : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.S3) {
+      return undefined;
+    }
+    const defaultValue = stack._pipeline?.ingestionServer.sinkS3?.s3BufferSize ?? 30;
+    return defaultValue * 1000 * 1000;
   })
     S3BatchMaxBytes?: number;
 
   @JSONObject.optional(300)
   @JSONObject.gte(30)
   @JSONObject.lte(1800)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3 ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.S3) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkS3?.s3BufferInterval ?? 300;
   })
     S3BatchTimeout?: number;
 
@@ -307,101 +380,143 @@ export class CIngestionServerStack extends JSONObject {
     WorkerStopTimeout?: number;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkKafka?.mskCluster?.name ?? '';
   })
     MskClusterName?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      validatePattern(key, MULTI_SECURITY_GROUP_PATTERN, value);
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return undefined;
     }
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : undefined;
+    const defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.securityGroupId;
+    validatePattern(key, MULTI_SECURITY_GROUP_PATTERN, defaultValue);
+    return defaultValue;
   })
     MskSecurityGroupId?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      validatePattern(key, KAFKA_TOPIC_PATTERN, value);
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return undefined;
     }
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : undefined;
+    const defaultValue = getKafkaTopic(stack._pipeline);
+    validatePattern(key, KAFKA_TOPIC_PATTERN, defaultValue);
+    return defaultValue;
   })
     KafkaTopic?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      if (stack._pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
-        value = stack._resources?.mskBrokers?.join(',') ?? '';
-      }
-      validatePattern(key, KAFKA_BROKERS_PATTERN, value);
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return undefined;
     }
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : undefined;
+    let defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.brokers.join(',');
+    if (stack._pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
+      defaultValue = stack._resources?.mskBrokers?.join(',') ?? '';
+    }
+    validatePattern(key, KAFKA_BROKERS_PATTERN, defaultValue);
+    return defaultValue;
   })
     KafkaBrokers?: string;
 
   @JSONObject.optional(KinesisStreamMode.ON_DEMAND)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkKinesis?.kinesisStreamMode ?? KinesisStreamMode.ON_DEMAND;
   })
     KinesisStreamMode?: KinesisStreamMode;
 
   @JSONObject.optional(3)
   @JSONObject.gte(1)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkKinesis?.kinesisShardCount ?? 3;
   })
     KinesisShardCount?: number;
 
   @JSONObject.optional(24)
   @JSONObject.gte(24)
   @JSONObject.lte(8760)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkKinesis?.kinesisDataRetentionHours ?? 24;
   })
     KinesisDataRetentionHours?: number;
 
   @JSONObject.optional(10000)
   @JSONObject.gte(1)
   @JSONObject.lte(10000)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkBatch?.size ?? 10000;
   })
     KinesisBatchSize?: number;
 
   @JSONObject.optional(300)
   @JSONObject.gte(0)
   @JSONObject.lte(300)
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkBatch?.intervalSeconds ?? 300;
   })
     KinesisMaxBatchingWindowSeconds?: number;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, value:string) => {
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS ? value : undefined;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
+    }
+    return stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket.name ?? stack._pipeline?.bucket.name;
   })
     KinesisDataS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
-      validatePattern(key, S3_PREFIX_PATTERN, value);
-      return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KINESIS) {
+      return undefined;
     }
-    return undefined;
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_BUFFER,
+      stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     KinesisDataS3Prefix?: string;
 
   @JSONObject.optional('')
-    AppRegistryApplicationArn?: string;
-
-  @JSONObject.optional(undefined)
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return getSinkType(stack._pipeline!);
+  })
     SinkType?: string;
 
-  @JSONObject.optional(undefined)
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
+    AppRegistryApplicationArn?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
     IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
@@ -417,57 +532,6 @@ export class CIngestionServerStack extends JSONObject {
     super({
       _pipeline: pipeline,
       _resources: resources,
-
-      DevMode: resources.project?.environment == ProjectEnvironment.DEV ? 'Yes' : 'No',
-      ProjectId: pipeline.projectId,
-      AppIds: resources.appIds?.join(','),
-      ClickStreamSDK: pipeline.dataCollectionSDK == DataCollectionSDK.CLICKSTREAM ? 'Yes' : 'No',
-      // VPC Information
-      VpcId: pipeline.network.vpcId,
-      PublicSubnetIds: pipeline.network.publicSubnetIds.join(','),
-      PrivateSubnetIds: pipeline.network.privateSubnetIds.join(','),
-      // Domain Information
-      DomainName: pipeline.ingestionServer.domain?.domainName,
-      ACMCertificateArn: pipeline.ingestionServer.domain?.certificateArn,
-      // Ingestion Server
-      Protocol: pipeline.ingestionServer.loadBalancer.protocol,
-      ServerEndpointPath: pipeline.ingestionServer.loadBalancer.serverEndpointPath,
-      ServerCorsOrigin: pipeline.ingestionServer.loadBalancer.serverCorsOrigin,
-      ServerMax: pipeline.ingestionServer.size.serverMax,
-      ServerMin: pipeline.ingestionServer.size.serverMin,
-      WarmPoolSize: pipeline.ingestionServer.size.warmPoolSize,
-      ScaleOnCpuUtilizationPercent: pipeline.ingestionServer.size.scaleOnCpuUtilizationPercent,
-      NotificationsTopicArn: pipeline.ingestionServer.loadBalancer.notificationsTopicArn,
-      EnableGlobalAccelerator: pipeline.ingestionServer.loadBalancer.enableGlobalAccelerator ? 'Yes' : 'No',
-      AuthenticationSecretArn: pipeline.ingestionServer.loadBalancer.authenticationSecretArn,
-      EnableAuthentication: pipeline.ingestionServer.loadBalancer.authenticationSecretArn ? 'Yes' : 'No',
-      EnableApplicationLoadBalancerAccessLog: pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
-      // Log
-      LogS3Bucket: pipeline.ingestionServer.loadBalancer.logS3Bucket?.name ?? pipeline.bucket.name,
-      LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_ALB, pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
-
-      SinkType: getSinkType(pipeline),
-      // S3 sink
-      S3DataBucket: pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name,
-      S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
-      S3BatchMaxBytes: pipeline.ingestionServer.sinkS3?.s3BufferSize,
-      S3BatchTimeout: pipeline.ingestionServer.sinkS3?.s3BufferInterval,
-      // Kafka sink
-      MskClusterName: pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
-      MskSecurityGroupId: pipeline.ingestionServer.sinkKafka?.securityGroupId,
-      KafkaTopic: getKafkaTopic(pipeline),
-      KafkaBrokers: pipeline.ingestionServer.sinkKafka?.brokers.join(','),
-      // Kinesis sink
-      KinesisStreamMode: pipeline.ingestionServer.sinkKinesis?.kinesisStreamMode,
-      KinesisShardCount: pipeline.ingestionServer.sinkKinesis?.kinesisShardCount,
-      KinesisDataRetentionHours: pipeline.ingestionServer.sinkKinesis?.kinesisDataRetentionHours,
-      KinesisBatchSize: pipeline.ingestionServer.sinkBatch?.size,
-      KinesisMaxBatchingWindowSeconds: pipeline.ingestionServer.sinkBatch?.intervalSeconds,
-      KinesisDataS3Bucket: pipeline.ingestionServer.sinkKinesis?.sinkBucket.name ?? pipeline.bucket.name,
-      KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
-      // Service Catalog AppRegistry
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
-      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -495,112 +559,167 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.required
     _pipeline?: IPipeline;
 
-  @JSONObject.optional
+  @JSONObject.required
     _resources?: CPipelineResources;
 
-  @JSONObject.required
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId;
+  })
     ProjectId?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? stack._pipeline?.bucket.name;
+  })
     DataS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_BUFFER,
+      stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix);
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     DataS3Prefix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.bucket.name;
+  })
     LogS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.LOGS_KAFKA_CONNECTOR,
+      '');
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     LogS3Prefix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.bucket.name;
+  })
     PluginS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.KAFKA_CONNECTOR_PLUGIN,
+      '');
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     PluginS3Prefix?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     SubnetIds?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, SECURITY_GROUP_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.securityGroupId;
+    validatePattern(key, SECURITY_GROUP_PATTERN, defaultValue);
+    return defaultValue;
   })
     SecurityGroupId?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack:CKafkaConnectorStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      if (stack._pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
-        value = stack._resources?.mskBrokers?.join(',') ?? '';
-      }
-      validatePattern(key, KAFKA_BROKERS_PATTERN, value);
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CKafkaConnectorStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return '';
     }
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : '';
+    let defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.brokers.join(',');
+    if (stack._pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
+      defaultValue = stack._resources?.mskBrokers?.join(',') ?? '';
+    }
+    validatePattern(key, KAFKA_BROKERS_PATTERN, defaultValue);
+    return defaultValue;
   })
     KafkaBrokers?: string;
 
-  @JSONObject.optional
-  @JSONObject.custom( (stack:CKafkaConnectorStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      validatePattern(key, KAFKA_TOPIC_PATTERN, value);
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CKafkaConnectorStack, key:string, _value:string) => {
+    if (stack._pipeline?.ingestionServer.sinkType !== PipelineSinkType.KAFKA) {
+      return '';
     }
-    return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : '';
+    const defaultValue = getKafkaTopic(stack._pipeline);
+    validatePattern(key, KAFKA_TOPIC_PATTERN, defaultValue);
+    return defaultValue;
   })
     KafkaTopic?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkKafka?.mskCluster?.name ?? '';
+  })
     MskClusterName?: string;
 
   @JSONObject.optional(3)
   @JSONObject.gte(1)
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount ?? 3;
+  })
     MaxWorkerCount?: number;
 
   @JSONObject.optional(1)
   @JSONObject.gte(1)
-  @JSONObject.custom( (stack:CKafkaConnectorStack, _key:string, value:number) => {
-    if (stack.MaxWorkerCount && stack.MaxWorkerCount < value) {
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount ?? 1;
+    if (stack.MaxWorkerCount && stack.MaxWorkerCount < defaultValue) {
       throw new ClickStreamBadRequestError('MaxWorkerCount must greater than or equal MinWorkerCount.');
     }
-    return value;
+    return defaultValue;
   })
     MinWorkerCount?: number;
 
   @JSONObject.optional(1)
   @JSONObject.gte(1)
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount ?? 1;
+  })
     WorkerMcuCount?: number;
 
   @JSONObject.optional(3000000)
   @JSONObject.gte(0)
   @JSONObject.lte(3000000)
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkBatch?.intervalSeconds ? stack._pipeline?.ingestionServer.sinkBatch?.intervalSeconds * 1000 : 3000000;
+  })
     RotateIntervalMS?: number;
 
   @JSONObject.optional(50000)
   @JSONObject.gte(1)
   @JSONObject.lte(50000)
+  @JSONObject.custom( (stack :CKafkaConnectorStack, _key:string, _value:any) => {
+    return stack._pipeline?.ingestionServer.sinkBatch?.size ?? 50000;
+  })
     FlushSize?: number;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
-  @JSONObject.optional(undefined)
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
     IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
@@ -611,31 +730,6 @@ export class CKafkaConnectorStack extends JSONObject {
     super({
       _pipeline: pipeline,
       _resources: resources,
-
-      ProjectId: pipeline.projectId,
-      DataS3Bucket: pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? pipeline.bucket.name,
-      DataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER,
-        pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix),
-      LogS3Bucket: pipeline.bucket.name,
-      LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_KAFKA_CONNECTOR, ''),
-      PluginS3Bucket: pipeline.bucket.name,
-      PluginS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.KAFKA_CONNECTOR_PLUGIN, ''),
-      SubnetIds: pipeline.network.privateSubnetIds.join(','),
-      SecurityGroupId: pipeline.ingestionServer.sinkKafka?.securityGroupId,
-
-      KafkaBrokers: pipeline.ingestionServer.sinkKafka?.brokers.join(','),
-      KafkaTopic: getKafkaTopic(pipeline),
-      MskClusterName: pipeline.ingestionServer.sinkKafka?.mskCluster?.name,
-      MaxWorkerCount: pipeline.ingestionServer.sinkKafka?.kafkaConnector.maxWorkerCount,
-      MinWorkerCount: pipeline.ingestionServer.sinkKafka?.kafkaConnector.minWorkerCount,
-      WorkerMcuCount: pipeline.ingestionServer.sinkKafka?.kafkaConnector.workerMcuCount,
-
-      RotateIntervalMS: pipeline.ingestionServer.sinkBatch?.intervalSeconds ? pipeline.ingestionServer.sinkBatch?.intervalSeconds * 1000 : 3000000,
-      FlushSize: pipeline.ingestionServer.sinkBatch?.size ?? 50000,
-
-      // Service Catalog AppRegistry
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
-      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -664,157 +758,181 @@ export class CDataProcessingStack extends JSONObject {
     _pipeline?: IPipeline;
 
   @JSONObject.required
-    _kafkaTopic?: string;
+    _resources?: CPipelineResources;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, VPC_ID_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.vpcId;
+    validatePattern(key, VPC_ID_PATTERN, defaultValue);
+    return defaultValue;
   })
     VpcId?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     PrivateSubnetIds?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId;
+  })
     ProjectId?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._resources?.appIds?.join(',');
+  })
     AppIds?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
-    if (stack._pipeline?.dataProcessing?.sourceS3Bucket.name) {
-      return stack._pipeline?.dataProcessing?.sourceS3Bucket.name;
-    }
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, _value:string) => {
+    let defaultValue = stack._pipeline?.dataProcessing?.sourceS3Bucket.name ?? stack._pipeline?.bucket.name;
     if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
-      value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.name ?? stack._pipeline.bucket.name;
+      defaultValue = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.name ?? stack._pipeline.bucket.name;
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      value = stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? stack._pipeline.bucket.name;
+      defaultValue = stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? stack._pipeline.bucket.name;
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
-      value = stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket?.name ?? stack._pipeline.bucket.name;
+      defaultValue = stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket?.name ?? stack._pipeline.bucket.name;
     }
-    return value;
+    return defaultValue;
   })
     SourceS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (stack:CDataProcessingStack, key:string, value:string) => {
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CDataProcessingStack, key:string, _value:string) => {
+    let defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_BUFFER,
+      stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix,
+    );
     if (stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix) {
-      return stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix;
+      defaultValue = stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix;
     }
     if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
-      value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+      defaultValue = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
         stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix);
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
       const kafkaPrefix = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
         stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix);
-      value = `${kafkaPrefix}${stack._kafkaTopic}/`;
+      defaultValue = `${kafkaPrefix}${getKafkaTopic(stack._pipeline)}/`;
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
-      value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+      defaultValue = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
         stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket.prefix);
     }
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     SourceS3Prefix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.sinkS3Bucket.name ?? stack._pipeline?.bucket.name;
+  })
     SinkS3Bucket?: string;
 
   @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:string) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_ODS,
+      stack._pipeline?.dataProcessing?.sinkS3Bucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     SinkS3Prefix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.pipelineBucket.name ?? stack._pipeline?.bucket.name;
+  })
     PipelineS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:string) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_PIPELINE_TEMP,
+      stack._pipeline?.dataProcessing?.pipelineBucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     PipelineS3Prefix?: string;
 
-  @JSONObject.required
   @JSONObject.optional(72)
   @JSONObject.gt(0)
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.dataFreshnessInHour ?? 72;
+  })
     DataFreshnessInHour?: number;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, _key:string, value:string) => {
-    validateDataProcessingInterval(value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.dataProcessing?.scheduleExpression ?? '';
+    validateDataProcessingInterval(defaultValue);
+    return defaultValue;
   })
     ScheduleExpression?: string;
 
   @JSONObject.optional(TRANSFORMER_AND_ENRICH_CLASS_NAMES)
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:string) => {
+    const pluginInfo = getPluginInfo(stack._pipeline!, stack._resources!);
+    return pluginInfo.transformerAndEnrichClassNames.join(',');
+  })
     TransformerAndEnrichClassNames?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (_:any, _key:string, value:string) => {
-    if (value) {
-      validatePattern('S3PathPluginJars', S3_PATH_PLUGIN_JARS_PATTERN, value);
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:string) => {
+    const pluginInfo = getPluginInfo(stack._pipeline!, stack._resources!);
+    const defaultValue = pluginInfo.s3PathPluginJars.join(',');
+    if (defaultValue) {
+      validatePattern(key, S3_PATH_PLUGIN_JARS_PATTERN, defaultValue);
     }
-    return value;
+    return defaultValue;
   })
     S3PathPluginJars?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (_:any, _key:string, value:string) => {
-    if (value) {
-      validatePattern('S3PathPluginFiles', S3_PATH_PLUGIN_FILES_PATTERN, value);
+  @JSONObject.custom( (stack :CDataProcessingStack, key:string, _value:string) => {
+    const pluginInfo = getPluginInfo(stack._pipeline!, stack._resources!);
+    const defaultValue = pluginInfo.s3PathPluginFiles.join(',');
+    if (defaultValue) {
+      validatePattern(key, S3_PATH_PLUGIN_FILES_PATTERN, defaultValue);
     }
-    return value;
+    return defaultValue;
   })
     S3PathPluginFiles?: string;
 
   @JSONObject.optional('parquet')
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.outputFormat ?? 'parquet';
+  })
     OutputFormat?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
-  @JSONObject.optional(undefined)
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CDataProcessingStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
     IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
-    const pluginInfo = getPluginInfo(pipeline, resources);
 
     super({
       _pipeline: pipeline,
-      _kafkaTopic: getKafkaTopic(pipeline),
-
-      VpcId: pipeline.network.vpcId,
-      PrivateSubnetIds: pipeline.network.privateSubnetIds.join(','),
-      ProjectId: pipeline.projectId,
-      AppIds: resources.appIds?.join(','),
-
-      SourceS3Bucket: pipeline.dataProcessing?.sourceS3Bucket.name ?? pipeline.bucket.name,
-      SourceS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.dataProcessing?.sourceS3Bucket.prefix),
-      SinkS3Bucket: pipeline.dataProcessing?.sinkS3Bucket.name ?? pipeline.bucket.name,
-      SinkS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataProcessing?.sinkS3Bucket.prefix),
-
-      PipelineS3Bucket: pipeline.dataProcessing?.pipelineBucket.name ?? pipeline.bucket.name,
-      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
-      DataFreshnessInHour: pipeline.dataProcessing?.dataFreshnessInHour,
-      ScheduleExpression: pipeline.dataProcessing?.scheduleExpression,
-
-      TransformerAndEnrichClassNames: pluginInfo.transformerAndEnrichClassNames.join(','),
-      S3PathPluginJars: pluginInfo.s3PathPluginJars.join(','),
-      S3PathPluginFiles: pluginInfo.s3PathPluginFiles.join(','),
-      OutputFormat: pipeline.dataProcessing?.outputFormat,
-
-      // Service Catalog AppRegistry
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
-      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
+      _resources: resources,
     });
   }
 }
@@ -844,74 +962,121 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.required
     _resources?: CPipelineResources;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, VPC_ID_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.vpcId;
+    validatePattern(key, VPC_ID_PATTERN, defaultValue);
+    return defaultValue;
   })
     VpcId?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     PrivateSubnetIds?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId;
+  })
     ProjectId?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._resources?.appIds?.join(',');
+  })
     AppIds?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataModeling?.ods?.bucket.name ?? stack._pipeline?.bucket.name;
+  })
     ODSEventBucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_ODS,
+      stack._pipeline?.dataModeling?.ods?.bucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     ODSEventPrefix?: string;
 
   @JSONObject.optional('.snappy.parquet')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataModeling?.ods?.fileSuffix ?? '.snappy.parquet';
+  })
     ODSEventFileSuffix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.pipelineBucket.name ?? stack._pipeline?.bucket.name;
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     PipelineS3Bucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.DATA_PIPELINE_TEMP,
+      stack._pipeline?.dataProcessing?.pipelineBucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     PipelineS3Prefix?: string;
 
-  @JSONObject.required
-  @JSONObject.custom((_stack: any, key: string, value: string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.SEGMENTS,
+      stack._pipeline?.bucket.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     SegmentsS3Prefix?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataModeling?.loadWorkflow?.bucket?.name ?? stack._pipeline?.bucket.name;
+  })
     LoadWorkflowBucket?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_stack:any, key:string, value:string) => {
-    validatePattern(key, S3_PREFIX_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = getBucketPrefix(
+      stack._pipeline?.projectId ?? '',
+      BucketPrefix.LOAD_WORKFLOW,
+      stack._pipeline?.dataModeling?.loadWorkflow?.bucket?.prefix,
+    );
+    validatePattern(key, S3_PREFIX_PATTERN, defaultValue);
+    return defaultValue;
   })
     LoadWorkflowBucketPrefix?: string;
 
   @JSONObject.optional(50)
   @JSONObject.gte(1)
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataModeling?.loadWorkflow?.maxFilesLimit ?? 50;
+  })
     MaxFilesLimit?: number;
 
   @JSONObject.optional('cron(0 1 * * ? *)')
-  @JSONObject.custom( (_stack :CDataModelingStack, key:string, value:any) => {
-    validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, value);
-    return value;
+  @JSONObject.custom( (stack :CDataModelingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.dataProcessing?.scheduleExpression ?? 'cron(0 1 * * ? *)';
+    validatePattern(key, SCHEDULE_EXPRESSION_PATTERN, defaultValue);
+    return defaultValue;
   })
     DataProcessingCronOrRateExpression?: string;
 
@@ -1053,20 +1218,46 @@ export class CDataModelingStack extends JSONObject {
   })
     RedshiftServerlessIAMRole?: string;
 
-
   @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.DATA_PROCESSING,
+      OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
+    );
+  })
     EMRServerlessApplicationId?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (_stack :CDataModelingStack, _key:string, _value:any) => {
+    const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
+    return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`;
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     ClickstreamAnalyticsMetadataDdbArn?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (_stack :CDataModelingStack, _key:string, _value:any) => {
+    const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
+    return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`;
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     ClickstreamMetadataDdbArn?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
-  @JSONObject.optional(undefined)
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CDataModelingStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
     IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
@@ -1085,39 +1276,9 @@ export class CDataModelingStack extends JSONObject {
       }
     }
 
-    const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-
     super({
       _pipeline: pipeline,
       _resources: resources,
-
-      VpcId: pipeline.network.vpcId,
-      PrivateSubnetIds: pipeline.network.privateSubnetIds.join(','),
-      ProjectId: pipeline.projectId,
-      AppIds: resources.appIds?.join(','),
-
-      ODSEventBucket: pipeline.dataModeling?.ods?.bucket.name ?? pipeline.bucket.name,
-      ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.ods?.bucket.prefix),
-      ODSEventFileSuffix: pipeline.dataModeling?.ods?.fileSuffix,
-
-      PipelineS3Bucket: pipeline.dataProcessing?.pipelineBucket.name ?? pipeline.bucket.name,
-      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
-      SegmentsS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.SEGMENTS, pipeline.bucket.prefix),
-
-      LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
-      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOAD_WORKFLOW, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
-      MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
-      DataProcessingCronOrRateExpression: pipeline.dataProcessing?.scheduleExpression,
-
-      EMRServerlessApplicationId: getValueFromStackOutputSuffix(
-        pipeline,
-        PipelineStackType.DATA_PROCESSING,
-        OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
-      ),
-      ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
-      ClickstreamMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`,
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
-      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1143,30 +1304,45 @@ export class CReportingStack extends JSONObject {
   @JSONObject.required
     _resources?: CPipelineResources;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, QUICKSIGHT_USER_NAME_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, key:string, _value:any) => {
+    const defaultValue = stack._resources?.quickSightUser?.publishUserName ?? '';
+    validatePattern(key, QUICKSIGHT_USER_NAME_PATTERN, defaultValue);
+    return defaultValue;
   })
     QuickSightUserParam?: string;
 
   @JSONObject.optional('default')
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, QUICKSIGHT_NAMESPACE_PATTERN, value);
-    return value;
+  @JSONObject.custom( (stack:CReportingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.reporting?.quickSight?.namespace ?? 'default';
+    validatePattern(key, QUICKSIGHT_NAMESPACE_PATTERN, defaultValue);
+    return defaultValue;
   })
     QuickSightNamespaceParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._resources?.quickSightUser?.publishUserArn ?? '';
+  })
     QuickSightPrincipalParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._resources?.quickSightUser?.exploreUserArn ?? '';
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     QuickSightOwnerPrincipalParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId ?? '';
+  })
     RedshiftDBParam?: string;
 
-  @JSONObject.required
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    return stack._resources?.appIds?.join(',');
+  })
     RedShiftDBSchemaParam?: string;
 
   @JSONObject.optional('')
@@ -1202,10 +1378,11 @@ export class CReportingStack extends JSONObject {
   })
     RedshiftPortParam?: string;
 
-  @JSONObject.required
-  @JSONObject.custom( (_:any, key:string, value:any) => {
-    validatePattern(key, SUBNETS_PATTERN, value);
-    return value;
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, key:string, _value:any) => {
+    const defaultValue = stack._resources?.quickSightSubnetIds?.join(',') ?? '';
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
   })
     QuickSightVpcConnectionSubnetParam?: string;
 
@@ -1221,12 +1398,29 @@ export class CReportingStack extends JSONObject {
     QuickSightVpcConnectionSGParam?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.DATA_MODELING_REDSHIFT,
+      OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+    );;
+  })
     RedshiftParameterKeyParam?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
-  @JSONObject.optional(undefined)
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CDataModelingStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
     IamRoleBoundaryArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
@@ -1237,22 +1431,6 @@ export class CReportingStack extends JSONObject {
     super({
       _pipeline: pipeline,
       _resources: resources,
-
-      QuickSightUserParam: resources.quickSightUser?.publishUserName,
-      QuickSightNamespaceParam: pipeline.reporting?.quickSight?.namespace,
-      QuickSightPrincipalParam: resources.quickSightUser?.publishUserArn,
-      QuickSightOwnerPrincipalParam: resources.quickSightUser?.publishUserArn,
-      RedshiftDBParam: pipeline.projectId,
-      RedShiftDBSchemaParam: resources.appIds?.join(','),
-      QuickSightVpcConnectionSubnetParam: resources.quickSightSubnetIds?.join(','),
-      RedshiftParameterKeyParam: getValueFromStackOutputSuffix(
-        pipeline,
-        PipelineStackType.DATA_MODELING_REDSHIFT,
-        OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
-      ),
-      // Service Catalog AppRegistry
-      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
-      IamRoleBoundaryArn: getIamRoleBoundaryArn(),
     });
   }
 }
@@ -1271,6 +1449,7 @@ export class CAthenaStack extends JSONObject {
     AthenaEventTable?: string;
 
   @JSONObject.optional('')
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional(undefined)
@@ -1327,6 +1506,7 @@ export class CMetricsStack extends JSONObject {
     Version?: string;
 
   @JSONObject.optional('')
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional(undefined)

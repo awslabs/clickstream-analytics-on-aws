@@ -26,6 +26,7 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
@@ -297,7 +298,7 @@ function getKafkaTopic(pipeline: IPipeline): string {
 function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
-  let s3PathPluginFiles: string[] = [];
+  const s3PathPluginFiles: string[] = [];
   // Transformer
   const { transformerClassNames, transformerPluginJars, transformerPluginFiles } = _getTransformerPluginInfo(pipeline, resources);
   transformerAndEnrichClassNames.push(...transformerClassNames);
@@ -1101,7 +1102,10 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+function getAppRegistryApplicationArn(pipeline: IPipeline | undefined): string {
+  if (!pipeline) {
+    return '';
+  }
   return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
@@ -1209,6 +1213,18 @@ function getDefaultTags(projectId: string) {
       Value: projectId,
     },
   ];
+  return tags;
+}
+
+function getAppRegistryStackTags(stackTags: Tag[] | undefined): Tag[] {
+  if (!stackTags) {
+    return [];
+  }
+  const tags = cloneDeep(stackTags);
+  const index = tags.findIndex(tag => tag.Key?.startsWith('#'));
+  if (index !== -1) {
+    tags.splice(index, 1);
+  }
   return tags;
 }
 
@@ -1473,4 +1489,5 @@ export {
   getLocalDateISOString,
   getSinkType,
   defaultValueFunc,
+  getAppRegistryStackTags,
 };
