@@ -291,7 +291,11 @@ export const getEventMethodOptions = (
       label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
     },
     {
-      label: defaultStr(i18n.t('analytics:countGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.COUNT_PROPERTY', {
+          label: '...',
+        })
+      ),
       value: ExploreComputeMethod.COUNT_PROPERTY,
       subList: _getSubList(
         userAttributeItems,
@@ -301,7 +305,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:minGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.min', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MIN,
       subList: _getSubList(
         userAttributeItems,
@@ -311,7 +319,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:maxGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.max', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MAX,
       subList: _getSubList(
         userAttributeItems,
@@ -321,7 +333,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:sumGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.sum', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.SUM,
       subList: _getSubList(
         userAttributeItems,
@@ -331,7 +347,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:avgGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.avg', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.AVG,
       subList: _getSubList(
         userAttributeItems,
@@ -341,7 +361,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:medianGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.median', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MEDIAN,
       subList: _getSubList(
         userAttributeItems,

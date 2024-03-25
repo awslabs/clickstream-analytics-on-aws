@@ -1,17 +1,13 @@
 {
   "analytics": "Analytics",
-  "countGroup": "COUNT by ...",
-  "countGroupLabel": "COUNT {{label}}",
-  "minGroup": "MIN by ...",
-  "minGroupLabel": "MIN by {{label}}",
-  "maxGroup": "MAX by ...",
-  "maxGroupLabel": "MAX by {{label}}",
-  "sumGroup": "SUM by ...",
-  "sumGroupLabel": "SUM by {{label}}",
-  "avgGroup": "AVG by ...",
-  "avgGroupLabel": "AVG by {{label}}",
-  "medianGroup": "MEDIAN by ...",
-  "medianGroupLabel": "MEDIAN by {{label}}",
+  "groupLabel": {
+    "COUNT_PROPERTY": "COUNT {{label}}",
+    "min": "MIN by {{label}}",
+    "max": "MAX by {{label}}",
+    "sum": "SUM by {{label}}",
+    "avg": "AVG by {{label}}",
+    "median": "MEDIAN by {{label}}"
+  },
   "category": {
     "app_info": "Application",
     "device": "Device",
