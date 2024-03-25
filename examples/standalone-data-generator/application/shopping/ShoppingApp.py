@@ -118,7 +118,7 @@ def get_launch_events(user, event):
     event["attributes"]["_session_number"] = user.session_number
     # generate latest referrer for web
     if user.platform == enums.Platform.Web:
-        referrer = enums.latest_referrer.get_random_item()
+        referrer = enums.get_latest_referrer()
         event["attributes"]["_latest_referrer"] = referrer[0]
         event["attributes"]["_latest_referrer_host"] = referrer[1]
     # handle first open
