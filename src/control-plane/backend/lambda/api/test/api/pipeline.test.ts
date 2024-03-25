@@ -3284,9 +3284,9 @@ describe('Pipeline test', () => {
       updatePipeline: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
         region: 'cn-north-1',
-        templateVersion: SolutionInfo.V1_1_4,
+        templateVersion: SolutionInfo.VER_1_1_4,
         tags: [
-          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: SolutionInfo.V1_1_4 },
+          { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: SolutionInfo.VER_1_1_4 },
         ],
       },
       bucket: {
@@ -3325,8 +3325,8 @@ describe('Pipeline test', () => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
-        expressionAttributeValues[':templateVersion'].S === SolutionInfo.V1_1_4 &&
-        expressionAttributeValues[':tags'].L[0].M.value.S === SolutionInfo.V1_1_4 &&
+        expressionAttributeValues[':templateVersion'].S === SolutionInfo.VER_1_1_4 &&
+        expressionAttributeValues[':tags'].L[0].M.value.S === SolutionInfo.VER_1_1_4 &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'GCRUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/GCRUser',
       ).toBeTruthy();
@@ -3343,7 +3343,7 @@ describe('Pipeline test', () => {
             enableApplicationLoadBalancerAccessLog: false,
           },
         },
-        templateVersion: SolutionInfo.V1_1_4,
+        templateVersion: SolutionInfo.VER_1_1_4,
         region: 'cn-north-1',
         reporting: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW.reporting,

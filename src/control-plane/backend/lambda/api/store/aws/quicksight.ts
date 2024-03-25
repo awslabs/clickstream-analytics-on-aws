@@ -279,7 +279,7 @@ export const getClickstreamUserArn = async (templateVersion: string, userArn: st
     `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
 
   const shortVersion = parseVersion(templateVersion).short;
-  if (shortVersion > SolutionInfo.V1_1_4) {
+  if (shortVersion > SolutionInfo.VER_1_1_4) {
     // remove explore user
     return {
       publishUserArn: publishUserArn ?? '',

@@ -28,18 +28,18 @@ export class SolutionInfo {
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
   static SOLUTION_TYPE = 'AWS-Solutions';
 
-  static V1_0_0 = 'v1.0.0';
-  static V1_0_1 = 'v1.0.1';
-  static V1_0_2 = 'v1.0.2';
-  static V1_0_3 = 'v1.0.3';
-  static V1_1_0 = 'v1.1.0';
-  static V1_1_1 = 'v1.1.1';
-  static V1_1_2 = 'v1.1.2';
-  static V1_1_3 = 'v1.1.3';
-  static V1_1_4 = 'v1.1.4';
-  static V1_1_5 = 'v1.1.5';
-  static V1_1_6 = 'v1.1.6';
-  static V1_2_0 = 'v1.2.0';
+  static VER_1_0_0 = 'v1.0.0';
+  static VER_1_0_1 = 'v1.0.1';
+  static VER_1_0_2 = 'v1.0.2';
+  static VER_1_0_3 = 'v1.0.3';
+  static VER_1_1_0 = 'v1.1.0';
+  static VER_1_1_1 = 'v1.1.1';
+  static VER_1_1_2 = 'v1.1.2';
+  static VER_1_1_3 = 'v1.1.3';
+  static VER_1_1_4 = 'v1.1.4';
+  static VER_1_1_5 = 'v1.1.5';
+  static VER_1_1_6 = 'v1.1.6';
+  static VER_1_2_0 = 'v1.2.0';
 }
 
 export function parseVersion(version: string): VersionProps {
