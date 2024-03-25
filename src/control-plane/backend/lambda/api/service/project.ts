@@ -18,6 +18,7 @@ import { FULL_SOLUTION_VERSION } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
+import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
 import { IApplication } from '../model/application';
@@ -140,7 +141,7 @@ export class ProjectServ {
         return res.status(404).json(new ApiFail('Dashboard not found.'));
       }
       const principals = await getClickstreamUserArn(
-        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
         pipeline.reporting?.quickSight?.user ?? '',
       );
       const embed = await generateEmbedUrlForRegisteredUser(
@@ -209,7 +210,7 @@ export class ProjectServ {
         return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
       }
       const principals = await getClickstreamUserArn(
-        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
         pipeline.reporting?.quickSight?.user ?? '',
       );
       const embed = await generateEmbedUrlForRegisteredUser(

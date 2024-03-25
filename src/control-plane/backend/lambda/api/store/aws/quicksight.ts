@@ -31,7 +31,7 @@ import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
-import { SolutionVersion, parseVersion } from '../../common/solution-info-ln';
+import { SolutionVersion } from '../../common/solution-info-ln';
 import { QuickSightAccountInfo } from '../../common/types';
 import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
@@ -268,7 +268,7 @@ export interface QuickSightUserArns {
   exploreUserName: string;
 }
 
-export const getClickstreamUserArn = async (templateVersion: string, userArn: string): Promise<QuickSightUserArns> => {
+export const getClickstreamUserArn = async (templateVersion: SolutionVersion, userArn: string): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const isChinaRegion = process.env.AWS_REGION?.startsWith('cn');
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
@@ -278,8 +278,7 @@ export const getClickstreamUserArn = async (templateVersion: string, userArn: st
   const publishUserArn = isChinaRegion ? userArn :
     `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
 
-  const shortVersion = parseVersion(templateVersion).short;
-  if (shortVersion > SolutionVersion.V_1_1_4.shortVersion) {
+  if (templateVersion.greaterThan(SolutionVersion.V_1_1_4)) {
     // remove explore user
     return {
       publishUserArn: publishUserArn ?? '',
@@ -348,7 +347,7 @@ export const createPublishDashboard = async (
   userArn: string,
 ): Promise<any> => {
   try {
-    const principals = await getClickstreamUserArn(templateVersion, userArn);
+    const principals = await getClickstreamUserArn(SolutionVersion.Of(templateVersion), userArn);
     const quickSight = sdkClient.QuickSight({
       region: dashboard.region,
     });
@@ -615,7 +614,7 @@ export const checkFolder = async (
     const folderId = getQuickSightFolderId(projectId, appId);
     const exist = await existFolder(region, folderId);
     if (!exist) {
-      const principals = await getClickstreamUserArn(templateVersion, userArn);
+      const principals = await getClickstreamUserArn(SolutionVersion.Of(templateVersion), userArn);
       let folderPermissions = [
         {
           Principal: principals.publishUserArn,

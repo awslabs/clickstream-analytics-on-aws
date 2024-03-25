@@ -76,6 +76,26 @@ export class SolutionVersion {
       this.buildId = parseVersion(fullVersion).buildId ?? '';
     }
   }
+
+  public equalTo(version: SolutionVersion): boolean {
+    return this.shortVersion === version.shortVersion;
+  }
+
+  public greaterThan(version: SolutionVersion): boolean {
+    return this.shortVersion > version.shortVersion;
+  }
+
+  public greaterThanOrEqualTo(version: SolutionVersion): boolean {
+    return this.shortVersion >= version.shortVersion;
+  }
+
+  public lessThan(version: SolutionVersion): boolean {
+    return this.shortVersion < version.shortVersion;
+  }
+
+  public lessThanOrEqualTo(version: SolutionVersion): boolean {
+    return this.shortVersion <= version.shortVersion;
+  }
 }
 
 export function parseVersion(version: string): VersionProps {

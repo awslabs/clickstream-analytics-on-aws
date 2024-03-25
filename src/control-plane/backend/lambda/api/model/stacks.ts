@@ -76,7 +76,7 @@ import {
   isEmpty,
 } from '../common/utils';
 
-export function getStackParameters(stack: JSONObject, version: string): Parameter[] {
+export function getStackParameters(stack: JSONObject, version: SolutionVersion): Parameter[] {
   const parameters: Parameter[] = [];
   Object.entries(stack).forEach(([k, v]) => {
     if (isSupportVersion(stack, k, version) && !k.startsWith('_') && v !== undefined) {

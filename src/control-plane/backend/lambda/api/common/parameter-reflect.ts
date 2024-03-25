@@ -12,7 +12,7 @@
  */
 
 import { JSONObject } from 'ts-json-object';
-import { SolutionVersion, parseVersion } from './solution-info-ln';
+import { SolutionVersion } from './solution-info-ln';
 
 export const __supportVersionsKey: Symbol = Symbol('supportVersions');
 
@@ -24,21 +24,20 @@ export function supportVersions(versions: SolutionVersion[]) {
   };
 }
 
-export function isSupportVersion(stack: JSONObject, key: string, version: string) : boolean {
-  const shortVersion = parseVersion(version).short;
+export function isSupportVersion(stack: JSONObject, key: string, version: SolutionVersion) : boolean {
   const versions = Reflect.getMetadata(__supportVersionsKey, Object.getPrototypeOf(stack), key) as SolutionVersion[];
-  let startVersion = '';
-  let endVersion = '';
+  let startVersion = SolutionVersion.ANY;
+  let endVersion = SolutionVersion.ANY;
   if (!versions || versions.length == 0) {
     return true;
   } else if (versions.length == 1) {
-    startVersion = versions[0].shortVersion;
-    endVersion = versions[0].shortVersion;
+    startVersion = versions[0];
+    endVersion = versions[0];
   } else if (versions.length > 1) {
-    startVersion = versions[0].shortVersion;
-    endVersion = versions[1].shortVersion;
+    startVersion = versions[0];
+    endVersion = versions[1];
   }
-  const startCheck = startVersion === '*' || shortVersion >= startVersion;
-  const endCheck = endVersion === '*' || shortVersion <= endVersion;
+  const startCheck = startVersion.equalTo(SolutionVersion.ANY) || version.greaterThanOrEqualTo(startVersion);
+  const endCheck = endVersion.equalTo(SolutionVersion.ANY) || version.lessThanOrEqualTo(endVersion);
   return startCheck && endCheck;
 }

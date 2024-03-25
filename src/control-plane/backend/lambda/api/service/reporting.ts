@@ -57,6 +57,7 @@ import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
+import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { sleep } from '../common/utils-ln';
@@ -898,7 +899,10 @@ export class ReportingService {
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
     const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
-    const principals = await getClickstreamUserArn(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION, pipeline?.reporting?.quickSight?.user ?? '');
+    const principals = await getClickstreamUserArn(
+      SolutionVersion.Of(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION),
+      pipeline?.reporting?.quickSight?.user ?? '',
+    );
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
@@ -1122,7 +1126,10 @@ export class ReportingService {
       const quickSight = sdkClient.QuickSight({ region: region });
 
       //warmup principal
-      await getClickstreamUserArn(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION, latestPipeline.reporting?.quickSight?.user ?? '');
+      await getClickstreamUserArn(
+        SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        latestPipeline.reporting?.quickSight?.user ?? '',
+      );
 
       //warm up redshift serverless
       if (latestPipeline.dataModeling?.redshift?.newServerless) {
