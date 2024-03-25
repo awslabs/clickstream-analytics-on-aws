@@ -43,7 +43,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { projectId, appId } = useParams();
   const [isExpanded, setIsExpanded] = useState<boolean>(
-    localStorage.getItem(ANALYTICS_NAV_STATUS) === 'close' ? false : true
+    localStorage.getItem(ANALYTICS_NAV_STATUS) !== 'close'
   );
   const toggleNavigation = () => {
     localStorage.setItem(ANALYTICS_NAV_STATUS, isExpanded ? 'close' : 'open');
@@ -71,12 +71,6 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       icon: <ExtendIcon icon="BsPencilSquare" />,
       href: `/analytics/${projectId}/app/${appId}/analyzes`,
       value: 'analyzes',
-    },
-    {
-      text: t('nav.analytics.segments'),
-      icon: <ExtendIcon icon="UnchecksGrid" />,
-      href: `/analytics/${projectId}/app/${appId}/segments`,
-      value: 'segments',
     },
     {
       text: t('nav.analytics.data-management'),
@@ -124,6 +118,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       </ul>
       <div className="expend-icon">
         <span
+          role="none"
           className="icon-wrap"
           onClick={() => {
             toggleNavigation();
