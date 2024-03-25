@@ -189,7 +189,7 @@ const devDepsForFrontendProject = [
   'jest-resolve@^27.4.2',
   'jest-watch-typeahead@^1.0.0',
   'webpack@^5.85.0',
-  'webpack-dev-server@^4.15.0',
+  'webpack-dev-server@^4.15.2',
   'webpack-manifest-plugin@^4.0.2',
   'workbox-webpack-plugin@^6.4.1',
   '@babel/plugin-proposal-private-property-in-object@^7.21.11',
@@ -365,6 +365,8 @@ project.eslint?.addRules({
 project.addFields({ version });
 project.package.addField('resolutions', {
   'nth-check': '^2.1.1',
+  'follow-redirects': '^1.15.6',
+  'semver': '^7.5.2',
 });
 
 const baseProject = new typescript.TypeScriptProject({
