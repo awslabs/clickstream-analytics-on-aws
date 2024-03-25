@@ -18,6 +18,9 @@ RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/ncc/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/ncc/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/ncc/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node/app/src/control-plane/backend/lambda/api/ncc/locales/
+RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift
+RUN cp /home/node/app/src/analytics/private/sqls/redshift/event-v2.sql /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift/event-v2.sql
+RUN cp /home/node/app/src/analytics/private/sqls/redshift/user-v2.sql /home/node/app/src/control-plane/backend/lambda/api/ncc/sqls/redshift/user-v2.sql
 
 RUN mkdir -p /asset
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/ncc /asset/

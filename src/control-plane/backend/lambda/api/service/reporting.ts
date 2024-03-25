@@ -498,7 +498,6 @@ export class ReportingService {
 
     let tableVisualDef: Visual;
     if (computeMethodProps.isSameAggregationMethod) {
-      console.log('create pivot table for aggregation: ', computeMethodProps.aggregationMethodName);
       tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
         , groupingColName, computeMethodProps.aggregationMethodName);
     } else if (
