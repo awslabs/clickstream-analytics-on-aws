@@ -24,7 +24,7 @@ BEGIN
     ;
 
 EXCEPTION WHEN OTHERS THEN
-    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_engagement_day_user_view', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_engagement_day_user_view', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$

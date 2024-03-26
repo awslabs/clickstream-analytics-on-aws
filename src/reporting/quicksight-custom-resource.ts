@@ -25,8 +25,6 @@ import {
   CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
-  CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV,
-  CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER,
@@ -51,6 +49,10 @@ import {
   CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER,
   CLICKSTREAM_DEVICE_CRASH_RATE,
   CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
+  CLICKSTREAM_RETENTION_VIEW_NAME,
+  CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
+  CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
+  CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -157,11 +159,11 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'merged_user_id',
+            Name: 'Active users',
             Type: 'STRING',
           },
           {
-            Name: 'new_user_count',
+            Name: 'New users',
             Type: 'INTEGER',
           },
           {
@@ -184,8 +186,8 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
-          'merged_user_id',
-          'new_user_count',
+          'Active users',
+          'New users',
           'view_count',
         ],
       },
@@ -282,16 +284,20 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'aggregation_type',
+            Type: 'STRING',
+          },
+          {
+            Name: 'aggregation_dim',
+            Type: 'STRING',
+          },
+          {
             Name: 'platform',
             Type: 'STRING',
           },
           {
-            Name: 'first_traffic_source',
+            Name: 'user_id',
             Type: 'STRING',
-          },
-          {
-            Name: 'user_count',
-            Type: 'INTEGER',
           },
         ],
         dateTimeDatasetParameter: [
@@ -309,44 +315,9 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
-          'first_traffic_source',
-          'user_count',
-        ],
-      },
-      {
-        tableName: CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_MONTH_TRAFFIC_SOURCE_USER_MV} where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate06>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate06>>))`,
-        columns: [
-          {
-            Name: 'event_date',
-            Type: 'DATETIME',
-          },
-          {
-            Name: 'platform',
-            Type: 'STRING',
-          },
-          {
-            Name: 'first_traffic_source',
-            Type: 'STRING',
-          },
-          {
-            Name: 'merged_user_id',
-            Type: 'STRING',
-          },
-        ],
-        dateTimeDatasetParameter: [
-          {
-            name: 'endDate06',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
-          },
-        ],
-        projectedColumns: [
-          'event_date',
-          'platform',
-          'first_traffic_source',
-          'merged_user_id',
+          'aggregation_dim',
+          'aggregation_type',
+          'user_id',
         ],
       },
       {
@@ -599,7 +570,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate12>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL} where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -631,6 +602,11 @@ export function createQuicksightCustomResource(
           },
         ],
         dateTimeDatasetParameter: [
+          {
+            name: 'startDate12',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
           {
             name: 'endDate12',
             timeGranularity: TimeGranularity.DAY,
@@ -855,6 +831,85 @@ export function createQuicksightCustomResource(
         ],
       },
       {
+        tableName: CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
+        columns: [
+          {
+            Name: 'first_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'day_diff',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'returned_user_count',
+            Type: 'INTEGER',
+          },
+          {
+            Name: 'total_users',
+            Type: 'INTEGER',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate19',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate19',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'first_date',
+          'day_diff',
+          'returned_user_count',
+          'total_users',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))`,
+        columns: [
+          {
+            Name: 'time_period',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'this_week_value',
+            Type: 'STRING',
+          },
+          {
+            Name: 'sum',
+            Type: 'INTEGER',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate20',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate20',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'time_period',
+          'this_week_value',
+          'sum',
+        ],
+      },
+
+      //Device Sheet
+      {
         tableName: CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_CRASH_RATE} where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))`,
@@ -865,6 +920,10 @@ export function createQuicksightCustomResource(
           },
           {
             Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'app_version',
             Type: 'STRING',
           },
           {
@@ -891,10 +950,12 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
+          'app_version',
           'merged_user_id',
           'crashed_user_id',
         ],
       },
+      
     ],
   };
 

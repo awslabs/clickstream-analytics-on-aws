@@ -163,7 +163,7 @@ BEGIN
       1,2,3,4;
 
 EXCEPTION WHEN OTHERS THEN
-    {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_engagement_exit', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_engagement_exit', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$
