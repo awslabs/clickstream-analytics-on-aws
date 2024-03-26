@@ -16,11 +16,9 @@ import {
   UserRole,
   GenerateEmbedUrlForRegisteredUserCommandInput,
   CreateDashboardCommandInput,
-  CreateAnalysisCommandInput,
   CreateDataSetCommandInput,
   DataSetImportMode,
   SheetDefinition,
-  AnalysisDefinition,
   ResourceNotFoundException,
   MemberType,
   FolderType,
@@ -30,7 +28,7 @@ import {
 } from '@aws-sdk/client-quicksight';
 import pLimit from 'p-limit';
 import { awsAccountId, awsRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DEFAULT_DASHBOARD_NAME_PREFIX, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
@@ -402,20 +400,6 @@ export const createPublishDashboard = async (
       ],
     };
     await quickSight.createDashboard(dashboardInput);
-    const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
-    const analysisInput: CreateAnalysisCommandInput = {
-      AwsAccountId: awsAccountId,
-      AnalysisId: analysisId,
-      Name: dashboard.name,
-      Definition: dashboardDefinition as AnalysisDefinition,
-      Permissions: [
-        {
-          Principal: principals.publishUserArn,
-          Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-        },
-      ],
-    };
-    await quickSight.createAnalysis(analysisInput);
     await quickSight.createFolderMembership({
       AwsAccountId: awsAccountId,
       FolderId: getQuickSightFolderId(dashboard.projectId, dashboard.appId),

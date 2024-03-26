@@ -424,7 +424,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.dashboardVersion).toBeDefined();
@@ -721,7 +721,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisName).toEqual('analysis-testview0004');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -890,7 +890,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -989,7 +989,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -2496,7 +2496,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -2692,7 +2692,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
+    expect(res.body.data.analysisArn).toEqual('');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
