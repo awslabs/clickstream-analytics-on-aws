@@ -23,7 +23,7 @@ const store: ClickStreamStore = new DynamoDbStore();
 
 const routerRoles: Map<string, IUserRole[]> = new Map();
 routerRoles.set('GET /api/user/details', []);
-routerRoles.set('GET /api/system/version', []);
+routerRoles.set('GET /api/system/version', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
