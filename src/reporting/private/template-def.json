@@ -13,11 +13,11 @@
               "DataType": "STRING"
             },
             {
-              "Name": "merged_user_id",
+              "Name": "Active users",
               "DataType": "STRING"
             },
             {
-              "Name": "new_user_count",
+              "Name": "New users",
               "DataType": "INTEGER"
             },
             {
@@ -89,37 +89,17 @@
               "DataType": "STRING"
             },
             {
-              "Name": "first_traffic_source",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "user_count",
-              "DataType": "INTEGER"
-            }
-          ]
-      },
-      "ColumnGroupSchemaList": []
-    },
-    {
-      "Placeholder": "Month_Traffic_Source_User",
-      "DataSetSchema": {
-          "ColumnSchemaList": [
-            {
-              "Name": "event_date",
-              "DataType": "DATETIME"
-            },
-            {
-              "Name": "platform",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "first_traffic_source",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "merged_user_id",
-              "DataType": "STRING"
-            }
+                "Name": "aggregation_dim",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "aggregation_type",
+                "DataType": "STRING"
+              },
+              {
+                "Name": "user_id",
+                "DataType": "STRING"
+              }
           ]
       },
       "ColumnGroupSchemaList": []
@@ -775,6 +755,10 @@
             {
               "Name": "view_event_indicator",
               "DataType": "STRING"
+            },
+            {
+              "Name": "event_timestamp_local",
+              "DataType": "DATETIME"
             }
           ]
       },
@@ -1045,6 +1029,10 @@
               "DataType": "STRING"
             },
             {
+              "Name": "app_version",
+              "DataType": "STRING"
+            },
+            {
               "Name": "merged_user_id",
               "DataType": "STRING"
             },
@@ -1055,6 +1043,50 @@
           ]
       },
       "ColumnGroupSchemaList": []
+    },
+    {
+        "Placeholder": "Retention_View",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+                {
+                    "Name": "first_date",
+                    "DataType": "DATETIME"
+                },
+                {
+                    "Name": "day_diff",
+                    "DataType": "INTEGER"
+                },
+                {
+                    "Name": "total_users",
+                    "DataType": "INTEGER"
+                },
+                {
+                    "Name": "returned_user_count",
+                    "DataType": "INTEGER"
+                }
+            ]
+        },
+        "ColumnGroupSchemaList": []
+    },
+    {
+        "Placeholder": "Lifecycle_Weekly_View",
+        "DataSetSchema": {
+            "ColumnSchemaList": [
+                {
+                    "Name": "sum",
+                    "DataType": "INTEGER"
+                },
+                {
+                    "Name": "time_period",
+                    "DataType": "DATETIME"
+                },
+                {
+                    "Name": "this_week_value",
+                    "DataType": "STRING"
+                }
+            ]
+        },
+        "ColumnGroupSchemaList": []
     }
   ],
   "Sheets": [
@@ -1176,7 +1208,7 @@
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "merged_user_id"
+                                                "ColumnName": "Active users"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
                                         }
@@ -1186,7 +1218,7 @@
                                             "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_View",
-                                                "ColumnName": "new_user_count"
+                                                "ColumnName": "New users"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "SUM"
@@ -1256,7 +1288,7 @@
                                         "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                         "Column": {
                                             "DataSetIdentifier": "Day_User_View",
-                                            "ColumnName": "merged_user_id"
+                                            "ColumnName": "Active users"
                                         }
                                     }
                                 }
@@ -1569,15 +1601,13 @@
                                 ],
                                 "Values": [
                                     {
-                                        "NumericalMeasureField": {
+                                        "CategoricalMeasureField": {
                                             "FieldId": "LogicalTable1.user_count.2.1711005440081",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_Traffic_Source_User",
-                                                "ColumnName": "user_count"
+                                                "ColumnName": "user_id"
                                             },
-                                            "AggregationFunction": {
-                                                "SimpleNumericalAggregation": "SUM"
-                                            }
+                                            "AggregationFunction": "DISTINCT_COUNT"
                                         }
                                     }
                                 ],
@@ -1587,7 +1617,7 @@
                                             "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_Traffic_Source_User",
-                                                "ColumnName": "first_traffic_source"
+                                                "ColumnName": "aggregation_dim"
                                             }
                                         }
                                     }
@@ -1659,96 +1689,6 @@
                             }
                         }
                     ]
-                }
-            },
-            {
-                "BarChartVisual": {
-                    "VisualId": "4aa57370-50e7-450a-bf31-c379d86113b1_78171913-c04c-46de-b81f-270295e1fc8b",
-                    "Title": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "Subtitle": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "ChartConfiguration": {
-                        "FieldWells": {
-                            "BarChartAggregatedFieldWells": {
-                                "Category": [
-                                    {
-                                        "CategoricalDimensionField": {
-                                            "FieldId": "LogicalTable1.first_traffic_source.0.1711005533692",
-                                            "Column": {
-                                                "DataSetIdentifier": "Month_Traffic_Source_User",
-                                                "ColumnName": "first_traffic_source"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "Values": [
-                                    {
-                                        "CategoricalMeasureField": {
-                                            "FieldId": "LogicalTable1.merged_user_id.1.1711005545728",
-                                            "Column": {
-                                                "DataSetIdentifier": "Month_Traffic_Source_User",
-                                                "ColumnName": "merged_user_id"
-                                            },
-                                            "AggregationFunction": "DISTINCT_COUNT"
-                                        }
-                                    }
-                                ],
-                                "Colors": []
-                            }
-                        },
-                        "SortConfiguration": {
-                            "CategorySort": [
-                                {
-                                    "FieldSort": {
-                                        "FieldId": "LogicalTable1.merged_user_id.1.1711005545728",
-                                        "Direction": "DESC"
-                                    }
-                                }
-                            ],
-                            "CategoryItemsLimit": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "ColorItemsLimit": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "SmallMultiplesLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            }
-                        },
-                        "Orientation": "HORIZONTAL",
-                        "BarsArrangement": "STACKED",
-                        "DataLabels": {
-                            "Visibility": "HIDDEN",
-                            "Overlap": "DISABLE_OVERLAP"
-                        },
-                        "Tooltip": {
-                            "TooltipVisibility": "VISIBLE",
-                            "SelectedTooltipType": "DETAILED",
-                            "FieldBasedTooltip": {
-                                "AggregationVisibility": "HIDDEN",
-                                "TooltipTitleType": "PRIMARY_VALUE",
-                                "TooltipFields": [
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.first_traffic_source.0.1711005533692",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    },
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.merged_user_id.1.1711005545728",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "Actions": [],
-                    "ColumnHierarchies": []
                 }
             },
             {
@@ -1999,14 +1939,6 @@
                                 "ElementId": "4aa57370-50e7-450a-bf31-c379d86113b1_f17e323a-b2e8-4604-9f04-db9619d8347f",
                                 "ElementType": "VISUAL",
                                 "ColumnIndex": 0,
-                                "ColumnSpan": 18,
-                                "RowIndex": 14,
-                                "RowSpan": 14
-                            },
-                            {
-                                "ElementId": "4aa57370-50e7-450a-bf31-c379d86113b1_78171913-c04c-46de-b81f-270295e1fc8b",
-                                "ElementType": "VISUAL",
-                                "ColumnIndex": 18,
                                 "ColumnSpan": 18,
                                 "RowIndex": 14,
                                 "RowSpan": 14
@@ -4694,8 +4626,20 @@
                         "DataSetParameterName": "startDate14"
                     },
                     {
+                        "DataSetIdentifier": "Page_Screen_View_Detail",
+                        "DataSetParameterName": "startDate12"
+                    },
+                    {
                         "DataSetIdentifier": "Entrance",
                         "DataSetParameterName": "startDate13"
+                    },
+                    {
+                        "DataSetIdentifier": "Retention_View",
+                        "DataSetParameterName": "startDate19"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
+                        "DataSetParameterName": "startDate20"
                     }
                 ]
             }
@@ -4711,10 +4655,6 @@
                 },
                 "TimeGranularity": "DAY",
                 "MappedDataSetParameters": [
-                    {
-                        "DataSetIdentifier": "Month_Traffic_Source_User",
-                        "DataSetParameterName": "endDate06"
-                    },
                     {
                         "DataSetIdentifier": "Event_View",
                         "DataSetParameterName": "endDate01"
@@ -4782,6 +4722,14 @@
                     {
                         "DataSetIdentifier": "Crash_Rate",
                         "DataSetParameterName": "endDate18"
+                    },
+                    {
+                        "DataSetIdentifier": "Retention_View",
+                        "DataSetParameterName": "endDate19"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
+                        "DataSetParameterName": "endDate20"
                     }
                 ]
             }

@@ -540,6 +540,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Name: 'view_event_indicator',
     Type: 'STRING',
   },
+  {
+    Name: 'event_timestamp_local',
+    Type: 'DATETIME',
+  },
 ];
 
 export const clickstream_item_view_columns: InputColumn[] = [
