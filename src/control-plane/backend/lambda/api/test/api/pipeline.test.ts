@@ -638,7 +638,7 @@ describe('Pipeline test', () => {
           },
           athena: false,
           redshift: {
-            dataRange: 'rate(6 months)',
+            dataRange: 259200,
             newServerless: {
               network: {
                 vpcId: 'vpc-00000000000000001',
@@ -702,7 +702,7 @@ describe('Pipeline test', () => {
           },
           athena: false,
           redshift: {
-            dataRange: 'rate(6 months)',
+            dataRange: 259200,
             newServerless: {
               network: {
                 vpcId: 'vpc-00000000000000001',
