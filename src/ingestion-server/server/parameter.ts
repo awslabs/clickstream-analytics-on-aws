@@ -326,7 +326,7 @@ export function createV2StackParameters(scope: Construct) {
       warmPoolSizeParam: commonParameters.warmPoolSizeParam,
       scaleOnCpuUtilizationPercentParam: commonParameters.scaleOnCpuUtilizationPercentParam,
       projectIdParam: commonParameters.projectIdParam,
-      publicSubnets: commonParameters.netWorkProps.publicSubnets!,
+      publicSubnets: commonParameters.netWorkProps.publicSubnets,
     },
   );
 

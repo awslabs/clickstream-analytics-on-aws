@@ -37,7 +37,7 @@ describe('analyticsSegmentGroupReducer', () => {
       type: AnalyticsSegmentActionType.ResetSegmentData,
     };
     const newState = analyticsSegmentGroupReducer(initialState, action);
-    expect(newState.subItemList.length === 1);
+    expect(newState.subItemList.length).toBe(1);
   });
 
   it('should handle setSegmentData action', () => {
