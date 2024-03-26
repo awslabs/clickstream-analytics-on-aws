@@ -29,13 +29,14 @@ export class SystemService {
       const solution = await store.getDictionary('Solution');
       const templateUrl = getTemplateUrl(consoleTemplateName, solution);
 
-      let newVersion = '';
+      let remoteVersion = '';
       try {
         const response = await fetchRemoteUrl(templateUrl);
         const jsonData = await response.json();
-        const { version, buildString } = this._parseVersionString( jsonData.description);
-        logger.debug(`fetched the template ${templateUrl}.`, { version, buildString });
-        newVersion = `${version}-${buildString}`;
+        logger.debug('Received remote template', { jsonData });
+        const { version, buildString } = this._parseVersionString( jsonData.Description);
+        logger.info(`fetched the template ${templateUrl}.`, { version, buildString });
+        remoteVersion = `${version}-${buildString}`;
       } catch (error) {
         logger.warn(`failed to fetch the template from ${templateUrl}`, { error });
       }
@@ -43,9 +44,9 @@ export class SystemService {
       return res.json(new ApiSuccess({
         version: SolutionInfo.SOLUTION_VERSION,
         templateUrl,
-        newVersion,
-        hasUpdate: newVersion == '' ? false :
-          SolutionVersion.Of(newVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
+        remoteVersion,
+        hasUpdate: remoteVersion == '' ? false :
+          SolutionVersion.Of(remoteVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
       }));
     } catch (error) {
       next(error);
@@ -53,7 +54,7 @@ export class SystemService {
   };
 
   _parseVersionString(descriptionStr: string): { version: string | null; buildString: string | null } {
-    const versionPattern = /Version\s*v(\d+\.\d+\.\d+)/;
+    const versionPattern = /Version\s*(v\d+\.\d+\.\d+)/;
     const buildPattern = /Build\s*([\w-]+)/;
 
     const versionMatch = descriptionStr.match(versionPattern);
