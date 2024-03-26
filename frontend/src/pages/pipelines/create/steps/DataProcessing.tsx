@@ -474,7 +474,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                 errorText={dataProcessorIntervalInvalidErrorText()}
               >
                 <div className="flex">
-                  <div style={{ width: 200 }}>
+                  <div className="w-200">
                     <Select
                       selectedOption={selectedExecution}
                       onChange={({ detail }) => {

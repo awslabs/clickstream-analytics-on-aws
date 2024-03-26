@@ -12,6 +12,7 @@
  */
 
 import { Input } from '@cloudscape-design/components';
+import classNames from 'classnames';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,8 +71,9 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
 
   return (
     <div
-      className="cs-dropdown-pop"
-      style={{ bottom: showDropdownAtTop ? '100%' : undefined }}
+      className={classNames('cs-dropdown-pop', {
+        'bottom-100p': showDropdownAtTop,
+      })}
     >
       <div className="cs-dropdown-pop-wrapper">
         <div className="cs-dropdown-pop-container">

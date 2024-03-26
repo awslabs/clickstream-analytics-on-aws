@@ -58,8 +58,9 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
 
   return (
     <div
-      className="cs-dropdown-pop"
-      style={{ bottom: showDropdownAtTop ? '100%' : undefined }}
+      className={classNames('cs-dropdown-pop', {
+        'bottom-100p': showDropdownAtTop,
+      })}
     >
       <div className="cs-dropdown-pop-wrapper group-select">
         <div className="cs-dropdown-pop-container">

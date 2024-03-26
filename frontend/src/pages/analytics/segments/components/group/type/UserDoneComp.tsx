@@ -197,7 +197,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
       <div>
         {segmentData.userDoneEventOperation?.value ===
         ConditionNumericOperator.BETWEEN ? (
-          <div className="align-center flex gap-5" style={{ width: 200 }}>
+          <div className="align-center flex gap-5 w-200">
             <Input
               type="number"
               placeholder={defaultStr(
