@@ -4,23 +4,54 @@
 # with local code from deleted or existing stack.
 # It requires the AWS CLI to be installed and configured.
 
-set -euo pipefail
+set -eo pipefail
 
-if [ $# -ne 2 ]; then
-  echo "Usage: $0 <stack-name-key> <stack-name or stack-id>"
-  echo "Example: $0 modelRedshiftStackName Clickstream-DataModelingRedshift-xxx"
-  echo "Example for retrieving parameters from deleted stack: $0 modelRedshiftStackName arn:aws:cloudformation:ap-northeast-1:123456789012:stack/Clickstream-DataModelingRedshift-xxx/18df3b90-a943-11ee-86a1-0ef0a7b32a81"
-  exit 1
+helpFunction()
+{
+   echo ""
+   echo "SYNOPSIS"
+   echo "      $0 [<Options> ...]"
+   echo ""
+   echo "Usage: $0 -n <stack name key> -s <stack name or stack arn> -c -profile <AWS profile> -region <AWS region>"
+   echo -e "\t-n: The key of stack name. Check main.ts for the detailed keys for different stacks."
+   echo -e "\t-s: Stack Name or stack arn. Must specify stack arn when retrieving parameters from deleted stack"
+   echo -e "\t-c: Indicate if deploying web console stack. Will deploy data pipeline stack without this option."
+   echo -e "\t-p: explicitly specify the AWS Profile. Use the default behavior without specifying it."
+   echo -e "\t-r: explicitly specify AWS Region. Use the default behavior without specifying it."
+   exit 1;
+}
+
+# Set the options of this bash script, get the 
+while getopts ":cn:s:p:r:" opt
+do
+   case "$opt" in
+      n ) stackNameKey="$OPTARG" ;;
+      s ) stackName="$OPTARG" ;;
+      r ) region="$OPTARG" ;;
+      p ) profile="$OPTARG" ;;
+      c ) deployWebConsole="true" ;;
+      ? ) helpFunction ;;
+   esac
+done
+
+# print the error and exit if the stackName or name key is not provided
+if [ -z "$stackNameKey" ]; then
+  echo "Stack name key must be specified."
+  helpFunction
+fi
+if [ -z "$stackName" ]; then
+  echo "Stack name must be specified."
+  helpFunction
 fi
 
-# get the first options of this bash script
-stackNameKey=$1
-stackName=$2
+cdk_options_string=""
+if [ -n "$profile" ]; then
+  cdk_options_string="${cdk_options_string} --profile $profile"
+fi
 
-# print the error and exit if the stackName is not provided
-if [ -z "$stackName" ]; then
-  printf "Please provide the stack name as the first argument.\n"
-  exit 5
+envs_string=""
+if [ -n "$region" ]; then
+  envs_string="${envs_string}export AWS_REGION=$region;"
 fi
 
 # AWS CLI command to describe CloudFormation stack parameters
@@ -67,11 +98,16 @@ for tag in $(echo "$tags" | jq -c '.[]'); do
   tag_string="${tag_string} --tags ${tag_key}=\"${tag_value}\""
 done
 
+context_string=""
+if [ "$deployWebConsole" !== "true" ]; then
+  context_string="${context_string} -c ignoreWebConsoleSynth=true"
+fi
+
 # Print the concatenated parameter string
 echo "Concatenated parameters: $param_string"
 
 echo "Concatenated tags: $tag_string"
 
-echo "Final command: npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+echo "Final command: $envs_string npx cdk deploy $cdk_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
 
-bash -c "npx cdk deploy $stackName -c ignoreWebConsoleSynth=true -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+bash -c "$envs_string npx cdk deploy $cdk_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
