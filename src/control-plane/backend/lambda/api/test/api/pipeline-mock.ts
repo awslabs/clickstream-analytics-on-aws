@@ -366,7 +366,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
   dataModeling: {
     athena: false,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',
@@ -442,7 +442,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
     },
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',
@@ -500,7 +500,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
     },
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',
@@ -699,7 +699,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE: IPipeline = {
     },
     athena: false,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',
@@ -757,7 +757,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE: IPipe
     },
     athena: false,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',
@@ -815,7 +815,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
     },
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       provisioned: {
         clusterIdentifier: 'redshift-cluster-1',
         dbUser: 'clickstream',
@@ -862,7 +862,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE: I
     },
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       provisioned: {
         clusterIdentifier: 'redshift-cluster-1',
         dbUser: 'clickstream',
@@ -893,7 +893,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGH
     ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE.dataModeling,
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       provisioned: {
         clusterIdentifier: 'redshift-cluster-1',
         dbUser: '',
@@ -908,7 +908,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGH
     ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE.dataModeling,
     athena: true,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       provisioned: {
         clusterIdentifier: 'redshift-cluster-1',
         dbUser: 'HGF%$#@BHHGF',
@@ -1632,7 +1632,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
     },
     athena: false,
     redshift: {
-      dataRange: 'rate(6 months)',
+      dataRange: 259200,
       newServerless: {
         network: {
           vpcId: 'vpc-00000000000000001',

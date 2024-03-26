@@ -174,7 +174,7 @@ export interface DataModeling {
     readonly fileSuffix: string;
   };
   readonly redshift?: {
-    readonly dataRange: string;
+    readonly dataRange: number;
     readonly newServerless?: {
       readonly baseCapacity: number;
       readonly network: RedshiftNetworkProps;
