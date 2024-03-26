@@ -44,7 +44,8 @@ export class SystemService {
         version: SolutionInfo.SOLUTION_VERSION,
         templateUrl,
         newVersion,
-        hasUpdate: SolutionVersion.Of(newVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
+        hasUpdate: newVersion == '' ? false :
+          SolutionVersion.Of(newVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
       }));
     } catch (error) {
       next(error);
