@@ -187,7 +187,7 @@
     },
     {
       "name": "webpack-dev-server",
-      "version": "^4.15.0",
+      "version": "^4.15.2",
       "type": "build"
     },
     {
