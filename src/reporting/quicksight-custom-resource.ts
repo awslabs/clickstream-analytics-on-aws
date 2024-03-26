@@ -19,10 +19,6 @@ import {
   CLICKSTREAM_ITEM_VIEW_NAME,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
-  CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV,
-  CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV_PLACEHOLDER,
-  CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV_PLACEHOLDER,
-  CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
@@ -189,89 +185,6 @@ export function createQuicksightCustomResource(
           'Active users',
           'New users',
           'view_count',
-        ],
-      },
-      {
-        tableName: CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_ACTIVE_USER_COMPARE_MV} where event_date_hour >= <<$startDate03>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate03>>))`,
-        columns: [
-          {
-            Name: 'event_date_hour',
-            Type: 'DATETIME',
-          },
-          {
-            Name: 'platform',
-            Type: 'STRING',
-          },
-          {
-            Name: 'active_user_count',
-            Type: 'INTEGER',
-          },
-          {
-            Name: 'previous_active_user_count',
-            Type: 'INTEGER',
-          },
-        ],
-        dateTimeDatasetParameter: [
-          {
-            name: 'startDate03',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: tenYearsAgo,
-          },
-          {
-            name: 'endDate03',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
-          },
-        ],
-        projectedColumns: [
-          'event_date_hour',
-          'platform',
-          'active_user_count',
-          'previous_active_user_count',
-        ],
-      },
-      {
-        tableName: CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_NEW_USER_COMPARE_MV} where event_date_hour >= <<$startDate04>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate04>>))`,
-        columns: [
-          {
-            Name: 'event_date_hour',
-            Type: 'DATETIME',
-          },
-          {
-            Name: 'platform',
-            Type: 'STRING',
-          },
-          {
-            Name: 'new_user_count',
-            Type: 'INTEGER',
-          }
-          ,
-          {
-            Name: 'previous_new_user_count',
-            Type: 'INTEGER',
-          },
-        ],
-        dateTimeDatasetParameter: [
-          {
-            name: 'startDate04',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: tenYearsAgo,
-          },
-          {
-            name: 'endDate04',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: futureDate,
-          },
-        ],
-        projectedColumns: [
-          'event_date_hour',
-          'platform',
-          'new_user_count',
-          'previous_new_user_count',
         ],
       },
       {

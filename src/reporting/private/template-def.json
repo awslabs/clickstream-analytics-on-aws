@@ -29,54 +29,6 @@
       "ColumnGroupSchemaList": []
     },
     {
-      "Placeholder": "Active_User_Compare",
-      "DataSetSchema": {
-          "ColumnSchemaList": [
-            {
-              "Name": "event_date_hour",
-              "DataType": "DATETIME"
-            },
-            {
-              "Name": "platform",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "active_user_count",
-              "DataType": "INTEGER"
-            },
-            {
-              "Name": "previous_active_user_count",
-              "DataType": "INTEGER"
-            }
-          ]
-      },
-      "ColumnGroupSchemaList": []
-    },
-    {
-      "Placeholder": "New_User_Compare",
-      "DataSetSchema": {
-          "ColumnSchemaList": [
-            {
-              "Name": "event_date_hour",
-              "DataType": "DATETIME"
-            },
-            {
-              "Name": "platform",
-              "DataType": "STRING"
-            },
-            {
-              "Name": "new_user_count",
-              "DataType": "INTEGER"
-            },
-            {
-              "Name": "previous_new_user_count",
-              "DataType": "INTEGER"
-            }
-          ]
-      },
-      "ColumnGroupSchemaList": []
-    },
-    {
       "Placeholder": "Day_Traffic_Source_User",
       "DataSetSchema": {
           "ColumnSchemaList": [
@@ -1343,240 +1295,6 @@
             },
             {
                 "LineChartVisual": {
-                    "VisualId": "4aa57370-50e7-450a-bf31-c379d86113b1_88aec2d6-77cc-423a-ace6-4c9bc00d5931",
-                    "Title": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "Subtitle": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "ChartConfiguration": {
-                        "FieldWells": {
-                            "LineChartAggregatedFieldWells": {
-                                "Category": [
-                                    {
-                                        "DateDimensionField": {
-                                            "FieldId": "LogicalTable1.event_date_hour.0.1711001984428",
-                                            "Column": {
-                                                "DataSetIdentifier": "Active_User_Compare",
-                                                "ColumnName": "event_date_hour"
-                                            },
-                                            "HierarchyId": "26532017-950e-49b7-a74e-fc7e82606fd1"
-                                        }
-                                    }
-                                ],
-                                "Values": [
-                                    {
-                                        "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.active_user_count.1.1711001995595",
-                                            "Column": {
-                                                "DataSetIdentifier": "Active_User_Compare",
-                                                "ColumnName": "active_user_count"
-                                            },
-                                            "AggregationFunction": {
-                                                "SimpleNumericalAggregation": "SUM"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.previous_active_user_count.2.1711002000511",
-                                            "Column": {
-                                                "DataSetIdentifier": "Active_User_Compare",
-                                                "ColumnName": "previous_active_user_count"
-                                            },
-                                            "AggregationFunction": {
-                                                "SimpleNumericalAggregation": "SUM"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "Colors": []
-                            }
-                        },
-                        "SortConfiguration": {
-                            "CategorySort": [
-                                {
-                                    "FieldSort": {
-                                        "FieldId": "LogicalTable1.event_date_hour.0.1711001984428",
-                                        "Direction": "DESC"
-                                    }
-                                }
-                            ],
-                            "CategoryItemsLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "ColorItemsLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "SmallMultiplesLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            }
-                        },
-                        "Type": "LINE",
-                        "DataLabels": {
-                            "Visibility": "HIDDEN",
-                            "Overlap": "DISABLE_OVERLAP"
-                        },
-                        "Tooltip": {
-                            "TooltipVisibility": "VISIBLE",
-                            "SelectedTooltipType": "DETAILED",
-                            "FieldBasedTooltip": {
-                                "AggregationVisibility": "HIDDEN",
-                                "TooltipTitleType": "PRIMARY_VALUE",
-                                "TooltipFields": [
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.event_date_hour.0.1711001984428",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    },
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.active_user_count.1.1711001995595",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    },
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.previous_active_user_count.2.1711002000511",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "Actions": [],
-                    "ColumnHierarchies": [
-                        {
-                            "DateTimeHierarchy": {
-                                "HierarchyId": "26532017-950e-49b7-a74e-fc7e82606fd1",
-                                "DrillDownFilters": []
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "LineChartVisual": {
-                    "VisualId": "4aa57370-50e7-450a-bf31-c379d86113b1_ee0b1239-e7ea-46ed-bc4d-ab460198232a",
-                    "Title": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "Subtitle": {
-                        "Visibility": "VISIBLE"
-                    },
-                    "ChartConfiguration": {
-                        "FieldWells": {
-                            "LineChartAggregatedFieldWells": {
-                                "Category": [
-                                    {
-                                        "DateDimensionField": {
-                                            "FieldId": "LogicalTable1.event_date_hour.0.1711002049280",
-                                            "Column": {
-                                                "DataSetIdentifier": "New_User_Compare",
-                                                "ColumnName": "event_date_hour"
-                                            },
-                                            "HierarchyId": "b8de4f2f-083f-44e0-94c5-c2290cf38202"
-                                        }
-                                    }
-                                ],
-                                "Values": [
-                                    {
-                                        "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.new_user_count.1.1711002052161",
-                                            "Column": {
-                                                "DataSetIdentifier": "New_User_Compare",
-                                                "ColumnName": "new_user_count"
-                                            },
-                                            "AggregationFunction": {
-                                                "SimpleNumericalAggregation": "SUM"
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.previous_new_user_count.2.1711002055700",
-                                            "Column": {
-                                                "DataSetIdentifier": "New_User_Compare",
-                                                "ColumnName": "previous_new_user_count"
-                                            },
-                                            "AggregationFunction": {
-                                                "SimpleNumericalAggregation": "SUM"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "Colors": []
-                            }
-                        },
-                        "SortConfiguration": {
-                            "CategorySort": [
-                                {
-                                    "FieldSort": {
-                                        "FieldId": "LogicalTable1.event_date_hour.0.1711002049280",
-                                        "Direction": "DESC"
-                                    }
-                                }
-                            ],
-                            "CategoryItemsLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "ColorItemsLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            },
-                            "SmallMultiplesLimitConfiguration": {
-                                "OtherCategories": "INCLUDE"
-                            }
-                        },
-                        "Type": "LINE",
-                        "DataLabels": {
-                            "Visibility": "HIDDEN",
-                            "Overlap": "DISABLE_OVERLAP"
-                        },
-                        "Tooltip": {
-                            "TooltipVisibility": "VISIBLE",
-                            "SelectedTooltipType": "DETAILED",
-                            "FieldBasedTooltip": {
-                                "AggregationVisibility": "HIDDEN",
-                                "TooltipTitleType": "PRIMARY_VALUE",
-                                "TooltipFields": [
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.event_date_hour.0.1711002049280",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    },
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.new_user_count.1.1711002052161",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    },
-                                    {
-                                        "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.previous_new_user_count.2.1711002055700",
-                                            "Visibility": "VISIBLE"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "Actions": [],
-                    "ColumnHierarchies": [
-                        {
-                            "DateTimeHierarchy": {
-                                "HierarchyId": "b8de4f2f-083f-44e0-94c5-c2290cf38202",
-                                "DrillDownFilters": []
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "LineChartVisual": {
                     "VisualId": "4aa57370-50e7-450a-bf31-c379d86113b1_f17e323a-b2e8-4604-9f04-db9619d8347f",
                     "Title": {
                         "Visibility": "VISIBLE"
@@ -1918,22 +1636,6 @@
                                 "ColumnSpan": 23,
                                 "RowIndex": 0,
                                 "RowSpan": 14
-                            },
-                            {
-                                "ElementId": "4aa57370-50e7-450a-bf31-c379d86113b1_ee0b1239-e7ea-46ed-bc4d-ab460198232a",
-                                "ElementType": "VISUAL",
-                                "ColumnIndex": 23,
-                                "ColumnSpan": 13,
-                                "RowIndex": 0,
-                                "RowSpan": 7
-                            },
-                            {
-                                "ElementId": "4aa57370-50e7-450a-bf31-c379d86113b1_88aec2d6-77cc-423a-ace6-4c9bc00d5931",
-                                "ElementType": "VISUAL",
-                                "ColumnIndex": 23,
-                                "ColumnSpan": 13,
-                                "RowIndex": 7,
-                                "RowSpan": 7
                             },
                             {
                                 "ElementId": "4aa57370-50e7-450a-bf31-c379d86113b1_f17e323a-b2e8-4604-9f04-db9619d8347f",
@@ -4574,14 +4276,6 @@
                         "DataSetParameterName": "startDate02"
                     },
                     {
-                        "DataSetIdentifier": "Active_User_Compare",
-                        "DataSetParameterName": "startDate03"
-                    },
-                    {
-                        "DataSetIdentifier": "New_User_Compare",
-                        "DataSetParameterName": "startDate04"
-                    },
-                    {
                         "DataSetIdentifier": "Day_Traffic_Source_User",
                         "DataSetParameterName": "startDate05"
                     },
@@ -4662,14 +4356,6 @@
                     {
                         "DataSetIdentifier": "Day_User_View",
                         "DataSetParameterName": "endDate02"
-                    },
-                    {
-                        "DataSetIdentifier": "Active_User_Compare",
-                        "DataSetParameterName": "endDate03"
-                    },
-                    {
-                        "DataSetIdentifier": "New_User_Compare",
-                        "DataSetParameterName": "endDate04"
                     },
                     {
                         "DataSetIdentifier": "Day_Traffic_Source_User",
