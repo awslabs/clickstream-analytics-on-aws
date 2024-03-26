@@ -59,17 +59,13 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
 ) => {
   const { t } = useTranslation();
   const { segmentProps, segmentData } = props;
-  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
+  const { segmentDataDispatch } = useSegmentContext();
   const [eventType, setEventType] = useState(EventTypes.UserDoneEvent);
 
   const [conditionWidth, setConditionWidth] = useState(0);
-  const [filterOptionData, filterOptionDataDispatch] = useReducer(
-    analyticsSegmentFilterReducer,
-    {
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: segmentDataState.attributeOptions,
-    }
-  );
+  const filterOptionDataDispatch = useReducer(analyticsSegmentFilterReducer, {
+    ...INIT_SEGMENTATION_DATA,
+  })[1];
 
   useEffect(() => {
     if (
@@ -90,7 +86,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
       segmentData.userEventType?.value === ConditionType.USER_IN_GROUP ||
       segmentData.userEventType?.value === ConditionType.USER_NOT_IN_GROUP
     ) {
-      setEventType(EventTypes.UserDoneEvent);
+      setEventType(EventTypes.UserInGroup);
     }
   }, [segmentData.userEventType?.value]);
 
@@ -196,7 +192,7 @@ const ConditionGroup: React.FC<ConditionGroupProps> = (
                 hideAddButton
                 filterDataState={{
                   enableChangeRelation: true,
-                  conditionOptions: filterOptionData.conditionOptions,
+                  conditionOptions: segmentData.eventAttributeOption ?? [],
                   conditionRelationShip:
                     segmentData.eventConditionRelationShip ?? ERelationShip.AND,
                   data: segmentData.userDoneEventConditionList,

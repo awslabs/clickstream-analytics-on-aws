@@ -22,31 +22,22 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import {
-  getMetadataUserAttributesList,
-  getMetadataParametersList,
-  getMetadataEventsList,
   getPipelineDetailByProjectId,
   warmup,
   clean,
   getPathNodes,
-  getBuiltInMetadata,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
-import { CategoryItemType } from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
+import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { DispatchContext, StateContext } from 'context/StateContext';
 import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { IMetadataBuiltInList, MetadataParameterType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
-import {
-  metadataEventsConvertToCategoryItemType,
-  parametersConvertToCategoryItemType,
-} from '../analytics-utils';
 import AnalyticsAttribution from '../attribution/AnalyticsAttribution';
 import AnalyticsCustomHeader from '../comps/AnalyticsCustomHeader';
 import AnalyticsCustomHeaderBg from '../comps/AnalyticsCustomHeaderBg';
@@ -108,29 +99,7 @@ const AnalyticsExplore: React.FC = () => {
   ];
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
-  const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
-  const [builtInMetadata, setBuiltInMetadata] =
-    useState<IMetadataBuiltInList>();
-  const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
-  const [metadataEventParameters, setMetadataEventParameters] = useState<
-    IMetadataEventParameter[]
-  >([]);
-
-  const [metadataUserAttributes, setMetadataUserAttributes] = useState<
-    IMetadataUserAttribute[]
-  >([]);
-
-  const [categoryEvents, setCategoryEvents] = useState(
-    [] as CategoryItemType[]
-  );
-
-  const [presetParameters, setPresetParameters] = useState<CategoryItemType[]>(
-    []
-  );
-
-  const [groupParameters, setGroupParameters] = useState<CategoryItemType[]>(
-    []
-  );
+  const { data, loading } = useUserEventParameter();
 
   const [pathNodes, setPathNodes] = useState<{
     pageTitles: IMetadataAttributeValue[];
@@ -144,18 +113,6 @@ const AnalyticsExplore: React.FC = () => {
     screenIds: [],
   });
 
-  const getAllBuiltInMetadata = async () => {
-    try {
-      const { success, data }: ApiResponse<IMetadataBuiltInList> =
-        await getBuiltInMetadata();
-      if (success) {
-        setBuiltInMetadata(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const getAllPathNodes = async () => {
     try {
       const { success, data }: ApiResponse<any> = await getPathNodes(
@@ -167,45 +124,6 @@ const AnalyticsExplore: React.FC = () => {
       }
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  const getUserAttributes = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({
-          projectId: defaultStr(projectId),
-          appId: defaultStr(appId),
-        });
-      if (success) {
-        setMetadataUserAttributes(data.items);
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const getAllParameters = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({
-          projectId: defaultStr(projectId),
-          appId: defaultStr(appId),
-        });
-      if (success) {
-        return data.items;
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
     }
   };
 
@@ -224,53 +142,6 @@ const AnalyticsExplore: React.FC = () => {
     ]);
   };
 
-  const listMetadataEvents = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({
-          projectId: defaultStr(projectId),
-          appId: defaultStr(appId),
-          attribute: true,
-        });
-      if (success) {
-        setMetadataEvents(data.items);
-        const events = metadataEventsConvertToCategoryItemType(data.items);
-        setCategoryEvents(events);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const listAllAttributes = async () => {
-    try {
-      const parameters = await getAllParameters();
-      setMetadataEventParameters(parameters ?? []);
-      const publicParameters = parameters?.filter(
-        (item) => item.parameterType === MetadataParameterType.PUBLIC
-      );
-      const userAttributes = await getUserAttributes();
-      const conditionOptions = parametersConvertToCategoryItemType(
-        userAttributes,
-        publicParameters ?? []
-      );
-      setPresetParameters(conditionOptions);
-      const groupOptions = parametersConvertToCategoryItemType(
-        userAttributes,
-        parameters ?? []
-      );
-      setGroupParameters(groupOptions);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const getEventParamsAndAttributes = async () => {
-    setLoadingMetadataEvent(true);
-    await Promise.all([listMetadataEvents(), listAllAttributes()]);
-    setLoadingMetadataEvent(false);
-  };
-
   const loadPipeline = async () => {
     setLoadingData(true);
     try {
@@ -285,7 +156,6 @@ const AnalyticsExplore: React.FC = () => {
           defaultStr(appId),
           defaultStr(data.region)
         );
-        await getEventParamsAndAttributes();
       }
     } catch (error) {
       setLoadingData(false);
@@ -295,7 +165,6 @@ const AnalyticsExplore: React.FC = () => {
 
   useEffect(() => {
     if (projectId && appId) {
-      getAllBuiltInMetadata();
       loadPipeline();
     }
   }, [projectId, appId]);
@@ -324,15 +193,13 @@ const AnalyticsExplore: React.FC = () => {
                 type: StateActionType.SHOW_HELP_PANEL,
                 payload: HelpPanelType.ANALYTICS_EXPLORE,
               });
+            } else if (!e.detail.open) {
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
-              if (!e.detail.open) {
-                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-              } else {
-                dispatch?.({
-                  type: StateActionType.SHOW_HELP_PANEL,
-                  payload: state?.helpPanelType,
-                });
-              }
+              dispatch?.({
+                type: StateActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
             }
           }}
           tools={<HelpInfo />}
@@ -396,45 +263,45 @@ const AnalyticsExplore: React.FC = () => {
                 !loadingData &&
                 selectedOption?.value === 'Funnel' && (
                   <AnalyticsFunnel
-                    loadingEvents={loadingMetadataEvent}
+                    loadingEvents={loading}
                     loading={false}
                     pipeline={pipeline}
-                    builtInMetadata={builtInMetadata}
-                    metadataEvents={metadataEvents}
-                    metadataEventParameters={metadataEventParameters}
-                    metadataUserAttributes={metadataUserAttributes}
-                    categoryEvents={categoryEvents}
-                    presetParameters={presetParameters}
-                    groupParameters={groupParameters}
+                    builtInMetadata={data?.builtInMetaData}
+                    metadataEvents={data?.metaDataEvents}
+                    metadataEventParameters={data?.metaDataEventParameters}
+                    metadataUserAttributes={data?.metaDataUserAttributes}
+                    categoryEvents={data?.categoryEvents}
+                    presetParameters={data.presetParameters}
+                    groupParameters={data.groupParameters}
                   />
                 )}
               {pipeline &&
                 !loadingData &&
                 selectedOption?.value === 'Event' && (
                   <AnalyticsEvent
-                    loadingEvents={loadingMetadataEvent}
+                    loadingEvents={loading}
                     loading={false}
                     pipeline={pipeline}
-                    builtInMetadata={builtInMetadata}
-                    metadataEvents={metadataEvents}
-                    metadataEventParameters={metadataEventParameters}
-                    metadataUserAttributes={metadataUserAttributes}
-                    categoryEvents={categoryEvents}
-                    presetParameters={presetParameters}
-                    groupParameters={groupParameters}
+                    builtInMetadata={data?.builtInMetaData}
+                    metadataEvents={data?.metaDataEvents}
+                    metadataEventParameters={data?.metaDataEventParameters}
+                    metadataUserAttributes={data?.metaDataUserAttributes}
+                    categoryEvents={data?.categoryEvents}
+                    presetParameters={data.presetParameters}
+                    groupParameters={data.groupParameters}
                   />
                 )}
               {pipeline && !loadingData && selectedOption?.value === 'Path' && (
                 <AnalyticsPath
-                  loadingEvents={loadingMetadataEvent}
+                  loadingEvents={loading}
                   loading={false}
                   pipeline={pipeline}
-                  builtInMetadata={builtInMetadata}
-                  metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
-                  metadataUserAttributes={metadataUserAttributes}
-                  categoryEvents={categoryEvents}
-                  presetParameters={presetParameters}
+                  builtInMetadata={data?.builtInMetaData}
+                  metadataEvents={data?.metaDataEvents}
+                  metadataEventParameters={data?.metaDataEventParameters}
+                  metadataUserAttributes={data?.metaDataUserAttributes}
+                  categoryEvents={data?.categoryEvents}
+                  presetParameters={data.presetParameters}
                   nodes={pathNodes}
                 />
               )}
@@ -442,31 +309,31 @@ const AnalyticsExplore: React.FC = () => {
                 !loadingData &&
                 selectedOption?.value === 'Retention' && (
                   <AnalyticsRetention
-                    loadingEvents={loadingMetadataEvent}
+                    loadingEvents={loading}
                     loading={false}
                     pipeline={pipeline}
-                    builtInMetadata={builtInMetadata}
-                    metadataEvents={metadataEvents}
-                    metadataEventParameters={metadataEventParameters}
-                    metadataUserAttributes={metadataUserAttributes}
-                    categoryEvents={categoryEvents}
-                    presetParameters={presetParameters}
-                    groupParameters={groupParameters}
+                    builtInMetadata={data?.builtInMetaData}
+                    metadataEvents={data?.metaDataEvents}
+                    metadataEventParameters={data?.metaDataEventParameters}
+                    metadataUserAttributes={data?.metaDataUserAttributes}
+                    categoryEvents={data?.categoryEvents}
+                    presetParameters={data.presetParameters}
+                    groupParameters={data.groupParameters}
                   />
                 )}
               {pipeline &&
                 !loadingData &&
                 selectedOption?.value === 'Attribution' && (
                   <AnalyticsAttribution
-                    loadingEvents={loadingMetadataEvent}
+                    loadingEvents={loading}
                     loading={false}
                     pipeline={pipeline}
-                    builtInMetadata={builtInMetadata}
-                    metadataEvents={metadataEvents}
-                    metadataEventParameters={metadataEventParameters}
-                    metadataUserAttributes={metadataUserAttributes}
-                    categoryEvents={categoryEvents}
-                    presetParameters={presetParameters}
+                    builtInMetadata={data?.builtInMetaData}
+                    metadataEvents={data?.metaDataEvents}
+                    metadataEventParameters={data?.metaDataEventParameters}
+                    metadataUserAttributes={data?.metaDataUserAttributes}
+                    categoryEvents={data?.categoryEvents}
+                    presetParameters={data.presetParameters}
                   />
                 )}
             </ContentLayout>

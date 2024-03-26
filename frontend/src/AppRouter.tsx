@@ -421,7 +421,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             }
           />
           <Route
-            path="/analytics/segments"
+            path="/analytics/:projectId/app/:appId/segments"
             element={
               <RoleRoute
                 layout="analytics"
@@ -433,7 +433,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             }
           />
           <Route
-            path="/analytics/segments/add"
+            path="/analytics/:projectId/app/:appId/segments/add"
             element={
               <RoleRoute
                 layout="analytics"

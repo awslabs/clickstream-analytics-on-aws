@@ -20,7 +20,7 @@ import {
 } from '@cloudscape-design/components';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
@@ -34,12 +34,13 @@ import EventItem from './EventItem';
 interface ConditionItemProps {
   item: IConditionItemType;
   conditionOptions: CategoryItemType[];
-  removeConditionItem: () => void;
+  removeConditionItem?: () => void;
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeConditionValue: (value: string[]) => void;
   loading?: boolean;
   disableValidate?: boolean;
+  hideRemove?: boolean;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (
@@ -56,18 +57,35 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeConditionValue,
     loading,
     disableValidate,
+    hideRemove,
   } = props;
 
-  const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
-  const [values, setValues] = useState<string[]>([]);
+  const [valueOptions, setValueOptions] = useState<SelectProps.Options>(
+    item.conditionOption?.values?.map((item) => {
+      return {
+        value: item.value,
+        label: item.displayValue,
+      };
+    }) ?? []
+  );
+  const [values, setValues] = useState<string[]>(item.conditionValue ?? []);
   const [labelValues, setLabelValues] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
 
-  const setConditionValues = (values: string[], labelValues: string[]) => {
-    setLabelValues(labelValues);
+  const setConditionValues = (values: string[]) => {
     setValues(values);
     changeConditionValue(values);
   };
+
+  useEffect(() => {
+    setLabelValues(
+      values.map(
+        (item: string) =>
+          valueOptions.find((ele: SelectProps.Option) => ele.value === item)
+            ?.label ?? item
+      )
+    );
+  }, [values]);
 
   const setCurOptions = (item: IAnalyticsItem | null) => {
     if (!item) {
@@ -81,7 +99,6 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         };
       });
       setValueOptions(options);
-      setLabelValues([]);
       setValues([]);
       changeConditionValue([]);
     }
@@ -161,8 +178,27 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.not_in,
   ];
 
+  const addNewOption = (inputValue: string) => {
+    if (
+      !values.includes(inputValue) &&
+      !valueOptions.find(
+        (item: SelectProps.Option) => item.value === inputValue
+      )
+    ) {
+      setValueOptions((prev) => {
+        return [
+          ...prev,
+          {
+            label: inputValue,
+            value: inputValue,
+          },
+        ];
+      });
+    }
+  };
+
   return (
-    <div className="cs-analytics-condition-item">
+    <div className="cs-analytics-condition-item flex gap-5">
       <div className="condition-event">
         <EventItem
           disableValidate={disableValidate}
@@ -214,30 +250,29 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                   setInputValue(detail.value);
                 }}
                 onSelect={({ detail }) => {
-                  setConditionValues(
-                    [...values, detail.value],
-                    [
-                      ...labelValues,
-                      detail.selectedOption?.label ?? detail.value,
-                    ]
-                  );
+                  if (values.includes(detail.value)) {
+                    return;
+                  }
+                  setConditionValues([...values, detail.value]);
                   setInputValue('');
                 }}
                 onKeyDown={({ detail }) => {
                   if (inputValue && detail.key === 'Enter') {
-                    setConditionValues(
-                      [...values, inputValue],
-                      [...labelValues, inputValue]
-                    );
+                    if (values.includes(inputValue)) {
+                      return;
+                    }
+                    addNewOption(inputValue);
+                    setConditionValues([...values, inputValue]);
                     setInputValue('');
                   }
                 }}
                 onBlur={() => {
                   if (inputValue) {
-                    setConditionValues(
-                      [...values, inputValue],
-                      [...labelValues, inputValue]
-                    );
+                    if (values.includes(inputValue)) {
+                      return;
+                    }
+                    addNewOption(inputValue);
+                    setConditionValues([...values, inputValue]);
                     setInputValue('');
                   }
                 }}
@@ -250,8 +285,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
               <TokenGroup
                 onDismiss={({ detail: { itemIndex } }) => {
                   setConditionValues(
-                    values.filter((item, eIndex) => eIndex !== itemIndex),
-                    labelValues.filter((item, eIndex) => eIndex !== itemIndex)
+                    values.filter((item, eIndex) => eIndex !== itemIndex)
                   );
                 }}
                 items={labelValues.map((value) => ({ label: value }))}
@@ -267,17 +301,19 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             </div>
           )}
       </div>
-      <div className="remove-item">
-        <div className="remove-item-icon">
-          <Button
-            onClick={() => {
-              removeConditionItem();
-            }}
-            variant="link"
-            iconName="close"
-          />
+      {!hideRemove && (
+        <div className="remove-item">
+          <div className="remove-item-icon">
+            <Button
+              onClick={() => {
+                removeConditionItem?.();
+              }}
+              variant="link"
+              iconName="close"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

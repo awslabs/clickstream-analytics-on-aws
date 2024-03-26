@@ -13,6 +13,7 @@
 import { SelectProps } from '@cloudscape-design/components';
 import {
   ERelationShip,
+  ExtendSegment,
   IEventSegmentationItem,
   IEventSegmentationObj,
 } from 'components/eventselect/AnalyticsType';
@@ -479,6 +480,25 @@ export const CONDITION_LIST: SelectProps.Option[] = [
   },
 ];
 
+export const enumToSelectOptions = (
+  enumObj: {
+    [s: string]: string;
+  },
+  prefix: string
+): SelectProps.Option[] => {
+  return Object.entries(enumObj).map(([key, value]) => ({
+    label: `analytics:segment.${prefix}.${value}`,
+    value,
+  }));
+};
+
+export const SEGMENT_AUTO_REFRESH_OPTIONS = [
+  { label: 'Daily', value: 'Daily' },
+  { label: 'Weekly', value: 'Weekly' },
+  { label: 'Monthly', value: 'Monthly' },
+  { label: 'Custom(Cron)', value: 'Custom' },
+];
+
 export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
   userEventType: CONDITION_LIST[0],
   subItemList: [],
@@ -499,12 +519,12 @@ export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
   filterGroupRelationShip: ERelationShip.AND,
   subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
   eventOption: [],
-  eventCalculateMethodOption: [],
-  conditionOptions: [],
+  userIsAttributeOptions: [],
   eventOperationOptions: [],
-  attributeOptions: [],
   attributeOperationOptions: [],
   userGroupOptions: [],
+  eventSessionOptions: [],
+  eventFlowOptions: [],
 };
 
 export const darkBackgroundColors = [
@@ -519,3 +539,29 @@ export const darkBackgroundColors = [
   '#10316B',
   '#8D0801',
 ];
+
+export const INIT_SEGMENT_OBJ: ExtendSegment = {
+  segmentId: '',
+  segmentType: 'User',
+  name: '',
+  description: '',
+  projectId: '',
+  appId: '',
+  createBy: '',
+  createAt: 0,
+  lastUpdateBy: '',
+  lastUpdateAt: 0,
+  refreshSchedule: {
+    cron: 'Manual',
+    expireAfter: 0,
+  },
+  criteria: {
+    filterGroups: [],
+    operator: 'and',
+  },
+  // extends fields
+  refreshType: 'manual',
+  autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
+  autoRefreshDayOption: null,
+  expireDate: '',
+};

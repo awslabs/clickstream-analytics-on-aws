@@ -1,17 +1,13 @@
 {
   "analytics": "Analytics",
-  "countGroup": "COUNT by ...",
-  "countGroupLabel": "COUNT {{label}}",
-  "minGroup": "MIN by ...",
-  "minGroupLabel": "MIN by {{label}}",
-  "maxGroup": "MAX by ...",
-  "maxGroupLabel": "MAX by {{label}}",
-  "sumGroup": "SUM by ...",
-  "sumGroupLabel": "SUM by {{label}}",
-  "avgGroup": "AVG by ...",
-  "avgGroupLabel": "AVG by {{label}}",
-  "medianGroup": "MEDIAN by ...",
-  "medianGroupLabel": "MEDIAN by {{label}}",
+  "groupLabel": {
+    "COUNT_PROPERTY": "COUNT {{label}}",
+    "min": "MIN by {{label}}",
+    "max": "MAX by {{label}}",
+    "sum": "SUM by {{label}}",
+    "avg": "AVG by {{label}}",
+    "median": "MEDIAN by {{label}}"
+  },
   "category": {
     "app_info": "Application",
     "device": "Device",
@@ -337,6 +333,12 @@
   "segment": {
     "title": "User Segments",
     "desc": "User Segments description",
+    "options": {
+      "withInSession": "Within a session",
+      "withOutSession": "Without a session",
+      "directlyFollow": "Directly followed",
+      "indirectlyFollow": "Indirectly followed"
+    },
     "type": {
       "userDone": "User has done",
       "userNotDone": "User has not done",
@@ -345,6 +347,26 @@
       "doneInSequence": "User has done in sequence",
       "userInGroup": "User in segment group",
       "userNotInGroup": "User not in segment group"
+    },
+    "calculateOption": {
+      "NUMBER_OF_TOTAL": "Total number (PV)",
+      "NUMBER_OF_TIMES_PER_DAY": "Number of times per day",
+      "NUMBER_OF_CONSECUTIVE_DAYS": "Number of consecutive days",
+      "NUMBER_OF_DAYS_HAVING_EVENT": "Distribution of days",
+      "SUM_OF_EVENT_PARAMETER": "Sum by {{type}} (SUM)",
+      "MIN_OF_EVENT_PARAMETER": "Find the minimum by {{type}} (MIN)",
+      "MAX_OF_EVENT_PARAMETER": "Find the maximum by {{type}} (MAX)",
+      "AVG_OF_EVENT_PARAMETER": "Average by {{type}} (AVG)",
+      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Count of distinct {{type}} (COUNT(DISTINCT))"
+    },
+    "calculateOperator": {
+      "=": "=",
+      "<>": "≠",
+      ">": ">",
+      ">=": ">=",
+      "<": "<",
+      "<=": "<=",
+      "between": "Between"
     },
     "comp": {
       "title": "Create Segment",
@@ -368,6 +390,16 @@
       "selectUserGroup": "Please select user segment group",
       "segmentDescPlaceholder": "Provide a short description",
       "filterByTimeRange": "Filter by a date and time range"
+    },
+    "valid": {
+      "nameEmptyError": "Please input segment name.",
+      "cronEmptyError": "Please input cron expression.",
+      "eventEmptyError": "Please select event",
+      "eventOperatorEmptyError": "Please select operator",
+      "eventValueEmptyError": "Please input value",
+      "eventValueBetweenError": "Max value can not be less than min value",
+      "attributeEmptyError": "Please select attribute",
+      "groupEmptyError": "Please select filter group"
     }
   }
 }

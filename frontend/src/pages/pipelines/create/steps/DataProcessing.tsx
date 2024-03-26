@@ -474,7 +474,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                 errorText={dataProcessorIntervalInvalidErrorText()}
               >
                 <div className="flex">
-                  <div style={{ width: 200 }}>
+                  <div className="w-200">
                     <Select
                       selectedOption={selectedExecution}
                       onChange={({ detail }) => {
@@ -909,9 +909,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 'finished'
                               )}
                               onChange={(e) => {
-                                changeReshiftSubnets(
-                                  e.detail.selectedOptions as any
-                                );
+                                changeReshiftSubnets(e.detail.selectedOptions);
                               }}
                             />
                           </FormField>

@@ -11,14 +11,33 @@
  *  and limitations under the License.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  getBuiltInMetadata,
+  getMetadataEventsList,
+  getMetadataParametersList,
+  getMetadataUserAttributesList,
+} from 'apis/analytics';
+import { getSegmentsList } from 'apis/segments';
+import { EventsParameterProvider } from 'context/AnalyticsEventsContext';
 import { SegmentProvider } from 'context/SegmentContext';
 import SegmentEditor from 'pages/analytics/segments/components/SegmentEditor';
 import { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
+import { useParams } from 'react-router-dom';
+import { INIT_SEGMENT_OBJ } from 'ts/const';
+import {
+  mockAttributeListData,
+  mockBuiltInData,
+  mockEventListData,
+  mockSegmentsList,
+  mockUserAttributeListData,
+} from './data/mock_data';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => jest.fn(),
+  useParams: jest.fn(),
 }));
 
 jest.mock('react-i18next', () => ({
@@ -35,22 +54,86 @@ jest.mock('react-i18next', () => ({
   },
 }));
 
+jest.mock('apis/segments', () => ({
+  getSegmentsList: jest.fn(),
+}));
+jest.mock('apis/analytics', () => ({
+  getBuiltInMetadata: jest.fn(),
+  getMetadataEventsList: jest.fn(),
+  getMetadataParametersList: jest.fn(),
+  getMetadataUserAttributesList: jest.fn(),
+}));
+
+beforeEach(() => {
+  (getSegmentsList as any).mockResolvedValue(mockSegmentsList);
+  (getBuiltInMetadata as any).mockResolvedValue(mockBuiltInData);
+  (getMetadataEventsList as any).mockResolvedValue(mockEventListData);
+  (getMetadataParametersList as any).mockResolvedValue(mockAttributeListData);
+  (getMetadataUserAttributesList as any).mockResolvedValue(
+    mockUserAttributeListData
+  );
+  const mockParams = {
+    appId: 'shopping',
+    projectId: 'test_magic_project_gpvz',
+  };
+  // Make useParams return the mock parameters
+  (useParams as any).mockReturnValue(mockParams);
+  jest.spyOn(console, 'error').mockImplementation(jest.fn());
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
 const renderWithProvider = (component: ReactElement) => {
-  return render(<SegmentProvider>{component}</SegmentProvider>);
+  return render(
+    <EventsParameterProvider>
+      <SegmentProvider>{component}</SegmentProvider>
+    </EventsParameterProvider>
+  );
 };
 
+const updateSegmentObjFn = jest.fn();
+
 describe('SegmentEditor', () => {
-  it('should render without errors', () => {
-    renderWithProvider(<SegmentEditor />);
+  it('should render without errors', async () => {
+    let queryAllByTestId;
+    await act(async () => {
+      const result = renderWithProvider(
+        <SegmentEditor
+          segmentObject={{ ...INIT_SEGMENT_OBJ }}
+          updateSegmentObject={updateSegmentObjFn}
+        />
+      );
+      queryAllByTestId = result.queryAllByTestId;
+    });
+    await waitFor(() => {
+      expect(screen.queryByText('loading')).not.toBeInTheDocument();
+    });
+    const listItems = queryAllByTestId('test-segment-item');
+    expect(listItems).toHaveLength(1);
   });
 
-  it('should call add filter group after click add filter group button', () => {
-    const { getByTestId, queryAllByTestId } = renderWithProvider(
-      <SegmentEditor />
-    );
+  it('should call add filter group after click add filter group button', async () => {
+    let getByTestId, queryAllByTestId;
+    await act(async () => {
+      const result = renderWithProvider(
+        <SegmentEditor
+          segmentObject={{ ...INIT_SEGMENT_OBJ }}
+          updateSegmentObject={updateSegmentObjFn}
+        />
+      );
+      queryAllByTestId = result.queryAllByTestId;
+      getByTestId = result.getByTestId;
+    });
+    await waitFor(() => {
+      expect(screen.queryByText('loading')).not.toBeInTheDocument();
+    });
     let listItems = queryAllByTestId('test-segment-item');
     expect(listItems).toHaveLength(1);
-    fireEvent.click(getByTestId('test-add-filter-group'));
+    await act(async () => {
+      fireEvent.click(getByTestId('test-add-filter-group'));
+    });
     listItems = queryAllByTestId('test-segment-item');
     expect(listItems).toHaveLength(2);
   });
