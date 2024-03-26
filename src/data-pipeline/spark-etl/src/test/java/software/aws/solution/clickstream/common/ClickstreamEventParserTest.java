@@ -47,6 +47,25 @@ public class ClickstreamEventParserTest extends BaseTest {
     }
 
     @Test
+    public void test_parse_line_client_time() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_client_time
+        String lines = resourceFileContent("/original_data_nozip_client_time.json");
+        String firstLine = lines.split("\n")[0];
+        String secondLine = lines.split("\n")[1];
+        String thirdLine = lines.split("\n")[2];
+
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        ClickstreamIngestRow row1 = clickstreamEventParser.ingestLineToRow(firstLine);
+        Assertions.assertEquals(1682319109405L, row1.getUploadTimestamp());
+
+        ClickstreamIngestRow row2 = clickstreamEventParser.ingestLineToRow(secondLine);
+        Assertions.assertNull(row2.getUploadTimestamp());
+
+        ClickstreamIngestRow row3 = clickstreamEventParser.ingestLineToRow(thirdLine);
+        Assertions.assertEquals(1682319109406L, row3.getUploadTimestamp());
+    }
+
+    @Test
     void test_parse_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_data
         String line = resourceFileContent("/event_deser_input.json");

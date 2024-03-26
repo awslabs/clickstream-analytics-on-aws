@@ -43,6 +43,7 @@ public class TransformerV3 {
     public static final String PLATFORM_WEB = "Web";
     public static final String USER_FIRST_EVENT_NAME = "first_event_name";
     public static final String USER_LATEST_EVENT_NAME = "latest_event_name";
+    public static final String CLIENT_TIMESTAMP = "client_timestamp";
     DataConverterV3 dataConverter = new DataConverterV3();
 
     public static Dataset<Row> addProcessInfo(final Dataset<Row> dataset) {
@@ -197,7 +198,7 @@ public class TransformerV3 {
                 .join(latestUserPropsDataset, joinCondition1, "left")
                 .join(firstUserPropsDataset, joinCondition2, "left");
 
-        Dataset<Row> userFinalDataset = userFinalDatasetJoined.select(
+        return userFinalDatasetJoined.select(
                 col(ModelV2.APP_ID),
                 col(ModelV2.USER_PSEUDO_ID),
                 col(ModelV2.EVENT_TIMESTAMP),
@@ -227,7 +228,6 @@ public class TransformerV3 {
                                 lit(firstEventName), col(firstEventName)
                         )).alias(PROCESS_INFO)
         );
-        return userFinalDataset;
     }
 
     public static Column mapConcatSafe(final Column map1, final Column map2) {
@@ -252,8 +252,9 @@ public class TransformerV3 {
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
         Dataset<Row> datasetWithFileName = dataset.withColumn(INPUT_FILE_NAME, input_file_name());
 
-        // check dataset.columns() has column `upload_timestamp`
-        if (!Arrays.asList(dataset.columns()).contains(UPLOAD_TIMESTAMP)) {
+        if (Arrays.asList(dataset.columns()).contains(CLIENT_TIMESTAMP)) {
+            datasetWithFileName = datasetWithFileName.withColumn(UPLOAD_TIMESTAMP, col(CLIENT_TIMESTAMP).cast(DataTypes.LongType));
+        } else if (!Arrays.asList(dataset.columns()).contains(UPLOAD_TIMESTAMP)) {
             datasetWithFileName = datasetWithFileName.withColumn(UPLOAD_TIMESTAMP, lit(null).cast(DataTypes.LongType));
         }
 

@@ -55,7 +55,8 @@ public class ClickstreamUserPropValueSerializer extends JsonSerializer<Clickstre
                 gen.writeNumberField(VALUE, Double.parseDouble(value.getValue()));
             }
         } else if (value.getType() == ValueType.OBJECT) {
-            gen.writeStringField(VALUE, value.getValue());
+            gen.writeFieldName(VALUE);
+            gen.writeRawValue(value.getValue());
         }
         gen.writeEndObject();
     }

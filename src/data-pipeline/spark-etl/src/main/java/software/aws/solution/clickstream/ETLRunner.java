@@ -51,6 +51,7 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.date_format;
 
+import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
@@ -202,6 +203,7 @@ public class ETLRunner {
                         DataTypes.createStructField("appId", DataTypes.StringType, true),
                         DataTypes.createStructField("compression", DataTypes.StringType, true),
                         DataTypes.createStructField("ingest_time", DataTypes.LongType, true),
+                        DataTypes.createStructField(CLIENT_TIMESTAMP, DataTypes.LongType, true),
                         DataTypes.createStructField("server_ingest_time", DataTypes.LongType, true),
                         DataTypes.createStructField("hour", DataTypes.IntegerType, true)
                 }

@@ -34,11 +34,6 @@ public class SafeBooleanDeserializer extends JsonDeserializer<Boolean> {
         if (value.equals("0")) {
             return false;
         }
-
-        try {
-            return Boolean.parseBoolean(value);
-        } catch (Exception e) {
-            return null;
-        }
+        return Boolean.parseBoolean(value);
     }
 }

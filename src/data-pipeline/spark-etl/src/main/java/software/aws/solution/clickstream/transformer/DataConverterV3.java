@@ -142,7 +142,7 @@ public class DataConverterV3 {
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
-            convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/DataConverterV2/");
+            convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/DataConverterV3/");
         }
         Dataset<Row> okDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNull());
         Dataset<Row> corruptDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNotNull());
@@ -157,7 +157,7 @@ public class DataConverterV3 {
     private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
         log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverterV2 corruptDataset").toString());
         String jobName = System.getProperty(JOB_NAME_PROP);
-        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_gtm_corrupted_json_data_v2";
+        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_corrupted_json_data_v2";
         log.info("save corruptedDataset to " + s3FilePath);
         corruptDataset.withColumn(JOB_NAME_COL, lit(jobName)).write().partitionBy(JOB_NAME_COL).option("compression", "gzip").mode(SaveMode.Append).json(s3FilePath);
     }
