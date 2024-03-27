@@ -920,6 +920,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         createPipelineObj.dataModeling.redshift.provisioned = null;
       }
     }
+
+    // set streaming
+    if (!pipelineInfo.enableStreaming) {
+      createPipelineObj.streaming = null;
+    } else {
+      createPipelineObj.streaming = {
+        appIdStreamList: pipelineInfo.streaming?.appIdStreamList ?? [],
+      };
+    }
     return createPipelineObj;
   };
 
@@ -995,6 +1004,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'kafkaBrokers',
       'arnAccountId',
       'enableReporting',
+      'enableStreaming',
       'selectedQuickSightUser',
       'dataConnectionType',
       'quickSightVpcConnection',
@@ -1950,6 +1960,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
+              changeEnableStreaming={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableStreaming: enable,
+                  };
+                });
+              }}
               changeEnableRedshift={(enable) => {
                 if (enable) {
                   // if enable redshift, default to enable athena and quicksight
@@ -2635,6 +2653,11 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     )[0];
   };
 
+  const setUpdateStreaming = async (pipelineInfo: IExtPipeline) => {
+    pipelineInfo.enableStreaming =
+      pipelineInfo.streaming?.appIdStreamList !== undefined;
+  };
+
   const setUpdateQuickSightUser = async (pipelineInfo: IExtPipeline) => {
     if (!pipelineInfo.reporting?.quickSight.user) {
       return;
@@ -2850,6 +2873,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
+      streaming: data.streaming,
+      reporting: data.reporting,
       statusType: data.statusType,
       stackDetails: defaultGenericsValue(data.stackDetails, []),
       executionDetail: data.executionDetail,
@@ -2894,6 +2919,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
               : setUpdateMSKCluster(extPipeline),
             setUpdateKDSType(extPipeline),
             setUpdateETL(extPipeline),
+            setUpdateStreaming(extPipeline),
             setUpdateReport(extPipeline),
           ])
             .then(() => {

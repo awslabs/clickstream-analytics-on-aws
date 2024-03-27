@@ -216,7 +216,9 @@
     "apply": "应用",
     "newGroup": "添加分组",
     "export": "导出",
-    "refreshSegment": "刷新分群"
+    "refreshSegment": "刷新分群",
+    "streamEnable": "开启实时流",
+    "streamDisable": "关闭实时流"
   },
   "item": "项目",
   "items": "项目",

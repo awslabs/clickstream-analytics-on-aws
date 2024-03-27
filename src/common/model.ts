@@ -39,7 +39,7 @@ export interface PipelineStatusDetail {
 }
 
 export interface ExecutionDetail {
-  executionArn: string;
+  executionArn?: string;
   name: string;
   status?: ExecutionStatus;
 }
@@ -53,6 +53,7 @@ export enum PipelineStackType {
   METRICS = 'Metrics',
   ATHENA = 'DataModelingAthena',
   APP_REGISTRY = 'ServiceCatalogAppRegistry',
+  STREAMING = 'Streaming',
 }
 
 export enum PipelineStatusType {

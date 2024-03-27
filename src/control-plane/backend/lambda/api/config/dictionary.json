@@ -22,7 +22,8 @@
       "Reporting": "data-reporting-quicksight-stack.template.json",
       "Metrics": "metrics-stack.template.json",
       "DataModelingAthena": "data-modeling-athena-stack.template.json",
-      "ServiceCatalogAppRegistry": "service-catalog-appregistry-stack.template.json"
+      "ServiceCatalogAppRegistry": "service-catalog-appregistry-stack.template.json",
+      "Streaming": "streaming-ingestion-stack.template.json"
     }
   },
   {

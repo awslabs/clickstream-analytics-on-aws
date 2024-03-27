@@ -12,7 +12,8 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { awsRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
+import { cloneDeep } from 'lodash';
+import { AFTER_REDSHIFT_STACKS, awsRegion, stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
 import {
   WorkflowParallelBranch,
@@ -166,16 +167,56 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getUpdateWorkflow(this.execWorkflow.Workflow, stackDetails, editStacks);
   }
 
-  public updateWorkflowReporting(reportingState: WorkflowState): void {
-    this._updateWorkflowReporting(this.execWorkflow?.Workflow as WorkflowState, reportingState);
-    this._updateWorkflowReporting(this.workflow?.Workflow as WorkflowState, reportingState);
+  public patchStateAfterRedshiftWorkflow(state: WorkflowState, type: PipelineStackType): void {
+    this._patchStateAfterRedshiftWorkflow(this.execWorkflow?.Workflow as WorkflowState, state, type);
+    this._patchStateAfterRedshiftWorkflow(this.workflow?.Workflow as WorkflowState, state, type);
   }
 
-  public _updateWorkflowReporting(workflow: WorkflowState, reportingState: WorkflowState): void {
+  public _patchStateAfterRedshiftWorkflow(workflow: WorkflowState, state: WorkflowState, type: PipelineStackType): void {
     const dataProcessingBranch = this._findBranch(workflow, PipelineStackType.DATA_PROCESSING);
-    if (dataProcessingBranch && PipelineStackType.DATA_MODELING_REDSHIFT in dataProcessingBranch.States) {
-      dataProcessingBranch.States[PipelineStackType.REPORTING] = reportingState;
-      dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
+    if (!dataProcessingBranch || !(PipelineStackType.DATA_MODELING_REDSHIFT in dataProcessingBranch.States)) {
+      throw new Error('Data Processing state or redshift state not found.');
+    }
+    if (AFTER_REDSHIFT_STACKS in dataProcessingBranch.States) {
+      dataProcessingBranch.States[AFTER_REDSHIFT_STACKS].Branches?.push({
+        StartAt: type,
+        States: {
+          [type]: state,
+        },
+      });
+      if (PipelineStackType.REPORTING in dataProcessingBranch.States) {
+        delete dataProcessingBranch.States[PipelineStackType.REPORTING];
+      }
+    } else {
+      const parallelAfterRedshift: WorkflowState = {
+        Type: WorkflowStateType.PARALLEL,
+        End: true,
+        Branches: [{
+          StartAt: type,
+          States: {
+            [type]: state,
+          },
+        }],
+      };
+      if (PipelineStackType.REPORTING in dataProcessingBranch.States) {
+        if (type === PipelineStackType.REPORTING) {
+          delete dataProcessingBranch.States[PipelineStackType.REPORTING];
+        } else {
+          const oldReporting = cloneDeep(dataProcessingBranch.States[PipelineStackType.REPORTING]);
+          parallelAfterRedshift.Branches?.push(
+            {
+              StartAt: PipelineStackType.REPORTING,
+              States: {
+                [PipelineStackType.REPORTING]: oldReporting,
+              },
+            },
+          );
+          delete dataProcessingBranch.States[PipelineStackType.REPORTING];
+        }
+      }
+
+      dataProcessingBranch.States[AFTER_REDSHIFT_STACKS] = parallelAfterRedshift;
+      dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = AFTER_REDSHIFT_STACKS;
       delete dataProcessingBranch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
     }
   }

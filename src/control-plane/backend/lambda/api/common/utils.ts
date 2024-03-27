@@ -268,6 +268,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.METRICS, `${getStackPrefix()}-${PipelineStackType.METRICS}-${pipelineId}`);
   names.set(PipelineStackType.ATHENA, `${getStackPrefix()}-${PipelineStackType.ATHENA}-${pipelineId}`);
   names.set(PipelineStackType.APP_REGISTRY, `${getStackPrefix()}-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
+  names.set(PipelineStackType.STREAMING, `${getStackPrefix()}-${PipelineStackType.STREAMING}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 

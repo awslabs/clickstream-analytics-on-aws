@@ -88,6 +88,20 @@ router_app.put(
     return appServ.updateTimezone(req, res, next);
   });
 
+router_app.put(
+  '/:id/stream',
+  validate([
+    param('id').custom((value, { req }) => isApplicationExisted(value, {
+      req,
+      location: 'body',
+      path: 'pid',
+    })),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return appServ.appStreamEnable(req, res, next);
+  });
+
+
 export {
   router_app,
 };

@@ -501,6 +501,11 @@ export class ClickStreamApiConstruct extends Construct {
           'sns:SetTopicAttributes',
           'sns:TagResource',
           'sns:UntagResource',
+          'kms:ListAliases',
+          'kinesisanalytics:DescribeApplication',
+          'kinesisanalytics:UpdateApplication',
+          'kinesisanalytics:StartApplication',
+          'kinesisanalytics:StopApplication',
         ],
       }),
       new PolicyStatement({

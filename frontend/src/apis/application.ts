@@ -55,10 +55,20 @@ const updateApplicationTimezone = async (params: {
   return result;
 };
 
+const streamApplication = async (data: {
+  id: string;
+  pid: string;
+  enable: boolean;
+}) => {
+  const result: any = await apiRequest('put', `/app/${data.id}/stream`, data);
+  return result;
+};
+
 export {
   getApplicationListByPipeline,
   createApplication,
   getApplicationDetail,
   deleteApplication,
   updateApplicationTimezone,
+  streamApplication,
 };

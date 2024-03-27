@@ -19,12 +19,14 @@ import {
   MULTI_EMAIL_PATTERN,
   MULTI_SECURITY_GROUP_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX,
   OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
+  OUTPUT_INGESTION_SERVER_KINESIS_ARN_SUFFIX,
   QUICKSIGHT_NAMESPACE_PATTERN,
   QUICKSIGHT_USER_NAME_PATTERN,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
@@ -43,7 +45,7 @@ import {
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
-import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName } from '../common/constants';
+import { analyticsMetadataTable, awsAccountId, awsPartition, awsRegion, clickStreamTableName } from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
 import {
@@ -1486,6 +1488,207 @@ export class CReportingStack extends JSONObject {
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
+    }
+
+    super({
+      _pipeline: pipeline,
+      _resources: resources,
+    });
+  }
+}
+
+export class CStreamingStack extends JSONObject {
+
+  public static editAllowedList(): string[] {
+    const allowedList:string[] = [];
+    return allowedList;
+  }
+
+  @JSONObject.required
+    _pipeline?: IPipeline;
+
+  @JSONObject.required
+    _resources?: CPipelineResources;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    return stack._pipeline?.projectId;
+  })
+    ProjectId?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    return stack._resources?.appIds?.join(',');
+  })
+    AppIds?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, key:string, _value:any) => {
+    const defaultValue = stack._pipeline?.network.vpcId;
+    validatePattern(key, VPC_ID_PATTERN, defaultValue);
+    return defaultValue;
+  })
+    VpcId?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, key:string, _value:any) => {
+    let defaultValue = stack._pipeline?.network.privateSubnetIds.join(',');
+    if (isEmpty(defaultValue)) {
+      defaultValue = stack._pipeline?.network.publicSubnetIds.join(',');
+    }
+    validatePattern(key, SUBNETS_PATTERN, defaultValue);
+    return defaultValue;
+  })
+    WorkerSubnets?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    const bucketName = stack._pipeline?.streaming?.bucket?.name ?? stack._pipeline?.bucket.name;
+    return `arn:${awsPartition}:s3:::${bucketName}`;
+  })
+    IngestionPipelineS3BucketArn?: string;
+
+  @JSONObject.optional(KinesisStreamMode.ON_DEMAND)
+  @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.sinkKinesis?.kinesisStreamMode ?? KinesisStreamMode.ON_DEMAND;
+  })
+    KinesisStreamMode?: KinesisStreamMode;
+
+  @JSONObject.optional(3)
+  @JSONObject.gte(1)
+  @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
+    return stack._pipeline?.ingestionServer.sinkKinesis?.kinesisShardCount ?? 3;
+  })
+    KinesisShardCount?: number;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.INGESTION,
+      OUTPUT_INGESTION_SERVER_KINESIS_ARN_SUFFIX,
+    );
+  })
+    KinesisSourceStreamArn?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    return stack._resources?.kinesisKeyARN ?? '';
+  })
+    KinesisEncryptionKMSKeyArn?: string;
+
+  @JSONObject.optional(REDSHIFT_MODE.NEW_SERVERLESS)
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
+      return REDSHIFT_MODE.PROVISIONED;
+    } else if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
+      return REDSHIFT_MODE.SERVERLESS;
+    }
+    return value;
+  })
+    RedshiftMode?: REDSHIFT_MODE;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
+      value = stack._pipeline?.dataModeling?.redshift?.provisioned.clusterIdentifier;
+    }
+    if (!isEmpty(value)) {
+      validatePattern(key, REDSHIFT_CLUSTER_IDENTIFIER_PATTERN, value);
+    }
+    return value;
+  })
+    RedshiftClusterIdentifier?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.provisioned) {
+      value = stack._pipeline?.dataModeling?.redshift?.provisioned.dbUser;
+    }
+    if (!isEmpty(value)) {
+      validatePattern(key, REDSHIFT_DB_USER_NAME_PATTERN, value);
+    }
+    return value;
+  })
+    RedshiftDbUser?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.newServerless) {
+      let workgroupName = `clickstream-${stack._resources!.project?.id.replace(/_/g, '-')}`;
+      if (workgroupName.length > 120) {
+        workgroupName = workgroupName.substring(0, 120);
+      }
+      return workgroupName;
+    }
+    return value;
+  })
+    RedshiftServerlessWorkgroupName?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
+      return stack._resources?.redshift?.serverless?.namespaceId;
+    }
+    return value;
+  })
+    RedshiftServerlessNamespaceId?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, value:any) => {
+    if (stack._pipeline?.dataModeling?.redshift?.existingServerless) {
+      return stack._resources?.redshift?.serverless?.workgroupId;
+    }
+    return value;
+  })
+    RedshiftServerlessWorkgroupId?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.DATA_MODELING_REDSHIFT,
+      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+    );
+  })
+    RedshiftDataAPIRole?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CStreamingStack, _key:string, _value:any) => {
+    if (!stack._pipeline) {
+      return '';
+    }
+    return getValueFromStackOutputSuffix(
+      stack._pipeline,
+      PipelineStackType.DATA_MODELING_REDSHIFT,
+      OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+    );
+  })
+    RedshiftUserParam?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CStreamingStack, _key:string, _value:string) => {
+    return getAppRegistryApplicationArn(stack._pipeline);
+  })
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
+    AppRegistryApplicationArn?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (_stack:CStreamingStack, _key:string, _value:string) => {
+    return getIamRoleBoundaryArn();
+  })
+    IamRoleBoundaryArn?: string;
+
+  constructor(pipeline: IPipeline, resources: CPipelineResources) {
+    if (pipeline.ingestionServer.sinkType !== PipelineSinkType.KINESIS ||
+      (!pipeline.dataModeling?.redshift?.provisioned && !pipeline.dataModeling?.redshift?.newServerless)) {
+      throw new ClickStreamBadRequestError('To open streaming, it must enable the Kinesis ingestion server and the Data Analytics engine first.');
     }
 
     super({

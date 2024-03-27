@@ -68,6 +68,7 @@ const DEFAULT_OPERATOR_ROLE_NAMES = 'ClickstreamOperator';
 const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
 const DEFAULT_ANALYST_READER_ROLE_NAMES = 'ClickstreamAnalystReader';
 const PIPELINE_STACKS = 'PipelineStacks';
+const AFTER_REDSHIFT_STACKS = 'AfterRedshiftStacks';
 
 const SOLUTION_COMMON_VPC_ENDPOINTS = ['s3', 'logs'];
 const SOLUTION_INGESTION_VPC_ENDPOINTS = ['ecr.dkr', 'ecr.api', 'ecs', 'ecs-agent', 'ecs-telemetry', 'kinesis-streams'];
@@ -112,6 +113,7 @@ export {
   DEFAULT_ANALYST_ROLE_NAMES,
   DEFAULT_ANALYST_READER_ROLE_NAMES,
   PIPELINE_STACKS,
+  AFTER_REDSHIFT_STACKS,
   SOLUTION_COMMON_VPC_ENDPOINTS,
   SOLUTION_INGESTION_VPC_ENDPOINTS,
   SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS,

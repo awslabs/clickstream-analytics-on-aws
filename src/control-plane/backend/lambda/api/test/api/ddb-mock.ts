@@ -24,6 +24,7 @@ import {
 } from '@aws-sdk/client-ec2';
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
+import { ListAliasesCommand } from '@aws-sdk/client-kms';
 import { DescribeAccountSubscriptionCommand, Edition, RegisterUserCommand, ResourceExistsException } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
@@ -377,6 +378,7 @@ function createPipelineMock(
     iamMock: any;
     cloudWatchEventsMock: any;
     snsMock: any;
+    kmsMock: any;
   },
   props?: {
     noApp?: boolean;
@@ -956,6 +958,7 @@ function createPipelineMock(
   createEventRuleMock(mockClients.cloudWatchEventsMock);
   createSNSTopicMock(mockClients.snsMock);
   mockQuickSight(mockClients.quickSightMock, props?.quickSightStandard, props?.quickSightUserExisted);
+  listAliasesMock(mockClients.kmsMock);
 }
 
 function mockQuickSight(quickSightMock: any, standard?: boolean, userExisted?: boolean): any {
@@ -1009,6 +1012,18 @@ function createSNSTopicMock(snsMock: any): any {
   snsMock.on(SNSTagResourceCommand).resolves({});
   snsMock.on(SetTopicAttributesCommand).resolves({});
   snsMock.on(SubscribeCommand).resolves({});
+}
+
+function listAliasesMock(kmsMock: any): any {
+  kmsMock.on(ListAliasesCommand).resolves({
+    Aliases: [
+      {
+        AliasName: 'alias/aws/kinesis',
+        AliasArn: 'arn:aws:kms:ap-southeast-1:111122223333:alias/ck-clickstream-branch-main',
+        TargetKeyId: 'e5a7d4e3-7f7e-4d0b-9b4f-5d2e0f9d3e4d',
+      },
+    ],
+  });
 }
 
 export {

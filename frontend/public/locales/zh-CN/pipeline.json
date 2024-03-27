@@ -312,7 +312,11 @@
     "redshiftProvisionedDesc": "选择符合您的成本和性能规格的预置 Redshift 集群",
     "reportNotSupported": "不支持",
     "reportNotSupportedDesc": "如果未启用数据处理，则不支持自动生成分析报表。",
-    "notSupportedServices": "以下服务：{{unSupportedServices}} 在此区域不可用，某些功能可能不支持。"
+    "notSupportedServices": "以下服务：{{unSupportedServices}} 在此区域不可用，某些功能可能不支持。",
+    "streamingTitle": "流式传输",
+    "streamingDesc": "数据将被流式传输到亚马逊Kinesis数据流中进行实时消费，lambda程序将定期读取数据并将其存储到S3存储桶中。",
+    "enableStreaming": "启用流式传输",
+    "enableStreamingDesc": "如果要为管道启用流式传输，请启用此选项。"
   },
   "detail": {
     "ingestion": "数据摄取",

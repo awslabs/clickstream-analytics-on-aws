@@ -90,6 +90,8 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-s3',
   '@aws-sdk/client-sfn',
   '@aws-sdk/client-kafka',
+  '@aws-sdk/client-kms',
+  '@aws-sdk/client-kinesis-analytics-v2',
   '@aws-sdk/client-redshift',
   '@aws-sdk/client-redshift-data',
   '@aws-sdk/client-redshift-serverless',

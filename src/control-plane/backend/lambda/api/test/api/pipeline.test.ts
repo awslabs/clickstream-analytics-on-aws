@@ -26,6 +26,7 @@ import {
   IAMClient,
 } from '@aws-sdk/client-iam';
 import { KafkaClient } from '@aws-sdk/client-kafka';
+import { KMSClient } from '@aws-sdk/client-kms';
 import {
   DescribeAccountSubscriptionCommand,
   QuickSightClient,
@@ -105,6 +106,7 @@ const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
 const snsMock = mockClient(SNSClient);
+const kmsMock = mockClient(KMSClient);
 
 const mockClients = {
   ddbMock,
@@ -120,6 +122,7 @@ const mockClients = {
   iamMock,
   cloudWatchEventsMock,
   snsMock,
+  kmsMock,
 };
 
 describe('Pipeline test', () => {
@@ -2926,12 +2929,16 @@ describe('Pipeline test', () => {
       const branches = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M.Branches;
       const reportingState = branches.L[1].M.States.M.Reporting;
       const redshiftState = branches.L[1].M.States.M.DataModelingRedshift;
+      const dataProcessingBranch = branches.L[1].M.States.M;
       expect(
         reportingState.M.End.BOOL === true &&
         reportingState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
         reportingState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
         redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
-        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000',
+        redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
+        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
+        dataProcessingBranch.Reporting === undefined &&
+        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting.M.End.BOOL === true,
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -2940,6 +2947,159 @@ describe('Pipeline test', () => {
         ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
         reporting: {
           ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.reporting,
+        },
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
+  it('Update pipeline add streaming', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        reporting: undefined,
+        streaming: undefined,
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const updateWorkflow = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M;
+      const dataProcessingBranch = updateWorkflow.Branches.L[1].M.States.M;
+      expect(
+        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
+        dataProcessingBranch.Reporting === undefined &&
+        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Streaming.M.End.BOOL === true,
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        reporting: undefined,
+        streaming: {
+          appIdStreamList: ['app1', 'app2'],
+          bucket: {
+            name: 'EXAMPLE_BUCKET',
+            prefix: '',
+          },
+        },
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
+  it('Update pipeline add streaming that enabled reporting', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        streaming: undefined,
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const updateWorkflow = input.TransactItems[1].Update.ExpressionAttributeValues[':workflow'].M.Workflow.M;
+      const dataProcessingBranch = updateWorkflow.Branches.L[1].M.States.M;
+      expect(
+        dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
+        dataProcessingBranch.Reporting === undefined &&
+        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Streaming.M.End.BOOL === true &&
+        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[1].M.States.M.Reporting.M.End.BOOL === true,
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        streaming: {
+          appIdStreamList: ['app1', 'app2'],
+          bucket: {
+            name: 'EXAMPLE_BUCKET',
+            prefix: '',
+          },
         },
       });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
@@ -3431,7 +3591,8 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
-      const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
+      const afterRedshiftStacks = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.AfterRedshiftStacks.M;
+      const reportInput = afterRedshiftStacks.Branches.L[0].M.States.M.Reporting.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === SolutionVersion.V_1_1_4.fullVersion &&
         expressionAttributeValues[':tags'].L[0].M.value.S === SolutionVersion.V_1_1_4.fullVersion &&
@@ -3912,7 +4073,7 @@ describe('Pipeline test', () => {
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
       Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
-      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
       ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
@@ -3980,7 +4141,7 @@ describe('Pipeline test', () => {
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(PutRuleCommand, {
       Name: `ClickstreamRuleForCFN-${MOCK_PROJECT_ID}`,
-      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:undefined:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
+      EventPattern: `{"source":["aws.cloudformation"],"resources":[{"wildcard":"arn:aws:cloudformation:ap-southeast-1:555555555555:stack/${getStackPrefix()}*6666-6666/*"}],"detail-type":["CloudFormation Stack Status Change"]}`,
     });
     expect(cloudWatchEventsMock).toHaveReceivedCommandWith(EventTagResourceCommand, {
       ResourceARN: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',

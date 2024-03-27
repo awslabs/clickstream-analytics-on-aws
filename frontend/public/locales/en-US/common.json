@@ -216,7 +216,9 @@
     "apply": "Apply",
     "newGroup": "Add Group",
     "export": "Export",
-    "refreshSegment": "Refresh Segment"
+    "refreshSegment": "Refresh Segment",
+    "streamEnable": "Streaming Enable",
+    "streamDisable": "Streaming Disable"
   },
   "item": "item",
   "items": "items",
