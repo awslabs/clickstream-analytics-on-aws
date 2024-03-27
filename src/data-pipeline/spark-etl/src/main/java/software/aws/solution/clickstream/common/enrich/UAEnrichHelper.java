@@ -49,6 +49,7 @@ public final class UAEnrichHelper {
             uaMap = OBJECT_MAPPER.readValue(uaJsonStr, new TypeReference<Map<String, Object>>(){});
         } catch (JsonProcessingException e) {
             log.error("parserUA::Error parsing user agent", e);
+            log.error("parserUA::User agent: {}", userAgent);
         }
         uaMap.put(UA_STRING, userAgent);
         clickstreamUA.setUaMap(uaMap);
