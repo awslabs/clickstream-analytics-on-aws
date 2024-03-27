@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { ExploreAnalyticsOperators } from '@aws/clickstream-base-lib';
 import { SelectProps } from '@cloudscape-design/components';
-import { ExploreAnalyticsOperators } from 'ts/explore-types';
 
 export const MOCK_EVENT_LIST: any = [
   {
