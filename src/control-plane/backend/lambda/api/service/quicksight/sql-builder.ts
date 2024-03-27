@@ -186,7 +186,6 @@ export interface EventNonNestColProps {
   colList: string[];
 }
 
-export const EVENT_TABLE = 'clickstream_event_attr_view_v2';
 export const EVENT_USER_VIEW = 'clickstream_event_view_v3';
 
 export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
@@ -1767,9 +1766,7 @@ export function _buildCommonPartSql(analyticsType: ExploreAnalyticsType, eventNa
   const columnsSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'event').columnsSql;
 
   // build base data sql
-  const baseDataSql = _buildBaseEventDataSql(analyticsType, eventNames, sqlParameters, eventColumnSql, columnsSql,
-    userConditionProps.hasComputeMethodOnUserId || userConditionProps.userAttributes.length > 0,
-  );
+  const baseDataSql = _buildBaseEventDataSql(analyticsType, eventNames, sqlParameters, eventColumnSql, columnsSql);
 
   return format(baseDataSql, { language: 'postgresql' });
 }
@@ -1788,7 +1785,7 @@ function _buildNodePathSQL(nodeType: ExplorePathNodeType) : string {
 function _getSqlColumnType(dataType: MetadataValueType) {
   if (dataType === MetadataValueType.INTEGER) {
     return 'bigint';
-  } else if (dataType === MetadataValueType.DOUBLE || dataType === MetadataValueType.FLOAT) {
+  } else if (dataType === MetadataValueType.DOUBLE || dataType === MetadataValueType.FLOAT || dataType === MetadataValueType.NUMBER) {
     return 'double precision';
   } else {
     return 'varchar';
@@ -1841,8 +1838,7 @@ export function buildDateUnitsSql() {
 function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
   sqlParameters: SQLParameters,
   eventColumnSql: string,
-  userColumnSql: string,
-  needJoinUserTable: boolean = false,
+  userColumnSql: string
 ) {
 
   const eventDateSQL = buildEventDateSql(sqlParameters, 'event.');
@@ -1850,13 +1846,6 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
     analyticsType === ExploreAnalyticsType.EVENT_PATH, analyticsType === ExploreAnalyticsType.NODE_PATH);
   let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
-
-  let tableName = '';
-  if (needJoinUserTable) {
-    tableName = EVENT_USER_VIEW;
-  } else {
-    tableName = EVENT_TABLE;
-  }
 
   return `
     with base_data as (
@@ -1870,7 +1859,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
         ${userColumnSql}
         ${buildDateUnitsSql()}
       from
-        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${tableName} as event
+        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
       where
         ${eventDateSQL}
         ${eventNameClause}
@@ -2270,10 +2259,13 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
   const prefix = propertyPrefix ?? '';
   switch (condition.dataType) {
     case MetadataValueType.STRING:
+      return _buildSqlFromBooleanCondition(condition, prefix);
+    case MetadataValueType.BOOLEAN:
       return _buildSqlFromStringCondition(condition, prefix);
     case MetadataValueType.DOUBLE:
     case MetadataValueType.FLOAT:
     case MetadataValueType.INTEGER:
+    case MetadataValueType.NUMBER:
       return _buildSqlFromNumberCondition(condition, prefix);
     default:
       logger.error('unsupported condition', { condition });
@@ -2305,6 +2297,19 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
       return `${prefix}${condition.property} is null `;
     case ExploreAnalyticsOperators.NOT_NULL:
       return `${prefix}${condition.property} is not null `;
+    default:
+      logger.error('unsupported condition', { condition });
+      throw new Error('Unsupported condition');
+  }
+
+}
+
+function _buildSqlFromBooleanCondition(condition: Condition, prefix: string) : string {
+  switch (condition.operator) {
+    case ExploreAnalyticsOperators.YES:
+      return `${prefix}${condition.property}  = 'true' `;
+    case ExploreAnalyticsOperators.NO:
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} = 'false' )`;
     default:
       logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
