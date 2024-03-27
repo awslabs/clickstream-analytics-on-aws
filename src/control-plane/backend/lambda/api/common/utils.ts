@@ -31,7 +31,7 @@ import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { SolutionInfo } from './solution-info-ln';
+import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -399,33 +399,40 @@ function _getClassNameByVersion(id: string, curClassName: string, templateVersio
   const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'],
+      versions: SolutionVersion.V_1_0_ALL,
       className: 'software.aws.solution.clickstream.Transformer',
     },
     {
       id: 'BUILT-IN-1',
-      versions: ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: SolutionVersion.V_1_1_ALL,
       className: 'software.aws.solution.clickstream.TransformerV2',
     },
     {
       id: 'BUILT-IN-2',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: [
+        ...SolutionVersion.V_1_0_ALL,
+        ...SolutionVersion.V_1_1_ALL,
+      ],
       className: 'software.aws.solution.clickstream.UAEnrichment',
     },
     {
       id: 'BUILT-IN-3',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: [
+        ...SolutionVersion.V_1_0_ALL,
+        ...SolutionVersion.V_1_1_ALL,
+      ],
       className: 'software.aws.solution.clickstream.IPEnrichment',
     },
     {
       id: 'BUILT-IN-4',
-      versions: ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: SolutionVersion.V_1_1_ALL,
       className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
     },
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
     for (let plugin of pluginHistoryClassNameWithVersion) {
-      if (plugin.id === id && plugin.versions.includes(shortVersion)) {
+      const pluginVersions = plugin.versions.map(v => v.shortVersion);
+      if (plugin.id === id && pluginVersions.includes(shortVersion)) {
         return plugin.className;
       }
     }
