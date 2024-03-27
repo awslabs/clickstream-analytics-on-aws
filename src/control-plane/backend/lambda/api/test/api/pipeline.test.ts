@@ -2937,7 +2937,8 @@ describe('Pipeline test', () => {
         redshiftState.M.Data.M.Callback.M.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
         redshiftState.M.Data.M.Callback.M.BucketPrefix.S === 'clickstream/workflow/main-6666-6666-1677715200000' &&
         dataProcessingBranch.AfterRedshiftStacks.M.End.BOOL === true &&
-        dataProcessingBranch.Reporting === undefined,
+        dataProcessingBranch.Reporting === undefined &&
+        dataProcessingBranch.AfterRedshiftStacks.M.Branches.L[0].M.States.M.Reporting.M.End.BOOL === true,
       ).toBeTruthy();
     });
     const res = await request(app)

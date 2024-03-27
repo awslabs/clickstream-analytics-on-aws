@@ -1014,11 +1014,20 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: removeParametersFromStack(
-                                setTagsToStack(reportingStackCn, Tags),
+                              Reporting: mergeParametersFromStack(
+                                setTagsToStack(ReportingStackCn, Tags),
                                 [
                                   {
+                                    ParameterKey: 'QuickSightUserParam',
+                                    ParameterValue: 'GCRUser',
+                                  },
+                                  {
                                     ParameterKey: 'QuickSightPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                  },
+                                  {
+                                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                                   },
                                 ],
                               ),
@@ -1424,9 +1433,18 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             StartAt: 'Reporting',
                             States: {
-                              Reporting: removeParametersFromStack(reportingStackCn, [
+                              Reporting: mergeParametersFromStack(ReportingStackCn, [
+                                {
+                                  ParameterKey: 'QuickSightUserParam',
+                                  ParameterValue: 'GCRUser',
+                                },
                                 {
                                   ParameterKey: 'QuickSightPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                                 },
                               ]),
                             },

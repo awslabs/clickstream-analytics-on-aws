@@ -1982,6 +1982,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
+              changeEnableStreaming={(enable) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    enableStreaming: enable,
+                  };
+                });
+              }}
               changeEnableRedshift={(enable) => {
                 if (enable) {
                   // if enable redshift, default to enable athena and quicksight
