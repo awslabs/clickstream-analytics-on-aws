@@ -22,7 +22,6 @@ import {
   MetadataValueType,
   MetadataPlatform,
 } from '@aws/clickstream-base-lib';
-import { SelectProps } from '@cloudscape-design/components';
 
 export interface IConditionItemType {
   eventType: string;

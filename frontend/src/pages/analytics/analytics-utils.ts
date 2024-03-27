@@ -12,10 +12,20 @@
  */
 
 import {
+  ConditionCategory,
   ConditionNumericOperator,
   ConditionOperator,
   EventsInSequenceCondition,
   EventWithParameter,
+  ExploreAggregationMethod,
+  ExploreAnalyticsOperators,
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExplorePathSessionDef,
+  ExploreRelativeTimeUnit,
+  ExploreTimeScopeType,
+  MetadataSource,
+  MetadataValueType,
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   ParameterCondition,
   SegmentCriteria,
@@ -45,18 +55,6 @@ import {
 import i18n from 'i18n';
 import moment from 'moment';
 import { ConditionType, DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
-import {
-  ConditionCategory,
-  ExploreAggregationMethod,
-  ExploreAnalyticsOperators,
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExplorePathSessionDef,
-  ExploreRelativeTimeUnit,
-  ExploreTimeScopeType,
-  MetadataSource,
-  MetadataValueType,
-} from 'ts/explore-types';
 import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
 
 export const metadataEventsConvertToCategoryItemType = (
