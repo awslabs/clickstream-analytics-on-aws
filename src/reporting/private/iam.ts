@@ -112,8 +112,7 @@ export function createRoleForQuicksightCustomResourceLambda(
 
   ];
 
-  const principal = new ServicePrincipal('lambda.amazonaws.com');
-  return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements, principal);
+  return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements);
 
 }
 
