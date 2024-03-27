@@ -25,110 +25,110 @@ import java.util.*;
 @Getter
 @Slf4j
 public class ClickstreamEvent {
-    private Timestamp eventTimestamp;
-    private String eventId;
-    private Long eventTimeMsec;
-    private String eventName;
-    private Double eventValue;
-    private String eventValueCurrency;
-    private Long eventBundleSequenceId;
-    private Long ingestTimeMsec;
-    private String deviceMobileBrandName;
-    private String deviceMobileModelName;
-    private String deviceManufacturer;
-    private String deviceCarrier;
-    private String deviceNetworkType;
-    private String deviceOperatingSystem;
-    private String deviceOperatingSystemVersion;
-    private String deviceVendorId;
-    private String deviceAdvertisingId;
-    private String deviceSystemLanguage;
-    private Integer deviceTimeZoneOffsetSeconds;
-    private String deviceUaBrowser;
-    private String deviceUaBrowserVersion;
-    private String deviceUaOs;
-    private String deviceUaOsVersion;
-    private String deviceUaDevice;
-    private String deviceUaDeviceCategory;
-    private Map<String, Object> deviceUa;
-    private Integer deviceScreenWidth;
-    private Integer deviceScreenHeight;
-    private Integer deviceViewportWidth;
-    private Integer deviceViewportHeight;
-    private String geoContinent;
-    private String geoSubContinent;
-    private String geoCountry;
-    private String geoRegion;
-    private String geoMetro;
-    private String geoCity;
-    private String geoLocale;
-    private String trafficSourceSource;
-    private String trafficSourceMedium;
-    private String trafficSourceCampaign;
-    private String trafficSourceContent;
-    private String trafficSourceTerm;
-    private String trafficSourceCampaignId;
-    private String trafficSourceClidPlatform;
-    private String trafficSourceClid;
-    private String trafficSourceChannelGroup;
-    private String trafficSourceCategory;
-    private Long userFirstTouchTimeMsec;
-    private String appPackageId;
-    private String appVersion;
-    private String appTitle;
-    private String appInstallSource;
-    private String platform;
-    private String projectId;
-    private String appId;
-    private String screenViewScreenName;
-    private String screenViewScreenId;
-    private String screenViewScreenUniqueId;
-    private String screenViewPreviousScreenName;
-    private String screenViewPreviousScreenId;
-    private String screenViewPreviousScreenUniqueId;
-    private Long screenViewPreviousTimeMsec;
-    private Long screenViewEngagementTimeMsec;
-    private Boolean screenViewEntrances;
-    private String pageViewPageReferrer;
-    private String pageViewPageReferrerTitle;
-    private Long pageViewPreviousTimeMsec;
-    private Long pageViewEngagementTimeMsec;
-    private String pageViewPageTitle;
-    private String pageViewPageUrl;
-    private String pageViewPageUrlPath;
-    private Map<String, String> pageViewPageUrlQueryParameters;
-    private String pageViewHostname;
-    private String pageViewLatestReferrer;
-    private String pageViewLatestReferrerHost;
-    private Boolean pageViewEntrances;
-    private Boolean appStartIsFirstTime;
-    private String upgradePreviousAppVersion;
-    private String upgradePreviousOsVersion;
-    private String searchKey;
-    private String searchTerm;
-    private String outboundLinkClasses;
-    private String outboundLinkDomain;
-    private String outboundLinkId;
-    private String outboundLinkUrl;
-    private Boolean outboundLink;
-    private Long userEngagementTimeMsec;
-    private String userId;
-    private String userPseudoId;
-    private String sessionId;
-    private Long sessionStartTimeMsec;
-    private Long sessionDuration;
-    private Long sessionNumber;
-    private Long scrollEngagementTimeMsec;
-    private String sdkErrorCode;
-    private String sdkErrorMessage;
-    private String sdkVersion;
-    private String sdkName;
-    private String appExceptionMessage;
-    private String appExceptionStack;
-    private Map<String, ClickstreamEventPropValue> customParameters;
-    private Map<String, String> processInfo;
-    private String ua;
-    private String ip;
+    private Timestamp eventTimestamp;  //NOSONAR
+    private String eventId;  //NOSONAR
+    private Long eventTimeMsec;  //NOSONAR
+    private String eventName;  //NOSONAR
+    private Double eventValue;  //NOSONAR
+    private String eventValueCurrency;  //NOSONAR
+    private Long eventBundleSequenceId;  //NOSONAR
+    private Long ingestTimeMsec;  //NOSONAR
+    private String deviceMobileBrandName;  //NOSONAR
+    private String deviceMobileModelName;  //NOSONAR
+    private String deviceManufacturer;  //NOSONAR
+    private String deviceCarrier;  //NOSONAR
+    private String deviceNetworkType;  //NOSONAR
+    private String deviceOperatingSystem;  //NOSONAR
+    private String deviceOperatingSystemVersion;  //NOSONAR
+    private String deviceVendorId;  //NOSONAR
+    private String deviceAdvertisingId;  //NOSONAR
+    private String deviceSystemLanguage;  //NOSONAR
+    private Integer deviceTimeZoneOffsetSeconds;  //NOSONAR
+    private String deviceUaBrowser;  //NOSONAR
+    private String deviceUaBrowserVersion;  //NOSONAR
+    private String deviceUaOs;  //NOSONAR
+    private String deviceUaOsVersion;  //NOSONAR
+    private String deviceUaDevice;  //NOSONAR
+    private String deviceUaDeviceCategory;  //NOSONAR
+    private Map<String, Object> deviceUa;  //NOSONAR
+    private Integer deviceScreenWidth;  //NOSONAR
+    private Integer deviceScreenHeight;  //NOSONAR
+    private Integer deviceViewportWidth;  //NOSONAR
+    private Integer deviceViewportHeight;  //NOSONAR
+    private String geoContinent;  //NOSONAR
+    private String geoSubContinent;  //NOSONAR
+    private String geoCountry;  //NOSONAR
+    private String geoRegion;  //NOSONAR
+    private String geoMetro;  //NOSONAR
+    private String geoCity;  //NOSONAR
+    private String geoLocale;  //NOSONAR
+    private String trafficSourceSource;  //NOSONAR
+    private String trafficSourceMedium;  //NOSONAR
+    private String trafficSourceCampaign;  //NOSONAR
+    private String trafficSourceContent;  //NOSONAR
+    private String trafficSourceTerm;  //NOSONAR
+    private String trafficSourceCampaignId;  //NOSONAR
+    private String trafficSourceClidPlatform;  //NOSONAR
+    private String trafficSourceClid;  //NOSONAR
+    private String trafficSourceChannelGroup;  //NOSONAR
+    private String trafficSourceCategory;  //NOSONAR
+    private Long userFirstTouchTimeMsec;  //NOSONAR
+    private String appPackageId;  //NOSONAR
+    private String appVersion;  //NOSONAR
+    private String appTitle;  //NOSONAR
+    private String appInstallSource;  //NOSONAR
+    private String platform;  //NOSONAR
+    private String projectId;  //NOSONAR
+    private String appId;  //NOSONAR
+    private String screenViewScreenName;  //NOSONAR
+    private String screenViewScreenId;  //NOSONAR
+    private String screenViewScreenUniqueId;  //NOSONAR
+    private String screenViewPreviousScreenName;  //NOSONAR
+    private String screenViewPreviousScreenId;  //NOSONAR
+    private String screenViewPreviousScreenUniqueId;  //NOSONAR
+    private Long screenViewPreviousTimeMsec;  //NOSONAR
+    private Long screenViewEngagementTimeMsec;  //NOSONAR
+    private Boolean screenViewEntrances;  //NOSONAR
+    private String pageViewPageReferrer;  //NOSONAR
+    private String pageViewPageReferrerTitle;  //NOSONAR
+    private Long pageViewPreviousTimeMsec;  //NOSONAR
+    private Long pageViewEngagementTimeMsec;  //NOSONAR
+    private String pageViewPageTitle;  //NOSONAR
+    private String pageViewPageUrl;  //NOSONAR
+    private String pageViewPageUrlPath;  //NOSONAR
+    private Map<String, String> pageViewPageUrlQueryParameters;  //NOSONAR
+    private String pageViewHostname;  //NOSONAR
+    private String pageViewLatestReferrer;  //NOSONAR
+    private String pageViewLatestReferrerHost;  //NOSONAR
+    private Boolean pageViewEntrances;  //NOSONAR
+    private Boolean appStartIsFirstTime;  //NOSONAR
+    private String upgradePreviousAppVersion;  //NOSONAR
+    private String upgradePreviousOsVersion;  //NOSONAR
+    private String searchKey;  //NOSONAR
+    private String searchTerm;  //NOSONAR
+    private String outboundLinkClasses;  //NOSONAR
+    private String outboundLinkDomain;  //NOSONAR
+    private String outboundLinkId;  //NOSONAR
+    private String outboundLinkUrl;  //NOSONAR
+    private Boolean outboundLink;  //NOSONAR
+    private Long userEngagementTimeMsec;  //NOSONAR
+    private String userId;  //NOSONAR
+    private String userPseudoId;  //NOSONAR
+    private String sessionId;  //NOSONAR
+    private Long sessionStartTimeMsec;  //NOSONAR
+    private Long sessionDuration;  //NOSONAR
+    private Long sessionNumber;  //NOSONAR
+    private Long scrollEngagementTimeMsec;  //NOSONAR
+    private String sdkErrorCode;  //NOSONAR
+    private String sdkErrorMessage;  //NOSONAR
+    private String sdkVersion;  //NOSONAR
+    private String sdkName;  //NOSONAR
+    private String appExceptionMessage;  //NOSONAR
+    private String appExceptionStack;  //NOSONAR
+    private Map<String, ClickstreamEventPropValue> customParameters;  //NOSONAR
+    private Map<String, String> processInfo;  //NOSONAR
+    private String ua;  //NOSONAR
+    private String ip;  //NOSONAR
 
     public static ClickstreamEvent deepCopy(final ClickstreamEvent csEvent) {
         ClickstreamEvent newCsEvent = new ClickstreamEvent();

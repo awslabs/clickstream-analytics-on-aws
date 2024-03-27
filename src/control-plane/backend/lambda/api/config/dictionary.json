@@ -38,7 +38,7 @@
           "zh-CN": "把SDK上报的数据格式，转换成数据仓库中的数据格式"
         },
         "builtIn": true,
-        "mainFunction": "software.aws.solution.clickstream.TransformerV2",
+        "mainFunction": "software.aws.solution.clickstream.TransformerV3",
         "jarFile": "",
         "bindCount": 0,
         "pluginType": "Transform",

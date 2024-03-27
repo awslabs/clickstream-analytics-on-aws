@@ -24,10 +24,13 @@ import java.util.*;
 import java.util.zip.*;
 
 @Slf4j
-public class Util {
+public final class Util {
 
     public static final String ERROR_LOG = ", error: ";
     public static final String VALUE_LOG = ", value: ";
+
+    private Util() {
+    }
 
     public static String decompress(final byte[] str) {
         if (str == null) {

@@ -22,7 +22,7 @@ import java.util.*;
 @Getter
 @Setter
 public class ParseDataResult {
-    private List<ClickstreamEvent> clickstreamEventList;
-    private ClickstreamUser clickstreamUser;
-    private List<ClickstreamItem> clickstreamItemList;
+    private List<ClickstreamEvent> clickstreamEventList; //NOSONAR
+    private ClickstreamUser clickstreamUser; //NOSONAR
+    private List<ClickstreamItem> clickstreamItemList; //NOSONAR
 }

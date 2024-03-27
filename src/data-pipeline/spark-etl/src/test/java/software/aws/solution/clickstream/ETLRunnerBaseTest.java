@@ -13,6 +13,7 @@
 
 package software.aws.solution.clickstream;
 
+import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.util.*;
 
 import java.nio.file.*;
@@ -79,5 +80,9 @@ public class ETLRunnerBaseTest extends BaseSparkTest {
                         1, 1
                 ));
         return runnerConfig;
+    }
+    @Test
+    void testGetConfig() {
+        this.getRunnerConfig(newArrayList("software.aws.solution.clickstream.transformer.FakeTransformer"), "test");
     }
 }

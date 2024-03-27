@@ -111,15 +111,19 @@ public final class DefaultTrafficSourceHelper {
         // 'cpc', 'ppc', 'retargeting', 'paid'
         List<String> mediumList = Arrays.asList("cpc", "ppc", "retargeting", "paid");
 
+        String utmMediumLowercase = utmMedium;
+        if (utmMedium !=null) {
+            utmMediumLowercase = utmMedium.toLowerCase();
+        }
 
         String channelGroup = null;
         if (paidShoppingSites.contains(utmSource)
                 || (utmCampaign != null && utmCampaign.toLowerCase().contains("shop")
-                && mediumList.contains(utmMedium.toLowerCase()))) {
+                && mediumList.contains(utmMediumLowercase))) {
             channelGroup = PAID_SHOPPING;
-        } else if (paidSearchSites.contains(utmSource) && mediumList.contains(utmMedium.toLowerCase())) {
+        } else if (paidSearchSites.contains(utmSource) && mediumList.contains(utmMediumLowercase)) {
             channelGroup = PAID_SEARCH;
-        } else if (paidSocialSites.contains(utmSource) && mediumList.contains(utmMedium.toLowerCase())) {
+        } else if (paidSocialSites.contains(utmSource) && mediumList.contains(utmMediumLowercase)) {
             channelGroup = PAID_SOCIAL;
         }
         return channelGroup;
