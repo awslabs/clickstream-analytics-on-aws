@@ -20,6 +20,7 @@ import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.*;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
 
@@ -64,7 +65,6 @@ public class ClickstreamEventParserTest extends BaseTest {
         ClickstreamIngestRow row3 = clickstreamEventParser.ingestLineToRow(thirdLine);
         Assertions.assertEquals(1682319109406L, row3.getUploadTimestamp());
     }
-
     @Test
     void test_parse_data() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_data
@@ -94,6 +94,28 @@ public class ClickstreamEventParserTest extends BaseTest {
         String expectedJson = this.resourceFileAsString("/expected/test_parse_line_to_db_row_event_v2.json");
 
         Assertions.assertEquals(expectedJson, prettyJson(objectToJsonString(eventV2)));
+    }
+
+    @Test
+    public void test_parse_line_to_db_row_disable_time_shift() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_disable_time_shift
+        ContextUtil.setEnableEventTimeShift(false);
+
+        String line = resourceFileContent("/original_data_nozip_upload_time.json");
+        log.info(line);
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        String projectId = "test_project_id";
+        String fileName = "original_data_nozip_upload_time.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+
+        String expectedJson = this.resourceFileAsString("/expected/test_parse_line_to_db_row_disable_time_shift.json");
+
+        Assertions.assertEquals(expectedJson, prettyJson(objectToJsonString(eventV2)));
+
+        ContextUtil.setEnableEventTimeShift(true);
     }
 
     @Test

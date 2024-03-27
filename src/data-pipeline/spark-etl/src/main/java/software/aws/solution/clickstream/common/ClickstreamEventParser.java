@@ -34,6 +34,7 @@ import static software.aws.solution.clickstream.common.Util.*;
 @Slf4j
 public final class ClickstreamEventParser extends BaseEventParser {
     private static final ClickstreamEventParser INSTANCE = new ClickstreamEventParser();
+    public static final String ENABLE_EVENT_TIME_SHIFT_PROP =  "enable.event.time.shift";
 
     private ClickstreamEventParser() {
     }
@@ -479,6 +480,12 @@ public final class ClickstreamEventParser extends BaseEventParser {
         }
     }
 
+    private boolean isEnableEventTimeShift() {
+        if (System.getProperty(ENABLE_EVENT_TIME_SHIFT_PROP) == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(System.getProperty(ENABLE_EVENT_TIME_SHIFT_PROP));
+    }
 
     private TimeShiftInfo getEventTimeShiftInfo(final Event ingestEvent, final ExtraParams extraParams) {
         TimeShiftInfo timeShiftInfo = new TimeShiftInfo();
@@ -492,6 +499,12 @@ public final class ClickstreamEventParser extends BaseEventParser {
         timeShiftInfo.setIngestTimestamp(extraParams.getIngestTimestamp());
         timeShiftInfo.setAdjusted(false);
         timeShiftInfo.setTimeDiff(0L);
+        timeShiftInfo.setUploadTimestamp(uploadTimestamp);
+
+        if (!isEnableEventTimeShift()) {
+            log.info("event time shift is disabled");
+            return timeShiftInfo;
+        }
 
         if (uploadTimestamp == null) {
             Map<String, List<String>> uriParams = getUriParams(extraParams.getUri());

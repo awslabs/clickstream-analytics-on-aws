@@ -20,6 +20,8 @@ import org.apache.spark.storage.StorageLevel;
 
 import java.util.Arrays;
 
+import static software.aws.solution.clickstream.common.ClickstreamEventParser.ENABLE_EVENT_TIME_SHIFT_PROP;
+
 @Slf4j
 public final class ContextUtil {
     public static final String JOB_NAME_PROP= "job.name";
@@ -38,7 +40,6 @@ public final class ContextUtil {
     public static final String USER_KEEP_DAYS_PROP = "keep.user.days";
 
     public static final String ITEM_KEEP_DAYS_PROP =  "keep.item.days";
-
 
     private static Dataset<Row> datasetCached;
 
@@ -102,5 +103,9 @@ public final class ContextUtil {
     }
     public static int getItemKeepDays() {
         return Integer.valueOf(System.getProperty(ITEM_KEEP_DAYS_PROP));
+    }
+
+    public static void setEnableEventTimeShift(final boolean enableEventTimeShift) {
+        System.setProperty(ENABLE_EVENT_TIME_SHIFT_PROP, String.valueOf(enableEventTimeShift));
     }
 }

@@ -18,6 +18,7 @@ import com.google.common.io.*;
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
 import org.junit.jupiter.api.*;
+import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
 import java.nio.charset.*;
@@ -27,6 +28,7 @@ public class BaseTest {
     public static void setup() {
         Configurator.setRootLevel(Level.WARN);
         Configurator.setLevel("software.aws.solution.clickstream", Level.DEBUG);
+        ContextUtil.setEnableEventTimeShift(true);
     }
     public String resourceFileAsString(final String fileName) throws IOException {
         String jsonStr = Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8).trim();
