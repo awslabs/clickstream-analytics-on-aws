@@ -1724,10 +1724,14 @@ export function buildColumnsSqlFromConditions(columns: ColumnAttribute[], prefix
     }
 
     if (col.category === ConditionCategory.USER) {
-      columnsSql += `${prefix}.user_properties.${col.property}.value::${_getSqlColumnType(col.dataType)} as u_${col.property},`;
+      if (col.dataType === MetadataValueType.BOOLEAN) {
+        columnsSql += `case when ${prefix}.user_properties.${col.property}.value === TRUE then 'true' as u_${col.property},`;
+      } else {
+        columnsSql += `${prefix}.user_properties.${col.property}.value::${_getSqlColumnType(col.dataType, col.category)} as u_${col.property},`;
+      }
       columnList.push('u.u_' + col.property);
     } else if (col.category === ConditionCategory.EVENT) {
-      columnsSql += `${prefix}.custom_parameters.${col.property}.value::${_getSqlColumnType(col.dataType)} as e_${col.property},`;
+      columnsSql += `${prefix}.custom_parameters.${col.property}.value::${_getSqlColumnType(col.dataType, col.category)} as e_${col.property},`;
       columnList.push('event.e_' + col.property);
     } else if (col.category === ConditionCategory.USER_OUTER) {
       columnsSql += `${prefix}.${col.property},`;
@@ -1782,12 +1786,14 @@ function _buildNodePathSQL(nodeType: ExplorePathNodeType) : string {
   `;
 }
 
-function _getSqlColumnType(dataType: MetadataValueType) {
+function _getSqlColumnType(dataType: MetadataValueType, category: ConditionCategory) {
   if (dataType === MetadataValueType.INTEGER) {
     return 'bigint';
   } else if (dataType === MetadataValueType.DOUBLE || dataType === MetadataValueType.FLOAT || dataType === MetadataValueType.NUMBER) {
     return 'double precision';
-  } else {
+  } else if (dataType === MetadataValueType.BOOLEAN && (category === ConditionCategory.EVENT || category === ConditionCategory.USER)) {
+    return 'boolean';
+  } else { //boolean type property with OUTER category was changed to string type in base data duet to QuickSight does not support boolean type
     return 'varchar';
   }
 }
@@ -1838,7 +1844,7 @@ export function buildDateUnitsSql() {
 function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames: string[],
   sqlParameters: SQLParameters,
   eventColumnSql: string,
-  userColumnSql: string
+  userColumnSql: string,
 ) {
 
   const eventDateSQL = buildEventDateSql(sqlParameters, 'event.');
@@ -1853,7 +1859,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
         event.event_id,
         event.event_name,
         event.event_timestamp,
-        event.user_pseudo_id,
+        event.merged_user_id as user_pseudo_id,
         event.user_id,
         ${eventColumnSql}
         ${userColumnSql}
@@ -2259,9 +2265,9 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
   const prefix = propertyPrefix ?? '';
   switch (condition.dataType) {
     case MetadataValueType.STRING:
-      return _buildSqlFromBooleanCondition(condition, prefix);
-    case MetadataValueType.BOOLEAN:
       return _buildSqlFromStringCondition(condition, prefix);
+    case MetadataValueType.BOOLEAN:
+      return _buildSqlFromBooleanCondition(condition, prefix);
     case MetadataValueType.DOUBLE:
     case MetadataValueType.FLOAT:
     case MetadataValueType.INTEGER:
@@ -2314,7 +2320,6 @@ function _buildSqlFromBooleanCondition(condition: Condition, prefix: string) : s
       logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
-
 }
 
 function _encodeValueForLikeOperator(value: string) {
