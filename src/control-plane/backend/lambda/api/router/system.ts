@@ -18,9 +18,9 @@ const router_system: express.Router = express.Router();
 const systemService: SystemService = new SystemService();
 
 router_system.get(
-  '/version',
+  '/info',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return systemService.version(req, res, next);
+    return systemService.info(req, res, next);
   });
 
 export {

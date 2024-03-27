@@ -21,10 +21,11 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
 const consoleTemplateName = process.env.TEMPLATE_FILE!;
+const stackId = process.env.STACK_ID!;
 
 export class SystemService {
 
-  public async version(_req: any, res: any, next: any) {
+  public async info(_req: any, res: any, next: any) {
     try {
       const solution = await store.getDictionary('Solution');
       const templateUrl = getTemplateUrl(consoleTemplateName, solution);
@@ -45,6 +46,7 @@ export class SystemService {
         version: SolutionInfo.SOLUTION_VERSION,
         templateUrl,
         remoteVersion,
+        stackId,
         hasUpdate: remoteVersion == '' ? false :
           SolutionVersion.Of(remoteVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
       }));
