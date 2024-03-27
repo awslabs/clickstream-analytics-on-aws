@@ -281,7 +281,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/system/version').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator.', async () => {
@@ -328,7 +328,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/system/version').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator & Analyst.', async () => {
@@ -375,7 +375,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/system/version').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator & Analyst Reader.', async () => {
@@ -514,7 +514,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/system/version').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for NoIdentity.', async () => {
@@ -562,7 +562,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/system/version').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(403);
   });
 
   afterAll((done) => {

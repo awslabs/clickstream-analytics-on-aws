@@ -39,9 +39,9 @@ describe('system api test', () => {
     done();
   });
 
-  it('fetch current version and failed to fetch remote version', async () => {
+  it('fetch info with current version and failed to fetch remote version', async () => {
     const res = await request(app)
-      .get('/api/system/version');
+      .get('/api/system/info');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -56,7 +56,7 @@ describe('system api test', () => {
     });
   });
 
-  it('fetch current version and same remote version', async () => {
+  it('fetch info with current version and same remote version', async () => {
     const structureVersion = parseVersion(version);
 
     doMockFetch({
@@ -65,7 +65,7 @@ describe('system api test', () => {
     });
 
     const res = await request(app)
-      .get('/api/system/version');
+      .get('/api/system/info');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -80,7 +80,7 @@ describe('system api test', () => {
     });
   });
 
-  it('fetch current version and newer remote version', async () => {
+  it('fetch info with current version and newer remote version', async () => {
 
     doMockFetch({
       Description: '(SO0219) Clickstream Analytics on AWS (Version v1.1.6)(Build 202404071513)- Control Plane',
@@ -90,7 +90,7 @@ describe('system api test', () => {
     expect(SolutionInfo.SOLUTION_VERSION).toEqual(version);
 
     const res = await request(app)
-      .get('/api/system/version');
+      .get('/api/system/info');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
