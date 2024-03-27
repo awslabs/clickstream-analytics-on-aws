@@ -1432,14 +1432,14 @@ function defaultValueFunc(exceptValue: any, defaultValue: any) {
   return exceptValue || defaultValue;
 }
 
-function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary) {
+function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, useTarget = false) {
   const solutionName = solutionMetadata?.data.name;
   // default/ or cn/ or 'null',''
   const prefix = isEmpty(solutionMetadata?.data.prefix) ? '' : solutionMetadata?.data.prefix;
   const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
   const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
-  let version = solutionMetadata?.data.version === 'latest' ?
+  let version = (useTarget || solutionMetadata?.data.version === 'latest') ?
     solutionMetadata?.data.target : solutionMetadata?.data.version;
   return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
 }
