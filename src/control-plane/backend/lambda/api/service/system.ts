@@ -28,7 +28,7 @@ export class SystemService {
   public async info(_req: any, res: any, next: any) {
     try {
       const solution = await store.getDictionary('Solution');
-      const templateUrl = getTemplateUrl(consoleTemplateName, solution);
+      const templateUrl = getTemplateUrl(consoleTemplateName, solution, true);
 
       let remoteVersion = '';
       try {

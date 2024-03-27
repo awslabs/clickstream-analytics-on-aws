@@ -48,7 +48,7 @@ describe('system api test', () => {
       data: {
         version,
         remoteVersion: '',
-        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/${process.env.TEMPLATE_FILE}`,
+        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: false,
       },
       message: '',
@@ -72,7 +72,7 @@ describe('system api test', () => {
       data: {
         version,
         remoteVersion: version,
-        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/${process.env.TEMPLATE_FILE}`,
+        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: false,
       },
       message: '',
@@ -97,7 +97,7 @@ describe('system api test', () => {
       data: {
         version,
         remoteVersion: 'v1.1.6-202404071513',
-        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/${process.env.TEMPLATE_FILE}`,
+        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: true,
       },
       message: '',
