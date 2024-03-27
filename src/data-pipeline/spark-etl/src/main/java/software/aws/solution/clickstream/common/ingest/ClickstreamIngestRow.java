@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common.model;
+package software.aws.solution.clickstream.common.ingest;
 
 import com.fasterxml.jackson.annotation.*;
 import lombok.*;

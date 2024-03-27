@@ -17,7 +17,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
-import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.common.ingest.*;
 
 import java.util.*;
 

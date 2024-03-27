@@ -20,6 +20,7 @@ import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.*;
 import software.aws.solution.clickstream.common.*;
 import software.aws.solution.clickstream.common.gtm.event.*;
+import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.util.*;
 
