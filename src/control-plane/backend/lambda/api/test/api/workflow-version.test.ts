@@ -784,13 +784,7 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: mergeParametersFromStack(DataProcessingStack, [
-                        {
-                          ParameterKey: 'TransformerAndEnrichClassNames',
-                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
-                        },
-                      ],
-                      ),
+                      DataProcessing: DataProcessingStack,
                       DataModelingRedshift: DataModelingRedshiftStack,
                       Reporting: ReportingStack,
                     },
@@ -1063,7 +1057,13 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: DataProcessingStackCn,
+                      DataProcessing: mergeParametersFromStack(DataProcessingStackCn, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        },
+                      ],
+                      ),
                       DataModelingRedshift: removeParametersFromStack(
                         {
                           Data: DataModelingRedshiftStackCn.Data,
@@ -1137,7 +1137,13 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: DataProcessingStackCn,
+                      DataProcessing: mergeParametersFromStack(DataProcessingStackCn, [
+                        {
+                          ParameterKey: 'TransformerAndEnrichClassNames',
+                          ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+                        },
+                      ],
+                      ),
                       DataModelingRedshift: removeParametersFromStack(
                         DataModelingRedshiftStackCn,
                         [
