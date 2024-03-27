@@ -11,9 +11,7 @@
  *  and limitations under the License.
  */
 
-import {
-  ExploreComputeMethod,
-} from '@aws/clickstream-base-lib';
+import { ExploreComputeMethod } from '@aws/clickstream-base-lib';
 import { Select } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';

@@ -12,10 +12,6 @@
  */
 
 import {
-  IMetadataBuiltInList,
-  MetadataParameterType,
-} from '@aws/clickstream-base-lib';
-import {
   AppLayout,
   Box,
   Container,
