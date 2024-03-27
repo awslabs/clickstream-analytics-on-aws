@@ -50,7 +50,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -93,7 +93,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -137,7 +137,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -180,7 +180,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -202,14 +202,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -218,17 +217,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -238,8 +227,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -265,8 +254,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -303,8 +292,8 @@ describe('Attribution SQL Builder test', () => {
             )
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -323,8 +312,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -494,7 +483,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -537,7 +526,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -586,7 +575,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -629,7 +618,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -651,15 +640,14 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -668,17 +656,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date_trunc('month', current_date - interval '23 months')
           and DATE (event.event_timestamp) <= CURRENT_DATE
@@ -688,8 +666,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -717,8 +695,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -756,8 +734,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source is not null
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -778,8 +756,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -959,7 +937,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1184,7 +1162,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -1227,7 +1205,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -1271,7 +1249,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -1314,7 +1292,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -1336,14 +1314,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -1352,17 +1329,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-09-30'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1372,8 +1339,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -1399,8 +1366,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source is not null
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -1434,8 +1401,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source is not null
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -1454,8 +1421,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -1630,7 +1597,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -1673,7 +1640,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -1707,13 +1674,6 @@ describe('Attribution SQL Builder test', () => {
                 dataType: MetadataValueType.STRING,
               },
               {
-                category: ConditionCategory.USER,
-                property: '_first_touch_timestamp',
-                operator: '>',
-                value: [1686532526770],
-                dataType: MetadataValueType.INTEGER,
-              },
-              {
                 category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: '>',
@@ -1722,7 +1682,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -1765,7 +1725,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -1787,16 +1747,14 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
-          u.u__first_touch_timestamp,
-          u.u__user_first_touch_timestamp,
-          u.first_channel,
-          u.first_traffic_source,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -1805,18 +1763,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._first_touch_timestamp::bigint as u__first_touch_timestamp,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_channel,
-              iu.first_traffic_source,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -1826,8 +1773,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -1855,8 +1802,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -1891,11 +1838,10 @@ describe('Attribution SQL Builder test', () => {
           and (
             platform = 'Android'
             and geo_country = 'China'
-            and u__first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -1916,8 +1862,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -2098,7 +2044,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -2147,7 +2093,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -2190,7 +2136,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -2213,14 +2159,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -2229,17 +2174,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date_trunc('month', current_date - interval '19 months')
           and DATE (event.event_timestamp) <= CURRENT_DATE
@@ -2268,8 +2203,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -2305,8 +2240,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -2326,8 +2261,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -2519,7 +2454,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -2568,7 +2503,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -2611,7 +2546,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -2634,14 +2569,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -2650,17 +2584,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= DATEADD (
             DAY,
@@ -2692,8 +2616,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -2727,8 +2651,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -2747,8 +2671,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -2945,7 +2869,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -2994,7 +2918,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -3037,7 +2961,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -3066,14 +2990,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -3082,17 +3005,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= DATEADD (
             DAY,
@@ -3130,8 +3043,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -3165,8 +3078,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -3185,8 +3098,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -3400,7 +3313,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -3443,7 +3356,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -3487,7 +3400,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -3530,7 +3443,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -3552,14 +3465,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -3568,17 +3480,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= DATEADD (
             DAY,
@@ -3592,8 +3494,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -3619,8 +3521,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -3654,8 +3556,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -3674,8 +3576,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -3852,7 +3754,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -3895,7 +3797,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -3939,7 +3841,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -3982,7 +3884,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -4004,14 +3906,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -4020,17 +3921,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= DATEADD (
             DAY,
@@ -4044,8 +3935,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -4071,8 +3962,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -4106,8 +3997,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -4126,8 +4017,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),
@@ -4315,7 +4206,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -4364,7 +4255,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -4407,7 +4298,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -4436,14 +4327,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -4452,17 +4342,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= DATEADD (
             DAY,
@@ -4500,8 +4380,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -4535,8 +4415,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -4555,8 +4435,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -4769,7 +4649,7 @@ describe('Attribution SQL Builder test', () => {
           },
           {
             category: ConditionCategory.USER_OUTER,
-            property: 'first_channel',
+            property: 'first_traffic_source',
             operator: '<>',
             value: ['google'],
             dataType: MetadataValueType.STRING,
@@ -4812,7 +4692,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['google'],
                 dataType: MetadataValueType.STRING,
@@ -4856,7 +4736,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -4899,7 +4779,7 @@ describe('Attribution SQL Builder test', () => {
               },
               {
                 category: ConditionCategory.USER_OUTER,
-                property: 'first_channel',
+                property: 'first_traffic_source',
                 operator: '<>',
                 value: ['apple'],
                 dataType: MetadataValueType.STRING,
@@ -4921,14 +4801,13 @@ describe('Attribution SQL Builder test', () => {
           event.event_id,
           event.event_name,
           event.event_timestamp,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          u.user_id,
+          event.user_pseudo_id,
+          event.user_id,
           event.platform,
           event.geo_country,
-          event.custom_parameters._session_duration::bigint as e__session_duration,
-          u.u__user_first_touch_timestamp,
-          u.first_traffic_source,
-          u.first_channel,
+          event.custom_parameters._session_duration.value::bigint as e__session_duration,
+          event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
+          event.first_traffic_source,
           TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
             date_trunc('week', event.event_timestamp),
@@ -4937,17 +4816,7 @@ describe('Attribution SQL Builder test', () => {
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
           TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
         from
-          shop.shop.event_v2 as event
-          join (
-            select
-              user_pseudo_id,
-              iu.user_properties._user_first_touch_timestamp::bigint as u__user_first_touch_timestamp,
-              iu.first_traffic_source,
-              iu.first_channel,
-              user_id
-            from
-              shop.shop.user_m_view_v2 as iu
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
+          shop.shop.clickstream_event_view_v3 as event
         where
           DATE (event.event_timestamp) >= date '2023-10-01'
           and DATE (event.event_timestamp) <= date '2025-10-10'
@@ -4957,8 +4826,8 @@ describe('Attribution SQL Builder test', () => {
             and geo_country = 'China'
             and u__user_first_touch_timestamp > 1686532526770
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -4984,8 +4853,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 200
             and (
-              first_channel is null
-              or first_channel <> 'google'
+              first_traffic_source is null
+              or first_traffic_source <> 'google'
             )
           )
       ),
@@ -5019,8 +4888,8 @@ describe('Attribution SQL Builder test', () => {
             and first_traffic_source = 'Google'
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
         union all
@@ -5039,8 +4908,8 @@ describe('Attribution SQL Builder test', () => {
             and u__user_first_touch_timestamp > 1686532526770
             and e__session_duration > 10
             and (
-              first_channel is null
-              or first_channel <> 'apple'
+              first_traffic_source is null
+              or first_traffic_source <> 'apple'
             )
           )
       ),

@@ -470,7 +470,7 @@ export function buildBaseDataForAttribution(eventNames: string[], sqlParameters:
 
   // build column sql from user condition
   const userConditionProps = _getUserConditionProps(sqlParameters);
-  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'iu');
+  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'event');
 
   // build base data sql
   const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql.columnsSql);
