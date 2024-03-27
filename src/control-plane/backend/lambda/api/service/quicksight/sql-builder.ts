@@ -2267,7 +2267,19 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
     case MetadataValueType.STRING:
       return _buildSqlFromStringCondition(condition, prefix);
     case MetadataValueType.BOOLEAN:
-      return _buildSqlFromBooleanCondition(condition, prefix);
+      switch (condition.category) { //boolean type property with OUTER category was changed to string type in base data duet to QuickSight does not support boolean type
+        case ConditionCategory.USER_OUTER:
+        case ConditionCategory.EVENT_OUTER:
+          const new_condition: Condition = {
+            ...condition,
+            dataType: MetadataValueType.STRING,
+            operator: ExploreAnalyticsOperators.EQUAL,
+            value: [condition.operator === ExploreAnalyticsOperators.YES ? 'true' : 'false'],
+          };
+          return _buildSqlFromStringCondition(new_condition, prefix);
+        default:
+          return _buildSqlFromBooleanCondition(condition, prefix);
+      }
     case MetadataValueType.DOUBLE:
     case MetadataValueType.FLOAT:
     case MetadataValueType.INTEGER:
@@ -2313,9 +2325,9 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
 function _buildSqlFromBooleanCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
     case ExploreAnalyticsOperators.YES:
-      return `${prefix}${condition.property}  = 'true' `;
+      return `${prefix}${condition.property}  = TRUE `;
     case ExploreAnalyticsOperators.NO:
-      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} = 'false' )`;
+      return `(${prefix}${condition.property} is null or ${prefix}${condition.property} = FALSE )`;
     default:
       logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
