@@ -12,7 +12,7 @@
  */
 
 import useFetchParams, { EventDataType } from 'hooks/useFetchEvents';
-import React, { ReactElement, createContext, useContext } from 'react';
+import React, { ReactElement, createContext, useContext, useMemo } from 'react';
 
 interface EventsContextType {
   data: EventDataType;
@@ -26,9 +26,13 @@ export const EventsParameterProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
   const { data, loading, error } = useFetchParams();
+  const contextValue = useMemo(
+    () => ({ data, loading, error }),
+    [data, loading, error]
+  );
 
   return (
-    <EventsContext.Provider value={{ data, loading, error }}>
+    <EventsContext.Provider value={contextValue}>
       {children}
     </EventsContext.Provider>
   );

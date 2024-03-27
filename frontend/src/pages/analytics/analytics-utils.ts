@@ -1152,7 +1152,8 @@ const convertAttributeList = (
     const eventCondition: ParameterCondition = {
       parameterType: attribute.conditionOption?.metadataSource as any,
       parameterName: attribute.conditionOption?.name ?? '',
-      conditionOperator: attribute.conditionOperator?.value as any,
+      conditionOperator: attribute.conditionOperator
+        ?.value as ConditionOperator,
       inputValue: attribute.conditionValue,
       dataType: attribute.conditionOption?.valueType as any,
     };
