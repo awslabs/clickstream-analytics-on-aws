@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 package software.aws.solution.clickstream.model;
 
 import org.apache.spark.sql.*;
@@ -19,8 +20,8 @@ import org.apache.spark.sql.types.*;
 import java.util.*;
 
 public final class ModelV2 {
-    private ModelV2() {
-    }
+    public static final String DEVICE_UA_OS = "device_ua_os";
+    public static final String DEVICE_UA_OS_VERSION = "device_ua_os_version";
     public static final String EVENT_TIMESTAMP = "event_timestamp";
     public static final String EVENT_ID = "event_id";
     public static final String EVENT_NAME = "event_name";
@@ -64,6 +65,7 @@ public final class ModelV2 {
     public static final String DEVICE_UA_BROWSER_VERSION = "device_ua_browser_version";
     public static final String DEVICE_UA_DEVICE = "device_ua_device";
     public static final String DEVICE_UA_DEVICE_CATEGORY = "device_ua_device_category";
+    public static final String DEVICE_UA = "device_ua";
     public static final String DEVICE_SCREEN_WIDTH = "device_screen_width";
     public static final String DEVICE_SCREEN_HEIGHT = "device_screen_height";
     public static final String DEVICE_VIEWPORT_WIDTH = "device_viewport_width";
@@ -91,27 +93,7 @@ public final class ModelV2 {
     public static final String APP_TITLE = "app_title";
     public static final String APP_INSTALL_SOURCE = "app_install_source";
     public static final String PROJECT_ID = "project_id";
-    public static final String SCREEN_NAME = "screen_name";
-    public static final String SCREEN_ID = "screen_id";
-    public static final String SCREEN_UNIQUE_ID = "screen_unique_id";
-    public static final String PREVIOUS_SCREEN_NAME = "previous_screen_name";
-    public static final String PREVIOUS_SCREEN_ID = "previous_screen_id";
-    public static final String PREVIOUS_SCREEN_UNIQUE_ID = "previous_screen_unique_id";
-    public static final String PAGE_REFERRER = "page_referrer";
-    public static final String PAGE_REFERRER_TITLE = "page_referrer_title";
-    public static final String PAGE_TITLE = "page_title";
-    public static final String PAGE_URL = "page_url";
-    public static final String PAGE_URL_PATH = "page_url_path";
-    public static final String PAGE_URL_QUERY_PARAMETERS = "page_url_query_parameters";
-    public static final String HOSTNAME = "hostname";
-    public static final String LATEST_REFERRER = "latest_referrer";
-    public static final String LATEST_REFERRER_HOST = "latest_referrer_host";
     public static final String APP_START_IS_FIRST_TIME = "app_start_is_first_time";
-    public static final String PREVIOUS_VIEW_TIME_MSEC = "previous_view_time_msec";
-    public static final String PREVIOUS_VIEW_ENGAGEMENT_TIME_MSEC = "previous_view_engagement_time_msec";
-    public static final String ENTRANCES = "entrances";
-    public static final String PREVIOUS_APP_VERSION = "previous_app_version";
-    public static final String PREVIOUS_OS_VERSION = "previous_os_version";
     public static final String SEARCH_KEY = "search_key";
     public static final String SEARCH_TERM = "search_term";
     public static final String OUTBOUND_LINK_CLASSES = "outbound_link_classes";
@@ -127,8 +109,6 @@ public final class ModelV2 {
     public static final String SCROLL_ENGAGEMENT_TIME_MSEC = "scroll_engagement_time_msec";
     public static final String SDK_ERROR_CODE = "sdk_error_code";
     public static final String SDK_ERROR_MESSAGE = "sdk_error_message";
-    public static final String SDK_EXCEPTION_MESSAGE = "sdk_exception_message";
-    public static final String SDK_EXCEPTION_STACK = "sdk_exception_stack";
     public static final String SDK_VERSION = "sdk_version";
     public static final String SDK_NAME = "sdk_name";
     public static final String UA = "ua";
@@ -161,12 +141,47 @@ public final class ModelV2 {
     public static final String SESSION_SOURCE_CATEGORY = "session_source_category";
     public static final String PROCESS_INFO = "process_info";
     public static final String CREATED_TIME = "created_time";
-    public static final MapType STR_TO_STR_MAP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.StringType, true);
-
-    public static final MapType USER_PROP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.createStructType(new StructField[] {
-            DataTypes.createStructField("value", DataTypes.StringType, true),
-            DataTypes.createStructField("set_timestamp_micros", DataTypes.LongType, true)
+    public static final String SCREEN_VIEW_SCREEN_NAME = "screen_view_screen_name";
+    public static final String SCREEN_VIEW_SCREEN_ID = "screen_view_screen_id";
+    public static final String UPGRADE_PREVIOUS_APP_VERSION = "upgrade_previous_app_version";
+    public static final String UPGRADE_PREVIOUS_OS_VERSION = "upgrade_previous_os_version";
+    public static final String SCREEN_VIEW_SCREEN_UNIQUE_ID = "screen_view_screen_unique_id";
+    public static final String SCREEN_VIEW_PREVIOUS_SCREEN_NAME = "screen_view_previous_screen_name";
+    public static final String SCREEN_VIEW_PREVIOUS_SCREEN_ID = "screen_view_previous_screen_id";
+    public static final String SCREEN_VIEW_PREVIOUS_SCREEN_UNIQUE_ID = "screen_view_previous_screen_unique_id";
+    public static final String SCREEN_VIEW_PREVIOUS_TIME_MSEC = "screen_view_previous_time_msec";
+    public static final String SCREEN_VIEW_ENGAGEMENT_TIME_MSEC = "screen_view_engagement_time_msec";
+    public static final String SCREEN_VIEW_ENTRANCES = "screen_view_entrances";
+    public static final String PAGE_VIEW_PAGE_REFERRER = "page_view_page_referrer";
+    public static final String PAGE_VIEW_PAGE_REFERRER_TITLE = "page_view_page_referrer_title";
+    public static final String PAGE_VIEW_PREVIOUS_TIME_MSEC = "page_view_previous_time_msec";
+    public static final String PAGE_VIEW_ENGAGEMENT_TIME_MSEC = "page_view_engagement_time_msec";
+    public static final String PAGE_VIEW_PAGE_TITLE = "page_view_page_title";
+    public static final String PAGE_VIEW_PAGE_URL = "page_view_page_url";
+    public static final String PAGE_VIEW_PAGE_URL_PATH = "page_view_page_url_path";
+    public static final String PAGE_VIEW_PAGE_URL_QUERY_PARAMETERS = "page_view_page_url_query_parameters";
+    public static final String PAGE_VIEW_HOSTNAME = "page_view_hostname";
+    public static final String PAGE_VIEW_LATEST_REFERRER = "page_view_latest_referrer";
+    public static final String PAGE_VIEW_LATEST_REFERRER_HOST = "page_view_latest_referrer_host";
+    public static final String PAGE_VIEW_ENTRANCES = "page_view_entrances";
+    public static final String APP_EXCEPTION_MESSAGE = "app_exception_message";
+    public static final String APP_EXCEPTION_STACK = "app_exception_stack";
+    public static final String SET_TIME_MSEC = "set_time_msec";
+    public static final String VALUE = "value";
+    public static final String TYPE = "type";
+    public static final MapType USER_PROP_MAP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.createStructType(new StructField[]{
+            DataTypes.createStructField(VALUE, DataTypes.StringType, true),
+            DataTypes.createStructField(TYPE, DataTypes.StringType, true),
+            DataTypes.createStructField(SET_TIME_MSEC, DataTypes.LongType, true)
     }), true);
+
+    public static final MapType EVENT_PROP_MAP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.createStructType(new StructField[]{
+            DataTypes.createStructField(VALUE, DataTypes.StringType, true),
+            DataTypes.createStructField(TYPE, DataTypes.StringType, true),
+
+    }), true);
+
+    public static final MapType STR_TO_STR_MAP_TYPE = DataTypes.createMapType(DataTypes.StringType, DataTypes.StringType, true);
 
     public static final StructType ITEM_TYPE = DataTypes.createStructType(new StructField[]{
             DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
@@ -190,12 +205,11 @@ public final class ModelV2 {
             DataTypes.createStructField(CATEGORY4, DataTypes.StringType, true),
             DataTypes.createStructField(CATEGORY5, DataTypes.StringType, true),
             DataTypes.createStructField(CUSTOM_PARAMETERS_JSON_STR, DataTypes.StringType, true),
-            DataTypes.createStructField(CUSTOM_PARAMETERS, STR_TO_STR_MAP_TYPE, true),
+            DataTypes.createStructField(CUSTOM_PARAMETERS, EVENT_PROP_MAP_TYPE, true),
             DataTypes.createStructField(PROCESS_INFO, STR_TO_STR_MAP_TYPE, true),
 
             DataTypes.createStructField(APP_ID, DataTypes.StringType, true),
     });
-
 
     public static final StructType EVENT_TYPE = DataTypes.createStructType(new StructField[]{
             DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
@@ -219,8 +233,11 @@ public final class ModelV2 {
             DataTypes.createStructField(DEVICE_TIME_ZONE_OFFSET_SECONDS, DataTypes.IntegerType, true),
             DataTypes.createStructField(DEVICE_UA_BROWSER, DataTypes.StringType, true),
             DataTypes.createStructField(DEVICE_UA_BROWSER_VERSION, DataTypes.StringType, true),
+            DataTypes.createStructField(DEVICE_UA_OS, DataTypes.StringType, true),
+            DataTypes.createStructField(DEVICE_UA_OS_VERSION, DataTypes.StringType, true),
             DataTypes.createStructField(DEVICE_UA_DEVICE, DataTypes.StringType, true),
             DataTypes.createStructField(DEVICE_UA_DEVICE_CATEGORY, DataTypes.StringType, true),
+            DataTypes.createStructField(DEVICE_UA, STR_TO_STR_MAP_TYPE, true),
             DataTypes.createStructField(DEVICE_SCREEN_WIDTH, DataTypes.IntegerType, true),
             DataTypes.createStructField(DEVICE_SCREEN_HEIGHT, DataTypes.IntegerType, true),
             DataTypes.createStructField(DEVICE_VIEWPORT_WIDTH, DataTypes.IntegerType, true),
@@ -244,33 +261,36 @@ public final class ModelV2 {
             DataTypes.createStructField(TRAFFIC_SOURCE_CATEGORY, DataTypes.StringType, true),
             DataTypes.createStructField(USER_FIRST_TOUCH_TIME_MSEC, DataTypes.LongType, true),
             DataTypes.createStructField(APP_PACKAGE_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(APP_ID, DataTypes.StringType, true),
             DataTypes.createStructField(APP_VERSION, DataTypes.StringType, true),
             DataTypes.createStructField(APP_TITLE, DataTypes.StringType, true),
             DataTypes.createStructField(APP_INSTALL_SOURCE, DataTypes.StringType, true),
             DataTypes.createStructField(PLATFORM, DataTypes.StringType, true),
             DataTypes.createStructField(PROJECT_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(SCREEN_NAME, DataTypes.StringType, true),
-            DataTypes.createStructField(SCREEN_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(SCREEN_UNIQUE_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(PREVIOUS_SCREEN_NAME, DataTypes.StringType, true),
-            DataTypes.createStructField(PREVIOUS_SCREEN_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(PREVIOUS_SCREEN_UNIQUE_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_REFERRER, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_REFERRER_TITLE, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_TITLE, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_URL, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_URL_PATH, DataTypes.StringType, true),
-            DataTypes.createStructField(PAGE_URL_QUERY_PARAMETERS, STR_TO_STR_MAP_TYPE, true),
-            DataTypes.createStructField(HOSTNAME, DataTypes.StringType, true),
-            DataTypes.createStructField(LATEST_REFERRER, DataTypes.StringType, true),
-            DataTypes.createStructField(LATEST_REFERRER_HOST, DataTypes.StringType, true),
+            DataTypes.createStructField(APP_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_SCREEN_NAME, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_SCREEN_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_SCREEN_UNIQUE_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_PREVIOUS_SCREEN_NAME, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_PREVIOUS_SCREEN_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_PREVIOUS_SCREEN_UNIQUE_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(SCREEN_VIEW_PREVIOUS_TIME_MSEC, DataTypes.LongType, true),
+            DataTypes.createStructField(SCREEN_VIEW_ENGAGEMENT_TIME_MSEC, DataTypes.LongType, true),
+            DataTypes.createStructField(SCREEN_VIEW_ENTRANCES, DataTypes.BooleanType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_REFERRER, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_REFERRER_TITLE, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_PREVIOUS_TIME_MSEC, DataTypes.LongType, true),
+            DataTypes.createStructField(PAGE_VIEW_ENGAGEMENT_TIME_MSEC, DataTypes.LongType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_TITLE, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_URL, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_URL_PATH, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_PAGE_URL_QUERY_PARAMETERS, STR_TO_STR_MAP_TYPE, true),
+            DataTypes.createStructField(PAGE_VIEW_HOSTNAME, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_LATEST_REFERRER, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_LATEST_REFERRER_HOST, DataTypes.StringType, true),
+            DataTypes.createStructField(PAGE_VIEW_ENTRANCES, DataTypes.BooleanType, true),
             DataTypes.createStructField(APP_START_IS_FIRST_TIME, DataTypes.BooleanType, true),
-            DataTypes.createStructField(PREVIOUS_VIEW_TIME_MSEC, DataTypes.LongType, true),
-            DataTypes.createStructField(PREVIOUS_VIEW_ENGAGEMENT_TIME_MSEC, DataTypes.LongType, true),
-            DataTypes.createStructField(ENTRANCES, DataTypes.BooleanType, true),
-            DataTypes.createStructField(PREVIOUS_APP_VERSION, DataTypes.StringType, true),
-            DataTypes.createStructField(PREVIOUS_OS_VERSION, DataTypes.StringType, true),
+            DataTypes.createStructField(UPGRADE_PREVIOUS_APP_VERSION, DataTypes.StringType, true),
+            DataTypes.createStructField(UPGRADE_PREVIOUS_OS_VERSION, DataTypes.StringType, true),
             DataTypes.createStructField(SEARCH_KEY, DataTypes.StringType, true),
             DataTypes.createStructField(SEARCH_TERM, DataTypes.StringType, true),
             DataTypes.createStructField(OUTBOUND_LINK_CLASSES, DataTypes.StringType, true),
@@ -288,23 +308,22 @@ public final class ModelV2 {
             DataTypes.createStructField(SCROLL_ENGAGEMENT_TIME_MSEC, DataTypes.LongType, true),
             DataTypes.createStructField(SDK_ERROR_CODE, DataTypes.StringType, true),
             DataTypes.createStructField(SDK_ERROR_MESSAGE, DataTypes.StringType, true),
-            DataTypes.createStructField(SDK_EXCEPTION_MESSAGE, DataTypes.StringType, true),
-            DataTypes.createStructField(SDK_EXCEPTION_STACK, DataTypes.StringType, true),
             DataTypes.createStructField(SDK_VERSION, DataTypes.StringType, true),
             DataTypes.createStructField(SDK_NAME, DataTypes.StringType, true),
+            DataTypes.createStructField(APP_EXCEPTION_MESSAGE, DataTypes.StringType, true),
+            DataTypes.createStructField(APP_EXCEPTION_STACK, DataTypes.StringType, true),
             DataTypes.createStructField(CUSTOM_PARAMETERS_JSON_STR, DataTypes.StringType, true),
-            DataTypes.createStructField(CUSTOM_PARAMETERS, STR_TO_STR_MAP_TYPE, true),
+            DataTypes.createStructField(CUSTOM_PARAMETERS, EVENT_PROP_MAP_TYPE, true),
             DataTypes.createStructField(PROCESS_INFO, STR_TO_STR_MAP_TYPE, true),
 
             DataTypes.createStructField(UA, DataTypes.StringType, true),
             DataTypes.createStructField(IP, DataTypes.StringType, true),
     });
-
     public static final StructType USER_TYPE = DataTypes.createStructType(new StructField[]{
             DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
             DataTypes.createStructField(USER_PSEUDO_ID, DataTypes.StringType, true),
             DataTypes.createStructField(USER_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(USER_PROPERTIES, USER_PROP_TYPE, true),
+            DataTypes.createStructField(USER_PROPERTIES, USER_PROP_MAP_TYPE, true),
             DataTypes.createStructField(USER_PROPERTIES_JSON_STR, DataTypes.StringType, true),
             DataTypes.createStructField(FIRST_TOUCH_TIME_MSEC, DataTypes.LongType, true),
             DataTypes.createStructField(FIRST_VISIT_DATE, DataTypes.DateType, true),
@@ -323,6 +342,7 @@ public final class ModelV2 {
             DataTypes.createStructField(PROCESS_INFO, STR_TO_STR_MAP_TYPE, true),
 
             DataTypes.createStructField(APP_ID, DataTypes.StringType, true),
+            DataTypes.createStructField(EVENT_NAME, DataTypes.StringType, true),
     });
     public static final StructType SESSION_TYPE = DataTypes.createStructType(new StructField[]{
             DataTypes.createStructField(USER_PSEUDO_ID, DataTypes.StringType, true),
@@ -346,14 +366,17 @@ public final class ModelV2 {
             DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
     });
 
+    private ModelV2() {
+    }
 
     public static List<String> getUserFields() {
         List<String> fields = new ArrayList<>();
-       for (StructField f : USER_TYPE.fields()) {
-           fields.add(f.name());
-       }
-       return fields;
+        for (StructField f : USER_TYPE.fields()) {
+            fields.add(f.name());
+        }
+        return fields;
     }
+
     public static List<String> getEventFields() {
         List<String> fields = new ArrayList<>();
         for (StructField f : EVENT_TYPE.fields()) {
@@ -361,6 +384,7 @@ public final class ModelV2 {
         }
         return fields;
     }
+
     public static List<String> getSessionFields() {
         List<String> fields = new ArrayList<>();
         for (StructField f : SESSION_TYPE.fields()) {
@@ -368,6 +392,7 @@ public final class ModelV2 {
         }
         return fields;
     }
+
     public static List<String> getItemFields() {
         List<String> fields = new ArrayList<>();
         for (StructField f : ITEM_TYPE.fields()) {

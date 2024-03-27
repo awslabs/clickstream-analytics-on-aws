@@ -1,6 +1,14 @@
 {
   "device_ua_browser" : "Mobile Safari",
-  "device_ua_browser_version" : null,
+  "device_ua_browser_version" : "16.6",
+  "device_ua_os" : "iOS",
+  "device_ua_os_version" : "16.6.1",
   "device_ua_device" : "iPhone",
-  "device_ua_device_category" : null
+  "device_ua_device_category" : "Mobile",
+  "device_ua" : {
+    "device" : "{\"family\":\"iPhone\"}",
+    "os" : "{\"family\":\"iOS\",\"major\":\"16\",\"minor\":\"6\",\"patch\":\"1\",\"patchMinor\":null}",
+    "string" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+    "userAgent" : "{\"family\":\"Mobile Safari\",\"major\":\"16\",\"minor\":\"6\",\"patch\":null}"
+  }
 }

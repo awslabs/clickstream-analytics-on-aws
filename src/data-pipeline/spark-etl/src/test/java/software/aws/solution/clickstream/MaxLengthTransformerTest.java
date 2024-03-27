@@ -16,21 +16,14 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.api.java.UDF2;
-import org.apache.spark.sql.catalyst.expressions.GenericRow;
-import org.apache.spark.sql.expressions.UserDefinedFunction;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.StructField;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.transformer.*;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.expr;
-import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.udf;
 
 public class MaxLengthTransformerTest extends BaseSparkTest {

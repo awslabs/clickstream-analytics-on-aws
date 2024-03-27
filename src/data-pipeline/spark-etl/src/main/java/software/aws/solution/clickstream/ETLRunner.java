@@ -28,6 +28,7 @@ import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.util.*;
 
 import javax.validation.constraints.NotEmpty;
 import java.lang.reflect.InvocationTargetException;
@@ -50,9 +51,10 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.date_format;
 
-import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
-import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
-import static software.aws.solution.clickstream.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
+import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
+import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
 
 @Slf4j
 public class ETLRunner {
@@ -201,6 +203,7 @@ public class ETLRunner {
                         DataTypes.createStructField("appId", DataTypes.StringType, true),
                         DataTypes.createStructField("compression", DataTypes.StringType, true),
                         DataTypes.createStructField("ingest_time", DataTypes.LongType, true),
+                        DataTypes.createStructField(CLIENT_TIMESTAMP, DataTypes.LongType, true),
                         DataTypes.createStructField("server_ingest_time", DataTypes.LongType, true),
                         DataTypes.createStructField("hour", DataTypes.IntegerType, true)
                 }
@@ -298,15 +301,15 @@ public class ETLRunner {
         Dataset<Row> userDataset = transformedDatasets.get(3);
         String outPath = config.getOutputPath();
         long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
-        log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.name).toString());
+        log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.getTableName()).toString());
 
         if (itemDataset != null) {
             long itemDatasetCount = writeResult(outPath, itemDataset, TableName.ITEM);
-            log.info(new ETLMetric(itemDatasetCount, SINK + " " + TableName.ITEM.name).toString());
+            log.info(new ETLMetric(itemDatasetCount, SINK + " " + TableName.ITEM.getTableName()).toString());
         }
         if (userDataset != null) {
             long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
-            log.info(new ETLMetric(userDatasetCount, SINK + " " + TableName.USER.name).toString());
+            log.info(new ETLMetric(userDatasetCount, SINK + " " + TableName.USER.getTableName()).toString());
         }
     }
 
@@ -334,9 +337,9 @@ public class ETLRunner {
             return 0L;
         }
         String saveOutputPath = outputPath;
-        if (!(saveOutputPath.endsWith(tbName.name + "/")
-                || saveOutputPath.endsWith(tbName.name))) {
-            saveOutputPath = Paths.get(outputPath, tbName.name).toString()
+        if (!(saveOutputPath.endsWith(tbName.getTableName() + "/")
+                || saveOutputPath.endsWith(tbName.getTableName()))) {
+            saveOutputPath = Paths.get(outputPath, tbName.getTableName()).toString()
                     .replace("s3:/", "s3://");
         }
         log.info("saveOutputPath: " + saveOutputPath);
@@ -406,7 +409,7 @@ public class ETLRunner {
         }
 
         if (tbName == TableName.USER_V2) {
-            return datasetWithPartition.drop(ModelV2.APP_ID);
+            return datasetWithPartition.drop(ModelV2.APP_ID, ModelV2.EVENT_NAME);
         }
 
         if (tbName == TableName.SESSION) {
@@ -454,27 +457,6 @@ public class ETLRunner {
 
     private boolean isDayEqual(final String[] day1, final String[] day2) {
         return String.join("-", day1).equals(String.join("-", day2));
-    }
-
-    public enum TableName {
-        ODS_EVENTS("ods_events"),
-        ITEM("item"),
-        USER("user"),
-        EVENT("event"),
-        EVEN_PARAMETER("event_parameter"),
-        ITEM_V2("item_v2"),
-        USER_V2("user_v2"),
-        EVENT_V2("event_v2"),
-        SESSION("session");
-        private final String name;
-
-        TableName(final String name) {
-            this.name = name;
-        }
-
-        public String getTableName() {
-            return this.name;
-        }
     }
 
 }

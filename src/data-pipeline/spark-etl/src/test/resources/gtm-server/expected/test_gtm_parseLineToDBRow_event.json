@@ -1,0 +1,181 @@
+{
+  "eventTimestamp" : 1704867230000,
+  "eventId" : "55384aaeda62c5b20a462076ec59f3f5-0-1704867229-9",
+  "eventTimeMsec" : 1704867230000,
+  "eventName" : "_user_engagement",
+  "eventValue" : 0.0,
+  "eventValueCurrency" : null,
+  "eventBundleSequenceId" : null,
+  "ingestTimeMsec" : 1704867230000,
+  "deviceMobileBrandName" : "Not_A Brand",
+  "deviceMobileModelName" : "",
+  "deviceManufacturer" : null,
+  "deviceCarrier" : null,
+  "deviceNetworkType" : null,
+  "deviceOperatingSystem" : "macOS",
+  "deviceOperatingSystemVersion" : "13.6.3",
+  "deviceVendorId" : null,
+  "deviceAdvertisingId" : null,
+  "deviceSystemLanguage" : "en-us",
+  "deviceTimeZoneOffsetSeconds" : null,
+  "deviceUaBrowser" : "Microsoft Edge",
+  "deviceUaBrowserVersion" : "120.0.2210.121",
+  "deviceUaOs" : "macOS",
+  "deviceUaOsVersion" : "13.6.3",
+  "deviceUaDevice" : null,
+  "deviceUaDeviceCategory" : null,
+  "deviceUa" : {
+    "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+  },
+  "deviceScreenWidth" : 3440,
+  "deviceScreenHeight" : 1440,
+  "deviceViewportWidth" : null,
+  "deviceViewportHeight" : null,
+  "geoContinent" : null,
+  "geoSubContinent" : null,
+  "geoCountry" : "US",
+  "geoRegion" : "CA",
+  "geoMetro" : null,
+  "geoCity" : null,
+  "geoLocale" : null,
+  "trafficSourceSource" : "direct",
+  "trafficSourceMedium" : null,
+  "trafficSourceCampaign" : "direct",
+  "trafficSourceContent" : null,
+  "trafficSourceTerm" : null,
+  "trafficSourceCampaignId" : null,
+  "trafficSourceClidPlatform" : null,
+  "trafficSourceClid" : null,
+  "trafficSourceChannelGroup" : null,
+  "trafficSourceCategory" : null,
+  "userFirstTouchTimeMsec" : null,
+  "appPackageId" : null,
+  "appVersion" : null,
+  "appTitle" : null,
+  "appInstallSource" : null,
+  "platform" : "Web",
+  "projectId" : "test_project_id",
+  "appId" : "sessionStartAppId1",
+  "screenViewScreenName" : null,
+  "screenViewScreenId" : null,
+  "screenViewScreenUniqueId" : null,
+  "screenViewPreviousScreenName" : null,
+  "screenViewPreviousScreenId" : null,
+  "screenViewPreviousScreenUniqueId" : null,
+  "screenViewPreviousTimeMsec" : null,
+  "screenViewEngagementTimeMsec" : null,
+  "screenViewEntrances" : null,
+  "pageViewPageReferrer" : null,
+  "pageViewPageReferrerTitle" : null,
+  "pageViewPreviousTimeMsec" : null,
+  "pageViewEngagementTimeMsec" : null,
+  "pageViewPageTitle" : "Retail Demo Store",
+  "pageViewPageUrl" : "https://d3mpqdtjegq8im.cloudfront.net/",
+  "pageViewPageUrlPath" : null,
+  "pageViewPageUrlQueryParameters" : null,
+  "pageViewHostname" : "d3mpqdtjegq8im.cloudfront.net",
+  "pageViewLatestReferrer" : null,
+  "pageViewLatestReferrerHost" : null,
+  "pageViewEntrances" : null,
+  "appStartIsFirstTime" : null,
+  "upgradePreviousAppVersion" : null,
+  "upgradePreviousOsVersion" : null,
+  "searchKey" : null,
+  "searchTerm" : null,
+  "outboundLinkClasses" : null,
+  "outboundLinkDomain" : null,
+  "outboundLinkId" : null,
+  "outboundLinkUrl" : null,
+  "outboundLink" : null,
+  "userEngagementTimeMsec" : null,
+  "userId" : null,
+  "userPseudoId" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "sessionId" : "1704867229",
+  "sessionStartTimeMsec" : 1704867230837,
+  "sessionDuration" : null,
+  "sessionNumber" : 9,
+  "scrollEngagementTimeMsec" : null,
+  "sdkErrorCode" : null,
+  "sdkErrorMessage" : null,
+  "sdkVersion" : null,
+  "sdkName" : null,
+  "appExceptionMessage" : null,
+  "appExceptionStack" : null,
+  "customParameters" : {
+    "x-sst-system_properties" : {
+      "value" : "{\"uc\":\"US\",\"ngs\":null,\"gse\":null,\"gcd\":\"11l1l1l1l1\",\"tft\":1704857853989,\"consent\":{\"consentGrantedState\":{\"ad_storage\":true,\"analytics_storage\":true,\"ad_user_data\":true,\"ad_personalization\":true},\"isUpdate\":false,\"updateType\":\"\"},\"request_start_time_ms\":1704867230837}",
+      "type" : "object"
+    },
+    "x-ga-tfd" : {
+      "value" : "9376618",
+      "type" : "number"
+    },
+    "event_location" : {
+      "value" : "{\"region\":\"CA\",\"country\":\"US\"}",
+      "type" : "object"
+    },
+    "x-ga-mp2-gcd" : {
+      "value" : "11l1l1l1l1",
+      "type" : "string"
+    },
+    "screen_resolution" : {
+      "value" : "3440x1440",
+      "type" : "string"
+    },
+    "x-ga-page_id" : {
+      "value" : "1704857853989",
+      "type" : "number"
+    },
+    "client_id" : {
+      "value" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+      "type" : "string"
+    },
+    "x-ga-dma" : {
+      "value" : "0",
+      "type" : "string"
+    },
+    "ip_override" : {
+      "value" : "52.94.133.141",
+      "type" : "string"
+    },
+    "x-ga-system_properties" : {
+      "value" : "{\"dbg\":null,\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":\"1\"}",
+      "type" : "object"
+    },
+    "client_hints" : {
+      "value" : "{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Not_A Brand\",\"version\":\"8.0.0.0\"},{\"brand\":\"Chromium\",\"version\":\"120.0.6099.200\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120.0.2210.121\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"macOS\",\"platform_version\":\"13.6.3\",\"wow64\":false,\"brands\":[{\"brand\":\"Not_A Brand\",\"version\":\"8\"},{\"brand\":\"Chromium\",\"version\":\"120\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120\"}]}",
+      "type" : "object"
+    },
+    "x-ga-protocol_version" : {
+      "value" : "2",
+      "type" : "string"
+    },
+    "x-ga-gtm_version" : {
+      "value" : "45je4180v9137682176",
+      "type" : "string"
+    },
+    "x-ga-mp2-seg" : {
+      "value" : "0",
+      "type" : "string"
+    },
+    "user_agent" : {
+      "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+      "type" : "string"
+    },
+    "x-ga-measurement_id" : {
+      "value" : "G-5HX07RSCP2",
+      "type" : "string"
+    },
+    "x-ga-request_count" : {
+      "value" : "3",
+      "type" : "number"
+    }
+  },
+  "processInfo" : {
+    "input_file_name" : "server-session-start.json",
+    "ingest_time" : "2024-01-10T06:13:50Z",
+    "rid" : "55384aaeda62c5b20a462076ec59f3f5"
+  },
+  "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+  "ip" : "52.94.133.141"
+}

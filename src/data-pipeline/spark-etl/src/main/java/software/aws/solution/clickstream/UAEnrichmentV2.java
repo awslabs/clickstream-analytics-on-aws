@@ -13,36 +13,66 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
+import org.apache.spark.sql.api.java.*;
+import org.apache.spark.sql.catalyst.expressions.*;
 import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
+import software.aws.solution.clickstream.common.enrich.*;
+import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.util.*;
 
 import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.DatasetUtil.*;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.*;
+import static software.aws.solution.clickstream.util.Utils.convertStringObjectMapToStringStringMap;
+import static software.aws.solution.clickstream.model.ModelV2.STR_TO_STR_MAP_TYPE;
 
+@Slf4j
 public class UAEnrichmentV2 {
+    static UDF1<String, Row> enrich() {
+        return uaString -> {
+           ClickstreamUA clickstreamUA = UAEnrichHelper.parserUA(uaString);
+            return new GenericRow(
+                    new Object[]{
+                            clickstreamUA.getUaBrowser(),
+                            clickstreamUA.getUaBrowserVersion(),
+                            clickstreamUA.getUaOs(),
+                            clickstreamUA.getUaOsVersion(),
+                            clickstreamUA.getUaDevice(),
+                            clickstreamUA.getUaDeviceCategory(),
+                            convertStringObjectMapToStringStringMap(clickstreamUA.getUaMap())
+                    });
+        };
+    }
+
     public Dataset<Row> transform(final Dataset<Row> dataset) {
-        UserDefinedFunction udfEnrichUserAgent = udf(UAEnrichment.enrich(), DataTypes.createStructType(
+        UserDefinedFunction udfEnrichUserAgent = udf(enrich(), DataTypes.createStructType(
                 new StructField[]{
-                        DataTypes.createStructField(UA_BROWSER, DataTypes.StringType, true),
-                        DataTypes.createStructField(UA_BROWSER_VERSION, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_BROWSER, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_BROWSER_VERSION, DataTypes.StringType, true),
 
-                        DataTypes.createStructField(UA_OS, DataTypes.StringType, true),
-                        DataTypes.createStructField(UA_OS_VERSION, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_OS, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_OS_VERSION, DataTypes.StringType, true),
 
-                        DataTypes.createStructField(UA_DEVICE, DataTypes.StringType, true),
-                        DataTypes.createStructField(UA_DEVICE_CATEGORY, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_DEVICE, DataTypes.StringType, true),
+                        DataTypes.createStructField(ModelV2.DEVICE_UA_DEVICE_CATEGORY, DataTypes.StringType, true),
+
+                        DataTypes.createStructField(ModelV2.DEVICE_UA, STR_TO_STR_MAP_TYPE, true),
                 }
         ));
         Dataset<Row> datasetUa = dataset.withColumn(UA_ENRICH, udfEnrichUserAgent.apply(col(ModelV2.UA)));
 
         Dataset<Row> enrichedDataset = datasetUa
-                .withColumn(ModelV2.DEVICE_UA_BROWSER, col(UA_ENRICH).getField(UA_BROWSER))
-                .withColumn(ModelV2.DEVICE_UA_BROWSER_VERSION, col(UA_ENRICH).getField(UA_BROWSER_VERSION))
-                .withColumn(ModelV2.DEVICE_UA_DEVICE, col(UA_ENRICH).getField(UA_DEVICE))
-                .withColumn(ModelV2.DEVICE_UA_DEVICE_CATEGORY, col(UA_ENRICH).getField(UA_DEVICE_CATEGORY))
+                .withColumn(ModelV2.DEVICE_UA_BROWSER, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_BROWSER))
+                .withColumn(ModelV2.DEVICE_UA_BROWSER_VERSION, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_BROWSER_VERSION))
+                .withColumn(ModelV2.DEVICE_UA_OS, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_OS))
+                .withColumn(ModelV2.DEVICE_UA_OS_VERSION, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_OS_VERSION))
+                .withColumn(ModelV2.DEVICE_UA_DEVICE, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_DEVICE))
+                .withColumn(ModelV2.DEVICE_UA_DEVICE_CATEGORY, col(UA_ENRICH).getField(ModelV2.DEVICE_UA_DEVICE_CATEGORY))
+                .withColumn(ModelV2.DEVICE_UA, col(UA_ENRICH).getField(ModelV2.DEVICE_UA))
                 .drop(UA_ENRICH);
 
         if (ContextUtil.isDebugLocal()) {
