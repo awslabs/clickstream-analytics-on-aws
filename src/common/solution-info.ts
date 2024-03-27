@@ -44,6 +44,22 @@ export class SolutionVersion {
   public static readonly V_1_2_0 = SolutionVersion.Of('v1.2.0');
   public static readonly ANY = SolutionVersion.Of('*');
 
+  public static readonly V_1_0_ALL = [
+    SolutionVersion.V_1_0_0,
+    SolutionVersion.V_1_0_1,
+    SolutionVersion.V_1_0_2,
+    SolutionVersion.V_1_0_3,
+  ];
+
+  public static readonly V_1_1_ALL = [
+    SolutionVersion.V_1_1_0,
+    SolutionVersion.V_1_1_1,
+    SolutionVersion.V_1_1_2,
+    SolutionVersion.V_1_1_3,
+    SolutionVersion.V_1_1_4,
+    SolutionVersion.V_1_1_5,
+  ];
+
   /**
    * Create a new SolutionVersion with an arbitrary version.
    *
