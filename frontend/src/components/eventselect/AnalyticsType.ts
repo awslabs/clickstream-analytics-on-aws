@@ -11,17 +11,17 @@
  *  and limitations under the License.
  */
 
-import { Segment } from '@aws/clickstream-base-lib';
 import {
-  DateRangePickerProps,
-  SelectProps,
-} from '@cloudscape-design/components';
-import {
+  Segment,
   MetadataSource,
   ConditionCategory,
   MetadataValueType,
   MetadataPlatform,
 } from '@aws/clickstream-base-lib';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 
 export interface IConditionItemType {
   eventType: string;

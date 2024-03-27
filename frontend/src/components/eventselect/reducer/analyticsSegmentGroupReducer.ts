@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { IMetadataBuiltInList } from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -27,7 +28,6 @@ import {
   DEFAULT_SEGMENT_GROUP_DATA,
   DEFAULT_SEGMENT_ITEM,
 } from 'ts/const';
-import { IMetadataBuiltInList } from 'ts/explore-types';
 import { getEventParameters, ternary } from 'ts/utils';
 import {
   CategoryItemType,
