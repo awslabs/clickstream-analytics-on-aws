@@ -22,10 +22,13 @@ import {
   Table,
   TextFilter,
   Link as CloudScapeLink,
+  StatusIndicator,
+  ButtonDropdown,
 } from '@cloudscape-design/components';
 import {
   deleteApplication,
   getApplicationListByPipeline,
+  streamApplication,
 } from 'apis/application';
 import { retryPipeline } from 'apis/pipeline';
 import PipelineStatus from 'components/pipeline/PipelineStatus';
@@ -55,7 +58,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [applicationList, setApplicationList] = useState<IApplication[]>([]);
-  const [loadingDelete, setLoadingDelete] = useState(false);
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [disableRetry, setDisableRetry] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
@@ -89,19 +91,34 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   };
 
   const confirmDeleteApplication = async () => {
-    setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteApplication({
-        pid: pipelineInfo.projectId || '',
-        id: selectedItems[0]?.appId || '',
+        pid: defaultStr(pipelineInfo.projectId),
+        id: defaultStr(selectedItems[0]?.appId),
       });
       if (resData.success) {
         setSelectedItems([]);
         listApplicationByProject();
-        setLoadingDelete(false);
       }
     } catch (error) {
-      setLoadingDelete(false);
+      console.error(error);
+    }
+  };
+
+  const confirmStreamingApplication = async (enable: boolean) => {
+    try {
+      const resData: ApiResponse<null> = await streamApplication({
+        pid: defaultStr(pipelineInfo.projectId),
+        id: defaultStr(selectedItems[0]?.appId),
+        enable,
+      });
+      if (resData.success) {
+        setSelectedItems([]);
+        startRetryPipeline();
+        listApplicationByProject();
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -140,6 +157,23 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
           {e.name}
         </Link>
       </div>
+    );
+  };
+
+  const renderAppEnable = (e: IApplication) => {
+    return pipelineInfo.streaming?.appIdStreamList?.includes(e.appId) ? (
+      <StatusIndicator>{t('yes')}</StatusIndicator>
+    ) : (
+      <StatusIndicator type="stopped">{t('no')}</StatusIndicator>
+    );
+  };
+
+  const disableStreamEnableButton = () => {
+    if (!selectedItems.length) {
+      return false;
+    }
+    return !pipelineInfo.streaming?.appIdStreamList?.includes(
+      selectedItems[0].appId
     );
   };
 
@@ -266,6 +300,11 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             cell: (e) => renderAppTimezone(e.appId),
           },
           {
+            id: 'stream',
+            header: t('project:pipeline.appStreamEnable'),
+            cell: (e) => renderAppEnable(e),
+          },
+          {
             id: 'time',
             header: t('project:pipeline.time'),
             cell: (e) => moment(e.createAt).format(TIME_FORMAT),
@@ -325,15 +364,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   {t('button.viewDetails')}
                 </Button>
                 <Button
-                  loading={loadingDelete}
-                  disabled={selectedItems.length <= 0}
-                  onClick={() => {
-                    confirmDeleteApplication();
-                  }}
-                >
-                  {t('button.delete')}
-                </Button>
-                <Button
                   disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
                   variant="primary"
                   iconName="add-plus"
@@ -343,6 +373,40 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 >
                   {t('button.addApplication')}
                 </Button>
+                <ButtonDropdown
+                  onItemClick={(e) => {
+                    if (e.detail.id === 'rm') {
+                      confirmDeleteApplication();
+                    }
+                    if (e.detail.id === 'stream-enable') {
+                      confirmStreamingApplication(true);
+                    }
+                    if (e.detail.id === 'stream-disable') {
+                      confirmStreamingApplication(false);
+                    }
+                  }}
+                  items={[
+                    {
+                      text: defaultStr(t('button.delete')),
+                      id: 'rm',
+                      disabled: !selectedItems.length,
+                    },
+                    {
+                      text: defaultStr(t('button.streamEnable')),
+                      id: 'stream-enable',
+                      disabled:
+                        !selectedItems.length || !disableStreamEnableButton(),
+                    },
+                    {
+                      text: defaultStr(t('button.streamDisable')),
+                      id: 'stream-disable',
+                      disabled:
+                        !selectedItems.length || disableStreamEnableButton(),
+                    },
+                  ]}
+                >
+                  {t('button.actions')}
+                </ButtonDropdown>
               </SpaceBetween>
             }
           >

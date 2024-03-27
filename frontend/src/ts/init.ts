@@ -184,6 +184,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   selectedQuickSightUser: null,
   selectedTransformPlugins: [],
   selectedEnrichPlugins: [],
+  enableStreaming: false,
   enableReporting: true,
   arnAccountId: '',
   enableAuthentication: false,

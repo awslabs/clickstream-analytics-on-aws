@@ -480,9 +480,10 @@ export class DynamoDbStore implements ClickStreamStore {
               dataModeling: marshallCurPipeline.dataModeling,
               reporting: marshallCurPipeline.reporting,
               timezone: marshallCurPipeline.timezone ?? { L: [] },
-              workflow: marshallCurPipeline.workflow,
-              executionDetail: marshallPipeline.executionDetail,
-              stackDetails: marshallPipeline.stackDetails,
+              streaming: marshallCurPipeline.streaming,
+              workflow: marshallCurPipeline.workflow ?? { M: {} },
+              executionDetail: marshallPipeline.executionDetail ?? { M: {} },
+              stackDetails: marshallPipeline.stackDetails ?? { L: [] },
               templateVersion: { S: curPipeline.templateVersion ?? '' },
               lastAction: { S: curPipeline.lastAction ?? '' },
               version: { S: curPipeline.version },
@@ -516,6 +517,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'dataModeling = :dataModeling, ' +
               'reporting = :reporting, ' +
               '#tz = :timezone,' +
+              'streaming = :streaming, ' +
               'workflow = :workflow, ' +
               'executionDetail = :executionDetail, ' +
               'stackDetails = :stackDetails, ' +
@@ -549,6 +551,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':dataModeling': marshallPipeline.dataModeling,
               ':reporting': marshallPipeline.reporting,
               ':timezone': marshallPipeline.timezone ?? { L: [] },
+              ':streaming': marshallPipeline.streaming,
               ':ConditionVersionValue': { S: pipeline.version },
               ':workflow': marshallPipeline.workflow,
               ':executionDetail': marshallPipeline.executionDetail,
@@ -588,6 +591,7 @@ export class DynamoDbStore implements ClickStreamStore {
           'dataModeling = :dataModeling, ' +
           'reporting = :reporting, ' +
           '#tz = :timezone,' +
+          'streaming = :streaming, ' +
           'workflow = :workflow, ' +
           'executionDetail = :executionDetail, ' +
           'stackDetails = :stackDetails, ' +
@@ -615,6 +619,7 @@ export class DynamoDbStore implements ClickStreamStore {
           ':dataModeling': pipeline.dataModeling ?? {},
           ':reporting': pipeline.reporting ?? {},
           ':timezone': pipeline.timezone ?? [],
+          ':streaming': pipeline.streaming ?? {},
           ':ConditionVersionValue': pipeline.version,
           ':workflow': pipeline.workflow ?? {},
           ':executionDetail': pipeline.executionDetail ?? {},

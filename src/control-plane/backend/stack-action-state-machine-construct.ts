@@ -134,6 +134,7 @@ export class StackActionStateMachine extends Construct {
           'events:*',
           'elasticloadbalancing:*',
           'kinesis:*',
+          'kinesisanalytics:*',
           'kafka:*',
           'states:*',
           'secretsmanager:*',

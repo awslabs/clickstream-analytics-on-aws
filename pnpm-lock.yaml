@@ -12616,7 +12616,7 @@ packages:
       ts-node:
         optional: true
     dependencies:
-      '@babel/core': 7.24.6
+      '@babel/core': 7.24.5
       '@jest/test-sequencer': 29.7.0
       '@jest/types': 29.6.3
       '@types/node': 20.14.0

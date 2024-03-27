@@ -52,7 +52,8 @@
     "noAppDisplay": "没有可显示的应用程序。",
     "findApp": "查找应用程序",
     "yourApp": "你的应用程序",
-    "yourAppDesc": "此表列出了在此项目中注册的所有应用程序"
+    "yourAppDesc": "此表列出了在此项目中注册的所有应用程序",
+    "appStreamEnable": "启用实时流"
   },
   "list": {
     "name": "项目名称",

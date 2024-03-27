@@ -52,7 +52,8 @@
     "noAppDisplay": "No application to display.",
     "findApp": "Find applications",
     "yourApp": "Your applications",
-    "yourAppDesc": "This table lists all the applications registered in this project"
+    "yourAppDesc": "This table lists all the applications registered in this project",
+    "appStreamEnable": "Streaming enable"
   },
   "list": {
     "name": "Project Name",

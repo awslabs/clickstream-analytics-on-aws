@@ -18,6 +18,7 @@ import {
   IAMClient,
 } from '@aws-sdk/client-iam';
 import { KafkaClient } from '@aws-sdk/client-kafka';
+import { KMSClient } from '@aws-sdk/client-kms';
 import {
   QuickSightClient,
 } from '@aws-sdk/client-quicksight';
@@ -81,6 +82,7 @@ const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
 const snsMock = mockClient(SNSClient);
+const kmsMock = mockClient(KMSClient);
 
 const mockClients = {
   ddbMock,
@@ -96,6 +98,7 @@ const mockClients = {
   iamMock,
   cloudWatchEventsMock,
   snsMock,
+  kmsMock,
 };
 
 const InitTags = [
@@ -236,7 +239,7 @@ const DataModelingRedshiftStack = {
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
     },
   },
-  Next: 'Reporting',
+  Next: 'AfterRedshiftStacks',
   Type: 'Stack',
 };
 
@@ -258,7 +261,7 @@ const DataModelingRedshiftStackCn = {
       TemplateURL: 'https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
     },
   },
-  Next: 'Reporting',
+  Next: 'AfterRedshiftStacks',
   Type: 'Stack',
 };
 
@@ -479,11 +482,18 @@ describe('Workflow test with pipeline version', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStack, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
-                      Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                        },
-                      ]),
+                      AfterRedshiftStacks: {
+                        Branches: [
+                          {
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: setTagsToStack(ReportingStack, Tags),
+                            },
+                          },
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -588,25 +598,35 @@ describe('Workflow test with pipeline version', () => {
                           },
                         ],
                       ),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_0_0), [
+                      AfterRedshiftStacks: {
+                        Branches: [
                           {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          },
-                          {
-                            ParameterKey: 'AppRegistryApplicationArn.#',
-                          },
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: removeParametersFromStack(ReportingStack, [
+                                {
+                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                },
+                                {
+                                  ParameterKey: 'AppRegistryApplicationArn.#',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightTimezoneParam',
+                                },
+                                {
+                                  ParameterKey: 'RedshiftIAMRoleParam.#',
+                                },
+                                {
+                                  ParameterKey: 'RedshiftDefaultDBParam',
+                                },
+                              ],
+                              ),
+                            },
                           },
                         ],
-                      ),
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -687,24 +707,35 @@ describe('Workflow test with pipeline version', () => {
                           },
                         ],
                       ),
-                      Reporting: removeParametersFromStack(
-                        mergeParametersFromStack(setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_0), [
+                      AfterRedshiftStacks: {
+                        Branches: [
                           {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                            ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: removeParametersFromStack(
+                                mergeParametersFromStack(ReportingStack, [
+                                  {
+                                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                                  },
+                                ],
+                                ), [
+                                  {
+                                    ParameterKey: 'QuickSightTimezoneParam',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftIAMRoleParam.#',
+                                  },
+                                  {
+                                    ParameterKey: 'RedshiftDefaultDBParam',
+                                  },
+                                ]),
+                            },
                           },
                         ],
-                        ), [
-                          {
-                            ParameterKey: 'QuickSightTimezoneParam',
-                          },
-                          {
-                            ParameterKey: 'RedshiftIAMRoleParam.#',
-                          },
-                          {
-                            ParameterKey: 'RedshiftDefaultDBParam',
-                          },
-                        ]),
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -793,6 +824,18 @@ describe('Workflow test with pipeline version', () => {
                           },
                         ],
                       ),
+                      AfterRedshiftStacks: {
+                        Branches: [
+                          {
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: ReportingStack,
+                            },
+                          },
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -846,14 +889,24 @@ describe('Workflow test with pipeline version', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: setTagsWithVersion(DataProcessingStack, SolutionVersion.V_1_1_6),
-                      DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStack, SolutionVersion.V_1_1_6),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(ReportingStack, SolutionVersion.V_1_1_6), [
+                      DataProcessing: DataProcessingStack,
+                      DataModelingRedshift: DataModelingRedshiftStack,
+                      AfterRedshiftStacks: {
+                        Branches: [
                           {
-                            ParameterKey: 'QuickSightPrincipalParam',
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: removeParametersFromStack(ReportingStack, [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
+                            },
                           },
-                        ]),
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -953,11 +1006,34 @@ describe('Workflow test with pipeline version in China region', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
-                      Reporting: removeParametersFromStack(reportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                        },
-                      ]),
+                      AfterRedshiftStacks: {
+                        Branches: [
+                          {
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: mergeParametersFromStack(
+                                setTagsToStack(ReportingStackCn, Tags),
+                                [
+                                  {
+                                    ParameterKey: 'QuickSightUserParam',
+                                    ParameterValue: 'GCRUser',
+                                  },
+                                  {
+                                    ParameterKey: 'QuickSightPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                  },
+                                  {
+                                    ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                    ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                  },
+                                ],
+                              ),
+                            },
+                          },
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -1267,6 +1343,31 @@ describe('Workflow test with pipeline version in China region', () => {
                           },
                         ],
                       ),
+                      AfterRedshiftStacks: {
+                        Branches: [
+                          {
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: mergeParametersFromStack(ReportingStackCn, [
+                                {
+                                  ParameterKey: 'QuickSightUserParam',
+                                  ParameterValue: 'GCRUser',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                },
+                              ]),
+                            },
+                          },
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {
@@ -1337,14 +1438,33 @@ describe('Workflow test with pipeline version in China region', () => {
                   {
                     StartAt: 'DataProcessing',
                     States: {
-                      DataProcessing: setTagsWithVersion(DataProcessingStackCn, SolutionVersion.V_1_1_6),
-                      DataModelingRedshift: setTagsWithVersion(DataModelingRedshiftStackCn, SolutionVersion.V_1_1_6),
-                      Reporting: removeParametersFromStack(
-                        setTagsWithVersion(reportingStackCn, SolutionVersion.V_1_1_6), [
+                      DataProcessing: DataProcessingStackCn,
+                      DataModelingRedshift: DataModelingRedshiftStackCn,
+                      AfterRedshiftStacks: {
+                        Branches: [
                           {
-                            ParameterKey: 'QuickSightPrincipalParam',
+                            StartAt: 'Reporting',
+                            States: {
+                              Reporting: mergeParametersFromStack(ReportingStackCn, [
+                                {
+                                  ParameterKey: 'QuickSightUserParam',
+                                  ParameterValue: 'GCRUser',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                },
+                                {
+                                  ParameterKey: 'QuickSightOwnerPrincipalParam',
+                                  ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                                },
+                              ]),
+                            },
                           },
-                        ]),
+                        ],
+                        End: true,
+                        Type: 'Parallel',
+                      },
                     },
                   },
                   {

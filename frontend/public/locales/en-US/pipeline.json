@@ -312,7 +312,11 @@
     "redshiftProvisionedDesc": "Provisioned Redshift cluster that meet your cost and performance specifications",
     "reportNotSupported": "Not Supported",
     "reportNotSupportedDesc": "Reporting is not supported if data processing is not enabled.",
-    "notSupportedServices": "These service(s): {{unSupportedServices}} are not available in this region, some of features may not supported."
+    "notSupportedServices": "These service(s): {{unSupportedServices}} are not available in this region, some of features may not supported.",
+    "streamingTitle": "Streaming",
+    "streamingDesc": "Data will be streamed into Amazon Kinesis Data Stream for real-time consumption, and a lambda program will periodically read and store the data into a S3 bucket.",
+    "enableStreaming": "Streaming Enable",
+    "enableStreamingDesc": "If you want to enable streaming for the pipeline, please enable this option."
   },
   "detail": {
     "ingestion": "Ingestion",
