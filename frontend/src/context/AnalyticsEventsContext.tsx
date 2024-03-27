@@ -26,8 +26,11 @@ export const EventsParameterProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
   const { data, loading, error } = useFetchParams();
-  const contextValue = useMemo(() => ({ data, loading, error }), [data, loading, error]);
-  
+  const contextValue = useMemo(
+    () => ({ data, loading, error }),
+    [data, loading, error]
+  );
+
   return (
     <EventsContext.Provider value={contextValue}>
       {children}
