@@ -400,7 +400,7 @@ function _getTransformerPluginInfoFromResources(
 }
 
 function _getClassNameByVersion(id: string, curClassName: string, templateVersion: string) {
-  const shortVersion = templateVersion?.split('-')[0];
+  const shortVersion = SolutionVersion.Of(templateVersion).shortVersion;
   const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
