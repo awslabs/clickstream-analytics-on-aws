@@ -29,6 +29,8 @@ export enum MetadataValueType {
   INTEGER = 'int',
   DOUBLE = 'double',
   FLOAT = 'float',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
 }
 
 export enum MetadataParameterType {
@@ -153,4 +155,6 @@ export enum ExploreAnalyticsOperators {
   NOT_IN = 'not_in',
   CONTAINS = 'contains',
   NOT_CONTAINS = 'not_contains',
+  YES = 'yes',
+  NO = 'no',
 }
