@@ -15,8 +15,6 @@ import { join } from 'path';
 import {
   CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
   CLICKSTREAM_EVENT_VIEW_NAME,
-  CLICKSTREAM_ITEM_VIEW_PLACEHOLDER,
-  CLICKSTREAM_ITEM_VIEW_NAME,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER,
   CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
@@ -58,7 +56,6 @@ import { Construct } from 'constructs';
 import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
 import {
   clickstream_event_view_columns,
-  clickstream_item_view_columns,
 } from './private/dataset-col-def';
 import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 
@@ -86,9 +83,7 @@ export function createQuicksightCustomResource(
 
   const databaseName = props.databaseName;
   const eventViewProjectedColumns: string[] = [];
-  const itemViewProjectedColumns: string[] = [];
   clickstream_event_view_columns.map( item => eventViewProjectedColumns.push(item.Name!));
-  clickstream_item_view_columns.map( item => itemViewProjectedColumns.push(item.Name!));
 
   const dashboardDefProps: QuickSightDashboardDefProps = {
     analysisName: 'Clickstream Analysis',
@@ -131,13 +126,6 @@ export function createQuicksightCustomResource(
           },
         ],
         projectedColumns: eventViewProjectedColumns,
-      },
-      {
-        tableName: CLICKSTREAM_ITEM_VIEW_PLACEHOLDER,
-        importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ITEM_VIEW_NAME}`,
-        columns: clickstream_item_view_columns,
-        projectedColumns: itemViewProjectedColumns,
       },
 
       //Acquisition Sheet
@@ -868,7 +856,7 @@ export function createQuicksightCustomResource(
           'crashed_user_id',
         ],
       },
-      
+
     ],
   };
 

@@ -33,7 +33,7 @@ import {
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL,
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP,
   CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP,
-  CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_ITEM_VIEW_NAME,
+  CLICKSTREAM_EVENT_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_VIEW_NAME,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
@@ -50,9 +50,8 @@ import { SQLDef, SQLViewDef } from './model';
 export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_EVENT_VIEW_NAME,
-  },
-  {
-    viewName: CLICKSTREAM_ITEM_VIEW_NAME,
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
@@ -65,6 +64,8 @@ export const reportingViewsDef: SQLViewDef[] = [
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
@@ -96,74 +97,86 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
   },
-
   {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_EXIT_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_KPI_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_DAU_WAU_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE_SP,
-    grantToBIUser: 'false',
+    type: 'sp',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_LIFECYCLE_VIEW_NAME,
-    grantToBIUser: 'false',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
-    grantToBIUser: 'false',
   },
   {
     viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
-    grantToBIUser: 'false',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
-    grantToBIUser: 'false',
   },
 
 ];
@@ -229,15 +242,23 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     sqlFile: 'user-m-max-view-v2.sql',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     sqlFile: 'user-m-view-v2.sql',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     sqlFile: 'session-m-max-view.sql',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
   {
     sqlFile: 'session-m-view.sql',
+    type: 'mv',
+    scheduleRefresh: 'true',
   },
 
 ];

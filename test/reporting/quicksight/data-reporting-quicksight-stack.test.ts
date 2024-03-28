@@ -347,26 +347,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'logs:CreateLogGroup',
             ],
             Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':logs:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':log-group:/aws/lambda/*',
-                ],
-              ],
-            },
+            Resource: '*',
           },
           {
             Action: [
@@ -1483,6 +1464,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Name: 'view_event_indicator',
                 Type: 'STRING',
               },
+              {
+                Name: 'event_timestamp_local',
+                Type: 'DATETIME',
+              },
             ],
             dateTimeDatasetParameter: [
               {
@@ -1646,90 +1631,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'new_user_indicator',
               'view_session_indicator',
               'view_event_indicator',
-            ],
-          },
-          {
-            tableName: 'Item_View',
-            importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_item_view_v1',
-            columns: [
-              {
-                Name: 'item_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'brand',
-                Type: 'STRING',
-              },
-              {
-                Name: 'currency',
-                Type: 'STRING',
-              },
-              {
-                Name: 'price',
-                Type: 'DECIMAL',
-              },
-              {
-                Name: 'quantity',
-                Type: 'DECIMAL',
-              },
-              {
-                Name: 'creative_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'creative_slot',
-                Type: 'STRING',
-              },
-              {
-                Name: 'location_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'category',
-                Type: 'STRING',
-              },
-              {
-                Name: 'category2',
-                Type: 'STRING',
-              },
-              {
-                Name: 'category3',
-                Type: 'STRING',
-              },
-              {
-                Name: 'category4',
-                Type: 'STRING',
-              },
-              {
-                Name: 'category5',
-                Type: 'STRING',
-              },
-              {
-                Name: 'custom_parameters_json_str',
-                Type: 'STRING',
-              },
-            ],
-            projectedColumns: [
-              'item_id',
-              'name',
-              'brand',
-              'currency',
-              'price',
-              'quantity',
-              'creative_name',
-              'creative_slot',
-              'location_id',
-              'category',
-              'category2',
-              'category3',
-              'category4',
-              'category5',
-              'custom_parameters_json_str',
+              'event_timestamp_local',
             ],
           },
           {
@@ -1746,11 +1648,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'merged_user_id',
+                Name: 'Active users',
                 Type: 'STRING',
               },
               {
-                Name: 'new_user_count',
+                Name: 'New users',
                 Type: 'INTEGER',
               },
               {
@@ -1771,87 +1673,9 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
-              'merged_user_id',
-              'new_user_count',
+              'Active users',
+              'New users',
               'view_count',
-            ],
-          },
-          {
-            tableName: 'Active_User_Compare',
-            importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_active_user_compare_mv where event_date_hour >= <<$startDate03>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate03>>))",
-            columns: [
-              {
-                Name: 'event_date_hour',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'active_user_count',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'previous_active_user_count',
-                Type: 'INTEGER',
-              },
-            ],
-            dateTimeDatasetParameter: [
-              {
-                name: 'startDate03',
-                timeGranularity: 'DAY',
-              },
-              {
-                name: 'endDate03',
-                timeGranularity: 'DAY',
-              },
-            ],
-            projectedColumns: [
-              'event_date_hour',
-              'platform',
-              'active_user_count',
-              'previous_active_user_count',
-            ],
-          },
-          {
-            tableName: 'New_User_Compare',
-            importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_new_user_compare_mv where event_date_hour >= <<$startDate04>> and event_date_hour < DATEADD(DAY, 1, date_trunc('day', <<$endDate04>>))",
-            columns: [
-              {
-                Name: 'event_date_hour',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'new_user_count',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'previous_new_user_count',
-                Type: 'INTEGER',
-              },
-            ],
-            dateTimeDatasetParameter: [
-              {
-                name: 'startDate04',
-                timeGranularity: 'DAY',
-              },
-              {
-                name: 'endDate04',
-                timeGranularity: 'DAY',
-              },
-            ],
-            projectedColumns: [
-              'event_date_hour',
-              'platform',
-              'new_user_count',
-              'previous_new_user_count',
             ],
           },
           {
@@ -1864,16 +1688,20 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DATETIME',
               },
               {
+                Name: 'aggregation_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
                 Name: 'platform',
                 Type: 'STRING',
               },
               {
-                Name: 'first_traffic_source',
+                Name: 'user_id',
                 Type: 'STRING',
-              },
-              {
-                Name: 'user_count',
-                Type: 'INTEGER',
               },
             ],
             dateTimeDatasetParameter: [
@@ -1889,43 +1717,9 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
-              'first_traffic_source',
-              'user_count',
-            ],
-          },
-          {
-            tableName: 'Month_Traffic_Source_User',
-            importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_month_traffic_source_user_mv where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate06>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate06>>))",
-            columns: [
-              {
-                Name: 'event_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_traffic_source',
-                Type: 'STRING',
-              },
-              {
-                Name: 'merged_user_id',
-                Type: 'STRING',
-              },
-            ],
-            dateTimeDatasetParameter: [
-              {
-                name: 'endDate06',
-                timeGranularity: 'DAY',
-              },
-            ],
-            projectedColumns: [
-              'event_date',
-              'platform',
-              'first_traffic_source',
-              'merged_user_id',
+              'aggregation_dim',
+              'aggregation_type',
+              'user_id',
             ],
           },
           {
@@ -2166,7 +1960,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Page_Screen_View_Detail',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view_detail where event_date >= DATEADD(DAY, -30, date_trunc('day', <<$endDate12>>)) and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view_detail where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))",
             columns: [
               {
                 Name: 'event_date',
@@ -2198,6 +1992,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
             ],
             dateTimeDatasetParameter: [
+              {
+                name: 'startDate12',
+                timeGranularity: 'DAY',
+              },
               {
                 name: 'endDate12',
                 timeGranularity: 'DAY',
@@ -2409,6 +2207,79 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
+            tableName: 'Retention_View',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
+            columns: [
+              {
+                Name: 'first_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'day_diff',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'returned_user_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'total_users',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate19',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate19',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'first_date',
+              'day_diff',
+              'returned_user_count',
+              'total_users',
+            ],
+          },
+          {
+            tableName: 'Lifecycle_Weekly_View',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v3 where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))",
+            columns: [
+              {
+                Name: 'time_period',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'this_week_value',
+                Type: 'STRING',
+              },
+              {
+                Name: 'sum',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate20',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate20',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'time_period',
+              'this_week_value',
+              'sum',
+            ],
+          },
+          {
             tableName: 'Crash_Rate',
             importMode: 'DIRECT_QUERY',
             customSql: "SELECT * FROM {{schema}}.clickstream_device_crash_rate where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))",
@@ -2419,6 +2290,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_version',
                 Type: 'STRING',
               },
               {
@@ -2443,6 +2318,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
+              'app_version',
               'merged_user_id',
               'crashed_user_id',
             ],

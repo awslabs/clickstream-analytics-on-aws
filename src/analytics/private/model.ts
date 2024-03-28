@@ -92,7 +92,8 @@ export interface CustomProperties {
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
-  readonly grantToBIUser?: 'true' | 'false';
+  readonly type?: 'mv' | 'sp'; //materialized view or stored procedure
+  readonly scheduleRefresh?: 'true' | 'false';
 }
 
 export type SQLDef = SQLBasic & {
