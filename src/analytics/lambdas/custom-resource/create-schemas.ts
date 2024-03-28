@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import {
+  CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
+  CLICKSTREAM_DEPRECATED_VIEW_LIST,
+  CLICKSTREAM_EVENT_VIEW_NAME,
+} from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -279,7 +283,9 @@ function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: Resourc
   return sqlStatementsByApp;
 }
 
-export const TABLES_VIEWS_FOR_REPORTING = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
+export const TABLES_VIEWS_FOR_REPORTING = [
+  'event_v2', 'user_v2', 'session', 'item_v2', 'user_m_view_v2', 'session_m_view', 'session_m_max_view', 'session_m_max_view',
+];
 function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 
   const statements: string[] = [];
@@ -311,17 +317,26 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      timezone: 'UTC', //todo: get from props
+      baseView: CLICKSTREAM_EVENT_VIEW_NAME,
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName);
+      if (viewDef.type === undefined || viewDef.type !== 'sp') {
+        views.push(viewDef.viewName);
+      }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
     //drop old views
+    for (const view of CLICKSTREAM_DEPRECATED_VIEW_LIST) {
+      sqlStatements.push(`DROP VIEW IF EXISTS ${app}.${view} CASCADE;`);
+    }
+
+    //drop old materialized views
     for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
-      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
+      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view} CASCADE;`);
     }
 
     sqlStatementsByApp.set(app, sqlStatements);

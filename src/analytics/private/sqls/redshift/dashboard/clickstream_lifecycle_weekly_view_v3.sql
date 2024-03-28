@@ -1,10 +1,10 @@
-CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
+CREATE OR REPLACE VIEW {{database_name}}.{{schema}}.{{viewName}}
 AS
 with lag_lead as (
   select user_pseudo_id, time_period_week,
     lag(time_period_week,1) over (partition by user_pseudo_id order by time_period_week),
     lead(time_period_week,1) over (partition by user_pseudo_id order by time_period_week)
-  from {{schema}}.clickstream_lifecycle_view_v1
+  from {{database_name}}.{{schema}}.clickstream_lifecycle_view_v2
 ),
 -- calculate lag and lead size
 lag_lead_with_diffs as (

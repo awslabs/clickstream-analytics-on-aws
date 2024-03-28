@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME } from '@aws/clickstream-base-lib';
 import {
   CreateAnalysisCommand,
   CreateDashboardCommand,
@@ -54,7 +53,6 @@ import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
-import { clickstream_lifecycle_daily_view_columns, clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';
 import { getMockContext } from '../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 import {
@@ -99,10 +97,67 @@ describe('QuickSight Lambda function', () => {
       dataSets: [
         {
           name: 'User Dim Data Set',
-          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          tableName: 'User_Dim_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_user_dim_view_columns,
-          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -141,10 +196,63 @@ describe('QuickSight Lambda function', () => {
         },
         {
           name: 'ODS Flattened Data Set',
-          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          tableName: 'Session_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_session_view_columns,
-          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          columns: [
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_duration',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'bounced_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_start_timestamp',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_engagement_time',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'session_date_hour',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
           dateTimeDatasetParameter: [
             {
               name: 'startDate',
@@ -182,10 +290,67 @@ describe('QuickSight Lambda function', () => {
       dataSourceArn: 'test-datasource',
       dataSets: [
         {
-          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          tableName: 'User_Dim_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_user_dim_view_columns,
-          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -223,10 +388,63 @@ describe('QuickSight Lambda function', () => {
           ],
         },
         {
-          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          tableName: 'Session_View',
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
-          columns: clickstream_session_view_columns,
+          customSql: 'select * from {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
+          columns: [
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_duration',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'bounced_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_start_timestamp',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_engagement_time',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'session_date_hour',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+          ],
           dateTimeDatasetParameter: [
             {
               name: 'startDate',
@@ -241,10 +459,23 @@ describe('QuickSight Lambda function', () => {
           ],
         },
         {
-          tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
+          tableName: 'Lifecycle_Daily_View',
           importMode: 'DIRECT_QUERY',
-          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
-          columns: clickstream_lifecycle_daily_view_columns,
+          customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2',
+          columns: [
+            {
+              Name: 'time_period',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'this_day_value',
+              Type: 'STRING',
+            },
+            {
+              Name: 'sum',
+              Type: 'INTEGER',
+            },
+          ],
           projectedColumns: [
             'time_period',
             'this_day_value',
@@ -277,8 +508,65 @@ describe('QuickSight Lambda function', () => {
         {
           tableName: 'clickstream_user_dim_view',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_user_dim_view_columns,
-          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -316,10 +604,23 @@ describe('QuickSight Lambda function', () => {
           ],
         },
         {
-          tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
+          tableName: 'Lifecycle_Daily_View',
           importMode: 'DIRECT_QUERY',
-          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
-          columns: clickstream_lifecycle_daily_view_columns,
+          customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2',
+          columns: [
+            {
+              Name: 'time_period',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'this_day_value',
+              Type: 'STRING',
+            },
+            {
+              Name: 'sum',
+              Type: 'INTEGER',
+            },
+          ],
           projectedColumns: [
             'time_period',
             'this_day_value',
@@ -351,10 +652,67 @@ describe('QuickSight Lambda function', () => {
       dataSets: [
         {
           name: 'User Dim Data Set',
-          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          tableName: 'User_Dim_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_user_dim_view_columns,
-          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -393,10 +751,63 @@ describe('QuickSight Lambda function', () => {
         },
         {
           name: 'ODS Flattened Data Set',
-          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          tableName: 'Session_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_session_view_columns,
-          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          columns: [
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_duration',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'bounced_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_start_timestamp',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_engagement_time',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'session_date_hour',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
           dateTimeDatasetParameter: [
             {
               name: 'startDate',
@@ -435,10 +846,67 @@ describe('QuickSight Lambda function', () => {
       dataSets: [
         {
           name: 'User Dim Data Set',
-          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          tableName: 'User_Dim_View',
           importMode: 'DIRECT_QUERY',
-          columns: clickstream_user_dim_view_columns,
-          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}`,
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
           columnGroups: [
             {
               geoSpatialColumnGroupName: 'geo',
@@ -477,10 +945,63 @@ describe('QuickSight Lambda function', () => {
         },
         {
           name: 'ODS Flattened Data Set',
-          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          tableName: 'Session_View',
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
-          columns: clickstream_session_view_columns,
+          customSql: 'select * from {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
+          columns: [
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_duration',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'bounced_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_start_timestamp',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_engagement_time',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'session_date_hour',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+          ],
           dateTimeDatasetParameter: [
             {
               name: 'startDate',

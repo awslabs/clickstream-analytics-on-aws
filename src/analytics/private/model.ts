@@ -92,6 +92,8 @@ export interface CustomProperties {
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
+  readonly type?: 'mv' | 'sp'; //materialized view or stored procedure
+  readonly scheduleRefresh?: 'true' | 'false';
 }
 
 export type SQLDef = SQLBasic & {
@@ -209,5 +211,6 @@ export type MustacheParamType = {
   table_clickstream_log: string;
   table_ods_events: string;
   user_bi?: string;
-
+  baseView?: string;
+  timezone?: string;
 }
