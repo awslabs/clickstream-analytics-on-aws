@@ -308,6 +308,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      sqlCodePath: codePath,
       scanMetadataWorkflowData: props.scanMetadataWorkflowData,
     });
 

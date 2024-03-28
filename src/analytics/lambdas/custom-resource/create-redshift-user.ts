@@ -42,8 +42,12 @@ async function _handler(event: CdkCustomResourceEvent) {
   const requestType = event.RequestType;
 
   logger.info('RequestType: ' + requestType);
-  if (requestType == 'Create' || requestType == 'Update') {
+  if (requestType == 'Create') {
     await onCreate(event);
+  }
+
+  if (requestType == 'Update') {
+    await onUpdate(event);
   }
 
   if (requestType == 'Delete') {
@@ -62,6 +66,8 @@ async function onCreate(event: CdkCustomResourceEvent) {
     await executeStatementsWithWait(redshiftClient, [
       `CREATE USER "IAMR:${props.dataRoleName}" PASSWORD DISABLE CREATEDB`,
       'CREATE ROLE clickstream',
+      'GRANT CREATE OR REPLACE FUNCTION TO ROLE clickstream',
+      'GRANT DROP FUNCTION TO ROLE clickstream',
       'GRANT create user to role clickstream',
       `GRANT ROLE clickstream TO "IAMR:${props.dataRoleName}"`,
     ],
@@ -73,6 +79,27 @@ async function onCreate(event: CdkCustomResourceEvent) {
     throw err;
   }
 }
+
+async function onUpdate(event: CdkCustomResourceEvent) {
+  logger.info('onUpdate()');
+  const props = event.ResourceProperties as ResourcePropertiesType;
+  const redshiftClient = getRedshiftClient(props.serverlessRedshiftProps!.dataAPIRoleArn);
+  try {
+    await executeStatementsWithWait(redshiftClient, [
+      'GRANT CREATE OR REPLACE FUNCTION TO ROLE clickstream',
+      'GRANT DROP FUNCTION TO ROLE clickstream',
+      'GRANT create user to role clickstream',
+      `GRANT ROLE clickstream TO "IAMR:${props.dataRoleName}"`,
+    ],
+    props.serverlessRedshiftProps);
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.error('Error when creating database in serverless Redshift.', err);
+    }
+    throw err;
+  }
+}
+
 async function onDelete(_event: CdkCustomResourceEvent) {
   logger.info('onDelete()');
   logger.info('doNothing to keep the db user');

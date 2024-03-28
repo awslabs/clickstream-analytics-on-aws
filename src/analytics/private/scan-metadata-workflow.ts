@@ -15,7 +15,7 @@ import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { IFunction, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
@@ -40,6 +40,7 @@ export interface ScanMetadataWorkflowProps {
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
   readonly dataAPIRole: IRole;
+  readonly sqlCodePath: string;
   readonly scanMetadataWorkflowData: ScanMetadataWorkflowData;
 }
 
@@ -262,6 +263,12 @@ export class ScanMetadataWorkflow extends Construct {
   }
 
   private scanMetadataFn(props: ScanMetadataWorkflowProps): IFunction {
+
+    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
+      code: Code.fromAsset(props.sqlCodePath),
+      description: 'SQL layer',
+    });
+
     const fnSG = props.securityGroupForLambda;
     const fn = new SolutionNodejsFunction(this, 'ScanMetadataFn', {
       entry: join(
@@ -284,6 +291,7 @@ export class ScanMetadataWorkflow extends Construct {
         TOP_FREQUENT_PROPERTIES_LIMIT: props.scanMetadataWorkflowData.topFrequentPropertiesLimit,
       },
       applicationLogLevel: 'WARN',
+      layers: [sqlLayer],
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
