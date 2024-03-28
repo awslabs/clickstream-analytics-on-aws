@@ -284,7 +284,7 @@ function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: Resourc
 }
 
 export const TABLES_VIEWS_FOR_REPORTING = [
-  'event_v2', 'user_v2', 'session', 'item_v2', 'user_m_view_v2', 'session_m_view', 'session_m_max_view', 'session_m_max_view', 
+  'event_v2', 'user_v2', 'session', 'item_v2', 'user_m_view_v2', 'session_m_view', 'session_m_max_view', 'session_m_max_view',
 ];
 function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 

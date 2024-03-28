@@ -137,7 +137,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const spCount = reportingViewsDef.filter(i => i.type === 'sp').length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount 
+  const appNewCount = appReportingCount * 2 + appSchemaCount
   + TABLES_VIEWS_FOR_REPORTING.length //grant sql for bi user to access on base tables and views
   - spCount // # of Sp. sp does't need to be granted
   + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length // materialized views need to remove
