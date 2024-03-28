@@ -27,7 +27,7 @@ import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceRes
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
-import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
+import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
@@ -138,10 +138,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
   const appNewCount = appReportingCount * 2 + appSchemaCount 
-  + 8 //grant sql for bi user to access on base tables and views
+  + TABLES_VIEWS_FOR_REPORTING.length //grant sql for bi user to access on base tables and views
   - spCount // # of Sp. sp does't need to be granted
-  + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length
-  + CLICKSTREAM_DEPRECATED_VIEW_LIST.length
+  + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length // materialized views need to remove
+  + CLICKSTREAM_DEPRECATED_VIEW_LIST.length // views need to remove
+  + 1 // create schema for app
   ;
 
   const defs: { [key: string]: string } = {};
