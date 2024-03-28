@@ -705,17 +705,12 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         APP_IDS: props.appIds,
 
-        REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
-        REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
-        REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
         REDSHIFT_DATABASE: props.databaseName,
-        REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
         ENABLE_REFRESH: 'true',
         REFRESH_INTERVAL_MINUTES: props.mvRefreshInterval.toString(),
         PIPELINE_S3_BUCKET_NAME: props.workflowBucketInfo.s3Bucket.bucketName,
         PIPELINE_S3_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
         REDSHIFT_ROLE: copyRole.roleArn,
-        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       },
       applicationLogLevel: 'WARN',
     });

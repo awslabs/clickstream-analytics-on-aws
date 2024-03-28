@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
   Arn,
   ArnFormat,
@@ -58,6 +58,7 @@ import {
 } from './private/model';
 import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
+import { RefreshMaterializedViewsWorkflow } from './private/refresh-materialized-views-workflow';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UserSegmentsWorkflow } from './private/segments/user-segments-workflow';
 import {
@@ -111,6 +112,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
+  readonly refreshMaterializedViewsWorkflowArn: string;
   readonly userSegmentsWorkflowArn: string;
 
   constructor(
@@ -312,6 +314,22 @@ export class RedshiftAnalyticsStack extends NestedStack {
     });
 
     this.scanMetadataWorkflowArn = scanMetadataWorkflow.scanMetadataWorkflow.stateMachineArn;
+
+    const refreshMaterializedViewsWorkflow = new RefreshMaterializedViewsWorkflow(this, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX, {
+      appIds: props.appIds,
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+    });
+
+    this.refreshMaterializedViewsWorkflowArn = refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine.stateMachineArn;
 
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
