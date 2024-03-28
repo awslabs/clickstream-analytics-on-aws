@@ -17,7 +17,7 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -136,7 +136,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const appSchemaCount = schemaDefs.length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length; // total: 42
+  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 
+  + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length
+  + CLICKSTREAM_DEPRECATED_VIEW_LIST.length
+  ;
 
   const defs: { [key: string]: string } = {};
 

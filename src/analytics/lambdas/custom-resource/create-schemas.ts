@@ -14,8 +14,6 @@
 import {
   CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
   CLICKSTREAM_DEPRECATED_VIEW_LIST,
-  // CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
-  // CLICKSTREAM_DEPRECATED_VIEW_LIST,
   CLICKSTREAM_EVENT_VIEW_NAME,
 } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
