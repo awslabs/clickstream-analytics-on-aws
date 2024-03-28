@@ -398,9 +398,8 @@ export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
 
 
-
-export const CLICKSTREAM_LIFECYCLE_VIEW_NAME = "clickstream_lifecycle_view_v2";
-export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = "clickstream_lifecycle_weekly_view_v3";
+export const CLICKSTREAM_LIFECYCLE_VIEW_NAME = 'clickstream_lifecycle_view_v2';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v3';
 export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v3';
 export const CLICKSTREAM_RETENTION_BASE_VIEW_NAME = 'clickstream_retention_base_view';
 
@@ -411,7 +410,6 @@ export const CLICKSTREAM_SESSION_M_VIEW_NAME = 'clickstream_session_m_view';
 export const CLICKSTREAM_SESSION_M_MAX_VIEW_NAME = 'clickstream_session_m_max_view';
 
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v3';
-export const CLICKSTREAM_ITEM_VIEW_NAME = 'clickstream_item_view_v1';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER = 'clickstream_acquisition_country_new_user';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP = 'clickstream_acquisition_country_new_user_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER = 'clickstream_acquisition_day_traffic_source_user';
@@ -442,7 +440,6 @@ export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP = 'clickstream_retention_ev
 export const CLICKSTREAM_DEVICE_CRASH_RATE_SP = 'clickstream_device_crash_rate_sp';
 
 export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
-export const CLICKSTREAM_ITEM_VIEW_PLACEHOLDER = 'Item_View';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER = 'Country_New_User';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER = 'Day_Traffic_Source_User';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER = 'Day_User_Acquisition';
@@ -459,7 +456,7 @@ export const CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER = 'DAU_WAU';
 export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER = 'Event_Overtime';
 export const CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER = 'Crash_Rate';
 
-export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = "Lifecycle_Weekly_View";
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
 export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
 
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [

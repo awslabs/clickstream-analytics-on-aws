@@ -12,6 +12,8 @@
  */
 
 import {
+  CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
+  CLICKSTREAM_DEPRECATED_VIEW_LIST,
   // CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
   // CLICKSTREAM_DEPRECATED_VIEW_LIST,
   CLICKSTREAM_EVENT_VIEW_NAME,
@@ -323,22 +325,22 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      if (viewDef.grantToBIUser === undefined || viewDef.grantToBIUser !== 'false') {
+      if (viewDef.type === undefined || viewDef.type !== 'sp') {
         views.push(viewDef.viewName);
       }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
-    // //drop old materialized views
-    // for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
-    //   sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
-    // }
+    //drop old materialized views
+    for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
+      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
+    }
 
-    // //drop old views
-    // for (const view of CLICKSTREAM_DEPRECATED_VIEW_LIST) {
-    //   sqlStatements.push(`DROP VIEW IF EXISTS ${app}.${view};`);
-    // }
+    //drop old views
+    for (const view of CLICKSTREAM_DEPRECATED_VIEW_LIST) {
+      sqlStatements.push(`DROP VIEW IF EXISTS ${app}.${view};`);
+    }
 
     sqlStatementsByApp.set(app, sqlStatements);
   };
