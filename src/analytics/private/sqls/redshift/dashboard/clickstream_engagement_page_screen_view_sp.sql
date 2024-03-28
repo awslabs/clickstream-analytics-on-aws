@@ -17,7 +17,7 @@ BEGIN
     select 
       event_date,
       platform,
-      'page_title' as aggregation_type,
+      'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
       count(distinct event_id) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
@@ -37,7 +37,7 @@ BEGIN
     select 
       event_date,
       platform,
-      'page_url_path' as aggregation_type,
+      'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
       count(distinct event_id) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
@@ -57,7 +57,7 @@ BEGIN
     select 
       event_date,
       platform,
-      'screen_name' as aggregation_type,
+      'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
       count(distinct event_id) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
@@ -77,7 +77,7 @@ BEGIN
     select 
       event_date,
       platform,
-      'screen_class' as aggregation_type,
+      'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
       count(distinct event_id) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}

@@ -259,7 +259,7 @@ export function createQuicksightCustomResource(
             Type: 'DECIMAL',
           },
           {
-            Name: 'avg_user_engagement_time_msec',
+            Name: 'avg_user_engagement_time_minutes',
             Type: 'DECIMAL',
           },
           {
@@ -288,7 +288,7 @@ export function createQuicksightCustomResource(
           'session_cnt',
           'engagement_session_cnt',
           'engagement_rate',
-          'avg_user_engagement_time_msec',
+          'avg_user_engagement_time_minutes',
           'event_cnt',
         ],
       },
@@ -494,8 +494,8 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'user_engagement_time_msec',
-            Type: 'INTEGER',
+            Name: 'user_engagement_time_minutes',
+            Type: 'DECIMAL',
           },
           {
             Name: 'event_id',
@@ -520,7 +520,7 @@ export function createQuicksightCustomResource(
           'aggregation_type',
           'aggregation_dim',
           'user_id',
-          'user_engagement_time_msec',
+          'user_engagement_time_minutes',
           'event_id',
         ],
       },

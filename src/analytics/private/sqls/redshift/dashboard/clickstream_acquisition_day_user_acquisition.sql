@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.clickstream_acquisition_
     session_cnt bigint,
     engagement_session_cnt bigint,
     engagement_rate decimal,
-    avg_user_engagement_time_msec bigint,
+    avg_user_engagement_time_minutes double precision,
     event_cnt bigint
 )
 BACKUP YES

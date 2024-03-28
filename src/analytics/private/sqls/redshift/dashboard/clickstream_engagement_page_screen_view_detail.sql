@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.clickstream_engagement_p
     aggregation_type varchar(255),
     aggregation_dim varchar(65535),
     user_id varchar(255),
-    user_engagement_time_msec bigint,
+    user_engagement_time_minutes double precision,
     event_id varchar(255)
 )
 BACKUP YES

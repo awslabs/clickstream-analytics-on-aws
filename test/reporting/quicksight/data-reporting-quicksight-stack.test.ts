@@ -1760,7 +1760,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DECIMAL',
               },
               {
-                Name: 'avg_user_engagement_time_msec',
+                Name: 'avg_user_engagement_time_minutes',
                 Type: 'DECIMAL',
               },
               {
@@ -1787,7 +1787,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'session_cnt',
               'engagement_session_cnt',
               'engagement_rate',
-              'avg_user_engagement_time_msec',
+              'avg_user_engagement_time_minutes',
               'event_cnt',
             ],
           },
@@ -1983,8 +1983,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'user_engagement_time_msec',
-                Type: 'INTEGER',
+                Name: 'user_engagement_time_minutes',
+                Type: 'DECIMAL',
               },
               {
                 Name: 'event_id',
@@ -2007,7 +2007,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'aggregation_type',
               'aggregation_dim',
               'user_id',
-              'user_engagement_time_msec',
+              'user_engagement_time_minutes',
               'event_id',
             ],
           },

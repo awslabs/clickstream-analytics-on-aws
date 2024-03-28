@@ -38,7 +38,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -55,14 +55,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_source' as aggregation_type,
+    'Traffic Source' as aggregation_type,
     tmp2.first_traffic_source as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60 / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -81,7 +81,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -99,14 +99,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_source-first_traffic_medium' as aggregation_type,
+    'Traffic Source/Medium' as aggregation_type,
     tmp2.first_traffic_source || '-' || tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -125,7 +125,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -142,14 +142,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_medium' as aggregation_type,
+    'Traffic Medium' as aggregation_type,
     tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -168,7 +168,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -185,14 +185,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_campaign' as aggregation_type,
+    'Traffic Campaign' as aggregation_type,
     tmp2.first_traffic_campaign as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -212,7 +212,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -229,14 +229,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_clid_platform' as aggregation_type,
+    'Traffic Clid Platform' as aggregation_type,
     tmp2.first_traffic_clid_platform as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -256,7 +256,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -273,14 +273,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_traffic_channel_group' as aggregation_type,
+    'Traffic Channel Group' as aggregation_type,
     tmp2.first_traffic_channel_group as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -300,7 +300,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -317,14 +317,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'first_app_install_source' as aggregation_type,
+    'App Install Source' as aggregation_type,
     tmp2.first_app_install_source as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -344,7 +344,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -361,14 +361,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_source' as aggregation_type,
+    'Session Source' as aggregation_type,
     tmp2.session_source as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -387,7 +387,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -404,14 +404,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_medium' as aggregation_type,
+    'Session Medium' as aggregation_type,
     tmp2.session_medium as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -430,7 +430,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -448,14 +448,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_source' as aggregation_type,
+    'Session Source / Medium' as aggregation_type,
     tmp2.session_source || '-' || tmp2.session_medium as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -475,7 +475,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -492,14 +492,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_campaign' as aggregation_type,
+    'Session Campaign' as aggregation_type,
     tmp2.session_campaign as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -518,7 +518,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -535,14 +535,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_clid_platform' as aggregation_type,
+    'Session Clid Platform' as aggregation_type,
     tmp2.session_clid_platform as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
@@ -561,7 +561,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     session_cnt,
     engagement_session_cnt,
     engagement_rate,
-    avg_user_engagement_time_msec,
+    avg_user_engagement_time_minutes,
     event_cnt
 )
 with tmp2 AS (
@@ -578,14 +578,14 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'session_channel_group' as aggregation_type,
+    'Session Channel Group' as aggregation_type,
     tmp2.session_channel_group as aggregation_dim,
     tmp2.platform,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
     SUM(tmp1.session_indicator) / SUM(tmp1.event_cnt) AS engagement_rate,
-    SUM(user_engagement_time_msec) / COUNT(tmp1.session_id) AS avg_user_engagement_time_msec,
+    SUM(user_engagement_time_msec):: double precision / 1000 / 60  / COUNT(tmp1.session_id) AS avg_user_engagement_time_minutes,
     SUM(tmp1.event_cnt) AS event_cnt
 FROM 
     tmp2
