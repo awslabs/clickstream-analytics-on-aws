@@ -155,7 +155,7 @@ public class DataConverterV3 {
 
 
     private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
-        log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverterV2 corruptDataset").toString());
+        log.info(new ETLMetric(corruptDatasetCount, "DataConverterV3 corruptDataset").toString());
         String jobName = System.getProperty(JOB_NAME_PROP);
         String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_corrupted_json_data_v2";
         log.info("save corruptedDataset to " + s3FilePath);

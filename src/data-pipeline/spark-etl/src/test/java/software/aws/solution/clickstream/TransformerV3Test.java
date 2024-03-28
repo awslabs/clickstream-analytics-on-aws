@@ -58,6 +58,25 @@ class TransformerV3Test extends BaseSparkTest {
         Assertions.assertEquals(expectedJson, replaceDynData(datasetEvent.first().prettyJson()));
     }
 
+
+    @Test
+    public void should_transform_gzip_data() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.should_transform_gzip_data
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        String testWarehouseDir = "/tmp/warehouse/should_transform_event_v2/" + new Date().getTime();
+        System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
+        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
+
+        String expectedJson = this.resourceFileAsString("/event_v2/expected/transform_v3_gzip_event.json");
+        Assertions.assertEquals(expectedJson, replaceDynData(datasetEvent.first().prettyJson()));
+        System.out.printf(datasetEvent.first().prettyJson());
+    }
+
     @Test
     public void should_transform_item_v2() throws IOException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV3Test.should_transform_item_v2

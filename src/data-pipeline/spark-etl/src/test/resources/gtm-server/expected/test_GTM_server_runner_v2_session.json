@@ -1,5 +1,6 @@
 {
   "created_time" : "_CREATED_TIME_",
+  "event_timestamp" : "2024-01-10T06:13:50.000Z",
   "process_info" : {
     "ingest_time" : "2024-01-10T06:13:50Z",
     "input_file_name" : "server-all-with-ss.json",

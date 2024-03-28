@@ -1,4 +1,5 @@
 {
+  "event_timestamp" : "2024-01-10 06:13:50",
   "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
   "session_id" : "1704867229",
   "user_id" : null,
@@ -22,6 +23,5 @@
     "rid" : "55384aaeda62c5b20a462076ec59f3f5"
   },
   "app_id" : "sessionStartAppId1",
-  "event_timestamp" : "2024-01-10 06:13:50",
   "created_time" : "_CREATED_TIME_"
 }

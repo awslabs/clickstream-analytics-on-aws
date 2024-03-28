@@ -49,11 +49,14 @@ import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.not;
 
 import static org.apache.spark.sql.types.DataTypes.StringType;
+import static software.aws.solution.clickstream.TransformerV3.DATA_STR;
+import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.DATA_FRESHNESS_HOUR_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.common.Util.decompress;
@@ -105,8 +108,9 @@ public class Cleaner {
 
     }
 
-    public Dataset<Row> clean(final Dataset<Row> dataset, final String schemaFile) {
-        log.info(new ETLMetric(dataset, "clean enter").toString());
+    public Dataset<Row> clean(final Dataset<Row> datasetInput, final String schemaFile) {
+        log.info(new ETLMetric(datasetInput, "clean enter").toString());
+        Dataset<Row> dataset = datasetInput.withColumn(INPUT_FILE_NAME, input_file_name());
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
         ContextUtil.cacheDataset(decodedDataset);
 
@@ -137,7 +141,9 @@ public class Cleaner {
         Map<String, String> options = Maps.newHashMap();
         options.put("mode", "PERMISSIVE");
         options.put("columnNameOfCorruptRecord", CORRUPT_RECORD);
-        Dataset<Row> rowDataset = dataset.withColumn("data", from_json(col("data"), dataType, options).alias("data"));
+        Dataset<Row> rowDataset = dataset
+                .withColumn(DATA_STR, col(DATA).cast(StringType))
+                .withColumn(DATA, from_json(col(DATA), dataType, options));
         log.info(new ETLMetric(rowDataset, "after load data schema").toString());
         if (ContextUtil.isDebugLocal()) {
             rowDataset.write().mode(SaveMode.Overwrite)

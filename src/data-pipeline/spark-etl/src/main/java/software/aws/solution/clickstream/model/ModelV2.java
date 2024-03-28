@@ -345,6 +345,7 @@ public final class ModelV2 {
             DataTypes.createStructField(EVENT_NAME, DataTypes.StringType, true),
     });
     public static final StructType SESSION_TYPE = DataTypes.createStructType(new StructField[]{
+            DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
             DataTypes.createStructField(USER_PSEUDO_ID, DataTypes.StringType, true),
             DataTypes.createStructField(SESSION_ID, DataTypes.StringType, true),
             DataTypes.createStructField(USER_ID, DataTypes.StringType, true),
@@ -363,7 +364,6 @@ public final class ModelV2 {
             DataTypes.createStructField(PROCESS_INFO, STR_TO_STR_MAP_TYPE, true),
 
             DataTypes.createStructField(APP_ID, DataTypes.StringType, true),
-            DataTypes.createStructField(EVENT_TIMESTAMP, DataTypes.TimestampType, true),
     });
 
     private ModelV2() {
