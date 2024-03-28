@@ -855,7 +855,6 @@ describe('resources in nested redshift stacks', () => {
           },
         ],
       },
-      Path: '/clickstream-role/',
       Policies: [
         {
           PolicyDocument: {
