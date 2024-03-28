@@ -94,6 +94,57 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
     DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
     ```
 
+### Migrate the existing data after upgrading from 1.1.x
+
+1. Open [Redshift query editor v2][query-editor]. You can refer to AWS doc [Working with query editor v2][working-with-query-editor] to log in and query data using Redshift query editor v2.
+
+    !!! info "Note"
+        You must use the `admin` user or the user with schema (known as the app ID) ownership permission.
+
+2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and make sure tables for the appId are listed there.
+
+3. Create a new SQL Editor.
+
+4. Execute below SQL in editor, which will migrate all the events since `180` days before to new tables.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    CALL "<app-id>".sp_migrate_all_to_v2(180);
+    ```
+
+5. Wait for the SQL to complete. The execution time depends on the volume of data in table `event`.
+
+6. Execute the below SQL to check the stored procedure execution log; make sure there are no errors there.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_event_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_user_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_item_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_session_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_all_to_v2' order by log_date desc;
+    ```
+
+7. If you don't have other applications using the legacy tables and views, you could run the SQLs below to clean the legacy views and tables to save the storage of Redshift.
+
+    ```sql
+    -- please replace `<app-id>` with your actual app id
+
+    DROP TABLE "<app-id>".event CASCADE;
+    DROP TABLE "<app-id>".item CASCADE;
+    DROP TABLE "<app-id>".user CASCADE;
+    DROP TABLE "<app-id>".event_parameter CASCADE;
+
+    DROP PROCEDURE  "<app-id>".sp_migrate_event_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_migrate_item_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_clear_expired_events(retention_range_days integer)
+    DROP PROCEDURE  "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_migrate_user_to_v2();
+    DROP PROCEDURE  "<app-id>".sp_migrate_session_to_v2();
+    DROP PROCEDURE  "<app-id>".sp_clear_item_and_user();
+    
+    ```
+
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
