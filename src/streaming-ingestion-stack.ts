@@ -16,6 +16,7 @@ import { OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN, OUTPUT_STREAMING_INGESTION_FL
 import { Application, ApplicationCode, LogLevel, MetricsLevel, Runtime } from '@aws-cdk/aws-kinesisanalytics-flink-alpha';
 import {
   Arn,
+  Aspects,
   CfnCondition,
   CfnOutput,
   CfnStack,
@@ -28,11 +29,13 @@ import { Stream } from 'aws-cdk-lib/aws-kinesis';
 import { CfnApplication } from 'aws-cdk-lib/aws-kinesisanalyticsv2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForBucketDeployment, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToSecurityGroup, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResourcesAndHighSPCM, ruleToSuppressCloudWatchLogEncryption } from './common/cfn-nag';
 import { REDSHIFT_MODE } from './common/model';
+import { Parameters } from './common/parameters';
 import { uploadBuiltInJarsAndRemoteFiles } from './common/s3-asset';
 import { SolutionInfo } from './common/solution-info';
-import { getShortIdOfStack } from './common/stack';
+import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
 import {
   createStackParameters,
@@ -217,6 +220,15 @@ export class StreamingIngestionStack extends Stack {
       description: 'Sink Kinesis info json',
       value: sinkStream.kinesisInfoJson,
     });
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 
   private addCfnNag() {
