@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '@aws/clickstream-base-lib';
+import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX, ConditionCategory, MetadataValueType, ExplorePathNodeType } from '@aws/clickstream-base-lib';
 import { CMetadataDisplay } from './display';
 import { PipelineServ } from './pipeline';
-import { ConditionCategory, MetadataValueType } from '../common/explore-types';
 import { MetadataVersionType, PipelineStackType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { groupAssociatedEventParametersByName, groupByParameterByName, getMetadataVersionType, pathNodesToAttribute, getLocalDateISOString, getStackOutputFromPipelineStatus } from '../common/utils';
@@ -195,13 +194,13 @@ export class MetadataEventParameterServ {
       screenIds: [],
     };
     const pageTitles =
-      parameters.find((p: IMetadataEventParameter) => p.name === '_page_title') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.name === ExplorePathNodeType.PAGE_TITLE) as IMetadataEventParameter;
     const pageUrls =
-      parameters.find((p: IMetadataEventParameter) => p.name === '_page_url') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.name === ExplorePathNodeType.PAGE_URL) as IMetadataEventParameter;
     const screenNames =
-      parameters.find((p: IMetadataEventParameter) => p.name === '_screen_name') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.name === ExplorePathNodeType.SCREEN_NAME) as IMetadataEventParameter;
     const screenIds =
-      parameters.find((p: IMetadataEventParameter) => p.name === '_screen_id') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.name === ExplorePathNodeType.SCREEN_ID) as IMetadataEventParameter;
     pathNodes.pageTitles = pathNodesToAttribute(pageTitles?.valueEnum);
     pathNodes.pageUrls = pathNodesToAttribute(pageUrls?.valueEnum);
     pathNodes.screenNames = pathNodesToAttribute(screenNames?.valueEnum);

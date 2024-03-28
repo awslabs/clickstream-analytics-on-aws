@@ -11,12 +11,12 @@
  *  and limitations under the License.
  */
 
+import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, encodeAttributionQueryValueForSql, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters, buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { ReportingService } from './reporting';
-import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 

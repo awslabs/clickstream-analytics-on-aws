@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 import { validSpecialCharacters } from '../../common/request-valid';
 
 export interface CheckParamsStatus {
