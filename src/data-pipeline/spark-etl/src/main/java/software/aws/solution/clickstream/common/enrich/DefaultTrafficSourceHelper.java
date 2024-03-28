@@ -112,7 +112,7 @@ public final class DefaultTrafficSourceHelper {
         List<String> mediumList = Arrays.asList("cpc", "ppc", "retargeting", "paid");
 
         String utmMediumLowercase = utmMedium;
-        if (utmMedium !=null) {
+        if (utmMedium != null) {
             utmMediumLowercase = utmMedium.toLowerCase();
         }
 
