@@ -44,7 +44,9 @@ public class TransformerV3 {
     public static final String USER_FIRST_EVENT_NAME = "first_event_name";
     public static final String USER_LATEST_EVENT_NAME = "latest_event_name";
     public static final String CLIENT_TIMESTAMP = "client_timestamp";
-    DataConverterV3 dataConverter = new DataConverterV3();
+    public static final String DATA_STR = "data_str";
+    private final DataConverterV3 dataConverter = new DataConverterV3();
+    private final Cleaner cleaner = new Cleaner();
 
     public static Dataset<Row> addProcessInfo(final Dataset<Row> dataset) {
         String jobName = ContextUtil.getJobName();
@@ -250,15 +252,22 @@ public class TransformerV3 {
     }
 
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
-        Dataset<Row> datasetWithFileName = dataset.withColumn(INPUT_FILE_NAME, input_file_name());
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, DATA_SCHEMA_V2_FILE_PATH);
+        cleanedDataset = cleanedDataset.drop(DATA)
+                .withColumnRenamed(DATA_STR, DATA);
+
+        ContextUtil.cacheDataset(cleanedDataset);
+        log.info(new ETLMetric(cleanedDataset, "after clean").toString());
+
+        log.info(cleanedDataset.schema().prettyJson());
 
         if (Arrays.asList(dataset.columns()).contains(CLIENT_TIMESTAMP)) {
-            datasetWithFileName = datasetWithFileName.withColumn(UPLOAD_TIMESTAMP, col(CLIENT_TIMESTAMP).cast(DataTypes.LongType));
+            cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, col(CLIENT_TIMESTAMP).cast(DataTypes.LongType));
         } else if (!Arrays.asList(dataset.columns()).contains(UPLOAD_TIMESTAMP)) {
-            datasetWithFileName = datasetWithFileName.withColumn(UPLOAD_TIMESTAMP, lit(null).cast(DataTypes.LongType));
+            cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, lit(null).cast(DataTypes.LongType));
         }
 
-        Dataset<Row> convertedDataset = dataConverter.transform(datasetWithFileName);
+        Dataset<Row> convertedDataset = dataConverter.transform(cleanedDataset);
         convertedDataset.cache();
         log.info("convertedDataset count:" + convertedDataset.count());
 

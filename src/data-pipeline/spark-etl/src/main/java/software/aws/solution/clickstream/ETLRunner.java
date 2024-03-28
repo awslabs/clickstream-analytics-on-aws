@@ -413,7 +413,7 @@ public class ETLRunner {
         }
 
         if (tbName == TableName.SESSION) {
-            return datasetWithPartition.drop(ModelV2.APP_ID, ModelV2.EVENT_TIMESTAMP);
+            return datasetWithPartition.drop(ModelV2.APP_ID);
         }
         return datasetWithPartition;
     }

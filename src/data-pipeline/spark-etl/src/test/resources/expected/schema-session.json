@@ -1,6 +1,11 @@
 {
   "type" : "struct",
   "fields" : [ {
+    "name" : "event_timestamp",
+    "type" : "timestamp",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "user_pseudo_id",
     "type" : "string",
     "nullable" : true,
@@ -88,11 +93,6 @@
   }, {
     "name" : "app_id",
     "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "event_timestamp",
-    "type" : "timestamp",
     "nullable" : true,
     "metadata" : { }
   }, {

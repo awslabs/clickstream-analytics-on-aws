@@ -1,4 +1,5 @@
 {
+  "event_timestamp" : "2023-04-24 07:08:29",
   "user_pseudo_id" : "unique_id_iOS_1",
   "session_id" : "see000201912dk-23u92-1df0020",
   "user_id" : "user_id_iOS_1",
@@ -29,6 +30,5 @@
     "upload_time" : "2023-04-24T06:35:09.102Z"
   },
   "app_id" : "uba-app",
-  "event_timestamp" : "2023-04-24 07:08:29",
   "created_time" : "_CREATED_TIME_"
 }
