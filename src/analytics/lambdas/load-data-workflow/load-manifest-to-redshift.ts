@@ -118,7 +118,8 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
     + `IAM_ROLE '${REDSHIFT_ROLE_ARN}' `
     + 'STATUPDATE ON '
     + 'FORMAT AS PARQUET SERIALIZETOJSON '
-    + 'MANIFEST;'
+    + 'MANIFEST '
+    + 'ACCEPTINVCHARS;'
     ;
 
   try {
