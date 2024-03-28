@@ -460,29 +460,28 @@ export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_V
 export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
 
 export const CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST = [
-  'clickstream_session_view_v1',
-  'clickstream_event_view_v1',
   'clickstream_lifecycle_daily_view_v1',
   'clickstream_lifecycle_weekly_view_v1',
   'clickstream_retention_view_v1',
   'clickstream_device_view_v1',
-  'clickstream_event_parameter_view_v1',
-  'clickstream_event_attr_view_v1',
   'clickstream_lifecycle_view_v1',
   'clickstream_retention_view_v2',
   'clickstream_session_duration_attr_view_v1',
   'clickstream_session_page_attr_view_v1',
   'clickstream_user_first_attr_view_v1',
+  'clickstream_event_parameter_view_v1',
+  'clickstream_event_attr_view_v1',
+  'clickstream_session_view_v1',
+  'clickstream_event_view_v1',
 ];
 
 export const CLICKSTREAM_DEPRECATED_VIEW_LIST = [
-
-  'clickstream_event_view_v2',
   'clickstream_lifecycle_daily_view_v2',
   'clickstream_lifecycle_weekly_view_v2',
   'clickstream_session_view_v2',
   'clickstream_user_attr_view_v1',
   'clickstream_user_dim_view_v1',
+  'clickstream_event_view_v2',
 ];
 
 export const QUICKSIGHT_RESOURCE_NAME_PREFIX = 'clickstream';
