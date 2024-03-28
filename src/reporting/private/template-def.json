@@ -89,7 +89,7 @@
               "DataType": "INTEGER"
             },
             {
-              "Name": "avg_user_engagement_time_msec",
+              "Name": "avg_user_engagement_time_minutes",
               "DataType": "DECIMAL"
             },
             {
@@ -1450,10 +1450,10 @@
                                     },
                                     {
                                         "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.avg_user_engagement_time_msec.8.1711007664420",
+                                            "FieldId": "LogicalTable1.avg_user_engagement_time_minutes.8.1711007664420",
                                             "Column": {
                                                 "DataSetIdentifier": "Day_User_Acquisition",
-                                                "ColumnName": "avg_user_engagement_time_msec"
+                                                "ColumnName": "avg_user_engagement_time_minutes"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "AVERAGE"
@@ -2555,10 +2555,10 @@
                                     },
                                     {
                                         "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.user_engagement_time_msec.3.1711010034447",
+                                            "FieldId": "LogicalTable1.user_engagement_time_minutes.3.1711010034447",
                                             "Column": {
                                                 "DataSetIdentifier": "Page_Screen_View_Detail",
-                                                "ColumnName": "user_engagement_time_msec"
+                                                "ColumnName": "user_engagement_time_minutes"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "SUM"

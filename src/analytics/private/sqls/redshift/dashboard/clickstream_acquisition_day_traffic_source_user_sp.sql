@@ -18,7 +18,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_source' as aggregation_type,
+    'Traffic Source' as aggregation_type,
     first_traffic_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -38,7 +38,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_source-first_traffic_medium' as aggregation_type,
+    'Traffic Source/Medium' as aggregation_type,
     first_traffic_source || '-' || first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -58,7 +58,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_medium' as aggregation_type,
+    'Traffic Medium' as aggregation_type,
     first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -78,7 +78,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_campaign' as aggregation_type,
+    'Traffic Campaign' as aggregation_type,
     first_traffic_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -98,7 +98,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_clid_platform' as aggregation_type,
+    'Traffic Clid Platform' as aggregation_type,
     first_traffic_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -118,7 +118,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_traffic_channel_group' as aggregation_type,
+    'Traffic Channel Group' as aggregation_type,
     first_traffic_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -138,7 +138,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'first_app_install_source' as aggregation_type,
+    'App Install Source' as aggregation_type,
     first_app_install_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -158,7 +158,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_source' as aggregation_type,
+    'Session Source' as aggregation_type,
     session_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -177,7 +177,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_medium' as aggregation_type,
+    'Session Medium' as aggregation_type,
     session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -196,7 +196,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_source - session_medium' as aggregation_type,
+    'Session Source/Medium' as aggregation_type,
     session_source || '-' || session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -215,7 +215,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_campaign' as aggregation_type,
+    'Session Campaign' as aggregation_type,
     session_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -233,7 +233,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_clid_platform' as aggregation_type,
+    'Session Clid Platform' as aggregation_type,
     session_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
@@ -251,7 +251,7 @@ BEGIN
   select 
     event_date,
     platform,
-    'session_channel_group' as aggregation_type,
+    'Session Channel Group' as aggregation_type,
     session_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}

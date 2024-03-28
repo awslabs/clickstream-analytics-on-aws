@@ -12,10 +12,11 @@ select
   event_date,
   platform,
   geo_country,
+  geo_city,
   count(distinct new_user_indicator) as user_count
 from {{database_name}}.{{schema}}.{{baseView}}
 where event_date = day
-group by 1,2,3
+group by 1,2,3,4
 ;
 
 EXCEPTION WHEN OTHERS THEN
