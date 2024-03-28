@@ -1887,11 +1887,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DECIMAL',
               },
               {
-                Name: 'avg_engagement_time_per_session',
+                Name: 'avg_engagement_time_per_session_minutes',
                 Type: 'DECIMAL',
               },
               {
-                Name: 'avg_engagement_time_per_user',
+                Name: 'avg_engagement_time_per_user_minutes',
                 Type: 'DECIMAL',
               },
             ],
@@ -1909,8 +1909,8 @@ describe('DataReportingQuickSightStack resource test', () => {
               'event_date',
               'platform',
               'avg_session_per_user',
-              'avg_engagement_time_per_session',
-              'avg_engagement_time_per_user',
+              'avg_engagement_time_per_session_minutes',
+              'avg_engagement_time_per_user_minutes',
             ],
           },
           {

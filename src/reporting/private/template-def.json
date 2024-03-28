@@ -165,11 +165,11 @@
               "DataType": "DECIMAL"
             },
             {
-              "Name": "avg_engagement_time_per_session",
+              "Name": "avg_engagement_time_per_session_minutes",
               "DataType": "DECIMAL"
             },
             {
-              "Name": "avg_engagement_time_per_user",
+              "Name": "avg_engagement_time_per_user_minutes",
               "DataType": "DECIMAL"
             }
           ]
@@ -1878,10 +1878,10 @@
                                     },
                                     {
                                         "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.avg_engagement_time_per_user.2.1711008934769",
+                                            "FieldId": "LogicalTable1.avg_engagement_time_per_user_minutes.2.1711008934769",
                                             "Column": {
                                                 "DataSetIdentifier": "Engagement_KPI",
-                                                "ColumnName": "avg_engagement_time_per_user"
+                                                "ColumnName": "avg_engagement_time_per_user_minutes"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "SUM"
@@ -1890,10 +1890,10 @@
                                     },
                                     {
                                         "NumericalMeasureField": {
-                                            "FieldId": "LogicalTable1.avg_engagement_time_per_session.3.1711008937937",
+                                            "FieldId": "LogicalTable1.avg_engagement_time_per_session_minutes.3.1711008937937",
                                             "Column": {
                                                 "DataSetIdentifier": "Engagement_KPI",
-                                                "ColumnName": "avg_engagement_time_per_session"
+                                                "ColumnName": "avg_engagement_time_per_session_minutes"
                                             },
                                             "AggregationFunction": {
                                                 "SimpleNumericalAggregation": "SUM"
@@ -1949,13 +1949,13 @@
                                     },
                                     {
                                         "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.avg_engagement_time_per_user.2.1711008934769",
+                                            "FieldId": "LogicalTable1.avg_engagement_time_per_user_minutes.2.1711008934769",
                                             "Visibility": "VISIBLE"
                                         }
                                     },
                                     {
                                         "FieldTooltipItem": {
-                                            "FieldId": "LogicalTable1.avg_engagement_time_per_session.3.1711008937937",
+                                            "FieldId": "LogicalTable1.avg_engagement_time_per_session_minutes.3.1711008937937",
                                             "Visibility": "VISIBLE"
                                         }
                                     }

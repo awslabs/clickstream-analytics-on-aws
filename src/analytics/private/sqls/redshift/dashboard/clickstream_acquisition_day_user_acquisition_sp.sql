@@ -10,6 +10,7 @@ DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
 drop table if exists event_traffic_tmp_tb;
 create temp table event_traffic_tmp_tb as (
     SELECT 
+        merged_user_id as user_id,
         session_id,
         COUNT(DISTINCT event_id) AS event_cnt,
         SUM(CASE WHEN event_name = '_page_view' OR event_name = '_screen_view' THEN 1 ELSE 0 END) AS session_views,
@@ -25,7 +26,7 @@ create temp table event_traffic_tmp_tb as (
     WHERE
         event_date = day
     GROUP BY 
-        session_id
+        1,2
 );
 
 -- first_traffic_source
@@ -34,6 +35,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -45,6 +47,7 @@ with tmp2 AS (
     SELECT 
         session_id,
         platform,
+        merged_user_id as user_id,
         MAX(first_traffic_source) AS first_traffic_source
     FROM 
         {{database_name}}.{{schema}}.{{baseView}}
@@ -58,6 +61,7 @@ SELECT
     'Traffic Source' as aggregation_type,
     tmp2.first_traffic_source as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -69,7 +73,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- first_traffic_source/medium
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -77,6 +81,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -102,6 +107,7 @@ SELECT
     'Traffic Source/Medium' as aggregation_type,
     tmp2.first_traffic_source || '-' || tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -113,7 +119,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- first_traffic_medium
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -121,6 +127,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -145,6 +152,7 @@ SELECT
     'Traffic Medium' as aggregation_type,
     tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -156,7 +164,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- first_traffic_campaign
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -164,6 +172,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -188,6 +197,7 @@ SELECT
     'Traffic Campaign' as aggregation_type,
     tmp2.first_traffic_campaign as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -199,7 +209,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 -- first_traffic_clid_platform
@@ -208,6 +218,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -232,6 +243,7 @@ SELECT
     'Traffic Clid Platform' as aggregation_type,
     tmp2.first_traffic_clid_platform as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -243,7 +255,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 -- first_traffic_channel_group,
@@ -252,6 +264,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -276,6 +289,7 @@ SELECT
     'Traffic Channel Group' as aggregation_type,
     tmp2.first_traffic_channel_group as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -287,7 +301,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 -- first_app_install_source
@@ -296,6 +310,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -320,6 +335,7 @@ SELECT
     'App Install Source' as aggregation_type,
     tmp2.first_app_install_source as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -331,7 +347,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 -- session_source,
@@ -340,6 +356,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -364,6 +381,7 @@ SELECT
     'Session Source' as aggregation_type,
     tmp2.session_source as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -375,7 +393,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- session_medium,
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -383,6 +401,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -407,6 +426,7 @@ SELECT
     'Session Medium' as aggregation_type,
     tmp2.session_medium as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -418,7 +438,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- session_source/medium,
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -426,6 +446,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -451,6 +472,7 @@ SELECT
     'Session Source / Medium' as aggregation_type,
     tmp2.session_source || '-' || tmp2.session_medium as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -462,7 +484,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 -- session_campaign,
@@ -471,6 +493,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -495,6 +518,7 @@ SELECT
     'Session Campaign' as aggregation_type,
     tmp2.session_campaign as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -506,7 +530,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- session_clid_platform,
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -514,6 +538,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -538,6 +563,7 @@ SELECT
     'Session Clid Platform' as aggregation_type,
     tmp2.session_clid_platform as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -549,7 +575,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 -- session_channel_group
 INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
@@ -557,6 +583,7 @@ INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquis
     aggregation_type,
     aggregation_dim,
     platform, 
+    user_id,
     new_user_cnt,
     session_cnt,
     engagement_session_cnt,
@@ -581,6 +608,7 @@ SELECT
     'Session Channel Group' as aggregation_type,
     tmp2.session_channel_group as aggregation_dim,
     tmp2.platform,
+    user_id,
     SUM(tmp1.new_user_indicator) AS new_user_cnt,
     COUNT(tmp1.session_id) AS session_cnt,
     SUM(tmp1.session_indicator) AS engagement_session_cnt,
@@ -592,7 +620,7 @@ FROM
 JOIN 
     event_traffic_tmp_tb tmp1 ON tmp2.session_id = tmp1.session_id
 GROUP BY 
-    1, 2, 3, 4;
+    1, 2, 3, 4, 5;
 
 
 DROP TABLE IF EXISTS event_traffic_tmp_tb;
