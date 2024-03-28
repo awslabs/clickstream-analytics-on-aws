@@ -26,5 +26,5 @@ public class Version {
     private String brand;
 
     @JsonProperty("version")
-    private String version;
+    private String version;  //NOSONAR
 }

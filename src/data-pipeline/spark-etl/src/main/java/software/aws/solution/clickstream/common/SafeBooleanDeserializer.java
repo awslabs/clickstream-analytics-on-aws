@@ -24,7 +24,7 @@ public class SafeBooleanDeserializer extends JsonDeserializer<Boolean> {
     public Boolean deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
         String value = p.getText();
         if (value == null || value.isEmpty() || value.equals("null")) {
-            return null;
+            return null; //NOSONAR
         }
 
         if (value.equals("1")) {

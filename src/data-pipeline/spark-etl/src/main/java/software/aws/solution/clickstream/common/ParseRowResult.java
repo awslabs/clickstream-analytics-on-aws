@@ -21,7 +21,7 @@ import java.util.*;
 
 @Getter
 public class ParseRowResult {
-    private List<ClickstreamEvent> clickstreamEventList = new ArrayList<>();
-    private List<ClickstreamUser> clickstreamUserList  = new ArrayList<>();
-    private List<ClickstreamItem> clickstreamItemList  = new ArrayList<>();
+    private List<ClickstreamEvent> clickstreamEventList = new ArrayList<>(); //NOSONAR
+    private List<ClickstreamUser> clickstreamUserList  = new ArrayList<>(); //NOSONAR
+    private List<ClickstreamItem> clickstreamItemList  = new ArrayList<>(); //NOSONAR
 }

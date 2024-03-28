@@ -21,7 +21,7 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Brand {
     @JsonProperty("brand")
-    private String brand;
+    private String brand; //NOSONAR
 
     @JsonProperty("version")
     private String version;
