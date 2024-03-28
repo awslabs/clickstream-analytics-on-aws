@@ -769,8 +769,8 @@
               "DataType": "STRING"
             },
             {
-              "Name": "user_engagement_time_msec",
-              "DataType": "INTEGER"
+              "Name": "user_engagement_time_minutes",
+              "DataType": "DECIMAL"
             },
             {
               "Name": "event_id",
