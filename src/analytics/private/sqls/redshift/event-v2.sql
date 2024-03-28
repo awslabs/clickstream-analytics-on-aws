@@ -137,9 +137,9 @@ CREATE TABLE IF NOT EXISTS {{schema}}.event_v2 (
     page_view_entrances bool,
     -- METADATA {"name":"app_start_is_first_time","dataType":"boolean","category":"app_info","displayName":{"en-US":"App start first time","zh-CN":"首次打开应用"},"description":{"en-US":"Is the first time open app","zh-CN":"是否是首次打开应用"}}
     app_start_is_first_time bool,
-    -- METADATA {"name":"upgrade_previous_app_version","dataType":"boolean","category":"upgrade","displayName":{"en-US":"Upgrade previous app version","zh-CN":"应用升级前的版本"},"description":{"en-US":"The version before app upgrade.","zh-CN":"应用升级前的版本"}}
+    -- METADATA {"name":"upgrade_previous_app_version","dataType":"string","category":"upgrade","displayName":{"en-US":"Upgrade previous app version","zh-CN":"应用升级前的版本"},"description":{"en-US":"The version before app upgrade.","zh-CN":"应用升级前的版本"}}
     upgrade_previous_app_version varchar(255),
-    -- METADATA {"name":"upgrade_previous_os_version","dataType":"boolean","category":"upgrade","displayName":{"en-US":"Upgrade previous OS version","zh-CN":"操作系统升级前的版本"},"description":{"en-US":"The version before OS upgrade.","zh-CN":"操作系统升级前的版本"}}
+    -- METADATA {"name":"upgrade_previous_os_version","dataType":"string","category":"upgrade","displayName":{"en-US":"Upgrade previous OS version","zh-CN":"操作系统升级前的版本"},"description":{"en-US":"The version before OS upgrade.","zh-CN":"操作系统升级前的版本"}}
     upgrade_previous_os_version varchar(255),
     -- METADATA {"name":"search_key","dataType":"string","category":"search","displayName":{"en-US":"Search key","zh-CN":"搜索关键词"},"description":{"en-US":"The name of the search keyword","zh-CN":"搜索关键词"}}
     search_key varchar(2048),
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.event_v2 (
     outbound_link_id varchar(2048),
     -- METADATA {"name":"outbound_link_url","dataType":"string","category":"outbound","displayName":{"en-US":"Outbound Link URL","zh-CN":"外链URL"},"description":{"en-US":"The URL of the outbound link","zh-CN":"外链URL"}}
     outbound_link_url varchar(65535),
-    -- METADATA {"name":"outbound_link_text","dataType":"boolean","category":"outbound","displayName":{"en-US":"Outbound Link","zh-CN":"是否外链"},"description":{"en-US":"If the domain is not in configured domain list, the attribute value is true","zh-CN":"如果该域不在配置的域名列表中，则属性值为true"}}
+    -- METADATA {"name":"outbound_link","dataType":"boolean","category":"outbound","displayName":{"en-US":"Outbound Link","zh-CN":"是否外链"},"description":{"en-US":"If the domain is not in configured domain list, the attribute value is true","zh-CN":"如果该域不在配置的域名列表中，则属性值为true"}}
     outbound_link bool,
     user_engagement_time_msec bigint,
     user_id varchar(255),
