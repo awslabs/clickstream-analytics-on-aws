@@ -116,6 +116,7 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;
+  readonly lambdaCodeHash: string;
 }
 
 export type AssociateIAMRoleToRedshift = CustomProperties & {
