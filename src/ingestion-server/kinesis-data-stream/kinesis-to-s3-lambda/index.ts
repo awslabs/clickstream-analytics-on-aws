@@ -69,7 +69,6 @@ async function stringToS3(dataLines: string[], key: string) {
 function recordToJsonLine(record: KinesisStreamRecord): string {
   const stringData = decode(record.kinesis.data);
   const jsonData = JSON.parse(stringData);
-  jsonData.ingest_time = new Date().getTime();
   const oneLineJsonData = JSON.stringify(jsonData);
   return oneLineJsonData;
 }
