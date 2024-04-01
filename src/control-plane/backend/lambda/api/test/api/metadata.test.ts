@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, ExplorePathNodeType, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExplorePathNodeType, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType, ConditionCategoryFrontend } from '@aws/clickstream-base-lib';
 import {
   SFNClient, StartExecutionCommand,
 } from '@aws-sdk/client-sfn';
@@ -604,7 +604,7 @@ describe('Metadata Event test', () => {
     expect(res.body.data.associatedParameters.length).toEqual(57);
     expect(res.body.data.associatedParameters).toContainEqual({
       appId: MOCK_APP_ID,
-      category: 'app_info',
+      category: ConditionCategoryFrontend.APP_INFO,
       description: {
         'en-US': 'Store where applications are installed',
         'zh-CN': '安装应用程序的商店',
@@ -614,7 +614,7 @@ describe('Metadata Event test', () => {
         'zh-CN': '应用程序安装商店',
       },
       eventName: '_first_open',
-      id: 'project_8888_8888#app_7777_7777#_first_open#app_info#install_source#string',
+      id: `project_8888_8888#app_7777_7777#_first_open#${ConditionCategoryFrontend.APP_INFO}#install_source#string`,
       metadataSource: MetadataSource.PRESET,
       month: '#202303',
       name: MOCK_EVENT_PARAMETER_NAME,
@@ -1182,13 +1182,13 @@ describe('Metadata Event test V2', () => {
     expect(res.body.data.month).toEqual('latest');
     expect(res.body.data.associatedParameters.length).toEqual(57);
     expect(res.body.data.associatedParameters).toContainEqual({
-      id: 'project_8888_8888#app_7777_7777#app_info#install_source#string',
+      id: `project_8888_8888#app_7777_7777#${ConditionCategoryFrontend.APP_INFO}#install_source#string`,
       month: 'latest',
       prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
       projectId: MOCK_PROJECT_ID,
       appId: MOCK_APP_ID,
       name: MOCK_EVENT_PARAMETER_NAME,
-      category: 'app_info',
+      category: ConditionCategoryFrontend.APP_INFO,
       valueType: MetadataValueType.STRING,
       platform: [],
       displayName: {
@@ -1493,10 +1493,10 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=app_info&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategoryFrontend.APP_INFO}&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#app_info#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
+    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategoryFrontend.APP_INFO}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
     expect(res.body.data.month).toEqual('#202303');
     expect(res.body.data.associatedEvents.length).toEqual(17);
     expect(res.body.data.associatedEvents).toContainEqual({

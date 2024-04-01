@@ -557,7 +557,6 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
   });
 }
 
-//todo event_date
 export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -744,7 +743,6 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
-//todo
 export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string {
 
   let midTableSql = '';

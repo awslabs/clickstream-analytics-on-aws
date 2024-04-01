@@ -107,6 +107,18 @@ export enum ConditionCategory {
   EVENT_OUTER = 'event_outer',
 }
 
+export enum ConditionCategoryFrontend {
+  USER = 'user',
+  USER_OUTER = 'user_outer',
+  EVENT = 'event',
+  EVENT_OUTER = 'event_outer',
+  APP_INFO = 'app_info',
+  DEVICE = 'app_info',
+  TRAFFIC_SOURCE = 'app_info',
+  GEO = 'app_info',
+  OTER = 'other'
+}
+
 export enum ExploreLocales {
   ZH_CN = 'zh-CN',
   EN_US = 'en-US'
