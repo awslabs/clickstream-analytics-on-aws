@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_retention_event_overtime_sp(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{database_name}}.{{schema}}.clickstream_retention_event_overtime where event_date = day;
+DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = day;
 
-INSERT INTO {{database_name}}.{{schema}}.clickstream_retention_event_overtime (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
 event_date, 
 platform, 
 event_cnt
@@ -22,7 +22,7 @@ group by 1,2
 ;
 
 EXCEPTION WHEN OTHERS THEN
-    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_retention_event_overtime', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('{{viewName}}', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$

@@ -1,8 +1,9 @@
-CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.clickstream_retention_user_new_return (
+CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}} (
     event_date date,
     platform varchar(255),
     user_type varchar(50),
-    user_cnt bigint
+    user_cnt bigint,
+    update_timestamp timestamp DEFAULT getdate()
 )
 BACKUP YES
 SORTKEY(event_date)

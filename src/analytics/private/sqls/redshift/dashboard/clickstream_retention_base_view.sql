@@ -5,10 +5,10 @@ AUTO REFRESH NO
 AS
 select
   user_pseudo_id,
-  first_visit_date as first_date,
-  DATE_DIFF('day', first_visit_date, DATE(CONVERT_TIMEZONE('Asia/Shanghai', event_timestamp))) as day_diff
+  DATE(CONVERT_TIMEZONE('{{timezone}}', TIMESTAMP 'epoch' + first_touch_time_msec/1000 * INTERVAL '1 second')) as first_date,
+  DATE_DIFF('day', DATE(CONVERT_TIMEZONE('{{timezone}}', TIMESTAMP 'epoch' + first_touch_time_msec/1000 * INTERVAL '1 second')), DATE(CONVERT_TIMEZONE('{{timezone}}', event_timestamp))) as day_diff
 from {{database_name}}.{{schema}}.{{baseView}}
-where event_timestamp >= first_visit_date
-and DATE_DIFF('day', first_visit_date, DATE(CONVERT_TIMEZONE('Asia/Shanghai', event_timestamp)))<= 42 
+where event_timestamp >= TIMESTAMP 'epoch' + first_touch_time_msec/1000 * INTERVAL '1 second'
+and day_diff <= 42 
 group by 1,2,3
 ;

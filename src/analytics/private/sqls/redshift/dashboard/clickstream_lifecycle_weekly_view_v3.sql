@@ -22,12 +22,15 @@ calculated as (
     count(user_pseudo_id) as total_users
   from (
     select time_period_week,
-      case when lag is null then '1-NEW'
+      case when lag is null or lag = 0 then '1-NEW'
         when lag_size = 1 then '2-ACTIVE'
         when lag_size > 1 then '3-RETURN'
       end as this_week_value,
-      case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
+      case when (lead_size > 1 OR lead_size IS NULL OR lead_size =0 ) then '0-CHURN'
         else NULL
+      end as next_week_churn,
+      case when lead_size = 1 then NULL
+        else '0-CHURN'
       end as next_week_churn,
       user_pseudo_id
     from lag_lead_with_diffs

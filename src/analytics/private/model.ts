@@ -92,7 +92,7 @@ export interface CustomProperties {
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
-  readonly type?: 'mv' | 'sp'; //materialized view or stored procedure
+  readonly type?: 'mv' | 'sp' | 'table' | 'view';
   readonly scheduleRefresh?: 'true' | 'false';
 }
 
@@ -102,6 +102,7 @@ export type SQLDef = SQLBasic & {
 
 export type SQLViewDef = SQLBasic & {
   readonly viewName: string;
+  readonly spName?: string;
 }
 
 export type CreateDatabaseAndSchemas = CustomProperties & {

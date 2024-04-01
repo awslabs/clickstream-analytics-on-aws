@@ -1,11 +1,11 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition_sp(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition where event_date = day;
+DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = day;
 
 drop table if exists event_traffic_tmp_tb;
 create temp table event_traffic_tmp_tb as (
@@ -30,7 +30,7 @@ create temp table event_traffic_tmp_tb as (
 );
 
 -- first_traffic_source
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -76,7 +76,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- first_traffic_source/medium
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -122,7 +122,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- first_traffic_medium
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -167,7 +167,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- first_traffic_campaign
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -213,7 +213,7 @@ GROUP BY
 
 
 -- first_traffic_clid_platform
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -259,7 +259,7 @@ GROUP BY
 
 
 -- first_traffic_channel_group,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -305,7 +305,7 @@ GROUP BY
 
 
 -- first_app_install_source
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -351,7 +351,7 @@ GROUP BY
 
 
 -- session_source,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -396,7 +396,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- session_medium,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -441,7 +441,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- session_source/medium,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -488,7 +488,7 @@ GROUP BY
 
 
 -- session_campaign,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -533,7 +533,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- session_clid_platform,
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -578,7 +578,7 @@ GROUP BY
     1, 2, 3, 4, 5;
 
 -- session_channel_group
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_day_user_acquisition (
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
     aggregation_dim,
@@ -626,7 +626,7 @@ GROUP BY
 DROP TABLE IF EXISTS event_traffic_tmp_tb;
 
 EXCEPTION WHEN OTHERS THEN
-    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_acquisition_day_user_acquisition', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('{{viewName}}', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$;

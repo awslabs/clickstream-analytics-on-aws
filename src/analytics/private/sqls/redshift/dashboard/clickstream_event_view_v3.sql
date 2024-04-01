@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{database_name}}.{{schema}}.clickstream_event_view_v3
+CREATE MATERIALIZED VIEW {{database_name}}.{{schema}}.{{viewName}}
 BACKUP YES
 SORTKEY (event_timestamp) 
 AUTO REFRESH NO
@@ -137,7 +137,7 @@ SELECT
   CASE WHEN event_name = '_first_open' THEN COALESCE(u.user_id, e.user_pseudo_id) ELSE NULL END as new_user_indicator,
   CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
   CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator,
-  TO_TIMESTAMP(TO_CHAR(e.event_timestamp AT TIME ZONE '{{timezone}}', 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') as event_timestamp_local
+  CONVERT_TIMEZONE('{{timezone}}', e.event_timestamp) AT TIME ZONE 'UTC' as event_timestamp_local
 FROM 
     {{database_name}}.{{schema}}.event_v2 as e
 JOIN 

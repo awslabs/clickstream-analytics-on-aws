@@ -1,13 +1,13 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user_sp (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
 
 BEGIN
 
-DELETE FROM {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user where event_date = day;
+DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = day;
 
-INSERT INTO {{database_name}}.{{schema}}.clickstream_acquisition_country_new_user (event_date, platform, geo_country, user_count)
+INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (event_date, platform, geo_country, user_count)
 select 
   event_date,
   platform,
@@ -20,7 +20,7 @@ group by 1,2,3,4
 ;
 
 EXCEPTION WHEN OTHERS THEN
-    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('clickstream_acquisition_country_new_user', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('{{viewName}}', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$;

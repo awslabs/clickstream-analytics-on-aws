@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{database_name}}.{{schema}}.clickstream_item_view_v1 AS
+CREATE OR REPLACE VIEW {{database_name}}.{{schema}}.{{viewName}} AS
 SELECT 
   item_id,
   name,
