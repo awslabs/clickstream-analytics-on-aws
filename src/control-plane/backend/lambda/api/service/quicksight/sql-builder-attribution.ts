@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
-import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_USER_VIEW, EventAndCondition, buildAllConditionSql, buildColNameWithPrefix, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
 import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
@@ -462,103 +462,21 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
   });
 }
 
-export function buildBaseDataForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
+export function buildBaseDataForAttribution(eventNames: string[], sqlParameters: AttributionSQLParameters) : string {
 
-  let resultSql = 'with';
-  const commonConditionSql = buildCommonConditionSql(params as BaseSQLParameters, 'event.');
+  // build column sql from event condition
+  const eventConditionProps = buildAttributionEventConditionProps(sqlParameters);
+  const eventColumnSql = buildColumnsSqlFromConditions(eventConditionProps.eventNonNestAttributes.concat(eventConditionProps.eventAttributes), 'event').columnsSql;
 
-  const eventConditionProps = buildAttributionEventConditionProps(params);
-  let eventJoinTable = '';
-  let baseUserDataSql = '';
-  let eventColList: string[] = [];
+  // build column sql from user condition
+  const userConditionProps = _getUserConditionProps(sqlParameters);
+  const userColumnSql = buildColumnsSqlFromConditions(userConditionProps.userAttributes, 'event');
 
-  const eventNonNestColProps = buildNecessaryEventColumnsSql(eventConditionProps);
-  const baseEventDataSql = _buildBaseEventDataSql(eventNames, params, eventNonNestColProps);
+  // build base data sql
+  const baseDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnSql, userColumnSql.columnsSql);
 
-  if (eventConditionProps.hasEventAttribute) {
-    const eventAttributes: ColumnAttribute[] = [];
-    eventAttributes.push(...eventConditionProps.eventAttributes);
-    const eventCommonColumnsSql = buildCommonColumnsSql(eventAttributes, 'event_param_key', 'event_param_{{}}_value');
-    eventColList = eventCommonColumnsSql.columns;
-    eventJoinTable = buildEventJoinTable(params.dbName + '.' + params.schemaName, eventCommonColumnsSql.columnsSql);
-  }
-
-  const userConditionProps = _getUserConditionProps(params);
-  let userJoinTable = '';
-  let userColList: string[] = [];
-  if (userConditionProps.hasNestUserAttribute || userConditionProps.hasOuterUserAttribute) {
-
-    baseUserDataSql = _buildBaseUserDataSql(params, userConditionProps.hasNestUserAttribute);
-
-    const userAttributes = [];
-    userAttributes.push(...userConditionProps.userAttributes);
-    const userCommonColumnsSql = buildCommonColumnsSql(userAttributes, 'user_param_key', 'user_param_{{}}_value');
-    userColList = userCommonColumnsSql.columns;
-    userJoinTable = buildUserJoinTable(userCommonColumnsSql.columnsSql);
-  }
-
-  userColList.push(...eventColList);
-  userColList = [...new Set(userColList)];
-
-  let nestColList = userColList.join(',');
-  if (nestColList !== '') {
-    nestColList += ',';
-  }
-
-  if (!userConditionProps.hasNestUserAttribute && !eventConditionProps.hasEventAttribute) {
-
-    let userOuterSql = '';
-    let userOuterCol = '';
-    if (userConditionProps.hasOuterUserAttribute) {
-      userOuterCol = ',user_base.*';
-      userOuterSql = `
-      join 
-        (
-          ${_buildBaseUserDataTableSql(params, false, '_join')}
-        ) as user_base
-        on event_base.user_pseudo_id = user_base.user_pseudo_id_join
-    `;
-    }
-
-    resultSql = resultSql.concat(
-      `
-        base_data as (
-          select 
-             event_base.*
-            ${userOuterCol}
-          from
-          (
-            ${_buildBaseEventDataTableSQL(eventNames, params, eventNonNestColProps)}
-          ) as event_base
-          ${userOuterSql}
-          where 1=1
-          ${commonConditionSql.globalConditionSql}
-        ),
-        `,
-    );
-
-  } else {
-    resultSql = resultSql.concat(
-      `
-        ${baseUserDataSql}
-        ${baseEventDataSql}
-        base_data as (
-          select 
-            ${nestColList}
-            event_base.*
-          from event_base
-          ${eventJoinTable}
-          ${userJoinTable}
-          where 1=1
-          ${commonConditionSql.globalConditionSql}
-        ),
-      `,
-    );
-  }
-
-  return format(resultSql, { language: 'postgresql' });
+  return format(baseDataSql, { language: 'postgresql' });
 }
-
 
 function getCustomTouchPointNamesSql(params: AttributionSQLParameters) {
   let touchPointNamesSql = `touch_point_names as (
@@ -604,23 +522,23 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       timeWindowSql = `
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         and TO_CHAR(
-          TIMESTAMP 'epoch' + cast(target_data.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          target_data.event_timestamp,
           'YYYY-MM-DD'
         ) = TO_CHAR(
-          TIMESTAMP 'epoch' + cast(touch_point_data_3.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          touch_point_data_3.event_timestamp,
           'YYYY-MM-DD'
         )
       `;
       break;
     case ExploreAttributionTimeWindowType.CUSTOMIZE:
       timeWindowSql = `
-        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * cast(1000 as bigint) )
+        and (EXTRACT(epoch FROM target_data.event_timestamp - touch_point_data_3.event_timestamp) <= cast(${params.timeWindowInSeconds} as bigint) )
       `;
       break;
     default:
-      sessionIdColSql = ',_session_id';
+      sessionIdColSql = ',session_id';
       timeWindowSql = `
-        and target_data._session_id = touch_point_data_3._session_id
+        and target_data.session_id = touch_point_data_3.session_id
       `;
   }
 
@@ -722,7 +640,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         ${timeWindowSql}
         where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
-        and TIMESTAMP 'epoch' + target_data.event_timestamp/1000 * INTERVAL '1 second' >= ${_buildConversionStartDateSql(params)}
+        and target_data.event_timestamp >= ${_buildConversionStartDateSql(params)}
     ),
   `;
 
@@ -803,8 +721,8 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   if (sqlParameters.timeWindowType === ExploreAttributionTimeWindowType.SESSION) {
     hasEventAttribute = hasEventAttribute || true;
     eventAttributes.push({
-      category: ConditionCategory.EVENT,
-      property: '_session_id',
+      category: ConditionCategory.EVENT_OUTER,
+      property: 'session_id',
       dataType: MetadataValueType.STRING,
     });
   }
@@ -817,29 +735,32 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
   };
 }
 
-function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters, eventNonNestColProps: EventNonNestColProps) {
+function _buildBaseEventDataSql(eventNames: string[], sqlParameters: AttributionSQLParameters, eventColumnSql: string,
+  userColumnSql: string) {
 
-  return `
-    event_base as (
-      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, eventNonNestColProps)}
-  ),
-  `;
-}
-
-function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: AttributionSQLParameters, eventNonNestColProps: EventNonNestColProps) {
   const eventDateSQL = buildEventDateSql(sqlParameters as BaseSQLParameters, 'event.', sqlParameters.timeWindowInSeconds);
   const eventNameClause = _buildEventNameClause(eventNames);
+  let globalConditionSql = buildAllConditionSql(sqlParameters.globalEventCondition);
+  globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
   return `
-    select
-      ${eventNonNestColProps.sql},
-      user_pseudo_id,
-      user_id
-    from
-      ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_TABLE} as event
-    where
+    with base_data as (
+      select
+        event.event_id,
+        event.event_name,
+        event.event_timestamp,
+        event.user_pseudo_id,
+        event.user_id,
+        ${eventColumnSql}
+        ${userColumnSql}
+        ${buildDateUnitsSql()}
+      from
+        ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
+      where
         ${eventDateSQL}
         ${eventNameClause}
+        ${globalConditionSql}
+    ),
   `;
 }
 
@@ -916,45 +837,4 @@ function _getUserConditionProps(sqlParameters: AttributionSQLParameters) {
     hasOuterUserAttribute,
     userAttributes,
   };
-}
-
-function _buildBaseUserDataSql(sqlParameters: AttributionSQLParameters, hasNestParams: boolean) {
-
-  return `
-    user_base as (
-      ${_buildBaseUserDataTableSql(sqlParameters, hasNestParams)}
-  ),
-  `;
-}
-
-function _buildBaseUserDataTableSql(sqlParameters: AttributionSQLParameters, hasNestParams: boolean, suffix: string ='') {
-
-  let nestParamSql = '';
-  let nextColSQL = '';
-  if (hasNestParams) {
-    nestParamSql = `,
-      user_properties.key:: varchar as user_param_key,
-      user_properties.value.string_value::varchar as user_param_string_value,
-      user_properties.value.int_value::bigint as user_param_int_value,
-      user_properties.value.float_value::double precision as user_param_float_value,
-      user_properties.value.double_value::double precision as user_param_double_value
-    `;
-    nextColSQL = ', u.user_properties as user_properties';
-  }
-
-  return `
-    select
-      user_pseudo_id${suffix},
-      user_id as user_id${suffix},
-      user_first_touch_timestamp,
-      _first_visit_date,
-      _first_referer,
-      _first_traffic_source_type,
-      _first_traffic_medium,
-      _first_traffic_source,
-      _channel
-      ${nestParamSql}
-    from
-      ${sqlParameters.dbName}.${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
-  `;
 }

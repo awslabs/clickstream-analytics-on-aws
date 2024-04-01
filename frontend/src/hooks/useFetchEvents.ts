@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { Segment } from '@aws/clickstream-base-lib';
+import {
+  IMetadataBuiltInList,
+  MetadataParameterType,
+  Segment,
+} from '@aws/clickstream-base-lib';
 import { SelectProps } from '@cloudscape-design/components';
 import {
   getBuiltInMetadata,
@@ -27,7 +31,6 @@ import {
 } from 'pages/analytics/analytics-utils';
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { IMetadataBuiltInList, MetadataParameterType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 
 export interface EventDataType {
