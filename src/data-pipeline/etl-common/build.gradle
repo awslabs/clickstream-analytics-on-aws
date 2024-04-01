@@ -1,0 +1,105 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "org.barfuin.gradle.jacocolog:gradle-jacoco-log:${jacocoLogVersion}"
+  }
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'org.barfuin.gradle.jacocolog'
+apply plugin: 'application'
+
+apply from: "${rootProject.projectDir}/gradle/config/scripts/idea.gradle"
+apply from: "${rootProject.projectDir}/gradle/config/scripts/style.gradle"
+apply from: "${rootProject.projectDir}/gradle/config/scripts/coverage.gradle"
+
+group = "$group"
+version = "$projectVersion"
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
+
+    // This dependency is used by the application.
+    implementation "com.google.guava:guava:$guavaVersion"
+
+    // For Ip to Geo.
+    implementation "com.maxmind.db:maxmind-db:$maxmindDbVersion"
+
+    // For UA.
+    implementation "com.github.ua-parser:uap-java:$uapJavaVersion"
+
+    // fasterxml
+    implementation "com.fasterxml.jackson.core:jackson-core:$fasterxmlJacksonCoreVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$fasterxmlJacksonDatabindVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$fasterxmlJacksonAnnotationsVersion"
+
+    // lombok related.
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+    testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
+
+    // test related
+    testImplementation("org.assertj:assertj-core:$assertJVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    // slf4j
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.slf4j:slf4j-simple:$slf4jVersion"
+
+    // log4j 2
+    implementation "org.apache.logging.log4j:log4j-api:$log4j2Version"
+    implementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    implementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+}
+
+// https://stackoverflow.com/questions/73465937/apache-spark-3-3-0-breaks-on-java-17-with-cannot-access-class-sun-nio-ch-direct
+var sparkJava17CompatibleJvmArgs = [
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+        "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED",
+        "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+        "--add-opens=java.base/sun.nio.cs=ALL-UNNAMED",
+        "--add-opens=java.base/sun.security.action=ALL-UNNAMED",
+        "--add-opens=java.base/sun.util.calendar=ALL-UNNAMED",
+        "--add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED",
+]
+
+tasks.named('test') {
+    jvmArgs += sparkJava17CompatibleJvmArgs
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+            xml.enabled true
+            csv.enabled true
+            html.enabled true
+    }
+}
+
+installDist {
+    into '/tmp/etl-common'
+}

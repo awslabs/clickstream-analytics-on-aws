@@ -19,6 +19,7 @@ import org.apache.spark.sql.*;
 import org.apache.spark.sql.api.java.*;
 import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
 
 import java.util.*;
@@ -42,27 +43,27 @@ public class MaxLengthTransformerV2 {
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.EVENT_ID,
-                        ModelV2.EVENT_NAME,
-                        ModelV2.PLATFORM,
-                        ModelV2.USER_PSEUDO_ID,
-                        ModelV2.USER_ID,
-                        ModelV2.ITEM_ID,
-                        ModelV2.NAME,
-                        ModelV2.BRAND,
-                        ModelV2.CURRENCY,
-                        ModelV2.CREATIVE_NAME,
-                        ModelV2.CREATIVE_SLOT,
-                        ModelV2.LOCATION_ID,
-                        ModelV2.CATEGORY,
-                        ModelV2.CATEGORY2,
-                        ModelV2.CATEGORY3,
-                        ModelV2.CATEGORY4,
-                        ModelV2.CATEGORY5
+                        Constant.EVENT_ID,
+                        Constant.EVENT_NAME,
+                        Constant.PLATFORM,
+                        Constant.USER_PSEUDO_ID,
+                        Constant.USER_ID,
+                        Constant.ITEM_ID,
+                        Constant.NAME,
+                        Constant.BRAND,
+                        Constant.CURRENCY,
+                        Constant.CREATIVE_NAME,
+                        Constant.CREATIVE_SLOT,
+                        Constant.LOCATION_ID,
+                        Constant.CATEGORY,
+                        Constant.CATEGORY2,
+                        Constant.CATEGORY3,
+                        Constant.CATEGORY4,
+                        Constant.CATEGORY5
                 ), MAX_STRING_VALUE_LEN_255)
         );
 
-        columnsMaxLengthList.add(new ColumnsMaxLength(Arrays.asList(ModelV2.CUSTOM_PARAMETERS_JSON_STR), MAX_STRING_VALUE_LEN_255));
+        columnsMaxLengthList.add(new ColumnsMaxLength(Arrays.asList(Constant.CUSTOM_PARAMETERS_JSON_STR), MAX_STRING_VALUE_LEN_255));
 
         Dataset<Row> newItemsDataset2 = new MaxLengthTransformerV2().transform(newItemsDataset1, columnsMaxLengthList);
         return newItemsDataset2.select(
@@ -74,28 +75,28 @@ public class MaxLengthTransformerV2 {
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.USER_PSEUDO_ID,
-                        ModelV2.USER_ID,
-                        ModelV2.FIRST_TRAFFIC_SOURCE,
-                        ModelV2.FIRST_TRAFFIC_MEDIUM,
-                        ModelV2.FIRST_TRAFFIC_CAMPAIGN,
-                        ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID,
-                        ModelV2.FIRST_TRAFFIC_CLID_PLATFORM,
-                        ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP,
-                        ModelV2.FIRST_TRAFFIC_CATEGORY,
-                        ModelV2.FIRST_APP_INSTALL_SOURCE
+                        Constant.USER_PSEUDO_ID,
+                        Constant.USER_ID,
+                        Constant.FIRST_TRAFFIC_SOURCE,
+                        Constant.FIRST_TRAFFIC_MEDIUM,
+                        Constant.FIRST_TRAFFIC_CAMPAIGN,
+                        Constant.FIRST_TRAFFIC_CAMPAIGN_ID,
+                        Constant.FIRST_TRAFFIC_CLID_PLATFORM,
+                        Constant.FIRST_TRAFFIC_CHANNEL_GROUP,
+                        Constant.FIRST_TRAFFIC_CATEGORY,
+                        Constant.FIRST_APP_INSTALL_SOURCE
                 ), MAX_STRING_VALUE_LEN_255)
         );
 
         columnsMaxLengthList.add(new ColumnsMaxLength(Arrays.asList(
-                ModelV2.FIRST_TRAFFIC_CONTENT,
-                ModelV2.FIRST_TRAFFIC_CLID,
-                ModelV2.FIRST_TRAFFIC_TERM
+                Constant.FIRST_TRAFFIC_CONTENT,
+                Constant.FIRST_TRAFFIC_CLID,
+                Constant.FIRST_TRAFFIC_TERM
         ), MAX_STRING_VALUE_LEN_2K));
 
         columnsMaxLengthList.add(new ColumnsMaxLength(Arrays.asList(
-                ModelV2.FIRST_REFERRER,
-                ModelV2.USER_PROPERTIES_JSON_STR
+                Constant.FIRST_REFERRER,
+                Constant.USER_PROPERTIES_JSON_STR
         ), MAX_STRING_VALUE_LEN_MAX));
 
         Dataset<Row> userDatasetTruncated = new MaxLengthTransformerV2().transform(
@@ -111,94 +112,94 @@ public class MaxLengthTransformerV2 {
         List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.EVENT_VALUE_CURRENCY
+                        Constant.EVENT_VALUE_CURRENCY
                 ), MAX_STRING_VALUE_LEN_32)
         );
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.EVENT_ID,
-                        ModelV2.EVENT_NAME,
-                        ModelV2.DEVICE_MOBILE_BRAND_NAME,
-                        ModelV2.DEVICE_MOBILE_MODEL_NAME,
-                        ModelV2.DEVICE_MANUFACTURER,
-                        ModelV2.DEVICE_CARRIER,
-                        ModelV2.DEVICE_NETWORK_TYPE,
-                        ModelV2.DEVICE_OPERATING_SYSTEM,
-                        ModelV2.DEVICE_OPERATING_SYSTEM_VERSION,
-                        ModelV2.DEVICE_VENDOR_ID,
-                        ModelV2.DEVICE_ADVERTISING_ID,
-                        ModelV2.DEVICE_SYSTEM_LANGUAGE,
-                        ModelV2.DEVICE_UA_BROWSER,
-                        ModelV2.DEVICE_UA_BROWSER_VERSION,
-                        ModelV2.DEVICE_UA_DEVICE,
-                        ModelV2.DEVICE_UA_DEVICE_CATEGORY,
-                        ModelV2.GEO_CONTINENT,
-                        ModelV2.GEO_SUB_CONTINENT,
-                        ModelV2.GEO_COUNTRY,
-                        ModelV2.GEO_REGION,
-                        ModelV2.GEO_METRO,
-                        ModelV2.GEO_CITY,
-                        ModelV2.GEO_LOCALE,
-                        ModelV2.TRAFFIC_SOURCE_SOURCE,
-                        ModelV2.TRAFFIC_SOURCE_MEDIUM,
-                        ModelV2.TRAFFIC_SOURCE_CAMPAIGN,
-                        ModelV2.TRAFFIC_SOURCE_CAMPAIGN_ID,
-                        ModelV2.TRAFFIC_SOURCE_CLID_PLATFORM,
-                        ModelV2.TRAFFIC_SOURCE_CHANNEL_GROUP,
-                        ModelV2.TRAFFIC_SOURCE_CATEGORY,
-                        ModelV2.APP_PACKAGE_ID,
-                        ModelV2.APP_ID,
-                        ModelV2.APP_VERSION,
-                        ModelV2.APP_TITLE,
-                        ModelV2.APP_INSTALL_SOURCE,
-                        ModelV2.PLATFORM,
-                        ModelV2.PROJECT_ID,
-                        ModelV2.SCREEN_VIEW_SCREEN_NAME,
-                        ModelV2.SCREEN_VIEW_SCREEN_ID,
-                        ModelV2.SCREEN_VIEW_SCREEN_UNIQUE_ID,
-                        ModelV2.SCREEN_VIEW_PREVIOUS_SCREEN_NAME,
-                        ModelV2.SCREEN_VIEW_PREVIOUS_SCREEN_ID,
-                        ModelV2.SCREEN_VIEW_PREVIOUS_SCREEN_UNIQUE_ID,
-                        ModelV2.UPGRADE_PREVIOUS_APP_VERSION,
-                        ModelV2.UPGRADE_PREVIOUS_OS_VERSION,
-                        ModelV2.USER_ID,
-                        ModelV2.USER_PSEUDO_ID,
-                        ModelV2.SESSION_ID,
-                        ModelV2.SDK_ERROR_CODE,
-                        ModelV2.SDK_VERSION,
-                        ModelV2.SDK_NAME,
-                        ModelV2.UA,
-                        ModelV2.IP
+                        Constant.EVENT_ID,
+                        Constant.EVENT_NAME,
+                        Constant.DEVICE_MOBILE_BRAND_NAME,
+                        Constant.DEVICE_MOBILE_MODEL_NAME,
+                        Constant.DEVICE_MANUFACTURER,
+                        Constant.DEVICE_CARRIER,
+                        Constant.DEVICE_NETWORK_TYPE,
+                        Constant.DEVICE_OPERATING_SYSTEM,
+                        Constant.DEVICE_OPERATING_SYSTEM_VERSION,
+                        Constant.DEVICE_VENDOR_ID,
+                        Constant.DEVICE_ADVERTISING_ID,
+                        Constant.DEVICE_SYSTEM_LANGUAGE,
+                        Constant.DEVICE_UA_BROWSER,
+                        Constant.DEVICE_UA_BROWSER_VERSION,
+                        Constant.DEVICE_UA_DEVICE,
+                        Constant.DEVICE_UA_DEVICE_CATEGORY,
+                        Constant.GEO_CONTINENT,
+                        Constant.GEO_SUB_CONTINENT,
+                        Constant.GEO_COUNTRY,
+                        Constant.GEO_REGION,
+                        Constant.GEO_METRO,
+                        Constant.GEO_CITY,
+                        Constant.GEO_LOCALE,
+                        Constant.TRAFFIC_SOURCE_SOURCE,
+                        Constant.TRAFFIC_SOURCE_MEDIUM,
+                        Constant.TRAFFIC_SOURCE_CAMPAIGN,
+                        Constant.TRAFFIC_SOURCE_CAMPAIGN_ID,
+                        Constant.TRAFFIC_SOURCE_CLID_PLATFORM,
+                        Constant.TRAFFIC_SOURCE_CHANNEL_GROUP,
+                        Constant.TRAFFIC_SOURCE_CATEGORY,
+                        Constant.APP_PACKAGE_ID,
+                        Constant.APP_ID,
+                        Constant.APP_VERSION,
+                        Constant.APP_TITLE,
+                        Constant.APP_INSTALL_SOURCE,
+                        Constant.PLATFORM,
+                        Constant.PROJECT_ID,
+                        Constant.SCREEN_VIEW_SCREEN_NAME,
+                        Constant.SCREEN_VIEW_SCREEN_ID,
+                        Constant.SCREEN_VIEW_SCREEN_UNIQUE_ID,
+                        Constant.SCREEN_VIEW_PREVIOUS_SCREEN_NAME,
+                        Constant.SCREEN_VIEW_PREVIOUS_SCREEN_ID,
+                        Constant.SCREEN_VIEW_PREVIOUS_SCREEN_UNIQUE_ID,
+                        Constant.UPGRADE_PREVIOUS_APP_VERSION,
+                        Constant.UPGRADE_PREVIOUS_OS_VERSION,
+                        Constant.USER_ID,
+                        Constant.USER_PSEUDO_ID,
+                        Constant.SESSION_ID,
+                        Constant.SDK_ERROR_CODE,
+                        Constant.SDK_VERSION,
+                        Constant.SDK_NAME,
+                        Constant.UA,
+                        Constant.IP
                 ), MAX_STRING_VALUE_LEN_255)
         );
 
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.TRAFFIC_SOURCE_CONTENT,
-                        ModelV2.TRAFFIC_SOURCE_TERM,
-                        ModelV2.TRAFFIC_SOURCE_CLID,
-                        ModelV2.PAGE_VIEW_PAGE_REFERRER_TITLE,
-                        ModelV2.PAGE_VIEW_PAGE_TITLE,
-                        ModelV2.PAGE_VIEW_HOSTNAME,
-                        ModelV2.PAGE_VIEW_LATEST_REFERRER_HOST,
-                        ModelV2.SEARCH_KEY,
-                        ModelV2.SEARCH_TERM,
-                        ModelV2.OUTBOUND_LINK_CLASSES,
-                        ModelV2.OUTBOUND_LINK_DOMAIN,
-                        ModelV2.OUTBOUND_LINK_ID,
-                        ModelV2.SDK_ERROR_MESSAGE,
-                        ModelV2.APP_EXCEPTION_MESSAGE
+                        Constant.TRAFFIC_SOURCE_CONTENT,
+                        Constant.TRAFFIC_SOURCE_TERM,
+                        Constant.TRAFFIC_SOURCE_CLID,
+                        Constant.PAGE_VIEW_PAGE_REFERRER_TITLE,
+                        Constant.PAGE_VIEW_PAGE_TITLE,
+                        Constant.PAGE_VIEW_HOSTNAME,
+                        Constant.PAGE_VIEW_LATEST_REFERRER_HOST,
+                        Constant.SEARCH_KEY,
+                        Constant.SEARCH_TERM,
+                        Constant.OUTBOUND_LINK_CLASSES,
+                        Constant.OUTBOUND_LINK_DOMAIN,
+                        Constant.OUTBOUND_LINK_ID,
+                        Constant.SDK_ERROR_MESSAGE,
+                        Constant.APP_EXCEPTION_MESSAGE
                 ), MAX_STRING_VALUE_LEN_2K)
         );
         columnsMaxLengthList.add(
                 new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.PAGE_VIEW_PAGE_REFERRER,
-                        ModelV2.PAGE_VIEW_PAGE_URL,
-                        ModelV2.PAGE_VIEW_PAGE_URL_PATH,
-                        ModelV2.PAGE_VIEW_LATEST_REFERRER,
-                        ModelV2.OUTBOUND_LINK_URL,
-                        ModelV2.APP_EXCEPTION_STACK,
-                        ModelV2.CUSTOM_PARAMETERS_JSON_STR
+                        Constant.PAGE_VIEW_PAGE_REFERRER,
+                        Constant.PAGE_VIEW_PAGE_URL,
+                        Constant.PAGE_VIEW_PAGE_URL_PATH,
+                        Constant.PAGE_VIEW_LATEST_REFERRER,
+                        Constant.OUTBOUND_LINK_URL,
+                        Constant.APP_EXCEPTION_STACK,
+                        Constant.CUSTOM_PARAMETERS_JSON_STR
                 ), MAX_STRING_VALUE_LEN_MAX)
         );
 
@@ -213,35 +214,7 @@ public class MaxLengthTransformerV2 {
     }
 
     public static Dataset<Row> runMaxLengthTransformerForSession(final Dataset<Row> sessionDataset) {
-        List<ColumnsMaxLength> columnsMaxLengthList = new ArrayList<>();
-        columnsMaxLengthList.add(
-                new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.USER_PSEUDO_ID,
-                        ModelV2.SESSION_ID,
-                        ModelV2.USER_ID,
-                        ModelV2.SESSION_SOURCE,
-                        ModelV2.SESSION_MEDIUM,
-                        ModelV2.SESSION_CAMPAIGN,
-                        ModelV2.SESSION_CAMPAIGN_ID,
-                        ModelV2.SESSION_CLID_PLATFORM,
-                        ModelV2.SESSION_CHANNEL_GROUP,
-                        ModelV2.SESSION_SOURCE_CATEGORY
-                ), MAX_STRING_VALUE_LEN_255)
-
-        );
-        columnsMaxLengthList.add(
-                new ColumnsMaxLength(Arrays.asList(
-                        ModelV2.SESSION_CONTENT,
-                        ModelV2.SESSION_TERM,
-                        ModelV2.SESSION_CLID
-                ), MAX_STRING_VALUE_LEN_2K)
-
-        );
-        Dataset<Row> sessionDatasetTruncated = new MaxLengthTransformerV2().transform(
-                sessionDataset,
-                columnsMaxLengthList
-        );
-        return sessionDatasetTruncated.select(
+        return sessionDataset.select(
                 toColumnArray(ModelV2.getSessionFields())
         );
     }

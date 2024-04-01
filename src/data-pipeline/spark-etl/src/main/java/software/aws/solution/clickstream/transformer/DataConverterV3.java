@@ -21,23 +21,25 @@ import org.apache.spark.sql.api.java.*;
 import org.apache.spark.sql.catalyst.expressions.*;
 import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
-import software.aws.solution.clickstream.common.*;
-import software.aws.solution.clickstream.common.model.*;
+
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
+import software.aws.solution.clickstream.common.model.ClickstreamItem;
 import software.aws.solution.clickstream.rowconv.*;
 import software.aws.solution.clickstream.util.*;
-
+import software.aws.solution.clickstream.common.*;
 import java.util.*;
 
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
+import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
+import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
+import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.*;
 import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter.toGenericRow;
 import static software.aws.solution.clickstream.util.Utils.*;
-import static software.aws.solution.clickstream.common.ClickstreamEventParser.INPUT_FILE_NAME;
-import static software.aws.solution.clickstream.common.ClickstreamEventParser.UPLOAD_TIMESTAMP;
-import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
-import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
+
 import static software.aws.solution.clickstream.model.ModelV2.*;
 
 

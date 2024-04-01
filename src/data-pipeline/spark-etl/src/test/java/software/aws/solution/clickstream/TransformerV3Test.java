@@ -19,7 +19,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.IOException;
@@ -245,8 +245,8 @@ class TransformerV3Test extends BaseSparkTest {
 
         datasetSession.write().mode(SaveMode.Overwrite).json("/tmp/session/");
 
-        datasetSession = datasetSession.filter(col(ModelV2.USER_PSEUDO_ID).equalTo("unique_id_iOS_1").and(
-                col(ModelV2.SESSION_ID).equalTo("see000201912dk-23u92-1df0020")
+        datasetSession = datasetSession.filter(col(Constant.USER_PSEUDO_ID).equalTo("unique_id_iOS_1").and(
+                col(Constant.SESSION_ID).equalTo("see000201912dk-23u92-1df0020")
         ));
         String expectedJsonSession = this.resourceFileAsString("/event_v2/expected/transform_v3_traffic_source_session.json");
 

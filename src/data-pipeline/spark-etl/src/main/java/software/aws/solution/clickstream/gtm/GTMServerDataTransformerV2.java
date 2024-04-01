@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.gtm;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
 import software.aws.solution.clickstream.util.*;
 
@@ -44,16 +45,16 @@ public class GTMServerDataTransformerV2 {
 
     public static Dataset<Row> aggUserDataset(final Dataset<Row> userDataSet, final String info) {
         Dataset<Row> userIdDataset = userDataSet
-                .select(ModelV2.APP_ID,
-                        ModelV2.USER_PSEUDO_ID,
-                        ModelV2.USER_ID,
-                        ModelV2.EVENT_TIMESTAMP,
-                        ModelV2.PROCESS_INFO)
-                .groupBy(ModelV2.APP_ID, ModelV2.USER_PSEUDO_ID)
+                .select(Constant.APP_ID,
+                        Constant.USER_PSEUDO_ID,
+                        Constant.USER_ID,
+                        Constant.EVENT_TIMESTAMP,
+                        Constant.PROCESS_INFO)
+                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID)
                 .agg(
-                        max(ModelV2.USER_ID).alias(ModelV2.USER_ID),
-                        max(ModelV2.EVENT_TIMESTAMP).alias(ModelV2.EVENT_TIMESTAMP),
-                        first(ModelV2.PROCESS_INFO).alias(ModelV2.PROCESS_INFO)
+                        max(Constant.USER_ID).alias(Constant.USER_ID),
+                        max(Constant.EVENT_TIMESTAMP).alias(Constant.EVENT_TIMESTAMP),
+                        first(Constant.PROCESS_INFO).alias(Constant.PROCESS_INFO)
                 );
 
         log.info("aggUserDataset() userIdDataset count: {}, info: {}", userIdDataset.count(), info);
@@ -66,19 +67,19 @@ public class GTMServerDataTransformerV2 {
 
         String latest = "latest.";
         Dataset<Row> latestUserPropsDataset1 =
-                userDataSet.filter(col(ModelV2.USER_PROPERTIES).isNotNull())
-                        .groupBy(ModelV2.APP_ID, ModelV2.USER_PSEUDO_ID)
+                userDataSet.filter(col(Constant.USER_PROPERTIES).isNotNull())
+                        .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID)
                         .agg(
                                 max_by(struct(
-                                        ModelV2.USER_PROPERTIES,
-                                        ModelV2.USER_PROPERTIES_JSON_STR
-                                ), col(ModelV2.EVENT_TIMESTAMP)).alias("latest"));
+                                        Constant.USER_PROPERTIES,
+                                        Constant.USER_PROPERTIES_JSON_STR
+                                ), col(Constant.EVENT_TIMESTAMP)).alias("latest"));
 
         Dataset<Row> latestUserPropsDataset = latestUserPropsDataset1.select(
-                col(ModelV2.APP_ID).alias("app_id_1"),
-                col(ModelV2.USER_PSEUDO_ID).alias("user_pseudo_id_1"),
-                col(latest + ModelV2.USER_PROPERTIES).alias(ModelV2.USER_PROPERTIES),
-                col(latest + ModelV2.USER_PROPERTIES_JSON_STR).alias(ModelV2.USER_PROPERTIES_JSON_STR)
+                col(Constant.APP_ID).alias("app_id_1"),
+                col(Constant.USER_PSEUDO_ID).alias("user_pseudo_id_1"),
+                col(latest + Constant.USER_PROPERTIES).alias(Constant.USER_PROPERTIES),
+                col(latest + Constant.USER_PROPERTIES_JSON_STR).alias(Constant.USER_PROPERTIES_JSON_STR)
         );
 
         log.info("aggUserDataset() latestUserPropsDataset count: {}, info: {}", latestUserPropsDataset.count(), info);
@@ -89,80 +90,80 @@ public class GTMServerDataTransformerV2 {
         String first = "first.";
         Dataset<Row> firstUserPropsDataset1 =
                 userDataSet
-                        .groupBy(ModelV2.APP_ID, ModelV2.USER_PSEUDO_ID)
+                        .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID)
                         .agg(
                                 min_by(struct(
-                                        ModelV2.FIRST_TOUCH_TIME_MSEC,
-                                        ModelV2.FIRST_VISIT_DATE,
-                                        ModelV2.FIRST_REFERRER,
-                                        ModelV2.FIRST_TRAFFIC_SOURCE,
-                                        ModelV2.FIRST_TRAFFIC_MEDIUM,
-                                        ModelV2.FIRST_TRAFFIC_CAMPAIGN,
-                                        ModelV2.FIRST_TRAFFIC_CONTENT,
-                                        ModelV2.FIRST_TRAFFIC_TERM,
-                                        ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID,
-                                        ModelV2.FIRST_TRAFFIC_CLID_PLATFORM,
-                                        ModelV2.FIRST_TRAFFIC_CLID,
-                                        ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP,
-                                        ModelV2.FIRST_TRAFFIC_CATEGORY,
-                                        ModelV2.FIRST_APP_INSTALL_SOURCE
-                                ), col(ModelV2.EVENT_TIMESTAMP)).alias("first"));
+                                        Constant.FIRST_TOUCH_TIME_MSEC,
+                                        Constant.FIRST_VISIT_DATE,
+                                        Constant.FIRST_REFERRER,
+                                        Constant.FIRST_TRAFFIC_SOURCE,
+                                        Constant.FIRST_TRAFFIC_MEDIUM,
+                                        Constant.FIRST_TRAFFIC_CAMPAIGN,
+                                        Constant.FIRST_TRAFFIC_CONTENT,
+                                        Constant.FIRST_TRAFFIC_TERM,
+                                        Constant.FIRST_TRAFFIC_CAMPAIGN_ID,
+                                        Constant.FIRST_TRAFFIC_CLID_PLATFORM,
+                                        Constant.FIRST_TRAFFIC_CLID,
+                                        Constant.FIRST_TRAFFIC_CHANNEL_GROUP,
+                                        Constant.FIRST_TRAFFIC_CATEGORY,
+                                        Constant.FIRST_APP_INSTALL_SOURCE
+                                ), col(Constant.EVENT_TIMESTAMP)).alias("first"));
 
         Dataset<Row> firstUserPropsDataset = firstUserPropsDataset1.select(
-                col(ModelV2.APP_ID).alias("app_id_2"),
-                col(ModelV2.USER_PSEUDO_ID).alias("user_pseudo_id_2"),
-                col(first + ModelV2.FIRST_TOUCH_TIME_MSEC).alias(ModelV2.FIRST_TOUCH_TIME_MSEC),
-                col(first + ModelV2.FIRST_VISIT_DATE).alias(ModelV2.FIRST_VISIT_DATE),
-                col(first + ModelV2.FIRST_REFERRER).alias(ModelV2.FIRST_REFERRER),
-                col(first + ModelV2.FIRST_TRAFFIC_SOURCE).alias(ModelV2.FIRST_TRAFFIC_SOURCE),
-                col(first + ModelV2.FIRST_TRAFFIC_MEDIUM).alias(ModelV2.FIRST_TRAFFIC_MEDIUM),
-                col(first + ModelV2.FIRST_TRAFFIC_CAMPAIGN).alias(ModelV2.FIRST_TRAFFIC_CAMPAIGN),
-                col(first + ModelV2.FIRST_TRAFFIC_CONTENT).alias(ModelV2.FIRST_TRAFFIC_CONTENT),
-                col(first + ModelV2.FIRST_TRAFFIC_TERM).alias(ModelV2.FIRST_TRAFFIC_TERM),
-                col(first + ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID).alias(ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID),
-                col(first + ModelV2.FIRST_TRAFFIC_CLID_PLATFORM).alias(ModelV2.FIRST_TRAFFIC_CLID_PLATFORM),
-                col(first + ModelV2.FIRST_TRAFFIC_CLID).alias(ModelV2.FIRST_TRAFFIC_CLID),
-                col(first + ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP).alias(ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP),
-                col(first + ModelV2.FIRST_TRAFFIC_CATEGORY).alias(ModelV2.FIRST_TRAFFIC_CATEGORY),
-                col(first + ModelV2.FIRST_APP_INSTALL_SOURCE).alias(ModelV2.FIRST_APP_INSTALL_SOURCE)
+                col(Constant.APP_ID).alias("app_id_2"),
+                col(Constant.USER_PSEUDO_ID).alias("user_pseudo_id_2"),
+                col(first + Constant.FIRST_TOUCH_TIME_MSEC).alias(Constant.FIRST_TOUCH_TIME_MSEC),
+                col(first + Constant.FIRST_VISIT_DATE).alias(Constant.FIRST_VISIT_DATE),
+                col(first + Constant.FIRST_REFERRER).alias(Constant.FIRST_REFERRER),
+                col(first + Constant.FIRST_TRAFFIC_SOURCE).alias(Constant.FIRST_TRAFFIC_SOURCE),
+                col(first + Constant.FIRST_TRAFFIC_MEDIUM).alias(Constant.FIRST_TRAFFIC_MEDIUM),
+                col(first + Constant.FIRST_TRAFFIC_CAMPAIGN).alias(Constant.FIRST_TRAFFIC_CAMPAIGN),
+                col(first + Constant.FIRST_TRAFFIC_CONTENT).alias(Constant.FIRST_TRAFFIC_CONTENT),
+                col(first + Constant.FIRST_TRAFFIC_TERM).alias(Constant.FIRST_TRAFFIC_TERM),
+                col(first + Constant.FIRST_TRAFFIC_CAMPAIGN_ID).alias(Constant.FIRST_TRAFFIC_CAMPAIGN_ID),
+                col(first + Constant.FIRST_TRAFFIC_CLID_PLATFORM).alias(Constant.FIRST_TRAFFIC_CLID_PLATFORM),
+                col(first + Constant.FIRST_TRAFFIC_CLID).alias(Constant.FIRST_TRAFFIC_CLID),
+                col(first + Constant.FIRST_TRAFFIC_CHANNEL_GROUP).alias(Constant.FIRST_TRAFFIC_CHANNEL_GROUP),
+                col(first + Constant.FIRST_TRAFFIC_CATEGORY).alias(Constant.FIRST_TRAFFIC_CATEGORY),
+                col(first + Constant.FIRST_APP_INSTALL_SOURCE).alias(Constant.FIRST_APP_INSTALL_SOURCE)
         );
 
         log.info("aggUserDataset() firstUserPropsDataset count: {}, info: {}", firstUserPropsDataset.count(), info);
         if (debugLocal && firstUserPropsDataset.count() > 0) {
             log.info("{} - firstUserPropsDataset: {}", info, firstUserPropsDataset.first().prettyJson());
         }
-        Column joinCondition1 = col(ModelV2.APP_ID).equalTo(col("app_id_1"))
-                .and(col(ModelV2.USER_PSEUDO_ID).equalTo(col("user_pseudo_id_1")));
+        Column joinCondition1 = col(Constant.APP_ID).equalTo(col("app_id_1"))
+                .and(col(Constant.USER_PSEUDO_ID).equalTo(col("user_pseudo_id_1")));
 
-        Column joinCondition2 = col(ModelV2.APP_ID).equalTo(col("app_id_2"))
-                .and(col(ModelV2.USER_PSEUDO_ID).equalTo(col("user_pseudo_id_2")));
+        Column joinCondition2 = col(Constant.APP_ID).equalTo(col("app_id_2"))
+                .and(col(Constant.USER_PSEUDO_ID).equalTo(col("user_pseudo_id_2")));
 
         Dataset<Row> userFinalDatasetJoined = userIdDataset
                 .join(latestUserPropsDataset, joinCondition1, "left")
                 .join(firstUserPropsDataset, joinCondition2, "left");
 
         Dataset<Row> userFinalDataset = userFinalDatasetJoined.select(
-                col(ModelV2.APP_ID),
-                col(ModelV2.USER_PSEUDO_ID),
-                col(ModelV2.EVENT_TIMESTAMP),
-                col(ModelV2.USER_ID),
-                col(ModelV2.USER_PROPERTIES),
-                col(ModelV2.USER_PROPERTIES_JSON_STR),
-                col(ModelV2.FIRST_TOUCH_TIME_MSEC),
-                col(ModelV2.FIRST_VISIT_DATE),
-                col(ModelV2.FIRST_REFERRER),
-                col(ModelV2.FIRST_TRAFFIC_SOURCE),
-                col(ModelV2.FIRST_TRAFFIC_MEDIUM),
-                col(ModelV2.FIRST_TRAFFIC_CAMPAIGN),
-                col(ModelV2.FIRST_TRAFFIC_CONTENT),
-                col(ModelV2.FIRST_TRAFFIC_TERM),
-                col(ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID),
-                col(ModelV2.FIRST_TRAFFIC_CLID_PLATFORM),
-                col(ModelV2.FIRST_TRAFFIC_CLID),
-                col(ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP),
-                col(ModelV2.FIRST_TRAFFIC_CATEGORY),
-                col(ModelV2.FIRST_APP_INSTALL_SOURCE),
-                col(ModelV2.PROCESS_INFO)
+                col(Constant.APP_ID),
+                col(Constant.USER_PSEUDO_ID),
+                col(Constant.EVENT_TIMESTAMP),
+                col(Constant.USER_ID),
+                col(Constant.USER_PROPERTIES),
+                col(Constant.USER_PROPERTIES_JSON_STR),
+                col(Constant.FIRST_TOUCH_TIME_MSEC),
+                col(Constant.FIRST_VISIT_DATE),
+                col(Constant.FIRST_REFERRER),
+                col(Constant.FIRST_TRAFFIC_SOURCE),
+                col(Constant.FIRST_TRAFFIC_MEDIUM),
+                col(Constant.FIRST_TRAFFIC_CAMPAIGN),
+                col(Constant.FIRST_TRAFFIC_CONTENT),
+                col(Constant.FIRST_TRAFFIC_TERM),
+                col(Constant.FIRST_TRAFFIC_CAMPAIGN_ID),
+                col(Constant.FIRST_TRAFFIC_CLID_PLATFORM),
+                col(Constant.FIRST_TRAFFIC_CLID),
+                col(Constant.FIRST_TRAFFIC_CHANNEL_GROUP),
+                col(Constant.FIRST_TRAFFIC_CATEGORY),
+                col(Constant.FIRST_APP_INSTALL_SOURCE),
+                col(Constant.PROCESS_INFO)
         );
         log.info("aggUserDataset() return count: {}, info: {}", userFinalDataset.count(), info);
         if (debugLocal && userFinalDataset.count() > 0) {
@@ -242,34 +243,34 @@ public class GTMServerDataTransformerV2 {
         saveFullDatasetToPath(pathInfo.getFull(), fullUserAggDataset);
 
         // get new updated
-        Dataset<Row> newUserIdDataset = newUserAggDataset.select(ModelV2.APP_ID, ModelV2.USER_PSEUDO_ID);
-        Column jonCondition = newUserIdDataset.col(ModelV2.APP_ID).equalTo(fullUserAggDataset.col(ModelV2.APP_ID))
-                .and(newUserIdDataset.col(ModelV2.USER_PSEUDO_ID).equalTo(fullUserAggDataset.col(ModelV2.USER_PSEUDO_ID)));
+        Dataset<Row> newUserIdDataset = newUserAggDataset.select(Constant.APP_ID, Constant.USER_PSEUDO_ID);
+        Column jonCondition = newUserIdDataset.col(Constant.APP_ID).equalTo(fullUserAggDataset.col(Constant.APP_ID))
+                .and(newUserIdDataset.col(Constant.USER_PSEUDO_ID).equalTo(fullUserAggDataset.col(Constant.USER_PSEUDO_ID)));
 
         Dataset<Row> userDatasetFinal = newUserIdDataset.join(fullUserAggDataset, jonCondition, "left")
                 .select(
-                        newUserIdDataset.col(ModelV2.APP_ID),
-                        newUserIdDataset.col(ModelV2.USER_PSEUDO_ID),
-                        col(ModelV2.EVENT_TIMESTAMP),
-                        col(ModelV2.USER_ID),
-                        col(ModelV2.USER_PROPERTIES),
-                        col(ModelV2.USER_PROPERTIES_JSON_STR),
-                        col(ModelV2.FIRST_TOUCH_TIME_MSEC),
-                        col(ModelV2.FIRST_VISIT_DATE),
-                        col(ModelV2.FIRST_REFERRER),
-                        col(ModelV2.FIRST_TRAFFIC_SOURCE),
-                        col(ModelV2.FIRST_TRAFFIC_MEDIUM),
-                        col(ModelV2.FIRST_TRAFFIC_CAMPAIGN),
-                        col(ModelV2.FIRST_TRAFFIC_CONTENT),
-                        col(ModelV2.FIRST_TRAFFIC_TERM),
-                        col(ModelV2.FIRST_TRAFFIC_CAMPAIGN_ID),
-                        col(ModelV2.FIRST_TRAFFIC_CLID_PLATFORM),
-                        col(ModelV2.FIRST_TRAFFIC_CLID),
-                        col(ModelV2.FIRST_TRAFFIC_CHANNEL_GROUP),
-                        col(ModelV2.FIRST_TRAFFIC_CATEGORY),
-                        col(ModelV2.FIRST_APP_INSTALL_SOURCE),
-                        col(ModelV2.PROCESS_INFO),
-                        lit(null).cast(DataTypes.StringType).alias(ModelV2.EVENT_NAME)
+                        newUserIdDataset.col(Constant.APP_ID),
+                        newUserIdDataset.col(Constant.USER_PSEUDO_ID),
+                        col(Constant.EVENT_TIMESTAMP),
+                        col(Constant.USER_ID),
+                        col(Constant.USER_PROPERTIES),
+                        col(Constant.USER_PROPERTIES_JSON_STR),
+                        col(Constant.FIRST_TOUCH_TIME_MSEC),
+                        col(Constant.FIRST_VISIT_DATE),
+                        col(Constant.FIRST_REFERRER),
+                        col(Constant.FIRST_TRAFFIC_SOURCE),
+                        col(Constant.FIRST_TRAFFIC_MEDIUM),
+                        col(Constant.FIRST_TRAFFIC_CAMPAIGN),
+                        col(Constant.FIRST_TRAFFIC_CONTENT),
+                        col(Constant.FIRST_TRAFFIC_TERM),
+                        col(Constant.FIRST_TRAFFIC_CAMPAIGN_ID),
+                        col(Constant.FIRST_TRAFFIC_CLID_PLATFORM),
+                        col(Constant.FIRST_TRAFFIC_CLID),
+                        col(Constant.FIRST_TRAFFIC_CHANNEL_GROUP),
+                        col(Constant.FIRST_TRAFFIC_CATEGORY),
+                        col(Constant.FIRST_APP_INSTALL_SOURCE),
+                        col(Constant.PROCESS_INFO),
+                        lit(null).cast(DataTypes.StringType).alias(Constant.EVENT_NAME)
                 );
 
         log.info("extractUser return userDatasetFinal count: {}", userDatasetFinal.count());
@@ -286,47 +287,47 @@ public class GTMServerDataTransformerV2 {
 
     private Dataset<Row> extractSessionFromEvent(final Dataset<Row> eventDataset) {
         Dataset<Row> sessionDataset = eventDataset.select(
-                        col(ModelV2.APP_ID),
-                        col(ModelV2.EVENT_TIMESTAMP),
-                        col(ModelV2.EVENT_NAME),
-                        col(ModelV2.PLATFORM),
-                        col(ModelV2.USER_PSEUDO_ID),
-                        col(ModelV2.SESSION_ID),
-                        col(ModelV2.USER_ID),
-                        col(ModelV2.SESSION_NUMBER),
-                        col(ModelV2.SESSION_START_TIME_MSEC),
-                        col(ModelV2.TRAFFIC_SOURCE_SOURCE).alias(ModelV2.SESSION_SOURCE),
-                        col(ModelV2.TRAFFIC_SOURCE_MEDIUM).alias(ModelV2.SESSION_MEDIUM),
-                        col(ModelV2.TRAFFIC_SOURCE_CAMPAIGN).alias(ModelV2.SESSION_CAMPAIGN),
-                        col(ModelV2.TRAFFIC_SOURCE_CONTENT).alias(ModelV2.SESSION_CONTENT),
-                        col(ModelV2.TRAFFIC_SOURCE_TERM).alias(ModelV2.SESSION_TERM),
-                        col(ModelV2.TRAFFIC_SOURCE_CAMPAIGN_ID).alias(ModelV2.SESSION_CAMPAIGN_ID),
-                        col(ModelV2.TRAFFIC_SOURCE_CLID_PLATFORM).alias(ModelV2.SESSION_CLID_PLATFORM),
-                        col(ModelV2.TRAFFIC_SOURCE_CLID).alias(ModelV2.SESSION_CLID),
-                        col(ModelV2.TRAFFIC_SOURCE_CHANNEL_GROUP).alias(ModelV2.SESSION_CHANNEL_GROUP),
-                        col(ModelV2.TRAFFIC_SOURCE_CATEGORY).alias(ModelV2.SESSION_SOURCE_CATEGORY),
-                        col(ModelV2.PROCESS_INFO)
+                        col(Constant.APP_ID),
+                        col(Constant.EVENT_TIMESTAMP),
+                        col(Constant.EVENT_NAME),
+                        col(Constant.PLATFORM),
+                        col(Constant.USER_PSEUDO_ID),
+                        col(Constant.SESSION_ID),
+                        col(Constant.USER_ID),
+                        col(Constant.SESSION_NUMBER),
+                        col(Constant.SESSION_START_TIME_MSEC),
+                        col(Constant.TRAFFIC_SOURCE_SOURCE).alias(Constant.SESSION_SOURCE),
+                        col(Constant.TRAFFIC_SOURCE_MEDIUM).alias(Constant.SESSION_MEDIUM),
+                        col(Constant.TRAFFIC_SOURCE_CAMPAIGN).alias(Constant.SESSION_CAMPAIGN),
+                        col(Constant.TRAFFIC_SOURCE_CONTENT).alias(Constant.SESSION_CONTENT),
+                        col(Constant.TRAFFIC_SOURCE_TERM).alias(Constant.SESSION_TERM),
+                        col(Constant.TRAFFIC_SOURCE_CAMPAIGN_ID).alias(Constant.SESSION_CAMPAIGN_ID),
+                        col(Constant.TRAFFIC_SOURCE_CLID_PLATFORM).alias(Constant.SESSION_CLID_PLATFORM),
+                        col(Constant.TRAFFIC_SOURCE_CLID).alias(Constant.SESSION_CLID),
+                        col(Constant.TRAFFIC_SOURCE_CHANNEL_GROUP).alias(Constant.SESSION_CHANNEL_GROUP),
+                        col(Constant.TRAFFIC_SOURCE_CATEGORY).alias(Constant.SESSION_SOURCE_CATEGORY),
+                        col(Constant.PROCESS_INFO)
                 )
-                .filter(col(ModelV2.SESSION_ID).isNotNull()
-                        .and(col(ModelV2.EVENT_NAME).equalTo(EVENT_SESSION_START))
+                .filter(col(Constant.SESSION_ID).isNotNull()
+                        .and(col(Constant.EVENT_NAME).equalTo(EVENT_SESSION_START))
                 )
-                .groupBy(ModelV2.APP_ID, ModelV2.USER_PSEUDO_ID, ModelV2.SESSION_ID)
+                .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
                 .agg(
-                        max(col(ModelV2.EVENT_TIMESTAMP)).alias(ModelV2.EVENT_TIMESTAMP),
-                        max(col(ModelV2.USER_ID)).alias(ModelV2.USER_ID),
-                        max(col(ModelV2.SESSION_NUMBER)).alias(ModelV2.SESSION_NUMBER),
-                        min(col(ModelV2.SESSION_START_TIME_MSEC)).alias(ModelV2.SESSION_START_TIME_MSEC),
-                        max(col(ModelV2.SESSION_SOURCE)).alias(ModelV2.SESSION_SOURCE),
-                        max(col(ModelV2.SESSION_MEDIUM)).alias(ModelV2.SESSION_MEDIUM),
-                        max(col(ModelV2.SESSION_CAMPAIGN)).alias(ModelV2.SESSION_CAMPAIGN),
-                        max(col(ModelV2.SESSION_CONTENT)).alias(ModelV2.SESSION_CONTENT),
-                        max(col(ModelV2.SESSION_TERM)).alias(ModelV2.SESSION_TERM),
-                        max(col(ModelV2.SESSION_CAMPAIGN_ID)).alias(ModelV2.SESSION_CAMPAIGN_ID),
-                        max(col(ModelV2.SESSION_CLID_PLATFORM)).alias(ModelV2.SESSION_CLID_PLATFORM),
-                        max(col(ModelV2.SESSION_CLID)).alias(ModelV2.SESSION_CLID),
-                        max(col(ModelV2.SESSION_CHANNEL_GROUP)).alias(ModelV2.SESSION_CHANNEL_GROUP),
-                        max(col(ModelV2.SESSION_SOURCE_CATEGORY)).alias(ModelV2.SESSION_SOURCE_CATEGORY),
-                        first(col(ModelV2.PROCESS_INFO)).alias(ModelV2.PROCESS_INFO)
+                        max(col(Constant.EVENT_TIMESTAMP)).alias(Constant.EVENT_TIMESTAMP),
+                        max(col(Constant.USER_ID)).alias(Constant.USER_ID),
+                        max(col(Constant.SESSION_NUMBER)).alias(Constant.SESSION_NUMBER),
+                        min(col(Constant.SESSION_START_TIME_MSEC)).alias(Constant.SESSION_START_TIME_MSEC),
+                        max(col(Constant.SESSION_SOURCE)).alias(Constant.SESSION_SOURCE),
+                        max(col(Constant.SESSION_MEDIUM)).alias(Constant.SESSION_MEDIUM),
+                        max(col(Constant.SESSION_CAMPAIGN)).alias(Constant.SESSION_CAMPAIGN),
+                        max(col(Constant.SESSION_CONTENT)).alias(Constant.SESSION_CONTENT),
+                        max(col(Constant.SESSION_TERM)).alias(Constant.SESSION_TERM),
+                        max(col(Constant.SESSION_CAMPAIGN_ID)).alias(Constant.SESSION_CAMPAIGN_ID),
+                        max(col(Constant.SESSION_CLID_PLATFORM)).alias(Constant.SESSION_CLID_PLATFORM),
+                        max(col(Constant.SESSION_CLID)).alias(Constant.SESSION_CLID),
+                        max(col(Constant.SESSION_CHANNEL_GROUP)).alias(Constant.SESSION_CHANNEL_GROUP),
+                        max(col(Constant.SESSION_SOURCE_CATEGORY)).alias(Constant.SESSION_SOURCE_CATEGORY),
+                        first(col(Constant.PROCESS_INFO)).alias(Constant.PROCESS_INFO)
                 );
         Dataset<Row> sessionDatasetAgg = sessionDataset.select(toColumnArray(ModelV2.getSessionFields()));
         return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
@@ -335,6 +336,6 @@ public class GTMServerDataTransformerV2 {
     public Dataset<Row> postTransform(final Dataset<Row> dataset) {
         SparkSession sparkSession = dataset.sparkSession();
         mergeIncrementalTables(sparkSession);
-        return dataset.drop(ModelV2.UA, ModelV2.IP);
+        return dataset.drop(Constant.UA, Constant.IP);
     }
 }

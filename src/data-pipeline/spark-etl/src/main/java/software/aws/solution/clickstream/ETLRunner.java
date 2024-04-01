@@ -26,8 +26,8 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
-import software.aws.solution.clickstream.model.*;
 import software.aws.solution.clickstream.util.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -395,25 +395,25 @@ public class ETLRunner {
     public Dataset<Row> prepareForPartitionV2(final Dataset<Row> dataset, final TableName tbName) {
         log.info("prepareForPartitionV2 for table " + tbName);
         Dataset<Row> datasetWithPartition = dataset
-                .withColumn(PARTITION_APP, col(ModelV2.APP_ID))
-                .withColumn(PARTITION_YEAR, date_format(col(ModelV2.EVENT_TIMESTAMP), "yyyy"))
-                .withColumn(PARTITION_MONTH, date_format(col(ModelV2.EVENT_TIMESTAMP), "MM"))
-                .withColumn(PARTITION_DAY, date_format(col(ModelV2.EVENT_TIMESTAMP), "dd"));
+                .withColumn(PARTITION_APP, col(Constant.APP_ID))
+                .withColumn(PARTITION_YEAR, date_format(col(Constant.EVENT_TIMESTAMP), "yyyy"))
+                .withColumn(PARTITION_MONTH, date_format(col(Constant.EVENT_TIMESTAMP), "MM"))
+                .withColumn(PARTITION_DAY, date_format(col(Constant.EVENT_TIMESTAMP), "dd"));
 
         if (tbName == TableName.ITEM_V2) {
-            return datasetWithPartition.drop(ModelV2.APP_ID);
+            return datasetWithPartition.drop(Constant.APP_ID);
         }
 
         if (tbName == TableName.EVENT_V2) {
-            return datasetWithPartition.drop(ModelV2.UA, ModelV2.IP);
+            return datasetWithPartition.drop(Constant.UA, Constant.IP);
         }
 
         if (tbName == TableName.USER_V2) {
-            return datasetWithPartition.drop(ModelV2.APP_ID, ModelV2.EVENT_NAME);
+            return datasetWithPartition.drop(Constant.APP_ID, Constant.EVENT_NAME);
         }
 
         if (tbName == TableName.SESSION) {
-            return datasetWithPartition.drop(ModelV2.APP_ID);
+            return datasetWithPartition.drop(Constant.APP_ID);
         }
         return datasetWithPartition;
     }

@@ -33,9 +33,16 @@ public class EventGenericRowConverter {
         }
         Map<String, GenericRow> rowsMap = new HashMap<>();
         for (Map.Entry<String, ClickstreamEventPropValue> entry : customParameters.entrySet()) {
-            rowsMap.put(entry.getKey(), entry.getValue().toGenericRow());
+            rowsMap.put(entry.getKey(), toGenericRow(entry.getValue()));
         }
         return rowsMap;
+    }
+
+    private static GenericRow toGenericRow(final ClickstreamEventPropValue value) {
+        return new GenericRow(new String[]{
+                value.getValue(),
+                value.getType().getTypeName()
+        });
     }
 
     public static String eventParametersToJsonString(final Map<String, ClickstreamEventPropValue> customParameters) {

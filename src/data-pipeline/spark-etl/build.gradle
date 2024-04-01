@@ -56,6 +56,9 @@ dependencies {
     // test related
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    // common etl
+    implementation files("/tmp/etl-common/lib/etl-common-${projectVersion}.jar")
 }
 
 // https://stackoverflow.com/questions/73465937/apache-spark-3-3-0-breaks-on-java-17-with-cannot-access-class-sun-nio-ch-direct
@@ -95,11 +98,12 @@ jacocoTestReport {
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations
                 .runtimeClasspath
                 .collect {
-                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java")) {
+                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java") || it.name.contains("etl-common")) {
                         zipTree(it)
                     }
                 }
