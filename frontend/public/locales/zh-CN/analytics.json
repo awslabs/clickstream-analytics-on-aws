@@ -12,10 +12,18 @@
     "app_info": "应用",
     "device": "设备",
     "event": "事件",
+    "event_outer": "事件预置属性",
     "geo": "地理位置",
     "other": "其它",
     "traffic_source": "流量",
-    "user": "用户"
+    "user": "用户",
+    "user_outer": "用户预置属性",
+    "page_view": "页面浏览",
+    "screen_view": "屏幕浏览",
+    "sdk": "SDK",
+    "search": "搜索",
+    "session": "会话",
+    "outer": "解决方案属性"
   },
   "dashboard": {
     "title": "仪表板",

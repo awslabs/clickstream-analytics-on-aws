@@ -1127,13 +1127,19 @@ function getIamRoleBoundaryArn(): string | undefined {
 }
 
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
-  const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
-  const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  const redshiftStackVersionStr = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
+  const reportStackVersionStr = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  if (!redshiftStackVersionStr || !reportStackVersionStr) {
+    return false;
+  }
+  const redshiftStackVersion = SolutionVersion.Of(redshiftStackVersionStr);
+  const reportStackVersion = SolutionVersion.Of(reportStackVersionStr);
+  const pipelineVersion = SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
   if (
     pipeline?.reporting?.quickSight?.accountName &&
-    !pipeline?.templateVersion?.startsWith('v1.0') &&
-    redshiftStackVersion && !redshiftStackVersion.startsWith('v1.0') &&
-    reportStackVersion && !reportStackVersion.startsWith('v1.0')
+    pipelineVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    redshiftStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    reportStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6)
   ) {
     return true;
   }
