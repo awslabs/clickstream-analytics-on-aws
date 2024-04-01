@@ -900,6 +900,8 @@ ul.menu-list li.checkbox-item {
             .click-stream-container-event-category {
               min-width: 129px;
               overflow-x: hidden;
+              height: 270px;
+              overflow-y: auto;
               box-shadow: inset -1px 0 0 #e1e4f0;
               padding: 5px 0;
               &-content {
