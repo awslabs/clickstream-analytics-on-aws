@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX, SegmentJobStatus } from '@aws/clickstream-base-lib';
 import { Aws, Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -33,7 +34,6 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { SegmentJobStatus } from './segments-model';
 import { createLambdaRole } from '../../../common/lambda';
 import { createLogGroup } from '../../../common/logs';
 import { REDSHIFT_MODE } from '../../../common/model';
@@ -74,7 +74,7 @@ export class UserSegmentsWorkflow extends Construct {
     const segmentJobInitFunc = this.constructNodejsFunction('segment-job-init', [
       new PolicyStatement({
         actions: ['events:DisableRule'],
-        resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/Clickstream-*`], // TODO: extract the prefix as a constant when creating the event rule.
+        resources: [`arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/${CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX}*`],
       }),
     ], {
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,

@@ -1,0 +1,23 @@
+{
+  "eventTimestamp" : 1704867230000,
+  "userPseudoId" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "userId" : null,
+  "userProperties" : null,
+  "firstTouchTimeMsec" : 1704867230837,
+  "firstVisitDate" : 1704867230837,
+  "firstReferrer" : null,
+  "firstTrafficSource" : "direct",
+  "firstTrafficMedium" : null,
+  "firstTrafficCampaign" : "direct",
+  "firstTrafficContent" : null,
+  "firstTrafficTerm" : null,
+  "firstTrafficCampaignId" : null,
+  "firstTrafficClidPlatform" : null,
+  "firstTrafficClid" : null,
+  "firstTrafficChannelGroup" : null,
+  "firstTrafficCategory" : null,
+  "firstAppInstallSource" : null,
+  "processInfo" : null,
+  "appId" : "sessionStartAppId1",
+  "eventName" : "_user_engagement"
+}

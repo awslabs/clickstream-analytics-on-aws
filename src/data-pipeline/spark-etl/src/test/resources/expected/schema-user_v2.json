@@ -28,7 +28,12 @@
           "nullable" : true,
           "metadata" : { }
         }, {
-          "name" : "set_timestamp_micros",
+          "name" : "type",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "set_time_msec",
           "type" : "long",
           "nullable" : true,
           "metadata" : { }
@@ -125,6 +130,11 @@
     "metadata" : { }
   }, {
     "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_name",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }

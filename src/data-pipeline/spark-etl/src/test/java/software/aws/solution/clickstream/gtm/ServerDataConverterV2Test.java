@@ -22,7 +22,8 @@ import java.io.*;
 
 import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
 public class ServerDataConverterV2Test extends BaseSparkTest {
     ServerDataConverterV2 converter = new ServerDataConverterV2();
@@ -79,6 +80,22 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
                 .filter(col("rid").equalTo("43cc3b89d7dfccbc2c906eb125ea25db"));
 
         String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_user_data_v2.json");
+        Assertions.assertEquals(expectedJson, replaceInputFileName(outDataset.first().prettyJson()));
+    }
+
+    @Test
+    void test_convert_user_data_user_props_v2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterV2Test.test_convert_user_data_user_props_v2
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-props.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(addFileName(dataset))
+                .filter(col("rid").equalTo("42cc3b89d7dfccbc2c906eb125ea25db"));
+
+        String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_user_data_user_props_v2.json");
         Assertions.assertEquals(expectedJson, replaceInputFileName(outDataset.first().prettyJson()));
     }
 
@@ -192,12 +209,12 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
     void test_decode_uri_v2() {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterV2Test.test_decode_uri_v2
         String uri = "https://www.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&qs=n&form=QBRE&=%25eManage%20Your%20Search%20History%25E&sp=-1&lq=0&pq=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=";
-        String decodeUri = ServerDataConverterV2.deCodeUri(uri);
+        String decodeUri = deCodeUri(uri);
         Assertions.assertEquals(
                 "https://www.bing.com/search?q=中国你好&qs=n&form=QBRE&=%eManage Your Search History%E&sp=-1&lq=0&pq=中国你好&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=",
                 decodeUri
         );
-        decodeUri = ServerDataConverterV2.deCodeUri(null);
+        decodeUri = deCodeUri(null);
         Assertions.assertNull(decodeUri);
     }
 

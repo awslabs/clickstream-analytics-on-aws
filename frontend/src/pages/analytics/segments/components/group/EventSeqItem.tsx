@@ -12,6 +12,7 @@
  */
 
 import { Button } from '@cloudscape-design/components';
+import ErrorText from 'components/common/ErrorText';
 import {
   ERelationShip,
   IAnalyticsItem,
@@ -21,9 +22,11 @@ import EventItem from 'components/eventselect/EventItem';
 import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { AnalyticsSegmentActionType } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { useUserEventParameter } from 'context/AnalyticsEventsContext';
 import { useSegmentContext } from 'context/SegmentContext';
 import React, { useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 import { SegmentPropsData } from './ConditionGroup';
 
 interface EventSeqItemProps {
@@ -44,20 +47,16 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
     conditionWidth,
   } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
-
-  const [filterOptionData, filterOptionDataDispatch] = useReducer(
-    analyticsSegmentFilterReducer,
-    {
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: segmentDataState.attributeOptions,
-    }
-  );
+  const { data: eventData } = useUserEventParameter();
+  const filterOptionDataDispatch = useReducer(analyticsSegmentFilterReducer, {
+    ...INIT_SEGMENTATION_DATA,
+  })[1];
   return (
     <div>
       <div>
         <div className="cs-analytics-dropdown">
           <div
-            className="analytics-segment-sequence-event flex gap-5 align-center"
+            className="analytics-segment-sequence-event flex gap-5 align-start"
             style={{
               position: 'relative',
               marginTop: 5,
@@ -81,6 +80,10 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                       sequenceEventIndex: sequenceEventIndex,
                     },
                     event: item,
+                    metaDataEventParameters: eventData.metaDataEventParameters,
+                    metaDataEvents: eventData.metaDataEvents,
+                    metaDataUserAttributes: eventData.metaDataUserAttributes,
+                    builtInMetaData: eventData.builtInMetaData,
                   });
                 }}
                 hasTab={true}
@@ -88,6 +91,13 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
                 categories={segmentDataState.eventOption}
                 loading={false}
               />
+              {sequenceEventData.seqEventEmptyError && (
+                <ErrorText
+                  text={`${t(
+                    defaultStr(sequenceEventData.seqEventEmptyError)
+                  )}`}
+                />
+              )}
             </div>
             <div>
               <Button
@@ -134,7 +144,8 @@ const EventSeqItem: React.FC<EventSeqItemProps> = (
               hideAddButton
               filterDataState={{
                 enableChangeRelation: true,
-                conditionOptions: filterOptionData.conditionOptions,
+                conditionOptions:
+                  sequenceEventData.sequenceEventAttributeOption ?? [],
                 conditionRelationShip:
                   sequenceEventData.filterGroupRelationShip ??
                   ERelationShip.AND,

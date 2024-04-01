@@ -1,0 +1,174 @@
+{
+  "event_timestamp" : "2023-04-24 06:51:49",
+  "event_id" : "event_idevent_idevent_idevent_idevent_idevent_idevent_idevent_idevent_id1fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39",
+  "event_time_msec" : 1682319109447,
+  "event_name" : "_profile_set",
+  "event_value" : null,
+  "event_value_currency" : null,
+  "event_bundle_sequence_id" : 111,
+  "ingest_time_msec" : null,
+  "device_mobile_brand_name" : "Brand HUAWEI",
+  "device_mobile_model_name" : "HUAWEI-P10",
+  "device_manufacturer" : "Make HUAWEI",
+  "device_carrier" : "CDMA",
+  "device_network_type" : "Mobile",
+  "device_operating_system" : null,
+  "device_operating_system_version" : "os-v1.0",
+  "device_vendor_id" : "deviceid-1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1682319109447device_iddevice_iddevice_iddevice_id1",
+  "device_advertising_id" : "device_unique_iddevice_unique_iddevice_unique_iduf24bec657ea8eff7-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe4578077",
+  "device_system_language" : "zh",
+  "device_time_zone_offset_seconds" : 28800,
+  "device_ua_browser" : null,
+  "device_ua_browser_version" : null,
+  "device_ua_os" : null,
+  "device_ua_os_version" : null,
+  "device_ua_device" : null,
+  "device_ua_device_category" : null,
+  "device_ua" : {
+    "string" : "Apache-HttpClient/4.5.12 (Java/11.0.15)"
+  },
+  "device_screen_width" : 1080,
+  "device_screen_height" : 2259,
+  "device_viewport_width" : null,
+  "device_viewport_height" : null,
+  "geo_continent" : null,
+  "geo_sub_continent" : null,
+  "geo_country" : null,
+  "geo_region" : null,
+  "geo_metro" : null,
+  "geo_city" : null,
+  "geo_locale" : "zh_CN_#Hans",
+  "traffic_source_source" : "TSS-_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_source_source_traffic_",
+  "traffic_source_medium" : "TSM-_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_source_medium_traffic_",
+  "traffic_source_campaign" : null,
+  "traffic_source_content" : null,
+  "traffic_source_term" : null,
+  "traffic_source_campaign_id" : null,
+  "traffic_source_clid_platform" : null,
+  "traffic_source_clid" : null,
+  "traffic_source_channel_group" : null,
+  "traffic_source_category" : null,
+  "user_first_touch_time_msec" : 1667877267895,
+  "app_package_id" : "com.example.demoapplication",
+  "app_version" : "1.0",
+  "app_title" : "test-title-98-0test-title-98-0test-title-98-0test-title-98-0test-title-98-0test-title-98-0test-title-98-0",
+  "app_install_source" : "_channel_channel_channel_channelC001-31212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131212131",
+  "platform" : "ANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDAND",
+  "project_id" : "test_project_id_01",
+  "app_id" : "maxLenTestItemUser",
+  "screen_view_screen_name" : null,
+  "screen_view_screen_id" : null,
+  "screen_view_screen_unique_id" : null,
+  "screen_view_previous_screen_name" : null,
+  "screen_view_previous_screen_id" : null,
+  "screen_view_previous_screen_unique_id" : null,
+  "screen_view_previous_time_msec" : null,
+  "screen_view_engagement_time_msec" : null,
+  "screen_view_entrances" : null,
+  "page_view_page_referrer" : null,
+  "page_view_page_referrer_title" : null,
+  "page_view_previous_time_msec" : null,
+  "page_view_engagement_time_msec" : null,
+  "page_view_page_title" : null,
+  "page_view_page_url" : null,
+  "page_view_page_url_path" : null,
+  "page_view_page_url_query_parameters" : null,
+  "page_view_hostname" : null,
+  "page_view_latest_referrer" : null,
+  "page_view_latest_referrer_host" : null,
+  "page_view_entrances" : null,
+  "app_start_is_first_time" : null,
+  "upgrade_previous_app_version" : null,
+  "upgrade_previous_os_version" : null,
+  "search_key" : null,
+  "search_term" : null,
+  "outbound_link_classes" : null,
+  "outbound_link_domain" : null,
+  "outbound_link_id" : null,
+  "outbound_link_url" : null,
+  "outbound_link" : null,
+  "user_engagement_time_msec" : null,
+  "user_id" : "_user_id_user_id_user_id312121-312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121-3121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213",
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-98",
+  "session_id" : "see000201912dk-23u92-1df0020-see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020see000201912dk-23u92-1df0020se",
+  "session_start_time_msec" : 1667963966697,
+  "session_duration" : 690000,
+  "session_number" : null,
+  "scroll_engagement_time_msec" : null,
+  "sdk_error_code" : null,
+  "sdk_error_message" : null,
+  "sdk_version" : "0.2.0",
+  "sdk_name" : "aws-solution-clickstream-sdk",
+  "app_exception_message" : null,
+  "app_exception_stack" : null,
+  "custom_parameters_json_str" : "{\"_device_advertising_id\":\"DAID001\",\"_error_name_length_exceed\":\"\",\"_error_attribute_size_exceed\":\"\",\"_device_vendor_id\":\"V001\",\"_traffic_source_name\":\"TSN-_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name\",\"_error_value_length_exceed\":\"\",\"_error_name_invalid\":\"\",\"country_code\":\"CN\",\"_privacy_info_analytics_storage\":\"PIAAS\",\"hashCode\":\"80452b0\",\"_privacy_info_uses_transient_token\":\"PIUTT\",\"_privacy_info_ads_storage\":\"PIAS\",\"_is_first_day\":true,\"event_sequence_id\":2}",
+  "custom_parameters" : {
+    "_device_advertising_id" : {
+      "value" : "DAID001",
+      "type" : "string"
+    },
+    "_device_vendor_id" : {
+      "value" : "V001",
+      "type" : "string"
+    },
+    "_error_attribute_size_exceed" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "_error_name_invalid" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "_error_name_length_exceed" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "_error_value_length_exceed" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "_is_first_day" : {
+      "value" : "true",
+      "type" : "boolean"
+    },
+    "_privacy_info_ads_storage" : {
+      "value" : "PIAS",
+      "type" : "string"
+    },
+    "_privacy_info_analytics_storage" : {
+      "value" : "PIAAS",
+      "type" : "string"
+    },
+    "_privacy_info_uses_transient_token" : {
+      "value" : "PIUTT",
+      "type" : "string"
+    },
+    "_traffic_source_name" : {
+      "value" : "TSN-_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name_traffic_source_name",
+      "type" : "string"
+    },
+    "country_code" : {
+      "value" : "CN",
+      "type" : "string"
+    },
+    "event_sequence_id" : {
+      "value" : "2",
+      "type" : "number"
+    },
+    "hashCode" : {
+      "value" : "80452b0",
+      "type" : "string"
+    }
+  },
+  "process_info" : {
+    "ingest_time" : "2023-04-24T06:51:49.403Z",
+    "input_file_name" : "_TEST_INPUT_FILE_NAME_",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_",
+    "rid" : "07157da84281bb7234ba6f8613df7d32",
+    "source_ip" : "13.212.229.59"
+  },
+  "ua" : "Apache-HttpClient/4.5.12 (Java/11.0.15)",
+  "ip" : "13.212.229.59",
+  "created_time" : "_CREATED_TIME_"
+}

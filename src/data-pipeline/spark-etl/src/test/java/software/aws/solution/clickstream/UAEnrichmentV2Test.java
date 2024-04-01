@@ -12,7 +12,6 @@
  */
 
 package software.aws.solution.clickstream;
-
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.model.*;
@@ -35,8 +34,11 @@ public class UAEnrichmentV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedJson, outDataset.select(
                 ModelV2.DEVICE_UA_BROWSER,
                 ModelV2.DEVICE_UA_BROWSER_VERSION,
+                ModelV2.DEVICE_UA_OS,
+                ModelV2.DEVICE_UA_OS_VERSION,
                 ModelV2.DEVICE_UA_DEVICE,
-                ModelV2.DEVICE_UA_DEVICE_CATEGORY
+                ModelV2.DEVICE_UA_DEVICE_CATEGORY,
+                ModelV2.DEVICE_UA
         ).first().prettyJson());
     }
 

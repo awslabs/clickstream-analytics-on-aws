@@ -29,7 +29,92 @@ export class SolutionInfo {
   static SOLUTION_TYPE = 'AWS-Solutions';
 }
 
-function parseVersion(version: string): VersionProps {
+export class SolutionVersion {
+  public static readonly V_1_0_0 = SolutionVersion.Of('v1.0.0');
+  public static readonly V_1_0_1 = SolutionVersion.Of('v1.0.1');
+  public static readonly V_1_0_2 = SolutionVersion.Of('v1.0.2');
+  public static readonly V_1_0_3 = SolutionVersion.Of('v1.0.3');
+  public static readonly V_1_1_0 = SolutionVersion.Of('v1.1.0');
+  public static readonly V_1_1_1 = SolutionVersion.Of('v1.1.1');
+  public static readonly V_1_1_2 = SolutionVersion.Of('v1.1.2');
+  public static readonly V_1_1_3 = SolutionVersion.Of('v1.1.3');
+  public static readonly V_1_1_4 = SolutionVersion.Of('v1.1.4');
+  public static readonly V_1_1_5 = SolutionVersion.Of('v1.1.5');
+  public static readonly V_1_1_6 = SolutionVersion.Of('v1.1.6');
+  public static readonly V_1_2_0 = SolutionVersion.Of('v1.2.0');
+  public static readonly ANY = SolutionVersion.Of('*');
+
+  public static readonly V_1_0_ALL = [
+    SolutionVersion.V_1_0_0,
+    SolutionVersion.V_1_0_1,
+    SolutionVersion.V_1_0_2,
+    SolutionVersion.V_1_0_3,
+  ];
+
+  public static readonly V_1_1_ALL = [
+    SolutionVersion.V_1_1_0,
+    SolutionVersion.V_1_1_1,
+    SolutionVersion.V_1_1_2,
+    SolutionVersion.V_1_1_3,
+    SolutionVersion.V_1_1_4,
+    SolutionVersion.V_1_1_5,
+  ];
+
+  /**
+   * Create a new SolutionVersion with an arbitrary version.
+   *
+   * @param fullVersion the full version string,
+   *   for example "v1.2.0-dev-main-202402080321-9d2dae7c"
+   */
+  public static Of(fullVersion: string): SolutionVersion {
+    return new SolutionVersion(fullVersion);
+  }
+
+  /** The full version string, for example:
+   * "v1.2.0-dev-main-202402080321-9d2dae7c"
+   * "v1.1.5-202403071513"
+   * "v1.1.0"
+   * */
+  public readonly fullVersion: string;
+  /** The short version string, for example, "v1.1.0". */
+  public readonly shortVersion: string;
+  /** The build id string, for example, "dev-main-202402080321-9d2dae7c". */
+  public readonly buildId: string;
+
+  private constructor(fullVersion: string) {
+    if (fullVersion === '*') {
+      this.fullVersion = fullVersion;
+      this.shortVersion = fullVersion;
+      this.buildId = '';
+    } else {
+      this.fullVersion = fullVersion;
+      this.shortVersion = parseVersion(fullVersion).short;
+      this.buildId = parseVersion(fullVersion).buildId ?? '';
+    }
+  }
+
+  public equalTo(version: SolutionVersion): boolean {
+    return this.shortVersion === version.shortVersion;
+  }
+
+  public greaterThan(version: SolutionVersion): boolean {
+    return this.shortVersion > version.shortVersion;
+  }
+
+  public greaterThanOrEqualTo(version: SolutionVersion): boolean {
+    return this.shortVersion >= version.shortVersion;
+  }
+
+  public lessThan(version: SolutionVersion): boolean {
+    return this.shortVersion < version.shortVersion;
+  }
+
+  public lessThanOrEqualTo(version: SolutionVersion): boolean {
+    return this.shortVersion <= version.shortVersion;
+  }
+}
+
+export function parseVersion(version: string): VersionProps {
   const versionPattern = /^(v\d+\.\d+\.\d+)-?(.*)/;
   const match = version.match(versionPattern);
 

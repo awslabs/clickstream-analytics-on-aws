@@ -13,31 +13,29 @@
 
 import {
   AppLayout,
-  Button,
-  Container,
   ContentLayout,
-  DatePicker,
-  Form,
-  FormField,
   Header,
-  Input,
-  RadioGroup,
-  Select,
-  SpaceBetween,
 } from '@cloudscape-design/components';
+import { ExtendSegment } from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { SegmentProvider } from 'context/SegmentContext';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { INIT_SEGMENT_OBJ } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
 
 const AddUserSegments: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { projectId, appId } = useParams();
+  const [segmentObject, setSegmentObject] = useState<ExtendSegment>({
+    ...INIT_SEGMENT_OBJ,
+    projectId: defaultStr(projectId),
+    appId: defaultStr(appId),
+  });
 
   const breadcrumbItems = [
     {
@@ -45,12 +43,12 @@ const AddUserSegments: React.FC = () => {
       href: '/',
     },
     {
-      text: t('breadCrumb.users'),
-      href: '/user',
+      text: t('breadCrumb.segments'),
+      href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text: t('breadCrumb.users'),
-      href: '/add',
+      text: t('breadCrumb.createSegment'),
+      href: '',
     },
   ];
 
@@ -59,7 +57,6 @@ const AddUserSegments: React.FC = () => {
       <AnalyticsNavigation activeHref={`/analytics/segments`} />
       <div className="flex-1">
         <AppLayout
-          // toolsHide
           tools={<HelpInfo />}
           navigationHide
           content={
@@ -70,132 +67,19 @@ const AddUserSegments: React.FC = () => {
                 </Header>
               }
             >
-              <Form
-                actions={
-                  <SpaceBetween direction="horizontal" size="xs">
-                    <Button
-                      onClick={() => {
-                        navigate(-1);
-                      }}
-                    >
-                      {t('button.cancel')}
-                    </Button>
-                    <Button variant="primary">{t('button.save')}</Button>
-                  </SpaceBetween>
-                }
-              >
-                <SpaceBetween direction="vertical" size="l">
-                  <Container
-                    header={
-                      <Header>
-                        {t('analytics:segment.comp.userSegmentSettings')}
-                      </Header>
-                    }
-                  >
-                    <SpaceBetween direction="vertical" size="m">
-                      <FormField
-                        label={t('analytics:segment.comp.segmentName')}
-                        description={t(
-                          'analytics:segment.comp.segmentNameDesc'
-                        )}
-                      >
-                        <Input
-                          value=""
-                          placeholder={defaultStr(
-                            t('analytics:segment.comp.segmentNamePlaceholder')
-                          )}
-                        />
-                      </FormField>
-                      <FormField
-                        label={t('analytics:segment.comp.segmentDescription')}
-                        description={t(
-                          'analytics:segment.comp.segmentDescriptionDesc'
-                        )}
-                      >
-                        <Input
-                          value=""
-                          placeholder={defaultStr(
-                            t(
-                              'analytics:segment.comp.segmentDescriptionPlaceholder'
-                            )
-                          )}
-                        />
-                      </FormField>
-                      <FormField
-                        label={t('analytics:segment.comp.refreshMethod')}
-                        description={t(
-                          'analytics:segment.comp.refreshMethodDesc'
-                        )}
-                      >
-                        <RadioGroup
-                          value="manual"
-                          items={[
-                            {
-                              value: 'manual',
-                              label: t(
-                                'analytics:segment.comp.refreshMethodManual'
-                              ),
-                            },
-                            {
-                              value: 'auto',
-                              label: t(
-                                'analytics:segment.comp.refreshMethodAuto'
-                              ),
-                            },
-                          ]}
-                        />
-                        <div className="mt-10">
-                          <SpaceBetween direction="horizontal" size="xs">
-                            <Select
-                              selectedOption={{ label: 'Daily', value: 'DAY' }}
-                              options={[
-                                { label: 'Daily', value: 'DAY' },
-                                { label: 'Monthly', value: 'MONTH' },
-                                { label: 'Custom(Cron)', value: 'CRON' },
-                              ]}
-                            />
-                            <Select
-                              selectedOption={{ label: '8PM', value: '20' }}
-                              options={[
-                                { label: '1AM', value: '1' },
-                                { label: '12AM', value: '0' },
-                                { label: '8PM', value: '20' },
-                              ]}
-                            />
-                          </SpaceBetween>
-                        </div>
-                      </FormField>
-
-                      <FormField
-                        label={t('analytics:segment.comp.expirationSettings')}
-                        description={t(
-                          'analytics:segment.comp.expirationSettingsDesc'
-                        )}
-                      >
-                        <DatePicker value={''} placeholder="YYYY/MM/DD" />
-                      </FormField>
-                    </SpaceBetween>
-                  </Container>
-
-                  <Container
-                    header={
-                      <Header
-                        description={t(
-                          'analytics:segment.comp.filterGroupDesc'
-                        )}
-                      >
-                        {t('analytics:segment.comp.filterGroup')}
-                      </Header>
-                    }
-                  >
-                    <div style={{ paddingBottom: 300 }}>
-                      <SegmentProvider>
-                        <SegmentEditor />
-                      </SegmentProvider>
-                    </div>
-                  </Container>
-                </SpaceBetween>
-              </Form>
+              <SegmentProvider>
+                <SegmentEditor
+                  segmentObject={segmentObject}
+                  updateSegmentObject={(key, value) => {
+                    setSegmentObject((prev) => {
+                      return {
+                        ...prev,
+                        [key]: value,
+                      };
+                    });
+                  }}
+                />
+              </SegmentProvider>
             </ContentLayout>
           }
           headerSelector="#header"

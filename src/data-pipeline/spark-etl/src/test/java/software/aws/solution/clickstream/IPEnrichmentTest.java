@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 class IPEnrichmentTest extends BaseSparkTest {
 

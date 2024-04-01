@@ -898,6 +898,22 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   ],
                 ],
               },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
+                  ],
+                ],
+              },
             ],
           },
           {
@@ -922,6 +938,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'redshift-serverless:GetNamespace',
               'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
+              's3:GetObject',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',
@@ -1180,6 +1197,39 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   },
                   ':role/Clickstream*',
                 ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'events:RemoveTargets',
+              'events:DeleteRule',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':events:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':rule/Clickstream-SegmentJobRule-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
               ],
             },
           },
@@ -2521,6 +2571,22 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
                   ],
                 ],
               },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
+                  ],
+                ],
+              },
             ],
           },
           {
@@ -2545,6 +2611,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'redshift-serverless:GetNamespace',
               'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
+              's3:GetObject',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',
@@ -2808,6 +2875,39 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
           },
           {
             Action: [
+              'events:RemoveTargets',
+              'events:DeleteRule',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':events:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':rule/Clickstream-SegmentJobRule-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
+              ],
+            },
+          },
+          {
+            Action: [
               'dynamodb:BatchGetItem',
               'dynamodb:GetRecords',
               'dynamodb:GetShardIterator',
@@ -2922,7 +3022,5 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
         },
       ],
     });
-
   });
-
 });

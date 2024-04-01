@@ -11,19 +11,27 @@
  *  and limitations under the License.
  */
 
+import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
+import { Container, Spinner } from '@cloudscape-design/components';
 import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import {
   AnalyticsSegmentAction,
+  AnalyticsSegmentActionType,
   analyticsSegmentGroupReducer,
 } from 'components/eventselect/reducer/analyticsSegmentGroupReducer';
+import { parametersConvertToUserCategoryItemType } from 'pages/analytics/analytics-utils';
 import {
   ReactElement,
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
 } from 'react';
-import { DEFAULT_SEGMENT_GROUP_DATA } from 'ts/const';
+import { useTranslation } from 'react-i18next';
+import { DEFAULT_SEGMENT_GROUP_DATA, enumToSelectOptions } from 'ts/const';
+import { defaultStr, getEventParameters } from 'ts/utils';
+import { useUserEventParameter } from './AnalyticsEventsContext';
 
 interface SegmentContextType {
   segmentDataState: IEventSegmentationObj;
@@ -36,15 +44,65 @@ const SegmentContext = createContext<SegmentContextType>(
 export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
+  const { data, loading } = useUserEventParameter();
+  const { t } = useTranslation();
   const [segmentDataState, segmentDataDispatch] = useReducer(
     analyticsSegmentGroupReducer,
-    { ...DEFAULT_SEGMENT_GROUP_DATA }
+    {
+      ...DEFAULT_SEGMENT_GROUP_DATA,
+      eventOperationOptions: enumToSelectOptions(
+        ConditionNumericOperator,
+        'calculateOperator'
+      ).map((item) => {
+        return { label: defaultStr(t(item.label ?? '')), value: item.value };
+      }),
+      eventSessionOptions: [
+        { label: t('analytics:segment.options.withInSession'), value: 'true' },
+        {
+          label: t('analytics:segment.options.withOutSession'),
+          value: 'false',
+        },
+      ],
+      eventFlowOptions: [
+        { label: t('analytics:segment.options.directlyFollow'), value: 'true' },
+        {
+          label: t('analytics:segment.options.indirectlyFollow'),
+          value: 'false',
+        },
+      ],
+    }
   );
 
   const contextValue = useMemo(
     () => ({ segmentDataState, segmentDataDispatch }),
     [segmentDataState, segmentDataDispatch]
   );
+
+  useEffect(() => {
+    if (data.categoryEvents) {
+      segmentDataDispatch({
+        type: AnalyticsSegmentActionType.SetEventOption,
+        eventOption: data.categoryEvents,
+        userIsAttributeOptions: parametersConvertToUserCategoryItemType(
+          data.metaDataUserAttributes,
+          getEventParameters(
+            data.metaDataEventParameters,
+            data.metaDataEvents,
+            data.builtInMetaData
+          )
+        ),
+        segmentGroupList: data.segmentGroupList ?? [],
+      });
+    }
+  }, [data]);
+
+  if (loading) {
+    return (
+      <Container>
+        <Spinner />
+      </Container>
+    );
+  }
 
   return (
     <SegmentContext.Provider value={contextValue}>
@@ -56,7 +114,7 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
 export const useSegmentContext = (): SegmentContextType => {
   const context = useContext(SegmentContext);
   if (context === undefined) {
-    throw new Error('useMainContext must be used within a MainProvider');
+    throw new Error('useSegmentContext must be used within a SegmentProvider');
   }
   return context;
 };

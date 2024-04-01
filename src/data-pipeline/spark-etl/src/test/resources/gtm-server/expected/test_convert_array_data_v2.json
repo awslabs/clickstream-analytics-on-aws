@@ -40,8 +40,13 @@
       "device_time_zone_offset_seconds" : null,
       "device_ua_browser" : null,
       "device_ua_browser_version" : null,
+      "device_ua_os" : null,
+      "device_ua_os_version" : null,
       "device_ua_device" : null,
       "device_ua_device_category" : null,
+      "device_ua" : {
+        "string" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+      },
       "device_screen_width" : 428,
       "device_screen_height" : 926,
       "device_viewport_width" : null,
@@ -65,37 +70,40 @@
       "traffic_source_category" : null,
       "user_first_touch_time_msec" : null,
       "app_package_id" : null,
-      "app_id" : "example_clickstream_analytics_aws",
       "app_version" : null,
       "app_title" : null,
       "app_install_source" : null,
       "platform" : "Web",
       "project_id" : "test_project_id_gtm_server",
-      "screen_name" : null,
-      "screen_id" : null,
-      "screen_unique_id" : null,
-      "previous_screen_name" : null,
-      "previous_screen_id" : null,
-      "previous_screen_unique_id" : null,
-      "page_referrer" : "https://www.example.com/product/screen-protector",
-      "page_referrer_title" : null,
-      "page_title" : "Black Kingsnake – example",
-      "page_url" : "https://www.example.com/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible",
-      "page_url_path" : "/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case",
-      "page_url_query_parameters" : {
+      "app_id" : "example_clickstream_analytics_aws",
+      "screen_view_screen_name" : null,
+      "screen_view_screen_id" : null,
+      "screen_view_screen_unique_id" : null,
+      "screen_view_previous_screen_name" : null,
+      "screen_view_previous_screen_id" : null,
+      "screen_view_previous_screen_unique_id" : null,
+      "screen_view_previous_time_msec" : null,
+      "screen_view_engagement_time_msec" : null,
+      "screen_view_entrances" : null,
+      "page_view_page_referrer" : "https://www.example.com/product/screen-protector",
+      "page_view_page_referrer_title" : null,
+      "page_view_previous_time_msec" : null,
+      "page_view_engagement_time_msec" : null,
+      "page_view_page_title" : "Black Kingsnake – example",
+      "page_view_page_url" : "https://www.example.com/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible",
+      "page_view_page_url_path" : "/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case",
+      "page_view_page_url_query_parameters" : {
         "artwork_name" : "black-kingsnake",
         "device" : "iphone-15-pro-max",
         "product" : "ultra-bounce-case-magsafe-compatible"
       },
-      "hostname" : "www.example.com",
-      "latest_referrer" : null,
-      "latest_referrer_host" : null,
+      "page_view_hostname" : "www.example.com",
+      "page_view_latest_referrer" : null,
+      "page_view_latest_referrer_host" : null,
+      "page_view_entrances" : null,
       "app_start_is_first_time" : null,
-      "previous_view_time_msec" : null,
-      "previous_view_engagement_time_msec" : null,
-      "entrances" : null,
-      "previous_app_version" : null,
-      "previous_os_version" : null,
+      "upgrade_previous_app_version" : null,
+      "upgrade_previous_os_version" : null,
       "search_key" : null,
       "search_term" : null,
       "outbound_link_classes" : null,
@@ -113,31 +121,88 @@
       "scroll_engagement_time_msec" : null,
       "sdk_error_code" : null,
       "sdk_error_message" : null,
-      "sdk_exception_message" : null,
-      "sdk_exception_stack" : null,
       "sdk_version" : null,
       "sdk_name" : null,
-      "custom_parameters_json_str" : "{\"x-sst-system_properties\":\"{\\\"uc\\\":\\\"US\\\",\\\"ngs\\\":null,\\\"gse\\\":\\\"1\\\",\\\"gcd\\\":null,\\\"tft\\\":1695261225665,\\\"consent\\\":null,\\\"request_start_time_ms\\\":1695261256542}\",\"x-ga-tfd\":\"32152\",\"Text\":\"\",\"screen_resolution\":\"428x926\",\"Url\":\"\",\"x-ga-page_id\":\"43700136\",\"client_id\":\"iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753\",\"ip_override\":\"70.123.241.83\",\"x-ga-ur\":\"US-TX\",\"x-ga-protocol_version\":\"2\",\"id\":\"\",\"x-ga-gtm_version\":\"45je39i0\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"448657059.1695257753\",\"dataset\":\"{}\",\"class\":\"\",\"user_agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1\",\"x-ga-measurement_id\":\"G-000000002\",\"x-ga-request_count\":\"5\"}",
+      "app_exception_message" : null,
+      "app_exception_stack" : null,
+      "custom_parameters_json_str" : "{\"x-sst-system_properties\":{\"uc\":\"US\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261225665,\"consent\":null,\"request_start_time_ms\":1695261256542},\"x-ga-tfd\":32152,\"Text\":\"\",\"screen_resolution\":\"428x926\",\"Url\":\"\",\"x-ga-page_id\":43700136,\"client_id\":\"iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753\",\"ip_override\":\"70.123.241.83\",\"x-ga-ur\":\"US-TX\",\"x-ga-protocol_version\":\"2\",\"id\":\"\",\"x-ga-gtm_version\":\"45je39i0\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"448657059.1695257753\",\"dataset\":\"{}\",\"class\":\"\",\"user_agent\":\"Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1\",\"x-ga-measurement_id\":\"G-000000002\",\"x-ga-request_count\":5}",
       "custom_parameters" : {
-        "Text" : "",
-        "Url" : "",
-        "class" : "",
-        "client_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
-        "dataset" : "{}",
-        "id" : "",
-        "ip_override" : "70.123.241.83",
-        "screen_resolution" : "428x926",
-        "user_agent" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
-        "x-ga-gtm_version" : "45je39i0",
-        "x-ga-js_client_id" : "448657059.1695257753",
-        "x-ga-measurement_id" : "G-000000002",
-        "x-ga-mp2-seg" : "1",
-        "x-ga-page_id" : "43700136",
-        "x-ga-protocol_version" : "2",
-        "x-ga-request_count" : "5",
-        "x-ga-tfd" : "32152",
-        "x-ga-ur" : "US-TX",
-        "x-sst-system_properties" : "{\"uc\":\"US\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261225665,\"consent\":null,\"request_start_time_ms\":1695261256542}"
+        "Text" : {
+          "value" : "",
+          "type" : "string"
+        },
+        "Url" : {
+          "value" : "",
+          "type" : "string"
+        },
+        "class" : {
+          "value" : "",
+          "type" : "string"
+        },
+        "client_id" : {
+          "value" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+          "type" : "string"
+        },
+        "dataset" : {
+          "value" : "{}",
+          "type" : "string"
+        },
+        "id" : {
+          "value" : "",
+          "type" : "string"
+        },
+        "ip_override" : {
+          "value" : "70.123.241.83",
+          "type" : "string"
+        },
+        "screen_resolution" : {
+          "value" : "428x926",
+          "type" : "string"
+        },
+        "user_agent" : {
+          "value" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+          "type" : "string"
+        },
+        "x-ga-gtm_version" : {
+          "value" : "45je39i0",
+          "type" : "string"
+        },
+        "x-ga-js_client_id" : {
+          "value" : "448657059.1695257753",
+          "type" : "string"
+        },
+        "x-ga-measurement_id" : {
+          "value" : "G-000000002",
+          "type" : "string"
+        },
+        "x-ga-mp2-seg" : {
+          "value" : "1",
+          "type" : "string"
+        },
+        "x-ga-page_id" : {
+          "value" : "43700136",
+          "type" : "number"
+        },
+        "x-ga-protocol_version" : {
+          "value" : "2",
+          "type" : "string"
+        },
+        "x-ga-request_count" : {
+          "value" : "5",
+          "type" : "number"
+        },
+        "x-ga-tfd" : {
+          "value" : "32152",
+          "type" : "number"
+        },
+        "x-ga-ur" : {
+          "value" : "US-TX",
+          "type" : "string"
+        },
+        "x-sst-system_properties" : {
+          "value" : "{\"uc\":\"US\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261225665,\"consent\":null,\"request_start_time_ms\":1695261256542}",
+          "type" : "object"
+        }
       },
       "process_info" : {
         "ingest_time" : "2023-09-21T01:54:26.814Z",
@@ -168,7 +233,8 @@
       "first_traffic_category" : null,
       "first_app_install_source" : null,
       "process_info" : null,
-      "app_id" : "example_clickstream_analytics_aws"
+      "app_id" : "example_clickstream_analytics_aws",
+      "event_name" : "PDP Clicks"
     },
     "items" : [ ]
   }

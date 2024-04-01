@@ -19,6 +19,8 @@ import org.apache.spark.sql.*;
 import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.util.*;
+
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ETLRunner.*;
 

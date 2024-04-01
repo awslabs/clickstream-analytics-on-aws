@@ -40,8 +40,13 @@
       "device_time_zone_offset_seconds" : null,
       "device_ua_browser" : "Google Chrome",
       "device_ua_browser_version" : "116.0.5845.188",
+      "device_ua_os" : "Windows",
+      "device_ua_os_version" : "10.0.0",
       "device_ua_device" : null,
       "device_ua_device_category" : null,
+      "device_ua" : {
+        "string" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+      },
       "device_screen_width" : 1920,
       "device_screen_height" : 1200,
       "device_viewport_width" : null,
@@ -65,33 +70,36 @@
       "traffic_source_category" : null,
       "user_first_touch_time_msec" : null,
       "app_package_id" : null,
-      "app_id" : "example_clickstream_analytics_aws",
       "app_version" : null,
       "app_title" : null,
       "app_install_source" : null,
       "platform" : "Web",
       "project_id" : "test_project_id_gtm_server",
-      "screen_name" : null,
-      "screen_id" : null,
-      "screen_unique_id" : null,
-      "previous_screen_name" : null,
-      "previous_screen_id" : null,
-      "previous_screen_unique_id" : null,
-      "page_referrer" : "https://www.example.com/iphone-cases/iphone-15-pro-max-cases?page=2",
-      "page_referrer_title" : null,
-      "page_title" : "Apple Watch保護殼 – example",
-      "page_url" : "https://www.example.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple Watch Case",
-      "page_url_path" : null,
-      "page_url_query_parameters" : null,
-      "hostname" : null,
-      "latest_referrer" : null,
-      "latest_referrer_host" : null,
+      "app_id" : "example_clickstream_analytics_aws",
+      "screen_view_screen_name" : null,
+      "screen_view_screen_id" : null,
+      "screen_view_screen_unique_id" : null,
+      "screen_view_previous_screen_name" : null,
+      "screen_view_previous_screen_id" : null,
+      "screen_view_previous_screen_unique_id" : null,
+      "screen_view_previous_time_msec" : null,
+      "screen_view_engagement_time_msec" : null,
+      "screen_view_entrances" : null,
+      "page_view_page_referrer" : "https://www.example.com/iphone-cases/iphone-15-pro-max-cases?page=2",
+      "page_view_page_referrer_title" : null,
+      "page_view_previous_time_msec" : null,
+      "page_view_engagement_time_msec" : null,
+      "page_view_page_title" : "Apple Watch保護殼 – example",
+      "page_view_page_url" : "https://www.example.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple Watch Case",
+      "page_view_page_url_path" : null,
+      "page_view_page_url_query_parameters" : null,
+      "page_view_hostname" : null,
+      "page_view_latest_referrer" : null,
+      "page_view_latest_referrer_host" : null,
+      "page_view_entrances" : null,
       "app_start_is_first_time" : null,
-      "previous_view_time_msec" : null,
-      "previous_view_engagement_time_msec" : null,
-      "entrances" : null,
-      "previous_app_version" : null,
-      "previous_os_version" : null,
+      "upgrade_previous_app_version" : null,
+      "upgrade_previous_os_version" : null,
       "search_key" : null,
       "search_term" : null,
       "outbound_link_classes" : null,
@@ -109,28 +117,76 @@
       "scroll_engagement_time_msec" : null,
       "sdk_error_code" : null,
       "sdk_error_message" : null,
-      "sdk_exception_message" : null,
-      "sdk_exception_stack" : null,
       "sdk_version" : null,
       "sdk_name" : null,
-      "custom_parameters_json_str" : "{\"x-sst-system_properties\":\"{\\\"uc\\\":\\\"HK\\\",\\\"ngs\\\":null,\\\"gse\\\":\\\"1\\\",\\\"gcd\\\":null,\\\"tft\\\":1695261251390,\\\"consent\\\":null,\\\"request_start_time_ms\\\":1695261261382,\\\"etld\\\":\\\"google.com.hk\\\"}\",\"x-ga-tfd\":\"10527\",\"screen_resolution\":\"1920x1200\",\"x-ga-page_id\":\"1061079922\",\"client_id\":\"oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066\",\"ip_override\":\"72.255.244.237\",\"client_hints\":\"{\\\"architecture\\\":\\\"x86\\\",\\\"bitness\\\":\\\"64\\\",\\\"full_version_list\\\":[{\\\"brand\\\":\\\"Chromium\\\",\\\"version\\\":\\\"116.0.5845.188\\\"},{\\\"brand\\\":\\\"Not)A;Brand\\\",\\\"version\\\":\\\"24.0.0.0\\\"},{\\\"brand\\\":\\\"Google Chrome\\\",\\\"version\\\":\\\"116.0.5845.188\\\"}],\\\"mobile\\\":false,\\\"model\\\":\\\"\\\",\\\"platform\\\":\\\"Windows\\\",\\\"platform_version\\\":\\\"10.0.0\\\",\\\"wow64\\\":false,\\\"brands\\\":[{\\\"brand\\\":\\\"Chromium\\\",\\\"version\\\":\\\"116\\\"},{\\\"brand\\\":\\\"Not)A;Brand\\\",\\\"version\\\":\\\"24\\\"},{\\\"brand\\\":\\\"Google Chrome\\\",\\\"version\\\":\\\"116\\\"}]}\",\"x-ga-ur\":\"HK\",\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je39i0\",\"x-ga-mp2-are\":\"1\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"1257382463.1695261066\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36\",\"x-ga-measurement_id\":\"G-000000002\",\"x-ga-request_count\":\"4\"}",
+      "app_exception_message" : null,
+      "app_exception_stack" : null,
+      "custom_parameters_json_str" : "{\"x-sst-system_properties\":{\"uc\":\"HK\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261251390,\"consent\":null,\"request_start_time_ms\":1695261261382,\"etld\":\"google.com.hk\"},\"x-ga-tfd\":10527,\"screen_resolution\":\"1920x1200\",\"x-ga-page_id\":1061079922,\"client_id\":\"oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066\",\"ip_override\":\"72.255.244.237\",\"client_hints\":{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Chromium\",\"version\":\"116.0.5845.188\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24.0.0.0\"},{\"brand\":\"Google Chrome\",\"version\":\"116.0.5845.188\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"Windows\",\"platform_version\":\"10.0.0\",\"wow64\":false,\"brands\":[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"116\"}]},\"x-ga-ur\":\"HK\",\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je39i0\",\"x-ga-mp2-are\":\"1\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"1257382463.1695261066\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36\",\"x-ga-measurement_id\":\"G-000000002\",\"x-ga-request_count\":4}",
       "custom_parameters" : {
-        "client_hints" : "{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Chromium\",\"version\":\"116.0.5845.188\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24.0.0.0\"},{\"brand\":\"Google Chrome\",\"version\":\"116.0.5845.188\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"Windows\",\"platform_version\":\"10.0.0\",\"wow64\":false,\"brands\":[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"116\"}]}",
-        "client_id" : "oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066",
-        "ip_override" : "72.255.244.237",
-        "screen_resolution" : "1920x1200",
-        "user_agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-        "x-ga-gtm_version" : "45je39i0",
-        "x-ga-js_client_id" : "1257382463.1695261066",
-        "x-ga-measurement_id" : "G-000000002",
-        "x-ga-mp2-are" : "1",
-        "x-ga-mp2-seg" : "1",
-        "x-ga-page_id" : "1061079922",
-        "x-ga-protocol_version" : "2",
-        "x-ga-request_count" : "4",
-        "x-ga-tfd" : "10527",
-        "x-ga-ur" : "HK",
-        "x-sst-system_properties" : "{\"uc\":\"HK\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261251390,\"consent\":null,\"request_start_time_ms\":1695261261382,\"etld\":\"google.com.hk\"}"
+        "client_hints" : {
+          "value" : "{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Chromium\",\"version\":\"116.0.5845.188\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24.0.0.0\"},{\"brand\":\"Google Chrome\",\"version\":\"116.0.5845.188\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"Windows\",\"platform_version\":\"10.0.0\",\"wow64\":false,\"brands\":[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Google Chrome\",\"version\":\"116\"}]}",
+          "type" : "object"
+        },
+        "client_id" : {
+          "value" : "oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066",
+          "type" : "string"
+        },
+        "ip_override" : {
+          "value" : "72.255.244.237",
+          "type" : "string"
+        },
+        "screen_resolution" : {
+          "value" : "1920x1200",
+          "type" : "string"
+        },
+        "user_agent" : {
+          "value" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+          "type" : "string"
+        },
+        "x-ga-gtm_version" : {
+          "value" : "45je39i0",
+          "type" : "string"
+        },
+        "x-ga-js_client_id" : {
+          "value" : "1257382463.1695261066",
+          "type" : "string"
+        },
+        "x-ga-measurement_id" : {
+          "value" : "G-000000002",
+          "type" : "string"
+        },
+        "x-ga-mp2-are" : {
+          "value" : "1",
+          "type" : "string"
+        },
+        "x-ga-mp2-seg" : {
+          "value" : "1",
+          "type" : "string"
+        },
+        "x-ga-page_id" : {
+          "value" : "1061079922",
+          "type" : "number"
+        },
+        "x-ga-protocol_version" : {
+          "value" : "2",
+          "type" : "string"
+        },
+        "x-ga-request_count" : {
+          "value" : "4",
+          "type" : "number"
+        },
+        "x-ga-tfd" : {
+          "value" : "10527",
+          "type" : "number"
+        },
+        "x-ga-ur" : {
+          "value" : "HK",
+          "type" : "string"
+        },
+        "x-sst-system_properties" : {
+          "value" : "{\"uc\":\"HK\",\"ngs\":null,\"gse\":\"1\",\"gcd\":null,\"tft\":1695261251390,\"consent\":null,\"request_start_time_ms\":1695261261382,\"etld\":\"google.com.hk\"}",
+          "type" : "object"
+        }
       },
       "process_info" : {
         "ingest_time" : "2023-09-21T01:54:26.828Z",
@@ -161,7 +217,8 @@
       "first_traffic_category" : null,
       "first_app_install_source" : null,
       "process_info" : null,
-      "app_id" : "example_clickstream_analytics_aws"
+      "app_id" : "example_clickstream_analytics_aws",
+      "event_name" : "select_item"
     },
     "items" : [ {
       "event_timestamp" : "2023-09-21 01:54:26",

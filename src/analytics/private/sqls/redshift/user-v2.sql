@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS {{schema}}.user_v2 (
     first_touch_time_msec bigint,
     -- METADATA {"name":"first_visit_date","dataType":"string","category":"user_outer","displayName":{"en-US":"First touch date","zh-CN":"首次访问日期"},"description":{"en-US":"The date when the user first opened the app","zh-CN":"用户首次打开应用程序或访问站点的日期"}}
     first_visit_date DATE,
-    -- METADATA {"name":"first_referer","dataType":"string","category":"user_outer","displayName":{"en-US":"First visit referer","zh-CN":"首次访问前序外链地址"},"description":{"en-US":"The referer when the user first opened the app","zh-CN":"用户第一次打开应用程序时的外链"}}
+    -- METADATA {"name":"first_referrer","dataType":"string","category":"user_outer","displayName":{"en-US":"First visit referer","zh-CN":"首次访问前序外链地址"},"description":{"en-US":"The referer when the user first opened the app","zh-CN":"用户第一次打开应用程序时的外链"}}
     first_referrer varchar(65535),
     -- METADATA {"name":"first_traffic_source","dataType":"string","category":"user_outer","displayName":{"en-US":"First visit traffic source type","zh-CN":"首次访问流量来源类型"},"description":{"en-US":"The first-captured traffic source","zh-CN":"第一个捕获的流量源"}}
     first_traffic_source varchar(255),

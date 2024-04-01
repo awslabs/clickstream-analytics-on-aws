@@ -17,6 +17,7 @@ import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
+import { PipelineServ } from './pipeline';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import {
   createDataSet,
@@ -51,11 +52,12 @@ import {
   DashboardTitleProps,
 } from './quicksight/reporting-utils';
 import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
-import { awsAccountId } from '../common/constants';
+import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
+import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { sleep } from '../common/utils-ln';
@@ -66,6 +68,29 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const sdkClient: SDKClient = new SDKClient();
 const store: ClickStreamStore = new DynamoDbStore();
+const pipelineServ: PipelineServ = new PipelineServ();
+
+interface BuildDashboardProps {
+  query: any;
+  visualPropsArray: VisualProps[];
+  quickSight: QuickSight;
+  sheetId: string;
+  resourceName: string;
+  principals: QuickSightUserArns;
+  dashboardCreateParameters: DashboardCreateParameters;
+  templateVersion: string;
+}
+
+interface CreateDashboardProps {
+  quickSight: QuickSight;
+  resourceName: string;
+  principals: QuickSightUserArns;
+  dashboard: DashboardVersionDefinition;
+  query: any;
+  dashboardCreateParameters: DashboardCreateParameters;
+  sheetId: string;
+  templateVersion: string;
+}
 
 export class ReportingService {
 
@@ -498,7 +523,6 @@ export class ReportingService {
 
     let tableVisualDef: Visual;
     if (computeMethodProps.isSameAggregationMethod) {
-      console.log('create pivot table for aggregation: ', computeMethodProps.aggregationMethodName);
       tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
         , groupingColName, computeMethodProps.aggregationMethodName);
     } else if (
@@ -874,7 +898,11 @@ export class ReportingService {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
-    const principals = await getClickstreamUserArn();
+    const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+    const principals = await getClickstreamUserArn(
+      SolutionVersion.Of(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION),
+      pipeline?.reporting?.quickSight?.user ?? '',
+    );
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
@@ -899,8 +927,16 @@ export class ReportingService {
 
     logger.info('Got first element of visual props', { visualPropsArray: visualPropsArray[0] });
 
-    const result = await this._buildDashboard(query, visualPropsArray, quickSight,
-      sheetId, resourceName, principals, dashboardCreateParameters);
+    const result = await this._buildDashboard({
+      query,
+      visualPropsArray,
+      quickSight,
+      sheetId,
+      resourceName,
+      principals,
+      dashboardCreateParameters,
+      templateVersion: pipeline?.templateVersion ?? FULL_SOLUTION_VERSION,
+    });
     for (let visualProps of visualPropsArray) {
       const visual: VisualMapProps = {
         name: visualProps.name,
@@ -912,20 +948,18 @@ export class ReportingService {
     return result;
   };
 
-  private async _buildDashboard(query: any, visualPropsArray: VisualProps[], quickSight: QuickSight,
-    sheetId: string, resourceName: string, principals: QuickSightUserArns,
-    dashboardCreateParameters: DashboardCreateParameters) {
+  private async _buildDashboard(props: BuildDashboardProps) {
     // generate dashboard definition
     let dashboardDef: DashboardVersionDefinition;
     let dashboardName: string | undefined;
-    if (!query.dashboardId) {
+    if (!props.query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
-      const sid = visualPropsArray[0].sheetId;
+      const sid = props.visualPropsArray[0].sheetId;
       dashboardDef.Sheets![0].SheetId = sid;
-      dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
+      dashboardDef.Sheets![0].Name = props.query.sheetName ?? 'sheet1';
       dashboardDef.Options!.WeekStart = DayOfWeek.MONDAY;
     } else {
-      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId, query.dashboardId);
+      const dashboardDefProps = await getDashboardDefinitionFromArn(props.quickSight, awsAccountId, props.query.dashboardId);
       dashboardDef = dashboardDefProps.def;
       dashboardName = dashboardDefProps.name;
       if (dashboardDef.Options === undefined) {
@@ -936,51 +970,48 @@ export class ReportingService {
 
     const dashboard = applyChangeToDashboard({
       action: 'ADD',
-      requestAction: query.action,
-      visuals: visualPropsArray,
+      requestAction: props.query.action,
+      visuals: props.visualPropsArray,
       dashboardDef: dashboardDef,
     });
     logger.info('final dashboard def:', { dashboard });
 
     let result: CreateDashboardResult;
-    if (!query.dashboardId) {
+    if (!props.query.dashboardId) {
       //create QuickSight analysis
-      result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
-        query, dashboardCreateParameters, sheetId);
+      result = await this._createDashboard({
+        quickSight: props.quickSight,
+        resourceName: props.resourceName,
+        principals: props.principals,
+        dashboard,
+        query: props.query,
+        dashboardCreateParameters: props.dashboardCreateParameters,
+        sheetId: props.sheetId,
+        templateVersion: props.templateVersion,
+      });
     } else {
-      //update QuickSight analysis
-      let newAnalysis;
-      if (query.analysisId) {
-        newAnalysis = await quickSight.updateAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: query.analysisId,
-          Name: query.analysisName,
-          Definition: dashboard as AnalysisDefinition,
-        });
-      }
-
       //update QuickSight dashboard
-      const newDashboard = await quickSight.updateDashboard({
+      const newDashboard = await props.quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
-        DashboardId: query.dashboardId,
+        DashboardId: props.query.dashboardId,
         Name: dashboardName,
         Definition: dashboard,
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      await this._publishNewVersionDashboard(quickSight, query, versionNumber);
+      await this._publishNewVersionDashboard(props.quickSight, props.query, versionNumber);
 
       result = {
-        dashboardId: query.dashboardId,
+        dashboardId: props.query.dashboardId,
         dashboardArn: newDashboard.Arn!,
-        dashboardName: query.dashboardName,
+        dashboardName: props.query.dashboardName,
         dashboardVersion: versionNumber ? Number.parseInt(versionNumber) : 1,
         dashboardEmbedUrl: '',
-        analysisId: query.analysisId,
-        analysisArn: newAnalysis?.Arn!,
-        analysisName: query.analysisName,
-        sheetId,
+        analysisId: props.query.analysisId,
+        analysisArn: '',
+        analysisName: props.query.analysisName,
+        sheetId: props.sheetId,
         visualIds: [],
       };
     }
@@ -1016,42 +1047,39 @@ export class ReportingService {
     }
   }
 
-  private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
-    dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
+  private async _createDashboard(props: CreateDashboardProps) {
     const analysisId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
-    const newAnalysis = await quickSight.createAnalysis({
+    const newAnalysis = await props.quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${resourceName}`,
-      Definition: dashboard as AnalysisDefinition,
+      Name: `${props.resourceName}`,
+      Definition: props.dashboard as AnalysisDefinition,
     });
 
     //create QuickSight dashboard
-    const embedUserArn = await _getEmbedUserArnFromPipeline(query.projectId);
-    let ownerArn = principals.publishUserArn;
-    if (process.env.AWS_REGION?.startsWith('cn')) {
-      ownerArn = embedUserArn;
-    }
+    const dashboardPermissions = [
+      {
+        Principal: props.principals.exploreUserArn,
+        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
+      },
+    ];
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
-    const newDashboard = await quickSight.createDashboard({
+    const newDashboard = await props.quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${resourceName}`,
-      Definition: dashboard,
-      Permissions: [{
-        Principal: ownerArn,
-        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
-      }],
+      Name: `${props.resourceName}`,
+      Definition: props.dashboard,
+      Permissions: dashboardPermissions,
     });
 
     let dashboardEmbedUrl = '';
-    if (query.action === ExploreRequestAction.PREVIEW) {
-      const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, dashboardId);
+    if (props.query.action === ExploreRequestAction.PREVIEW) {
+      const dashboardSuccess = await waitDashboardSuccess(props.dashboardCreateParameters.region, dashboardId);
       if (dashboardSuccess) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          ownerArn,
-          dashboardCreateParameters.allowedDomain,
+          props.dashboardCreateParameters.region,
+          props.principals.exploreUserArn,
+          props.dashboardCreateParameters.allowedDomain,
           dashboardId,
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;
@@ -1060,13 +1088,13 @@ export class ReportingService {
     const result = {
       dashboardId,
       dashboardArn: newDashboard.Arn!,
-      dashboardName: `${resourceName}`,
+      dashboardName: `${props.resourceName}`,
       dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
       dashboardEmbedUrl: dashboardEmbedUrl,
       analysisId,
       analysisArn: newAnalysis.Arn!,
-      analysisName: `${resourceName}`,
-      sheetId,
+      analysisName: `${props.resourceName}`,
+      sheetId: props.sheetId,
       visualIds: [],
     };
     return result;
@@ -1098,7 +1126,10 @@ export class ReportingService {
       const quickSight = sdkClient.QuickSight({ region: region });
 
       //warmup principal
-      await getClickstreamUserArn();
+      await getClickstreamUserArn(
+        SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        latestPipeline.reporting?.quickSight?.user ?? '',
+      );
 
       //warm up redshift serverless
       if (latestPipeline.dataModeling?.redshift?.newServerless) {
@@ -1288,13 +1319,4 @@ function _needExploreUserVersion(pipeline: IPipeline) {
   const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'];
   return oldVersions.includes(version);
 
-}
-
-async function _getEmbedUserArnFromPipeline(projectId: string) {
-  let embedUserArn = '';
-  const pipelines = await store.listPipeline(projectId, 'latest', 'asc');
-  if (pipelines.length > 0) {
-    embedUserArn = pipelines[0].reporting?.quickSight?.user ?? '';
-  }
-  return embedUserArn;
 }

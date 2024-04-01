@@ -19,15 +19,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SegmentPropsData } from '../ConditionGroup';
 
-export const EVENT_SEQUENCE_SESSION_OPTION = [
-  { label: 'Within a session', value: 'within_a_session' },
-  { label: 'Without a session', value: 'without_a_session' },
-];
-export const EVENT_SEQUENCE_FLOW_OPTION = [
-  { label: 'Indirectly flow', value: 'indirectly_flow' },
-  { label: 'Directly flow', value: 'directly_flow' },
-];
-
 interface UserDoneInSeqProps {
   segmentData: IEventSegmentationItem;
   segmentProps: SegmentPropsData;
@@ -38,7 +29,7 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
 ) => {
   const { t } = useTranslation();
   const { segmentData, segmentProps } = props;
-  const { segmentDataDispatch } = useSegmentContext();
+  const { segmentDataState, segmentDataDispatch } = useSegmentContext();
 
   return (
     <div className="flex gap-5">
@@ -57,12 +48,8 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
       </div>
       <div>
         <Select
-          options={EVENT_SEQUENCE_SESSION_OPTION}
-          selectedOption={
-            segmentData.userSequenceSession ??
-            null ??
-            EVENT_SEQUENCE_SESSION_OPTION[0]
-          }
+          options={segmentDataState.eventSessionOptions}
+          selectedOption={segmentData.userSequenceSession ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateSequenceSessionType,
@@ -74,10 +61,8 @@ const UserDoneInSeq: React.FC<UserDoneInSeqProps> = (
       </div>
       <div>
         <Select
-          options={EVENT_SEQUENCE_FLOW_OPTION}
-          selectedOption={
-            segmentData.userSequenceFlow ?? EVENT_SEQUENCE_FLOW_OPTION[0]
-          }
+          options={segmentDataState.eventFlowOptions}
+          selectedOption={segmentData.userSequenceFlow ?? null}
           onChange={(e) => {
             segmentDataDispatch({
               type: AnalyticsSegmentActionType.UpdateSequenceFlowType,

@@ -57,7 +57,6 @@ export class StreamingIngestionRedshiftStack extends NestedStack {
 
     const streamingIngestionRole = new Role(this, 'StreamingIngestionFromKDS', {
       assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
-      path: '/clickstream-role/',
       inlinePolicies: {
         kinesis: new PolicyDocument({
           statements: [

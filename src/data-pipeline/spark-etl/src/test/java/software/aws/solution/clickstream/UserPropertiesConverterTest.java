@@ -17,10 +17,11 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
 import scala.collection.Iterator;
+import software.aws.solution.clickstream.transformer.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 
 public class UserPropertiesConverterTest extends BaseSparkTest {
     @Test

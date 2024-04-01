@@ -391,7 +391,7 @@ export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';
 export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
 export const DEFAULT_DASHBOARD_NAME_PREFIX = 'Clickstream Dashboard ';
 
-export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
+export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2';
 
 export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
 
@@ -436,6 +436,8 @@ export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
+export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWorkflowStateMachine';
+export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',

@@ -107,7 +107,7 @@ describe('DataAnalyticsRedshiftStack user segment workflow tests', () => {
                     {
                       Ref: 'AWS::AccountId',
                     },
-                    ':rule/Clickstream-*',
+                    ':rule/Clickstream-SegmentJobRule-*',
                   ],
                 ],
               },

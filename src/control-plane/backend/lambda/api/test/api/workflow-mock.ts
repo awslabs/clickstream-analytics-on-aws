@@ -12,12 +12,13 @@
  */
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
+import { cloneDeep } from 'lodash';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import { getStackPrefix } from '../../common/utils';
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
-  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const parameters = cloneDeep(base);
   const keys = parameters.map(p => p.ParameterKey);
   for (let att of attach) {
     if (keys.indexOf(att.ParameterKey) > -1) {
@@ -30,9 +31,23 @@ export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   return parameters;
 }
 
+export function removeParameters(base: Parameter[], attach: Parameter[]) {
+  // Deep Copy
+  const parameters = cloneDeep(base);
+  const keys = parameters.map(p => p.ParameterKey);
+  for (let att of attach) {
+    if (keys.indexOf(att.ParameterKey) > -1) {
+      const index = keys.indexOf(att.ParameterKey);
+      parameters.splice(index, 1);
+      keys.splice(index, 1);
+    }
+  }
+  return parameters;
+}
+
 export function replaceParameters(base: Parameter[], search: Parameter, replace: Parameter) {
   // Deep Copy
-  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const parameters = cloneDeep(base);
   const indexOfObject = parameters.findIndex((object) => {
     return object.ParameterKey === search.ParameterKey;
   });
@@ -568,7 +583,7 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -586,7 +601,7 @@ export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParam
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -620,7 +635,7 @@ export const DATA_PROCESSING_PLUGIN2_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -638,7 +653,7 @@ export const DATA_PROCESSING_PLUGIN3_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -678,7 +693,7 @@ export const DATA_PROCESSING_PLUGIN4_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -734,7 +749,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'SegmentsS3Prefix',
-    ParameterValue: 'clickstream/project_8888_8888/data/segments/',
+    ParameterValue: 'clickstream/project_8888_8888/data/segments-output/',
   },
   {
     ParameterKey: 'LoadWorkflowBucket',
@@ -758,7 +773,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'ClearExpiredEventsRetentionRangeDays',
-    ParameterValue: '365',
+    ParameterValue: '180',
   },
   {
     ParameterKey: 'RedshiftMode',

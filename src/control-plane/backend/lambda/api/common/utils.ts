@@ -26,11 +26,12 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { SolutionInfo } from './solution-info-ln';
+import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -230,7 +231,7 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixes.set(BucketPrefix.LOAD_WORKFLOW, `clickstream/${projectId}/data/load-workflow/`);
     prefixes.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
     prefixes.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
-    prefixes.set(BucketPrefix.SEGMENTS, `clickstream/${projectId}/data/segments/`);
+    prefixes.set(BucketPrefix.SEGMENTS, `clickstream/${projectId}/data/segments-output/`);
     return prefixes.get(key) ?? '';
   }
   return value!;
@@ -297,7 +298,7 @@ function getKafkaTopic(pipeline: IPipeline): string {
 function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
-  let s3PathPluginFiles: string[] = [];
+  const s3PathPluginFiles: string[] = [];
   // Transformer
   const { transformerClassNames, transformerPluginJars, transformerPluginFiles } = _getTransformerPluginInfo(pipeline, resources);
   transformerAndEnrichClassNames.push(...transformerClassNames);
@@ -307,7 +308,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   if (pipeline.dataProcessing?.enrichPlugin) {
     for (let enrichPluginId of pipeline.dataProcessing?.enrichPlugin) {
       const { classNames, pluginJars, pluginFiles } = _getEnrichPluginInfo(
-        resources, pipeline.dataCollectionSDK, enrichPluginId, pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
+        resources, enrichPluginId, pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
       transformerAndEnrichClassNames.push(...classNames);
       s3PathPluginJars.push(...pluginJars);
       s3PathPluginFiles.push(...pluginFiles);
@@ -321,7 +322,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   };
 }
 
-function _getEnrichPluginInfo(resources: CPipelineResources, dataCollectionSDK: DataCollectionSDK, enrichPluginId: string, templateVersion: string) {
+function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -335,7 +336,7 @@ function _getEnrichPluginInfo(resources: CPipelineResources, dataCollectionSDK: 
     }
   }
   if (enrich?.mainFunction) {
-    classNames.push(_getClassNameByVersion(dataCollectionSDK, enrich?.id, enrich?.mainFunction, templateVersion));
+    classNames.push(_getClassNameByVersion(enrich?.id, enrich?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
@@ -350,7 +351,6 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
       if (defaultTransformer?.mainFunction) {
         transformerClassNames.push(
           _getClassNameByVersion(
-            pipeline.dataCollectionSDK,
             defaultTransformer?.id,
             defaultTransformer?.mainFunction,
             pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
@@ -363,7 +363,6 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   } else {
     const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(
       resources,
-      pipeline.dataCollectionSDK,
       pipeline.dataProcessing?.transformPlugin,
       pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
     );
@@ -375,7 +374,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
 }
 
 function _getTransformerPluginInfoFromResources(
-  resources: CPipelineResources, dataCollectionSDK: DataCollectionSDK,
+  resources: CPipelineResources,
   transformPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
@@ -390,47 +389,53 @@ function _getTransformerPluginInfoFromResources(
     }
   }
   if (transform?.mainFunction) {
-    classNames.push(_getClassNameByVersion(dataCollectionSDK, transform?.id, transform?.mainFunction, templateVersion));
+    classNames.push(_getClassNameByVersion(transform?.id, transform?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
 
-function _getClassNameByVersion(dataCollectionSDK: DataCollectionSDK, id: string, curClassName: string, templateVersion: string) {
+function _getClassNameByVersion(id: string, curClassName: string, templateVersion: string) {
   const shortVersion = templateVersion?.split('-')[0];
   const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'],
+      versions: SolutionVersion.V_1_0_ALL,
       className: 'software.aws.solution.clickstream.Transformer',
     },
     {
+      id: 'BUILT-IN-1',
+      versions: SolutionVersion.V_1_1_ALL,
+      className: 'software.aws.solution.clickstream.TransformerV2',
+    },
+    {
       id: 'BUILT-IN-2',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: [
+        ...SolutionVersion.V_1_0_ALL,
+        ...SolutionVersion.V_1_1_ALL,
+      ],
       className: 'software.aws.solution.clickstream.UAEnrichment',
     },
     {
       id: 'BUILT-IN-3',
-      versions: ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: [
+        ...SolutionVersion.V_1_0_ALL,
+        ...SolutionVersion.V_1_1_ALL,
+      ],
       className: 'software.aws.solution.clickstream.IPEnrichment',
     },
     {
       id: 'BUILT-IN-4',
-      versions: ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'],
+      versions: SolutionVersion.V_1_1_ALL,
       className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
     },
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
     for (let plugin of pluginHistoryClassNameWithVersion) {
-      if (plugin.id === id && plugin.versions.includes(shortVersion)) {
+      const pluginVersions = plugin.versions.map(v => v.shortVersion);
+      if (plugin.id === id && pluginVersions.includes(shortVersion)) {
         return plugin.className;
       }
     }
-  }
-  if (dataCollectionSDK === DataCollectionSDK.CLICKSTREAM && id === 'BUILT-IN-2') {
-    return 'software.aws.solution.clickstream.UAEnrichment';
-  }
-  if (dataCollectionSDK === DataCollectionSDK.CLICKSTREAM && id === 'BUILT-IN-3') {
-    return 'software.aws.solution.clickstream.IPEnrichment';
   }
   return curClassName;
 }
@@ -1101,7 +1106,10 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+function getAppRegistryApplicationArn(pipeline: IPipeline | undefined): string {
+  if (!pipeline) {
+    return '';
+  }
   return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
@@ -1209,6 +1217,18 @@ function getDefaultTags(projectId: string) {
       Value: projectId,
     },
   ];
+  return tags;
+}
+
+function getAppRegistryStackTags(stackTags: Tag[] | undefined): Tag[] {
+  if (!stackTags) {
+    return [];
+  }
+  const tags = cloneDeep(stackTags);
+  const index = tags.findIndex(tag => tag.Key?.startsWith('#'));
+  if (index !== -1) {
+    tags.splice(index, 1);
+  }
   return tags;
 }
 
@@ -1473,4 +1493,5 @@ export {
   getLocalDateISOString,
   getSinkType,
   defaultValueFunc,
+  getAppRegistryStackTags,
 };

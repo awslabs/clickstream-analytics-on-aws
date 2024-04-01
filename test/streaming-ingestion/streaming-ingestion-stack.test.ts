@@ -172,6 +172,18 @@ describe('common parameter test of StreamingIngestionStack', () => {
           e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftDataAPIRole').toBeTruthy();
     }
   });
+
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
+
+  test('Should has Parameter IamRoleBoundaryArn', () => {
+    template.hasParameter('IamRoleBoundaryArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('have custom resource to provisioning sink kinesis', () => {
@@ -843,7 +855,6 @@ describe('resources in nested redshift stacks', () => {
           },
         ],
       },
-      Path: '/clickstream-role/',
       Policies: [
         {
           PolicyDocument: {
@@ -963,7 +974,7 @@ describe('resources in nested redshift stacks', () => {
           workgroupName: RefAnyValue,
           databaseName: RefAnyValue,
         },
-        lastModifiedTime: Match.anyValue(),
+        schemaHash: Match.anyValue(),
         projectId: RefAnyValue,
         appIds: RefAnyValue,
         databaseName: RefAnyValue,

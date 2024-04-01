@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SegmentJobStatus } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -19,7 +20,6 @@ import {
   SegmentJobStatusEvent,
 } from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-status';
 import 'aws-sdk-client-mock-jest';
-import { SegmentJobStatus } from '../../../../../src/analytics/private/segments/segments-model';
 import { getMockContext } from '../../../../common/lambda-context';
 
 describe('User segments workflow segment-job-status lambda tests', () => {
