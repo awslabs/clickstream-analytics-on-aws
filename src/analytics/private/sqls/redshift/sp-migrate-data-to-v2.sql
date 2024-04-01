@@ -1,10 +1,10 @@
-CREATE OR REPLACE PROCEDURE {{schema}}.sp_migrate_all_to_v2(ndays int)
+CREATE OR REPLACE PROCEDURE {{schema}}.sp_migrate_data_to_v2(ndays int)
 NONATOMIC
 LANGUAGE plpgsql
 AS $$
 DECLARE
     log_name VARCHAR(50) := 'sp_migrate_all_to_v2';
-    current_date TIMESTAMP := GETDATE();
+    start_dt TIMESTAMP := GETDATE();
     loop_count INT := 0;
 
 BEGIN
@@ -24,7 +24,7 @@ BEGIN
     );
 
     loop_count := 0;
-    current_date := GETDATE();
+    start_dt := GETDATE();
 
     WHILE NOT EXISTS (
         SELECT
@@ -32,9 +32,8 @@ BEGIN
         FROM
             {{schema}}.clickstream_log
         WHERE
-            log_name = 'sp_migrate_event_to_v2'
-            AND log_msg = 'backfill event_v2 is done'
-            AND log_date > current_date
+            log_msg = 'backfill event_v2 is done'
+            AND log_date > start_dt
     )
     LOOP
         CALL {{schema}}.sp_clickstream_log_non_atomic(
@@ -80,7 +79,7 @@ BEGIN
             );
     
     loop_count := 0;
-    current_date := GETDATE();
+    start_dt := GETDATE();
     
     WHILE NOT EXISTS (
             SELECT
@@ -88,9 +87,8 @@ BEGIN
             FROM
                 {{schema}}.clickstream_log
             WHERE
-                log_name = 'sp_migrate_item_to_v2'
-                AND log_msg = 'backfill item_v2 is done'
-                AND log_date > current_date
+                log_msg = 'backfill item_v2 is done'
+                AND log_date > start_dt
         )
         LOOP
     

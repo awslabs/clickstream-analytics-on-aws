@@ -159,6 +159,6 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'sp-migrate-session-to-v2.sql',
   },
   {
-    sqlFile: 'sp-migrate-all-to-v2.sql',
+    sqlFile: 'sp-migrate-data-to-v2.sql',
   },
 ];
