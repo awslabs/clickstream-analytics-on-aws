@@ -49,7 +49,7 @@ ClickstreamAnalytics.init({
 !!! info "Important"
 
     - Your `appId` and `endpoint` are already set up in it. We only need to initialize the SDK once after the application starts. 
-    - Make sure you call `ClickstreamAnalytics.init` as early as possible in your application’s life-cycle. And make sure the SDK is initialized when calling other APIs.
+    - Make sure you call `ClickstreamAnalytics.init()` as early as possible in your application's life-cycle. And make sure the SDK is initialized when calling other APIs.
     - We can use `const result = await ClickstreamAnalytics.init()` to get the boolean value of the initialization result.
 
 ### 3. Start using
