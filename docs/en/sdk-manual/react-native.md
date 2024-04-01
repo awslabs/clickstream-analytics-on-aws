@@ -54,7 +54,7 @@ ClickstreamAnalytics.init({
 
 ### 3. Start using
 
-#### Record events
+#### Record event
 
 Add the following code where you need to record events.
 
@@ -75,7 +75,7 @@ ClickstreamAnalytics.record({
 ClickstreamAnalytics.record({name: 'button_click'});
 ```
 
-#### Add global attributes
+#### Add global attribute
 
 1. Add global attributes when initializing the SDK
    ```typescript
@@ -100,7 +100,7 @@ ClickstreamAnalytics.record({name: 'button_click'});
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
 that occur after it is set.
 
-#### Delete global attributes
+#### Delete global attribute
 
 ``` typescript
 ClickstreamAnalytics.deleteGlobalAttributes(['level','_traffic_source_medium']);
@@ -118,7 +118,7 @@ ClickstreamAnalytics.setUserId("userId");
 ClickstreamAnalytics.setUserId(null);
 ```
 
-#### Add user attributes
+#### Add user attribute
 
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
