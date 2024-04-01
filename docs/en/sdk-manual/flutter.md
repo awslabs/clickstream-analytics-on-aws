@@ -108,9 +108,13 @@ analytics.setUserAttributes({
 });
 ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's
-attribute again, of course you can use the same API `analytics.setUserAttributes()` to update the current user's
-attribute when it changes.
+Current login user's attributes will be cached in disk, so the next time app open you don't need to set all user
+attributes again, of course you can use the same API `analytics.setUserAttributes()` to update the current
+user's attribute when it changes.
+
+!!! info "Important"
+
+    If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstream SDK for the first time to ensure that subsequent events contains user attributes.
 
 #### Record event with items
 
