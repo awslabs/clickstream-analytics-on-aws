@@ -4,7 +4,7 @@ DISTSTYLE ALL
 SORTKEY(user_pseudo_id)
 AUTO REFRESH NO AS
 SELECT  u.user_pseudo_id
-       ,u.event_timestamp,
+       ,u.event_timestamp
        ,MAX(user_id) user_id
        ,MAX(user_properties) user_properties
        ,MAX(user_properties_json_str) user_properties_json_str
