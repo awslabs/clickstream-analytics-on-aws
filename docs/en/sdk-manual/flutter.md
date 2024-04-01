@@ -108,7 +108,7 @@ analytics.setUserAttributes({
 });
 ```
 
-Current login user's attributes will be cached in disk, so the next time app open you don't need to set all user
+Current logged-in user's attributes will be cached in disk, so the next time app open you don't need to set all user
 attributes again, of course you can use the same API `analytics.setUserAttributes()` to update the current
 user's attribute when it changes.
 

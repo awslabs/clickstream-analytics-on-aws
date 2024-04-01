@@ -249,7 +249,7 @@ ClickstreamAnalytics.updateConfigure({
   isLogEvents: true,
   authCookie: 'your auth cookie',
   isCompressEvents: true,
-  isTrackPageViewEvents: false,
+  isTrackScreenViewEvents: false,
   isTrackUserEngagementEvents: false,
   isTrackAppExceptionEvents: false,
 });
