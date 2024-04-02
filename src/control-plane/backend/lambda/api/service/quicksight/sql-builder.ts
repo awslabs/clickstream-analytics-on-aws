@@ -1366,7 +1366,10 @@ function _buildIDColumnSqlMixedMode(index: number, eventAndCondition: EventAndCo
   return idSql;
 }
 
-function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string, dateGroupCol: string) {
+function _buildQueryColumnSqlMixedMode(eventAndCondition: EventAndCondition, groupCol: string, dateGroupCol: string | undefined) {
+  if (!dateGroupCol) {
+    throw new Error('dateGroupCol is required');
+  }
   let sql = '';
   let groupby = ',custom_attr_id';
   if (eventAndCondition.computeMethod === ExploreComputeMethod.EVENT_CNT
@@ -1872,13 +1875,20 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
   `;
 };
 
-function _getStartDateForFixDateRange(date: Date, timeWindowInSeconds: number) {
+function _getStartDateForFixDateRange(date: Date | undefined, timeWindowInSeconds: number) {
+  if (!date || !timeWindowInSeconds) {
+    throw new Error('date and timeWindowInSeconds are required');
+  }
   const dayCount = Math.ceil(timeWindowInSeconds / 86400);
   date.setDate(date.getDate() - dayCount);
   return formatDateToYYYYMMDD(date);
 }
 
-function _getStartDateForRelativeDateRange(lastN: number, timeUnit: ExploreRelativeTimeUnit, timeWindowInSeconds: number) {
+function _getStartDateForRelativeDateRange(
+  lastN: number | undefined, timeUnit: ExploreRelativeTimeUnit | undefined, timeWindowInSeconds: number | undefined) {
+  if (!lastN || !timeWindowInSeconds) {
+    throw new Error('lastN, timeUnit and timeWindowInSeconds are required');
+  }
 
   const dayCount = Math.ceil(timeWindowInSeconds / 86400);
 
@@ -1897,9 +1907,9 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   let eventDateSQL = '';
   if (timeWindowInSeconds) {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart!, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
     } else {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN!, sqlParameters.timeUnit, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
     }
   } else {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
@@ -1933,29 +1943,13 @@ export function buildColNameWithPrefix(groupCondition: ColumnAttribute) {
 }
 
 export function getComputeMethodProps(sqlParameters: SQLParameters): EventComputeMethodsProps {
-  let eventAndConditions = sqlParameters.eventAndConditions;
-  let hasExtParameter: boolean = false;
-  let hasCounntPropertyMethod: boolean = false;
-  let hasAggregationPropertyMethod: boolean = false;
-  let hasIdCountMethod: boolean = false;
-  const aggregationMethodSet: Set<ExploreAggregationMethod> = new Set();
-  for (const item of eventAndConditions!) {
-    if (item.eventExtParameter !== undefined) {
-      hasExtParameter = true;
-    }
-    if (item.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
-      hasCounntPropertyMethod = true;
-    }
-
-    if (item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
-      hasAggregationPropertyMethod = true;
-      aggregationMethodSet.add(item.eventExtParameter!.aggregationMethod);
-    }
-
-    if (item.computeMethod === ExploreComputeMethod.EVENT_CNT || item.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-      hasIdCountMethod = true;
-    }
-  }
+  const {
+    hasExtParameter,
+    hasCounntPropertyMethod,
+    hasAggregationPropertyMethod,
+    hasIdCountMethod,
+    aggregationMethodSet,
+  } = _loopComputeMethodProps(sqlParameters);
 
   const isMixedMethod = hasAggregationPropertyMethod && (hasCounntPropertyMethod || hasIdCountMethod);
   const isSameAggregationMethod = !isMixedMethod && aggregationMethodSet.size === 1 && hasAggregationPropertyMethod;
@@ -1971,6 +1965,39 @@ export function getComputeMethodProps(sqlParameters: SQLParameters): EventComput
     isSameAggregationMethod,
     isCountMixedMethod,
     aggregationMethodName,
+  };
+}
+
+function _loopComputeMethodProps(sqlParameters: SQLParameters) {
+  let eventAndConditions = sqlParameters.eventAndConditions ?? [];
+  let hasExtParameter: boolean = false;
+  let hasCounntPropertyMethod: boolean = false;
+  let hasAggregationPropertyMethod: boolean = false;
+  let hasIdCountMethod: boolean = false;
+  const aggregationMethodSet: Set<ExploreAggregationMethod> = new Set();
+  for (const item of eventAndConditions) {
+    if (item.eventExtParameter !== undefined) {
+      hasExtParameter = true;
+    }
+    if (item.computeMethod === ExploreComputeMethod.COUNT_PROPERTY) {
+      hasCounntPropertyMethod = true;
+    }
+
+    if (item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY && item.eventExtParameter?.aggregationMethod) {
+      hasAggregationPropertyMethod = true;
+      aggregationMethodSet.add(item.eventExtParameter?.aggregationMethod);
+    }
+
+    if (item.computeMethod === ExploreComputeMethod.EVENT_CNT || item.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
+      hasIdCountMethod = true;
+    }
+  }
+  return {
+    hasExtParameter,
+    hasCounntPropertyMethod,
+    hasAggregationPropertyMethod,
+    hasIdCountMethod,
+    aggregationMethodSet,
   };
 }
 
@@ -2239,7 +2266,10 @@ export function buildAllConditionSql(sqlCondition: SQLCondition | undefined) {
   return sql;
 }
 
-export function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
+export function getLastNDayNumber(lastN: number | undefined, timeUnit: ExploreRelativeTimeUnit | undefined) : number {
+  if (!lastN || !timeUnit) {
+    throw new Error('lastN and timeUnit are required');
+  }
   const currentDate = new Date();
   let targetDate: Date = new Date();
   if (timeUnit === ExploreRelativeTimeUnit.WK) {
@@ -2383,7 +2413,7 @@ function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : str
   return [...new Set(eventNames)];
 }
 
-function _getRetentionDateSql(groupCol: string) {
+function _getRetentionDateSql(groupCol: string | undefined) {
   if (groupCol === ExploreGroupColumn.WEEK) {
     //sunday as first day of week to align with quicksight
     return `

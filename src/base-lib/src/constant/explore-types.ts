@@ -176,4 +176,5 @@ export enum ExploreAnalyticsOperators {
   NOT_CONTAINS = 'not_contains',
   YES = 'yes',
   NO = 'no',
+  BETWEEN = 'between',
 }

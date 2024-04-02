@@ -90,6 +90,5 @@ const constructSqlStatement = async (appId: string, segmentId: string) => {
       type: `SEGMENT_SETTING#${segmentId}`,
     },
   }));
-
   return `SELECT 1, '${appId}', '${segmentId}';`;
 };

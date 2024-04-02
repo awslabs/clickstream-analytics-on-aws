@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
+import { ExploreAnalyticsOperators, MetadataSource, MetadataValueType } from '../constant';
+
 export interface Segment {
   segmentId: string;
   segmentType: 'User' | 'Session' | 'Event';
@@ -107,57 +109,20 @@ export interface EventWithParameter {
 }
 
 export interface ParameterCondition {
-  parameterType: ParameterType;
+  parameterType: MetadataSource;
   parameterName: string;
-  dataType: ParameterDataType;
-  conditionOperator: ConditionOperator;
+  dataType: MetadataValueType;
+  conditionOperator: ExploreAnalyticsOperators;
   inputValue: number | number[] | string | string[];
 }
 
 export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
-  conditionOperator: ConditionNumericOperator;
+  conditionOperator: ExploreAnalyticsOperators;
   inputValue: number | number[];
-  parameterType?: ParameterType;
+  parameterType?: MetadataSource;
   parameterName?: string;
-  dataType?: ParameterDataType;
-}
-
-export enum ParameterType {
-  PRESET = 'Preset',
-  CUSTOM = 'Custom',
-}
-
-export enum ParameterDataType {
-  STRING = 'string',
-  INTEGER = 'int',
-  DOUBLE = 'double',
-  FLOAT = 'float',
-}
-
-export enum ConditionOperator {
-  NULL = 'is null',
-  NOT_NULL = 'is not null',
-  EQUAL = '=',
-  NOT_EQUAL = '<>',
-  GREATER_THAN = '>',
-  GREATER_THAN_OR_EQUAL = '>=',
-  LESS_THAN = '<',
-  LESS_THAN_OR_EQUAL = '<=',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  CONTAINS = 'contains',
-  NOT_CONTAINS = 'not_contains',
-}
-
-export enum ConditionNumericOperator {
-  EQUAL = '=',
-  NOT_EQUAL = '<>',
-  GREATER_THAN = '>',
-  GREATER_THAN_OR_EQUAL = '>=',
-  LESS_THAN = '<',
-  LESS_THAN_OR_EQUAL = '<=',
-  BETWEEN = 'between',
+  dataType?: MetadataValueType;
 }
 
 export enum SegmentFilterEventMetricType {
