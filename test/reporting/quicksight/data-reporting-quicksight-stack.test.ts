@@ -1767,6 +1767,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Name: 'event_cnt',
                 Type: 'INTEGER',
               },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
             ],
             dateTimeDatasetParameter: [
               {
@@ -1789,6 +1793,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'engagement_rate',
               'avg_user_engagement_time_minutes',
               'event_cnt',
+              'user_id',
             ],
           },
           {
@@ -1809,6 +1814,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'geo_city',
+                Type: 'STRING',
+              },
+              {
                 Name: 'user_count',
                 Type: 'INTEGER',
               },
@@ -1823,10 +1832,25 @@ describe('DataReportingQuickSightStack resource test', () => {
                 timeGranularity: 'DAY',
               },
             ],
+            tagColumnOperations: [
+              {
+                columnName: 'geo_country',
+                columnGeographicRoles: [
+                  'COUNTRY',
+                ],
+              },
+              {
+                columnName: 'geo_city',
+                columnGeographicRoles: [
+                  'CITY',
+                ],
+              },
+            ],
             projectedColumns: [
               'event_date',
               'platform',
               'geo_country',
+              'geo_city',
               'user_count',
             ],
           },

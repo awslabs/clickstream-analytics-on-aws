@@ -269,7 +269,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'user_id',
             Type: 'STRING',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
@@ -294,7 +294,7 @@ export function createQuicksightCustomResource(
           'engagement_rate',
           'avg_user_engagement_time_minutes',
           'event_cnt',
-          'user_id'
+          'user_id',
         ],
       },
       {
