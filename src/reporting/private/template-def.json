@@ -694,10 +694,6 @@
                 "DataType": "DATETIME"
                 },
                 {
-                "Name": "event_date_hour",
-                "DataType": "DATETIME"
-                },
-                {
                 "Name": "merged_user_id",
                 "DataType": "STRING"
                 },
@@ -2538,7 +2534,7 @@
                                                 "FieldId": "LogicalTable1.event_timestamp.2.1711523597437",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "event_timestamp"
+                                                    "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
                                                 "HierarchyId": "c52b902a-6408-462d-8d97-3276c961336e"
@@ -3601,7 +3597,7 @@
                                                 "FieldId": "LogicalTable1.event_timestamp.2.1711523597437",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "event_timestamp"
+                                                    "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
                                                 "HierarchyId": "d7d35259-66ad-4acf-9994-3a56566c5875"
@@ -8789,12 +8785,12 @@
         {
             "DataSetIdentifier": "Event_View",
             "Name": "Previous Day Active Users",
-            "Expression": "periodOverPeriodLastValue(distinct_count({merged_user_id}), {event_timestamp},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue(distinct_count({merged_user_id}), {event_timestamp_local},DAY, 1)"
         },
         {
             "DataSetIdentifier": "Event_View",
             "Name": "Previous Day New Users",
-            "Expression": "periodOverPeriodLastValue({New user}, {event_timestamp},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue({New user}, {event_timestamp_local},DAY, 1)"
         },
         {
             "DataSetIdentifier": "Event_View",

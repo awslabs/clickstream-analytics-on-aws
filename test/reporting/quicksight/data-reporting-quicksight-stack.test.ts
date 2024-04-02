@@ -1441,10 +1441,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DATETIME',
               },
               {
-                Name: 'event_date_hour',
-                Type: 'DATETIME',
-              },
-              {
                 Name: 'merged_user_id',
                 Type: 'STRING',
               },
@@ -1625,7 +1621,6 @@ describe('DataReportingQuickSightStack resource test', () => {
               'first_app_install_source',
               'user_properties_json_str',
               'event_date',
-              'event_date_hour',
               'merged_user_id',
               'latest_user_id',
               'new_user_indicator',
