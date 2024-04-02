@@ -18,7 +18,7 @@ retention_counts AS (
   SELECT
     first_date,
     day_diff,
-    COUNT(user_pseudo_id) AS returned_user_count
+    COUNT(distinct user_pseudo_id) AS returned_user_count
   FROM {{database_name}}.{{schema}}.clickstream_retention_base_view
   GROUP BY first_date, day_diff
 )

@@ -310,6 +310,10 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
+            Name: 'geo_city',
+            Type: 'STRING',
+          },
+          {
             Name: 'user_count',
             Type: 'INTEGER',
           },
@@ -326,10 +330,21 @@ export function createQuicksightCustomResource(
             defaultValue: futureDate,
           },
         ],
+        tagColumnOperations: [
+          {
+            columnName: 'geo_country',
+            columnGeographicRoles: ['COUNTRY'],
+          },
+          {
+            columnName: 'geo_city',
+            columnGeographicRoles: ['CITY'],
+          },
+        ],
         projectedColumns: [
           'event_date',
           'platform',
           'geo_country',
+          'geo_city',
           'user_count',
         ],
       },
