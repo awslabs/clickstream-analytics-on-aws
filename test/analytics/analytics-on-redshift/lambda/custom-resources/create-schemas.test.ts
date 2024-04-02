@@ -156,11 +156,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
       ...loadSQLFromFS(schemaDefs, rootPath),
-      ...loadSQLFromFS(reportingViewsDef.map(i => { 
-        if(i.type === 'sp') {
-          return { sqlFile: i.spName + '.sql' }
+      ...loadSQLFromFS(reportingViewsDef.map(i => {
+        if (i.type === 'sp') {
+          return { sqlFile: i.spName + '.sql' };
         } else {
-          return { sqlFile: i.viewName + '.sql' }
+          return { sqlFile: i.viewName + '.sql' };
         }
       }), rootPath, 'dashboard/'),
       ...defs,
