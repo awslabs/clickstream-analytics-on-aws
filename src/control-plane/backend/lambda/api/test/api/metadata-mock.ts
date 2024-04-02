@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   QueryCommand,
   QueryCommandInput,
@@ -17,7 +18,6 @@ import {
 import { MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_USER_ATTRIBUTE_NAME, dictionaryMock } from './ddb-mock';
 import { BASE_STATUS, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { analyticsMetadataTable, clickStreamTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
-import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import 'aws-sdk-client-mock-jest';
 
 

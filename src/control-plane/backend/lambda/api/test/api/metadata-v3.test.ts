@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { ConditionCategoryFrontend, ExplorePathNodeType, MetadataParameterType, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -23,7 +24,6 @@ import request from 'supertest';
 import { MOCK_APP_ID, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_USER_ATTRIBUTE_NAME } from './ddb-mock';
 import { displayDataMock, mockPipeline, MOCK_EVENT_PARAMETER_V2, MOCK_USER_ATTRIBUTE_V2 } from './metadata-mock';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
-import { ConditionCategory, MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -83,7 +83,7 @@ describe('Metadata Event test V3', () => {
       projectId: MOCK_PROJECT_ID,
       appId: MOCK_APP_ID,
       name: 'device_mobile_brand_name',
-      category: ConditionCategory.DEVICE,
+      category: ConditionCategoryFrontend.DEVICE,
       valueType: MetadataValueType.STRING,
       platform: [],
       description: {
@@ -205,8 +205,8 @@ describe('Metadata Event Attribute test V3', () => {
       Items: [
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_page_title#${MetadataValueType.STRING}`,
-          name: '_page_title',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.EVENT}#${ExplorePathNodeType.PAGE_TITLE}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.PAGE_TITLE,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_page_view', '_page_view1'],
@@ -228,8 +228,8 @@ describe('Metadata Event Attribute test V3', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_page_url#${MetadataValueType.STRING}`,
-          name: '_page_url',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.EVENT}#${ExplorePathNodeType.PAGE_URL}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.PAGE_URL,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_page_view', '_page_view1'],
@@ -247,8 +247,8 @@ describe('Metadata Event Attribute test V3', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_screen_name#${MetadataValueType.STRING}`,
-          name: '_screen_name',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.EVENT}#${ExplorePathNodeType.SCREEN_NAME}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.SCREEN_NAME,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],
@@ -266,8 +266,8 @@ describe('Metadata Event Attribute test V3', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#_screen_id#${MetadataValueType.STRING}`,
-          name: '_screen_id',
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.EVENT}#${ExplorePathNodeType.SCREEN_ID}#${MetadataValueType.STRING}`,
+          name: ExplorePathNodeType.SCREEN_ID,
           summary: {
             ...MOCK_EVENT_PARAMETER_V2.summary,
             associatedEvents: ['_screen_view', '_screen_view1'],
@@ -385,7 +385,7 @@ describe('Metadata User Attribute test V3', () => {
         },
         {
           ...MOCK_USER_ATTRIBUTE_V2,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
           name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
           valueType: MetadataValueType.FLOAT,
           summary: {
@@ -410,7 +410,7 @@ describe('Metadata User Attribute test V3', () => {
       data: {
         items: [
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
             month: 'latest',
             prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -424,7 +424,7 @@ describe('Metadata User Attribute test V3', () => {
               'en-US': `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
               'zh-CN': `${MOCK_USER_ATTRIBUTE_NAME}参数说明`,
             },
-            category: ConditionCategory.USER_OUTER,
+            category: ConditionCategoryFrontend.USER_OUTER,
             metadataSource: MetadataSource.CUSTOM,
             valueType: MetadataValueType.STRING,
             values: [
@@ -434,7 +434,7 @@ describe('Metadata User Attribute test V3', () => {
             ],
           },
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategoryFrontend.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
             month: 'latest',
             prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -445,10 +445,10 @@ describe('Metadata User Attribute test V3', () => {
               'zh-CN': '',
             },
             displayName: {
-              'en-US': `[${ConditionCategory.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
-              'zh-CN': `[${ConditionCategory.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
+              'en-US': `[${ConditionCategoryFrontend.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
+              'zh-CN': `[${ConditionCategoryFrontend.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
             },
-            category: ConditionCategory.USER_OUTER,
+            category: ConditionCategoryFrontend.USER_OUTER,
             metadataSource: MetadataSource.CUSTOM,
             valueType: MetadataValueType.FLOAT,
             values: [

@@ -113,10 +113,17 @@ export enum ConditionCategoryFrontend {
   EVENT = 'event',
   EVENT_OUTER = 'event_outer',
   APP_INFO = 'app_info',
-  DEVICE = 'app_info',
-  TRAFFIC_SOURCE = 'app_info',
-  GEO = 'app_info',
-  OTER = 'other'
+  DEVICE = 'device',
+  TRAFFIC_SOURCE = 'traffic_source',
+  SCREEN_VIEW = 'screen_view',
+  PAGE_VIEW = 'page_view',
+  UPGRADE = 'upgrade',
+  SEARCH = 'search',
+  OUTBOUND = 'outbound',
+  SESSION = 'session',
+  GEO = 'geo',
+  SDK = 'sdk',
+  OTHER = 'other'
 }
 
 export enum ExploreLocales {
