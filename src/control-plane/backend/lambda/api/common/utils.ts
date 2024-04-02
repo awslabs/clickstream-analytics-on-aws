@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -34,7 +36,7 @@ import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusD
 import { logger } from './powertools';
 import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -1125,13 +1127,19 @@ function getIamRoleBoundaryArn(): string | undefined {
 }
 
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
-  const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
-  const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  const redshiftStackVersionStr = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
+  const reportStackVersionStr = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  if (!redshiftStackVersionStr || !reportStackVersionStr) {
+    return false;
+  }
+  const redshiftStackVersion = SolutionVersion.Of(redshiftStackVersionStr);
+  const reportStackVersion = SolutionVersion.Of(reportStackVersionStr);
+  const pipelineVersion = SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
   if (
     pipeline?.reporting?.quickSight?.accountName &&
-    !pipeline?.templateVersion?.startsWith('v1.0') &&
-    redshiftStackVersion && !redshiftStackVersion.startsWith('v1.0') &&
-    reportStackVersion && !reportStackVersion.startsWith('v1.0')
+    pipelineVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    redshiftStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    reportStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6)
   ) {
     return true;
   }
@@ -1413,13 +1421,16 @@ function _getRunningStatus(lastAction: string) {
 function getMetadataVersionType(pipeline: IPipeline) {
   const version = pipeline.templateVersion?.split('-')[0] ?? '';
   const unSupportVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'];
-  const oldVersions = ['v1.1.0', 'v1.1.1'];
+  const v1Versions = ['v1.1.0', 'v1.1.1'];
+  const v2Versions = ['v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'];
   if (unSupportVersions.includes(version)) {
     return MetadataVersionType.UNSUPPORTED;
-  } else if (oldVersions.includes(version)) {
+  } else if (v1Versions.includes(version)) {
     return MetadataVersionType.V1;
+  } else if (v2Versions.includes(version)) {
+    return MetadataVersionType.V2;
   }
-  return MetadataVersionType.V2;
+  return MetadataVersionType.V3;
 }
 
 function getLocalDateISOString(date: Date, offsetDay?: number) {
@@ -1430,6 +1441,40 @@ function getLocalDateISOString(date: Date, offsetDay?: number) {
 
 function defaultValueFunc(exceptValue: any, defaultValue: any) {
   return exceptValue || defaultValue;
+}
+
+function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined): IMetadataBuiltInList {
+  if (!builtInList) {
+    builtInList = {} as IMetadataBuiltInList;
+  }
+  const event_parameters = readAndIterateFile(join(__dirname, './sqls/redshift/event-v2.sql'));
+  const user_attributes = readAndIterateFile(join(__dirname, './sqls/redshift/user-v2.sql'));
+  builtInList = {
+    ...builtInList,
+    PresetEventParameters: event_parameters,
+    PublicEventParameters: [],
+    PresetUserAttributes: user_attributes,
+  };
+  return builtInList;
+}
+
+function readAndIterateFile(filePath: string): any[] {
+  try {
+    const fileContent = readFileSync(filePath, 'utf-8');
+    const lines = fileContent.split('\n');
+    const metadata: any[] = [];
+    for (const line of lines) {
+      if (line.includes('-- METADATA ')) {
+        const metaStr = line.split('-- METADATA ')[1].trim();
+        const meta = JSON.parse(metaStr);
+        metadata.push(meta);
+      }
+    }
+    return metadata;
+  } catch (error) {
+    logger.warn('readAndIterateFile error', { error, filePath });
+    return [];
+  }
 }
 
 export {
@@ -1495,4 +1540,5 @@ export {
   getSinkType,
   defaultValueFunc,
   getAppRegistryStackTags,
+  readMetadataFromSqlFile,
 };

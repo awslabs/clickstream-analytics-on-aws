@@ -32,6 +32,7 @@ jspm_packages/
 src/aws-exports.js
 build/
 ncc/
+sqls/
 /test-reports/
 junit.xml
 /coverage/
