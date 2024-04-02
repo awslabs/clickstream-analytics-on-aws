@@ -13,8 +13,6 @@
 
 import {
   ConditionCategory,
-  ConditionNumericOperator,
-  ConditionOperator,
   EventsInSequenceCondition,
   EventWithParameter,
   ExploreAggregationMethod,
@@ -1148,12 +1146,14 @@ const convertAttributeList = (
   const eventConditionList: ParameterCondition[] = [];
   for (const attribute of attributeList) {
     const eventCondition: ParameterCondition = {
-      parameterType: attribute.conditionOption?.metadataSource as any,
+      parameterType:
+        attribute.conditionOption?.metadataSource ?? MetadataSource.PRESET,
       parameterName: attribute.conditionOption?.name ?? '',
       conditionOperator: attribute.conditionOperator
-        ?.value as ConditionOperator,
+        ?.value as ExploreAnalyticsOperators,
       inputValue: attribute.conditionValue,
-      dataType: attribute.conditionOption?.valueType as any,
+      dataType:
+        attribute.conditionOption?.valueType ?? MetadataValueType.STRING,
     };
     eventConditionList.push(eventCondition);
   }
@@ -1180,11 +1180,11 @@ const ConvertUserDoneEvent = (
             item.userDoneEventCalculateMethod?.value
           )) as SegmentFilterEventMetricType,
       conditionOperator: item.userDoneEventOperation
-        ?.value as ConditionNumericOperator,
+        ?.value as ExploreAnalyticsOperators,
       inputValue: item.userDoneEventValue?.map(Number) ?? [],
       parameterType:
         item.userDoneEventCalculateMethod?.itemType === 'children'
-          ? (item.userDoneEventCalculateMethod?.metadataSource as any)
+          ? item.userDoneEventCalculateMethod?.metadataSource
           : undefined,
       parameterName:
         item.userDoneEventCalculateMethod?.itemType === 'children'
@@ -1202,10 +1202,12 @@ const ConvertUserIsEvent = (
     conditionType: SegmentFilterConditionType.UserAttributeCondition,
     hasAttribute: item.userEventType?.value === ConditionType.USER_IS,
     attributeCondition: {
-      parameterType: item.userIsParamOption?.metadataSource as any,
+      parameterType:
+        item.userIsParamOption?.metadataSource ?? MetadataSource.PRESET,
       parameterName: item.userIsParamOption?.name ?? '',
-      dataType: item.userIsParamOption?.valueType as any,
-      conditionOperator: item.userISOperator?.value as ConditionOperator,
+      dataType: item.userIsParamOption?.valueType ?? MetadataValueType.STRING,
+      conditionOperator: item.userISOperator
+        ?.value as ExploreAnalyticsOperators,
       inputValue: item.userIsValue,
     },
   };

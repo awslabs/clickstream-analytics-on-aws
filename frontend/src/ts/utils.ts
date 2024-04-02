@@ -449,8 +449,8 @@ const patchBuiltInMetadata = (
     );
     if (presetParameter) {
       const localeLng = getLngFromLocalStorage();
-      parameter.displayName = (presetParameter.displayName as any)[localeLng];
-      parameter.description = (presetParameter.description as any)[localeLng];
+      parameter.displayName = presetParameter.displayName[localeLng];
+      parameter.description = presetParameter.description[localeLng];
     }
   }
 };

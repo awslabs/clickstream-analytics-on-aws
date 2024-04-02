@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
+import { ExploreAnalyticsOperators } from '@aws/clickstream-base-lib';
 import { Button, Input, Select } from '@cloudscape-design/components';
 import ErrorText from 'components/common/ErrorText';
 import { IEventSegmentationItem } from 'components/eventselect/AnalyticsType';
@@ -196,7 +196,7 @@ const UserDoneComp: React.FC<UserDoneCompProps> = (
 
       <div>
         {segmentData.userDoneEventOperation?.value ===
-        ConditionNumericOperator.BETWEEN ? (
+        ExploreAnalyticsOperators.BETWEEN ? (
           <div className="align-center flex gap-5 w-200">
             <Input
               type="number"
