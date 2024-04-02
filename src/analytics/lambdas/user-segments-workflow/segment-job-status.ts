@@ -64,8 +64,6 @@ const _handler = async (event: SegmentJobStatusEvent) => {
         ReturnValues: 'ALL_NEW',
       });
 
-      // TODO: retrieve segment result including sample data from S3, update result to job status table
-
       logger.info(`Update segment job status to ${jobStatus} in DDB metadata table`);
       await ddbDocClient.send(command);
     }

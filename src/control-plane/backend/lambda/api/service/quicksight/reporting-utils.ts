@@ -834,7 +834,7 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
       filterGroupId: uuidv4(),
       filterId: sourceFilterId,
       lastN: props.lastN!,
-      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit!),
+      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit),
     };
 
     filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheRelativeDateFilterGroupType)) as FilterGroup;

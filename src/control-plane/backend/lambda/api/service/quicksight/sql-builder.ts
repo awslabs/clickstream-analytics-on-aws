@@ -1036,7 +1036,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
     select 
       ${groupingColSql}
       grouping, 
-      ${_getRetentionDateSql(sqlParameters.groupColumn!)}
+      ${_getRetentionDateSql(sqlParameters.groupColumn)}
       (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
     from result_table 
     group by ${groupByColSql} grouping, start_event_date, event_date
@@ -1468,7 +1468,7 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
       }
 
       const idSql = _buildIDColumnSqlMixedMode(index, item);
-      const query = _buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn!);
+      const query = _buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn);
 
       joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
@@ -1899,7 +1899,7 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
       eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart!, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
     } else {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN!, sqlParameters.timeUnit!, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN!, sqlParameters.timeUnit, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
     }
   } else {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
@@ -1949,7 +1949,7 @@ export function getComputeMethodProps(sqlParameters: SQLParameters): EventComput
 
     if (item.computeMethod === ExploreComputeMethod.AGGREGATION_PROPERTY) {
       hasAggregationPropertyMethod = true;
-      aggregationMethodSet.add(item.eventExtParameter!.aggregationMethod!);
+      aggregationMethodSet.add(item.eventExtParameter!.aggregationMethod);
     }
 
     if (item.computeMethod === ExploreComputeMethod.EVENT_CNT || item.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
@@ -2151,7 +2151,7 @@ function _buildDateListSQL(sqlParameters: SQLParameters) {
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
     dateList.push(...generateDateList(new Date(sqlParameters.timeStart!), new Date(sqlParameters.timeEnd!)));
   } else {
-    const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit!);
+    const daysCount = getLastNDayNumber(sqlParameters.lastN!-1, sqlParameters.timeUnit);
     for (let n = 0; n < daysCount; n++) {
       dateList.push(`
        (CURRENT_DATE - INTERVAL '${n} day') 
@@ -2705,21 +2705,21 @@ export function buildColumnConditionProps(columnAttribute: ColumnAttribute | und
   const userOuterAttributes: ColumnAttribute[] = [];
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
-  if (columnAttribute?.category === ConditionCategory.USER) {
+  if (columnAttribute?.category === ConditionCategory.USER && columnAttribute?.property) {
     hasUserAttribute = true;
     userAttributes.push({
       property: columnAttribute.property,
       category: columnAttribute.category,
       dataType: columnAttribute.dataType,
     });
-  } else if (columnAttribute?.category === ConditionCategory.EVENT) {
+  } else if (columnAttribute?.category === ConditionCategory.EVENT && columnAttribute?.property) {
     hasEventAttribute = true;
     eventAttributes.push({
       property: columnAttribute.property,
       category: columnAttribute.category,
       dataType: columnAttribute.dataType,
     });
-  } else if (columnAttribute?.category === ConditionCategory.USER_OUTER ) {
+  } else if (columnAttribute?.category === ConditionCategory.USER_OUTER && columnAttribute?.property) {
     hasUserOuterAttribute = true;
     userOuterAttributes.push({
       property: columnAttribute.property,

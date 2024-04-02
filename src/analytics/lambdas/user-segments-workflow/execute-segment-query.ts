@@ -91,6 +91,5 @@ const constructSqlStatement = async (appId: string, segmentId: string) => {
     },
   }));
 
-  // TODO: construct sql
   return `SELECT 1, '${appId}', '${segmentId}';`;
 };
