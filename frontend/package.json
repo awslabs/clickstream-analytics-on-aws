@@ -1,7 +1,7 @@
 {
   "name": "@aws/clickstream-web-console",
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "env-cmd -f .env node scripts/build.js",
     "compile": "pnpm dlx projen compile",
     "default": "pnpm dlx projen default",
     "package": "pnpm dlx projen package",
@@ -14,7 +14,7 @@
     "watch": "pnpm dlx projen watch",
     "projen": "pnpm dlx projen",
     "start": "node scripts/start.js",
-    "crabuild": "node scripts/build.js",
+    "crabuild": "env-cmd -f .env node scripts/build.js",
     "lint": "eslint --ext .js,.ts,.jsx,.tsx src",
     "format": "npm run lint --fix & prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
     "test:coverage": "node scripts/test.js --transformIgnorePatterns -coverage --watchAll=false --collectCoverageFrom='src/**/*.{ts,tsx}'"
@@ -37,6 +37,7 @@
     "babel-plugin-named-asset-import": "^0.3.8",
     "babel-preset-react-app": "^10.0.1",
     "constructs": "^10.0.0",
+    "env-cmd": "^10.1.0",
     "esbuild": "^0.17.12",
     "esbuild-plugin-inline-image": "^0.0.9",
     "esbuild-plugin-sass": "^1.0.1",

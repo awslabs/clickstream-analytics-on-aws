@@ -211,6 +211,7 @@ const devDepsForFrontendProject = [
   'html-minifier@^4.0.0',
   'prettier@^2.7.1',
   'typescript@^4.8.4',
+  'env-cmd@^10.1.0',
 ];
 
 const depsForApiProject = [
@@ -523,8 +524,8 @@ frontendProject.package.addField('eslintConfig', {
 });
 frontendProject.addFields({ version });
 frontendProject.setScript('start', 'node scripts/start.js');
-frontendProject.setScript('build', 'node scripts/build.js');
-frontendProject.setScript('crabuild', 'node scripts/build.js');
+frontendProject.setScript('build', 'env-cmd -f .env node scripts/build.js');
+frontendProject.setScript('crabuild', 'env-cmd -f .env node scripts/build.js');
 frontendProject.setScript('lint', 'eslint --ext .js,.ts,.jsx,.tsx src');
 frontendProject.setScript('format', 'npm run lint --fix & prettier --write \'src/**/*.{js,jsx,ts,tsx}\'');
 frontendProject.setScript('test', 'node scripts/test.js --transformIgnorePatterns');

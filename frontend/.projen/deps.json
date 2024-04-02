@@ -85,6 +85,11 @@
       "type": "build"
     },
     {
+      "name": "env-cmd",
+      "version": "^10.1.0",
+      "type": "build"
+    },
+    {
       "name": "esbuild-plugin-inline-image",
       "version": "^0.0.9",
       "type": "build"

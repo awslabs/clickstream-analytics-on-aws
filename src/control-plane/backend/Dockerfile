@@ -1,7 +1,11 @@
 FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
+
 COPY frontend frontend
+ARG REACT_APP_SOLUTION_VERSION
+RUN echo "REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION" > ./frontend/.env
+
 COPY src src
 COPY package.json package.json
 COPY pnpm-lock.yaml pnpm-lock.yaml

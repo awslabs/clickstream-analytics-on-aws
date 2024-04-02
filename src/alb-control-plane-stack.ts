@@ -167,6 +167,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
           CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '819200',
           CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '1024000',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
       },
     });

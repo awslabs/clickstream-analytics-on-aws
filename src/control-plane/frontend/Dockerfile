@@ -13,6 +13,7 @@ COPY pnpm-workspace.yaml pnpm-workspace.yaml
 ARG GENERATE_SOURCEMAP=false
 ARG CHUNK_MIN_SIZE=819200
 ARG CHUNK_MAX_SIZE=1024000
+ARG REACT_APP_SOLUTION_VERSION
 
 RUN export GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP} && export CHUNK_MIN_SIZE=${CHUNK_MIN_SIZE} && export CHUNK_MAX_SIZE=${CHUNK_MAX_SIZE}
 RUN npm install -g pnpm@8.15.3
@@ -21,6 +22,7 @@ RUN pnpm projen
 RUN pnpm nx build @aws/clickstream-base-lib
 
 WORKDIR /home/node/app/frontend
+RUN echo "REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION" > .env
 RUN pnpm install
 RUN pnpm run crabuild
 

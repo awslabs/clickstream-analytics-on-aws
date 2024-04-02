@@ -222,6 +222,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           'mkdir $APP_PATH',
           'tar --exclude=\'node_modules\' --exclude=\'cdk.out\' --exclude=\'build\' -cf - . | (cd $APP_PATH && tar -xf -)',
           'cd $APP_PATH',
+          'echo "REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION" > ./frontend/.env',
           'pnpm install',
           'pnpm projen',
           'pnpm nx run-many --target=build',
@@ -230,6 +231,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
         user: 'node',
         autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', SOLUTION_CONFIG_PATH, '/locales/*'],
