@@ -47,7 +47,6 @@ with tmp2 AS (
     SELECT 
         session_id,
         platform,
-        merged_user_id as user_id,
         MAX(first_traffic_source) AS first_traffic_source
     FROM 
         {{database_name}}.{{schema}}.{{baseView}}
@@ -626,7 +625,7 @@ GROUP BY
 DROP TABLE IF EXISTS event_traffic_tmp_tb;
 
 EXCEPTION WHEN OTHERS THEN
-    call {{database_name}}.{{schema}}.sp_clickstream_log_non_atomic('{{viewName}}', 'error', 'error message:' || SQLERRM);
+    call {{database_name}}.{{schema}}.sp_clickstream_log('{{viewName}}', 'error', 'error message:' || SQLERRM);
     RAISE INFO 'error message: %', SQLERRM;
 END;      
 $$;
