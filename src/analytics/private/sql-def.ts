@@ -254,7 +254,7 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'user-v2.sql',
   },
   {
-    sqlFile: 'user-m-max-view-v2.sql',
+    sqlFile: 'user-m-max-view.sql',
     type: 'mv',
     scheduleRefresh: 'true',
   },
