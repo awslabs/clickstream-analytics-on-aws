@@ -12,6 +12,7 @@
  */
 
 import {
+  ExploreAnalyticsNumericOperators,
   ExploreAnalyticsOperators,
   MetadataSource,
   MetadataValueType,
@@ -217,7 +218,7 @@ function commonValidationsForSegment() {
                   body(path + 'event.eventParameterConditions.*.conditionOperator').isIn(Object.values(ExploreAnalyticsOperators)),
                   body(path + 'event.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
                   body(path + 'metricCondition.metricType').isIn(Object.values(SegmentFilterEventMetricType)),
-                  body(path + 'metricCondition.conditionOperator').isIn(Object.values(ExploreAnalyticsOperators)),
+                  body(path + 'metricCondition.conditionOperator').isIn(Object.values(ExploreAnalyticsNumericOperators)),
                   body(path + 'metricCondition.inputValue').custom(validateMetricConditionInputValue),
                   body(path + 'metricCondition.parameterType').optional().isIn(Object.values(MetadataSource)),
                   body(path + 'metricCondition.parameterName').optional().isString(),
