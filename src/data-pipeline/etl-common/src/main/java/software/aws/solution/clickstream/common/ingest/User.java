@@ -33,15 +33,13 @@ public class User {
 
     @JsonAnySetter
     public void setCustomProperties(final String name, final Object value) {
-        if (value instanceof Map<?, ?>) {
-            Map<String, Object> valueMap = (Map<String, Object>) value;
-
+        if (value instanceof Map<?, ?> valueMap) {
             Object valObj = valueMap.getOrDefault("value", null);
             Object setTimestampObj = valueMap.getOrDefault("set_timestamp", null);
 
             Long setTimestamp = null;
-            if (setTimestampObj instanceof Number) {
-                setTimestamp = ((Number) setTimestampObj).longValue();
+            if (setTimestampObj instanceof Number setTimestampNum) {
+                setTimestamp = setTimestampNum.longValue();
             }
             if (valObj == null) {
                 customProperties.put(name, new UserPropObjectValue(value, null));

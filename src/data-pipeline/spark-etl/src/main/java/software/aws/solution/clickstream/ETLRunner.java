@@ -121,7 +121,7 @@ public class ETLRunner {
                 "platform", "privacy_info", "project_id", "traffic_source",
                 "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
                 "user_pseudo_id"
-        ).map(functions::col).collect(Collectors.toList());
+        ).map(functions::col).collect(Collectors.toList()); //NOSONAR
         return cols.toArray(new Column[]{});
     }
 
@@ -439,7 +439,7 @@ public class ETLRunner {
 
     private List<String> getSourcePaths(final String sourceDir, final List<String[]> partitions) {
         return partitions.stream().map((String[] p) -> sourceDir + String.join("/",
-                "year=" + p[0], "month=" + p[1], "day=" + p[2])).collect(Collectors.toList());
+                "year=" + p[0], "month=" + p[1], "day=" + p[2])).collect(Collectors.toList()); //NOSONAR
     }
 
     private String[] getUTCYearMonthDay(final long timestamp) {

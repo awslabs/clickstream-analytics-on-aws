@@ -34,11 +34,11 @@ import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
 import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
 import static software.aws.solution.clickstream.common.Util.VALUE_LOG;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.*;
 import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter.toGenericRow;
-import static software.aws.solution.clickstream.util.Utils.*;
 
 import static software.aws.solution.clickstream.model.ModelV2.*;
 

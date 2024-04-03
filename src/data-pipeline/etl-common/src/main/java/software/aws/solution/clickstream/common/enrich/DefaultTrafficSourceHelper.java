@@ -14,20 +14,29 @@
 
 package software.aws.solution.clickstream.common.enrich;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
-import software.aws.solution.clickstream.common.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.SourceMedium;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceHelper;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
+import software.aws.solution.clickstream.common.model.UriInfo;
 
-import java.net.*;
-import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static software.aws.solution.clickstream.common.Util.ERROR_LOG;
 import static software.aws.solution.clickstream.common.Util.getUriParams;
 
 
 @Slf4j
-public final class DefaultTrafficSourceHelper {
+public final class DefaultTrafficSourceHelper implements TrafficSourceHelper {
 
     public static final String GCLID = "gclid";
     public static final String TYPE = "type";
@@ -252,7 +261,39 @@ public final class DefaultTrafficSourceHelper {
                 "yelp", TRIPADVISOR, ANGIESLIST, NEXTDOOR);
     }
 
-    public ParserResult parse(final String inputUrl, final String referrer) throws URISyntaxException, JsonProcessingException {
+    private static UriInfo getUriInfo(final URI uri, final Map<String, List<String>> params) {
+        String host = uri.getHost();
+        String path = uri.getPath();
+        String query = uri.getQuery();
+        String protocol = uri.getScheme();
+
+        log.info("params: {}", params);
+
+        UriInfo uriInfo = new UriInfo();
+        uriInfo.setProtocol(protocol);
+        uriInfo.setHost(host);
+        if (path != null && !path.isEmpty() && !path.equals("/")) {
+            uriInfo.setPath(path);
+        }
+        uriInfo.setQuery(query);
+        if (!params.isEmpty()) {
+            uriInfo.setParameters(convertToStringMap(params));
+        }
+        return uriInfo;
+    }
+
+    @Override
+    public CategoryTrafficSource getCategoryTrafficSource(final TrafficSource trafficSource) {
+        if (trafficSource == null || trafficSource.getSource() == null) {
+            return null;
+        }
+        String category = getCategory(trafficSource.getSource());
+        String channelGroup = getChannelGroup(trafficSource.getSource(), trafficSource.getCampaign(), trafficSource.getMedium());
+        return new CategoryTrafficSource(trafficSource, channelGroup, category);
+    }
+
+    @Override
+    public TrafficSourceParserResult parse(final String inputUrl, final String referrer) {
         String url = inputUrl;
         if (url == null) {
             url = "";
@@ -262,17 +303,43 @@ public final class DefaultTrafficSourceHelper {
             url = "http://" + url;
         }
 
-        URI uri = new URI(url);
-        String host = uri.getHost();
-        String path = uri.getPath();
-        String query = uri.getQuery();
-        String protocol = uri.getScheme();
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            log.error("cannot parse url: " + url + ERROR_LOG + e.getMessage());
+        }
 
-        Map<String, List<String>> params = getUriParams(uri);
+        UriInfo uriInfo = null;
+        TrafficSource trafficSource = new TrafficSource();
 
-        log.info("params: {}", params);
+        if (uri != null) {
+            Map<String, List<String>> params = getUriParams(uri);
+            uriInfo = getUriInfo(uri, params);
+            // Extract the UTM parameters from the params map
+            trafficSource = getTrafficSourceFromUri(params);
+        }
 
-        // Extract the UTM parameters from the params map
+        if (trafficSource.getSource() == null && referrer != null) {
+            trafficSource = getTrafficSourceFromReferrer(referrer);
+        }
+
+        if (trafficSource.getSource() == null) {
+            trafficSource.setSource(DIRECT);
+            trafficSource.setCampaign(DIRECT);
+        }
+
+        CategoryTrafficSource categoryTrafficSource = getCategoryTrafficSource(trafficSource);
+
+        log.info("trafficSource: {}", trafficSource);
+        log.info("uriInfo: {}", uriInfo);
+
+        return new TrafficSourceParserResult(categoryTrafficSource, uriInfo);
+    }
+
+    private TrafficSource getTrafficSourceFromUri(final Map<String, List<String>> params) {
+        TrafficSource trafficSource = new TrafficSource();
+
         String utmId = getFirst(params.get("utm_id"));
         String utmSource = getFirst(params.get("utm_source"));
         String utmMedium = getFirst(params.get("utm_medium"));
@@ -285,7 +352,6 @@ public final class DefaultTrafficSourceHelper {
         if (params.containsKey("q")) {
             queryQ = String.join(",", params.get("q"));
         }
-
         log.info("utmSource: {}, utmMedium: {}, utmContent: {}, utmTerm: {}, utmCampaign: {}, utmId: {}, utmSourcePlatform: {}, queryQ: {}, gclid: {}",
                 utmSource, utmMedium, utmContent, utmTerm, utmCampaign, utmId, utmSourcePlatform, queryQ, gclid);
 
@@ -305,22 +371,6 @@ public final class DefaultTrafficSourceHelper {
             utmTerm = queryQ;
         }
 
-        if (utmSource == null && referrer != null) {
-            String[] sourceMediumContent = getSourceMediumContentFromReferrer(referrer);
-            utmSource = sourceMediumContent[0];
-            utmMedium = sourceMediumContent[1];
-            utmContent = sourceMediumContent[2];
-        }
-
-        if (utmSource == null) {
-            utmSource = DIRECT;
-            utmCampaign = DIRECT;
-        }
-
-        String category = getCategory(utmSource);
-        String channelGroup = getChannelGroup(utmSource, utmCampaign, utmMedium);
-
-        TrafficSource trafficSource = new TrafficSource();
         trafficSource.setSource(utmSource);
         trafficSource.setMedium(utmMedium);
         trafficSource.setCampaign(utmCampaign);
@@ -329,36 +379,29 @@ public final class DefaultTrafficSourceHelper {
         trafficSource.setCampaignId(utmId);
         trafficSource.setClidPlatform(utmSourcePlatform);
         if (!clidMap.isEmpty()) {
-            trafficSource.setClid(OBJECT_MAPPER.writeValueAsString(clidMap));
+            try {
+                trafficSource.setClid(OBJECT_MAPPER.writeValueAsString(clidMap));
+            } catch (JsonProcessingException e) {
+                log.error("Error converting clidMap to string", e);
+            }
         }
-        trafficSource.setChannelGroup(channelGroup);
-        trafficSource.setCategory(category);
-
-        UriInfo uriInfo = new UriInfo();
-        uriInfo.setProtocol(protocol);
-        uriInfo.setHost(host);
-        if (path != null && !path.isEmpty() && !path.equals("/")) {
-            uriInfo.setPath(path);
-        }
-        uriInfo.setQuery(query);
-        if (!params.isEmpty()) {
-            uriInfo.setParameters(convertToStringMap(params));
-        }
-
-        log.info("trafficSource: {}", trafficSource);
-        log.info("uriInfo: {}", uriInfo);
-
-        return new ParserResult(trafficSource, uriInfo);
+        return trafficSource;
     }
 
-    private String[] getSourceMediumContentFromReferrer(final String referrer) throws URISyntaxException {
+    private TrafficSource getTrafficSourceFromReferrer(final String referrer) {
+        TrafficSource trafficSource = new TrafficSource();
         String utmSource = null;
         String utmMedium = null;
         String utmContent = null;
 
         Map<String, SourceMedium> hostSuffixToMediumMap = getHostSuffixToSourceMediumMap();
-
-        URI referrerUri = new URI(referrer);
+        URI referrerUri = null;
+        try {
+            referrerUri = new URI(referrer);
+        } catch (URISyntaxException e) {
+            log.error("cannot parse referrer: " + referrer + ERROR_LOG + e.getMessage());
+            return trafficSource;
+        }
         String referrerHost = referrerUri.getHost();
         if (referrerHost != null) {
             for (Map.Entry<String, SourceMedium> entry : hostSuffixToMediumMap.entrySet()) {
@@ -376,24 +419,12 @@ public final class DefaultTrafficSourceHelper {
             }
         }
 
-        return new String[]{
-                utmSource, utmMedium, utmContent
-        };
+        trafficSource.setSource(utmSource);
+        trafficSource.setMedium(utmMedium);
+        trafficSource.setContent(utmContent);
+
+        return trafficSource;
 
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    public static class ParserResult {
-        TrafficSource trafficSource;
-        UriInfo uriInfo;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    private static class SourceMedium {
-        String source;
-        String medium;
-    }
 }

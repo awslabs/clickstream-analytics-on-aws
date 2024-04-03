@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.common;
 import com.fasterxml.jackson.core.*;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.enrich.*;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 
@@ -457,36 +458,27 @@ public final class ClickstreamEventParser extends BaseEventParser {
     private void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
         log.info("setTrafficSourceBySourceParser: " + clickstreamEvent.getPageViewPageUrl() + ", " + clickstreamEvent.getPageViewPageReferrer() + ", " + clickstreamEvent.getPageViewLatestReferrer());
         DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult parserResult = null;
-        try {
-            if (clickstreamEvent.getPageViewPageUrl() != null) {
-                String refferr = clickstreamEvent.getPageViewPageReferrer();
-                if (refferr == null) {
-                    refferr = clickstreamEvent.getPageViewLatestReferrer();
-                }
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), refferr);
-            } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
+        TrafficSourceParserResult parserResult = null;
+
+        if (clickstreamEvent.getPageViewPageUrl() != null) {
+            String refferr = clickstreamEvent.getPageViewPageReferrer();
+            if (refferr == null) {
+                refferr = clickstreamEvent.getPageViewLatestReferrer();
             }
-        } catch (URISyntaxException | JsonProcessingException e) {
-            log.error("cannot parse pageViewPageUrl or pageViewPageReferrer"
-                    + ERROR_LOG + e.getMessage()
-                    + VALUE_LOG
-                    + " url: " + clickstreamEvent.getPageViewPageUrl()
-                    + ", referrer:" + clickstreamEvent.getPageViewPageReferrer()
-                    + ", latestReferrer: " + clickstreamEvent.getPageViewLatestReferrer());
-            log.error(getStackTrace(e));
+            parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), refferr);
+        } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
+            parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
         }
 
         if (parserResult != null && parserResult.getTrafficSource() != null) {
-            clickstreamEvent.setTrafficSourceSource(parserResult.getTrafficSource().getSource());
-            clickstreamEvent.setTrafficSourceMedium(parserResult.getTrafficSource().getMedium());
-            clickstreamEvent.setTrafficSourceCampaign(parserResult.getTrafficSource().getCampaign());
-            clickstreamEvent.setTrafficSourceContent(parserResult.getTrafficSource().getContent());
-            clickstreamEvent.setTrafficSourceTerm(parserResult.getTrafficSource().getTerm());
-            clickstreamEvent.setTrafficSourceCampaignId(parserResult.getTrafficSource().getCampaignId());
-            clickstreamEvent.setTrafficSourceClidPlatform(parserResult.getTrafficSource().getClidPlatform());
-            clickstreamEvent.setTrafficSourceClid(parserResult.getTrafficSource().getClid());
+            clickstreamEvent.setTrafficSourceSource(parserResult.getTrafficSource().getTrafficSource().getSource());
+            clickstreamEvent.setTrafficSourceMedium(parserResult.getTrafficSource().getTrafficSource().getMedium());
+            clickstreamEvent.setTrafficSourceCampaign(parserResult.getTrafficSource().getTrafficSource().getCampaign());
+            clickstreamEvent.setTrafficSourceContent(parserResult.getTrafficSource().getTrafficSource().getContent());
+            clickstreamEvent.setTrafficSourceTerm(parserResult.getTrafficSource().getTrafficSource().getTerm());
+            clickstreamEvent.setTrafficSourceCampaignId(parserResult.getTrafficSource().getTrafficSource().getCampaignId());
+            clickstreamEvent.setTrafficSourceClidPlatform(parserResult.getTrafficSource().getTrafficSource().getClidPlatform());
+            clickstreamEvent.setTrafficSourceClid(parserResult.getTrafficSource().getTrafficSource().getClid());
             clickstreamEvent.setTrafficSourceChannelGroup(parserResult.getTrafficSource().getChannelGroup());
             clickstreamEvent.setTrafficSourceCategory(parserResult.getTrafficSource().getCategory());
         }

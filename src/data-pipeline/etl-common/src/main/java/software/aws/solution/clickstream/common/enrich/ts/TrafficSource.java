@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common.model;
+package software.aws.solution.clickstream.common.enrich.ts;
 
 import lombok.*;
 
@@ -27,6 +27,4 @@ public class TrafficSource {
     private String campaignId;
     private String clidPlatform;
     private String clid;
-    private String channelGroup;
-    private String category;
 }

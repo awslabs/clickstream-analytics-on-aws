@@ -17,6 +17,8 @@ import com.fasterxml.jackson.core.*;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.*;
 import software.aws.solution.clickstream.common.enrich.*;
+import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.gtm.event.*;
 import software.aws.solution.clickstream.common.model.*;
 
@@ -226,7 +228,7 @@ public final class GTMEventParser extends BaseEventParser {
 
     private void setTrafficSource(final ClickstreamEvent clickstreamEvent) {
         DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult parserResult = null;
+        TrafficSourceParserResult parserResult = null;
         try {
             if (clickstreamEvent.getPageViewPageUrl() != null) {
                 parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), clickstreamEvent.getPageViewPageReferrer());
@@ -240,22 +242,24 @@ public final class GTMEventParser extends BaseEventParser {
         }
 
         if (parserResult != null) {
-            TrafficSource trafficSource = parserResult.getTrafficSource();
-            clickstreamEvent.setTrafficSourceCampaign(trafficSource.getCampaign());
-            clickstreamEvent.setTrafficSourceContent(trafficSource.getContent());
-            clickstreamEvent.setTrafficSourceMedium(trafficSource.getMedium());
-            clickstreamEvent.setTrafficSourceSource(trafficSource.getSource());
-            clickstreamEvent.setTrafficSourceTerm(trafficSource.getTerm());
-            clickstreamEvent.setTrafficSourceClid(trafficSource.getClid());
-            clickstreamEvent.setTrafficSourceClidPlatform(trafficSource.getClidPlatform());
-            clickstreamEvent.setTrafficSourceCampaignId(trafficSource.getCampaignId());
-            clickstreamEvent.setTrafficSourceChannelGroup(trafficSource.getChannelGroup());
-            clickstreamEvent.setTrafficSourceCategory(trafficSource.getCategory());
+            CategoryTrafficSource cTrafficSource = parserResult.getTrafficSource();
+            clickstreamEvent.setTrafficSourceCampaign(cTrafficSource.getTrafficSource().getCampaign());
+            clickstreamEvent.setTrafficSourceContent(cTrafficSource.getTrafficSource().getContent());
+            clickstreamEvent.setTrafficSourceMedium(cTrafficSource.getTrafficSource().getMedium());
+            clickstreamEvent.setTrafficSourceSource(cTrafficSource.getTrafficSource().getSource());
+            clickstreamEvent.setTrafficSourceTerm(cTrafficSource.getTrafficSource().getTerm());
+            clickstreamEvent.setTrafficSourceClid(cTrafficSource.getTrafficSource().getClid());
+            clickstreamEvent.setTrafficSourceClidPlatform(cTrafficSource.getTrafficSource().getClidPlatform());
+            clickstreamEvent.setTrafficSourceCampaignId(cTrafficSource.getTrafficSource().getCampaignId());
+            clickstreamEvent.setTrafficSourceChannelGroup(cTrafficSource.getChannelGroup());
+            clickstreamEvent.setTrafficSourceCategory(cTrafficSource.getCategory());
 
             UriInfo uriInfo = parserResult.getUriInfo();
-            clickstreamEvent.setPageViewHostname(uriInfo.getHost());
-            clickstreamEvent.setPageViewPageUrlPath(uriInfo.getPath());
-            clickstreamEvent.setPageViewPageUrlQueryParameters(uriInfo.getParameters());
+            if (uriInfo != null) {
+                clickstreamEvent.setPageViewHostname(uriInfo.getHost());
+                clickstreamEvent.setPageViewPageUrlPath(uriInfo.getPath());
+                clickstreamEvent.setPageViewPageUrlQueryParameters(uriInfo.getParameters());
+            }
 
         }
     }

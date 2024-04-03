@@ -25,9 +25,9 @@ import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.util.*;
 
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringStringMap;
 import static software.aws.solution.clickstream.util.DatasetUtil.UA_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.*;
-import static software.aws.solution.clickstream.util.Utils.convertStringObjectMapToStringStringMap;
 import static software.aws.solution.clickstream.model.ModelV2.STR_TO_STR_MAP_TYPE;
 
 @Slf4j

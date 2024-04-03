@@ -215,7 +215,7 @@ public class GTMServerDataTransformerV2 {
         Dataset<Row> userDataset = convertedDataset.select(expr("dataOut.user.*"))
                 .select(toColumnArray(ModelV2.getUserFields()));
 
-        if (userDataset == null || userDataset.count() == 0) {
+        if (userDataset.count() == 0) {
             log.info("extractUser return empty dataset");
             return userDataset;
         }

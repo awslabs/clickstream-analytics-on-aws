@@ -21,6 +21,9 @@ import org.apache.logging.log4j.core.config.*;
 
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.common.enrich.*;
+import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.model.*;
 
 import java.net.*;
@@ -39,11 +42,11 @@ public class DefaultTrafficSourceHelperTest {
     void testParse() throws URISyntaxException, JsonProcessingException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.TrafficSourceParserTest.testParse
         DefaultTrafficSourceHelper parser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult result = parser.parse("https://www.example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx", null);
-        TrafficSource trafficSource = result.getTrafficSource();
-
+        TrafficSourceParserResult result = parser.parse("https://www.example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx", null);
+        CategoryTrafficSource cTrafficSource = result.getTrafficSource();
+        TrafficSource trafficSource = cTrafficSource.getTrafficSource();
         UriInfo uriInfo = result.getUriInfo();
-
+        
         Assertions.assertEquals("source", trafficSource.getSource());
         Assertions.assertEquals("medium", trafficSource.getMedium());
         Assertions.assertEquals("campaign", trafficSource.getCampaign());
@@ -52,8 +55,8 @@ public class DefaultTrafficSourceHelperTest {
         Assertions.assertEquals("campaignId", trafficSource.getCampaignId());
         Assertions.assertEquals("clidPlatform", trafficSource.getClidPlatform());
         Assertions.assertEquals("{\"type\":\"xclid\",\"value\":\"xcidxxxx\"}", trafficSource.getClid());
-        Assertions.assertNull(trafficSource.getChannelGroup());
-        Assertions.assertNull(trafficSource.getCategory());
+        Assertions.assertNull(cTrafficSource.getChannelGroup());
+        Assertions.assertNull(cTrafficSource.getCategory());
 
         Assertions.assertEquals("https", uriInfo.getProtocol());
         Assertions.assertEquals("www.example.com", uriInfo.getHost());
@@ -69,9 +72,10 @@ public class DefaultTrafficSourceHelperTest {
     void testParse2() throws URISyntaxException, JsonProcessingException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.TrafficSourceParserTest.testParse2
         DefaultTrafficSourceHelper parser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult result = parser.parse("https://www.example.com/search?q=abc&q=food" +
+        TrafficSourceParserResult result = parser.parse("https://www.example.com/search?q=abc&q=food" +
                 "&utm_campaign=shopping&utm_content=content&utm_id=shopping_id&utm_source_platform=clidPlatform&gclid=gcidxxxx", null);
-        TrafficSource trafficSource = result.getTrafficSource();
+        CategoryTrafficSource cTrafficSource = result.getTrafficSource();
+        TrafficSource trafficSource = cTrafficSource.getTrafficSource();
 
         log.info("trafficSource: {}", trafficSource);
 
@@ -83,16 +87,17 @@ public class DefaultTrafficSourceHelperTest {
         Assertions.assertEquals("shopping_id", trafficSource.getCampaignId());
         Assertions.assertEquals("clidPlatform", trafficSource.getClidPlatform());
         Assertions.assertEquals("{\"type\":\"gclid\",\"value\":\"gcidxxxx\"}", trafficSource.getClid());
-        Assertions.assertEquals("Paid Shopping", trafficSource.getChannelGroup());
-        Assertions.assertEquals("search", trafficSource.getCategory());
+        Assertions.assertEquals("Paid Shopping", cTrafficSource.getChannelGroup());
+        Assertions.assertEquals("search", cTrafficSource.getCategory());
     }
 
     @Test
     void testParseWithoutProtocol() throws URISyntaxException, JsonProcessingException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.TrafficSourceParserTest.testParseWithoutProtocol
         DefaultTrafficSourceHelper parser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult result = parser.parse("example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx", null);
-        TrafficSource trafficSource = result.getTrafficSource();
+        TrafficSourceParserResult result = parser.parse("example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx", null);
+        CategoryTrafficSource cTrafficSource = result.getTrafficSource();
+        TrafficSource trafficSource = cTrafficSource.getTrafficSource();
 
         UriInfo uriInfo = result.getUriInfo();
 
@@ -104,8 +109,8 @@ public class DefaultTrafficSourceHelperTest {
         Assertions.assertEquals("campaignId", trafficSource.getCampaignId());
         Assertions.assertEquals("clidPlatform", trafficSource.getClidPlatform());
         Assertions.assertEquals("{\"type\":\"xclid\",\"value\":\"xcidxxxx\"}", trafficSource.getClid());
-        Assertions.assertNull(trafficSource.getChannelGroup());
-        Assertions.assertNull(trafficSource.getCategory());
+        Assertions.assertNull(cTrafficSource.getChannelGroup());
+        Assertions.assertNull(cTrafficSource.getCategory());
 
         Assertions.assertEquals("http", uriInfo.getProtocol());
         Assertions.assertEquals("example.com", uriInfo.getHost());
@@ -118,9 +123,10 @@ public class DefaultTrafficSourceHelperTest {
     void testParseWithReferrer() throws URISyntaxException, JsonProcessingException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.TrafficSourceParserTest.testParseWithReferrer
         DefaultTrafficSourceHelper parser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult result = parser.parse("https://www.example.com/query_path/abc?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx&q=flowers&q=food&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg",
+        TrafficSourceParserResult result = parser.parse("https://www.example.com/query_path/abc?utm_source=source&utm_medium=medium&utm_campaign=campaign&utm_content=content&utm_term=term&utm_id=campaignId&utm_source_platform=clidPlatform&xclid=xcidxxxx&q=flowers&q=food&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg",
                 "http://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg");
-        TrafficSource trafficSource = result.getTrafficSource();
+        CategoryTrafficSource cTrafficSource = result.getTrafficSource();
+        TrafficSource trafficSource = cTrafficSource.getTrafficSource();
 
         Assertions.assertEquals("source", trafficSource.getSource());
         Assertions.assertEquals("medium", trafficSource.getMedium());
@@ -130,8 +136,8 @@ public class DefaultTrafficSourceHelperTest {
         Assertions.assertEquals("campaignId", trafficSource.getCampaignId());
         Assertions.assertEquals("clidPlatform", trafficSource.getClidPlatform());
         Assertions.assertEquals("{\"type\":\"xclid\",\"value\":\"xcidxxxx\"}", trafficSource.getClid());
-        Assertions.assertNull(trafficSource.getChannelGroup());
-        Assertions.assertNull(trafficSource.getCategory());
+        Assertions.assertNull(cTrafficSource.getChannelGroup());
+        Assertions.assertNull(cTrafficSource.getCategory());
 
         UriInfo uriInfo = result.getUriInfo();
 
@@ -148,9 +154,10 @@ public class DefaultTrafficSourceHelperTest {
     void testParseWithReferrer2() throws URISyntaxException, JsonProcessingException {
         //./gradlew clean test --info --tests software.aws.solution.clickstream.TrafficSourceParserTest.testParseWithReferrer2
         DefaultTrafficSourceHelper parser = DefaultTrafficSourceHelper.getInstance();
-        DefaultTrafficSourceHelper.ParserResult result = parser.parse("https://www.example.com/query_path/abc?q=flowers&q=food&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg",
+        TrafficSourceParserResult result = parser.parse("https://www.example.com/query_path/abc?q=flowers&q=food&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg",
                 "http://www.google.com/search?q=flowers&hl=en&biw=1366&bih=667&source=lnms&tbm=isch&sa=X&ei=0f8yU5r6E8mSyAGFhoGwDw&ved=0CAcQ_AUoAg");
-        TrafficSource trafficSource = result.getTrafficSource();
+        CategoryTrafficSource cTrafficSource = result.getTrafficSource();
+        TrafficSource trafficSource = cTrafficSource.getTrafficSource();
 
         Assertions.assertEquals("google", trafficSource.getSource());
         Assertions.assertEquals("organic", trafficSource.getMedium());
@@ -160,8 +167,8 @@ public class DefaultTrafficSourceHelperTest {
         Assertions.assertNull(trafficSource.getCampaignId());
         Assertions.assertNull(trafficSource.getClidPlatform());
         Assertions.assertNull(trafficSource.getClid());
-        Assertions.assertNull(trafficSource.getChannelGroup());
-        Assertions.assertEquals("search", trafficSource.getCategory());
+        Assertions.assertNull(cTrafficSource.getChannelGroup());
+        Assertions.assertEquals("search", cTrafficSource.getCategory());
 
     }
 
