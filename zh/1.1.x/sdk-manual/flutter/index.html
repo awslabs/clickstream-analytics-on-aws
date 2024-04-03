@@ -16,11 +16,11 @@
         <link rel="prev" href="../web/">
       
       
-        <link rel="next" href="../wechat/">
+        <link rel="next" href="../react-native/">
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.bcfcd587.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -1941,6 +1941,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../react-native/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    React Native SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../wechat/" class="md-nav__link">
         
   
@@ -3259,11 +3280,16 @@ appId 和 endpoint 的值。</p>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="s2">&quot;userAge&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">22</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">});</span>
 </span></code></pre></div>
-<p>当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
+<p>当前登录用户的属性会进行缓存，因此在下次 App 打开时不需要再次设置所有的用户属性，当然您可以使用相同的
 API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。</p>
+</div>
 <h4 id="item">记录带有 Item 的事件</h4>
-<p>您可以添加以下代码来记录带有 Item 的事件，同时您可以在 <code>attributes</code> Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">var</span><span class="w"> </span><span class="n">itemBook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">(</span>
+<p>您可以添加以下代码来记录带有 Item 的事件，同时您可以在 <code>attributes</code> Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item
+最多可以添加 10 个自定义属性。</p>
+<p><div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">var</span><span class="w"> </span><span class="n">itemBook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">(</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nl">id:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;Nature&quot;</span><span class="p">,</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nl">category:</span><span class="w"> </span><span class="s2">&quot;book&quot;</span><span class="p">,</span>
@@ -3476,83 +3502,118 @@ API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">名称</th>
-<th style="text-align: left;">建议</th>
-<th style="text-align: left;">硬限制</th>
-<th style="text-align: left;">超过限制的处理策略</th>
-<th style="text-align: left;">错误码</th>
+<th>名称</th>
+<th>建议</th>
+<th>硬限制</th>
+<th>超过限制的处理策略</th>
+<th>错误码</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">事件名称合规</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">1001</td>
+<td>事件名称合规</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>1001</td>
 </tr>
 <tr>
-<td style="text-align: left;">事件名称长度</td>
-<td style="text-align: left;">25 个字符以下</td>
-<td style="text-align: left;">50 个字符</td>
-<td style="text-align: left;">丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">1002</td>
+<td>事件名称长度</td>
+<td>25 个字符以下</td>
+<td>50 个字符</td>
+<td>丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>1002</td>
 </tr>
 <tr>
-<td style="text-align: left;">事件属性名称的长度</td>
-<td style="text-align: left;">25 个字符以下</td>
-<td style="text-align: left;">50 个字符</td>
-<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
-<td style="text-align: left;">2001</td>
+<td>事件属性名称的长度</td>
+<td>25 个字符以下</td>
+<td>50 个字符</td>
+<td>丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td>2001</td>
 </tr>
 <tr>
-<td style="text-align: left;">属性名称合规</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
-<td style="text-align: left;">2002</td>
+<td>属性名称合规</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td>2002</td>
 </tr>
 <tr>
-<td style="text-align: left;">事件属性值的长度</td>
-<td style="text-align: left;">少于 100 个字符</td>
-<td style="text-align: left;">1024 个字符</td>
-<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
-<td style="text-align: left;">2003</td>
+<td>事件属性值的长度</td>
+<td>少于 100 个字符</td>
+<td>1024 个字符</td>
+<td>丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td>2003</td>
 </tr>
 <tr>
-<td style="text-align: left;">每个事件的事件属性</td>
-<td style="text-align: left;">50 属性以下</td>
-<td style="text-align: left;">500 event 属性</td>
-<td style="text-align: left;">丢弃超过限制的属性、打印日志并在事件属性中记录错误</td>
-<td style="text-align: left;">2004</td>
+<td>每个事件的事件属性</td>
+<td>50 属性以下</td>
+<td>500 event 属性</td>
+<td>丢弃超过限制的属性、打印日志并在事件属性中记录错误</td>
+<td>2004</td>
 </tr>
 <tr>
-<td style="text-align: left;">用户属性数</td>
-<td style="text-align: left;">25岁以下属性</td>
-<td style="text-align: left;">100个用户属性</td>
-<td style="text-align: left;">丢弃超过限制的属性、打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">3001</td>
+<td>用户属性数</td>
+<td>25岁以下属性</td>
+<td>100个用户属性</td>
+<td>丢弃超过限制的属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>3001</td>
 </tr>
 <tr>
-<td style="text-align: left;">用户属性名称的长度</td>
-<td style="text-align: left;">25 个字符以下</td>
-<td style="text-align: left;">50 个字符</td>
-<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">3002</td>
+<td>用户属性名称的长度</td>
+<td>25 个字符以下</td>
+<td>50 个字符</td>
+<td>丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>3002</td>
 </tr>
 <tr>
-<td style="text-align: left;">用户属性名称合规</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">--</td>
-<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">3003</td>
+<td>用户属性名称合规</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>3003</td>
 </tr>
 <tr>
-<td style="text-align: left;">用户属性值的长度</td>
-<td style="text-align: left;">50 个字符以下</td>
-<td style="text-align: left;">256 个字符</td>
-<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
-<td style="text-align: left;">3004</td>
+<td>用户属性值的长度</td>
+<td>50 个字符以下</td>
+<td>256 个字符</td>
+<td>丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td>3004</td>
+</tr>
+<tr>
+<td>事件中 Item 的个数</td>
+<td>50 个 Item 以下</td>
+<td>100 个 Item</td>
+<td>丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td>4001</td>
+</tr>
+<tr>
+<td>Item 属性值的长度</td>
+<td>少于 100 个字符</td>
+<td>256 个字符</td>
+<td>丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td>4002</td>
+</tr>
+<tr>
+<td>一个 Item 中自定义属性的个数</td>
+<td>少于 10 个自定义属性</td>
+<td>10 个自定义属性</td>
+<td>丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td>4003</td>
+</tr>
+<tr>
+<td>Item 属性名的长度</td>
+<td>25 个字符以下</td>
+<td>50 个字符</td>
+<td>丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td>4004</td>
+</tr>
+<tr>
+<td>Item 属性名称合规</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td>4005</td>
 </tr>
 </tbody>
 </table>
@@ -3566,11 +3627,11 @@ API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
 </ul>
 </div>
 <h2 id="_15">预置事件</h2>
-<p>Android: 参考 <a href="../android/#preset-events">Android SDK 预置事件</a></p>
-<p>iOS: 参考 <a href="../swift/#preset-events">Swift SDK 预置事件</a></p>
+<p>Android: 参考 <a href="../android/#_13">Android SDK 预置事件</a></p>
+<p>iOS: 参考 <a href="../swift/#_13">Swift SDK 预置事件</a></p>
 <h2 id="_16">事件属性</h2>
-<p>Android: 参考 <a href="../android/#event-attributes">Android SDK 事件属性</a></p>
-<p>iOS: 参考 <a href="../swift/#event-attributes">Swift SDK 事件属性</a></p>
+<p>Android: 参考 <a href="../android/#_18">Android SDK 事件属性</a></p>
+<p>iOS: 参考 <a href="../swift/#_18">Swift SDK 事件属性</a></p>
 <h2 id="sdk_2">SDK更新日志</h2>
 <p>参考：<a href="https://github.com/awslabs/clickstream-flutter/releases">GitHub 更新日志</a></p>
 <p>原生 SDK 版本依赖关系</p>
@@ -3654,7 +3715,7 @@ API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.1e8ae164.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
