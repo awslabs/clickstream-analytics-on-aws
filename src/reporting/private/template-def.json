@@ -77,15 +77,15 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "new_user_cnt",
+                "Name": "new_user_count",
                 "DataType": "INTEGER"
                 },
                 {
-                "Name": "session_cnt",
+                "Name": "session_count",
                 "DataType": "INTEGER"
                 },
                 {
-                "Name": "engagement_session_cnt",
+                "Name": "engagement_session_count",
                 "DataType": "INTEGER"
                 },
                 {
@@ -93,7 +93,7 @@
                 "DataType": "DECIMAL"
                 },
                 {
-                "Name": "event_cnt",
+                "Name": "event_count",
                 "DataType": "INTEGER"
                 },
                 {
@@ -147,11 +147,11 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "event_cnt",
+                "Name": "event_count",
                 "DataType": "INTEGER"
                 },
                 {
-                "Name": "view_cnt",
+                "Name": "view_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -742,7 +742,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "view_cnt",
+                "Name": "view_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -806,7 +806,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "entrance_cnt",
+                "Name": "entrance_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -834,7 +834,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "exit_cnt",
+                "Name": "exit_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -858,7 +858,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "user_cnt",
+                "Name": "view_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -898,7 +898,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "event_cnt",
+                "Name": "event_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -1855,10 +1855,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
+                                                "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "session_cnt"
+                                                    "ColumnName": "session_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -1867,10 +1867,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
+                                                "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "engagement_session_cnt"
+                                                    "ColumnName": "engagement_session_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -1920,10 +1920,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
+                                                "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "event_cnt"
+                                                    "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -2046,12 +2046,12 @@
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
+                                        "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                         "CustomLabel": "Sessions",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
+                                        "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                         "CustomLabel": "Engaged sessions",
                                         "Visibility": "VISIBLE"
                                     },
@@ -2066,7 +2066,7 @@
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
+                                        "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                         "CustomLabel": "Events",
                                         "Visibility": "VISIBLE"
                                     }
@@ -2084,8 +2084,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
-                                                "FieldValue": "event_cnt"
+                                                "FieldId": "LogicalTable1.event_count.5.1711007636650",
+                                                "FieldValue": "event_count"
                                             }
                                         ],
                                         "Width": "211px"
@@ -2093,8 +2093,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
-                                                "FieldValue": "engagement_session_cnt"
+                                                "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
+                                                "FieldValue": "engagement_session_count"
                                             }
                                         ],
                                         "Width": "200px"
@@ -2120,8 +2120,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
-                                                "FieldValue": "session_cnt"
+                                                "FieldId": "LogicalTable1.session_count.2.1711007577714",
+                                                "FieldValue": "session_count"
                                             }
                                         ],
                                         "Width": "178px"
@@ -3140,10 +3140,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.new_user_cnt.1.1711007569880",
+                                                "FieldId": "LogicalTable1.new_user_count.1.1711007569880",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "new_user_cnt"
+                                                    "ColumnName": "new_user_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -3152,10 +3152,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
+                                                "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "session_cnt"
+                                                    "ColumnName": "session_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -3164,10 +3164,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
+                                                "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "engagement_session_cnt"
+                                                    "ColumnName": "engagement_session_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -3205,10 +3205,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
+                                                "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                                    "ColumnName": "event_cnt"
+                                                    "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -3327,17 +3327,17 @@
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.new_user_cnt.1.1711007569880",
+                                        "FieldId": "LogicalTable1.new_user_count.1.1711007569880",
                                         "CustomLabel": "New users",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
+                                        "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                         "CustomLabel": "Sessions",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
+                                        "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                         "CustomLabel": "Engaged sessions",
                                         "Visibility": "VISIBLE"
                                     },
@@ -3347,7 +3347,7 @@
                                         "Visibility": "VISIBLE"
                                     },
                                     {
-                                        "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
+                                        "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                         "CustomLabel": "Events",
                                         "Visibility": "VISIBLE"
                                     }
@@ -3356,8 +3356,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.event_cnt.5.1711007636650",
-                                                "FieldValue": "event_cnt"
+                                                "FieldId": "LogicalTable1.event_count.5.1711007636650",
+                                                "FieldValue": "event_count"
                                             }
                                         ],
                                         "Width": "252px"
@@ -3365,8 +3365,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.engagement_session_cnt.3.1711007585763",
-                                                "FieldValue": "engagement_session_cnt"
+                                                "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
+                                                "FieldValue": "engagement_session_count"
                                             }
                                         ],
                                         "Width": "233px"
@@ -3383,8 +3383,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.session_cnt.2.1711007577714",
-                                                "FieldValue": "session_cnt"
+                                                "FieldId": "LogicalTable1.session_count.2.1711007577714",
+                                                "FieldValue": "session_count"
                                             }
                                         ],
                                         "Width": "208px"
@@ -3392,8 +3392,8 @@
                                     {
                                         "DataPathList": [
                                             {
-                                                "FieldId": "LogicalTable1.new_user_cnt.1.1711007569880",
-                                                "FieldValue": "new_user_cnt"
+                                                "FieldId": "LogicalTable1.new_user_count.1.1711007569880",
+                                                "FieldValue": "new_user_count"
                                             }
                                         ],
                                         "Width": "201px"
@@ -4562,10 +4562,10 @@
                                         },
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.view_cnt.2.1711008548112",
+                                                "FieldId": "LogicalTable1.view_count.2.1711008548112",
                                                 "Column": {
                                                     "DataSetIdentifier": "Day_User_View_Engagement",
-                                                    "ColumnName": "view_cnt"
+                                                    "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -4608,8 +4608,8 @@
                                     },
                                     {
                                         "Element": {
-                                            "FieldId": "LogicalTable1.view_cnt.2.1711008548112",
-                                            "FieldValue": "view_cnt"
+                                            "FieldId": "LogicalTable1.view_count.2.1711008548112",
+                                            "FieldValue": "view_count"
                                         },
                                         "Color": "#E436BB"
                                     }
@@ -4650,7 +4650,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.view_cnt.2.1711008548112",
+                                                "FieldId": "LogicalTable1.view_count.2.1711008548112",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -5311,10 +5311,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.view_cnt.1.1711009788797",
+                                                "FieldId": "LogicalTable1.view_count.1.1711009788797",
                                                 "Column": {
                                                     "DataSetIdentifier": "Page_Screen_View",
-                                                    "ColumnName": "view_cnt"
+                                                    "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -5379,7 +5379,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.view_cnt.1.1711009788797",
+                                                "FieldId": "LogicalTable1.view_count.1.1711009788797",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -5433,10 +5433,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.view_cnt.1.1711009898756",
+                                                "FieldId": "LogicalTable1.view_count.1.1711009898756",
                                                 "Column": {
                                                     "DataSetIdentifier": "Page_Screen_View",
-                                                    "ColumnName": "view_cnt"
+                                                    "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -5451,7 +5451,7 @@
                                 "CategorySort": [
                                     {
                                         "FieldSort": {
-                                            "FieldId": "LogicalTable1.view_cnt.1.1711009898756",
+                                            "FieldId": "LogicalTable1.view_count.1.1711009898756",
                                             "Direction": "DESC"
                                         }
                                     }
@@ -5497,7 +5497,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.view_cnt.1.1711009898756",
+                                                "FieldId": "LogicalTable1.view_count.1.1711009898756",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -5751,10 +5751,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.entrance_cnt.1.1711010293936",
+                                                "FieldId": "LogicalTable1.entrance_count.1.1711010293936",
                                                 "Column": {
                                                     "DataSetIdentifier": "Entrance",
-                                                    "ColumnName": "entrance_cnt"
+                                                    "ColumnName": "entrance_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -5769,7 +5769,7 @@
                                 "CategorySort": [
                                     {
                                         "FieldSort": {
-                                            "FieldId": "LogicalTable1.entrance_cnt.1.1711010293936",
+                                            "FieldId": "LogicalTable1.entrance_count.1.1711010293936",
                                             "Direction": "DESC"
                                         }
                                     }
@@ -5802,7 +5802,7 @@
                                     "TooltipFields": [
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.entrance_cnt.1.1711010293936",
+                                                "FieldId": "LogicalTable1.entrance_count.1.1711010293936",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -5849,10 +5849,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.exit_cnt.1.1711010461307",
+                                                "FieldId": "LogicalTable1.exit_count.1.1711010461307",
                                                 "Column": {
                                                     "DataSetIdentifier": "Exit",
-                                                    "ColumnName": "exit_cnt"
+                                                    "ColumnName": "exit_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -5867,7 +5867,7 @@
                                 "CategorySort": [
                                     {
                                         "FieldSort": {
-                                            "FieldId": "LogicalTable1.exit_cnt.1.1711010461307",
+                                            "FieldId": "LogicalTable1.exit_count.1.1711010461307",
                                             "Direction": "DESC"
                                         }
                                     }
@@ -5906,7 +5906,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.exit_cnt.1.1711010461307",
+                                                "FieldId": "LogicalTable1.exit_count.1.1711010461307",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -6493,10 +6493,10 @@
                                     "BarValues": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.user_cnt.1.1711010591368",
+                                                "FieldId": "LogicalTable1.view_count.1.1711010591368",
                                                 "Column": {
                                                     "DataSetIdentifier": "User_New_Return",
-                                                    "ColumnName": "user_cnt"
+                                                    "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -6568,7 +6568,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.user_cnt.1.1711010591368",
+                                                "FieldId": "LogicalTable1.view_count.1.1711010591368",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -6623,10 +6623,10 @@
                                     "Values": [
                                         {
                                             "NumericalMeasureField": {
-                                                "FieldId": "LogicalTable1.event_cnt.1.1711010755874",
+                                                "FieldId": "LogicalTable1.event_count.1.1711010755874",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_Overtime",
-                                                    "ColumnName": "event_cnt"
+                                                    "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
@@ -6705,7 +6705,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.event_cnt.1.1711010755874",
+                                                "FieldId": "LogicalTable1.event_count.1.1711010755874",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -8725,22 +8725,22 @@
         {
             "DataSetIdentifier": "Day_User_Acquisition",
             "Name": "Engagement Rate",
-            "Expression": "sum({engagement_session_cnt})/sum({session_cnt})"
+            "Expression": "sum({engagement_session_count})/sum({session_count})"
         },
         {
             "DataSetIdentifier": "Day_User_View_Engagement",
             "Name": "Other events",
-            "Expression": "{event_cnt} - {view_cnt}"
+            "Expression": "{event_count} - {view_count}"
         },
         {
             "DataSetIdentifier": "Event_Overtime",
             "Name": "User Activity in Last 30 Days",
-            "Expression": "windowSum(sum({event_cnt}),[truncDate('DD',{event_date}) ASC],29,0)"
+            "Expression": "windowSum(sum({event_count}),[truncDate('DD',{event_date}) ASC],29,0)"
         },
         {
             "DataSetIdentifier": "Event_Overtime",
             "Name": "User Activity in Last 7 Days",
-            "Expression": "windowSum(sum({event_cnt}),[truncDate('DD',{event_date}) ASC],6,0)"
+            "Expression": "windowSum(sum({event_count}),[truncDate('DD',{event_date}) ASC],6,0)"
         },
         {
             "DataSetIdentifier": "Event_View",
@@ -9337,7 +9337,7 @@
                         "IncludeMinimum": true,
                         "RangeMinimumValue": {
                             "RollingDate": {
-                                "Expression": "addDateTime(-1, 'SS', addDateTime(-1, 'DD', truncDate('DD', now())))"
+                                "Expression": "addDateTime(-1, 'SS', addDateTime(-2, 'DD', truncDate('DD', now())))"
                             }
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -9374,7 +9374,7 @@
                         "IncludeMinimum": true,
                         "RangeMinimumValue": {
                             "RollingDate": {
-                                "Expression": "addDateTime(-1, 'DD', truncDate('DD', now()))"
+                                "Expression": "addDateTime(-1, 'SS', addDateTime(-2, 'DD', truncDate('DD', now())))"
                             }
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -9412,7 +9412,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                    "ColumnName": "new_user_cnt"
+                                    "ColumnName": "new_user_count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {
@@ -9580,7 +9580,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Day_User_Acquisition",
-                                    "ColumnName": "new_user_cnt"
+                                    "ColumnName": "new_user_count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {
@@ -9706,7 +9706,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Page_Screen_View",
-                                    "ColumnName": "view_cnt"
+                                    "ColumnName": "view_count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {
@@ -9827,7 +9827,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Exit",
-                                    "ColumnName": "exit_cnt"
+                                    "ColumnName": "exit_count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {
@@ -9871,7 +9871,7 @@
                             {
                                 "Column": {
                                     "DataSetIdentifier": "Entrance",
-                                    "ColumnName": "entrance_cnt"
+                                    "ColumnName": "entrance_count"
                                 },
                                 "SortDirection": "DESC",
                                 "AggregationFunction": {

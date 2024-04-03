@@ -10,14 +10,14 @@ BEGIN
     INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
         event_date,
         platform,
-        event_cnt,
-        view_cnt
+        event_count,
+        view_count
     )
     select 
     day::date as event_date,
     platform,
-    count(distinct event_id) as event_cnt,
-    count(distinct view_event_indicator) as view_cnt
+    count(distinct event_id) as event_count,
+    count(distinct view_event_indicator) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
     group by 1,2

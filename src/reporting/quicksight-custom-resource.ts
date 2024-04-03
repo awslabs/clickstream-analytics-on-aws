@@ -265,15 +265,15 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'new_user_cnt',
+            Name: 'new_user_count',
             Type: 'INTEGER',
           },
           {
-            Name: 'session_cnt',
+            Name: 'session_count',
             Type: 'INTEGER',
           },
           {
-            Name: 'engagement_session_cnt',
+            Name: 'engagement_session_count',
             Type: 'INTEGER',
           },
           {
@@ -285,7 +285,7 @@ export function createQuicksightCustomResource(
             Type: 'DECIMAL',
           },
           {
-            Name: 'event_cnt',
+            Name: 'event_count',
             Type: 'INTEGER',
           },
           {
@@ -310,12 +310,12 @@ export function createQuicksightCustomResource(
           'aggregation_type',
           'aggregation_dim',
           'platform',
-          'new_user_cnt',
-          'session_cnt',
-          'engagement_session_cnt',
+          'new_user_count',
+          'session_count',
+          'engagement_session_count',
           'engagement_rate',
           'avg_user_engagement_time_minutes',
-          'event_cnt',
+          'event_count',
           'user_id',
         ],
       },
@@ -391,11 +391,11 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'event_cnt',
+            Name: 'event_count',
             Type: 'INTEGER',
           },
           {
-            Name: 'view_cnt',
+            Name: 'view_count',
             Type: 'INTEGER',
           },
         ],
@@ -414,8 +414,8 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
-          'event_cnt',
-          'view_cnt',
+          'event_count',
+          'view_count',
         ],
       },
       {
@@ -486,7 +486,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'view_cnt',
+            Name: 'view_count',
             Type: 'INTEGER',
           },
         ],
@@ -507,7 +507,7 @@ export function createQuicksightCustomResource(
           'platform',
           'aggregation_type',
           'aggregation_dim',
-          'view_cnt',
+          'view_count',
         ],
       },
       {
@@ -588,7 +588,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'entrance_cnt',
+            Name: 'entrance_count',
             Type: 'INTEGER',
           },
         ],
@@ -609,7 +609,7 @@ export function createQuicksightCustomResource(
           'platform',
           'aggregation_type',
           'aggregation_dim',
-          'entrance_cnt',
+          'entrance_count',
         ],
       },
       {
@@ -634,7 +634,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'exit_cnt',
+            Name: 'exit_count',
             Type: 'INTEGER',
           },
         ],
@@ -655,7 +655,7 @@ export function createQuicksightCustomResource(
           'platform',
           'aggregation_type',
           'aggregation_dim',
-          'exit_cnt',
+          'exit_count',
         ],
       },
 
@@ -678,7 +678,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'user_cnt',
+            Name: 'user_count',
             Type: 'INTEGER',
           },
         ],
@@ -698,7 +698,7 @@ export function createQuicksightCustomResource(
           'event_date',
           'platform',
           'user_type',
-          'user_cnt',
+          'user_count',
         ],
       },
       {
@@ -715,7 +715,7 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
-            Name: 'event_cnt',
+            Name: 'event_count',
             Type: 'INTEGER',
           },
         ],
@@ -734,7 +734,7 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
-          'event_cnt',
+          'event_count',
         ],
       },
       {

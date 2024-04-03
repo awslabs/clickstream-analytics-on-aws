@@ -12,7 +12,7 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        exit_cnt
+        exit_count
     )
     WITH tmp1 AS (
       SELECT 
@@ -40,7 +40,7 @@ BEGIN
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      COUNT(1) AS exit_cnt
+      COUNT(1) AS exit_count
     FROM 
       tmp2 
     GROUP BY 
@@ -52,7 +52,7 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        exit_cnt
+        exit_count
     )
     WITH tmp1 AS (
       SELECT 
@@ -80,7 +80,7 @@ BEGIN
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      COUNT(1) AS exit_cnt
+      COUNT(1) AS exit_count
     FROM 
       tmp2 
     GROUP BY 
@@ -92,7 +92,7 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        exit_cnt
+        exit_count
     )
     WITH tmp1 AS (
       SELECT 
@@ -120,7 +120,7 @@ BEGIN
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      COUNT(1) AS exit_cnt
+      COUNT(1) AS exit_count
     FROM 
       tmp2 
     GROUP BY 
@@ -132,7 +132,7 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        exit_cnt
+        exit_count
     )
     WITH tmp1 AS (
       SELECT 
@@ -160,7 +160,7 @@ BEGIN
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      COUNT(1) AS exit_cnt
+      COUNT(1) AS exit_count
     FROM 
       tmp2 
     GROUP BY 

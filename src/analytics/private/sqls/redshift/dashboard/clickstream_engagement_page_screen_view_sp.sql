@@ -12,14 +12,14 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        view_cnt
+        view_count
     )
     select 
       day::date as event_date,
       platform,
       'Page Title' as aggregation_type,
       page_view_page_title as aggregation_dim,
-      count(distinct event_id) as view_cnt
+      count(distinct event_id) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day  
@@ -32,14 +32,14 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        view_cnt
+        view_count
     )
     select 
       day::date as event_date,
       platform,
       'Page URL Path' as aggregation_type,
       page_view_page_url_path as aggregation_dim,
-      count(distinct event_id) as view_cnt
+      count(distinct event_id) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
@@ -52,14 +52,14 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        view_cnt
+        view_count
     )
     select 
       day::date as event_date,
       platform,
       'Screen Name' as aggregation_type,
       screen_view_screen_name as aggregation_dim,
-      count(distinct event_id) as view_cnt
+      count(distinct event_id) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
@@ -72,14 +72,14 @@ BEGIN
         platform,
         aggregation_type,
         aggregation_dim,
-        view_cnt
+        view_count
     )
     select 
       day::date as event_date,
       platform,
       'Screen Class' as aggregation_type,
       screen_view_screen_id as aggregation_dim,
-      count(distinct event_id) as view_cnt
+      count(distinct event_id) as view_count
     from {{database_name}}.{{schema}}.{{baseView}}
     where 
       DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 

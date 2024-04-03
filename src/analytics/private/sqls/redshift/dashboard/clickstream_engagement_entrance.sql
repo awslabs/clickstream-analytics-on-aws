@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}} (
     platform varchar(255),
     aggregation_type varchar(255),
     aggregation_dim varchar(65535),
-    entrance_cnt bigint,
+    entrance_count bigint,
     update_timestamp timestamp DEFAULT getdate()
 )
 BACKUP YES

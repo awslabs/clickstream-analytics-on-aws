@@ -94,6 +94,7 @@ type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
   readonly type?: 'mv' | 'sp' | 'table' | 'view';
   readonly scheduleRefresh?: 'true' | 'false';
+  readonly timezoneSensitive?: 'true' | 'false';
 }
 
 export type SQLDef = SQLBasic & {

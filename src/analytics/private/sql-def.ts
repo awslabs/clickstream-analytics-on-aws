@@ -66,6 +66,7 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
     type: 'mv',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true'
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
@@ -179,6 +180,7 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_LIFECYCLE_VIEW_NAME,
     type: 'mv',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true'
   },
   {
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
@@ -187,6 +189,7 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_RETENTION_BASE_VIEW_NAME,
     type: 'mv',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true'
   },
   {
     viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
