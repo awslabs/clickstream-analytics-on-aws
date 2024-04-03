@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date, timezone varchar) 
 LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -16,13 +16,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Source' as aggregation_type,
     first_traffic_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -36,13 +36,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Source/Medium' as aggregation_type,
     first_traffic_source || '-' || first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -56,13 +56,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Medium' as aggregation_type,
     first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -76,13 +76,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Campaign' as aggregation_type,
     first_traffic_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -96,13 +96,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Clid Platform' as aggregation_type,
     first_traffic_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -116,13 +116,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Traffic Channel Group' as aggregation_type,
     first_traffic_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -136,13 +136,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'App Install Source' as aggregation_type,
     first_app_install_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   and event_name = '_first_open'
   group by 1,2,3,4,5
   ;
@@ -156,13 +156,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Source' as aggregation_type,
     session_source as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
 
@@ -175,13 +175,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Medium' as aggregation_type,
     session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
 
@@ -194,13 +194,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Source/Medium' as aggregation_type,
     session_source || '-' || session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
 
@@ -213,13 +213,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Campaign' as aggregation_type,
     session_campaign as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
   -- session_clid_platform
@@ -231,13 +231,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Clid Platform' as aggregation_type,
     session_clid_platform as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
   -- session_channel_group
@@ -249,13 +249,13 @@ BEGIN
     user_id
   )
   select 
-    event_date,
+    day::date as event_date,
     platform,
     'Session Channel Group' as aggregation_type,
     session_channel_group as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
-  where event_date = day
+  where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
   group by 1,2,3,4,5
   ;
 

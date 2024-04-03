@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date, timezone varchar) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -28,7 +28,7 @@ WITH tmp1 AS (
     FROM 
         {{database_name}}.{{schema}}.{{baseView}}
     WHERE
-        event_date = day
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
     GROUP BY 
         1,2,3,4
 )

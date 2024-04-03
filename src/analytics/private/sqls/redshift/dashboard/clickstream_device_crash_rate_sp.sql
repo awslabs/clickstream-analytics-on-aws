@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}}(day date, timezone varchar) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -15,13 +15,13 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
   crashed_user_id
 )
 select 
-  event_date,
+  day::date as event_date,
   platform,
   app_version,
   merged_user_id,
   case when event_name = '_app_exeption' then merged_user_id else null end as crashed_user_id
 from {{database_name}}.{{schema}}.{{baseView}}
-where event_date = day
+where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
 group by 1, 2, 3, 4, 5
 ;
 

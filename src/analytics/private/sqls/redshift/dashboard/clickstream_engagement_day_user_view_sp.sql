@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date, timezone varchar) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -14,12 +14,12 @@ BEGIN
         view_cnt
     )
     select 
-    event_date,
+    day::date as event_date,
     platform,
     count(distinct event_id) as event_cnt,
     count(distinct view_event_indicator) as view_cnt
     from {{database_name}}.{{schema}}.{{baseView}}
-    where event_date = day
+    where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
     group by 1,2
     ;
 

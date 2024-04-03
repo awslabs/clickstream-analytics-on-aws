@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date) 
+CREATE OR REPLACE PROCEDURE {{database_name}}.{{schema}}.{{spName}} (day date, timezone varchar) 
  LANGUAGE plpgsql
 AS $$ 
 DECLARE 
@@ -23,6 +23,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
         event_name = '_screen_view'
         and screen_view_screen_name is not null
     ), 
@@ -62,6 +63,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
         event_name = '_screen_view'
         and screen_view_screen_id is not null
     ), 
@@ -100,7 +102,8 @@ BEGIN
         ROW_NUMBER() OVER(PARTITION BY session_id ORDER BY event_timestamp DESC) AS rk
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
-      WHERE 
+      WHERE
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
         event_name = '_page_view'
         and page_view_page_title is not null
     ), 
@@ -140,6 +143,7 @@ BEGIN
       FROM 
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
+        DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
         event_name = '_page_view'
         and page_view_page_url_path is not null
     ), 
