@@ -59,14 +59,9 @@ export const handler = async (_e: any, _c: Context) => {
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_USER_M_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_M_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_VIEW_NAME};
-
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_VIEW_NAME};
-
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_VIEW_NAME};
           REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_BASE_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_BASE_VIEW_NAME};
-
         `;
 
         const sqlStatements = sqlStatementForApp.split(';').map(s => s.trim()).filter(s => s.length > 0);
