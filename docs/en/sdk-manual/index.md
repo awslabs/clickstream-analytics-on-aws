@@ -1,10 +1,11 @@
 
 {{ solution_name }} provides different client-side SDKs, which can make it easier for you to report click stream data to the data pipeline created in the solution. Currently, the solution supports the following platforms:
 
-- [Android](./android.md) 
-- [Swift](./swift.md)  
+- [Android](./android.md)
+- [Swift](./swift.md)
 - [Web](./web.md)
 - [Flutter](./flutter.md)
+- [React Native](./react-native.md)
 - [WeChat Miniprogram](./wechat.md)
 
 In addition, we also provide [HTTP API](./http-api.md) to collect clickstream data from other platforms (e.g., server) through http request.

@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.11.1'
+    implementation 'software.aws.solution:clickstream:0.12.0'
 }
 ```
 
@@ -143,7 +143,7 @@ ClickstreamUserAttribute clickstreamUserAttribute = ClickstreamUserAttribute.bui
 ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
-Current login user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
+Current logged-in user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API `ClickstreamAnalytics.addUserAttributes()` to update the current user's attribute when it changes.
 
 !!! info "Important"
 
