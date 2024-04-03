@@ -204,7 +204,7 @@ ClickstreamAnalytics.flushEvents();
 #### Other configurations
 
 In addition to the required `appId` and `endpoint`, you can configure other information to get more customized usage
-when initialing the SDK:
+when initializing the SDK:
 
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
@@ -296,56 +296,7 @@ You can follow the steps below to view the events raw JSON and debug your events
    json in AndroidStudio Logcat or Xcode debug console by filter `EventRecorder`.
 
 ## Data format definition
-
-### Data types
-
-Clickstream React Native SDK supports the following data types.
-
-| Data type | Range                       | Sample                 |
-|-----------|-----------------------------|------------------------|
-| number    | 5e-324~1.79e+308            | 12, 26854775808, 3.14  |
-| boolean   | true, false                 | true                   |
-| string    | max support 1024 characters | "clickstream"          |
-
-### Naming rules
-
-1. The event name and attribute name cannot start with a number, and only contain uppercase and lowercase letters,
-   numbers, and underscores. In case of an invalid attribute name or user attribute name, it will discard the attribute
-   and record error.
-
-2. Do not use `_` as prefix in an event name or attribute name, because the `_` prefix is reserved for the solution.
-
-3. The event name and attribute name are case-sensitive, so `Add_to_cart` and `add_to_cart` will be recognized as two
-   different event names.
-
-### Event and attribute limitation
-
-In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:
-
-| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
-|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
-| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
-| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
-| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
-| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
-| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
-
-!!! info "Important"
-
-    - The character limits are the same for single-width character languages (e.g., English) and double-width character languages (e.g., Chinese).
-    - The limit of event attribute per event include preset attributes.
-    - If the attribute or user attribute with the same name is added more than twice, the latest value will apply.
-    - All errors that exceed the limit will be recorded `_error_code` and `_error_message` these two attribute in the event attributes.
+Refer to [Web SDK Data format definition](./web.md#data-format-definition)
 
 ## Preset events
 

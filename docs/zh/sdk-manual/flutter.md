@@ -287,15 +287,15 @@ Clickstream Flutter SDK 支持以下数据类型：
 
 ## 预置事件
 
-Android: 参考 [Android SDK 预置事件](./android.md#preset-events)
+Android: 参考 [Android SDK 预置事件](./android.md#_13)
 
-iOS: 参考 [Swift SDK 预置事件](./swift.md#preset-events)
+iOS: 参考 [Swift SDK 预置事件](./swift.md#_13)
 
 ## 事件属性
 
-Android: 参考 [Android SDK 事件属性](./android.md#event-attributes)
+Android: 参考 [Android SDK 事件属性](./android.md#_18)
 
-iOS: 参考 [Swift SDK 事件属性](./swift.md#event-attributes)
+iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 ## SDK更新日志
 
