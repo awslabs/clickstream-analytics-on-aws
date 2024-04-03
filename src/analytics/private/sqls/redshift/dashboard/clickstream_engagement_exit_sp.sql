@@ -24,7 +24,7 @@ BEGIN
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
-        event_name = '_screen_view'
+        and event_name = '_screen_view'
         and screen_view_screen_name is not null
     ), 
     tmp2 AS (
@@ -64,7 +64,7 @@ BEGIN
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
-        event_name = '_screen_view'
+        and event_name = '_screen_view'
         and screen_view_screen_id is not null
     ), 
     tmp2 AS (
@@ -104,7 +104,7 @@ BEGIN
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE
         DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
-        event_name = '_page_view'
+        and event_name = '_page_view'
         and page_view_page_title is not null
     ), 
     tmp2 AS (
@@ -144,7 +144,7 @@ BEGIN
         {{database_name}}.{{schema}}.{{baseView}}
       WHERE 
         DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
-        event_name = '_page_view'
+        and event_name = '_page_view'
         and page_view_page_url_path is not null
     ), 
     tmp2 AS (
