@@ -1766,7 +1766,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
               {
-                Name: 'sessiont_count',
+                Name: 'session_count',
                 Type: 'INTEGER',
               },
               {
