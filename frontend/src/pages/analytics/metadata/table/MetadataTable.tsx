@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataSource } from '@aws/clickstream-base-lib';
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Box, SpaceBetween } from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
@@ -26,7 +27,6 @@ import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataSource } from 'ts/explore-types';
 import { alertMsg } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';

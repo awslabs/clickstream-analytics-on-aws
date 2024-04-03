@@ -123,12 +123,13 @@ def get_launch_events(user, event):
         event["attributes"]["_latest_referrer_host"] = referrer[1]
     # handle first open
     if user.is_first_open:
-        event["attributes"]["_session_start_timestamp"] = user.current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["value"] = user.current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = user.current_timestamp
+        current_timestamp = user.current_timestamp
+        event["attributes"]["_session_start_timestamp"] = current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["value"] = current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = current_timestamp
         events.append(get_final_event(user, EventType.FIRST_OPEN, clean_event(event)))
         user.is_first_open = False
-        user.first_touch_timestamp = user.current_timestamp
+        user.first_touch_timestamp = current_timestamp
     # add user attribute if user is login
     if user.is_login:
         user_id = {

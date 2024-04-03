@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { MetadataSource } from '@aws/clickstream-base-lib';
 import MetadataPlatformFC from 'pages/analytics/metadata/comps/MetadataPlatform';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetadataSource } from 'ts/explore-types';
 import { IAnalyticsItem } from '../AnalyticsType';
 
 interface AttributePreviewProps {

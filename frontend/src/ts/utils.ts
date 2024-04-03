@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { ServerlessRedshiftRPUByRegionMapping } from '@aws/clickstream-base-lib';
+import {
+  IMetadataBuiltInList,
+  ServerlessRedshiftRPUByRegionMapping,
+} from '@aws/clickstream-base-lib';
 import {
   DateRangePickerProps,
   SelectProps,
@@ -26,7 +29,6 @@ import {
   ExecutionType,
   IUserRole,
 } from './const';
-import { IMetadataBuiltInList } from './explore-types';
 
 /**
  * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
@@ -447,8 +449,8 @@ const patchBuiltInMetadata = (
     );
     if (presetParameter) {
       const localeLng = getLngFromLocalStorage();
-      parameter.displayName = (presetParameter.displayName as any)[localeLng];
-      parameter.description = (presetParameter.description as any)[localeLng];
+      parameter.displayName = presetParameter.displayName[localeLng];
+      parameter.description = presetParameter.description[localeLng];
     }
   }
 };

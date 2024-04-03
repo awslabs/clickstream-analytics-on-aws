@@ -78,6 +78,7 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
         [
           'DROP TABLE IF EXISTS app1.property_array_temp_table;',
           'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);',
+          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type\) VALUES \((.*)\);/),
         ],
       ),
     });
@@ -108,6 +109,7 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
         [
           'DROP TABLE IF EXISTS app1.property_array_temp_table;',
           'CREATE TABLE IF NOT EXISTS app1.property_array_temp_table (category VARCHAR, property_name VARCHAR, value_type VARCHAR, property_type VARCHAR);',
+          expect.stringMatching(/INSERT INTO app1\.property_array_temp_table \(category, property_name, value_type, property_type\) VALUES \((.*)\);/),
         ],
       ),
     });

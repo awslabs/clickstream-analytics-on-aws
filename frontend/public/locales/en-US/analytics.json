@@ -12,10 +12,18 @@
     "app_info": "Application",
     "device": "Device",
     "event": "Event",
+    "event_outer": "Event preset",
     "geo": "Geography",
     "other": "Other",
     "traffic_source": "Traffic",
-    "user": "User"
+    "user": "User",
+    "user_outer": "User preset",
+    "page_view": "Page view",
+    "screen_view": "Screen view",
+    "sdk": "SDK",
+    "search": "Search",
+    "session": "Session",
+    "outer": "Solution properties"
   },
   "dashboard": {
     "title": "Dashboards",

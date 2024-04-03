@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { ExploreComputeMethod } from '@aws/clickstream-base-lib';
 import { Select } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';

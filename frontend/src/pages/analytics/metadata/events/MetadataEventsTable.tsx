@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataPlatform, MetadataSource } from '@aws/clickstream-base-lib';
 import { Input } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import { UserContext } from 'context/UserContext';
@@ -19,7 +20,6 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_DISPLAY_PREFIX } from 'ts/const';
-import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,

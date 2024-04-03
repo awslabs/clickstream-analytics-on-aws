@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionNumericOperator } from '@aws/clickstream-base-lib';
+import { ExploreAnalyticsOperators } from '@aws/clickstream-base-lib';
 import { Container, Spinner } from '@cloudscape-design/components';
 import { IEventSegmentationObj } from 'components/eventselect/AnalyticsType';
 import {
@@ -51,7 +51,7 @@ export const SegmentProvider: React.FC<{ children: ReactElement }> = ({
     {
       ...DEFAULT_SEGMENT_GROUP_DATA,
       eventOperationOptions: enumToSelectOptions(
-        ConditionNumericOperator,
+        ExploreAnalyticsOperators,
         'calculateOperator'
       ).map((item) => {
         return { label: defaultStr(t(item.label ?? '')), value: item.value };
