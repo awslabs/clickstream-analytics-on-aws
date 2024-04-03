@@ -65,6 +65,8 @@
     "analyticsDocumentation": "Analytics Documentation",
     "feedback": "Feedback",
     "signOut": "Sign out",
+    "updateAvailable1": "New version {{version}} is available. Click to upgrade.",
+    "updateAvailable2": "New version {{version}} is available. Contact your administrator to upgrade.",    
     "search": "Search",
     "closeSearch": "Close search",
     "more": "More",

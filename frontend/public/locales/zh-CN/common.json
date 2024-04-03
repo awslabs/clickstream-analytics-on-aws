@@ -65,6 +65,8 @@
     "analyticsDocumentation": "点击流分析文档",
     "feedback": "反馈",
     "signOut": "登出",
+    "updateAvailable1": "新版本 {{version}} 可用。点此开始升级。",
+    "updateAvailable2": "新版本 {{version}} 可用。联系您的管理员进行升级。", 
     "search": "搜索",
     "closeSearch": "关闭搜索",
     "more": "更多",

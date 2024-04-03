@@ -17,11 +17,15 @@ import {
   Select,
   SelectProps,
   TopNavigation,
+  TopNavigationProps,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
+import { getSystemInfo } from 'apis/system';
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
+import { AppContext } from 'context/AppContext';
+import { UserContext } from 'context/UserContext';
 import { useLocalStorage } from 'pages/common/use-local-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
@@ -34,8 +38,13 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
-import { getDocumentLink } from 'ts/url';
-import { defaultStr, getProjectAppFromOptions } from 'ts/utils';
+import { buildUpdateCloudFormationStackLink, getDocumentLink } from 'ts/url';
+import {
+  defaultStr,
+  getProjectAppFromOptions,
+  getUserInfoFromLocalStorage,
+  isAdminRole,
+} from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -62,6 +71,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   );
   const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const [systemInfo, setSystemInfo] = useState<SystemInfo>();
+  const appConfig = useContext(AppContext);
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const getRedirectUrl = (projectId: string, appId: string) => {
     const navItem = localStorage.getItem(ANALYTICS_NAV_ITEM) ?? 'dashboards';
@@ -175,6 +187,17 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   };
 
+  const fetchSystemInfo = async () => {
+    try {
+      const { success, data }: ApiResponse<SystemInfo> = await getSystemInfo();
+      if (success) {
+        setSystemInfo(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     setDisplayName(
       user?.profile?.email ||
@@ -185,6 +208,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         ''
     );
     listProjects();
+    if (currentUser?.roles && currentUser?.roles.length > 0) fetchSystemInfo();
   }, [user]);
 
   useEffect(() => {
@@ -211,6 +235,87 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       setFullLogoutUrl(decodeURIComponent(logoutUrl.toString()));
     }
   }, []);
+
+  const getNavItems = () => {
+    const notifications = systemInfo?.hasUpdate
+      ? [
+          {
+            type: 'menu-dropdown',
+            iconName: 'notification',
+            title: '',
+            ariaLabel: 'Notifications (unread)',
+            badge: true,
+            items: [
+              isAdminRole(currentUser?.roles)
+                ? {
+                    id: 'update-available',
+                    href: buildUpdateCloudFormationStackLink(
+                      appConfig!.solution_region,
+                      systemInfo?.stackId,
+                      systemInfo?.templateUrl
+                    ),
+                    text: defaultStr(
+                      t('header.updateAvailable1', {
+                        version: systemInfo?.remoteVersion,
+                      })
+                    ),
+                    external: true,
+                    externalIconAriaLabel: '(opens in AWS console)',
+                  }
+                : {
+                    id: 'update-available',
+                    disable: true,
+                    text: defaultStr(
+                      t('header.updateAvailable2', {
+                        version: systemInfo?.remoteVersion,
+                      })
+                    ),
+                  },
+            ],
+          },
+        ]
+      : [];
+
+    return [
+      {
+        type: 'button',
+        text: defaultStr(t('header.analyticsDocumentation')),
+        href: getDocumentLink(i18n.language),
+        external: true,
+      },
+      ...notifications,
+      {
+        type: 'menu-dropdown',
+        text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
+        title: 'Language',
+        ariaLabel: 'settings',
+        onItemClick: (item) => {
+          changeLanguage(item.detail.id);
+          window.location.reload();
+        },
+        items:
+          i18n.language === DEFAULT_ZH_LANG
+            ? [...LANGUAGE_ITEMS].reverse()
+            : LANGUAGE_ITEMS,
+      },
+      {
+        type: 'menu-dropdown',
+        text: displayName,
+        description: displayName,
+        iconName: 'user-profile',
+        onItemClick: (item) => {
+          if (item.detail.id === 'signout') {
+            if (fullLogoutUrl) {
+              signOut?.();
+              window.location.href = fullLogoutUrl;
+            }
+            signOut?.();
+          }
+        },
+        items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
+      },
+    ] as ReadonlyArray<TopNavigationProps.Utility>;
+  };
 
   return (
     <header id="h">
@@ -242,44 +347,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             options={allProjectOptions}
           />
         }
-        utilities={[
-          {
-            type: 'button',
-            text: defaultStr(t('header.analyticsDocumentation')),
-            href: getDocumentLink(i18n.language),
-            external: true,
-          },
-          {
-            type: 'menu-dropdown',
-            text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
-            title: 'Language',
-            ariaLabel: 'settings',
-            onItemClick: (item) => {
-              changeLanguage(item.detail.id);
-              window.location.reload();
-            },
-            items:
-              i18n.language === DEFAULT_ZH_LANG
-                ? [...LANGUAGE_ITEMS].reverse()
-                : LANGUAGE_ITEMS,
-          },
-          {
-            type: 'menu-dropdown',
-            text: displayName,
-            description: displayName,
-            iconName: 'user-profile',
-            onItemClick: (item) => {
-              if (item.detail.id === 'signout') {
-                if (fullLogoutUrl) {
-                  signOut?.();
-                  window.location.href = fullLogoutUrl;
-                }
-                signOut?.();
-              }
-            },
-            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
-          },
-        ]}
+        utilities={getNavItems()}
         i18nStrings={{
           searchIconAriaLabel: defaultStr(t('header.search')),
           searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),

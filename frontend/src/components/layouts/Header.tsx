@@ -11,8 +11,14 @@
  *  and limitations under the License.
  */
 
-import { TopNavigation } from '@cloudscape-design/components';
-import React, { useEffect, useState } from 'react';
+import {
+  TopNavigation,
+  TopNavigationProps,
+} from '@cloudscape-design/components';
+import { getSystemInfo } from 'apis/system';
+import { AppContext } from 'context/AppContext';
+import { UserContext } from 'context/UserContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   CLICK_STREAM_USER_DATA,
@@ -23,7 +29,8 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { buildUpdateCloudFormationStackLink } from 'ts/url';
+import { defaultStr, getUserInfoFromLocalStorage, isAdminRole } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -35,9 +42,23 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
+  const [systemInfo, setSystemInfo] = useState<SystemInfo>();
+  const appConfig = useContext(AppContext);
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+  };
+
+  const fetchSystemInfo = async () => {
+    try {
+      const { success, data }: ApiResponse<SystemInfo> = await getSystemInfo();
+      if (success) {
+        setSystemInfo(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -49,6 +70,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         user?.profile?.sub ||
         ''
     );
+    if (currentUser?.roles && currentUser?.roles.length > 0) fetchSystemInfo();
   }, [user]);
 
   useEffect(() => {
@@ -76,6 +98,88 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   }, []);
 
+  const getNavItems = () => {
+    const notifications = systemInfo?.hasUpdate
+      ? [
+          {
+            type: 'menu-dropdown',
+            iconName: 'notification',
+            title: '',
+            ariaLabel: 'Notifications (unread)',
+            badge: true,
+            items: [
+              isAdminRole(currentUser?.roles)
+                ? {
+                    id: 'update-available',
+                    href: buildUpdateCloudFormationStackLink(
+                      appConfig!.solution_region,
+                      systemInfo?.stackId,
+                      systemInfo?.templateUrl
+                    ),
+                    text: defaultStr(
+                      t('header.updateAvailable1', {
+                        version: systemInfo?.remoteVersion,
+                      })
+                    ),
+                    external: true,
+                    externalIconAriaLabel: '(opens in AWS console)',
+                  }
+                : {
+                    id: 'update-available',
+                    disable: true,
+                    text: defaultStr(
+                      t('header.updateAvailable2', {
+                        version: systemInfo?.remoteVersion,
+                      })
+                    ),
+                  },
+            ],
+          },
+        ]
+      : [];
+
+    return [
+      {
+        type: 'button',
+        text: defaultStr(t('header.solutionLibrary')),
+        href: 'https://aws.amazon.com/solutions/',
+        external: true,
+      },
+      ...notifications,
+      {
+        type: 'menu-dropdown',
+        text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
+        title: 'Language',
+        ariaLabel: 'settings',
+        onItemClick: (item) => {
+          changeLanguage(item.detail.id);
+          window.location.reload();
+        },
+        items:
+          i18n.language === DEFAULT_ZH_LANG
+            ? [...LANGUAGE_ITEMS].reverse()
+            : LANGUAGE_ITEMS,
+      },
+      {
+        type: 'menu-dropdown',
+        text: displayName,
+        description: displayName,
+        iconName: 'user-profile',
+        onItemClick: (item) => {
+          if (item.detail.id === 'signout') {
+            window.localStorage.removeItem(CLICK_STREAM_USER_DATA);
+            if (fullLogoutUrl) {
+              signOut?.();
+              window.location.href = fullLogoutUrl;
+            }
+            signOut?.();
+          }
+        },
+        items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
+      },
+    ] as ReadonlyArray<TopNavigationProps.Utility>;
+  };
+
   return (
     <header id="h">
       <TopNavigation
@@ -83,45 +187,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           href: '/',
           title: defaultStr(t('header.solution')),
         }}
-        utilities={[
-          {
-            type: 'button',
-            text: defaultStr(t('header.solutionLibrary')),
-            href: 'https://aws.amazon.com/solutions/',
-            external: true,
-          },
-          {
-            type: 'menu-dropdown',
-            text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
-            title: 'Language',
-            ariaLabel: 'settings',
-            onItemClick: (item) => {
-              changeLanguage(item.detail.id);
-              window.location.reload();
-            },
-            items:
-              i18n.language === DEFAULT_ZH_LANG
-                ? [...LANGUAGE_ITEMS].reverse()
-                : LANGUAGE_ITEMS,
-          },
-          {
-            type: 'menu-dropdown',
-            text: displayName,
-            description: displayName,
-            iconName: 'user-profile',
-            onItemClick: (item) => {
-              if (item.detail.id === 'signout') {
-                window.localStorage.removeItem(CLICK_STREAM_USER_DATA);
-                if (fullLogoutUrl) {
-                  signOut?.();
-                  window.location.href = fullLogoutUrl;
-                }
-                signOut?.();
-              }
-            },
-            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
-          },
-        ]}
+        utilities={getNavItems()}
         i18nStrings={{
           searchIconAriaLabel: defaultStr(t('header.search')),
           searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),

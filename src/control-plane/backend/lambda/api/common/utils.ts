@@ -185,12 +185,14 @@ function getTokenFromRequest(req: any) {
 
 async function getRoleFromToken(decodedToken: any) {
   if (!decodedToken) {
+    logger.debug('No decoded token when fetching roles from token.');
     return [];
   }
 
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
+  logger.debug('User setting is ', { userSettings });
   const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
@@ -202,6 +204,10 @@ async function getRoleFromToken(decodedToken: any) {
 }
 
 function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+  logger.debug('mapping oidc roles with user setting.', {
+    userSettings,
+    oidcRoles,
+  });
   const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
     return userRoles;
