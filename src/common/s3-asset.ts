@@ -52,7 +52,7 @@ export function uploadBuiltInJarsAndRemoteFiles(
   const shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
-     ...commonLibCommands,
+    ...commonLibCommands,
     `cd /tmp/${props.buildDirectory}`,
     `gradle clean build -PprojectVersion=${version} -x test -x coverageCheck ${props.additionalBuildArgument ?? ''}`,
     `cp ./build/libs/${jarFile} /asset-output/`,
