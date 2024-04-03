@@ -531,5 +531,5 @@ export const clickstream_event_view_columns: InputColumn[] = [
   {
     Name: 'view_event_indicator',
     Type: 'STRING',
-  }
+  },
 ];

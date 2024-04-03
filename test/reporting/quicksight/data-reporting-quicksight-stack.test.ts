@@ -938,7 +938,30 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_event_view_v3 where event_date >= <<$startDate01>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))",
+            customSql: {
+              'Fn::Join': [
+                '',
+                [
+                  "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('",
+                  {
+                    Ref: 'QuickSightTimezoneParam',
+                  },
+                  "', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('",
+                  {
+                    Ref: 'QuickSightTimezoneParam',
+                  },
+                  "', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('",
+                  {
+                    Ref: 'QuickSightTimezoneParam',
+                  },
+                  "', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('",
+                  {
+                    Ref: 'QuickSightTimezoneParam',
+                  },
+                  "', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
+                ],
+              ],
+            },
             columns: [
               {
                 Name: 'event_timestamp',
@@ -1437,10 +1460,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'event_date',
-                Type: 'DATETIME',
-              },
-              {
                 Name: 'merged_user_id',
                 Type: 'STRING',
               },
@@ -1462,6 +1481,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'event_timestamp_local',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'event_date',
                 Type: 'DATETIME',
               },
             ],
@@ -1620,13 +1643,13 @@ describe('DataReportingQuickSightStack resource test', () => {
               'first_traffic_channel_group',
               'first_app_install_source',
               'user_properties_json_str',
-              'event_date',
               'merged_user_id',
               'latest_user_id',
               'new_user_indicator',
               'view_session_indicator',
               'view_event_indicator',
               'event_timestamp_local',
+              'event_date',
             ],
           },
           {

@@ -106,7 +106,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   labels[quickSightTimezoneParam.logicalId] = {
     default: 'Dashboard Timezone',
   };
-  
+
 
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',

@@ -119,7 +119,7 @@ export function createQuicksightCustomResource(
           {
             Name: 'event_date',
             Type: 'DATETIME',
-          }
+          },
         ],
         dateTimeDatasetParameter: [
           {
