@@ -111,11 +111,11 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
               isAdminRole(currentUser?.roles)
                 ? {
                     id: 'update-available',
-                    href: buildUpdateCloudFormationStackLink(
-                      appConfig!.solution_region,
+                    href: appConfig?.solution_region ? buildUpdateCloudFormationStackLink(
+                      appConfig.solution_region,
                       systemInfo?.stackId,
                       systemInfo?.templateUrl
-                    ),
+                    ) : '',
                     text: defaultStr(
                       t('header.updateAvailable1', {
                         version: systemInfo?.remoteVersion,

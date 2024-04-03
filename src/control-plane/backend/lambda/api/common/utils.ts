@@ -23,7 +23,6 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
   ConditionCategory,
   MetadataValueType,
-  IMetadataBuiltInList,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -38,7 +37,7 @@ import { logger } from './powertools';
 import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IDictionary } from '../model/dictionary';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -410,40 +409,40 @@ function _getClassNameByVersion(id: string, curClassName: string, templateVersio
   const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
-      versions: SolutionVersion.V_1_0_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V1_VERSIONS],
       className: 'software.aws.solution.clickstream.Transformer',
     },
     {
       id: 'BUILT-IN-1',
-      versions: SolutionVersion.V_1_1_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
       className: 'software.aws.solution.clickstream.TransformerV2',
     },
     {
       id: 'BUILT-IN-2',
       versions: [
-        ...SolutionVersion.V_1_0_ALL,
-        ...SolutionVersion.V_1_1_ALL,
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
       ],
       className: 'software.aws.solution.clickstream.UAEnrichment',
     },
     {
       id: 'BUILT-IN-3',
       versions: [
-        ...SolutionVersion.V_1_0_ALL,
-        ...SolutionVersion.V_1_1_ALL,
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
       ],
       className: 'software.aws.solution.clickstream.IPEnrichment',
     },
     {
       id: 'BUILT-IN-4',
-      versions: SolutionVersion.V_1_1_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
       className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
     },
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
     for (let plugin of pluginHistoryClassNameWithVersion) {
       const pluginVersions = plugin.versions.map(v => v.shortVersion);
-      if (plugin.id === id && pluginVersions.includes(shortVersion)) {
+      if (plugin.id === id && pluginVersions.some(v => v.equals(shortVersion))) {
         return plugin.className;
       }
     }

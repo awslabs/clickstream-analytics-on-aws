@@ -52,11 +52,9 @@ class Version {
   }
 
   public equals(other: Version): boolean {
-    return (
-      this.major === other.major &&
-    this.minor === other.minor &&
-    this.micro === other.micro
-    );
+    return (this.major === other.major &&
+      this.minor === other.minor &&
+      this.micro === other.micro);
   }
 
   public greaterThan(other: Version): boolean {
@@ -100,14 +98,14 @@ export class SolutionVersion {
   public static readonly V_1_2_0 = SolutionVersion.Of('v1.2.0');
   public static readonly ANY = SolutionVersion.Of('*');
 
-  public static readonly V_1_0_ALL = [
+  public static readonly DATA_MODEL_V1_VERSIONS = [
     SolutionVersion.V_1_0_0,
     SolutionVersion.V_1_0_1,
     SolutionVersion.V_1_0_2,
     SolutionVersion.V_1_0_3,
   ];
 
-  public static readonly V_1_1_ALL = [
+  public static readonly DATA_MODEL_V2_VERSIONS = [
     SolutionVersion.V_1_1_0,
     SolutionVersion.V_1_1_1,
     SolutionVersion.V_1_1_2,
