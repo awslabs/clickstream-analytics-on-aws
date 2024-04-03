@@ -113,13 +113,13 @@ export interface ParameterCondition {
   parameterName: string;
   dataType: MetadataValueType;
   conditionOperator: ExploreAnalyticsOperators;
-  inputValue: number | number[] | string | string[];
+  inputValue: string[];
 }
 
 export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
   conditionOperator: ExploreAnalyticsOperators;
-  inputValue: number | number[];
+  inputValue: number[];
   parameterType?: MetadataSource;
   parameterName?: string;
   dataType?: MetadataValueType;
