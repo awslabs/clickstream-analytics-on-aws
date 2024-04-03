@@ -23,6 +23,8 @@
     "sdk": "SDK",
     "search": "Search",
     "session": "Session",
+    "outbound": "Outbound",
+    "upgrade": "Upgrade",
     "outer": "Solution properties"
   },
   "dashboard": {
@@ -245,7 +247,9 @@
     "in": "in",
     "notIn": "not in",
     "contains": "contains",
-    "notContains": "not contains"
+    "notContains": "not contains",
+    "true": "is true",
+    "false": "is false"
   },
   "labels": {
     "eventTitle": "Event",

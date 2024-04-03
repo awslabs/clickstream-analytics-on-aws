@@ -14,7 +14,7 @@
 import {
   Segment,
   MetadataSource,
-  ConditionCategory,
+  ConditionCategoryFrontend,
   MetadataValueType,
   MetadataPlatform,
 } from '@aws/clickstream-base-lib';
@@ -41,7 +41,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   name?: string;
   modifyTime?: string;
   metadataSource?: MetadataSource;
-  category?: ConditionCategory;
+  category?: ConditionCategoryFrontend;
   valueType?: MetadataValueType;
   platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
