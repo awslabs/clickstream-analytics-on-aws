@@ -814,7 +814,6 @@ export const getEventAndConditions = (
     if (validEventAnalyticsItem(item)) {
       const conditions: ICondition[] = [];
       item.conditionList.forEach((condition) => {
-        console.log('condition', condition);
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
             category: categoryMapping(condition.conditionOption?.category),
