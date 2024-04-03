@@ -85,6 +85,12 @@ export function createQuicksightCustomResource(
   const eventViewProjectedColumns: string[] = [];
   clickstream_event_view_columns.map( item => eventViewProjectedColumns.push(item.Name!));
 
+  const eventViewColumns = `
+    *, 
+    DATE_TRUNC('second', CONVERT_TIMEZONE('${props.timezone}', event_timestamp)) ::timestamp AS event_timestamp_local,
+    DATE_TRUNC('day', CONVERT_TIMEZONE('${props.timezone}', event_timestamp)) ::timestamp AS event_date
+  `;
+
   const dashboardDefProps: QuickSightDashboardDefProps = {
     analysisName: 'Clickstream Analysis',
     dashboardName: 'Clickstream Dashboard',
@@ -97,8 +103,24 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_date >= <<$startDate01>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))`,
-        columns: clickstream_event_view_columns,
+        customSql: `
+          select 
+            ${eventViewColumns} 
+          from {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}
+          where DATE_TRUNC('day', CONVERT_TIMEZONE('${props.timezone}', event_timestamp)) >= <<$startDate01>>
+          and DATE_TRUNC('day', CONVERT_TIMEZONE('${props.timezone}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))
+        `,
+        columns: [
+          ...clickstream_event_view_columns,
+          {
+            Name: 'event_timestamp_local',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          }
+        ],
         dateTimeDatasetParameter: [
           {
             name: 'startDate01',
@@ -125,7 +147,7 @@ export function createQuicksightCustomResource(
             columnGeographicRoles: ['STATE'],
           },
         ],
-        projectedColumns: eventViewProjectedColumns,
+        projectedColumns: [...eventViewProjectedColumns, 'event_timestamp_local', 'event_date'],
       },
 
       //Acquisition Sheet

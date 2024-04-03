@@ -513,10 +513,6 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
-  {
     Name: 'merged_user_id',
     Type: 'STRING',
   },
@@ -535,9 +531,5 @@ export const clickstream_event_view_columns: InputColumn[] = [
   {
     Name: 'view_event_indicator',
     Type: 'STRING',
-  },
-  {
-    Name: 'event_timestamp_local',
-    Type: 'DATETIME',
-  },
+  }
 ];
