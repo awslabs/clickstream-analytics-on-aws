@@ -1293,3 +1293,17 @@ ul.menu-list li.checkbox-item {
     }
   }
 }
+
+.re-sign-in {
+  .alert-container {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.re-sign-in-modal {
+  [class^='awsui_dismiss-control'] {
+    display: none !important;
+  }
+}

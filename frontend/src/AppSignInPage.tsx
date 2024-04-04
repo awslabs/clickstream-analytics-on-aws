@@ -47,6 +47,7 @@ const SignedInPage: React.FC = () => {
   };
 
   useEffect(() => {
+    console.info('auth:', auth);
     if (auth.isAuthenticated) {
       getCurrentUser();
     }
@@ -57,13 +58,18 @@ const SignedInPage: React.FC = () => {
   }
 
   if (auth.error) {
-    return <ReSignIn auth={auth} />;
+    return (
+      <>
+        <ReSignIn auth={auth} />
+        <AppRouter sessionExpired={true} auth={auth} />
+      </>
+    );
   }
 
   if (auth.isAuthenticated) {
     return (
       <UserContext.Provider value={currentUser}>
-        <AppRouter auth={auth} />
+        <AppRouter auth={auth} sessionExpired={false} />
       </UserContext.Provider>
     );
   }
