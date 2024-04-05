@@ -18935,7 +18935,7 @@ describe('SQL Builder test', () => {
           {
             category: ConditionCategory.EVENT_OUTER,
             property: 'screen_view_entrances',
-            operator: ExploreAnalyticsOperators.YES,
+            operator: ExploreAnalyticsOperators.TRUE,
             value: [],
             dataType: MetadataValueType.BOOLEAN,
           },
@@ -18951,7 +18951,7 @@ describe('SQL Builder test', () => {
               {
                 category: ConditionCategory.EVENT_OUTER,
                 property: 'screen_view_entrances',
-                operator: ExploreAnalyticsOperators.YES,
+                operator: ExploreAnalyticsOperators.TRUE,
                 value: [],
                 dataType: MetadataValueType.BOOLEAN,
               },
@@ -19148,7 +19148,7 @@ describe('SQL Builder test', () => {
           {
             category: ConditionCategory.EVENT,
             property: 'is_high_value_user',
-            operator: ExploreAnalyticsOperators.NO,
+            operator: ExploreAnalyticsOperators.FALSE,
             value: [],
             dataType: MetadataValueType.BOOLEAN,
           },
@@ -19164,7 +19164,7 @@ describe('SQL Builder test', () => {
               {
                 category: ConditionCategory.EVENT,
                 property: 'is_high_value_user',
-                operator: ExploreAnalyticsOperators.YES,
+                operator: ExploreAnalyticsOperators.TRUE,
                 value: [],
                 dataType: MetadataValueType.BOOLEAN,
               },

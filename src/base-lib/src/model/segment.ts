@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { ExploreAnalyticsOperators, MetadataSource, MetadataValueType } from '../constant';
+import {
+  ExploreAnalyticsNumericOperators,
+  ExploreAnalyticsOperators,
+  MetadataSource,
+  MetadataValueType,
+} from '../constant';
 
 export interface Segment {
   segmentId: string;
@@ -118,7 +123,7 @@ export interface ParameterCondition {
 
 export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
-  conditionOperator: ExploreAnalyticsOperators;
+  conditionOperator: ExploreAnalyticsNumericOperators;
   inputValue: number[];
   parameterType?: MetadataSource;
   parameterName?: string;

@@ -2303,7 +2303,7 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
             ...condition,
             dataType: MetadataValueType.STRING,
             operator: ExploreAnalyticsOperators.EQUAL,
-            value: [condition.operator === ExploreAnalyticsOperators.YES ? 'true' : 'false'],
+            value: [condition.operator === ExploreAnalyticsOperators.TRUE ? 'true' : 'false'],
           };
           return _buildSqlFromStringCondition(new_condition, prefix);
         default:
@@ -2353,9 +2353,9 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
 
 function _buildSqlFromBooleanCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
-    case ExploreAnalyticsOperators.YES:
+    case ExploreAnalyticsOperators.TRUE:
       return `${prefix}${condition.property}  = TRUE `;
-    case ExploreAnalyticsOperators.NO:
+    case ExploreAnalyticsOperators.FALSE:
       return `(${prefix}${condition.property} is null or ${prefix}${condition.property} = FALSE )`;
     default:
       logger.error('unsupported condition', { condition });

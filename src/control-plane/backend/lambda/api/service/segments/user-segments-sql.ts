@@ -12,13 +12,13 @@
  */
 
 import {
-  ConditionNumericOperator,
-  ConditionOperator,
   EventsInSequenceCondition,
   EventWithParameter,
+  ExploreAnalyticsNumericOperators,
+  ExploreAnalyticsOperators,
+  MetadataSource,
+  MetadataValueType,
   ParameterCondition,
-  ParameterDataType,
-  ParameterType,
   Segment,
   SegmentFilter,
   SegmentFilterConditionType,
@@ -137,9 +137,9 @@ export class UserSegmentsSql {
     // Metric condition inputValue is always a number array with two elements
     // Use two numbers only when the operator is 'between'
     const metricCondition = condition.metricCondition;
-    const metricInputValueClause = metricCondition.conditionOperator === ConditionNumericOperator.BETWEEN ?
+    const metricInputValueClause = metricCondition.conditionOperator === ExploreAnalyticsNumericOperators.BETWEEN ?
       `BETWEEN ${metricCondition.inputValue[0]} AND ${metricCondition.inputValue[1]}` : `${metricCondition.conditionOperator} ${metricCondition.inputValue[0]}`;
-    const metricParamField = metricCondition.parameterType === ParameterType.PRESET ?
+    const metricParamField = metricCondition.parameterType === MetadataSource.PRESET ?
       metricCondition.parameterName : `CAST(${EVENT_CUSTOM_PARAM_COLUMN}.${metricCondition.parameterName}.value AS FLOAT)`;
 
     let hasDone: string;
@@ -416,40 +416,47 @@ export class UserSegmentsSql {
   private composeParameterConditionClause(condition: ParameterCondition, type: ParameterSourceType) {
     const customColumn = type === 'EventParameter' ? EVENT_CUSTOM_PARAM_COLUMN : USER_CUSTOM_ATTR_COLUMN;
     const customValue = `${customColumn}.${condition.parameterName}.value`;
-    const field = condition.parameterType === ParameterType.PRESET ? condition.parameterName :
-      condition.dataType === ParameterDataType.STRING ? customValue : `CAST(${customValue} AS FLOAT)`;
+    const field = condition.parameterType === MetadataSource.PRESET ? condition.parameterName :
+      condition.dataType === MetadataValueType.STRING || condition.dataType === MetadataValueType.BOOLEAN ? customValue : `CAST(${customValue} AS FLOAT)`;
     const inputValues = condition.inputValue.map(value => {
       switch (condition.dataType) {
-        case ParameterDataType.STRING:
+        case MetadataValueType.STRING:
           return `'${value}'`;
-        case ParameterDataType.INTEGER:
+        case MetadataValueType.INTEGER:
           return parseInt(value);
-        case ParameterDataType.DOUBLE:
-        case ParameterDataType.FLOAT:
+        case MetadataValueType.DOUBLE:
+        case MetadataValueType.FLOAT:
+        case MetadataValueType.NUMBER:
           return parseFloat(value);
+        case MetadataValueType.BOOLEAN:
+          return value;
       }
     });
 
     switch (condition.conditionOperator) {
-      case ConditionOperator.NULL:
+      case ExploreAnalyticsOperators.NULL:
         return `${field} IS NULL`;
-      case ConditionOperator.NOT_NULL:
+      case ExploreAnalyticsOperators.NOT_NULL:
         return `${field} IS NOT NULL`;
-      case ConditionOperator.EQUAL:
-      case ConditionOperator.NOT_EQUAL:
-      case ConditionOperator.GREATER_THAN:
-      case ConditionOperator.GREATER_THAN_OR_EQUAL:
-      case ConditionOperator.LESS_THAN:
-      case ConditionOperator.LESS_THAN_OR_EQUAL:
+      case ExploreAnalyticsOperators.EQUAL:
+      case ExploreAnalyticsOperators.NOT_EQUAL:
+      case ExploreAnalyticsOperators.GREATER_THAN:
+      case ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL:
+      case ExploreAnalyticsOperators.LESS_THAN:
+      case ExploreAnalyticsOperators.LESS_THAN_OR_EQUAL:
         return `${field} ${condition.conditionOperator} ${inputValues[0]}`;
-      case ConditionOperator.IN:
+      case ExploreAnalyticsOperators.IN:
         return `${field} IN (${inputValues.join(', ')})`;
-      case ConditionOperator.NOT_IN:
+      case ExploreAnalyticsOperators.NOT_IN:
         return `${field} NOT IN (${inputValues.join(', ')})`;
-      case ConditionOperator.CONTAINS:
+      case ExploreAnalyticsOperators.CONTAINS:
         return `(${condition.inputValue.map(value => (`${field} LIKE '%${value}%'`)).join(' AND ')})`;
-      case ConditionOperator.NOT_CONTAINS:
+      case ExploreAnalyticsOperators.NOT_CONTAINS:
         return `(${condition.inputValue.map(value => (`${field} NOT LIKE '%${value}%'`)).join(' AND ')})`;
+      case ExploreAnalyticsOperators.TRUE:
+        return `${field} = true`;
+      case ExploreAnalyticsOperators.FALSE:
+        return `${field} = false`;
     }
   }
 }
