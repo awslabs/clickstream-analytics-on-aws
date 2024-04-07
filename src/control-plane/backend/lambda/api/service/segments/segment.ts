@@ -31,6 +31,7 @@ import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { NextFunction, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { UserSegmentsSql } from './user-segments-sql';
 import { PipelineStackType } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
@@ -50,6 +51,10 @@ export class SegmentServ {
   public async create(req: Request, res: Response, next: NextFunction) {
     try {
       const segment = this.constructSegmentFromInput(req, res);
+
+      // Construct storage procedure with segment sql query
+      const userSegmentsSql = new UserSegmentsSql(segment);
+      segment.sql = userSegmentsSql.buildCriteriaStatement();
 
       // Create EventBridge rule
       if (segment.refreshSchedule.cron !== 'Manual' && !!segment.refreshSchedule.cronExpression) {
@@ -225,19 +230,16 @@ export class SegmentServ {
         return res.status(400).send(new ApiFail(`Segment job for segmentId: ${segmentId}, jobRunId: ${jobRunId} is not in COMPLETED status.`));
       }
 
-      const pipelines = await pipelineStore.listPipeline(projectId as string, 'latest', 'asc');
-      if (pipelines.length === 0) {
-        return res.status(400).send(new ApiFail(`Pipeline for ${projectId} is not found`));
-      }
+      const pipeline = await this.getPipeline(projectId as string);
       const s3Client = new S3Client({
         ...aws_sdk_client_common_config,
-        region: pipelines[0].region,
+        region: pipeline.region,
       });
 
       // @ts-ignore https://github.com/aws/aws-sdk-js-v3/issues/4451
       const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
-        Bucket: pipelines[0].bucket.name,
-        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/output.csv`,
+        Bucket: pipeline.bucket.name,
+        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, pipeline.bucket.prefix ?? '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/output.csv`,
       }), { expiresIn: 600 });
 
       return res.status(200).json(new ApiSuccess({ presignedUrl }, 'Generate presigned URL successfully.'));
@@ -265,16 +267,23 @@ export class SegmentServ {
       refreshSchedule: input.refreshSchedule,
       criteria: input.criteria,
       eventBridgeRuleArn: '',
+      uiRenderingJson: input.uiRenderingJson ?? '',
     };
   }
 
-  private async getPipelineRegion(projectId: string) {
+  private async getPipeline(projectId: string) {
     const pipelines = await pipelineStore.listPipeline(projectId, 'latest', 'asc');
     if (pipelines.length === 0) {
       throw new Error(`Pipeline for ${projectId} is not found`);
     }
 
-    return pipelines[0].region;
+    return pipelines[0];
+  }
+
+  private async getPipelineRegion(projectId: string) {
+    const pipeline = await this.getPipeline(projectId);
+
+    return pipeline.region;
   }
 
   private async createEventBridgeClient(projectId: string) {
@@ -296,11 +305,7 @@ export class SegmentServ {
   }
 
   private async getSegmentsWorkflowSfnArn(segment: Segment) {
-    const pipelines = await pipelineStore.listPipeline(segment.projectId, 'latest', 'asc');
-    if (pipelines.length === 0) {
-      throw new Error(`Pipeline for ${segment.projectId} is not found`);
-    }
-    const pipeline = new CPipeline(pipelines[0]);
+    const pipeline = new CPipeline(await this.getPipeline(segment.projectId));
     const outputs = pipeline.getStackOutputBySuffixes(PipelineStackType.DATA_MODELING_REDSHIFT, [
       OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
     ]);

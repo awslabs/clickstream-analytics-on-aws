@@ -292,5 +292,7 @@ export const schemaDefs: SQLDef[] = [
     type: 'mv',
     scheduleRefresh: 'true',
   },
-
+  {
+    sqlFile: 'segment-user.sql',
+  },
 ];

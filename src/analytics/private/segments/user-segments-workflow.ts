@@ -109,6 +109,8 @@ export class UserSegmentsWorkflow extends Construct {
       REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
+      PIPELINE_S3_BUCKET: props.pipelineS3Bucket,
+      SEGMENTS_S3_PREFIX: props.segmentsS3Prefix,
     });
     const executeSegmentQueryTask = new LambdaInvoke(this, 'WorkflowTask-ExecuteSegmentQuery', {
       lambdaFunction: executeSegmentQueryFunc,
@@ -121,6 +123,7 @@ export class UserSegmentsWorkflow extends Construct {
     const segmentJobStatusFunc = this.constructNodejsFunction('segment-job-status', [], {
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
+      PIPELINE_S3_BUCKET: props.pipelineS3Bucket,
       SEGMENTS_S3_PREFIX: props.segmentsS3Prefix,
     });
     const segmentJobStatusTask = new LambdaInvoke(this, 'WorkflowTask-SegmentJobStatus', {

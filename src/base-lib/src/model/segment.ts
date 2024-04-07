@@ -32,6 +32,8 @@ export interface Segment {
   refreshSchedule: RefreshSchedule;
   criteria: SegmentCriteria;
   eventBridgeRuleArn?: string;
+  sql?: string;
+  uiRenderingJson?: string;
 }
 
 export interface RefreshSchedule {
