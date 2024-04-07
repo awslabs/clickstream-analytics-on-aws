@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.16">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
     
     
       
@@ -2807,118 +2807,6 @@
 </ol>
 <h2 id="where-the-data-comes-from">Where the data comes from</h2>
 <p>User report are created based on the QuickSight dataset of:</p>
-<ul>
-<li><code>User_Dim_View-&lt;app&gt;-&lt;project&gt;</code> which connects to the <code>clickstream_user_dim_view</code> view in analytics engine (i.e., Redshift)</li>
-<li><code>User_Attr_View-&lt;app&gt;-&lt;project&gt;</code> which connects to <code>clickstream_user_attr_view</code>. Below is the SQL command that generates the view.</li>
-</ul>
-<details class="example">
-<summary>SQL Commands</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream_user_dim_view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">WITH</span><span class="w"> </span><span class="n">user_base</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">user_id</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">_first_visit_date</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_visit_date</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">_first_referer</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_referer</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="k">NULLIF</span><span class="p">(</span><span class="n">_first_traffic_source</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;(Direct)&#39;</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="n">_first_traffic_source</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_source</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">_first_traffic_medium</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_medium</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">_first_traffic_source_type</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">first_traffic_source_name</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="k">CASE</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="n">user_id</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">THEN</span><span class="w"> </span><span class="s1">&#39;Registered&#39;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="k">ELSE</span><span class="w"> </span><span class="s1">&#39;Non-registered&#39;</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="k">END</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">registration_status</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span><span class="k">FROM</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">),</span><span class="w"> </span><span class="n">device_id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="n">LISTAGG</span><span class="p">(</span><span class="n">d_id</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; | &#39;</span><span class="p">)</span><span class="w"> </span><span class="n">WITHIN</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="p">(</span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">device_id</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="k">SELECT</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">      </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">      </span><span class="n">d_id</span><span class="p">::</span><span class="nb">VARCHAR</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="k">FROM</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">      </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">device_id_list</span><span class="w"> </span><span class="n">d_id</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="p">)</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">  </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">)</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="k">SELECT</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span><span class="n">u</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_install_source</span><span class="p">,</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_device_language</span><span class="p">,</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_platform</span><span class="p">,</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_country</span><span class="p">,</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">  </span><span class="n">f</span><span class="p">.</span><span class="n">first_visit_city</span><span class="p">,</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">  </span><span class="n">d</span><span class="p">.</span><span class="n">device_id</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="k">FROM</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">  </span><span class="n">user_base</span><span class="w"> </span><span class="n">u</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">  </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_user_first_attr_view_v1</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="n">device_id</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">d</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">;</span>
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-user-dim-query.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- run following command to load latest partition</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">-- msck repair table {{database}}.{{eventTable}};</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">with</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="o">*</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">eventTable</span><span class="err">}}</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="k">and</span><span class="w"> </span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">),</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">clickstream_user_dim_mv_1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="k">SELECT</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">      </span><span class="n">user_pseudo_id</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">event_date</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_visit_date</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">app_info</span><span class="p">.</span><span class="n">install_source</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_visit_install_source</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">device</span><span class="p">.</span><span class="n">system_language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_visit_device_language</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">platform</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_platform</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">geo</span><span class="p">.</span><span class="n">country</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_visit_country</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">geo</span><span class="p">.</span><span class="n">city</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_visit_city</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="k">nullif</span><span class="p">(</span><span class="n">traffic_source</span><span class="p">.</span><span class="k">source</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;(direct)&#39;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">traffic_source</span><span class="p">.</span><span class="k">source</span><span class="w"> </span><span class="k">end</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_traffic_source_source</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">traffic_source</span><span class="p">.</span><span class="n">medium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_traffic_source_medium</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="p">,</span><span class="w"> </span><span class="n">traffic_source</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">first_traffic_source_name</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">base</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;_first_open&#39;</span><span class="p">,</span><span class="s1">&#39;_first_visit&#39;</span><span class="p">)</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="p">),</span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="n">clickstream_user_dim_mv_2</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">    </span><span class="k">count</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">    </span><span class="p">(</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">        </span><span class="k">distinct</span><span class="w"> </span><span class="n">user_id</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">user_id_count</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">ods</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">  </span><span class="k">where</span><span class="w"> </span><span class="n">event_name</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">    </span><span class="p">(</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">        </span><span class="s1">&#39;_first_open&#39;</span><span class="p">,</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">        </span><span class="s1">&#39;_first_visit&#39;</span>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="k">group</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="mi">1</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="p">)</span>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">upid</span><span class="p">.</span><span class="o">*</span><span class="p">,</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="w">  </span><span class="p">(</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">uid</span><span class="p">.</span><span class="n">user_id_count</span><span class="o">&gt;</span><span class="mi">0</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="s1">&#39;Registered&#39;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;Non-registered&#39;</span><span class="w"> </span><span class="k">end</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">is_registered</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="k">from</span><span class="w"> </span><span class="n">clickstream_user_dim_mv_1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">upid</span><span class="w"> </span><span class="k">left</span><span class="w"> </span><span class="k">outer</span><span class="w"> </span><span class="k">join</span><span class="w"> </span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a><span class="n">clickstream_user_dim_mv_2</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">uid</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">upid</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="o">=</span><span class="n">uid</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span></code></pre></div>
-</div>
-</div>
-</div>
-</details>
 <h2 id="dimensions-and-metrics">Dimensions and metrics</h2>
 <p>The report includes the following dimensions and metrics. You can add more dimensions or metrics by creating <code>calculated field</code> in QuickSight dateset. <a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">Learn more</a>. </p>
 <table>
@@ -2932,178 +2820,10 @@
 </thead>
 <tbody>
 <tr>
-<td><code>user_pseudo_id</code></td>
-<td>Dimension</td>
-<td>A SDK-generated unique id for the user</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>user_id</code></td>
-<td>Dimension</td>
-<td>The user ID set via the setUserId API in SDK</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>device_id</code></td>
-<td>Dimension</td>
-<td>The unique ID for the device, please refer to <a href="../../../sdk-manual/">SDK Manual</a> for how the device id was obtained</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_date</code></td>
-<td>Dimension</td>
-<td>The date that the user first visited your website or first opened the app</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_install_source</code></td>
-<td>Dimension</td>
-<td>The installation source when user first opened your app. Blank for web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_source</code></td>
-<td>Dimension</td>
-<td>The traffic source for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_medium</code></td>
-<td>Dimension</td>
-<td>The traffic medium for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_traffic_source_name</code></td>
-<td>Dimension</td>
-<td>The traffic campaign name for the user when first visit the app or web</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_device_language</code></td>
-<td>Dimension</td>
-<td>The system language of the device user used when they first opened your app or first visited your website.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_device_language</code></td>
-<td>Dimension</td>
-<td>The system language of the device user used when they first opened your app or first visited your website.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_platform</code></td>
-<td>Dimension</td>
-<td>The platform when user first visited your website or first opened your app</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_referer</code></td>
-<td>Dimension</td>
-<td>The referer when user first visited your website</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_country</code></td>
-<td>Dimension</td>
-<td>The country where user first visited your website or first opened your app.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>first_visit_city</code></td>
-<td>Dimension</td>
-<td>The city where user first visited your website or first opened your app.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>custom_attr_key</code></td>
-<td>Dimension</td>
-<td>The name of the custom attribute key of the user.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>custom_attr_value</code></td>
-<td>Dimension</td>
-<td>The value of the custom attribute key of the user.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>registration_status</code></td>
-<td>Dimension</td>
-<td>If user had registered or not</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>Event Time (HH:MM:SS)</code></td>
-<td>Dimension</td>
-<td>The time in MMDDYYYY HH:MM:SS format when the event was recorded in the client</td>
-<td>Calculated field in QuickSight</td>
-</tr>
-<tr>
-<td><code>event_id</code></td>
-<td>Dimension</td>
-<td>A SDK-generated unique id for the event user triggered when using your websites and apps</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_name</code></td>
-<td>Dimension</td>
-<td>The name of the event</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>platform</code></td>
-<td>Dimension</td>
-<td>The platform user used during the session</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_value_in_usd</code></td>
-<td>Metric</td>
-<td>The value in USD associated with the event</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>app_info_version</code></td>
-<td>Dimension</td>
-<td>The app version associated with the event</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>geo_locale</code></td>
-<td>Dimension</td>
-<td>The geo and locale information associated with the event</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_parameter_key</code></td>
-<td>Dimension</td>
-<td>The key of the event parameter</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_parameter_key</code></td>
-<td>Dimension</td>
-<td>The value of the event parameter</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_date</code></td>
-<td>Metric</td>
-<td>The date when the event was logged (YYYYMMDD format in UTC).</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>event_timestamp</code></td>
-<td>Dimension</td>
-<td>The time (in microseconds, UTC) when the event was logged on the client.</td>
-<td>Query from analytics engine</td>
-</tr>
-<tr>
-<td><code>app_info_version</code></td>
-<td>Dimension</td>
-<td>The version of the app or website when event was logged</td>
-<td>Query from analytics engine</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -3166,7 +2886,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.1e8ae164.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
