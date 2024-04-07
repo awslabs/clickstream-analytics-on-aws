@@ -3,7 +3,7 @@ NONATOMIC
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    log_name VARCHAR(50) := 'sp_migrate_all_to_v2';
+    log_name VARCHAR(50) := 'sp_migrate_data_to_v2';
     start_dt TIMESTAMP := GETDATE();
     loop_count INT := 0;
 

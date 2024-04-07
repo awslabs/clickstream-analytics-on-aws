@@ -218,6 +218,11 @@ CALL {{schema}}.sp_clickstream_log_non_atomic (
 );
 
 
+REFRESH MATERIALIZED VIEW {{schema}}.session_m_max_view;
+
+REFRESH MATERIALIZED VIEW {{schema}}.session_m_view;
+
+
 EXCEPTION
 WHEN OTHERS THEN 
 

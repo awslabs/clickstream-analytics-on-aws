@@ -41,9 +41,9 @@ WHERE
 
 CREATE temp TABLE tmp_event_item AS (
     WITH event_item AS (
-        SELECT
+        SELECT DISTINCT
             event_timestamp AS event_time_msec,
-            DISTINCT TIMESTAMP 'epoch' + event_timestamp / 1000 * INTERVAL '1 second' AS event_timestamp,
+            TIMESTAMP 'epoch' + event_timestamp / 1000 * INTERVAL '1 second' AS event_timestamp,
             event_id,
             event_name,
             platform,

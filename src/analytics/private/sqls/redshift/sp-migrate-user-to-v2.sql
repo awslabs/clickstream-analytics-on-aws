@@ -215,7 +215,7 @@ CALL {{schema}}.sp_clickstream_log_non_atomic(
 WITH tmp_user_first_traffic_web AS (
     SELECT
         user_pseudo_id,
-        MAX(page_referrer) AS first_referrer,
+        MAX(page_view_page_referrer) AS first_referrer,
         MAX(traffic_source_source) AS first_traffic_source,
         MAX(traffic_source_medium) AS first_traffic_medium,
         MAX(traffic_source_campaign) AS first_traffic_campaign,
@@ -298,7 +298,7 @@ WITH tmp_user_first_session_mobile AS (
 tmp_user_first_traffic_mobile AS (
     SELECT
         e.user_pseudo_id,
-        MAX(latest_referrer) AS first_referrer,
+        MAX(page_view_latest_referrer) AS first_referrer,
         coalesce(MAX(traffic_source_source), 'direct') AS first_traffic_source,
         MAX(traffic_source_medium) AS first_traffic_medium,
         coalesce(MAX(traffic_source_campaign), 'direct') AS first_traffic_campaign,
