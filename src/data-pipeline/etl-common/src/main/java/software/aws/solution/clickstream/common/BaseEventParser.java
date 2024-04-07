@@ -17,11 +17,17 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import lombok.*;
 import lombok.extern.slf4j.*;
+import software.aws.solution.clickstream.common.enrich.DefaultTrafficSourceHelper;
+import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.ingest.*;
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
+import software.aws.solution.clickstream.common.model.UriInfo;
 
 import java.util.*;
 
 import static software.aws.solution.clickstream.common.Util.decompress;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 
 @Slf4j
 public abstract class BaseEventParser implements EventParser {
@@ -84,6 +90,51 @@ public abstract class BaseEventParser implements EventParser {
         rowResult.getClickstreamEventList().addAll(result.getClickstreamEventList());
         rowResult.getClickstreamUserList().add(result.getClickstreamUser());
         rowResult.getClickstreamItemList().addAll(result.getClickstreamItemList());
+    }
+
+
+    protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
+        DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
+        TrafficSourceParserResult parserResult = null;
+        try {
+            if (clickstreamEvent.getPageViewPageUrl() != null) {
+                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), clickstreamEvent.getPageViewPageReferrer());
+            } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
+                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
+            }
+        } catch (Exception e) {
+            log.error("cannot parse traffic source: " + clickstreamEvent.getPageViewPageUrl() + ", error: " + e.getMessage());
+            log.error(getStackTrace(e));
+            return;
+        }
+
+        if (parserResult != null) {
+            CategoryTrafficSource cTrafficSource = parserResult.getTrafficSource();
+            clickstreamEvent.setTrafficSourceCampaign(cTrafficSource.getTrafficSource().getCampaign());
+            clickstreamEvent.setTrafficSourceContent(cTrafficSource.getTrafficSource().getContent());
+            clickstreamEvent.setTrafficSourceMedium(cTrafficSource.getTrafficSource().getMedium());
+            clickstreamEvent.setTrafficSourceSource(cTrafficSource.getTrafficSource().getSource());
+            clickstreamEvent.setTrafficSourceTerm(cTrafficSource.getTrafficSource().getTerm());
+            clickstreamEvent.setTrafficSourceClid(cTrafficSource.getTrafficSource().getClid());
+            clickstreamEvent.setTrafficSourceClidPlatform(cTrafficSource.getTrafficSource().getClidPlatform());
+            clickstreamEvent.setTrafficSourceCampaignId(cTrafficSource.getTrafficSource().getCampaignId());
+            clickstreamEvent.setTrafficSourceChannelGroup(cTrafficSource.getChannelGroup());
+            clickstreamEvent.setTrafficSourceCategory(cTrafficSource.getCategory());
+
+            UriInfo uriInfo = parserResult.getUriInfo();
+            if (uriInfo != null) {
+                if (clickstreamEvent.getPageViewHostname() == null) {
+                    clickstreamEvent.setPageViewHostname(uriInfo.getHost());
+                }
+                if (clickstreamEvent.getPageViewPageUrlPath() == null) {
+                    clickstreamEvent.setPageViewPageUrlPath(uriInfo.getPath());
+                }
+                if (clickstreamEvent.getPageViewPageUrlQueryParameters() == null) {
+                    clickstreamEvent.setPageViewPageUrlQueryParameters(uriInfo.getParameters());
+                }
+            }
+
+        }
     }
 
 

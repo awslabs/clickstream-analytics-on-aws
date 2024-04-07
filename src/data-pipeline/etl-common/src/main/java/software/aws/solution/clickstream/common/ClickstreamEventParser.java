@@ -16,11 +16,9 @@ package software.aws.solution.clickstream.common;
 import com.fasterxml.jackson.core.*;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.enrich.*;
-import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 
-import java.net.*;
 import java.sql.*;
 import java.time.*;
 import java.util.*;
@@ -455,34 +453,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
         }
     }
 
-    private void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
-        log.info("setTrafficSourceBySourceParser: " + clickstreamEvent.getPageViewPageUrl() + ", " + clickstreamEvent.getPageViewPageReferrer() + ", " + clickstreamEvent.getPageViewLatestReferrer());
-        DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
-        TrafficSourceParserResult parserResult = null;
-
-        if (clickstreamEvent.getPageViewPageUrl() != null) {
-            String refferr = clickstreamEvent.getPageViewPageReferrer();
-            if (refferr == null) {
-                refferr = clickstreamEvent.getPageViewLatestReferrer();
-            }
-            parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), refferr);
-        } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
-            parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
-        }
-
-        if (parserResult != null && parserResult.getTrafficSource() != null) {
-            clickstreamEvent.setTrafficSourceSource(parserResult.getTrafficSource().getTrafficSource().getSource());
-            clickstreamEvent.setTrafficSourceMedium(parserResult.getTrafficSource().getTrafficSource().getMedium());
-            clickstreamEvent.setTrafficSourceCampaign(parserResult.getTrafficSource().getTrafficSource().getCampaign());
-            clickstreamEvent.setTrafficSourceContent(parserResult.getTrafficSource().getTrafficSource().getContent());
-            clickstreamEvent.setTrafficSourceTerm(parserResult.getTrafficSource().getTrafficSource().getTerm());
-            clickstreamEvent.setTrafficSourceCampaignId(parserResult.getTrafficSource().getTrafficSource().getCampaignId());
-            clickstreamEvent.setTrafficSourceClidPlatform(parserResult.getTrafficSource().getTrafficSource().getClidPlatform());
-            clickstreamEvent.setTrafficSourceClid(parserResult.getTrafficSource().getTrafficSource().getClid());
-            clickstreamEvent.setTrafficSourceChannelGroup(parserResult.getTrafficSource().getChannelGroup());
-            clickstreamEvent.setTrafficSourceCategory(parserResult.getTrafficSource().getCategory());
-        }
-    }
 
     private boolean isEnableEventTimeShift() {
         if (System.getProperty(ENABLE_EVENT_TIME_SHIFT_PROP) == null) {

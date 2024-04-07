@@ -16,9 +16,6 @@ package software.aws.solution.clickstream.common.gtm;
 import com.fasterxml.jackson.core.*;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.*;
-import software.aws.solution.clickstream.common.enrich.*;
-import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
-import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
 import software.aws.solution.clickstream.common.gtm.event.*;
 import software.aws.solution.clickstream.common.model.*;
 
@@ -32,7 +29,6 @@ import static software.aws.solution.clickstream.common.ClickstreamEventParser.EV
 import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_USER_ENGAGEMENT;
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringEventPropMap;
 import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringUserPropMap;
-import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_STRING;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
@@ -163,7 +159,7 @@ public final class GTMEventParser extends BaseEventParser {
         clickstreamEvent.setCustomParameters(customParameters);
 
         // set traffic source
-        setTrafficSource(clickstreamEvent);
+        setTrafficSourceBySourceParser(clickstreamEvent);
 
         Map<String, String> processInfo = new HashMap<>();
         processInfo.put("rid", extraParams.getRid());
@@ -223,44 +219,6 @@ public final class GTMEventParser extends BaseEventParser {
 
         if (clickstreamEvent.getGeoRegion() == null) {
             clickstreamEvent.setGeoRegion(gtmEvent.getXGaUr());
-        }
-    }
-
-    private void setTrafficSource(final ClickstreamEvent clickstreamEvent) {
-        DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
-        TrafficSourceParserResult parserResult = null;
-        try {
-            if (clickstreamEvent.getPageViewPageUrl() != null) {
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), clickstreamEvent.getPageViewPageReferrer());
-            } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
-            }
-        } catch (Exception e) {
-            log.error("cannot parse traffic source: " + clickstreamEvent.getPageViewPageUrl() + ", error: " + e.getMessage());
-            log.error(getStackTrace(e));
-            return;
-        }
-
-        if (parserResult != null) {
-            CategoryTrafficSource cTrafficSource = parserResult.getTrafficSource();
-            clickstreamEvent.setTrafficSourceCampaign(cTrafficSource.getTrafficSource().getCampaign());
-            clickstreamEvent.setTrafficSourceContent(cTrafficSource.getTrafficSource().getContent());
-            clickstreamEvent.setTrafficSourceMedium(cTrafficSource.getTrafficSource().getMedium());
-            clickstreamEvent.setTrafficSourceSource(cTrafficSource.getTrafficSource().getSource());
-            clickstreamEvent.setTrafficSourceTerm(cTrafficSource.getTrafficSource().getTerm());
-            clickstreamEvent.setTrafficSourceClid(cTrafficSource.getTrafficSource().getClid());
-            clickstreamEvent.setTrafficSourceClidPlatform(cTrafficSource.getTrafficSource().getClidPlatform());
-            clickstreamEvent.setTrafficSourceCampaignId(cTrafficSource.getTrafficSource().getCampaignId());
-            clickstreamEvent.setTrafficSourceChannelGroup(cTrafficSource.getChannelGroup());
-            clickstreamEvent.setTrafficSourceCategory(cTrafficSource.getCategory());
-
-            UriInfo uriInfo = parserResult.getUriInfo();
-            if (uriInfo != null) {
-                clickstreamEvent.setPageViewHostname(uriInfo.getHost());
-                clickstreamEvent.setPageViewPageUrlPath(uriInfo.getPath());
-                clickstreamEvent.setPageViewPageUrlQueryParameters(uriInfo.getParameters());
-            }
-
         }
     }
 
