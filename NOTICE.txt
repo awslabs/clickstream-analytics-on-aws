@@ -31,6 +31,8 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/client-iam under the Apache-2.0
 @aws-sdk/client-kafka under the Apache-2.0
 @aws-sdk/client-kafkaconnect under the Apache-2.0
+@aws-sdk/client-kinesis-analytics-v2 under the Apache-2.0
+@aws-sdk/client-kms under the Apache-2.0
 @aws-sdk/client-lambda under the Apache-2.0
 @aws-sdk/client-quicksight under the Apache-2.0
 @aws-sdk/client-redshift under the Apache-2.0
