@@ -34,10 +34,10 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
+import { SolutionInfo } from '../common/solution-info';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
-import { SolutionInfo } from '../common/solution-info';
 
 export enum SinkTableEnum {
   EVENT='event',
@@ -112,7 +112,7 @@ export class DataPipelineConstruct extends Construct {
       'cd /tmp/data-pipeline/etl-common/',
       `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
     ];
-  
+
     const {
       entryPointJar,
       jars: builtInJars,
