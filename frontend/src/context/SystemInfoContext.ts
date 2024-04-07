@@ -11,13 +11,11 @@
  *  and limitations under the License.
  */
 
-export {};
-declare global {
-  interface SystemInfo {
-    readonly version: string;
-    readonly remoteVersion: string;
-    readonly templateUrl: string;
-    readonly stackId: string;
-    readonly hasUpdate: boolean;
-  }
-}
+import { createContext } from 'react';
+export const SystemInfoContext = createContext<SystemInfo | undefined>({
+  version: '',
+  remoteVersion: '',
+  templateUrl: '',
+  stackId: '',
+  hasUpdate: false,
+});

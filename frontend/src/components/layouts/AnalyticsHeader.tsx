@@ -12,6 +12,7 @@
  */
 
 import {
+  ButtonDropdownProps,
   Flashbar,
   FlashbarProps,
   Select,
@@ -20,9 +21,9 @@ import {
   TopNavigationProps,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
-import { getSystemInfo } from 'apis/system';
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { AppContext } from 'context/AppContext';
+import { SystemInfoContext } from 'context/SystemInfoContext';
 import { UserContext } from 'context/UserContext';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useContext, useEffect, useState } from 'react';
@@ -71,9 +72,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   );
   const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
-  const [systemInfo, setSystemInfo] = useState<SystemInfo>();
   const appConfig = useContext(AppContext);
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
+  const systemInfo = useContext(SystemInfoContext);
 
   const getRedirectUrl = (projectId: string, appId: string) => {
     const navItem = localStorage.getItem(ANALYTICS_NAV_ITEM) ?? 'dashboards';
@@ -187,17 +188,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   };
 
-  const fetchSystemInfo = async () => {
-    try {
-      const { success, data }: ApiResponse<SystemInfo> = await getSystemInfo();
-      if (success) {
-        setSystemInfo(data);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     setDisplayName(
       user?.profile?.email ||
@@ -208,7 +198,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         ''
     );
     listProjects();
-    if (currentUser?.roles && currentUser?.roles.length > 0) fetchSystemInfo();
   }, [user]);
 
   useEffect(() => {
@@ -236,45 +225,49 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   }, []);
 
+  const getNotifyItem = () => {
+    let updateNotifyItem: ButtonDropdownProps.ItemOrGroup = {
+      id: 'no-update',
+      disabled: true,
+      text: defaultStr(t('header.noNotification')),
+    };
+
+    if (systemInfo?.hasUpdate) {
+      if (isAdminRole(currentUser?.roles))
+        updateNotifyItem = {
+          id: 'update-available',
+          href: appConfig?.solution_region
+            ? buildUpdateCloudFormationStackLink(
+                appConfig.solution_region,
+                systemInfo?.stackId,
+                systemInfo?.templateUrl
+              )
+            : '',
+          text: defaultStr(
+            t('header.updateAvailable1', {
+              version: systemInfo?.remoteVersion,
+            })
+          ),
+          external: true,
+          externalIconAriaLabel: '(opens in AWS console)',
+        };
+      else {
+        updateNotifyItem = {
+          id: 'update-available',
+          disabled: true,
+          text: defaultStr(
+            t('header.updateAvailable2', {
+              version: systemInfo?.remoteVersion,
+            })
+          ),
+        };
+      }
+    }
+
+    return updateNotifyItem;
+  };
   const getNavItems = () => {
-    const notifications = systemInfo?.hasUpdate
-      ? [
-          {
-            type: 'menu-dropdown',
-            iconName: 'notification',
-            title: '',
-            ariaLabel: 'Notifications (unread)',
-            badge: true,
-            items: [
-              isAdminRole(currentUser?.roles)
-                ? {
-                    id: 'update-available',
-                    href: appConfig?.solution_region ? buildUpdateCloudFormationStackLink(
-                      appConfig.solution_region,
-                      systemInfo?.stackId,
-                      systemInfo?.templateUrl
-                    ) : '',
-                    text: defaultStr(
-                      t('header.updateAvailable1', {
-                        version: systemInfo?.remoteVersion,
-                      })
-                    ),
-                    external: true,
-                    externalIconAriaLabel: '(opens in AWS console)',
-                  }
-                : {
-                    id: 'update-available',
-                    disable: true,
-                    text: defaultStr(
-                      t('header.updateAvailable2', {
-                        version: systemInfo?.remoteVersion,
-                      })
-                    ),
-                  },
-            ],
-          },
-        ]
-      : [];
+    const updateNotifyItem = getNotifyItem();
 
     return [
       {
@@ -283,7 +276,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         href: getDocumentLink(i18n.language),
         external: true,
       },
-      ...notifications,
       {
         type: 'menu-dropdown',
         text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
@@ -297,6 +289,14 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           i18n.language === DEFAULT_ZH_LANG
             ? [...LANGUAGE_ITEMS].reverse()
             : LANGUAGE_ITEMS,
+      },
+      {
+        type: 'menu-dropdown',
+        iconName: 'notification',
+        title: '',
+        ariaLabel: 'Notifications (unread)',
+        badge: systemInfo?.hasUpdate,
+        items: [updateNotifyItem],
       },
       {
         type: 'menu-dropdown',
