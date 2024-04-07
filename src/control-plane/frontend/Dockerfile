@@ -22,7 +22,7 @@ RUN pnpm projen
 RUN pnpm nx build @aws/clickstream-base-lib
 
 WORKDIR /home/node/app/frontend
-RUN echo "REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION" > .env
+ENV REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION
 RUN pnpm install
 RUN pnpm run crabuild
 
