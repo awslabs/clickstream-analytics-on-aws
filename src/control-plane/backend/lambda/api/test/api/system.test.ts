@@ -16,7 +16,8 @@ import { mockClient } from 'aws-sdk-client-mock';
 import fetch, { Response } from 'node-fetch';
 import request from 'supertest';
 import { dictionaryMock } from './ddb-mock';
-import { SolutionInfo, parseVersion } from '../../common/solution-info-ln';
+import { FULL_SOLUTION_VERSION } from '../../common/constants';
+import { parseVersion } from '../../common/solution-info-ln';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -26,7 +27,7 @@ jest.mock('node-fetch');
 describe('system api test', () => {
 
   const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
-  const version = SolutionInfo.SOLUTION_VERSION;
+  const version = FULL_SOLUTION_VERSION;
 
   beforeEach(() => {
     ddbMock.reset();
@@ -80,14 +81,14 @@ describe('system api test', () => {
     });
   });
 
-  it('fetch info with current version and newer remote version', async () => {
+  it('fetch info with current version and remote version with newer build number', async () => {
 
     doMockFetch({
       Description: '(SO0219) Clickstream Analytics on AWS (Version v1.1.6)(Build 202404071513)- Control Plane',
       Metadata: {},
     });
 
-    expect(SolutionInfo.SOLUTION_VERSION).toEqual(version);
+    expect(FULL_SOLUTION_VERSION).toEqual(version);
 
     const res = await request(app)
       .get('/api/system/info');
@@ -97,6 +98,31 @@ describe('system api test', () => {
       data: {
         version,
         remoteVersion: 'v1.1.6-202404071513',
+        templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
+        hasUpdate: true,
+      },
+      message: '',
+      success: true,
+    });
+  });
+
+  it('fetch info with current version and remote version with newer micro version', async () => {
+
+    doMockFetch({
+      Description: '(SO0219) Clickstream Analytics on AWS (Version v1.1.7)(Build 202404071513)- Control Plane',
+      Metadata: {},
+    });
+
+    expect(FULL_SOLUTION_VERSION).toEqual(version);
+
+    const res = await request(app)
+      .get('/api/system/info');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: {
+        version,
+        remoteVersion: 'v1.1.7-202404071513',
         templateUrl: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/${process.env.TEMPLATE_FILE}`,
         hasUpdate: true,
       },

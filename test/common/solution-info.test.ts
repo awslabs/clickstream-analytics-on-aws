@@ -50,4 +50,14 @@ test ('compare solution version', () => {
     SolutionVersion.Of('v1.10.0-dev-main-202311081606-1111111')
       .greaterThan(SolutionVersion.Of('v1.2.11-dev-main-202311081606-2222222')),
   ).toEqual(true);
+
+  expect(
+    SolutionVersion.Of('v1.1.6-202404071513')
+      .greaterThan(SolutionVersion.Of('v1.1.6-202311200542_dev')),
+  ).toEqual(false);
+
+  expect(
+    SolutionVersion.Of('v1.1.6-202404071513')
+      .fullVersionGreaterThan(SolutionVersion.Of('v1.1.6-202311200542_dev')),
+  ).toEqual(true);
 });

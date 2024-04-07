@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
+import { FULL_SOLUTION_VERSION } from '../common/constants';
 import { fetchRemoteUrl } from '../common/fetch';
 import { logger } from '../common/powertools';
-import { SolutionInfo, SolutionVersion } from '../common/solution-info-ln';
+import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiSuccess } from '../common/types';
 import { getTemplateUrl } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -43,12 +44,12 @@ export class SystemService {
       }
 
       return res.json(new ApiSuccess({
-        version: SolutionInfo.SOLUTION_VERSION,
+        version: FULL_SOLUTION_VERSION,
         templateUrl,
         remoteVersion,
         stackId,
         hasUpdate: remoteVersion == '' ? false :
-          SolutionVersion.Of(remoteVersion).greaterThan(SolutionVersion.Of(SolutionInfo.SOLUTION_VERSION)),
+          SolutionVersion.Of(remoteVersion).fullVersionGreaterThan(SolutionVersion.Of(FULL_SOLUTION_VERSION)),
       }));
     } catch (error) {
       next(error);
