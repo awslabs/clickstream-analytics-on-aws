@@ -47,7 +47,6 @@ const SignedInPage: React.FC = () => {
   };
 
   useEffect(() => {
-    console.info('auth:', auth);
     if (auth.isAuthenticated) {
       getCurrentUser();
     }
