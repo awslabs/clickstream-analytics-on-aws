@@ -257,7 +257,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       deleteDatabase,
       schemaName,
       dashboardDefProps);
-
     logger.info('Deleting schema', {
       schemaName: schemaName,
       dashboardDefProps: dashboardDefProps,
@@ -443,7 +442,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 
     // Delete Dashboard
     const dashboardId = buildDashBoardId(deleteDatabase, schema);
-    const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
+    const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
 
     //delete Analysis
     const analysisId = buildAnalysisId(deleteDatabase, schema);
