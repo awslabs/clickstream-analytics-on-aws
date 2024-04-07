@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.16">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
     
     
       
@@ -2788,140 +2788,6 @@
 </ol>
 <h2 id="_3">数据从哪里来</h2>
 <p>活动报告是基于以下 QuickSight 数据集创建的：</p>
-<ul>
-<li><code>Events_View-&lt;app id&gt;-&lt;project id&gt;</code> 连接到分析引擎（即 Redshift）中的 <code>clickstream_event_view</code> 视图</li>
-<li><code>Events_Parameter_View-&lt;app id&gt;-&lt;project id&gt;</code> 连接到分析引擎中的 <code>clickstream_events_parameter_view</code> 视图</li>
-</ul>
-<p>下面是生成相关视图的 SQL 命令。</p>
-<details class="示例">
-<summary>SQL 命令</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Redshift</label><label for="__tabbed_1_2">Athena</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream_event_view.sql</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">select</span><span class="w"> </span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">event_date</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">,</span><span class="w"> </span><span class="n">event_name</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">,</span><span class="w"> </span><span class="n">event_id</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">,</span><span class="w"> </span><span class="n">event_bundle_sequence_id</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">,</span><span class="w"> </span><span class="n">event_previous_timestamp</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">event_timestamp</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">,</span><span class="w"> </span><span class="n">event_value_in_usd</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_app_id</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_package_id</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_install_source</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_version</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_sdk_name</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">,</span><span class="w"> </span><span class="n">app_info_sdk_version</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">,</span><span class="w"> </span><span class="n">device_id</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">,</span><span class="w"> </span><span class="n">device_mobile_brand_name</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">,</span><span class="w"> </span><span class="n">device_mobile_model_name</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">,</span><span class="w"> </span><span class="n">device_manufacturer</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">,</span><span class="w"> </span><span class="n">device_screen_width</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">,</span><span class="w"> </span><span class="n">device_screen_height</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="p">,</span><span class="w"> </span><span class="n">device_carrier</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="p">,</span><span class="w"> </span><span class="n">device_network_type</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="p">,</span><span class="w"> </span><span class="n">device_operating_system</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="p">,</span><span class="w"> </span><span class="n">device_operating_system_version</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="p">,</span><span class="w"> </span><span class="n">host_name</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_browser</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_browser_version</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_os</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_os_version</span>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_device</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="p">,</span><span class="w"> </span><span class="n">ua_device_category</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">,</span><span class="w"> </span><span class="n">device_system_language</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="p">,</span><span class="w"> </span><span class="n">device_time_zone_offset_seconds</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_continent</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_country</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_city</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_metro</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_region</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_sub_continent</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="p">,</span><span class="w"> </span><span class="n">geo_locale</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="p">,</span><span class="w"> </span><span class="n">platform</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="p">,</span><span class="w"> </span><span class="n">project_id</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="p">,</span><span class="w"> </span><span class="n">traffic_source_name</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="p">,</span><span class="w"> </span><span class="n">traffic_source_medium</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="p">,</span><span class="w"> </span><span class="n">traffic_source_source</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_first_touch_timestamp</span>
-</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">clickstream_event_attr_view_v1</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">event</span>
-</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="k">left</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="err">{{</span><span class="k">schema</span><span class="err">}}</span><span class="p">.</span><span class="n">user_m_view</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-sql highlight"><span class="filename">clickstream-ods-events-query.sql</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">-- run following command to load latest partition</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1">-- msck repair table {{database}}.{{eventTable}};</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">-- msck repair table {{database}}.{{userTable}};</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">select</span><span class="w"> </span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">   </span><span class="n">event_date</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="p">,</span><span class="n">event_name</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="p">,</span><span class="n">event_id</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="p">,</span><span class="n">event_bundle_sequence_id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">event_bundle_sequence_id</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="p">,</span><span class="n">event_previous_timestamp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">event_previous_timestamp</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="p">,</span><span class="n">event_timestamp</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="p">,</span><span class="n">event_value_in_usd</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">  </span><span class="p">,</span><span class="n">app_info</span><span class="p">.</span><span class="n">app_id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">app_info_app_id</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="p">,</span><span class="n">app_info</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">app_info_package_id</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="p">,</span><span class="n">app_info</span><span class="p">.</span><span class="n">install_source</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">app_info_install_source</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="p">,</span><span class="n">app_info</span><span class="p">.</span><span class="k">version</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">app_info_version</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">vendor_id</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_id</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">mobile_brand_name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_mobile_brand_name</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">mobile_model_name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_mobile_model_name</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">manufacturer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_manufacturer</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">screen_width</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_screen_width</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">screen_height</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_screen_height</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">carrier</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_carrier</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">network_type</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_network_type</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">operating_system</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_operating_system</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">operating_system_version</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_operating_system_version</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_browser</span><span class="w"> </span>
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_browser_version</span>
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_os</span>
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_os_version</span>
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_device</span>
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">ua_device_category</span>
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">system_language</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_system_language</span>
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">  </span><span class="p">,</span><span class="n">device</span><span class="p">.</span><span class="n">time_zone_offset_seconds</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">device_time_zone_offset_seconds</span>
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">continent</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_continent</span>
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">country</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_country</span>
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">city</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_city</span>
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">metro</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_metro</span>
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">region</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_region</span>
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">sub_continent</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_sub_continent</span>
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="w">  </span><span class="p">,</span><span class="n">geo</span><span class="p">.</span><span class="n">locale</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">geo_locale</span>
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="w">  </span><span class="p">,</span><span class="n">platform</span>
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="w">  </span><span class="p">,</span><span class="n">project_id</span>
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="w">  </span><span class="p">,</span><span class="n">traffic_source</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">traffic_source_name</span>
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="w">  </span><span class="p">,</span><span class="n">traffic_source</span><span class="p">.</span><span class="n">medium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">traffic_source_medium</span>
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a><span class="w">  </span><span class="p">,</span><span class="n">traffic_source</span><span class="p">.</span><span class="k">source</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">traffic_source_source</span>
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="w">  </span><span class="p">,</span><span class="n">event</span><span class="p">.</span><span class="n">user_id</span>
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a><span class="w">  </span><span class="p">,</span><span class="n">event</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a><span class="w">  </span><span class="p">,</span><span class="n">u</span><span class="p">.</span><span class="n">user_first_touch_timestamp</span>
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">eventTable</span><span class="err">}}</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">event</span>
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a><span class="k">left</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a><span class="w">    </span><span class="k">select</span>
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a><span class="w">      </span><span class="o">*</span>
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a><span class="w">    </span><span class="k">from</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a><span class="w">    </span><span class="k">select</span><span class="w">  </span>
-</span><span id="__span-1-56"><a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a><span class="w">      </span><span class="n">user_pseudo_id</span><span class="p">,</span>
-</span><span id="__span-1-57"><a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a><span class="w">          </span><span class="n">user_first_touch_timestamp</span>
-</span><span id="__span-1-58"><a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a><span class="w">        </span><span class="p">,</span><span class="n">ROW_NUMBER</span><span class="p">()</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="p">(</span><span class="n">partition</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">event_timestamp</span><span class="w"> </span><span class="k">desc</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">et_rank</span>
-</span><span id="__span-1-59"><a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a><span class="w">      </span><span class="k">from</span><span class="w"> </span><span class="err">{{</span><span class="k">database</span><span class="err">}}</span><span class="p">.</span><span class="err">{{</span><span class="n">userTable</span><span class="err">}}</span>
-</span><span id="__span-1-60"><a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a><span class="w">  </span><span class="p">)</span>
-</span><span id="__span-1-61"><a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a><span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">et_rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
-</span><span id="__span-1-62"><a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">user_pseudo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">.</span><span class="n">user_pseudo_id</span>
-</span><span id="__span-1-63"><a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a><span class="k">where</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">partition_app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="w"> </span>
-</span><span id="__span-1-64"><a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">partition_year</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-65"><a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">partition_month</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span><span id="__span-1-66"><a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a><span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="n">partition_day</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="o">?</span>
-</span></code></pre></div>
-</div>
-</div>
-</div>
-</details>
 <h2 id="_4">维度和指标</h2>
 <p>该报告包括以下维度和指标。 您可以通过在 QuickSight 数据集中创建“计算字段”来添加更多维度或指标。 <a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">了解更多</a>。</p>
 <table>
@@ -2935,82 +2801,10 @@
 </thead>
 <tbody>
 <tr>
-<td><code>event_id</code></td>
-<td>维度</td>
-<td>SDK 为用户在使用您的网站和应用程序时触发的事件生成唯一 ID</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>事件名称</code></td>
-<td>维度</td>
-<td>事件名称</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>平台</code></td>
-<td>维度</td>
-<td>会话期间用户使用的平台</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>事件用户类型</code></td>
-<td>维度</td>
-<td>执行事件的用户类型，即新用户或现有用户</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>事件日期</code></td>
-<td>指标</td>
-<td>记录事件的日期（UTC 格式的 YYYYMMDD）。</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>事件时间戳</code></td>
-<td>维度</td>
-<td>客户端记录事件的时间（以微秒为单位，UTC）。</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>app_info_version</code></td>
-<td>维度</td>
-<td>记录事件时应用程序或网站的版本</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>event_parameter_key</code></td>
-<td>维度</td>
-<td>事件参数key</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>event_parameter_key</code></td>
-<td>维度</td>
-<td>事件参数的值</td>
-<td>来自分析引擎的查询</td>
-</tr>
-<tr>
-<td><code>最近7天的用户活跃数</code></td>
-<td>指标</td>
-<td>过去 7 天记录的事件数</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>最近30天内的用户活动数</code></td>
-<td>指标</td>
-<td>过去 30 天记录的事件数</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>视图</code></td>
-<td>指标</td>
-<td><code>_screen_view</code> 或 <code>_page_view</code> 事件的数量</td>
-<td>QuickSight 中的计算字段</td>
-</tr>
-<tr>
-<td><code>屏幕时间</code></td>
-<td>指标</td>
-<td>屏幕或网页上的参与时间（以分钟为单位）</td>
-<td>QuickSight 中的计算字段</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -3073,7 +2867,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.1e8ae164.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
