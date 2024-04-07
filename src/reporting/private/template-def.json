@@ -858,7 +858,7 @@
                 "DataType": "STRING"
                 },
                 {
-                "Name": "view_count",
+                "Name": "user_count",
                 "DataType": "INTEGER"
                 }
             ]
@@ -6496,7 +6496,7 @@
                                                 "FieldId": "LogicalTable1.view_count.1.1711010591368",
                                                 "Column": {
                                                     "DataSetIdentifier": "User_New_Return",
-                                                    "ColumnName": "view_count"
+                                                    "ColumnName": "user_count"
                                                 },
                                                 "AggregationFunction": {
                                                     "SimpleNumericalAggregation": "SUM"
