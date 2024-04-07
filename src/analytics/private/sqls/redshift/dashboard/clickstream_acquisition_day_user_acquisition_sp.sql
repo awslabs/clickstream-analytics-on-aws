@@ -74,7 +74,7 @@ JOIN
 GROUP BY 
     1, 2, 3, 4, 5;
 
--- first_traffic_source/medium
+-- first_traffic_source / medium
 INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
@@ -103,8 +103,8 @@ with tmp2 AS (
 )
 SELECT 
     day::date AS event_date,
-    'Traffic Source/Medium' as aggregation_type,
-    tmp2.first_traffic_source || '-' || tmp2.first_traffic_medium as aggregation_dim,
+    'Traffic Source / Medium' as aggregation_type,
+    tmp2.first_traffic_source || ' / ' || tmp2.first_traffic_medium as aggregation_dim,
     tmp2.platform,
     user_id,
     SUM(tmp1.new_user_indicator) AS new_user_count,
@@ -439,7 +439,7 @@ JOIN
 GROUP BY 
     1, 2, 3, 4, 5;
 
--- session_source/medium,
+-- session_source / medium,
 INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
     aggregation_type,
@@ -469,7 +469,7 @@ with tmp2 AS (
 SELECT 
     day::date AS event_date,
     'Session Source / Medium' as aggregation_type,
-    tmp2.session_source || '-' || tmp2.session_medium as aggregation_dim,
+    tmp2.session_source || ' / ' || tmp2.session_medium as aggregation_dim,
     tmp2.platform,
     user_id,
     SUM(tmp1.new_user_indicator) AS new_user_count,

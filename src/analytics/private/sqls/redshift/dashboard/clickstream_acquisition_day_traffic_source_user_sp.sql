@@ -27,7 +27,7 @@ BEGIN
   group by 1,2,3,4,5
   ;
 
-  -- first_traffic_source/medium
+  -- first_traffic_source / medium
   INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date, 
     platform, 
@@ -38,8 +38,8 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Traffic Source/Medium' as aggregation_type,
-    first_traffic_source || '-' || first_traffic_medium as aggregation_dim,
+    'Traffic Source / Medium' as aggregation_type,
+    first_traffic_source || ' / ' || first_traffic_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
   where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
@@ -185,7 +185,7 @@ BEGIN
   group by 1,2,3,4,5
   ;
 
-  -- session_source/medium
+  -- session_source / medium
   INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date, 
     platform, 
@@ -196,8 +196,8 @@ BEGIN
   select 
     day::date as event_date,
     platform,
-    'Session Source/Medium' as aggregation_type,
-    session_source || '-' || session_medium as aggregation_dim,
+    'Session Source / Medium' as aggregation_type,
+    session_source || ' / ' || session_medium as aggregation_dim,
     merged_user_id as user_id
   from {{database_name}}.{{schema}}.{{baseView}}
   where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day
