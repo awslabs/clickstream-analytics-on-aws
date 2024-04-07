@@ -24,6 +24,7 @@ import { SolutionNodejsFunction } from '../private/function';
 export interface GetIntervalProps {
   readonly expression: string;
   readonly scanWorkflowMinInterval?: string;
+  readonly mvRefreshInterval?: string;
   readonly evaluationPeriods?: number;
 }
 
@@ -40,6 +41,10 @@ export class GetInterval extends Construct {
 
   public getScanWorkflowMinIntervalSeconds(): string {
     return this.intervalCustomResource.getAttString('scanWorkflowMinIntervalSeconds');
+  }
+
+  public getMvRefreshIntervalSeconds(): string {
+    return this.intervalCustomResource.getAttString('mvRefreshIntervalSeconds');
   }
 }
 
@@ -62,6 +67,7 @@ function createGetIntervalCustomResource(
     properties: {
       expression: props.expression,
       scanWorkflowMinInterval: props.scanWorkflowMinInterval,
+      mvRefreshInterval: props.mvRefreshInterval,
       evaluationPeriods: props.evaluationPeriods || '1',
       version: new Date().getTime(),
     },

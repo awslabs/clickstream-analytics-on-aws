@@ -35,6 +35,7 @@ const commonDeps = [
   'node-fetch@^2.6.4',
   'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
+  'moment-timezone@^0.5.45',
   'jsonpath-plus@^7.2.0',
   'hpagent@^1.2.0',
 ];

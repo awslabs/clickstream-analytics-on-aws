@@ -331,6 +331,11 @@
       "type": "runtime"
     },
     {
+      "name": "moment-timezone",
+      "version": "^0.5.45",
+      "type": "runtime"
+    },
+    {
       "name": "mustache",
       "version": "^4.2.0",
       "type": "runtime"

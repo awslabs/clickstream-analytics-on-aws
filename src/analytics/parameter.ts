@@ -43,6 +43,8 @@ export interface RedshiftAnalyticsStackProps {
   projectId: string;
   appIds: string;
   dataProcessingCronOrRateExpression: string;
+  dataFreshnessInHour: number;
+  timeZoneWithAppId: string;
   dataSourceConfiguration: {
     bucket: IBucket;
     prefix: string;
@@ -615,6 +617,18 @@ export function createStackParameters(scope: Construct): {
     default: 365,
   });
 
+  const dataFreshnessInHourParam = new CfnParameter(scope, 'DataFreshnessInHour', {
+    description: 'Data Freshness in hour, default is 72 hours (3 days)',
+    default: 72,
+    type: 'Number',
+  });
+
+  const timeZoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
+    description: 'The time zone with app id',
+    type: 'String',
+    default: '',
+  });
+
   const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {
     description: 'The schedule expression of data processing.',
     type: 'String',
@@ -761,6 +775,8 @@ export function createStackParameters(scope: Construct): {
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsNumber,
+      timeZoneWithAppId: timeZoneWithAppIdParam.valueAsString,
       dataSourceConfiguration: {
         bucket: Bucket.fromBucketName(
           scope,

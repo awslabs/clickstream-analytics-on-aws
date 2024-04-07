@@ -27,6 +27,8 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
   loadDataWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   scanWorkflowMinInterval: string;
+  mvRefreshInterval: string;
+  refreshMaterializedViewsWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
   sqlExecutionWorkflow: IStateMachine;
 }) {

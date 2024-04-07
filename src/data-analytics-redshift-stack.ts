@@ -212,6 +212,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timeZoneWithAppId: props.timeZoneWithAppId,
     },
   );
   (newRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isNewRedshiftServerless;
@@ -229,6 +231,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timeZoneWithAppId: props.timeZoneWithAppId,
     },
   );
   (redshiftExistingServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
@@ -244,6 +248,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timeZoneWithAppId: props.timeZoneWithAppId,
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;

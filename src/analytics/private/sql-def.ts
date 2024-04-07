@@ -203,6 +203,9 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'clickstream-log.sql',
   },
   {
+    sqlFile: 'refresh-mv-sp-status.sql',
+  },
+  {
     sqlFile: 'event.sql',
   },
   {

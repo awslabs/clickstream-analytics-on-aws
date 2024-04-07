@@ -21,6 +21,12 @@ export function loadSQLFromFS(defs: SQLDef[], rootPath: string, prefix: string =
   }, {} as { [key: string]: string });
 }
 
+export function loadFileFromFS(fileName: string, rootPath: string) {
+  const acc: { [key: string]: string } = {};
+  acc[`/opt/${fileName}`] = testSqlContent(rootPath + fileName);
+  return acc;
+}
+
 const testSqlContent = (filePath: string) => {
   const sqlTemplate = readFileSync(filePath, 'utf8');
   return sqlTemplate;
