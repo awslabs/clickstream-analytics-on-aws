@@ -37,6 +37,7 @@ import { createSGForEgressToAwsService } from '../common/sg';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
+import { SolutionInfo } from '../common/solution-info';
 
 export enum SinkTableEnum {
   EVENT='event',
@@ -105,6 +106,13 @@ export class DataPipelineConstruct extends Construct {
       'built-in',
     ])]);
 
+    const version = SolutionInfo.SOLUTION_VERSION_SHORT;
+
+    let commonLibCommands = [
+      'cd /tmp/data-pipeline/etl-common/',
+      `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
+    ];
+  
     const {
       entryPointJar,
       jars: builtInJars,
@@ -118,7 +126,7 @@ export class DataPipelineConstruct extends Construct {
         shadowJar: false,
         destinationBucket: this.props.pipelineS3Bucket,
         destinationKeyPrefix: pluginPrefix,
-        useCommonLib: true,
+        commonLibs: commonLibCommands,
       },
     );
 

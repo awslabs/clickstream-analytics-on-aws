@@ -27,7 +27,7 @@ export interface BuildJarProps {
   readonly buildImage?: string;
   readonly additionalBuildArgument?: string;
   readonly remoteFiles?: string[];
-  readonly useCommonLib: boolean;
+  readonly commonLibs?: string[];
 }
 
 export function uploadBuiltInJarsAndRemoteFiles(
@@ -39,20 +39,10 @@ export function uploadBuiltInJarsAndRemoteFiles(
   if (props.shadowJar) {
     jarFile = `${props.jarName}-${version}-all.jar`;
   }
-
-  let commonLibCommands = [
-    'cd /tmp/data-pipeline/etl-common/',
-    `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck ${props.additionalBuildArgument ?? ''}`,
-  ];
-
-  if (!props.useCommonLib) {
-    commonLibCommands = [];
-  }
-
   const shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
-    ...commonLibCommands,
+    ...props.commonLibs ?? [],
     `cd /tmp/${props.buildDirectory}`,
     `gradle clean build -PprojectVersion=${version} -x test -x coverageCheck ${props.additionalBuildArgument ?? ''}`,
     `cp ./build/libs/${jarFile} /asset-output/`,
