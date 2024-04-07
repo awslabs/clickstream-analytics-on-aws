@@ -30,6 +30,7 @@ export interface QuicksightCustomResourceProps {
   readonly templateId: string;
   readonly dataSourceArn: string;
   readonly databaseName: string;
+  readonly timezone: string;
   readonly quickSightProps: QuickSightProps;
   readonly redshiftProps: RedShiftProps;
 };
