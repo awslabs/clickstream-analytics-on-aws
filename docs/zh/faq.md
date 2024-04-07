@@ -17,6 +17,17 @@
 - 不使用 Redshift 进行流式摄取。
 - 预估成本低于预置集群。
 
+### 我已经在 Redshift 上启用了数据建模，那么为什么我在 Redshift 查询编辑器中看不到此解决方案创建的 schema 和表？
+
+该解决方案在您的 Amazon Redshift 集群中创建一个单独的数据库和 schema，用于存储和处理点击流事件。 默认情况下，schema、表和视图仅由创建它们的用户拥有，并且对登录 Redshift [查询编辑器][redshift-query-editor]的其他用户不可见。
+
+您可以使用超级用户或 Redshift `admin` 来查看它们。
+
+- 对于预置集群，您可以使用配置数据管道时指定的管理员或数据库用户。
+- 对于无服务器，schema 和表由解决方案管理的 IAM 角色创建； 该用户没有默认密码。 您可以[编辑无服务器命名空间的密钥][redshift-secrets-manager-integration]。
+
+在查询编辑器中可查看 schema 和表后，您可以向[其他 Redshift 用户授予权限][redshift-grant]。
+
 ### 如何监控数据流管道的运行状况？
 
 可以打开内置的 [可观测性仪表板][monitoring-dashboard] 来查看数据流管道的关键指标。
@@ -90,3 +101,6 @@
 您只需为使用的内容付费，没有最低费用或设置费用。有关详细的成本估算，请参阅 [Cost](./plan-deployment/cost.md) 部分。
 
 [monitoring-dashboard]: ./pipeline-mgmt/pipe-mgmt.md#_2
+[redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
+[redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
+[redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
