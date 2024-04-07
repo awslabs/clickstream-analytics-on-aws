@@ -507,6 +507,9 @@ describe('Test EMR Serverless service available', () => {
             QUICK_SIGHT: quickSightAvailable,
           },
         }}
+        changeEnableStreaming={() => {
+          return;
+        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -620,6 +623,9 @@ describe('Test EMR Serverless service available', () => {
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
           },
+        }}
+        changeEnableStreaming={() => {
+          return;
         }}
         changeEnableDataProcessing={() => {
           return;
@@ -736,6 +742,9 @@ describe('Test Redsfhift Serverless service available', () => {
             MSK: mskAvailable,
             QUICK_SIGHT: quickSightAvailable,
           },
+        }}
+        changeEnableStreaming={() => {
+          return;
         }}
         changeEnableDataProcessing={() => {
           return;
@@ -857,6 +866,9 @@ describe('Test Redsfhift Serverless service available', () => {
           },
         }}
         changeEnableDataProcessing={() => {
+          return;
+        }}
+        changeEnableStreaming={() => {
           return;
         }}
         changeExecutionType={() => {

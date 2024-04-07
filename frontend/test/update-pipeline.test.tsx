@@ -55,6 +55,9 @@ describe('Test update pipeline when not enable data processing or data modeling'
       <DataProcessing
         update={true}
         pipelineInfo={pipelineData}
+        changeEnableStreaming={() => {
+          return;
+        }}
         changeEnableDataProcessing={() => {
           return;
         }}
@@ -186,6 +189,9 @@ describe('Test update pipeline when not enable data processing or data modeling'
       <DataProcessing
         update={true}
         pipelineInfo={pipelineData}
+        changeEnableStreaming={() => {
+          return;
+        }}
         changeEnableDataProcessing={() => {
           return;
         }}
