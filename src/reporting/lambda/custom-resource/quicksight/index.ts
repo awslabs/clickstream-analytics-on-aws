@@ -454,7 +454,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     for ( const dataSet of dataSets) {
       await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
     }
-    return await result;
+    return result;
 
   } catch (err: any) {
     logger.error('Delete QuickSight dashboard failed, skip retry. Manually delete it if necessary.', err);
@@ -595,11 +595,12 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   if (analysisExist) {
     await deleteAnalysisById(quickSight, commonParams.awsAccountId, analysisId.id);
     logger.info(`Analysis ${analysisId.id} delete completed.`);
-
   } else {
-    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, analysisId.id.replace(`/${analysisId.idSuffix}/g`, ''), analysisId.id);
+    const prefix = analysisId.id.replace(analysisId.idSuffix, '');
+    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, prefix, analysisId.id);
     if (foundAnalysisId !== undefined) {
       await deleteAnalysisById(quickSight, commonParams.awsAccountId, foundAnalysisId);
+      logger.info(`Analysis ${analysisId.id} (old version) delete completed.`);
     }
   }
 
