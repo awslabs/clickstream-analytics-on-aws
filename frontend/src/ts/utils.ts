@@ -375,12 +375,14 @@ export const isStreamingVisible = (
   pipelineInfo?: IExtPipeline
 ) => {
   if (update) {
-    return !(pipelineInfo?.templateVersion?.startsWith('v1.0') || 
-    pipelineInfo?.templateVersion?.startsWith('v1.1.1') || 
-    pipelineInfo?.templateVersion?.startsWith('v1.1.2') || 
-    pipelineInfo?.templateVersion?.startsWith('v1.1.3') || 
-    pipelineInfo?.templateVersion?.startsWith('v1.1.4') || 
-    pipelineInfo?.templateVersion?.startsWith('v1.1.5'));
+    return !(
+      pipelineInfo?.templateVersion?.startsWith('v1.0') ||
+      pipelineInfo?.templateVersion?.startsWith('v1.1.1') ||
+      pipelineInfo?.templateVersion?.startsWith('v1.1.2') ||
+      pipelineInfo?.templateVersion?.startsWith('v1.1.3') ||
+      pipelineInfo?.templateVersion?.startsWith('v1.1.4') ||
+      pipelineInfo?.templateVersion?.startsWith('v1.1.5')
+    );
   }
   return true;
 };
