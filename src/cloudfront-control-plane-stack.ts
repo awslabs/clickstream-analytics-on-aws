@@ -230,6 +230,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
         user: 'node',
         autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', SOLUTION_CONFIG_PATH, '/locales/*'],

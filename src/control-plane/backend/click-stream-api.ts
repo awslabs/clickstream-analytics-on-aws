@@ -317,6 +317,9 @@ export class ClickStreamApiConstruct extends Construct {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
         file: './src/control-plane/backend/Dockerfile',
+        buildArgs: {
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
+        },
       }),
       handler: 'run.sh',
       runtime: Runtime.NODEJS_18_X,
