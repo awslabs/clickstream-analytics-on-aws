@@ -222,7 +222,6 @@ export class CloudFrontControlPlaneStack extends Stack {
           'mkdir $APP_PATH',
           'tar --exclude=\'node_modules\' --exclude=\'cdk.out\' --exclude=\'build\' -cf - . | (cd $APP_PATH && tar -xf -)',
           'cd $APP_PATH',
-          'export REACT_APP_SOLUTION_VERSION=$REACT_APP_SOLUTION_VERSION',
           'pnpm install',
           'pnpm projen',
           'pnpm nx run-many --target=build',
