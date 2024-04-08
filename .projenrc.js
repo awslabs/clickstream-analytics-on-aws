@@ -211,7 +211,6 @@ const devDepsForFrontendProject = [
   'html-minifier@^4.0.0',
   'prettier@^2.7.1',
   'typescript@^4.8.4',
-  'env-cmd@^10.1.0',
 ];
 
 const depsForApiProject = [
