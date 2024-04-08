@@ -25,7 +25,7 @@ describe('Lambda - check next refresh task', () => {
       startRefreshViewOrSp: '',
       forceRefresh: '',
     },
-    timeZoneWithAppId: {
+    timezoneWithAppId: {
       appId: 'app1',
       timezone: 'Asia/Shanghai',
     },
@@ -40,7 +40,7 @@ describe('Lambda - check next refresh task', () => {
         startRefreshViewOrSp: '',
         forceRefresh: '',
       },
-      timeZoneWithAppId: {
+      timezoneWithAppId: {
         appId: 'app1',
         timezone: 'Asia/Shanghai',
       },
@@ -54,7 +54,7 @@ describe('Lambda - check next refresh task', () => {
         viewName: 'user_m_max_view',
         nextStep: REFRESH_MV_STEP,
       },
-      timeZoneWithAppId: checkNextRefreshViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
@@ -66,7 +66,7 @@ describe('Lambda - check next refresh task', () => {
         viewName: 'user_m_view_v2',
         nextStep: REFRESH_MV_STEP,
       },
-      timeZoneWithAppId: checkNextRefreshViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
@@ -77,7 +77,7 @@ describe('Lambda - check next refresh task', () => {
       detail: {
         nextStep: END_STEP,
       },
-      timeZoneWithAppId: checkNextRefreshViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
@@ -90,7 +90,7 @@ describe('Lambda - check next refresh task', () => {
         viewName: 'user_m_view_v2',
         nextStep: REFRESH_MV_STEP,
       },
-      timeZoneWithAppId: checkNextRefreshViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
@@ -103,7 +103,7 @@ describe('Lambda - check next refresh task', () => {
         viewName: 'user_m_max_view',
         nextStep: REFRESH_MV_STEP,
       },
-      timeZoneWithAppId: checkNextRefreshViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 

@@ -25,7 +25,7 @@ const refreshSpEvent: RefreshSpEvent = {
   },
   originalInput: {
     appId: 'app1',
-    timeZone: 'Asia/Shanghai',
+    timezone: 'Asia/Shanghai',
   },
 };
 
@@ -54,12 +54,12 @@ describe('Lambda - do refresh in Redshift Serverless', () => {
         queryId: exeuteId,
         refreshDate: refreshSpEvent.detail.refreshDate,
         appId: refreshSpEvent.originalInput.appId,
-        timeZone: refreshSpEvent.originalInput.timeZone,
+        timezone: refreshSpEvent.originalInput.timezone,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
-      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timeZone}');`,
+      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timezone}');`,
     });
   });
 
@@ -102,13 +102,13 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
         queryId: exeuteId,
         refreshDate: refreshSpEvent.detail.refreshDate,
         appId: refreshSpEvent.originalInput.appId,
-        timeZone: refreshSpEvent.originalInput.timeZone,
+        timezone: refreshSpEvent.originalInput.timezone,
       },
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
-      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timeZone}');`,
+      Sql: `CALL ${refreshSpEvent.originalInput.appId}.${refreshSpEvent.detail.spName}('${refreshSpEvent.detail.refreshDate}', '${refreshSpEvent.originalInput.timezone}');`,
     });
   });
 

@@ -17,7 +17,7 @@ import { logger } from '../../../common/powertools';
  * The lambda function to parse timezone with appId list.
   @returns as below:
   {
-  timeZoneWithAppIdList:
+  timezoneWithAppIdList:
     [
         {
           "appId": app1,
@@ -32,10 +32,10 @@ import { logger } from '../../../common/powertools';
  */
 export const handler = async () => {
   try {
-    const timeZoneWithAppIdList = process.env.TIMEZONE_WITH_APPID_LIST!;
-    const parsedArray = JSON.parse(timeZoneWithAppIdList);
+    const timezoneWithAppIdList = process.env.TIMEZONE_WITH_APPID_LIST!;
+    const parsedArray = JSON.parse(timezoneWithAppIdList);
     return {
-      timeZoneWithAppIdList: parsedArray,
+      timezoneWithAppIdList: parsedArray,
     };
   } catch (err) {
     logger.error('Error when refresh mv:', { err });

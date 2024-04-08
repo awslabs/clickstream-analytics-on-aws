@@ -27,7 +27,7 @@ export interface CheckRefreshViewStatusEvent {
     queryId: string;
     viewName: string;
   };
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: string;
     timezone: string;
   };
@@ -45,7 +45,7 @@ export interface CheckRefreshViewStatusEvent {
  */
 export const _handler = async (event: CheckRefreshViewStatusEvent, context: Context) => {
   logger.debug(`context.awsRequestId:${context.awsRequestId}`);
-  const timeZoneWithAppId = event.timeZoneWithAppId;
+  const timezoneWithAppId = event.timezoneWithAppId;
   const queryId = event.detail.queryId;
   const viewName = event.detail.viewName;
   logger.debug(`query_id:${queryId}`);
@@ -58,7 +58,7 @@ export const _handler = async (event: CheckRefreshViewStatusEvent, context: Cont
         status: response.Status,
         completeRefreshView: viewName,
       },
-      timeZoneWithAppId,
+      timezoneWithAppId,
     };
   } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
     logger.error(`Executing ${queryId} , view: ${viewName},  status of statement is ${response.Status}`);
@@ -69,7 +69,7 @@ export const _handler = async (event: CheckRefreshViewStatusEvent, context: Cont
         viewName: viewName,
         message: `Error: ${response.Error} , view: ${viewName}`,
       },
-      timeZoneWithAppId,
+      timezoneWithAppId,
     };
   } else {
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
@@ -79,7 +79,7 @@ export const _handler = async (event: CheckRefreshViewStatusEvent, context: Cont
         viewName: viewName,
         status: response.Status,
       },
-      timeZoneWithAppId,
+      timezoneWithAppId,
     };
   }
 };

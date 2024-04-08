@@ -104,7 +104,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clickstreamMetadataDdbTable: ITable;
   readonly segmentsS3Prefix: string;
   readonly dataFreshnessInHour: number;
-  readonly timeZoneWithAppId: string;
+  readonly timezoneWithAppId: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -331,7 +331,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
       dataFreshnessInHour: props.dataFreshnessInHour,
-      timeZoneWithAppId: props.timeZoneWithAppId,
+      timezoneWithAppId: props.timezoneWithAppId,
     });
 
     this.refreshMaterializedViewsWorkflowArn = refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine.stateMachineArn;
@@ -370,6 +370,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       workflowBucketInfo: props.workflowBucketInfo,
       loadDataConfig: props.loadDataConfig,
       refreshViewStateMachineArn: this.refreshMaterializedViewsWorkflowArn,
+      pipelineEmrStatusS3Prefix: props.scanMetadataWorkflowData.pipelineS3Prefix,
       nextStateStateMachines: [
         {
           name: 'Scan Metadata Async',

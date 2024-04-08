@@ -18,7 +18,7 @@ describe('Lambda - parse timezone with appId list', () => {
   test('Parse timezone with appId list succeed', async () => {
     const resp = await handler();
     expect(resp).toEqual({
-      timeZoneWithAppIdList: [
+      timezoneWithAppIdList: [
         {
           appId: 'app1',
           timezone: 'America/Noronha',

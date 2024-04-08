@@ -22,7 +22,7 @@ export interface CheckNextRefreshSpEvent {
     startRefreshViewOrSp: string;
     refreshDate: string;
     appId: string;
-    timeZone: string;
+    timezone: string;
   };
 }
 
@@ -50,9 +50,9 @@ export const handler = async (event: CheckNextRefreshSpEvent) => {
           nextStep: END_STEP,
           completeRefreshDate: event.originalInput.refreshDate,
         },
-        timeZoneWithAppId: {
+        timezoneWithAppId: {
           appId: event.originalInput.appId,
-          timezone: event.originalInput.timeZone,
+          timezone: event.originalInput.timezone,
         },
       };
     }

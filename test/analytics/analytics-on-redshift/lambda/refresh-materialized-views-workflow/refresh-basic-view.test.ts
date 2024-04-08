@@ -22,7 +22,7 @@ const refreshBasicViewEvent: RefreshBasicViewEvent = {
   detail: {
     viewName: 'view1',
   },
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: 'app1',
     timezone: 'Asia/Shanghai',
   },
@@ -52,11 +52,11 @@ describe('Lambda - do refresh job in Redshift Serverless', () => {
         viewName: refreshBasicViewEvent.detail.viewName,
         queryId: exeuteId,
       },
-      timeZoneWithAppId: refreshBasicViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timeZoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
     });
   });
 
@@ -98,12 +98,12 @@ describe('Lambda - refresh in Redshift Provisioned', () => {
         viewName: refreshBasicViewEvent.detail.viewName,
         queryId: exeuteId,
       },
-      timeZoneWithAppId: refreshBasicViewEvent.timeZoneWithAppId,
+      timezoneWithAppId: refreshBasicViewEvent.timezoneWithAppId,
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
-      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timeZoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
+      Sql: `REFRESH MATERIALIZED VIEW ${refreshBasicViewEvent.timezoneWithAppId.appId}.${refreshBasicViewEvent.detail.viewName};`,
     });
   });
 

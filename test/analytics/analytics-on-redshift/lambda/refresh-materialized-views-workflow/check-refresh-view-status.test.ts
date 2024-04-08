@@ -23,7 +23,7 @@ const checkRefreshViewStatusEvent: CheckRefreshViewStatusEvent = {
     queryId: 'id-1',
     viewName: 'user_m_max_view',
   },
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: 'app1',
     timezone: 'Asia/Shanghai',
   },
@@ -58,7 +58,7 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
         status: StatusString.FINISHED,
         completeRefreshView: checkRefreshViewStatusEvent.detail.viewName,
       },
-      timeZoneWithAppId: checkRefreshViewStatusEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkRefreshViewStatusEvent.timezoneWithAppId,
       waitTimeInfo: {
         loopCount: 1,
         waitTime: 30,
@@ -78,7 +78,7 @@ describe('Lambda - check the refresh status in Redshift Serverless', () => {
       detail: expect.objectContaining({
         status: StatusString.STARTED,
       }),
-      timeZoneWithAppId: checkRefreshViewStatusEvent.timeZoneWithAppId,
+      timezoneWithAppId: checkRefreshViewStatusEvent.timezoneWithAppId,
       waitTimeInfo: {
         loopCount: 1,
         waitTime: 30,

@@ -57,6 +57,8 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
   readonly workflowBucketInfo: WorkflowBucketInfo; // bucket to store workflow logs, temp files
 
+  readonly pipelineEmrStatusS3Prefix: string; // prefix for EMR status files
+
   readonly nextStateStateMachines: { name: string; stateMachine: IStateMachine;
     input?: TaskInput; integrationPattern?: IntegrationPattern; resultPath?: string; }[];
 }
@@ -687,6 +689,18 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const resourceId = 'RefreshViews';
 
     const fnSG = props.securityGroupForLambda;
+
+    const policyStatements = [
+      new PolicyStatement({
+        actions: [
+          'states:StartExecution',
+        ],
+        resources: [
+          props.refreshViewStateMachineArn,
+        ],
+      }),
+    ];
+
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       entry: join(
         this.lambdaRootPath,
@@ -699,7 +713,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         retention: RetentionDays.ONE_WEEK,
       },
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, `${resourceId}Role`, true, []),
+      role: createLambdaRole(this, `${resourceId}Role`, true, policyStatements),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
@@ -709,6 +723,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PIPELINE_S3_BUCKET_NAME: props.workflowBucketInfo.s3Bucket.bucketName,
         PIPELINE_S3_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
         REFRESH_STATE_MACHINE_ARN: props.refreshViewStateMachineArn,
+        PIPELINE_EMR_STATUS_S3_PREFIX: props.pipelineEmrStatusS3Prefix,
         REDSHIFT_ROLE: copyRole.roleArn,
       },
       applicationLogLevel: 'WARN',
@@ -716,6 +731,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     props.workflowBucketInfo.s3Bucket.grantPut(fn, `${props.workflowBucketInfo.prefix}*`);
     props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.workflowBucketInfo.prefix}*`);
+    props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.pipelineEmrStatusS3Prefix}*`);
     return fn;
   }
 }

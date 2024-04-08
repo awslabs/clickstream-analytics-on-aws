@@ -663,7 +663,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       ...nestStackCommonTablesProps,
       mvRefreshInterval: 120,
       dataFreshnessInHour: 72,
-      timeZoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
@@ -714,7 +714,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       ...nestStackCommonTablesProps,
       mvRefreshInterval: 120,
       dataFreshnessInHour: 72,
-      timeZoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
         subnetIds: 'subnet-1,subnet-2',
@@ -767,7 +767,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       appIds: 'app1',
       ...nestStackCommonTablesProps,
       dataFreshnessInHour: 72,
-      timeZoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       mvRefreshInterval: 120,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       scanMetadataWorkflowData: {

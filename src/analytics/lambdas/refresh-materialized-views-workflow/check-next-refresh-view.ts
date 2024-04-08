@@ -23,7 +23,7 @@ export interface CheckNextRefreshViewEvent {
   detail: {
     completeRefreshView: string;
   };
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: string;
     timezone: string;
   };
@@ -46,7 +46,7 @@ export interface CheckNextRefreshViewEvent {
 
 export const handler = async (event: CheckNextRefreshViewEvent) => {
   const { mvViews, spViews } = getRefreshList();
-  const timeZoneWithAppId = event.timeZoneWithAppId;
+  const timezoneWithAppId = event.timezoneWithAppId;
   let nextView: RefreshViewOrSp | undefined;
   if (event.detail.completeRefreshView) {
     const index = mvViews.findIndex((viewInfo) => viewInfo.name === event.detail.completeRefreshView);
@@ -57,7 +57,7 @@ export const handler = async (event: CheckNextRefreshViewEvent) => {
         detail: {
           nextStep: END_STEP,
         },
-        timeZoneWithAppId,
+        timezoneWithAppId,
       };
     }
   } else {
@@ -81,7 +81,7 @@ export const handler = async (event: CheckNextRefreshViewEvent) => {
       nextStep: REFRESH_MV_STEP,
       viewName: nextView?.name,
     },
-    timeZoneWithAppId,
+    timezoneWithAppId,
   };
 };
 

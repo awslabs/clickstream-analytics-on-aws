@@ -23,7 +23,7 @@ export interface RefreshBasicViewEvent {
   detail: {
     viewName: string;
   };
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: string;
     timezone: string;
   };
@@ -52,21 +52,21 @@ export const handler = async (event: RefreshBasicViewEvent) => {
 
   const sqlStatements: string[] = [];
   try {
-    const timeZoneWithAppId = event.timeZoneWithAppId;
+    const timezoneWithAppId = event.timezoneWithAppId;
     const viewName = event.detail.viewName;
-    sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timeZoneWithAppId.appId}.${viewName};`);
+    sqlStatements.push(`REFRESH MATERIALIZED VIEW ${timezoneWithAppId.appId}.${viewName};`);
 
     logger.info('sqlStatements', { sqlStatements });
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
-    logger.info(`Refresh mv for app: ${timeZoneWithAppId.appId} finished`);
+    logger.info(`Refresh mv for app: ${timezoneWithAppId.appId} finished`);
     return {
       detail: {
         queryId: queryId,
         viewName: viewName,
       },
-      timeZoneWithAppId,
+      timezoneWithAppId,
     };
   } catch (err) {
     logger.error('Error when refresh mv:', { err });

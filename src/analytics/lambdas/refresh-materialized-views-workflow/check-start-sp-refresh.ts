@@ -31,9 +31,9 @@ export interface CheckStartRefreshSpEvent {
     latestJobTimestamp: string;
     forceRefresh: string;
   };
-  timeZoneWithAppId: {
+  timezoneWithAppId: {
     appId: string;
-    timeZone: string;
+    timezone: string;
   };
 }
 
@@ -45,7 +45,7 @@ export interface CheckStartRefreshSpEvent {
 *  startRefreshViewOrSp: string,
 *  refreshDate: string,
 *  appId: string,
-*  timeZone: string,
+*  timezone: string,
 *  forceRefresh: string,
 *  nextStep: 'REFRESH_SP' | 'END',
 * }
@@ -54,7 +54,7 @@ export interface CheckStartRefreshSpEvent {
 export const handler = async (event: CheckStartRefreshSpEvent) => {
   const spList = getRefreshList().spViews;
 
-  const timeZoneWithAppId = event.timeZoneWithAppId;
+  const timezoneWithAppId = event.timezoneWithAppId;
 
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
@@ -67,7 +67,7 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
 
   const dataFreshnessInHour = process.env.DATA_REFRESHNESS_IN_HOUR!;
 
-  const refreshDateString = getDateStringFromTimestampAndTimezone(event.originalInput.latestJobTimestamp, timeZoneWithAppId.timeZone);
+  const refreshDateString = getDateStringFromTimestampAndTimezone(event.originalInput.latestJobTimestamp, timezoneWithAppId.timezone);
 
   const refreshEarliestDate = getRefreshEarliestDate(dataFreshnessInHour, refreshDateString);
 
@@ -87,8 +87,8 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
           detail: {
             startRefreshViewOrSp: event.originalInput.startRefreshViewOrSp,
             refreshDate: refreshDateString,
-            appId: timeZoneWithAppId.appId,
-            timeZone: timeZoneWithAppId.timeZone,
+            appId: timezoneWithAppId.appId,
+            timezone: timezoneWithAppId.timezone,
             forceRefresh: event.originalInput.forceRefresh,
             nextStep: REFRESH_SP_STEP,
           },
@@ -113,8 +113,8 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
         return {
           detail: {
             refreshDate: date.toISOString().split('T')[0],
-            appId: timeZoneWithAppId.appId,
-            timeZone: timeZoneWithAppId.timeZone,
+            appId: timezoneWithAppId.appId,
+            timezone: timezoneWithAppId.timezone,
             nextStep: REFRESH_SP_STEP,
           },
         };
@@ -129,7 +129,7 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
       // first time to refresh sp
       // check max refresh date
       const propertyListSqlStatements: string[] = [];
-      propertyListSqlStatements.push(`SELECT MAX(refresh_date) FROM ${timeZoneWithAppId.appId}.refresh_mv_sp_status where triggerred_by = 'WORK_FLOW';`);
+      propertyListSqlStatements.push(`SELECT MAX(refresh_date) FROM ${timezoneWithAppId.appId}.refresh_mv_sp_status where triggerred_by = 'WORK_FLOW';`);
       const propertyListQueryId = await executeStatementsWithWait(
         redshiftDataApiClient, propertyListSqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
       const response = await getStatementResult(redshiftDataApiClient, propertyListQueryId!);
@@ -141,8 +141,8 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
         return {
           detail: {
             refreshDate: refreshDateString,
-            appId: timeZoneWithAppId.appId,
-            timeZone: timeZoneWithAppId.timeZone,
+            appId: timezoneWithAppId.appId,
+            timezone: timezoneWithAppId.timezone,
             nextStep: REFRESH_SP_STEP,
           },
         };

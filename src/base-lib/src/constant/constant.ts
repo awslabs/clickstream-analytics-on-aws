@@ -408,6 +408,7 @@ export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWork
 export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
 export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 export const REFRESH_SP_STEP = 'REFRESH_SP';
+export const REFRESH_MV_STEP = 'REFRESH_MV';
 export const END_STEP = 'END';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [

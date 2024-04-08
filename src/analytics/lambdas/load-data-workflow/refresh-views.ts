@@ -28,6 +28,7 @@ const sfnClient = new SFNClient({
 
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3BucketPrefix = process.env.PIPELINE_S3_BUCKET_PREFIX!;
+const pipelineEmrStatusS3Prefix = process.env.PIPELINE_EMR_STATUS_S3_PREFIX!;
 const stateMachineArn = process.env.REFRESH_STATE_MACHINE_ARN!;
 const projectId = process.env.PROJECT_ID!;
 
@@ -39,9 +40,9 @@ export const handler = async (_e: any, _c: Context) => {
   if (ENABLE_REFRESH === 'true') {
     const refreshInfo = await getMVRefreshInfoFromS3(pipelineS3BucketPrefix);
 
-    if (refreshInfo === undefined || Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000) {
-
-      const latestJobTimestamp = await getLatestEmrJobEndTime(pipelineS3BucketName, pipelineS3BucketPrefix, projectId);
+    if (refreshInfo === undefined
+      || (refreshInfo !== undefined && Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000)) {
+      const latestJobTimestamp = await getLatestEmrJobEndTime(pipelineS3BucketName, pipelineEmrStatusS3Prefix, projectId);
 
       const input = JSON.stringify({
         latestJobTimestamp: latestJobTimestamp,

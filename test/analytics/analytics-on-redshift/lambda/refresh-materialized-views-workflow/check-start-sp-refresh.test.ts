@@ -30,9 +30,9 @@ describe('Lambda - check next refresh task', () => {
       latestJobTimestamp: '1710026295000',
       forceRefresh: '',
     },
-    timeZoneWithAppId: {
+    timezoneWithAppId: {
       appId: 'app1',
-      timeZone: 'Asia/Shanghai',
+      timezone: 'Asia/Shanghai',
     },
   };
 
@@ -46,9 +46,9 @@ describe('Lambda - check next refresh task', () => {
         latestJobTimestamp: '1710026295000',
         forceRefresh: '',
       },
-      timeZoneWithAppId: {
+      timezoneWithAppId: {
         appId: 'app1',
-        timeZone: 'Asia/Shanghai',
+        timezone: 'Asia/Shanghai',
       },
     };
     redshiftDataMock.reset();
@@ -63,8 +63,8 @@ describe('Lambda - check next refresh task', () => {
         nextStep: REFRESH_SP_STEP,
         startRefreshViewOrSp: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
         refreshDate: '2024-03-10',
-        appId: checkNextRefreshViewEvent.timeZoneWithAppId.appId,
-        timeZone: checkNextRefreshViewEvent.timeZoneWithAppId.timeZone,
+        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
+        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
         forceRefresh: checkNextRefreshViewEvent.originalInput.forceRefresh,
       },
     });
@@ -116,8 +116,8 @@ describe('Lambda - check next refresh task', () => {
       detail: {
         nextStep: REFRESH_SP_STEP,
         refreshDate: '2024-03-10',
-        appId: checkNextRefreshViewEvent.timeZoneWithAppId.appId,
-        timeZone: checkNextRefreshViewEvent.timeZoneWithAppId.timeZone,
+        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
+        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
       },
     });
   });
@@ -152,8 +152,8 @@ describe('Lambda - check next refresh task', () => {
       detail: {
         nextStep: REFRESH_SP_STEP,
         refreshDate: '2024-03-09',
-        appId: checkNextRefreshViewEvent.timeZoneWithAppId.appId,
-        timeZone: checkNextRefreshViewEvent.timeZoneWithAppId.timeZone,
+        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
+        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
       },
     });
   });
@@ -162,6 +162,10 @@ describe('Lambda - check next refresh task', () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
     checkNextRefreshViewEvent.detail.completeRefreshDate = '2024-03-08';
     const resp = await handler(checkNextRefreshViewEvent);
-    await expect(handler(checkNextRefreshViewEvent)).rejects.toThrow('forceRefresh is true, but no completeRefreshView or startRefreshView found');
+    expect(resp).toEqual({
+      detail: {
+        nextStep: END_STEP,
+      },
+    });
   });
 });

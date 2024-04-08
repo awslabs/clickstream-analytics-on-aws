@@ -40,7 +40,7 @@ export interface RefreshMaterializedViewsWorkflowProps {
   readonly databaseName: string;
   readonly dataAPIRole: IRole;
   readonly dataFreshnessInHour: number;
-  readonly timeZoneWithAppId: string;
+  readonly timezoneWithAppId: string;
 }
 
 export class RefreshMaterializedViewsWorkflow extends Construct {
@@ -58,7 +58,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       lambdaFunction: checkRefreshMvStatusFn,
       payload: TaskInput.fromObject({
         'detail.$': '$.detail',
-        'timeZoneWithAppId.$': '$.timeZoneWithAppId',
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
         'waitTimeInfo.$': '$.waitTimeInfo',
       }),
       outputPath: '$.Payload',
@@ -81,7 +81,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       lambdaFunction: refreshBasicViewFn,
       payload: TaskInput.fromObject({
         'detail.$': '$.detail',
-        'timeZoneWithAppId.$': '$.timeZoneWithAppId',
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
       }),
       outputPath: '$.Payload',
     });
@@ -91,7 +91,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       lambdaFunction: checkNextRefreshViewFn,
       payload: TaskInput.fromObject({
         'detail.$': '$.detail',
-        'timeZoneWithAppId.$': '$.timeZoneWithAppId',
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
         'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
@@ -107,7 +107,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       lambdaFunction: checkStartSpRefreshFn,
       payload: TaskInput.fromObject({
         'detail.$': '$.detail',
-        'timeZoneWithAppId.$': '$.timeZoneWithAppId',
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
         'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
@@ -169,10 +169,10 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       `${this.node.id} - Do refresh job`,
       {
         maxConcurrency: 1,
-        itemsPath: '$.timeZoneWithAppIdList',
+        itemsPath: '$.timezoneWithAppIdList',
         inputPath: '$',
         parameters: {
-          'timeZoneWithAppId.$': '$$.Map.Item.Value',
+          'timezoneWithAppId.$': '$$.Map.Item.Value',
           'detail.$': '$',
         },
         resultPath: '$.doRefreshJobResult',
@@ -183,23 +183,23 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     doRefreshJob.next(doRefreshJobSucceed);
 
     const checkJobExist = new Choice(this, `${this.node.id} - Check if job exists`)
-      .when(Condition.isPresent('$.timeZoneWithAppIdList'), doRefreshJob)
+      .when(Condition.isPresent('$.timezoneWithAppIdList'), doRefreshJob)
       .otherwise(doRefreshJobSucceed);
 
     const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props);
-    const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timeZone with appId list from props`, {
+    const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timezone with appId list from props`, {
       lambdaFunction: parseTimeZoneWithAppIdListFn,
       outputPath: '$.Payload',
     }).next(checkJobExist);
 
     const getJobListFromInput = new Pass(this, `${this.node.id} - Get app_id from input`, {
       parameters: {
-        'timeZoneWithAppIdList.$': '$.timeZoneWithAppIdList',
+        'timezoneWithAppIdList.$': '$.timezoneWithAppIdList',
       },
     }).next(checkJobExist);
 
     const getAppIdList = new Choice(this, `${this.node.id} - Check if app_id list exists`)
-      .when(Condition.isPresent('$.timeZoneWithAppIdList'), getJobListFromInput)
+      .when(Condition.isPresent('$.timezoneWithAppIdList'), getJobListFromInput)
       .otherwise(parseTimeZoneWithAppIdListJob);
 
     // Create state machine
@@ -235,7 +235,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
-        TIMEZONE_WITH_APPID_LIST: props.timeZoneWithAppId,
+        TIMEZONE_WITH_APPID_LIST: props.timezoneWithAppId,
       },
       applicationLogLevel: 'WARN',
     });
@@ -521,7 +521,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     const refreshSpWorkflowEnd = new Pass(this, `${this.node.id} - Refresh SP workflow End`, {
       parameters: {
         'detail.$': '$.detail',
-        'timeZoneWithAppId.$': '$.timeZoneWithAppId',
+        'timezoneWithAppId.$': '$.timezoneWithAppId',
       },
     });
 

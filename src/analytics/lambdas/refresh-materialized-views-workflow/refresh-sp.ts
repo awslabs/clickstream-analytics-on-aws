@@ -26,7 +26,7 @@ export interface RefreshSpEvent {
   };
   originalInput: {
     appId: string;
-    timeZone: string;
+    timezone: string;
   };
 }
 
@@ -40,7 +40,7 @@ export interface RefreshSpEvent {
     }
     "originalInput": {
       "appId": app1,
-      "timeZone": "UTC"
+      "timezone": "UTC"
   }
   @returns The query_id and relevant properties.
  */
@@ -58,10 +58,10 @@ export const handler = async (event: RefreshSpEvent) => {
   const sqlStatements: string[] = [];
   try {
     const appId = event.originalInput.appId;
-    const timeZone = event.originalInput.timeZone;
+    const timezone = event.originalInput.timezone;
     const spName = event.detail.spName;
     const refreshDate = event.detail.refreshDate;
-    sqlStatements.push(`CALL ${appId}.${spName}('${refreshDate}', '${timeZone}');`);
+    sqlStatements.push(`CALL ${appId}.${spName}('${refreshDate}', '${timezone}');`);
 
     logger.info('sqlStatements', { sqlStatements });
     const queryId = await executeStatements(
@@ -74,7 +74,7 @@ export const handler = async (event: RefreshSpEvent) => {
         spName: spName,
         refreshDate: refreshDate,
         appId: appId,
-        timeZone: timeZone,
+        timezone: timezone,
       },
     };
   } catch (err) {

@@ -29,7 +29,7 @@ describe('Lambda - check next refresh task', () => {
       startRefreshViewOrSp: '',
       refreshDate: '',
       appId: '',
-      timeZone: '',
+      timezone: '',
     },
   };
 
@@ -42,7 +42,7 @@ describe('Lambda - check next refresh task', () => {
         startRefreshViewOrSp: '',
         refreshDate: '2024-03-10',
         appId: 'app1',
-        timeZone: 'Asia/Shanghai',
+        timezone: 'Asia/Shanghai',
       },
     };
     redshiftDataMock.reset();
@@ -91,7 +91,7 @@ describe('Lambda - check next refresh task', () => {
         nextStep: END_STEP,
         completeRefreshDate: '2024-03-10',
       },
-      timeZoneWithAppId: {
+      timezoneWithAppId: {
         appId: 'app1',
         timezone: 'Asia/Shanghai',
       },
