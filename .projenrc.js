@@ -540,6 +540,7 @@ const apiProject = new typescript.TypeScriptProject({
     'src/aws-exports.js',
     'build/',
     'ncc/',
+    'sqls/',
   ],
   description: 'Backend api service of control plane.',
   version,

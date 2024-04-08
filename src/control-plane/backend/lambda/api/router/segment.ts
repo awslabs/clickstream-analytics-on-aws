@@ -12,10 +12,10 @@
  */
 
 import {
-  ConditionNumericOperator,
-  ConditionOperator,
-  ParameterDataType,
-  ParameterType,
+  ExploreAnalyticsNumericOperators,
+  ExploreAnalyticsOperators,
+  MetadataSource,
+  MetadataValueType,
   SCHEDULE_EXPRESSION_PATTERN,
   SegmentFilterConditionType,
   SegmentFilterEventMetricType,
@@ -212,17 +212,17 @@ function commonValidationsForSegment() {
                   body(path + 'hasDone').isBoolean(),
                   body(path + 'event.eventName').notEmpty(),
                   body(path + 'event.operator').optional().isIn(['and', 'or']),
-                  body(path + 'event.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'event.eventParameterConditions.*.parameterType').isIn(Object.values(MetadataSource)),
                   body(path + 'event.eventParameterConditions.*.parameterName').notEmpty(),
-                  body(path + 'event.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
-                  body(path + 'event.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'event.eventParameterConditions.*.dataType').isIn(Object.values(MetadataValueType)),
+                  body(path + 'event.eventParameterConditions.*.conditionOperator').isIn(Object.values(ExploreAnalyticsOperators)),
                   body(path + 'event.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
                   body(path + 'metricCondition.metricType').isIn(Object.values(SegmentFilterEventMetricType)),
-                  body(path + 'metricCondition.conditionOperator').isIn(Object.values(ConditionNumericOperator)),
+                  body(path + 'metricCondition.conditionOperator').isIn(Object.values(ExploreAnalyticsNumericOperators)),
                   body(path + 'metricCondition.inputValue').custom(validateMetricConditionInputValue),
-                  body(path + 'metricCondition.parameterType').optional().isIn(Object.values(ParameterType)),
+                  body(path + 'metricCondition.parameterType').optional().isIn(Object.values(MetadataSource)),
                   body(path + 'metricCondition.parameterName').optional().isString(),
-                  body(path + 'metricCondition.dataType').optional().isIn(Object.values(ParameterDataType)),
+                  body(path + 'metricCondition.dataType').optional().isIn(Object.values(MetadataValueType)),
                 ];
                 break;
               case SegmentFilterConditionType.EventsInSequenceCondition:
@@ -232,10 +232,10 @@ function commonValidationsForSegment() {
                   body(path + 'events.*.eventName').notEmpty(),
                   body(path + 'events.*.operator').optional().isIn(['and', 'or']),
                   body(path + 'events.*.eventParameterConditions').optional().isArray(),
-                  body(path + 'events.*.eventParameterConditions.*.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'events.*.eventParameterConditions.*.parameterType').isIn(Object.values(MetadataSource)),
                   body(path + 'events.*.eventParameterConditions.*.parameterName').notEmpty(),
-                  body(path + 'events.*.eventParameterConditions.*.dataType').isIn(Object.values(ParameterDataType)),
-                  body(path + 'events.*.eventParameterConditions.*.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'events.*.eventParameterConditions.*.dataType').isIn(Object.values(MetadataValueType)),
+                  body(path + 'events.*.eventParameterConditions.*.conditionOperator').isIn(Object.values(ExploreAnalyticsOperators)),
                   body(path + 'events.*.eventParameterConditions.*.inputValue').custom(validateParameterConditionInputValue),
                   body(path + 'isInOneSession').isBoolean(),
                   body(path + 'isDirectlyFollow').isBoolean(),
@@ -245,10 +245,10 @@ function commonValidationsForSegment() {
                 validations = [
                   body(path + 'hasAttribute').isBoolean(),
                   body(path + 'attributeCondition').isObject(),
-                  body(path + 'attributeCondition.parameterType').isIn(Object.values(ParameterType)),
+                  body(path + 'attributeCondition.parameterType').isIn(Object.values(MetadataSource)),
                   body(path + 'attributeCondition.parameterName').notEmpty(),
-                  body(path + 'attributeCondition.dataType').isIn(Object.values(ParameterDataType)),
-                  body(path + 'attributeCondition.conditionOperator').isIn(Object.values(ConditionOperator)),
+                  body(path + 'attributeCondition.dataType').isIn(Object.values(MetadataValueType)),
+                  body(path + 'attributeCondition.conditionOperator').isIn(Object.values(ExploreAnalyticsOperators)),
                   body(path + 'attributeCondition.inputValue').custom(validateParameterConditionInputValue),
                 ];
                 break;

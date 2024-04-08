@@ -12,6 +12,10 @@
  */
 
 import {
+  ExploreAnalyticsOperators,
+  MetadataValueType,
+} from '@aws/clickstream-base-lib';
+import {
   Autosuggest,
   Button,
   Select,
@@ -22,7 +26,6 @@ import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import {
   CategoryItemType,

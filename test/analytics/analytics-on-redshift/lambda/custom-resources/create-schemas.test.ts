@@ -17,7 +17,7 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -27,7 +27,7 @@ import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceRes
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
-import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
+import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
@@ -134,9 +134,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const biUserSQLCount = 1;
   const appReportingCount = reportingViewsDef.length;
   const appSchemaCount = schemaDefs.length;
+  const spCount = reportingViewsDef.filter(i => i.type === 'sp').length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length; // total: 42
+  const appNewCount = appReportingCount * 2 + appSchemaCount
+  + TABLES_VIEWS_FOR_REPORTING.length //grant sql for bi user to access on base tables and views
+  - spCount // # of Sp. sp does't need to be granted
+  + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length // materialized views need to remove
+  + CLICKSTREAM_DEPRECATED_VIEW_LIST.length // views need to remove
+  + 1 // create schema for app
+  ;
 
   const defs: { [key: string]: string } = {};
 
@@ -149,7 +156,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
       ...loadSQLFromFS(schemaDefs, rootPath),
-      ...loadSQLFromFS(reportingViewsDef.map(i => { return { sqlFile: i.viewName + '.sql' }; }), rootPath, 'dashboard/'),
+      ...loadSQLFromFS(reportingViewsDef.map(i => {
+        if (i.type === 'sp') {
+          return { sqlFile: i.spName + '.sql' };
+        } else {
+          return { sqlFile: i.viewName + '.sql' };
+        }
+      }), rootPath, 'dashboard/'),
       ...defs,
     });
   });

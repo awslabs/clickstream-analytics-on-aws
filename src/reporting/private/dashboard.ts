@@ -30,6 +30,7 @@ export interface QuicksightCustomResourceProps {
   readonly templateId: string;
   readonly dataSourceArn: string;
   readonly databaseName: string;
+  readonly timezone: string;
   readonly quickSightProps: QuickSightProps;
   readonly redshiftProps: RedShiftProps;
 };
@@ -398,6 +399,7 @@ export const findAnalysisWithPrefix = async (quickSight: QuickSight, accountId: 
 
     for (const analysisSummary of analysisSummaries) {
       if (analysisSummary.AnalysisId?.startsWith(prefix) && analysisSummary.AnalysisId !== excludeAnalysisId ) {
+        console.log('found old version analysis:', analysisSummary.AnalysisId);
         return analysisSummary.AnalysisId;
       }
     }

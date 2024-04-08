@@ -42,7 +42,7 @@ import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { IUserRole } from 'ts/const';
+import { IUserRole, LAST_VISIT_URL } from 'ts/const';
 import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
 import Home from './pages/home/Home';
 
@@ -63,10 +63,15 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
   const [unexpectedErrorMessage, setUnexpectedErrorMessage] = useState('');
 
   const gotoBasePage = () => {
-    window.location.href = `${BASE_URL}`;
+    const lastVisitUrl = localStorage.getItem(LAST_VISIT_URL) ?? BASE_URL;
+    localStorage.removeItem(LAST_VISIT_URL);
+    window.location.href = `${lastVisitUrl}`;
   };
   const gotoAnalyticsPage = () => {
-    window.location.href = `${BASE_URL}analytics`;
+    const lastVisitUrl =
+      localStorage.getItem(LAST_VISIT_URL) ?? `${BASE_URL}analytics`;
+    localStorage.removeItem(LAST_VISIT_URL);
+    window.location.href = `${lastVisitUrl}`;
   };
 
   const getUserInfo = async () => {
@@ -122,10 +127,11 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
 
 interface AppRouterProps {
   auth: any;
+  sessionExpired: boolean;
 }
 
 const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
-  const { auth } = props;
+  const { auth, sessionExpired } = props;
   return (
     <Router>
       <Suspense fallback={null}>
@@ -135,6 +141,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -147,6 +154,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/projects"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -159,6 +167,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/alarms"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -170,7 +179,12 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
           <Route
             path="/user"
             element={
-              <RoleRoute layout="common" auth={auth} roles={[IUserRole.ADMIN]}>
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="common"
+                auth={auth}
+                roles={[IUserRole.ADMIN]}
+              >
                 <UserList />
               </RoleRoute>
             }
@@ -180,6 +194,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/detail/:id"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -192,6 +207,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/:pid/pipeline/:id"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -204,6 +220,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/:pid/pipeline/:id/update"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -216,6 +233,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/:projectId/pipelines/create"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -228,6 +246,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/pipelines/create"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -240,6 +259,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/:id/application/create"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -252,6 +272,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/plugins"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -264,6 +285,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/plugins/create"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -276,6 +298,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/project/:pid/application/detail/:id"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="common"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.OPERATOR]}
@@ -288,6 +311,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="none"
                 auth={auth}
                 roles={[
@@ -304,6 +328,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/data-management"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[
@@ -320,6 +345,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/realtime"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[
@@ -336,6 +362,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/explore"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[
@@ -352,6 +379,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/analyzes"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
@@ -364,6 +392,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/analyzes/full"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="none"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
@@ -376,6 +405,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/dashboards"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[
@@ -392,6 +422,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/dashboard/:dashboardId"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[
@@ -408,6 +439,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/dashboard/full/:dashboardId"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="none"
                 auth={auth}
                 roles={[
@@ -424,6 +456,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/segments"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
@@ -436,6 +469,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
             path="/analytics/:projectId/app/:appId/segments/add"
             element={
               <RoleRoute
+                sessionExpired={sessionExpired}
                 layout="analytics"
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}

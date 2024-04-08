@@ -377,7 +377,7 @@ CALL {{schema}}.sp_clickstream_log_non_atomic (
     'backfill is done ---- user_v2'
 );
 
-REFRESH MATERIALIZED VIEW {{schema}}.user_m_max_view_v2;
+REFRESH MATERIALIZED VIEW {{schema}}.user_m_max_view;
 
 REFRESH MATERIALIZED VIEW {{schema}}.user_m_view_v2;
 

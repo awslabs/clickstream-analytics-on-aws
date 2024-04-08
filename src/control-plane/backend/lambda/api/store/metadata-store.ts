@@ -11,24 +11,26 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataValueType } from '../common/explore-types';
+import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
+import { MetadataVersionType } from '../common/model-ln';
 import { IMetadataDisplay, IMetadataDisplayNameAndDescription, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
-  getEventV2: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
+  getEventV2: (projectId: string, appId: string, eventName: string, version: MetadataVersionType) => Promise<IMetadataEvent | undefined>;
   listEvents: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
-  listEventsV2: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
+  listEventsV2: (projectId: string, appId: string, version: MetadataVersionType) => Promise<IMetadataEvent[]>;
 
   getEventParameter: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
   Promise<IMetadataEventParameter | undefined>;
-  getEventParameterV2: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
+  getEventParameterV2: (projectId: string, appId: string, parameterName: string, category: ConditionCategory,
+    valueType: MetadataValueType, version: MetadataVersionType) =>
   Promise<IMetadataEventParameter | undefined>;
   listEventParameters: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
-  listEventParametersV2: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
+  listEventParametersV2: (projectId: string, appId: string, version: MetadataVersionType) => Promise<IMetadataEventParameter[]>;
 
   listUserAttributes: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
-  listUserAttributesV2: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
+  listUserAttributesV2: (projectId: string, appId: string, version: MetadataVersionType) => Promise<IMetadataUserAttribute[]>;
 
   getDisplay: (projectId: string, appId: string) => Promise<IMetadataDisplay[]>;
   updateDisplay: (id: string, projectId: string, appId: string,

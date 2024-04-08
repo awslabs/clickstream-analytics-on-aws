@@ -21,7 +21,7 @@ export enum MetadataPlatform {
   ANDROID = 'Android',
   IOS = 'iOS',
   WEB = 'Web',
-  WECHAT_MINIPROGRAM = 'WechatMP',
+  WECHAT_MINIPROGRAM = 'WeChatMP',
 }
 
 export enum MetadataValueType {
@@ -29,6 +29,8 @@ export enum MetadataValueType {
   INTEGER = 'int',
   DOUBLE = 'double',
   FLOAT = 'float',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
 }
 
 export enum MetadataParameterType {
@@ -37,7 +39,7 @@ export enum MetadataParameterType {
 }
 
 export enum ExploreComputeMethod {
-  USER_ID_CNT = 'USER_ID_CNT', // user_id
+  USER_ID_CNT = 'USER_ID_CNT', // nullif(user_id,user_pseudo_id)
   EVENT_CNT = 'EVENT_CNT',
   SUM_VALUE = 'SUM_VALUE',
   COUNT_PROPERTY = 'COUNT_PROPERTY',
@@ -50,19 +52,6 @@ export enum ExploreAggregationMethod {
   SUM = 'sum',
   AVG = 'avg',
   MEDIAN = 'median',
-}
-
-export enum ExplorePathSessionDef {
-  SESSION = 'SESSION',
-  CUSTOMIZE = 'CUSTOMIZE',
-}
-
-export enum ExplorePathNodeType {
-  EVENT = 'event',
-  PAGE_TITLE = '_page_title',
-  PAGE_URL = '_page_url',
-  SCREEN_NAME = '_screen_name',
-  SCREEN_ID = '_screen_id',
 }
 
 export enum ExploreConversionIntervalType {
@@ -79,12 +68,10 @@ export enum ExploreRelativeTimeUnit {
   DD = 'DD',
   WK = 'WK',
   MM = 'MM',
-  Q = 'Q',
   YY = 'YY',
 }
 
 export enum ExploreGroupColumn {
-  HOUR = 'HOUR',
   DAY = 'DAY',
   WEEK = 'WEEK',
   MONTH = 'MONTH',
@@ -95,30 +82,61 @@ export enum ExploreRequestAction {
   PUBLISH = 'PUBLISH',
 }
 
-export enum ExploreAnalyticsOperators {
-  NULL = 'is_null',
-  NOT_NULL = 'is_not_null',
-  EQUAL = '=',
-  NOT_EQUAL = '<>',
-  GREATER_THAN = '>',
-  GREATER_THAN_OR_EQUAL = '>=',
-  LESS_THAN = '<',
-  LESS_THAN_OR_EQUAL = '<=',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  CONTAINS = 'contains',
-  NOT_CONTAINS = 'not_contains',
+export enum ExplorePathSessionDef {
+  SESSION = 'SESSION',
+  CUSTOMIZE = 'CUSTOMIZE',
+}
+
+export enum ExplorePathNodeType {
+  EVENT = 'event',
+  PAGE_TITLE = 'page_title',
+  PAGE_URL = 'page_url',
+  SCREEN_NAME = 'screen_name',
+  SCREEN_ID = 'screen_id',
+}
+
+export enum ExploreVisualName {
+  CHART = 'CHART',
+  TABLE = 'TABLE',
 }
 
 export enum ConditionCategory {
-  APP_INFO = 'app_info',
-  DEVICE = 'device',
-  EVENT = 'event',
-  GEO = 'geo',
-  OTHER = 'other',
-  TRAFFIC_SOURCE = 'traffic_source',
   USER = 'user',
   USER_OUTER = 'user_outer',
+  EVENT = 'event',
+  EVENT_OUTER = 'event_outer',
+}
+
+export enum ConditionCategoryFrontend {
+  USER = 'user',
+  USER_OUTER = 'user_outer',
+  EVENT = 'event',
+  EVENT_OUTER = 'event_outer',
+  APP_INFO = 'app_info',
+  DEVICE = 'device',
+  TRAFFIC_SOURCE = 'traffic_source',
+  SCREEN_VIEW = 'screen_view',
+  PAGE_VIEW = 'page_view',
+  UPGRADE = 'upgrade',
+  SEARCH = 'search',
+  OUTBOUND = 'outbound',
+  SESSION = 'session',
+  GEO = 'geo',
+  SDK = 'sdk',
+  OTHER = 'other'
+}
+
+export enum ExploreLocales {
+  ZH_CN = 'zh-CN',
+  EN_US = 'en-US'
+}
+
+export enum AnalysisType {
+  FUNNEL = 'FUNNEL',
+  EVENT = 'EVENT',
+  PATH = 'PATH',
+  RETENTION = 'RETENTION',
+  ATTRIBUTION = 'ATTRIBUTION',
 }
 
 export enum QuickSightChartType {
@@ -143,37 +161,30 @@ export enum ExploreAttributionTimeWindowType {
   SESSION = 'SESSION',
 }
 
-export interface IMetadataDisplayNameAndDescription {
-  'zh-CN': string;
-  'en-US': string;
+export enum ExploreAnalyticsOperators {
+  NULL = 'is_null',
+  NOT_NULL = 'is_not_null',
+  EQUAL = '=',
+  NOT_EQUAL = '<>',
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUAL = '>=',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUAL = '<=',
+  IN = 'in',
+  NOT_IN = 'not_in',
+  CONTAINS = 'contains',
+  NOT_CONTAINS = 'not_contains',
+  YES = 'yes',
+  NO = 'no',
+  BETWEEN = 'between',
 }
 
-export interface IMetadataBuiltInList {
-  readonly PresetEvents: Array<{
-    name: string;
-    displayName: IMetadataDisplayNameAndDescription;
-    description: IMetadataDisplayNameAndDescription;
-  }>;
-  readonly PresetEventParameters: Array<{
-    name: string;
-    eventName?: string;
-    category: ConditionCategory;
-    dataType: MetadataValueType;
-    displayName: IMetadataDisplayNameAndDescription;
-    description: IMetadataDisplayNameAndDescription;
-  }>;
-  readonly PublicEventParameters: Array<{
-    name: string;
-    dataType: MetadataValueType;
-    category: ConditionCategory;
-    displayName: IMetadataDisplayNameAndDescription;
-    description: IMetadataDisplayNameAndDescription;
-  }>;
-  readonly PresetUserAttributes: Array<{
-    name: string;
-    dataType: MetadataValueType;
-    category: ConditionCategory;
-    displayName: IMetadataDisplayNameAndDescription;
-    description: IMetadataDisplayNameAndDescription;
-  }>;
+export enum ExploreAnalyticsNumericOperators {
+  EQUAL = '=',
+  NOT_EQUAL = '<>',
+  GREATER_THAN = '>',
+  GREATER_THAN_OR_EQUAL = '>=',
+  LESS_THAN = '<',
+  LESS_THAN_OR_EQUAL = '<=',
+  BETWEEN = 'between',
 }

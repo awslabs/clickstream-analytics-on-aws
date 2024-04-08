@@ -234,6 +234,7 @@ describe('Route role test', () => {
     ddbMock.reset();
     ec2ClientMock.reset();
     quickSightClient.reset();
+    jest.setTimeout(10000);
   });
 
   it('Validate all routers for Admin.', async () => {

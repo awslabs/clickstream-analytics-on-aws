@@ -12,8 +12,15 @@
  */
 
 import {
+  AttributionModelType,
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRequestAction,
+  IMetadataBuiltInList,
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
+  QuickSightChartType,
 } from '@aws/clickstream-base-lib';
 import {
   Button,
@@ -48,15 +55,6 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { PERCENTAGE_REGEX, POSITIVE_INTEGER_REGEX } from 'ts/const';
-import {
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExploreRequestAction,
-  ExploreGroupColumn,
-  QuickSightChartType,
-  AttributionModelType,
-  IMetadataBuiltInList,
-} from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,

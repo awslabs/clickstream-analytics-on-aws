@@ -25,11 +25,13 @@ const RoleRoute = ({
   layout,
   auth,
   children,
+  sessionExpired,
   roles,
 }: {
   auth: AuthContextProps;
   layout: 'common' | 'analytics' | 'none';
   children: ReactElement;
+  sessionExpired: boolean;
   roles: Array<IUserRole>;
 }) => {
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
@@ -42,7 +44,7 @@ const RoleRoute = ({
     return <Loading isPage />;
   }
 
-  if (!userHasRequiredRole) {
+  if (!userHasRequiredRole && !sessionExpired) {
     if (layout === 'analytics') {
       return (
         <AnalyticsLayout auth={auth}>
