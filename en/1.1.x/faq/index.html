@@ -2555,6 +2555,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-do-i-monitor-the-health-of-the-data-pipeline-for-my-project" class="md-nav__link">
     <span class="md-ellipsis">
       How do I monitor the health of the data pipeline for my project?
@@ -2924,6 +2933,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-do-i-monitor-the-health-of-the-data-pipeline-for-my-project" class="md-nav__link">
     <span class="md-ellipsis">
       How do I monitor the health of the data pipeline for my project?
@@ -3067,6 +3085,14 @@
 <li>Redshift is not used for streaming ingestion.</li>
 <li>The estimated cost is lower than the provisioned cluster.</li>
 </ul>
+<h3 id="i-already-enable-data-modeling-on-redshift-so-why-cant-i-see-the-schema-and-tables-created-by-this-solution-in-the-redshift-query-editor">I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?</h3>
+<p>This solution creates a separate database and schema within your Amazon Redshift cluster for storing and processing clickstream events. By default, the schema, tables, and views are only owned by the user who created them and are not visible to other users who log into the Redshift <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html">query editor</a>.</p>
+<p>You could use the <code>superusers</code> or the <code>admin</code> of Redshift to view them.</p>
+<ul>
+<li>For provisioned Redshift, you could use <code>admin</code> or the <strong>Database user</strong> specified when configuring the data pipeline.</li>
+<li>For Redshift serverless, the schema and tables are created by an IAM role managed by the solution; there is no default password for this user. You could <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html">edit admin credentials</a> for the Redshift serverless namespace.</li>
+</ul>
+<p>Once you view the schema and tables in the query editor, you can <a href="https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html">grant permissions</a> to other Redshift users.</p>
 <h3 id="how-do-i-monitor-the-health-of-the-data-pipeline-for-my-project">How do I monitor the health of the data pipeline for my project?</h3>
 <p>You can open the built-in <a href="../pipeline-mgmt/pipe-mgmt/#monitoring-and-alarms">observability dashboard</a> to view the key metrics of your data pipeline.</p>
 <p>The dashboard displays metrics for different components of your data pipeline, including data ingestion, processing, and modeling.</p>
