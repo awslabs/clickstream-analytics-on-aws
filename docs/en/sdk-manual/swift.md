@@ -686,6 +686,9 @@ You can use the above preset item attributes, of course, you can also add custom
 
 [GitHub change log](https://github.com/awslabs/clickstream-swift/releases)
 
+## Sample project
+Sample [iOS Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/ios) for SDK integration.
+
 ## Reference link
 
 [Source code](https://github.com/awslabs/clickstream-swift)

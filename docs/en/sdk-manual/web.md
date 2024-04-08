@@ -508,6 +508,9 @@ You can use the above preset item attributes, of course, you can also add custom
 
 [GitHub Change log](https://github.com/awslabs/clickstream-web/releases)
 
+## Sample project
+Sample [Web Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/web) for SDK integration.
+
 ## Reference link
 
 [Source code](https://github.com/awslabs/clickstream-web)
