@@ -2536,6 +2536,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redshift-redshift-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      我已经在 Redshift 上启用了数据建模，那么为什么我在 Redshift 查询编辑器中看不到此解决方案创建的 schema 和表？
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       如何监控数据流管道的运行状况？
@@ -2905,6 +2914,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redshift-redshift-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      我已经在 Redshift 上启用了数据建模，那么为什么我在 Redshift 查询编辑器中看不到此解决方案创建的 schema 和表？
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       如何监控数据流管道的运行状况？
@@ -3048,6 +3066,14 @@
 <li>不使用 Redshift 进行流式摄取。</li>
 <li>预估成本低于预置集群。</li>
 </ul>
+<h3 id="redshift-redshift-schema">我已经在 Redshift 上启用了数据建模，那么为什么我在 Redshift 查询编辑器中看不到此解决方案创建的 schema 和表？</h3>
+<p>该解决方案在您的 Amazon Redshift 集群中创建一个单独的数据库和 schema，用于存储和处理点击流事件。 默认情况下，schema、表和视图仅由创建它们的用户拥有，并且对登录 Redshift <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html">查询编辑器</a>的其他用户不可见。</p>
+<p>您可以使用超级用户或 Redshift <code>admin</code> 来查看它们。</p>
+<ul>
+<li>对于预置集群，您可以使用配置数据管道时指定的管理员或数据库用户。</li>
+<li>对于无服务器，schema 和表由解决方案管理的 IAM 角色创建； 该用户没有默认密码。 您可以<a href="https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html">编辑无服务器命名空间的密钥</a>。</li>
+</ul>
+<p>在查询编辑器中可查看 schema 和表后，您可以向<a href="https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html">其他 Redshift 用户授予权限</a>。</p>
 <h3 id="_5">如何监控数据流管道的运行状况？</h3>
 <p>可以打开内置的 <a href="../pipeline-mgmt/pipe-mgmt/#_2">可观测性仪表板</a> 来查看数据流管道的关键指标。</p>
 <p>仪表板会显示数据流管道不同组件的指标，包括摄取、处理和建模。</p>
