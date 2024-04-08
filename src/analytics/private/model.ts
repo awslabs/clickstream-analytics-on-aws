@@ -92,6 +92,9 @@ export interface CustomProperties {
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
+  readonly type?: 'mv' | 'sp' | 'table' | 'view';
+  readonly scheduleRefresh?: 'true' | 'false';
+  readonly timezoneSensitive?: 'true' | 'false';
 }
 
 export type SQLDef = SQLBasic & {
@@ -100,6 +103,7 @@ export type SQLDef = SQLBasic & {
 
 export type SQLViewDef = SQLBasic & {
   readonly viewName: string;
+  readonly spName?: string;
 }
 
 export type CreateDatabaseAndSchemas = CustomProperties & {
@@ -210,5 +214,6 @@ export type MustacheParamType = {
   table_clickstream_log: string;
   table_ods_events: string;
   user_bi?: string;
-
+  baseView?: string;
+  timezone?: string;
 }

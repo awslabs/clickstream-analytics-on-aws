@@ -1,10 +1,10 @@
-CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
+CREATE OR REPLACE VIEW {{database_name}}.{{schema}}.{{viewName}}
 AS
 with lag_lead as (
   select user_pseudo_id, time_period_week,
     lag(time_period_week,1) over (partition by user_pseudo_id order by time_period_week),
     lead(time_period_week,1) over (partition by user_pseudo_id order by time_period_week)
-  from {{schema}}.clickstream_lifecycle_view_v1
+  from {{database_name}}.{{schema}}.clickstream_lifecycle_view_v2
 ),
 -- calculate lag and lead size
 lag_lead_with_diffs as (
@@ -22,12 +22,12 @@ calculated as (
     count(user_pseudo_id) as total_users
   from (
     select time_period_week,
-      case when lag is null then '1-NEW'
+      case when lag is null or lag = 0 then '1-NEW'
         when lag_size = 1 then '2-ACTIVE'
         when lag_size > 1 then '3-RETURN'
       end as this_week_value,
-      case when (lead_size > 1 OR lead_size IS NULL) then '0-CHURN'
-        else NULL
+      case when lead_size = 1 then NULL
+        else '0-CHURN'
       end as next_week_churn,
       user_pseudo_id
     from lag_lead_with_diffs

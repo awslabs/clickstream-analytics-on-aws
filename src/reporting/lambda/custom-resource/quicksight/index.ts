@@ -12,13 +12,11 @@
  */
 
 import crypto from 'crypto';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   QuickSight,
   DashboardSourceEntity,
-  AnalysisSourceEntity,
   CreateDataSetCommandOutput,
-  CreateAnalysisCommandOutput,
   CreateDashboardCommandOutput,
   ResourceNotFoundException,
   ColumnGroup,
@@ -51,7 +49,6 @@ import { sleep } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
-  waitForAnalysisChangeCompleted,
   waitForAnalysisDeleteCompleted,
   waitForDashboardChangeCompleted,
   waitForDashboardDeleteCompleted,
@@ -260,7 +257,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       deleteDatabase,
       schemaName,
       dashboardDefProps);
-
     logger.info('Deleting schema', {
       schemaName: schemaName,
       dashboardDefProps: dashboardDefProps,
@@ -339,23 +335,6 @@ const getDataSourcePermission = (sharePrincipalArn: string, ownerPrincipalArn: s
   ];
 };
 
-const getAnalysisPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
-  if (sharePrincipalArn === ownerPrincipalArn) {
-    return [
-      {
-        Principal: sharePrincipalArn,
-        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-      },
-    ];
-  }
-  return [
-    {
-      Principal: ownerPrincipalArn,
-      Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-    },
-  ];
-};
-
 const getDashboardPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
   if (sharePrincipalArn === ownerPrincipalArn) {
     return [
@@ -428,9 +407,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     });
   }
 
-  const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-  logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
-
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
@@ -466,7 +442,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 
     // Delete Dashboard
     const dashboardId = buildDashBoardId(deleteDatabase, schema);
-    const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
+    const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
 
     //delete Analysis
     const analysisId = buildAnalysisId(deleteDatabase, schema);
@@ -478,7 +454,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     for ( const dataSet of dataSets) {
       await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
     }
-    return await result;
+    return result;
 
   } catch (err: any) {
     logger.error('Delete QuickSight dashboard failed, skip retry. Manually delete it if necessary.', err);
@@ -617,15 +593,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
 
   const analysisExist = await existAnalysis(quickSight, commonParams.awsAccountId, analysisId.id);
   if (analysisExist) {
-    const analysis = await updateAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-    logger.info(`Analysis ${analysis?.AnalysisId} update completed.`);
+    await deleteAnalysisById(quickSight, commonParams.awsAccountId, analysisId.id);
+    logger.info(`Analysis ${analysisId.id} delete completed.`);
   } else {
-    const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-    logger.info(`Analysis ${analysis?.AnalysisId} create completed.`);
-
-    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, analysisId.id.replace(`/${analysisId.idSuffix}/g`, ''), analysis?.AnalysisId);
+    const prefix = analysisId.id.replace(analysisId.idSuffix, '');
+    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, prefix, analysisId.id);
     if (foundAnalysisId !== undefined) {
       await deleteAnalysisById(quickSight, commonParams.awsAccountId, foundAnalysisId);
+      logger.info(`Analysis ${analysisId.id} (old version) delete completed.`);
     }
   }
 
@@ -819,33 +794,6 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
   } catch (err: any) {
     logger.error('Create QuickSight dataset failed', err);
-    throw err;
-  }
-};
-
-const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
-: Promise<CreateAnalysisCommandOutput|undefined> => {
-
-  try {
-    const identifier = buildAnalysisId(commonParams.databaseName, commonParams.schema);
-    const analysisId = identifier.id;
-
-    logger.info(`start to create analysis: ${analysisId}`);
-    const analysis = await quickSight.createAnalysis({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
-      Permissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
-      SourceEntity: sourceEntity,
-    });
-    await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-    logger.info('Create analysis finished', { Id: analysisId });
-
-    return analysis;
-
-  } catch (err: any) {
-    logger.error('Create QuickSight analysis failed due to', err);
     throw err;
   }
 };
@@ -1117,40 +1065,6 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
   } catch (err: any) {
     logger.error(`update QuickSight dataset failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
-: Promise<CreateAnalysisCommandOutput|undefined> => {
-
-  try {
-    const identifier = buildAnalysisId(commonParams.databaseName, commonParams.schema);
-    const analysisId = identifier.id;
-
-    logger.info('start to update analysis');
-    const analysis = await quickSight.updateAnalysis({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
-      SourceEntity: sourceEntity,
-    });
-    logger.info(`update analysis finished. Id: ${analysisId}`);
-
-    await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-    await quickSight.updateAnalysisPermissions({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      GrantPermissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
-    });
-
-    logger.info(`grant analysis permissions to new principal ${commonParams.ownerPrincipalArn}`);
-
-    return analysis;
-
-  } catch (err: any) {
-    logger.error(`Update QuickSight analysis failed due to: ${(err as Error).message}`);
     throw err;
   }
 };

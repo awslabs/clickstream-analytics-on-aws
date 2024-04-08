@@ -21,14 +21,16 @@ export function getSqlContent(
     sqlFile: string;
   } | {
     viewName: string;
+    spName?: string;
   },
   mustacheParam: MustacheParamBaseType,
   path: string = '/opt',
 ): string {
-  const sqlTemplate = readFileSync(join(path, ('sqlFile' in sqlDef) ? sqlDef.sqlFile : `${sqlDef.viewName}.sql`), 'utf8');
+  const sqlTemplate = readFileSync(join(path, ('sqlFile' in sqlDef) ? sqlDef.sqlFile : `${sqlDef.spName ? sqlDef.spName : sqlDef.viewName}.sql`), 'utf8');
   return Mustache.render(sqlTemplate, {
     ...mustacheParam,
     viewName: 'viewName' in sqlDef ? sqlDef.viewName : undefined,
+    spName: 'spName' in sqlDef ? sqlDef.spName : undefined,
   });
 };
 

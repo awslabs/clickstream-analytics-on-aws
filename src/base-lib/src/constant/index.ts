@@ -12,3 +12,4 @@
  */
 export * from './constant';
 export * from './explore-types';
+export * from './dashboard';
