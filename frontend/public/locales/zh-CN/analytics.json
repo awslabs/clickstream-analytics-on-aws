@@ -92,7 +92,14 @@
     "inputVisualName": "图表名称",
     "inputVisualNamePlaceholder": "请输入图表名称",
     "inputVisualDescription": "图表描述",
-    "inputVisualDescriptionPlaceholder": "请输入图表描述"
+    "inputVisualDescriptionPlaceholder": "请输入图表描述",
+    "inputDomainPlaceholder": "例如，google.com",
+    "inputSourcePlaceholder": "例如，Google",
+    "inputCategoryPlaceholder": "请选择一个类别",
+    "inputPatternPlaceholder": "例如，q",
+    "inputChannelGroupNamePlaceholder": "例如，Organic Search",
+    "inputChannelGroupDescriptionPlaceholder": "例如，Search engine traffic",
+    "inputChannelGroupConditionPlaceholder": "{}"
   },
   "options": {
     "eventNumber": "总次数",
@@ -192,6 +199,48 @@
         "title": "用户属性详细信息"
       }
     },
+    "trafficSource": {
+      "title": "流量来源",
+      "alert": "对流量源设置的任何更改都只适用于未来的数据，历史数据不会被重新分类。",
+      "channelGroup": {
+        "title": "渠道组",
+        "description": "渠道组是一组渠道，这些渠道是基于规则的流量来源类别。Clickstream解决方案提供了一个默认的渠道组来对流量源进行分类，但您可以灵活地进行自定义。",
+        "columnOrder": "序号",
+        "columnName": "名称",
+        "columnDescription": "描述",
+        "columnCondition": "条件",
+        "columnActions": "操作",
+        "filteringAriaLabel": "查找渠道组",
+        "filteringPlaceholder": "查找渠道组",
+        "loadingText": "正在加载渠道组",
+        "nameDesc": "渠道组的名称。",
+        "descriptionDesc": "对该渠道组的详细描述。"
+      },
+      "sourceCategory": {
+        "title": "来源类别",
+        "description": "点击流解决方案根据此表将流量来源分类为搜索、社交、视频、购物和内部，您可以根据需要添加或修改。",
+        "columnDomain": "域名",
+        "columnName": "名称",
+        "columnCategory": "类别",
+        "columnPattern": "关键字模式",
+        "columnActions": "操作",
+        "filteringAriaLabel": "查找源类别",
+        "filteringPlaceholder": "查找源类别",
+        "loadingText": "正在加载来源类别",
+        "domainDesc": "流量源域的url，这将用于与 latest_referrer_host 进行匹配，以确定类别类型。",
+        "sourceDesc": "流量源的名称，它将用于与 traffic_source_source 字段匹配，以确定类别类型。",
+        "categoryDesc": "流量源的类别。",
+        "patternDesc": "提取关键字的模式，仅适用于SEARCH流量。"
+      },
+      "detailAction": "详细信息",
+      "copyAction": "复制到新的",
+      "reorderAction": "重新排序",
+      "modalType": {
+        "new": "新增",
+        "edit": "编辑",
+        "copy": "复制"
+      }
+    },
     "dictionary": {
       "tableColumnValue": "值",
       "tableColumnDisplayValue": "显示值"
@@ -233,7 +282,12 @@
     "errorProjectOrApp": "不存在的的项目或应用程序: ",
     "notSupportProjectOrApp": "当前项目或应用程序不支持分析工作坊: ",
     "metadataNotAllowEditError": "预置元数据不支持编辑",
-    "inputSpecialCharactersError": "不支持输入特殊字符（! @ # $ % ^ & * + = : ; ? ~ ' \" |）"
+    "inputSpecialCharactersError": "不支持输入特殊字符（! @ # $ % ^ & * + = : ; ? ~ ' \" |）",
+    "inputDomainError": "必须输入域名",
+    "inputSourceError": "必须输入流量源",
+    "inputCategoryError": "必须选择一个类别",
+    "inputChannelGroupNameError": "必须输入渠道组名称",
+    "inputChannelGroupConditionError": "输入必须为JSON格式"
   },
   "operators": {
     "null": "空",

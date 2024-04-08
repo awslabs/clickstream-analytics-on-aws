@@ -92,7 +92,14 @@
     "inputVisualName": "Visualization name",
     "inputVisualNamePlaceholder": "Input visualization name",
     "inputVisualDescription": "Visualization description",
-    "inputVisualDescriptionPlaceholder": "Input visualization description"
+    "inputVisualDescriptionPlaceholder": "Input visualization description",
+    "inputDomainPlaceholder": "E.g., google.com",
+    "inputSourcePlaceholder": "E.g., Google",
+    "inputCategoryPlaceholder": "Choose a category",
+    "inputPatternPlaceholder": "E.g., q",
+    "inputChannelGroupNamePlaceholder": "E.g., Organic Search",
+    "inputChannelGroupDescriptionPlaceholder": "E.g., Search engine traffic",
+    "inputChannelGroupConditionPlaceholder": "{}"
   },
   "options": {
     "eventNumber": "Event number",
@@ -192,6 +199,48 @@
         "title": "User attribute details"
       }
     },
+    "trafficSource": {
+      "title": "Traffic source",
+      "alert": "Any change to traffic source setting will only apply to future data, historical data will not be re-categorized.",
+      "channelGroup": {
+        "title": "Channel group",
+        "description": "A channel group is a set of channels, which are rule-based categories of your traffic sources. Clickstream solution provides a default channel group to classify your traffic source, but you have the flexibility to customize it. Note that update",
+        "columnOrder": "Order",
+        "columnName": "Group name",
+        "columnDescription": "Description",
+        "columnCondition": "Condition",
+        "columnActions": "Actions",
+        "filteringAriaLabel": "Find channel groups",
+        "filteringPlaceholder": "Find channel groups",
+        "loadingText": "Loading channel groups",
+        "nameDesc": "The name of the channel group.",
+        "descriptionDesc": "The description of the channel group."
+      },
+      "sourceCategory": {
+        "title": "Source category",
+        "description": "Clickstream solution categorizes the traffic source into Search, Social, Video, Shopping, and Internal based on this table, you can add or modify for your need.",
+        "columnDomain": "Domain",
+        "columnName": "Source name",
+        "columnCategory": "Category",
+        "columnPattern": "Keyword pattern",
+        "columnActions": "Actions",
+        "filteringAriaLabel": "Find source categories",
+        "filteringPlaceholder": "Find source categories",
+        "loadingText": "Loading source categories",
+        "domainDesc": "The url of the traffic source domain, this will be used to match against the latest_referrer_host to  determine the category type.",
+        "sourceDesc": "The name for the traffic source, this will be used to match against traffic_source_source field to determine the category type.",
+        "categoryDesc": "Category for the source.",
+        "patternDesc": "The pattern to extract the keyword, only apply for SEARCH traffic."
+      },
+      "detailAction": "View details",
+      "copyAction": "Copy to new",
+      "reorderAction": "Reorder",
+      "modalType": {
+        "new": "New",
+        "edit": "Edit",
+        "copy": "Copy"
+      }
+    },
     "dictionary": {
       "tableColumnValue": "Value",
       "tableColumnDisplayValue": "Display value"
@@ -233,7 +282,13 @@
     "errorProjectOrApp": "Non-existent projects or applications: ",
     "notSupportProjectOrApp": "This project or application does not support Analytics Studio: ",
     "metadataNotAllowEditError": "The preset metadata does not support editing.",
-    "inputSpecialCharactersError": "The input cannot contain special characters(! @ # $ % ^ & * + = : ; ? ~ ' \" |)."
+    "inputSpecialCharactersError": "The input cannot contain special characters(! @ # $ % ^ & * + = : ; ? ~ ' \" |).",
+    "inputDomainError": "Please input domain name.",
+    "inputSourceError": "Please input source name.",
+    "inputCategoryError": "Please select a category.",
+    "inputPatternNumError": "The keyword pattern can't be more than ten.",
+    "inputChannelGroupNameError": "Please input channel group name.",
+    "inputChannelGroupConditionError": "Input must be in JSON format."
   },
   "operators": {
     "null": "is null",
