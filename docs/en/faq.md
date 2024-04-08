@@ -19,7 +19,7 @@ If the data pipeline meets the below criteria, Redshift serverless is preferred.
 
 ### I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?
 
-This solution creates a separate database and schema within your Amazon Redshift cluster for storing and processing clickstream events. By default, the schema, tables, and views are only owned by the user who created them and are not visible to users who log into the Redshift [query editor][redshift-query-editor].
+This solution creates a separate database and schema within your Amazon Redshift cluster for storing and processing clickstream events. By default, the schema, tables, and views are only owned by the user who created them and are not visible to other users who log into the Redshift [query editor][redshift-query-editor].
 
 You could use the `superusers` or the `admin` of Redshift to view them.
 
