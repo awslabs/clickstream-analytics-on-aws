@@ -34,9 +34,17 @@ for entry in $(echo "$environments_entries" | jq -c '.[]'); do
     export $key=$value
 done
 
-# Disable the auth middleware and role validation
-export WITH_AUTH_MIDDLEWARE=false
-export WITH_VALIDATE_ROLE=false
+# Get user pool in the control plane stack
+userPoolResource=$(aws cloudformation list-stack-resources --stack-name $CONTROL_PLANE_STACK_NAME --query "StackResourceSummaries[?ResourceType=='AWS::Cognito::UserPool']")
+userPoolPhysicalResourceId=$(echo "$userPoolResource" | jq -r '.[].PhysicalResourceId')
+echo "userPoolPhysicalResourceId: $userPoolPhysicalResourceId"
+
+issuer="https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId"
+echo "issuer: $issuer"
+# set environment for auth middleware and role validation
+export ISSUER=$issuer
+export WITH_AUTH_MIDDLEWARE=true
+export WITH_VALIDATE_ROLE=true
 
 # Run the server
 cd ../backend/lambda/api && pnpm dev
