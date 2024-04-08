@@ -30,11 +30,11 @@ import software.aws.solution.clickstream.util.*;
 import java.util.*;
 
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.*;
 import static software.aws.solution.clickstream.TransformerV3.*;
-import static software.aws.solution.clickstream.util.Utils.*;
 import static software.aws.solution.clickstream.model.ModelV2.*;
 import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter.*;
 

@@ -1,0 +1,62 @@
+{
+  "event_timestamp" : 1693281865000,
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_properties" : {
+    "firstName" : {
+      "set_time_msec" : null,
+      "value" : "firstName 007"
+    },
+    "lastName" : {
+      "set_time_msec" : null,
+      "value" : "lastName 007"
+    },
+    "persona" : {
+      "set_time_msec" : null,
+      "value" : "persona 007"
+    },
+    "gender" : {
+      "set_time_msec" : null,
+      "value" : "F"
+    },
+    "user_id" : {
+      "set_time_msec" : null,
+      "value" : "0eb41e46-2373-4883-8daf-e1975ccb3821"
+    },
+    "f_value" : {
+      "set_time_msec" : null,
+      "value" : 25.1
+    },
+    "email" : {
+      "set_time_msec" : null,
+      "value" : "yxxxxn@example.com"
+    },
+    "age" : {
+      "set_time_msec" : null,
+      "value" : 25
+    },
+    "username" : {
+      "set_time_msec" : null,
+      "value" : "NameL2"
+    },
+    "b_value" : {
+      "set_time_msec" : null,
+      "value" : true
+    }
+  },
+  "first_touch_time_msec" : 1693281865635,
+  "first_visit_date" : 1693281865635,
+  "first_referrer" : null,
+  "first_traffic_source" : "direct",
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : "direct",
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : null,
+  "process_info" : null
+}

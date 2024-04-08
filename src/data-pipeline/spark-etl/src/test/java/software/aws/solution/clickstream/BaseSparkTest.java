@@ -23,7 +23,7 @@ import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
@@ -177,8 +177,8 @@ public class BaseSparkTest extends BaseTest {
                 processInfo.put(INPUT_FILE_NAME, Paths.get(fileFullPath).getFileName().toString());
             }
         }
-        if (node.has(ModelV2.CREATED_TIME)) {
-            ((ObjectNode)node).put(ModelV2.CREATED_TIME, "_CREATED_TIME_");
+        if (node.has(Constant.CREATED_TIME)) {
+            ((ObjectNode)node).put(Constant.CREATED_TIME, "_CREATED_TIME_");
         }
         return node.toPrettyString();
     }

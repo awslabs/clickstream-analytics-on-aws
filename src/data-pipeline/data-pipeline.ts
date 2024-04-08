@@ -34,6 +34,7 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
+import { SolutionInfo } from '../common/solution-info';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
@@ -105,6 +106,13 @@ export class DataPipelineConstruct extends Construct {
       'built-in',
     ])]);
 
+    const version = SolutionInfo.SOLUTION_VERSION_SHORT;
+
+    let commonLibCommands = [
+      'cd /tmp/data-pipeline/etl-common/',
+      `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
+    ];
+
     const {
       entryPointJar,
       jars: builtInJars,
@@ -112,11 +120,13 @@ export class DataPipelineConstruct extends Construct {
     } = uploadBuiltInJarsAndRemoteFiles(
       scope,
       {
-        sourcePath: path.resolve(__dirname, 'spark-etl'),
+        sourcePath: path.resolve(__dirname, '..'), // src/ directory
+        buildDirectory: path.join( 'data-pipeline', 'spark-etl'),
         jarName: 'spark-etl',
         shadowJar: false,
         destinationBucket: this.props.pipelineS3Bucket,
         destinationKeyPrefix: pluginPrefix,
+        commonLibs: commonLibCommands,
       },
     );
 
