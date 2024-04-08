@@ -40,7 +40,7 @@ userPoolPhysicalResourceId=$(echo "$userPoolResource" | jq -r '.[].PhysicalResou
 echo "userPoolPhysicalResourceId: $userPoolPhysicalResourceId"
 
 issuer="https://cognito-idp.$AWS_REGION.amazonaws.com/$userPoolPhysicalResourceId"
-echi "issuer: $issuer"
+echo "issuer: $issuer"
 # set environment for auth middleware and role validation
 export ISSUER=$issuer
 export WITH_AUTH_MIDDLEWARE=true
