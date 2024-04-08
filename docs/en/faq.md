@@ -17,6 +17,17 @@ If the data pipeline meets the below criteria, Redshift serverless is preferred.
 - Redshift is not used for streaming ingestion.
 - The estimated cost is lower than the provisioned cluster.
 
+### I already enable data modeling on Redshift, so why can't I see the schema and tables created by this solution in the Redshift query editor?
+
+This solution creates a separate database and schema within your Amazon Redshift cluster for storing and processing clickstream events. By default, the schema, tables, and views are only owned by the user who created them and are not visible to other users who log into the Redshift [query editor][redshift-query-editor].
+
+You could use the `superusers` or the `admin` of Redshift to view them.
+
+- For provisioned Redshift, you could use `admin` or the **Database user** specified when configuring the data pipeline.
+- For Redshift serverless, the schema and tables are created by an IAM role managed by the solution; there is no default password for this user. You could [edit admin credentials][redshift-secrets-manager-integration] for the Redshift serverless namespace.
+
+Once you view the schema and tables in the query editor, you can [grant permissions][redshift-grant] to other Redshift users.
+
 ### How do I monitor the health of the data pipeline for my project?
 
 You can open the built-in [observability dashboard][monitoring-dashboard] to view the key metrics of your data pipeline.
@@ -89,3 +100,6 @@ The solution is free to use, and you are responsible for the cost of AWS service
 You pay only for what you use, and there are no minimum or setup fees. Refer to the [Cost](./plan-deployment/cost.md) section for detailed cost estimation. 
 
 [monitoring-dashboard]: ./pipeline-mgmt/pipe-mgmt.md#monitoring-and-alarms
+[redshift-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
+[redshift-secrets-manager-integration]: https://docs.aws.amazon.com/redshift/latest/mgmt/redshift-secrets-manager-integration.html
+[redshift-grant]: https://docs.aws.amazon.com/redshift/latest/dg/r_GRANT.html
