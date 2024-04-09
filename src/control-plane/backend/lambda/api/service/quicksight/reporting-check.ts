@@ -85,7 +85,7 @@ export class ReportingCheck {
         this.params.groupCondition.dataType === MetadataValueType.BOOLEAN)) {
       this.status = {
         success: false,
-        message: 'Grouping function is not supported on no-string attribute.',
+        message: 'Grouping function only supports string and boolean data type.',
       };
     }
     return this;
