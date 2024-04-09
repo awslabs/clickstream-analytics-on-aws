@@ -13,6 +13,7 @@
 
 import {
   ConditionCategory,
+  ConditionCategoryFrontend,
   EventsInSequenceCondition,
   EventWithParameter,
   ExploreAggregationMethod,
@@ -565,6 +566,8 @@ export const validateFilterConditions = (conditions: IConditionItemType[]) => {
       [
         ExploreAnalyticsOperators.NULL,
         ExploreAnalyticsOperators.NOT_NULL,
+        ExploreAnalyticsOperators.YES,
+        ExploreAnalyticsOperators.NO,
       ].includes(item.conditionOperator.value as ExploreAnalyticsOperators)
     ) {
       return true;
@@ -635,6 +638,8 @@ export const validConditionItemType = (condition: IConditionItemType) => {
     ![
       ExploreAnalyticsOperators.NULL,
       ExploreAnalyticsOperators.NOT_NULL,
+      ExploreAnalyticsOperators.YES,
+      ExploreAnalyticsOperators.NO,
     ].includes(condition.conditionOperator.value as ExploreAnalyticsOperators);
   return (
     isValidConditionOption &&
@@ -654,10 +659,7 @@ export const getTouchPointsAndConditions = (
       item.conditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.EVENT
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
@@ -694,10 +696,7 @@ export const getGoalAndConditions = (
   goalData.conditionList.forEach((condition) => {
     if (validConditionItemType(condition)) {
       const conditionObj: ICondition = {
-        category: defaultStr(
-          condition.conditionOption?.category,
-          ConditionCategory.EVENT
-        ),
+        category: categoryMapping(condition.conditionOption?.category),
         property: defaultStr(condition.conditionOption?.name),
         operator: defaultStr(condition.conditionOperator?.value),
         value: condition.conditionValue,
@@ -712,10 +711,7 @@ export const getGoalAndConditions = (
   let groupColumn: IColumnAttribute | undefined;
   if (goalData.calculateMethodOption?.name) {
     groupColumn = {
-      category: defaultStr(
-        goalData.calculateMethodOption?.category,
-        ConditionCategory.EVENT
-      ),
+      category: categoryMapping(goalData.calculateMethodOption?.category),
       property: defaultStr(goalData.calculateMethodOption?.name),
       dataType: defaultStr(
         goalData.calculateMethodOption?.valueType,
@@ -773,10 +769,7 @@ const _gatEventExtParameter = (
   ) {
     return {
       targetProperty: {
-        category: defaultStr(
-          computeMethodOption?.category,
-          ConditionCategory.EVENT_OUTER
-        ),
+        category: categoryMapping(computeMethodOption?.category),
         property: defaultStr(computeMethodOption?.value),
         dataType: defaultStr(
           computeMethodOption?.valueType,
@@ -789,6 +782,30 @@ const _gatEventExtParameter = (
   return undefined;
 };
 
+const categoryMapping = (category: ConditionCategoryFrontend | undefined) => {
+  switch (category) {
+    case ConditionCategoryFrontend.USER:
+      return ConditionCategory.USER;
+    case ConditionCategoryFrontend.USER_OUTER:
+      return ConditionCategory.USER_OUTER;
+    case ConditionCategoryFrontend.APP_INFO:
+    case ConditionCategoryFrontend.DEVICE:
+    case ConditionCategoryFrontend.TRAFFIC_SOURCE:
+    case ConditionCategoryFrontend.SCREEN_VIEW:
+    case ConditionCategoryFrontend.PAGE_VIEW:
+    case ConditionCategoryFrontend.UPGRADE:
+    case ConditionCategoryFrontend.SEARCH:
+    case ConditionCategoryFrontend.OUTBOUND:
+    case ConditionCategoryFrontend.SESSION:
+    case ConditionCategoryFrontend.GEO:
+    case ConditionCategoryFrontend.SDK:
+    case ConditionCategoryFrontend.OTHER:
+      return ConditionCategory.EVENT_OUTER;
+    default:
+      return ConditionCategory.EVENT;
+  }
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
@@ -799,10 +816,7 @@ export const getEventAndConditions = (
       item.conditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.EVENT
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
@@ -849,10 +863,7 @@ export const getPairEventAndConditions = (
       item.startConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.EVENT
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
@@ -867,10 +878,7 @@ export const getPairEventAndConditions = (
       item.revisitConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.EVENT
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name, ''),
             operator: defaultStr(condition.conditionOperator?.value, ''),
             value: condition.conditionValue,
@@ -905,9 +913,8 @@ export const getPairEventAndConditions = (
           startEvent: {
             ...pairEventAndCondition.startEvent,
             retentionJoinColumn: {
-              category: defaultStr(
-                item.startEventRelationAttribute?.category,
-                ConditionCategory.EVENT
+              category: categoryMapping(
+                item.startEventRelationAttribute?.category
               ),
               property: defaultStr(item.startEventRelationAttribute?.name, ''),
               dataType: defaultStr(
@@ -924,9 +931,8 @@ export const getPairEventAndConditions = (
           backEvent: {
             ...pairEventAndCondition.backEvent,
             retentionJoinColumn: {
-              category: defaultStr(
-                item.revisitEventRelationAttribute?.category,
-                ConditionCategory.EVENT
+              category: categoryMapping(
+                item.revisitEventRelationAttribute?.category
               ),
               property: defaultStr(
                 item.revisitEventRelationAttribute?.name,
@@ -951,7 +957,7 @@ export const getGroupCondition = (
   groupApplyToFirst: boolean | null
 ) => {
   let groupingCondition: GroupingCondition = {
-    category: defaultStr(option?.category, ConditionCategory.EVENT),
+    category: categoryMapping(option?.category),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
@@ -974,10 +980,7 @@ export const getGlobalEventCondition = (
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
       const conditionObj: ICondition = {
-        category: defaultStr(
-          condition.conditionOption?.category,
-          ConditionCategory.EVENT
-        ),
+        category: categoryMapping(condition.conditionOption?.category),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,

@@ -555,7 +555,7 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
 
-  it('event visual - preview - twice request with group condition', async () => {
+  it('event visual - preview - twice request with string group condition', async () => {
     quickSightMock.on(CreateDataSetCommand).callsFake(input => {
       expect(
         input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
@@ -624,6 +624,103 @@ describe('reporting test', () => {
         category: ConditionCategory.EVENT_OUTER,
         property: 'platform',
         dataType: MetadataValueType.STRING,
+      },
+      dashboardCreateParameters: {
+        region: 'us-east-1',
+        allowedDomain: 'https://example.com',
+        quickSight: {
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+        },
+      },
+    };
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send(requestBody);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+
+    const res2 = await request(app)
+      .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send(requestBody);
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(201);
+    expect(res2.body.success).toEqual(true);
+    expect(quickSightMock).toHaveReceivedNthSpecificCommandWith(2, CreateDataSetCommand, {});
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
+  });
+
+  it('event visual - preview - twice request with boolean group condition', async () => {
+    quickSightMock.on(CreateDataSetCommand).callsFake(input => {
+      expect(
+        input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
+      ).toBeTruthy();
+    });
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
+
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_TOKEN,
+        type: 'REQUESTID',
+      },
+    }, true).resolves({});
+
+    const requestBody = {
+      action: 'PREVIEW',
+      locale: ExploreLocales.ZH_CN,
+      chartType: QuickSightChartType.LINE,
+      viewName: 'testview0002',
+      projectId: 'project01_wvzh',
+      pipelineId: 'pipeline-1111111',
+      appId: 'app1',
+      sheetName: 'sheet99',
+      computeMethod: 'USER_ID_CNT',
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalInSeconds: 7200,
+      eventAndConditions: [{
+        eventName: 'add_button_click',
+      },
+      {
+        eventName: 'note_share',
+      },
+      {
+        eventName: 'note_export',
+      }],
+      timeScopeType: 'RELATIVE',
+      lastN: 4,
+      timeUnit: 'WK',
+      groupColumn: 'week',
+      groupCondition: {
+        category: ConditionCategory.EVENT_OUTER,
+        property: 'screen_view_entrances',
+        dataType: MetadataValueType.BOOLEAN,
       },
       dashboardCreateParameters: {
         region: 'us-east-1',

@@ -80,10 +80,12 @@ export class ReportingCheck {
       };
     }
 
-    if (this.params.groupCondition !== undefined && this.params.groupCondition.dataType !== MetadataValueType.STRING) {
+    if (this.params.groupCondition !== undefined &&
+       !(this.params.groupCondition.dataType === MetadataValueType.STRING ||
+        this.params.groupCondition.dataType === MetadataValueType.BOOLEAN)) {
       this.status = {
         success: false,
-        message: 'Grouping function is not supported on no-string attribute.',
+        message: 'Grouping function only supports string and boolean data type.',
       };
     }
     return this;

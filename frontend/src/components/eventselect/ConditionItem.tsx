@@ -156,6 +156,14 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       value: ExploreAnalyticsOperators.NOT_CONTAINS,
       label: t('analytics:operators.notContains'),
     },
+    true: {
+      value: ExploreAnalyticsOperators.YES,
+      label: t('analytics:operators.true'),
+    },
+    false: {
+      value: ExploreAnalyticsOperators.NO,
+      label: t('analytics:operators.false'),
+    },
   };
 
   const CONDITION_STRING_OPERATORS: SelectProps.Options = [
@@ -180,6 +188,32 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.in,
     ANALYTICS_OPERATORS.not_in,
   ];
+  const CONDITION_BOOLEAN_OPERATORS: SelectProps.Options = [
+    ANALYTICS_OPERATORS.true,
+    ANALYTICS_OPERATORS.false,
+  ];
+
+  const getOperatorOptions = (valueType: MetadataValueType) => {
+    switch (valueType) {
+      case MetadataValueType.STRING:
+        return CONDITION_STRING_OPERATORS;
+      case MetadataValueType.NUMBER:
+        return CONDITION_NUMBER_OPERATORS;
+      case MetadataValueType.BOOLEAN:
+        return CONDITION_BOOLEAN_OPERATORS;
+      default:
+        return [];
+    }
+  };
+
+  const displayInput = (operatorValue: string | undefined) => {
+    return (
+      operatorValue !== ANALYTICS_OPERATORS.is_null.value &&
+      operatorValue !== ANALYTICS_OPERATORS.is_not_null.value &&
+      operatorValue !== ANALYTICS_OPERATORS.true.value &&
+      operatorValue !== ANALYTICS_OPERATORS.false.value
+    );
+  };
 
   const addNewOption = (inputValue: string) => {
     if (
@@ -229,11 +263,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
           onChange={(e) => {
             changeConditionOperator(e.detail.selectedOption);
           }}
-          options={
-            item.conditionOption?.valueType === MetadataValueType.STRING
-              ? CONDITION_STRING_OPERATORS
-              : CONDITION_NUMBER_OPERATORS
-          }
+          options={getOperatorOptions(
+            item.conditionOption?.valueType ?? MetadataValueType.STRING
+          )}
         />
         {!item.conditionOperator && state?.showAttributeOperatorError && (
           <ErrorText
@@ -244,65 +276,63 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         )}
       </div>
       <div className="flex-1">
-        {item.conditionOperator?.value !== ANALYTICS_OPERATORS.is_null.value &&
-          item.conditionOperator?.value !==
-            ANALYTICS_OPERATORS.is_not_null.value && (
-            <div className="condition-value">
-              <Autosuggest
-                onChange={({ detail }) => {
-                  setInputValue(detail.value);
-                }}
-                onSelect={({ detail }) => {
-                  if (values.includes(detail.value)) {
+        {displayInput(item.conditionOperator?.value) && (
+          <div className="condition-value">
+            <Autosuggest
+              onChange={({ detail }) => {
+                setInputValue(detail.value);
+              }}
+              onSelect={({ detail }) => {
+                if (values.includes(detail.value)) {
+                  return;
+                }
+                setConditionValues([...values, detail.value]);
+                setInputValue('');
+              }}
+              onKeyDown={({ detail }) => {
+                if (inputValue && detail.key === 'Enter') {
+                  if (values.includes(inputValue)) {
                     return;
                   }
-                  setConditionValues([...values, detail.value]);
+                  addNewOption(inputValue);
+                  setConditionValues([...values, inputValue]);
                   setInputValue('');
-                }}
-                onKeyDown={({ detail }) => {
-                  if (inputValue && detail.key === 'Enter') {
-                    if (values.includes(inputValue)) {
-                      return;
-                    }
-                    addNewOption(inputValue);
-                    setConditionValues([...values, inputValue]);
-                    setInputValue('');
+                }
+              }}
+              onBlur={() => {
+                if (inputValue) {
+                  if (values.includes(inputValue)) {
+                    return;
                   }
-                }}
-                onBlur={() => {
-                  if (inputValue) {
-                    if (values.includes(inputValue)) {
-                      return;
-                    }
-                    addNewOption(inputValue);
-                    setConditionValues([...values, inputValue]);
-                    setInputValue('');
-                  }
-                }}
-                value={inputValue}
-                options={valueOptions}
-                placeholder={defaultStr(
-                  t('analytics:labels.conditionValuePlaceholder')
-                )}
-              />
-              <TokenGroup
-                onDismiss={({ detail: { itemIndex } }) => {
-                  setConditionValues(
-                    values.filter((item, eIndex) => eIndex !== itemIndex)
-                  );
-                }}
-                items={labelValues.map((value) => ({ label: value }))}
-              />
-              {(!labelValues || labelValues.length <= 0) &&
-                state?.showAttributeValueError && (
-                  <ErrorText
-                    text={`${t('analytics:valid.please')}${t(
-                      'analytics:labels.conditionValuePlaceholder'
-                    )}`}
-                  />
-                )}
-            </div>
-          )}
+                  addNewOption(inputValue);
+                  setConditionValues([...values, inputValue]);
+                  setInputValue('');
+                }
+              }}
+              value={inputValue}
+              options={valueOptions}
+              placeholder={defaultStr(
+                t('analytics:labels.conditionValuePlaceholder')
+              )}
+            />
+            <TokenGroup
+              onDismiss={({ detail: { itemIndex } }) => {
+                setConditionValues(
+                  values.filter((item, eIndex) => eIndex !== itemIndex)
+                );
+              }}
+              items={labelValues.map((value) => ({ label: value }))}
+            />
+            {(!labelValues || labelValues.length <= 0) &&
+              state?.showAttributeValueError && (
+                <ErrorText
+                  text={`${t('analytics:valid.please')}${t(
+                    'analytics:labels.conditionValuePlaceholder'
+                  )}`}
+                />
+              )}
+          </div>
+        )}
       </div>
       {!hideRemove && (
         <div className="remove-item">

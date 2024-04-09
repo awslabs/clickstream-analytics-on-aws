@@ -64,7 +64,7 @@ declare global {
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataEvent[];
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -87,7 +87,7 @@ declare global {
     readonly valueType: MetadataValueType;
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -99,7 +99,7 @@ declare global {
   }
 
   interface IColumnAttribute {
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
     readonly property: string;
     readonly dataType: MetadataValueType;
   }

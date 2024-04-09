@@ -23,6 +23,8 @@
     "sdk": "SDK",
     "search": "搜索",
     "session": "会话",
+    "outbound": "外链",
+    "upgrade": "升级",
     "outer": "解决方案属性"
   },
   "dashboard": {
@@ -245,7 +247,9 @@
     "in": "在其中",
     "notIn": "不在其中",
     "contains": "包含",
-    "notContains": "不包含"
+    "notContains": "不包含",
+    "true": "真",
+    "false": "假"
   },
   "labels": {
     "eventTitle": "事件",
