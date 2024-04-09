@@ -51,6 +51,7 @@ export interface QuicksightCustomResourceLambdaProps {
   readonly awsAccountId: string;
   readonly awsRegion: string;
   readonly awsPartition: string;
+  readonly timezone: string;
   readonly quickSightNamespace: string;
   readonly quickSightUser: string;
   readonly quickSightSharePrincipalArn: string;

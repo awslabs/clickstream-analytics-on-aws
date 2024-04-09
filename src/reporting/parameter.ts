@@ -98,15 +98,14 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'QuickSight Template Arn',
   };
 
-  const quickSightTimezoneParam = new CfnParameter(scope, 'QuickSightTimezoneParam', {
-    description: 'Timezone of the builtin dashboard.',
+  const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
+    description: 'The time zone with app id',
     type: 'String',
-    default: 'UTC',
+    default: '',
   });
-  labels[quickSightTimezoneParam.logicalId] = {
-    default: 'Dashboard Timezone',
+  labels[timezoneWithAppIdParam.logicalId] = {
+    default: 'Dashboard Timezones',
   };
-
 
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
     description: 'Redshift database name.',
@@ -173,7 +172,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightOwnerPrincipalParam.logicalId,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
-      quickSightTimezoneParam.logicalId,
+      timezoneWithAppIdParam.logicalId,
     ],
   });
 
@@ -197,7 +196,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightOwnerPrincipalParam,
     quickSightPrincipalParam,
     quickSightTemplateArnParam,
-    quickSightTimezoneParam,
+    timezoneWithAppIdParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redshiftDefaultDBParam,
