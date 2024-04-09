@@ -510,6 +510,9 @@ Clickstream Web SDK 支持以下数据类型：
 
 参考：[GitHub 更新日志](https://github.com/awslabs/clickstream-web/releases)
 
+## 示例项目
+集成 SDK 的示例 [Web 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/web)
+
 ## 参考链接
 
 [SDK 源码](https://github.com/awslabs/clickstream-web)

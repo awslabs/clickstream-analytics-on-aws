@@ -545,6 +545,9 @@ You can use the above preset item attributes, of course, you can also add custom
 
 [GitHub change log](https://github.com/awslabs/clickstream-android/releases)
 
+## Sample project
+Sample [Android Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/android) for SDK integration.
+
 ## Reference link
 
 [Source code](https://github.com/awslabs/clickstream-android)

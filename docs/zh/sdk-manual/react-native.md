@@ -188,6 +188,11 @@ ClickstreamAnalytics.record({
 });
 ```
 
+#### 记录 React Navigation 的 Screen View 事件
+此 [示例](https://github.com/aws-samples/clickstream-sdk-samples/pull/25/files#diff-96a74db413b2f02988e5537fdbdf4f307334e8f5ef3a9999df7de3c6785af75bR344-R397) 代码演示了 React Navigation 6.x 版本如何全局记录 `_screen_view` 事件。
+
+对于其他版本的 React Navigation，你可以参考官方文档：[Screen tracking for analytics](https://reactnavigation.org/docs/screen-tracking/)
+
 #### 实时发送事件
 
 ```typescript
@@ -312,6 +317,9 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 | React Native SDK 版本 | Android SDK 版本 | Swift SDK 版本 |
 |---------------------|----------------|--------------|
 | 0.1.0               | 0.12.0         | 0.11.0       |
+
+## 示例项目
+集成 SDK 的示例 [React Native 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/react-native)
 
 ## 参考链接
 

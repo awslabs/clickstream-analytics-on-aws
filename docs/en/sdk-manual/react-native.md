@@ -193,6 +193,11 @@ ClickstreamAnalytics.record({
 });
 ```
 
+#### Record Screen Views for React Navigation
+Here's an [example](https://github.com/aws-samples/clickstream-sdk-samples/pull/25/files#diff-96a74db413b2f02988e5537fdbdf4f307334e8f5ef3a9999df7de3c6785af75bR344-R397) of globally logging React Native screen view events when using React Navigation 6.x
+
+For other version of React Navigation, you can refer to official documentation: [Screen tracking for analytics](https://reactnavigation.org/docs/screen-tracking/).
+
 #### Send event immediately
 
 ```typescript
@@ -319,6 +324,9 @@ React Native SDK version dependencies
 | React Native SDK Version | Android SDK Version | Swift SDK Version |
 |--------------------------|---------------------|-------------------|
 | 0.1.0                    | 0.12.0              | 0.11.0            |
+
+## Sample project
+Sample [React Native Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/react-native) for SDK integration.
 
 ## Reference link
 
