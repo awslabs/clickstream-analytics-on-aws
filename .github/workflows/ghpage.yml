@@ -10,7 +10,7 @@ on:
       - src/analytics/private/sqls/**
       - .github/workflows/ghpage.yml
   pull_request:
-  merge_group: { }
+  merge_group: {}
 jobs:
   pages:
     runs-on: ubuntu-latest
