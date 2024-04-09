@@ -12,6 +12,7 @@
  */
 
 import {
+  ConflictException,
   CreateDashboardCommand,
   CreateDataSetCommand,
   CreateFolderCommand,
@@ -71,6 +72,11 @@ describe('QuickSight Lambda function', () => {
   });
   const notExistError = new ResourceNotFoundException({
     message: 'ResourceNotFoundException',
+    $metadata: {},
+  });
+
+  const conflictException = new ConflictException({
+    message: 'ConflictException',
     $metadata: {},
   });
 
@@ -261,6 +267,299 @@ describe('QuickSight Lambda function', () => {
               name: 'endDate',
               timeGranularity: TimeGranularity.DAY,
               defaultValue: futureDate,
+            },
+          ],
+        },
+      ],
+    },
+  };
+
+  const commonPropsWithNewDataSet = {
+    awsAccountId: 'xxxxxxxxxx',
+    awsRegion: 'us-east-1',
+    awsPartition: 'aws',
+    quickSightNamespace: 'default',
+    quickSightUser: 'clickstream',
+    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
+    databaseName: 'test-database',
+    templateArn: 'test-template-arn',
+    vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
+
+    dashboardDefProps: {
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
+      templateArn: 'test-template-arn',
+      databaseName: 'test-database-name',
+      dataSourceArn: 'test-datasource',
+      dataSets: [
+        {
+          name: 'User Dim Data Set',
+          tableName: 'User_Dim_View',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'registration_status',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
+            },
+          ],
+        },
+        {
+          name: 'ODS Flattened Data Set',
+          tableName: 'Session_View',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'session_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'session_duration',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_views',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'engaged_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'bounced_session',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_start_timestamp',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_engagement_time',
+              Type: 'INTEGER',
+            },
+            {
+              Name: 'session_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'session_date_hour',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'entry_view',
+              Type: 'STRING',
+            },
+            {
+              Name: 'exit_view',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc(\'day\', <<$endDate>>))',
+          dateTimeDatasetParameter: [
+            {
+              name: 'startDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: tenYearsAgo,
+            },
+            {
+              name: 'endDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: futureDate,
+            },
+          ],
+        },
+        {
+          name: 'Session Data Set',
+          tableName: 'User_View',
+          importMode: 'DIRECT_QUERY',
+          columns: [
+            {
+              Name: 'user_pseudo_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'user_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_date',
+              Type: 'DATETIME',
+            },
+            {
+              Name: 'first_visit_install_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_device_language',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_platform',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_country',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_visit_city',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_source',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_medium',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_traffic_source_name',
+              Type: 'STRING',
+            },
+            {
+              Name: 'first_referer',
+              Type: 'STRING',
+            },
+            {
+              Name: 'device_id',
+              Type: 'STRING',
+            },
+            {
+              Name: 'registration_status',
+              Type: 'STRING',
+            },
+          ],
+          customSql: 'select * from {{schema}}.clickstream_user_dim_view_v1',
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'registration_status',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
             },
           ],
         },
@@ -1170,6 +1469,20 @@ describe('QuickSight Lambda function', () => {
     ResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
+      schemas: 'test1,zzzz',
+    },
+    OldResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...commonProps,
+      schemas: 'test1',
+    },
+  };
+
+  const multiSchemaUpdateWithCreateEventAndNewDataset = {
+    ...basicCloudFormationUpdateEvent,
+    ResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...commonPropsWithNewDataSet,
       schemas: 'test1,zzzz',
     },
     OldResourceProperties: {
@@ -3451,6 +3764,454 @@ describe('QuickSight Lambda function', () => {
     logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
+  });
+
+  test('Create QuickSight dashboard - delete resources after creation fail', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+    quickSightClientMock.on(CreateDashboardCommand).rejects(conflictException);
+
+    quickSightClientMock.on(DescribeFolderCommand).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteDashboardCommand).rejects(notExistError);
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).rejects(notExistError);
+
+    try {
+      await handler(basicEvent, context) as CdkCustomResourceResponse;
+    } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeFolderCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 1);
+
+      return;
+    }
+
+    fail('should not reach here, expected error to be thrown');
+  });
+
+  test('Update QuickSight dashboard - remove created resources when fail', async () => {
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisCommand).rejects(notExistError);
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).rejectsOnce(notExistError)
+      .rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateDashboardCommand).rejectsOnce(conflictException);
+    quickSightClientMock.on(DeleteDashboardCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
+
+    quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard_0',
+    });
+
+    quickSightClientMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [
+        {
+          AnalysisId: 'clickstream_analysis_test-database-name_test1_ttttt',
+        },
+      ],
+    });
+
+    try {
+      await handler(multiSchemaUpdateWithCreateEvent, context) as CdkCustomResourceResponse;
+    } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetPermissionsCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardPermissionsCommand, 1);
+
+      return;
+    }
+    fail('should not reach here, expected error to be thrown');
+  });
+
+  test('Update QuickSight dashboard - remove created resources when create new dataset fail', async () => {
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).rejectsOnce(conflictException).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_3',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisCommand).rejects(notExistError);
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).rejectsOnce(notExistError)
+      .resolvesOnce({
+        DataSet: {
+          DataSetId: 'dataset_0',
+        },
+      }).resolvesOnce({
+        DataSet: {
+          DataSetId: 'dataset_1',
+        },
+      }).rejectsOnce(notExistError)
+      .rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_1',
+      Status: 200,
+    });
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
+
+    quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard_0',
+    });
+
+    quickSightClientMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [
+        {
+          AnalysisId: 'clickstream_analysis_test-database-name_test1_ttttt',
+        },
+      ],
+    });
+
+    try {
+      await handler(multiSchemaUpdateWithCreateEventAndNewDataset, context) as CdkCustomResourceResponse;
+    } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 0);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetPermissionsCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardPermissionsCommand, 0);
+
+      return;
+    }
+    fail('should not reach here, expected error to be thrown');
+  });
+
+  test('Update QuickSight dashboard - remove created resources when create new dataset fail at second schema', async () => {
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_2',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    }).rejectsOnce(conflictException);
+
+    quickSightClientMock.on(DescribeAnalysisCommand).rejects(notExistError);
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce(
+      {
+        DataSet: {
+          DataSetId: 'dataset_2',
+        },
+      },
+    )
+      .resolvesOnce({
+        DataSet: {
+          DataSetId: 'dataset_0',
+        },
+      }).resolvesOnce({
+        DataSet: {
+          DataSetId: 'dataset_1',
+        },
+      }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_1',
+      Status: 200,
+    });
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+
+    quickSightClientMock.on(CreateFolderCommand).resolvesOnce({
+      FolderId: 'folder_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
+
+    quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard_0',
+    });
+
+    quickSightClientMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [
+        {
+          AnalysisId: 'clickstream_analysis_test-database-name_test1_ttttt',
+        },
+      ],
+    });
+
+    try {
+      await handler(multiSchemaUpdateWithCreateEventAndNewDataset, context) as CdkCustomResourceResponse;
+    } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 5);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 4);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 4);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetPermissionsCommand, 2);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardPermissionsCommand, 1);
+
+      return;
+    }
+    fail('should not reach here, expected error to be thrown');
   });
 
 });
