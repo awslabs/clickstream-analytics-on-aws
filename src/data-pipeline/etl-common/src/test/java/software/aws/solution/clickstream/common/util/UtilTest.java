@@ -14,12 +14,17 @@
 package software.aws.solution.clickstream.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 import software.aws.solution.clickstream.BaseTest;
 import software.aws.solution.clickstream.common.Util;
+import software.aws.solution.clickstream.common.enrich.UrlParseResult;
 import software.aws.solution.clickstream.common.model.ClickstreamUserPropValue;
 
 import java.io.File;
+import java.io.IOException;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -27,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 
@@ -78,7 +84,7 @@ public class UtilTest extends BaseTest {
 
     @Test
     void test_getUriParams_error() throws JsonProcessingException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_getUriParams
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_getUriParams_error
 
         Map<String, List<String>> result = Util.getUriParams("abc");
         assertEquals(0, result.size());
@@ -131,4 +137,37 @@ public class UtilTest extends BaseTest {
                         "\"first\":{\"value\":\"true\",\"type\":\"boolean\",\"setTimemsec\":null}}",
                 objectToJsonString(result));
     }
+
+    @Test
+    void test_readResourceFile() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_readResourceFile
+        String result = Util.readResourceFile("original_data.json");
+        assertNotNull( result);
+    }
+
+    @Test
+    void test_readResourceFile_not_exists() {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_readResourceFile_not_exists
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Util.readResourceFile("_not_exist_file.json");
+        });
+    }
+
+    @Test
+    void test_readTextFile() throws IOException {
+        writeStringToFile("/tmp/_test_readTextFile.txt", "test");
+        String content =  Util.readTextFile("/tmp/_test_readTextFile.txt");
+        assertEquals("test", content);
+    }
+
+    @Test
+    void  test_parseUrl() {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_parseUrl
+        String url = "https://www.example.com/abc/test?param1=value1&param2=value2";
+        UrlParseResult result = Util.parseUrl(url);
+        assertEquals("www.example.com", result.getHostName());
+        assertEquals("param1=value1&param2=value2", result.getQueryString());
+        assertEquals("/abc/test", result.getPath());
+    }
+
 }

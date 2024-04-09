@@ -324,3 +324,14 @@ export class DataPipelineConstruct extends Construct {
     });
   }
 }
+
+
+export function getRuleConfigDir(prefix: string, projectId: string) {
+  let ruleConfigPrefix: string;
+  if (prefix.startsWith(`clickstream/${projectId}/`)) {
+    ruleConfigPrefix = `clickstream/${projectId}/rules/`;
+  } else {
+    ruleConfigPrefix = prefix + "/" + projectId + "/rules/";
+  }
+  return ruleConfigPrefix;
+}

@@ -200,6 +200,7 @@ export class EMRServerlessUtil {
       rePartitions, // [14] rePartitions.
       userKeepDays, // [15] userKeepDays
       itemKeepDays, // [16] itemKeepDays
+      config.ruleConfigDir, // [17] ruleConfigDir
     ];
 
     const jars = Array.from(
@@ -331,6 +332,7 @@ export class EMRServerlessUtil {
       rePartitions: process.env.RE_PARTITIONS ?? '200',
       userKeepDays: process.env.USER_KEEP_DAYS ?? '180',
       itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '360',
+      ruleConfigDir: process.env.RULE_CONFIG_DIR!,
     };
   }
 

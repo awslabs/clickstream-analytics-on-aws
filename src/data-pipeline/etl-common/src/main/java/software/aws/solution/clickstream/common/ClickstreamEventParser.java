@@ -14,8 +14,12 @@
 package software.aws.solution.clickstream.common;
 
 import com.fasterxml.jackson.core.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.*;
 import software.aws.solution.clickstream.common.enrich.*;
+import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
+import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
 import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 
@@ -23,15 +27,14 @@ import java.sql.*;
 import java.time.*;
 import java.util.*;
 
-import static software.aws.solution.clickstream.common.enrich.DefaultTrafficSourceHelper.*;
 import static software.aws.solution.clickstream.common.Util.*;
+import static software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper.GCLID;
 
 
 @Slf4j
 public final class ClickstreamEventParser extends BaseEventParser {
-    private static final ClickstreamEventParser INSTANCE = new ClickstreamEventParser();
+    private static ClickstreamEventParser instance;
     public static final String ENABLE_EVENT_TIME_SHIFT_PROP =  "enable.event.time.shift";
-    public static final String PLATFORM_WEB = "web";
     public static final String EVENT_PROFILE_SET = "_profile_set";
     public static final String EVENT_PAGE_VIEW = "_page_view";
     public static final String EVENT_SCREEN_VIEW = "_screen_view";
@@ -43,13 +46,23 @@ public final class ClickstreamEventParser extends BaseEventParser {
     public static final String EVENT_USER_ENGAGEMENT = "_user_engagement";
     public static final String EVENT_SCROLL = "_scroll";
 
-    private ClickstreamEventParser() {
+    private Map<String, RuleConfig> appRuleConfig;
+
+    private ClickstreamEventParser(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
     }
 
     public static ClickstreamEventParser getInstance() {
-        return INSTANCE;
+        // use default config rule in java resource file
+        return getInstance(null);
     }
 
+    public static ClickstreamEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+        if (instance == null) {
+            instance = new ClickstreamEventParser(appRuleConfig);
+        }
+         return instance;
+    }
     Event ingestDataToEvent(final String data) throws JsonProcessingException {
         return getObjectMapper().readValue(data, Event.class);
     }
@@ -346,12 +359,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
         clickstreamEvent.setPageViewPageTitle(ingestEvent.getAttributes().getPageTitle());
         clickstreamEvent.setPageViewPageUrl(ingestEvent.getAttributes().getPageUrl());
 
-        UrlParseResult urlParseResult = parseUrl(ingestEvent.getAttributes().getPageUrl());
-        if (urlParseResult != null) {
-            clickstreamEvent.setPageViewPageUrlPath(urlParseResult.getPath());
-            clickstreamEvent.setPageViewPageUrlQueryParameters(convertUriParamsToStrMap(urlParseResult.getQueryParameters()));
-            clickstreamEvent.setPageViewHostname(urlParseResult.getHostName());
-        }
+        setPageViewUrl(clickstreamEvent, ingestEvent.getAttributes().getPageUrl());
 
         clickstreamEvent.setPageViewLatestReferrer(ingestEvent.getAttributes().getLatestReferrer());
         clickstreamEvent.setPageViewLatestReferrerHost(ingestEvent.getAttributes().getLatestReferrerHost());
@@ -361,7 +369,6 @@ public final class ClickstreamEventParser extends BaseEventParser {
             clickstreamEvent.setPageViewLatestReferrerHost(latestReferrerUrlParseResult.getHostName());
         }
         clickstreamEvent.setPageViewEntrances(ingestEvent.getAttributes().getEntrances());
-
     }
 
     private void setScreenView(final Event ingestEvent, final ClickstreamEvent clickstreamEvent, final TimeShiftInfo timeShiftInfo) {
@@ -398,61 +405,130 @@ public final class ClickstreamEventParser extends BaseEventParser {
         uaMap.put("string", extraParams.getUa());
         clickstreamEvent.setDeviceUa(uaMap);
     }
-
     private void setTrafficSource(final Event ingestEvent, final ClickstreamEvent clickstreamEvent) {
-        log.info("setTrafficSource: " + ingestEvent.getAttributes().getTrafficSourceSource());
-        clickstreamEvent.setTrafficSourceSource(ingestEvent.getAttributes().getTrafficSourceSource());
-        clickstreamEvent.setTrafficSourceMedium(ingestEvent.getAttributes().getTrafficSourceMedium());
-        clickstreamEvent.setTrafficSourceCampaign(ingestEvent.getAttributes().getTrafficSourceCampaign());
-        clickstreamEvent.setTrafficSourceContent(ingestEvent.getAttributes().getTrafficSourceContent());
-        clickstreamEvent.setTrafficSourceTerm(ingestEvent.getAttributes().getTrafficSourceTerm());
-        clickstreamEvent.setTrafficSourceCampaignId(ingestEvent.getAttributes().getTrafficSourceCampaignId());
-        clickstreamEvent.setTrafficSourceClidPlatform(ingestEvent.getAttributes().getTrafficSourceClidPlatform());
-        clickstreamEvent.setTrafficSourceClid(ingestEvent.getAttributes().getTrafficSourceClid());
-        clickstreamEvent.setTrafficSourceChannelGroup(ingestEvent.getAttributes().getTrafficSourceChannelGroup());
-        clickstreamEvent.setTrafficSourceCategory(ingestEvent.getAttributes().getTrafficSourceCategory());
+        IngestTrafficSourceWrap clientTsInfo = getIngestTrafficSourceInfo(ingestEvent);
 
-        if (clickstreamEvent.getTrafficSourceSource() == null) {
-            clickstreamEvent.setTrafficSourceSource(ingestEvent.getAttributes().getUtmSource());
-            clickstreamEvent.setTrafficSourceMedium(ingestEvent.getAttributes().getUtmMedium());
-            clickstreamEvent.setTrafficSourceCampaign(ingestEvent.getAttributes().getUtmCampaign());
-            clickstreamEvent.setTrafficSourceContent(ingestEvent.getAttributes().getUtmContent());
-            clickstreamEvent.setTrafficSourceTerm(ingestEvent.getAttributes().getUtmTerm());
-            clickstreamEvent.setTrafficSourceCampaignId(ingestEvent.getAttributes().getUtmId());
-            clickstreamEvent.setTrafficSourceClidPlatform(ingestEvent.getAttributes().getUtmSourcePlatform());
-        }
+        clickstreamEvent.setTrafficSourceSource(clientTsInfo.getSource());
+        clickstreamEvent.setTrafficSourceMedium(clientTsInfo.getMedium());
+        clickstreamEvent.setTrafficSourceCampaign(clientTsInfo.getCampaign());
+        clickstreamEvent.setTrafficSourceContent(clientTsInfo.getContent());
+        clickstreamEvent.setTrafficSourceTerm(clientTsInfo.getTerm());
+        clickstreamEvent.setTrafficSourceCampaignId(clientTsInfo.getCampaignId());
+        clickstreamEvent.setTrafficSourceClidPlatform(clientTsInfo.getClidPlatform());
+        clickstreamEvent.setTrafficSourceClid(clientTsInfo.getClid());
+        clickstreamEvent.setTrafficSourceChannelGroup(clientTsInfo.getChannel());
+        clickstreamEvent.setTrafficSourceCategory(clientTsInfo.getCategory());
 
+        log.info("setTrafficSource() platform: {}, source: {}", clickstreamEvent.getPlatform(), clientTsInfo.getSource());
 
-        if (ingestEvent.getAttributes().getGclid() != null && clickstreamEvent.getTrafficSourceClid() == null) {
-            clickstreamEvent.setTrafficSourceClid(buildTrafficSourceClidJson(GCLID, ingestEvent.getAttributes().getGclid()));
-            if (clickstreamEvent.getTrafficSourceSource() == null) {
-                clickstreamEvent.setTrafficSourceSource(GOOGLE);
+        // TrafficSource is set by SDK, but category or channel not set
+        if (clientTsInfo.getSource() != null && (clientTsInfo.getCategory() == null || clientTsInfo.getChannel() == null)) {
+            String appId = clickstreamEvent.getAppId();
+            RuleConfig ruleConfig = getAppRuleConfig() != null ? getAppRuleConfig().get(appId) : null;
+            if (ruleConfig == null) {
+                log.warn("RuleConfig is not set for appId: " + appId);
             }
+
+            RuleBasedTrafficSourceHelper rsHelper = RuleBasedTrafficSourceHelper.getInstance(appId, ruleConfig);
+
+            TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
+            trafficSourceUtm.setSource(clientTsInfo.getSource());
+            trafficSourceUtm.setMedium(clientTsInfo.getMedium());
+            trafficSourceUtm.setCampaign(clientTsInfo.getCampaign());
+            trafficSourceUtm.setContent(clientTsInfo.getContent());
+            trafficSourceUtm.setTerm(clientTsInfo.getTerm());
+            trafficSourceUtm.setCampaignId(clientTsInfo.getCampaignId());
+            trafficSourceUtm.setClidPlatform(clientTsInfo.getClidPlatform());
+            trafficSourceUtm.setClid(clientTsInfo.getClid());
+
+            CategoryTrafficSource ts = rsHelper.parse(trafficSourceUtm,
+                    clickstreamEvent.getPageViewPageReferrer(),
+                    clickstreamEvent.getPageViewLatestReferrer(),
+                    clickstreamEvent.getPageViewLatestReferrerHost());
+
+            clickstreamEvent.setTrafficSourceChannelGroup(ts.getChannelGroup());
+            clickstreamEvent.setTrafficSourceCategory(ts.getCategory());
         }
 
-        if (clickstreamEvent.getTrafficSourceSource() != null) {
-            setTrafficChannelAndCategory(clickstreamEvent);
-        } else {
+        // not set by client SDK
+        if (clientTsInfo.getSource() == null) {
             setTrafficSourceBySourceParser(clickstreamEvent);
         }
     }
 
-    private void setTrafficChannelAndCategory(final ClickstreamEvent clickstreamEvent) {
-        if (clickstreamEvent.getTrafficSourceCategory() == null) {
-            clickstreamEvent.setTrafficSourceCategory(
-                    DefaultTrafficSourceHelper.getCategory(clickstreamEvent.getTrafficSourceSource())
-            );
+    private IngestTrafficSourceWrap getIngestTrafficSourceInfo(final Event ingestEvent) {
+        IngestTrafficSourceWrap ingestTrafficSourceInfo =  new IngestTrafficSourceWrap();
+        String source = ingestEvent.getAttributes().getTrafficSourceSource() != null
+                ? ingestEvent.getAttributes().getTrafficSourceSource(): ingestEvent.getAttributes().getUtmSource();
+        ingestTrafficSourceInfo.setSource(source);
+
+        String medium = ingestEvent.getAttributes().getTrafficSourceMedium() != null
+                ? ingestEvent.getAttributes().getTrafficSourceMedium(): ingestEvent.getAttributes().getUtmMedium();
+        ingestTrafficSourceInfo.setMedium(medium);
+
+
+        String campaign = ingestEvent.getAttributes().getTrafficSourceCampaign() != null
+                ? ingestEvent.getAttributes().getTrafficSourceCampaign(): ingestEvent.getAttributes().getUtmCampaign();
+        ingestTrafficSourceInfo.setCampaign(campaign);
+
+
+        String content = ingestEvent.getAttributes().getTrafficSourceContent() != null
+                ? ingestEvent.getAttributes().getTrafficSourceContent(): ingestEvent.getAttributes().getUtmContent();
+        ingestTrafficSourceInfo.setContent(content);
+
+        String term = ingestEvent.getAttributes().getTrafficSourceTerm() != null
+                ? ingestEvent.getAttributes().getTrafficSourceTerm(): ingestEvent.getAttributes().getUtmTerm();
+        ingestTrafficSourceInfo.setTerm(term);
+
+        String campaignId = ingestEvent.getAttributes().getTrafficSourceCampaignId() != null
+                ? ingestEvent.getAttributes().getTrafficSourceCampaignId(): ingestEvent.getAttributes().getUtmId();
+        ingestTrafficSourceInfo.setCampaignId(campaignId);
+
+        String clidPlatform = ingestEvent.getAttributes().getTrafficSourceClidPlatform() != null
+                ? ingestEvent.getAttributes().getTrafficSourceClidPlatform(): ingestEvent.getAttributes().getUtmSourcePlatform();
+        ingestTrafficSourceInfo.setClidPlatform(clidPlatform);
+
+        String gclid = null;
+        if (ingestEvent.getAttributes().getGclid() != null) {
+           gclid = buildTrafficSourceClidJson(GCLID, ingestEvent.getAttributes().getGclid());
+
         }
-        if (clickstreamEvent.getTrafficSourceChannelGroup() == null) {
-            clickstreamEvent.setTrafficSourceChannelGroup(
-                    DefaultTrafficSourceHelper.getChannelGroup(
-                            clickstreamEvent.getTrafficSourceSource(),
-                            clickstreamEvent.getTrafficSourceMedium(),
-                            clickstreamEvent.getTrafficSourceCampaign())
-            );
-        }
+        String clid = ingestEvent.getAttributes().getTrafficSourceClid() != null
+                ? ingestEvent.getAttributes().getTrafficSourceClid(): gclid;
+        ingestTrafficSourceInfo.setClid(clid);
+
+        String channel = ingestEvent.getAttributes().getTrafficSourceChannelGroup();
+        ingestTrafficSourceInfo.setChannel(channel);
+
+        String category = ingestEvent.getAttributes().getTrafficSourceCategory();
+        ingestTrafficSourceInfo.setCategory(category);
+
+        return ingestTrafficSourceInfo;
     }
 
+
+    @Getter
+    @Setter
+    public static class IngestTrafficSourceWrap {
+        String source;
+        String medium;
+        String campaign;
+        String content;
+        String term;
+        String campaignId;
+        String clidPlatform;
+        String clid;
+        String channel;
+        String category;
+    }
+
+    @Override
+    public Map<String, RuleConfig> getAppRuleConfig() {
+        return this.appRuleConfig;
+    }
+    public void setAppRuleConfig(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
+    }
 
     private boolean isEnableEventTimeShift() {
         if (System.getProperty(ENABLE_EVENT_TIME_SHIFT_PROP) == null) {

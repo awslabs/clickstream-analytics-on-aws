@@ -16,8 +16,10 @@ package software.aws.solution.clickstream.gtm;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
+import software.aws.solution.clickstream.TransformerInterfaceV3;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import java.util.*;
@@ -31,10 +33,23 @@ import static software.aws.solution.clickstream.model.ModelV2.*;
 
 
 @Slf4j
-public class GTMServerDataTransformerV2 {
+public class GTMServerDataTransformerV2 implements TransformerInterfaceV3 {
     public static final String TABLE_VERSION_SUFFIX_V2 = "_v2";
     public static final String ETL_GTM_USER_V2_PROPS = "etl_gtm_user_v2_props";
-    ServerDataConverterV2 serverDataConverterV2 = new ServerDataConverterV2();
+
+    private TransformConfig transformConfig;
+
+    public GTMServerDataTransformerV2(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
+    }
+
+    public GTMServerDataTransformerV2() {
+    }
+
+    @Override
+    public void config(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
+    }
 
     private static Dataset<Row> extractEvent(final Dataset<Row> convertedDataset) {
         Dataset<Row> eventDataset = convertedDataset.select(explode(expr("dataOut.events")).alias("event"))
@@ -185,8 +200,16 @@ public class GTMServerDataTransformerV2 {
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
 
+    @Override
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
-        Dataset<Row> datasetWithFileName = dataset.withColumn(INPUT_FILE_NAME, input_file_name());
+        Dataset<Row> datasetWithFileName = dataset;
+
+        if (!hasColumn(dataset, INPUT_FILE_NAME)) {
+            datasetWithFileName = dataset.withColumn(INPUT_FILE_NAME, input_file_name());
+        }
+
+        ServerDataConverterV2 serverDataConverterV2 = new ServerDataConverterV2(this.transformConfig.getAppRuleConfig());
+
         Dataset<Row> convertedDataset = serverDataConverterV2.transform(datasetWithFileName);
         convertedDataset.cache();
         log.info("convertedDataset count:" + convertedDataset.count());
@@ -333,6 +356,7 @@ public class GTMServerDataTransformerV2 {
         return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
     }
 
+    @Override
     public Dataset<Row> postTransform(final Dataset<Row> dataset) {
         SparkSession sparkSession = dataset.sparkSession();
         mergeIncrementalTables(sparkSession);

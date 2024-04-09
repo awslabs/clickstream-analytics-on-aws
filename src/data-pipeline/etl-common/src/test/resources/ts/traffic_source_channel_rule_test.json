@@ -1,0 +1,95 @@
+[{
+    "id": "rule#1",
+    "channel": "Direct",
+    "displayName": {
+      "en-US": "Direct",
+      "zh-CN": "直接访问"
+
+    },
+    "description": {
+      "en-US": "Direct traffic is the most common type of traffic. It is the traffic that comes to your website by typing your website URL into the browser or clicking on a bookmark. Direct traffic is not only the most common type of traffic, but it is also the most valuable.",
+      "zh-CN": "直接访问是最常见的流量类型。它是通过在浏览器中键入您的网站 URL 或单击书签来访问您的网站的流量。直接访问不仅是最常见的流量类型，而且也是最有价值的。"
+    },
+    "condition": {
+      "op::and": [{
+          "field": "traffic_source_category",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_source",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_medium",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_campaign",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_content",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_term",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_campaign_id",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_clid_platform",
+          "op": "eq",
+          "value": "__empty__"
+        },
+        {
+          "field": "traffic_source_clid",
+          "op": "eq",
+          "value": "__empty__"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rule#2",
+    "channel": "Paid Search",
+    "displayName": {
+      "en-US": "Paid Search",
+      "zh-CN": "付费搜索"
+    },
+    "description": {
+      "en-US": "Paid search is a form of digital marketing where search engines such as Google and Bing allow advertisers to show ads on their search engine results pages (SERPs). Paid search works on a pay-per-click model, meaning you do exactly that – until someone clicks on your ad, you don’t pay.",
+      "zh-CN": "付费搜索是数字营销的一种形式，搜索引擎（如 Google 和必应）允许广告商在其搜索引擎结果页面（SERP）上显示广告。付费搜索采用按点击付费的模式运作，这意味着您确实如此 - 直到有人点击您的广告，您才需要支付费用。"
+    },
+    "condition": {
+      "op::and": [{
+          "field": "traffic_source_category",
+          "op": "eq",
+          "value": "Search"
+        },
+        {
+          "op::or": [{
+              "field": "traffic_source_medium",
+              "op": "match",
+              "value": "^(.*cp.*|ppc|retargeting|paid.*)$"
+            },
+            {
+              "field": "traffic_source_clid",
+              "op": "not_eq",
+              "value": "__empty__"
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

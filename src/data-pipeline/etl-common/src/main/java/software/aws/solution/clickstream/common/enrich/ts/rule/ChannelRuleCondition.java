@@ -11,20 +11,21 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common.model;
+package software.aws.solution.clickstream.common.enrich.ts.rule;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.*;
-
+import java.util.List;
 
 @Getter
 @Setter
-@ToString
-public class UriInfo {
-    private String protocol;
-    private String host;
-    private String path;
-    private String query;
-    private Map<String, String> parameters;
+public class ChannelRuleCondition {
+    @JsonProperty("op::and")
+    List<ChannelRuleConditionItem> opAndList;
+
+    @JsonProperty("op::or")
+    List<ChannelRuleConditionItem> opOrList;
 }
+

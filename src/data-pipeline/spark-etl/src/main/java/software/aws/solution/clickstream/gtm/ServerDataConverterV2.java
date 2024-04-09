@@ -41,7 +41,11 @@ import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter
 
 @Slf4j
 public class ServerDataConverterV2 {
-    private static UDF6<String, Long, String, String, String, String, List<GenericRow>> convertGTMServerData() {
+    private final Map<String, RuleConfig> appRuleConfig;
+    public ServerDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
+    }
+    private static UDF6<String, Long, String, String, String, String, List<GenericRow>> convertGTMServerData(final Map<String, RuleConfig> appRuleConfig) {
         return (String value, Long ingestTimestamp,
                 String rid, String appId,
                 String projectId, String inputFileName) -> {
@@ -55,7 +59,7 @@ public class ServerDataConverterV2 {
                         .ua(null)
                         .ip(null)
                         .appId(appId)
-                        .build());
+                        .build(), appRuleConfig);
             } catch (Exception e) {
                 log.error("cannot convert data: " + value + ", error: " + e.getMessage());
                 log.error(getStackTrace(e));
@@ -74,7 +78,7 @@ public class ServerDataConverterV2 {
         }));
     }
 
-    private static List<GenericRow> getGenericRow(final String jsonString, final ExtraParams extraParams) throws JsonProcessingException {
+    private static List<GenericRow> getGenericRow(final String jsonString, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
         List<GenericRow> rows = new ArrayList<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -82,19 +86,19 @@ public class ServerDataConverterV2 {
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.add(getGenericRow(elementsIt.next(), index, extraParams));
+                rows.add(getGenericRow(elementsIt.next(), index, extraParams, appRuleConfig));
                 index++;
             }
         } else {
-            rows.add(getGenericRow(jsonNode, index, extraParams));
+            rows.add(getGenericRow(jsonNode, index, extraParams, appRuleConfig));
         }
         return rows;
 
     }
 
-    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams) throws JsonProcessingException {
+    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
 
-        ParseDataResult dataResult = GTMEventParser.getInstance()
+        ParseDataResult dataResult = GTMEventParser.getInstance(appRuleConfig)
                 .parseData(jsonNode.toString(),
                             extraParams,
                             index);
@@ -142,7 +146,7 @@ public class ServerDataConverterV2 {
                 DataTypes.createStructField("items", itemListType, true),
         }));
 
-        UserDefinedFunction convertGTMServerDataUdf = udf(convertGTMServerData(), udfOutType);
+        UserDefinedFunction convertGTMServerDataUdf = udf(convertGTMServerData(this.appRuleConfig), udfOutType);
         String appId = "appId";
         Dataset<Row> convertedKeyValueDataset = dataset
                 .filter(col(appId).isNotNull().and(col(appId).notEqual("")))

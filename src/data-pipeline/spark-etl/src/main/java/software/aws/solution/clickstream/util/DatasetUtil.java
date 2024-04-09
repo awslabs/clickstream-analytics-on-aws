@@ -519,6 +519,15 @@ public final class DatasetUtil {
             return incremental;
         }
     }
+
+    public static boolean hasColumn(final Dataset<Row> datasetInput, final String inputFileName) {
+        for (String colName : datasetInput.columns()) {
+            if (colName.equals(inputFileName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
