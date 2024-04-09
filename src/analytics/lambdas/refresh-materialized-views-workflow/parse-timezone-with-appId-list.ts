@@ -38,7 +38,7 @@ export const handler = async () => {
       timezoneWithAppIdList: parsedArray,
     };
   } catch (err) {
-    logger.error('Error when refresh mv:', { err });
+    logger.error('Parse timezone with appId list error:', { err });
     throw err;
   }
 };

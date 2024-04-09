@@ -11,10 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP, REFRESH_SP_STEP, END_STEP } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckStartRefreshSpEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-start-sp-refresh';
+import { RefreshWorkflowSteps } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 
 
@@ -26,7 +27,7 @@ describe('Lambda - check next refresh task', () => {
       completeRefreshDate: '',
     },
     originalInput: {
-      startRefreshViewOrSp: '',
+      startRefreshViewNameOrSPName: '',
       latestJobTimestamp: '1710026295000',
       forceRefresh: '',
     },
@@ -42,7 +43,7 @@ describe('Lambda - check next refresh task', () => {
         completeRefreshDate: '',
       },
       originalInput: {
-        startRefreshViewOrSp: '',
+        startRefreshViewNameOrSPName: '',
         latestJobTimestamp: '1710026295000',
         forceRefresh: '',
       },
@@ -56,12 +57,12 @@ describe('Lambda - check next refresh task', () => {
 
   test('forceRefresh is true and it is first time', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
-        startRefreshViewOrSp: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
         refreshDate: '2024-03-10',
         appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
         timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
@@ -70,7 +71,7 @@ describe('Lambda - check next refresh task', () => {
     });
   });
 
-  test('forceRefresh is true but there is no startRefreshViewOrSp', async () => {
+  test('forceRefresh is true but there is no startRefreshViewNameOrSPName', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
     await expect(handler(checkNextRefreshViewEvent)).rejects.toThrow('forceRefresh is true, but no completeRefreshView or startRefreshView found');
   });
@@ -81,18 +82,18 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
       },
     });
   });
 
-  test('forceRefresh is true but startRefreshViewOrSp is not the sp', async () => {
+  test('forceRefresh is true but startRefreshViewNameOrSPName is not the sp', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = 'no_user_m_max_view';
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'no_user_m_max_view';
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
       },
     });
   });
@@ -114,7 +115,7 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         refreshDate: '2024-03-10',
         appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
         timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
@@ -139,7 +140,7 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
       },
     });
   });
@@ -150,7 +151,7 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         refreshDate: '2024-03-09',
         appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
         timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
@@ -164,7 +165,7 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
       },
     });
   });

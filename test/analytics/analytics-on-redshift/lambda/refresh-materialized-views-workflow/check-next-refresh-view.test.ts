@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { REFRESH_MV_STEP, END_STEP, CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
 import { handler, CheckNextRefreshViewEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-next-refresh-view';
+import { RefreshWorkflowSteps } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 
 
@@ -22,7 +23,7 @@ describe('Lambda - check next refresh task', () => {
       completeRefreshView: '',
     },
     originalInput: {
-      startRefreshViewOrSp: '',
+      startRefreshViewNameOrSPName: '',
       forceRefresh: '',
     },
     timezoneWithAppId: {
@@ -37,7 +38,7 @@ describe('Lambda - check next refresh task', () => {
         completeRefreshView: '',
       },
       originalInput: {
-        startRefreshViewOrSp: '',
+        startRefreshViewNameOrSPName: '',
         forceRefresh: '',
       },
       timezoneWithAppId: {
@@ -52,7 +53,7 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_max_view',
-        nextStep: REFRESH_MV_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
@@ -64,7 +65,7 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_view_v2',
-        nextStep: REFRESH_MV_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
@@ -75,41 +76,41 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
-  test('forceRefresh is true and startRefreshViewOrSp is a correct view', async () => {
+  test('forceRefresh is true and startRefreshViewNameOrSPName is a correct view', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = 'user_m_view_v2';
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'user_m_view_v2';
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_view_v2',
-        nextStep: REFRESH_MV_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
-  test('forceRefresh is true and startRefreshViewOrSp is a correct sp', async () => {
+  test('forceRefresh is true and startRefreshViewNameOrSPName is a correct sp', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
         viewName: 'user_m_max_view',
-        nextStep: REFRESH_MV_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       },
       timezoneWithAppId: checkNextRefreshViewEvent.timezoneWithAppId,
     });
   });
 
-  test('forceRefresh is true and startRefreshViewOrSp is a invalid value', async () => {
+  test('forceRefresh is true and startRefreshViewNameOrSPName is a invalid value', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'true';
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = 'invalid_value';
-    await expect(handler(checkNextRefreshViewEvent)).rejects.toThrow(`View ${checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp} not found in the list of views or sp to refresh`);
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = 'invalid_value';
+    await expect(handler(checkNextRefreshViewEvent)).rejects.toThrow(`View ${checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName} not found in the list of views or sp to refresh`);
   });
 });

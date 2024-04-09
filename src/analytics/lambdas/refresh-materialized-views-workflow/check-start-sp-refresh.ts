@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
-import { REFRESH_SP_STEP, END_STEP } from '@aws/clickstream-base-lib';
 import { utc } from 'moment-timezone';
 import { getRefreshList } from './check-next-refresh-view';
+import { RefreshWorkflowSteps } from '../../private/constant';
 import { getRedshiftClient, executeStatementsWithWait, getRedshiftProps, getStatementResult } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -27,7 +27,7 @@ export interface CheckStartRefreshSpEvent {
     completeRefreshDate: string;
   };
   originalInput: {
-    startRefreshViewOrSp: string;
+    startRefreshViewNameOrSPName: string;
     latestJobTimestamp: string;
     forceRefresh: string;
   };
@@ -42,7 +42,7 @@ export interface CheckStartRefreshSpEvent {
  * @param event CheckRefreshSpStatusEvent.
  * @returns {
 * detail: {
-*  startRefreshViewOrSp: string,
+*  startRefreshViewNameOrSPName: string,
 *  refreshDate: string,
 *  appId: string,
 *  timezone: string,
@@ -77,27 +77,27 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
       // force refresh has been ended
       return {
         detail: {
-          nextStep: END_STEP,
+          nextStep: RefreshWorkflowSteps.END_STEP,
         },
       };
-    } else if (event.originalInput.startRefreshViewOrSp) {
-      const index = spList.findIndex((spInfo) => spInfo.name === event.originalInput.startRefreshViewOrSp);
+    } else if (event.originalInput.startRefreshViewNameOrSPName) {
+      const index = spList.findIndex((spInfo) => spInfo.name === event.originalInput.startRefreshViewNameOrSPName);
       if (index !== -1) {
         return {
           detail: {
-            startRefreshViewOrSp: event.originalInput.startRefreshViewOrSp,
+            startRefreshViewNameOrSPName: event.originalInput.startRefreshViewNameOrSPName,
             refreshDate: refreshDateString,
             appId: timezoneWithAppId.appId,
             timezone: timezoneWithAppId.timezone,
             forceRefresh: event.originalInput.forceRefresh,
-            nextStep: REFRESH_SP_STEP,
+            nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
           },
         };
       } else {
         // no sp need to be force refreshed
         return {
           detail: {
-            nextStep: END_STEP,
+            nextStep: RefreshWorkflowSteps.END_STEP,
           },
         };
       }
@@ -115,13 +115,13 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
             refreshDate: date.toISOString().split('T')[0],
             appId: timezoneWithAppId.appId,
             timezone: timezoneWithAppId.timezone,
-            nextStep: REFRESH_SP_STEP,
+            nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
           },
         };
       } else {
         return {
           detail: {
-            nextStep: END_STEP,
+            nextStep: RefreshWorkflowSteps.END_STEP,
           },
         };
       }
@@ -143,13 +143,13 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
             refreshDate: refreshDateString,
             appId: timezoneWithAppId.appId,
             timezone: timezoneWithAppId.timezone,
-            nextStep: REFRESH_SP_STEP,
+            nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
           },
         };
       } else {
         return {
           detail: {
-            nextStep: END_STEP,
+            nextStep: RefreshWorkflowSteps.END_STEP,
           },
         };
       }
@@ -159,7 +159,7 @@ export const handler = async (event: CheckStartRefreshSpEvent) => {
 
 function getRefreshEarliestDate(dataFreshnessInHour: string, refreshDate: string): Date {
   const date = new Date(refreshDate);
-  date.setHours(date.getHours() - parseInt(dataFreshnessInHour));
+  date.setHours(date.getHours() - parseInt(dataFreshnessInHour) + 24);
   return date;
 }
 

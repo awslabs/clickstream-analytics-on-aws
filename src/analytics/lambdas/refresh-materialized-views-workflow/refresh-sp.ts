@@ -22,6 +22,7 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 export interface RefreshSpEvent {
   detail: {
     spName: string;
+    timezoneSensitive: string;
     refreshDate: string;
   };
   originalInput: {
@@ -61,7 +62,12 @@ export const handler = async (event: RefreshSpEvent) => {
     const timezone = event.originalInput.timezone;
     const spName = event.detail.spName;
     const refreshDate = event.detail.refreshDate;
-    sqlStatements.push(`CALL ${appId}.${spName}('${refreshDate}', '${timezone}');`);
+    const timezoneSensitive = event.detail.timezoneSensitive;
+    if (timezoneSensitive === 'true') {
+      sqlStatements.push(`CALL ${appId}.${spName}('${refreshDate}', '${timezone}');`);
+    } else {
+      sqlStatements.push(`CALL ${appId}.${spName}('${refreshDate}');`);
+    }
 
     logger.info('sqlStatements', { sqlStatements });
     const queryId = await executeStatements(

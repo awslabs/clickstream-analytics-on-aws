@@ -22,6 +22,7 @@ const refreshSpEvent: RefreshSpEvent = {
   detail: {
     spName: 'sp1',
     refreshDate: '2024-01-01',
+    timezoneSensitive: 'true',
   },
   originalInput: {
     appId: 'app1',

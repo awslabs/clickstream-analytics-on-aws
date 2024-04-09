@@ -72,6 +72,7 @@ node-fetch under the MIT
 p-limit under the MIT
 ts-json-object under the MIT
 uuid under the MIT
+moment-timezone under the MIT
 @aws-sdk/lib-storage under the Apache-2.0
 @aws-sdk/xhr-http-handler under the Apache-2.0
 @babel/core under the MIT

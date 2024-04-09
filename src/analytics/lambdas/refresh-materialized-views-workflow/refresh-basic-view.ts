@@ -60,7 +60,7 @@ export const handler = async (event: RefreshBasicViewEvent) => {
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
-    logger.info(`Refresh mv for app: ${timezoneWithAppId.appId} finished`);
+    logger.info(`Refresh mv for app: ${timezoneWithAppId.appId} is scheduled and viewName: ${viewName}`);
     return {
       detail: {
         queryId: queryId,

@@ -11,15 +11,15 @@
  *  and limitations under the License.
  */
 
-import { REFRESH_SP_STEP, END_STEP } from '@aws/clickstream-base-lib';
 import { getRefreshList } from './check-next-refresh-view';
+import { RefreshWorkflowSteps } from '../../private/constant';
 
 export interface CheckNextRefreshSpEvent {
   detail: {
     completeRefreshSp: string;
   };
   originalInput: {
-    startRefreshViewOrSp: string;
+    startRefreshViewNameOrSPName: string;
     refreshDate: string;
     appId: string;
     timezone: string;
@@ -37,17 +37,19 @@ export interface CheckNextRefreshSpEvent {
 */
 export const handler = async (event: CheckNextRefreshSpEvent) => {
   const spList = getRefreshList().spViews;
-  const startRefreshViewOrSp = event.originalInput.startRefreshViewOrSp;
+  const startRefreshViewNameOrSPName = event.originalInput.startRefreshViewNameOrSPName;
   let nextSpName;
+  let timezoneSensitive;
   if (event.detail.completeRefreshSp) {
     // it is not the first time to refresh, find the next view
     const index = spList.findIndex((spInfo) => spInfo.name === event.detail.completeRefreshSp);
     if (index !== -1 && index + 1 < spList.length) {
       nextSpName = spList[index + 1].name;
+      timezoneSensitive = spList[index + 1].timezoneSensitive;
     } else {
       return {
         detail: {
-          nextStep: END_STEP,
+          nextStep: RefreshWorkflowSteps.END_STEP,
           completeRefreshDate: event.originalInput.refreshDate,
         },
         timezoneWithAppId: {
@@ -57,19 +59,26 @@ export const handler = async (event: CheckNextRefreshSpEvent) => {
       };
     }
   } else {
-    if (startRefreshViewOrSp) {
+    if (startRefreshViewNameOrSPName) {
       // refresh from the indicate sp
-      nextSpName = startRefreshViewOrSp;
+      const index = spList.findIndex((spInfo) => spInfo.name === startRefreshViewNameOrSPName);
+      if (index === -1) {
+        throw new Error(`The sp ${startRefreshViewNameOrSPName} is not found in the list.`);
+      }
+      nextSpName = spList[index].name;
+      timezoneSensitive = spList[index].timezoneSensitive;
     } else {
       // it is the first time to refresh, find the first sp
       nextSpName = spList[0].name;
+      timezoneSensitive = spList[0].timezoneSensitive;
     }
   }
   return {
     detail: {
       spName: nextSpName,
+      timezoneSensitive,
       refreshDate: event.originalInput.refreshDate,
-      nextStep: REFRESH_SP_STEP,
+      nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
     },
   };
 };

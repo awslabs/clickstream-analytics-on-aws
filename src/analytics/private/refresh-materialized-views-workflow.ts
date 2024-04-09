@@ -53,7 +53,9 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
   }
 
   private createWorkflow(props: RefreshMaterializedViewsWorkflowProps): IStateMachine {
-    const checkRefreshMvStatusFn = this.checkRefreshMvStatusFn(props);
+    const logGroup = createLogGroup(this, { prefix: '/aws/vendedlogs/states/Clickstream/RefreshMaterializedViews' });
+
+    const checkRefreshMvStatusFn = this.checkRefreshMvStatusFn(props, logGroup);
     const checkRefreshMvStatusJob = new LambdaInvoke(this, `${this.node.id} - Check refresh MV status`, {
       lambdaFunction: checkRefreshMvStatusFn,
       payload: TaskInput.fromObject({
@@ -76,7 +78,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       resultPath: '$.waitTimeInfo',
     });
 
-    const refreshBasicViewFn = this.refreshBasicViewFn(props);
+    const refreshBasicViewFn = this.refreshBasicViewFn(props, logGroup);
     const refreshBasicViewFnJob = new LambdaInvoke(this, `${this.node.id} - refresh basic view`, {
       lambdaFunction: refreshBasicViewFn,
       payload: TaskInput.fromObject({
@@ -86,7 +88,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
-    const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props);
+    const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props, logGroup);
     const checkNextRefreshViewJob = new LambdaInvoke(this, `${this.node.id} - Check next view should be refreshed`, {
       lambdaFunction: checkNextRefreshViewFn,
       payload: TaskInput.fromObject({
@@ -102,7 +104,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Check next refresh view FAILED',
     });
 
-    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props);
+    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props, logGroup);
     const checkStartSpRefreshJob = new LambdaInvoke(this, `${this.node.id} - Check whether start SP refresh`, {
       lambdaFunction: checkStartSpRefreshFn,
       payload: TaskInput.fromObject({
@@ -131,7 +133,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       );
 
     const doRefreshJobSucceed = new Succeed(this, `${this.node.id} - Refresh job succeed`);
-    const logGroup = createLogGroup(this, { prefix: '/aws/vendedlogs/states/Clickstream/RefreshMaterializedViewsMachine' });
 
     const refreshSpSubWorkflow = this.createSubWorkflow(props, logGroup);
 
@@ -186,7 +187,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       .when(Condition.isPresent('$.timezoneWithAppIdList'), doRefreshJob)
       .otherwise(doRefreshJobSucceed);
 
-    const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props);
+    const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props, logGroup);
     const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timezone with appId list from props`, {
       lambdaFunction: parseTimeZoneWithAppIdListFn,
       outputPath: '$.Payload',
@@ -216,7 +217,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return refreshMaterializedViewsMachine;
   }
 
-  private parseTimeZoneWithAppIdList(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private parseTimeZoneWithAppIdList(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'ParseTimeZoneWithAppIdList', {
@@ -230,6 +231,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'ParseTimeZoneWithAppIdListRule', true, []),
       ...props.networkConfig,
@@ -243,7 +245,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkNextRefreshSpFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private checkNextRefreshSpFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckNextRefreshSp', {
@@ -257,6 +259,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshSpRole', true, []),
       ...props.networkConfig,
@@ -272,7 +275,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkNextRefreshViewFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private checkNextRefreshViewFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckNextRefreshView', {
@@ -286,6 +289,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshViewRole', true, []),
       ...props.networkConfig,
@@ -299,7 +303,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private refreshBasicViewFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private refreshBasicViewFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'RefreshBasicView', {
@@ -313,6 +317,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshBasicViewRole', true, []),
       ...props.networkConfig,
@@ -328,7 +333,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkStartSpRefreshFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private checkStartSpRefreshFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckStartSpRefresh', {
@@ -342,6 +347,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckStartSpRefreshRole', true, []),
       ...props.networkConfig,
@@ -358,7 +364,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkRefreshMvStatusFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private checkRefreshMvStatusFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckRefreshMvStatus', {
@@ -372,6 +378,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshMvStatusRole', true, []),
       ...props.networkConfig,
@@ -386,7 +393,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private checkRefreshSpStatusFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private checkRefreshSpStatusFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckRefreshSpStatus', {
@@ -400,6 +407,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshSpStatusRole', true, []),
       ...props.networkConfig,
@@ -415,7 +423,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
-  private refreshSpFn(props: RefreshMaterializedViewsWorkflowProps): IFunction {
+  private refreshSpFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'RefreshSp', {
@@ -429,6 +437,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       logConf: {
         retention: RetentionDays.ONE_WEEK,
       },
+      logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshSpRole', true, []),
       ...props.networkConfig,
@@ -458,7 +467,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
 
   private createSubWorkflow(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IStateMachine {
 
-    const refreshSpFn = this.refreshSpFn(props);
+    const refreshSpFn = this.refreshSpFn(props, logGroup);
     const refreshSpFnJob = new LambdaInvoke(this, `${this.node.id} - refresh SP`, {
       lambdaFunction: refreshSpFn,
       payload: TaskInput.fromObject({
@@ -468,7 +477,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
-    const checkRefreshSpStatusFn = this.checkRefreshSpStatusFn(props);
+    const checkRefreshSpStatusFn = this.checkRefreshSpStatusFn(props, logGroup);
     const checkRefreshSpStatusJob = new LambdaInvoke(this, `${this.node.id} - Check refresh SP status`, {
       lambdaFunction: checkRefreshSpStatusFn,
       payload: TaskInput.fromObject({
@@ -496,7 +505,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Refresh SP Job FAILED',
     });
 
-    const checkNextRefreshSpFn = this.checkNextRefreshSpFn(props);
+    const checkNextRefreshSpFn = this.checkNextRefreshSpFn(props, logGroup);
     const checkNextRefreshSpJob = new LambdaInvoke(this, `${this.node.id} - Check next sp should be refreshed`, {
       lambdaFunction: checkNextRefreshSpFn,
       payload: TaskInput.fromObject({

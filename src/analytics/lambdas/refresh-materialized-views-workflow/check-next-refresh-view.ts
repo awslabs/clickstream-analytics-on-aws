@@ -11,12 +11,13 @@
  *  and limitations under the License.
  */
 
-import { REFRESH_MV_STEP, END_STEP } from '@aws/clickstream-base-lib';
+import { RefreshWorkflowSteps } from '../../private/constant';
 import { reportingViewsDef, schemaDefs } from '../../private/sql-def';
 
 interface RefreshViewOrSp {
   name: string;
   type: string;
+  timezoneSensitive: string;
 }
 
 export interface CheckNextRefreshViewEvent {
@@ -28,7 +29,7 @@ export interface CheckNextRefreshViewEvent {
     timezone: string;
   };
   originalInput: {
-    startRefreshViewOrSp: string;
+    startRefreshViewNameOrSPName: string;
     forceRefresh: string;
   };
 }
@@ -55,21 +56,21 @@ export const handler = async (event: CheckNextRefreshViewEvent) => {
     } else {
       return {
         detail: {
-          nextStep: END_STEP,
+          nextStep: RefreshWorkflowSteps.END_STEP,
         },
         timezoneWithAppId,
       };
     }
   } else {
-    if (event.originalInput.startRefreshViewOrSp && event.originalInput.forceRefresh === 'true') {
-      const index = mvViews.findIndex((viewInfo) => viewInfo.name === event.originalInput.startRefreshViewOrSp);
-      const spIndex = spViews.findIndex((spInfo) => spInfo.name === event.originalInput.startRefreshViewOrSp);
+    if (event.originalInput.startRefreshViewNameOrSPName && event.originalInput.forceRefresh === 'true') {
+      const index = mvViews.findIndex((viewInfo) => viewInfo.name === event.originalInput.startRefreshViewNameOrSPName);
+      const spIndex = spViews.findIndex((spInfo) => spInfo.name === event.originalInput.startRefreshViewNameOrSPName);
       if (index !== -1) {
         nextView = mvViews[index];
       } else if (spIndex !== -1) {
         nextView = mvViews[0];
       } else {
-        throw new Error(`View ${event.originalInput.startRefreshViewOrSp} not found in the list of views or sp to refresh`);
+        throw new Error(`View ${event.originalInput.startRefreshViewNameOrSPName} not found in the list of views or sp to refresh`);
       }
     } else {
       nextView = mvViews[0];
@@ -78,7 +79,7 @@ export const handler = async (event: CheckNextRefreshViewEvent) => {
 
   return {
     detail: {
-      nextStep: REFRESH_MV_STEP,
+      nextStep: RefreshWorkflowSteps.REFRESH_MV_STEP,
       viewName: nextView?.name,
     },
     timezoneWithAppId,
@@ -94,6 +95,7 @@ export function getRefreshList() {
       mvViews.push({
         name: convertSqlFileToViewName(def.sqlFile),
         type: def.type,
+        timezoneSensitive: def.timezoneSensitive || 'false',
       });
     }
   });
@@ -104,11 +106,13 @@ export function getRefreshList() {
         mvViews.push({
           name: def.viewName,
           type: def.type,
+          timezoneSensitive: def.timezoneSensitive || 'false',
         });
       } else if (def.type === 'sp') {
         spViews.push({
           name: def.spName!,
           type: def.type,
+          timezoneSensitive: def.timezoneSensitive || 'false',
         });
       }
     }

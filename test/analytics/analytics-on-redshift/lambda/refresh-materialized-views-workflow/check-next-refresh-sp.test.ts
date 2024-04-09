@@ -11,10 +11,11 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP, REFRESH_SP_STEP, END_STEP } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckNextRefreshSpEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-next-refresh-sp';
+import { RefreshWorkflowSteps } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 
 
@@ -26,7 +27,7 @@ describe('Lambda - check next refresh task', () => {
       completeRefreshSp: '',
     },
     originalInput: {
-      startRefreshViewOrSp: '',
+      startRefreshViewNameOrSPName: '',
       refreshDate: '',
       appId: '',
       timezone: '',
@@ -39,7 +40,7 @@ describe('Lambda - check next refresh task', () => {
         completeRefreshSp: '',
       },
       originalInput: {
-        startRefreshViewOrSp: '',
+        startRefreshViewNameOrSPName: '',
         refreshDate: '2024-03-10',
         appId: 'app1',
         timezone: 'Asia/Shanghai',
@@ -52,21 +53,23 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         spName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
         refreshDate: '2024-03-10',
+        timezoneSensitive: 'true',
       },
     });
   });
 
-  test('there is startRefreshViewOrSp', async () => {
-    checkNextRefreshViewEvent.originalInput.startRefreshViewOrSp = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
+  test('there is startRefreshViewNameOrSPName', async () => {
+    checkNextRefreshViewEvent.originalInput.startRefreshViewNameOrSPName = CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP;
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         spName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
         refreshDate: '2024-03-10',
+        timezoneSensitive: 'true',
       },
     });
   });
@@ -76,9 +79,10 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: REFRESH_SP_STEP,
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         spName: 'clickstream_acquisition_day_traffic_source_user_sp',
         refreshDate: '2024-03-10',
+        timezoneSensitive: 'true',
       },
     });
   });
@@ -88,7 +92,7 @@ describe('Lambda - check next refresh task', () => {
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {
-        nextStep: END_STEP,
+        nextStep: RefreshWorkflowSteps.END_STEP,
         completeRefreshDate: '2024-03-10',
       },
       timezoneWithAppId: {

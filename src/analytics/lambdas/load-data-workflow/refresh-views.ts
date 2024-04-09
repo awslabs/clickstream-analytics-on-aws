@@ -62,8 +62,10 @@ export const handler = async (_e: any, _c: Context) => {
         status: WorkflowStatus.SUCCEED,
       };
     } else {
-      logger.info('Skip mv and sp refresh');
+      logger.info(`Skip mv and sp refresh because the interval ${REFRESH_INTERVAL_MINUTES} minutes is not reached yet.`);
     }
+  } else {
+    logger.info('Skip mv and sp refresh because ENABLE_REFRESH is not true.');
   }
   return {
     status: WorkflowStatus.SKIP,
