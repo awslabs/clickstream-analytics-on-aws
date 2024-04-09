@@ -33,20 +33,18 @@ import SourceCategoryModal from './modal/SourceCategoryModal';
 import {
   ISourceCategory,
   ITrafficSource,
-  TrafficSourceAction,
 } from './reducer/trafficReducer';
 
 interface SourceCategoryProps {
   loading: boolean;
   state: ITrafficSource;
-  dispatch: React.Dispatch<TrafficSourceAction>;
   overwrite: (state: ITrafficSource) => Promise<boolean>;
 }
 
 const SourceCategory: React.FC<SourceCategoryProps> = (
   props: SourceCategoryProps
 ) => {
-  const { state, dispatch, loading, overwrite } = props;
+  const { state, loading, overwrite } = props;
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState<ISourceCategory[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -192,7 +190,6 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
   };
 
   const persistChanges = () => {
-    dispatch({ type: 'SetState', data: state });
     setItemsSnap([]);
   };
 

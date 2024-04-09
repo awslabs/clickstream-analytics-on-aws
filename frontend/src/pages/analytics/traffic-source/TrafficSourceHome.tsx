@@ -91,14 +91,12 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
       <ChannelGroup
         loading={loading}
         state={trafficSourceState}
-        dispatch={trafficSourceDispatch}
         overwrite={overwriteTrafficSource}
       />
       <br />
       <SourceCategory
         loading={loading}
         state={trafficSourceState}
-        dispatch={trafficSourceDispatch}
         overwrite={overwriteTrafficSource}
       />
     </>

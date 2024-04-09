@@ -12,7 +12,6 @@
  */
 
 import { IState } from 'context/reducer';
-import cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 
 export interface ITrafficSource {
@@ -56,19 +55,7 @@ export type SetState = {
   data: ITrafficSource;
 };
 
-export type AddNewSourceCategory = {
-  type: 'AddNewSourceCategory';
-};
-
-export type RemoveSourceCategory = {
-  type: 'RemoveSourceCategory';
-  url: string;
-};
-
-export type TrafficSourceAction =
-  | SetState
-  | AddNewSourceCategory
-  | RemoveSourceCategory;
+export type TrafficSourceAction = SetState;
 
 export type TrafficSourceDispatchFunction = (
   action: TrafficSourceAction
@@ -82,34 +69,8 @@ export const trafficSourceReducer = (
   state: ITrafficSource,
   action: TrafficSourceAction
 ): ITrafficSource => {
-  const newState = cloneDeep(state);
-  switch (action.type) {
-    case 'SetState': {
-      return action.data;
-    }
-    case 'AddNewSourceCategory': {
-      return {
-        ...newState,
-        sourceCategories: [
-          ...newState.sourceCategories,
-          {
-            url: '',
-            source: '',
-            category: ESourceCategory.OTHER,
-            params: [],
-          },
-        ],
-      };
-    }
-    case 'RemoveSourceCategory': {
-      return {
-        ...newState,
-        sourceCategories: newState.sourceCategories.filter(
-          (sourceCategory) => sourceCategory.url !== action.url
-        ),
-      };
-    }
-    default:
-      return state;
+  if (action.type === 'SetState') {
+    return action.data;
   }
+  return state;
 };

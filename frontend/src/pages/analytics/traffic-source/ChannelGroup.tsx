@@ -33,21 +33,19 @@ import ChannelGroupModal from './modal/ChannelGroupModal';
 import {
   IChannelGroup,
   ITrafficSource,
-  TrafficSourceAction,
 } from './reducer/trafficReducer';
 import { getLngFromLocalStorage } from '../analytics-utils';
 
 interface ChannelGroupProps {
   loading: boolean;
   state: ITrafficSource;
-  dispatch: React.Dispatch<TrafficSourceAction>;
   overwrite: (state: ITrafficSource) => Promise<boolean>;
 }
 
 const ChannelGroup: React.FC<ChannelGroupProps> = (
   props: ChannelGroupProps
 ) => {
-  const { state, dispatch, loading, overwrite } = props;
+  const { state, loading, overwrite } = props;
   const { t } = useTranslation();
   const localeLng = getLngFromLocalStorage();
   const [selectedItems, setSelectedItems] = useState<IChannelGroup[]>([]);
@@ -89,7 +87,6 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
             onClick={async () => {
               const success = await overwrite(reorderState);
               if (success) {
-                dispatch({ type: 'SetState', data: reorderState });
                 setIsReordering(false);
                 setItemsSnap([]);
               }
@@ -293,7 +290,6 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
   };
 
   const persistChanges = () => {
-    dispatch({ type: 'SetState', data: state });
     setItemsSnap([]);
   };
 
