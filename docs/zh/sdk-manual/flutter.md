@@ -73,17 +73,35 @@ analytics.record(name: "button_click");
 
 #### 添加全局属性
 
+1. 在初始化 SDK 时添加全局属性。
+
+   ```dart
+   analytics.init({
+     appId: "your appId",
+     endpoint: "https://example.com/collect",
+     globalAttributes: {
+       "_traffic_source_medium": "Search engine",
+       "_traffic_source_name": "Summer promotion",
+     }
+   });
+   ```
+
+2. 在初始化 SDK 后添加全局属性。
+   ```dart
+   analytics.addGlobalAttributes({
+     "_traffic_source_medium": "Search engine",
+     "_traffic_source_name": "Summer promotion",
+     "level": 10
+   });
+   ```
+
+建议在初始化 SDK 时设置全局属性，设置后记录的所有事件都会包含全局属性。
+
+#### 删除全局属性
+
 ```dart
-analytics.addGlobalAttributes({
-  "_traffic_source_medium": "Search engine",
-  "_traffic_source_name": "Summer promotion",
-  "level": 10
-});
-// 删除全局属性
 analytics.deleteGlobalAttributes(["level"]);
 ```
-
-建议每次 SDK 初始化后设置全局属性，全局属性将包含在设置后产生的所有事件中。
 
 #### 登录和登出
 
@@ -111,7 +129,6 @@ API `analytics.setUserAttributes()` 在当用户属性改变时来更新当前�
 
     如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
 
-
 #### 记录带有 Item 的事件
 
 您可以添加以下代码来记录带有 Item 的事件，同时您可以在 `attributes` Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item
@@ -131,12 +148,13 @@ var itemBook = ClickstreamItem(
 analytics.record(
     name: "view_item", 
     attributes: {
-        "currency": 'USD',
-        "event_category": 'recommended'
+        "currency": "USD",
+        "event_category": "recommended"
     }, 
     items: [itemBook]
 );
 ```
+
 要记录 Item 中的更多属性，请参阅 [Item 属性](android.md#item_1)。
 
 !!! warning "重要提示"
@@ -144,6 +162,26 @@ analytics.record(
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
     
     ITEM_ID 为必需字段，如果不设置，该 Item 将被丢弃。
+
+#### 手动记录 Screen View 事件
+
+默认情况下，当 Android Activity 触发 `onResume` 或 iOS ViewController 触发 `viewDidAppear` 时，SDK
+会自动记录预置的 `_screen_view` 事件。
+
+无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`
+事件。
+
+* `screenName` 必需字段，屏幕的名称。
+* `screenUniqueId` 可选字段，设置为您组件的 id。如果不设置，SDK会以当前原生 Activity 或原生 ViewController 的 hashcode
+  作为默认值。
+
+```dart
+analytics.recordScreenView(
+  screenName: 'Main',
+  screenUniqueId: '123adf',
+  attributes: { ... }
+);
+```
 
 #### 其他配置项
 
@@ -161,7 +199,10 @@ analytics.init(
   isTrackUserEngagementEvents: true,
   isTrackAppExceptionEvents: false,
   authCookie: "your auth cookie",
-  sessionTimeoutDuration: 1800000
+  sessionTimeoutDuration: 1800000,
+  globalAttributes: {
+    "_traffic_source_medium": "Search engine",
+  }
 );
 ```
 
@@ -179,6 +220,7 @@ analytics.init(
 | isTrackAppExceptionEvents   | 否     | false   | 是否自动记录应用崩溃事件                        |
 | authCookie                  | 否     | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie         |
 | sessionTimeoutDuration      | 否     | 1800000 | 会话超时的时长（毫秒）                         |
+| globalAttributes            | 否     | --      | 初始化SDK时的全局属性                        |
 
 #### 更新配置
 
@@ -194,7 +236,6 @@ analytics.updateConfigure(
     isTrackScreenViewEvents: false
     isTrackUserEngagementEvents: false,
     isTrackAppExceptionEvents: false,
-    sessionTimeoutDuration: 100000,
     authCookie: "test cookie");
 ```
 
@@ -303,10 +344,11 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 原生 SDK 版本依赖关系
 
-| Flutter SDK 版本  | Android SDK 版本 | Swift SDK 版本 |
-|-----------------|----------------|--------------|
-| 0.2.0           | 0.10.0         | 0.9.1        |
-| 0.1.0           | 0.9.0          | 0.8.0        |
+| Flutter SDK 版本 | Android SDK 版本 | Swift SDK 版本 |
+|----------------|----------------|--------------|
+| 0.3.0          | 0.12.0         | 0.11.0       |
+| 0.2.0          | 0.10.0         | 0.9.1        |
+| 0.1.0          | 0.9.0          | 0.8.0        |
 
 ## 参考链接
 

@@ -172,8 +172,8 @@ ClickstreamAnalytics.record({
 无论是否启用预置的 `_screen_view` 事件，您都可以手动记录屏幕浏览事件。添加以下代码以记录带有如下两个属性的 `_screen_view`
 事件。
 
-* `SCREEN_NAME` 必需字段，屏幕的名称
-* `SCREEN_UNIQUE_ID` 可选字段，设置为您组件的 id。 如果不设置，SDK会以当前原生 Activity 或原生 ViewController 的 hashcode
+* `SCREEN_NAME` 必需字段，屏幕的名称。
+* `SCREEN_UNIQUE_ID` 可选字段，设置为您组件的 id。如果不设置，SDK会以当前原生 Activity 或原生 ViewController 的 hashcode
   作为默认值。
 
 ```typescript
