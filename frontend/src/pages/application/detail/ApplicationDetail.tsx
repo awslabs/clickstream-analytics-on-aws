@@ -191,13 +191,15 @@ const ApplicationDetail: React.FC = () => {
                       {!isEditing && (
                         <div className="flex align-center">
                           <div>{applicationInfo?.timezone}</div>
-                          <Button
-                            onClick={() => {
-                              setIsEditing(true);
-                            }}
-                            variant="icon"
-                            iconName="edit"
-                          />
+                          {!applicationInfo?.timezone.trim() && (
+                            <Button
+                              onClick={() => {
+                                setIsEditing(true);
+                              }}
+                              variant="icon"
+                              iconName="edit"
+                            />
+                          )}
                         </div>
                       )}
                       {isEditing && (
