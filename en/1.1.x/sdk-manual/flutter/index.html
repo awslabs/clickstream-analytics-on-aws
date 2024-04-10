@@ -1764,6 +1764,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#delete-global-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete global attribute
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#login-and-logout" class="md-nav__link">
     <span class="md-ellipsis">
       Login and logout
@@ -1785,6 +1794,15 @@
   <a href="#record-event-with-items" class="md-nav__link">
     <span class="md-ellipsis">
       Record event with items
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#record-screen-view-events-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Record Screen View events manually
     </span>
   </a>
   
@@ -3047,6 +3065,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#delete-global-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete global attribute
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#login-and-logout" class="md-nav__link">
     <span class="md-ellipsis">
       Login and logout
@@ -3068,6 +3095,15 @@
   <a href="#record-event-with-items" class="md-nav__link">
     <span class="md-ellipsis">
       Record event with items
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#record-screen-view-events-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      Record Screen View events manually
     </span>
   </a>
   
@@ -3279,29 +3315,44 @@ app to a data pipeline in the Clickstream Analytics solution console.</p>
 </span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;button_click&quot;</span><span class="p">);</span>
 </span></code></pre></div>
 <h4 id="add-global-attribute">Add global attribute</h4>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">addGlobalAttributes</span><span class="p">({</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="s2">&quot;level&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">10</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">});</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1">// delete global attribute</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">analytics</span><span class="p">.</span><span class="n">deleteGlobalAttributes</span><span class="p">([</span><span class="s2">&quot;level&quot;</span><span class="p">]);</span>
+<ol>
+<li>Add global attributes when initializing the SDK</li>
+</ol>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">({</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nl">globalAttributes:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">});</span>
 </span></code></pre></div>
+<ol>
+<li>Add global attributes after initializing the SDK
+   <div class="language-dart highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">addGlobalAttributes</span><span class="p">({</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="s2">&quot;level&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">10</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">});</span>
+</span></code></pre></div></li>
+</ol>
 <p>It is recommended to set global attributes after each SDK initialization, global attributes will be included in all
 events that occur after it is set.</p>
+<h4 id="delete-global-attribute">Delete global attribute</h4>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>analytics.deleteGlobalAttributes([&quot;level&quot;]);
+</span></code></pre></div>
 <h4 id="login-and-logout">Login and logout</h4>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">// when user login success.</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">);</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1">// when user logout</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// when user login success.</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">);</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1">// when user logout</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
 </span></code></pre></div>
 <h4 id="add-user-attribute">Add user attribute</h4>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserAttributes</span><span class="p">({</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="s2">&quot;userName&quot;</span><span class="o">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="s2">&quot;userAge&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">22</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">});</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserAttributes</span><span class="p">({</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="s2">&quot;userName&quot;</span><span class="o">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="s2">&quot;userAge&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">22</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">});</span>
 </span></code></pre></div>
 <p>Current logged-in user's attributes will be cached in disk, so the next time app open you don't need to set all user
 attributes again, of course you can use the same API <code>analytics.setUserAttributes()</code> to update the current
@@ -3312,24 +3363,24 @@ user's attribute when it changes.</p>
 </div>
 <h4 id="record-event-with-items">Record event with items</h4>
 <p>You can add the following code to log an event with an item, and you can add custom item attribute in the <code>attributes</code> Map. In addition to the preset attributes, an item can add up to 10 custom attributes.
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">var</span><span class="w"> </span><span class="n">itemBook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">(</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nl">id:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;Nature&quot;</span><span class="p">,</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nl">category:</span><span class="w"> </span><span class="s2">&quot;book&quot;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nl">price:</span><span class="w"> </span><span class="m">99</span><span class="p">,</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="s2">&quot;book_publisher&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Nature Research&quot;</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">);</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;view_item&quot;</span><span class="p">,</span><span class="w"> </span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">        </span><span class="s2">&quot;currency&quot;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="s2">&quot;event_category&quot;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;recommended&#39;</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="nl">items:</span><span class="w"> </span><span class="p">[</span><span class="n">itemBook</span><span class="p">]</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">);</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">var</span><span class="w"> </span><span class="n">itemBook</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">(</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nl">id:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;Nature&quot;</span><span class="p">,</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nl">category:</span><span class="w"> </span><span class="s2">&quot;book&quot;</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nl">price:</span><span class="w"> </span><span class="m">99</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="s2">&quot;book_publisher&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Nature Research&quot;</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">);</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;view_item&quot;</span><span class="p">,</span><span class="w"> </span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="s2">&quot;currency&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="s2">&quot;event_category&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="nl">items:</span><span class="w"> </span><span class="p">[</span><span class="n">itemBook</span><span class="p">]</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="p">);</span>
 </span></code></pre></div></p>
 <p>For logging more attribute in an item, please refer to <a href="../android/#item-attributes">item attributes</a>.</p>
 <div class="admonition warning">
@@ -3337,21 +3388,40 @@ user's attribute when it changes.</p>
 <p>Only pipelines from version 1.1+ can handle items with custom attribute.</p>
 <p>item id is required attribute, if not set the item will be discarded.</p>
 </div>
+<h4 id="record-screen-view-events-manually">Record Screen View events manually</h4>
+<p>By default, SDK will automatically track the preset <code>_screen_view</code> event when Android Activity triggers <code>onResume</code> or
+iOS ViewController triggers <code>viewDidAppear</code>.</p>
+<p>You can also manually record screen view events whether automatic screen view tracking is enabled, add the following
+code to record a screen view event with two attributes.</p>
+<ul>
+<li><code>screenName</code> Required. Your screen's name.</li>
+<li><code>screenUniqueId</code> Optional. Set the id of your Widget. If you do not set, the SDK will set a default value based on the
+  hashcode of the current Activity or ViewController.</li>
+</ul>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">recordScreenView</span><span class="p">(</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nl">screenName:</span><span class="w"> </span><span class="s1">&#39;Main&#39;</span><span class="p">,</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nl">screenUniqueId:</span><span class="w"> </span><span class="s1">&#39;123adf&#39;</span><span class="p">,</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="p">);</span>
+</span></code></pre></div>
 <h4 id="other-configurations">Other configurations</h4>
 <p>In addition to the required <code>appId</code> and <code>endpoint</code>, you can configure other information to get more customized usage:</p>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">(</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nl">sendEventsInterval:</span><span class="w"> </span><span class="m">10000</span><span class="p">,</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;your auth cookie&quot;</span><span class="p">,</span>
-</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nl">sessionTimeoutDuration:</span><span class="w"> </span><span class="m">1800000</span>
-</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">);</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">(</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nl">sendEventsInterval:</span><span class="w"> </span><span class="m">10000</span><span class="p">,</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;your auth cookie&quot;</span><span class="p">,</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">  </span><span class="nl">sessionTimeoutDuration:</span><span class="w"> </span><span class="m">1800000</span><span class="p">,</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">  </span><span class="nl">globalAttributes:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="p">);</span>
 </span></code></pre></div>
 <p>Here is an explanation of each option:</p>
 <table>
@@ -3424,45 +3494,50 @@ user's attribute when it changes.</p>
 <td>1800000</td>
 <td>the duration for session timeout in milliseconds</td>
 </tr>
+<tr>
+<td>globalAttributes</td>
+<td>false</td>
+<td>--</td>
+<td>the global attributes when initializing the SDK</td>
+</tr>
 </tbody>
 </table>
 <h4 id="configuration-update">Configuration update</h4>
 <p>You can update the default configuration after initializing the SDK, below are the additional configuration options you
 can customize.</p>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">false</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">    </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="nl">sessionTimeoutDuration:</span><span class="w"> </span><span class="m">100000</span><span class="p">,</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;test cookie&quot;</span><span class="p">);</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;test cookie&quot;</span><span class="p">);</span>
 </span></code></pre></div>
 <h4 id="send-event-immediately">Send event immediately</h4>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">flushEvents</span><span class="p">();</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">flushEvents</span><span class="p">();</span>
 </span></code></pre></div>
 <h4 id="disable-sdk">Disable SDK</h4>
 <p>You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and
 sending of any events. Of course, you can enable the SDK when you need to continue logging events.</p>
-<div class="language-dart highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1">// disable SDK</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">analytics</span><span class="p">.</span><span class="n">disable</span><span class="p">();</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1">// enable SDK</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">analytics</span><span class="p">.</span><span class="n">enable</span><span class="p">();</span>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1">// disable SDK</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">analytics</span><span class="p">.</span><span class="n">disable</span><span class="p">();</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="c1">// enable SDK</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">analytics</span><span class="p">.</span><span class="n">enable</span><span class="p">();</span>
 </span></code></pre></div>
 <h4 id="debug-events">Debug events</h4>
 <p>You can follow the steps below to view the event raw JSON and debug your events.</p>
 <ol>
 <li>
 <p>Using <code>analytics.updateConfigure()</code> API and set the <code>isLogEvents</code> attributes with true in debug mode, for example:
-    <div class="language-dart highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1">// log the event in debug mode.</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span>
+    <div class="language-dart highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1">// log the event in debug mode.</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span>
 </span></code></pre></div></p>
 </li>
 <li>
@@ -3674,6 +3749,11 @@ sending of any events. Of course, you can enable the SDK when you need to contin
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>0.3.0</td>
+<td>0.12.0</td>
+<td>0.11.0</td>
+</tr>
 <tr>
 <td>0.2.0</td>
 <td>0.10.0</td>
