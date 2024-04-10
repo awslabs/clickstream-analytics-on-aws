@@ -952,6 +952,7 @@ export class CDataModelingStack extends JSONObject {
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'RedshiftServerlessRPU',
+      'TimeZoneWithAppId',
     ];
     return allowedList;
   }
@@ -1255,6 +1256,17 @@ export class CDataModelingStack extends JSONObject {
     ClickstreamMetadataDdbArn?: string;
 
   @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    const tz = stack._pipeline?.timezone ?? [];
+    if (tz.length === 0) {
+      return '';
+    }
+    return JSON.stringify(tz);
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    TimeZoneWithAppId?: string;
+
+  @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
@@ -1301,6 +1313,7 @@ export class CReportingStack extends JSONObject {
       'RedshiftParameterKeyParam',
       'QuickSightPrincipalParam',
       'QuickSightOwnerPrincipalParam',
+      'QuickSightTimezoneParam',
     ];
     return allowedList;
   }
@@ -1418,14 +1431,25 @@ export class CReportingStack extends JSONObject {
     RedshiftParameterKeyParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
+  @JSONObject.custom( (stack :CReportingStack, _key:string, _value:any) => {
+    const tz = stack._pipeline?.timezone ?? [];
+    if (tz.length === 0) {
+      return '';
+    }
+    return JSON.stringify(tz);
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    QuickSightTimezoneParam?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
   @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (_stack:CDataModelingStack, _key:string, _value:string) => {
+  @JSONObject.custom( (_stack:CReportingStack, _key:string, _value:string) => {
     return getIamRoleBoundaryArn();
   })
     IamRoleBoundaryArn?: string;

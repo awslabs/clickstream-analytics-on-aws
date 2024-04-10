@@ -1,15 +1,21 @@
 {
   "valid": {
     "nameEmpty": "Please input application name",
-    "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters"
+    "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters",
+    "timezoneInvalid": "Please select a timezone"
   },
   "appName": "App Name",
   "appID": "App ID",
+  "appTimezone": "App Timezone",
   "appDesc": "App Description",
   "appPackageName": "App package name",
   "androidPackageName": "Android package name",
   "iosAppBundleId": "App Bundle ID (iOS)",
   "createdTime": "Created",
+  "labels": {
+    "timezonePlaceholder": "Select Timezone",
+    "empty": "No matches found"
+  },
   "sdkGuide": {
     "registerApp": "Register App",
     "configSDK": "Configure SDK",

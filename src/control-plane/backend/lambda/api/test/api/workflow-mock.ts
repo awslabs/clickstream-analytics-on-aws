@@ -835,6 +835,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterKey: 'ClickstreamMetadataDdbArn',
     ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/click-stream-table-name',
   },
+  {
+    ParameterKey: 'TimeZoneWithAppId',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
+  },
 ];
 
 export const DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
@@ -993,6 +997,10 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterKey: 'RedshiftParameterKeyParam.#',
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
   },
+  {
+    ParameterKey: 'QuickSightTimezoneParam',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
+  },
 ];
 
 export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
@@ -1056,6 +1064,10 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
     ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
+  },
+  {
+    ParameterKey: 'QuickSightTimezoneParam',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
 ];
 

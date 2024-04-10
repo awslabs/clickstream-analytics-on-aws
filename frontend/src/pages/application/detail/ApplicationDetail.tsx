@@ -13,7 +13,9 @@
 
 import {
   AppLayout,
+  Autosuggest,
   Box,
+  Button,
   ColumnLayout,
   Container,
   ContentLayout,
@@ -22,7 +24,10 @@ import {
   SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
-import { getApplicationDetail } from 'apis/application';
+import {
+  getApplicationDetail,
+  updateApplicationTimezone,
+} from 'apis/application';
 import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
@@ -48,6 +53,8 @@ const ApplicationDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
   const [applicationInfo, setApplicationInfo] = useState<IApplication>();
+  const [isEditing, setIsEditing] = useState(false);
+  const [timeZone, setTimeZone] = useState<string>('');
 
   const breadcrumbItems = [
     {
@@ -89,10 +96,31 @@ const ApplicationDetail: React.FC = () => {
         });
       if (success) {
         setApplicationInfo(data);
+        setTimeZone(data.timezone);
         getProjectDetailById();
       }
     } catch (error) {
       setLoadingData(false);
+    }
+  };
+
+  const updateTimezone = async () => {
+    try {
+      const { success }: ApiResponse<IApplication> =
+        await updateApplicationTimezone({
+          pid: defaultStr(pid),
+          id: defaultStr(id),
+          timezone: timeZone,
+        });
+      if (success) {
+        setApplicationInfo({
+          ...applicationInfo,
+          timezone: timeZone,
+        } as IApplication);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -122,7 +150,7 @@ const ApplicationDetail: React.FC = () => {
                   </Header>
                 }
               >
-                <ColumnLayout columns={3} variant="text-grid">
+                <ColumnLayout columns={2} variant="text-grid">
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
@@ -130,32 +158,24 @@ const ApplicationDetail: React.FC = () => {
                       </Box>
                       <div>{applicationInfo?.name}</div>
                     </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:appID')}
                       </Box>
                       <div>{applicationInfo?.appId}</div>
                     </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:appDesc')}
                       </Box>
                       <div>{applicationInfo?.description}</div>
                     </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:androidPackageName')}
                       </Box>
                       <div>{applicationInfo?.androidPackage}</div>
                     </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:iosAppBundleId')}
@@ -164,6 +184,65 @@ const ApplicationDetail: React.FC = () => {
                     </div>
                   </SpaceBetween>
                   <SpaceBetween direction="vertical" size="l">
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('application:appTimezone')}
+                      </Box>
+                      {!isEditing && (
+                        <div className="flex align-center">
+                          <div>{applicationInfo?.timezone}</div>
+                          <Button
+                            onClick={() => {
+                              setIsEditing(true);
+                            }}
+                            variant="icon"
+                            iconName="edit"
+                          />
+                        </div>
+                      )}
+                      {isEditing && (
+                        <div className="flex">
+                          <div className="w-45p mr-5">
+                            <Autosuggest
+                              value={timeZone}
+                              onChange={({ detail }) => {
+                                setTimeZone(detail.value);
+                              }}
+                              options={moment.tz.names().flatMap((tz) => {
+                                return {
+                                  label: tz,
+                                  value: tz,
+                                };
+                              })}
+                              placeholder={defaultStr(
+                                t('application:labels.timezonePlaceholder')
+                              )}
+                              empty={t('application:labels.empty')}
+                            />
+                          </div>
+
+                          <div>
+                            <SpaceBetween direction="horizontal" size="xs">
+                              <Button
+                                onClick={() => {
+                                  setIsEditing(false);
+                                }}
+                              >
+                                {t('button.cancel')}
+                              </Button>
+                              <Button
+                                variant="primary"
+                                onClick={() => {
+                                  updateTimezone();
+                                }}
+                              >
+                                {t('button.save')}
+                              </Button>
+                            </SpaceBetween>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <Box variant="awsui-key-label">
                         {t('application:createdTime')}
@@ -183,7 +262,7 @@ const ApplicationDetail: React.FC = () => {
                   </Header>
                 }
               >
-                <ColumnLayout columns={3} variant="text-grid">
+                <ColumnLayout columns={2} variant="text-grid">
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
@@ -197,6 +276,18 @@ const ApplicationDetail: React.FC = () => {
                         >
                           {applicationInfo?.pipeline?.id}
                         </Link>
+                      </div>
+                    </div>
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('project:pipeline.status')}
+                      </Box>
+                      <div>
+                        <PipelineStatus
+                          pipelineId={applicationInfo?.pipeline?.id}
+                          projectId={pid}
+                          status={applicationInfo?.pipeline?.status?.status}
+                        />
                       </div>
                     </div>
                   </SpaceBetween>
@@ -240,20 +331,6 @@ const ApplicationDetail: React.FC = () => {
                         endpoint={applicationInfo?.pipeline?.endpoint}
                         fetch
                       />
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="l">
-                    <div>
-                      <Box variant="awsui-key-label">
-                        {t('project:pipeline.status')}
-                      </Box>
-                      <div>
-                        <PipelineStatus
-                          pipelineId={applicationInfo?.pipeline?.id}
-                          projectId={pid}
-                          status={applicationInfo?.pipeline?.status?.status}
-                        />
-                      </div>
                     </div>
                   </SpaceBetween>
                 </ColumnLayout>
