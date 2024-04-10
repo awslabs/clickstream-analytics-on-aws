@@ -601,7 +601,7 @@ describe('reporting test', () => {
 
     const requestBody = {
       action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+      timezone: 'Asia/Shanghai',
       locale: ExploreLocales.ZH_CN,
       chartType: QuickSightChartType.LINE,
       viewName: 'testview0002',
@@ -699,7 +699,7 @@ describe('reporting test', () => {
 
     const requestBody = {
       action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+      timezone: 'Asia/Shanghai',
       locale: ExploreLocales.ZH_CN,
       chartType: QuickSightChartType.LINE,
       viewName: 'testview0002',
@@ -2552,7 +2552,7 @@ describe('reporting test', () => {
   it('common parameter check - limit conditions', async () => {
     const funnelBody = {
       action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+      timezone: 'Asia/Shanghai',
       chartType: QuickSightChartType.BAR,
       viewName: 'testview0002',
       projectId: 'project01_wvzh',
@@ -3572,7 +3572,7 @@ describe('reporting test', () => {
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
-        timezone: "Asia/Shanghai",
+        timezone: 'Asia/Shanghai',
         groupColumn: 'week',
         timeStart: undefined,
         timeEnd: undefined,
