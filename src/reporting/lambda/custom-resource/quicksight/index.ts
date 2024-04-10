@@ -254,7 +254,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       });
     };
 
-    //create before delete
     for (const schemaName of createSchemas) {
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
       createdQuickSightResources.createdSchemas.push({
