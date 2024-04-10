@@ -91,7 +91,6 @@ describe('QuickSight Lambda function', () => {
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
     vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
-
     dashboardDefProps: {
       analysisName: 'Clickstream Analysis',
       dashboardName: 'Clickstream Dashboard',
@@ -1322,8 +1321,13 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
-
   };
 
   const oneQuickSightUserEvent = {
@@ -1340,6 +1344,7 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationEvent.ResourceProperties,
       ...commonProps,
       schemas: '',
+      timezone: '[]',
     },
   };
 
@@ -1349,6 +1354,16 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
   };
 
@@ -1358,11 +1373,23 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -1372,11 +1399,23 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...testProps4,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -1386,11 +1425,23 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonPropsUserChange,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -1400,11 +1451,23 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...testProps2,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...testProps3,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -1414,6 +1477,12 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
@@ -1428,11 +1497,31 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
   };
 
@@ -1442,11 +1531,27 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,tttt',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "tttt",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
   };
 
@@ -1456,11 +1561,31 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,tttt',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "tttt",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
   };
 
@@ -1470,11 +1595,27 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Tokyo"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -1498,6 +1639,12 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationDeleteEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -3051,10 +3198,7 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(UpdateDataSourcePermissionsCommand).callsFakeOnce(input => {
       if ( input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
-        && input.GrantPermissions[1].Principal === 'test-principal-arn'
         && input.GrantPermissions[0].Actions[5] === 'quicksight:UpdateDataSource'
-        && input.GrantPermissions[1].Actions[5] === 'quicksight:UpdateDataSource'
-
       ) {
         return {
           DataSourceArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/datasource_1',
@@ -3097,11 +3241,9 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(UpdateDataSetPermissionsCommand).callsFakeOnce(input => {
-      if ( input.GrantPermissions.length === 2
+      if ( input.GrantPermissions.length === 1
         && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
-        && input.GrantPermissions[1].Principal === 'test-principal-arn'
         && input.GrantPermissions[0].Actions[9] === 'quicksight:CancelIngestion'
-        && input.GrantPermissions[1].Actions[4] === 'quicksight:ListIngestions'
       ) {
         return {};
       } else {
@@ -3111,11 +3253,10 @@ describe('QuickSight Lambda function', () => {
 
 
     quickSightClientMock.on(UpdateDashboardPermissionsCommand).callsFakeOnce(input => {
-      if ( input.GrantPermissions.length === 2
+      if ( input.GrantPermissions.length === 1
         && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
-        && input.GrantPermissions[1].Principal === 'test-principal-arn'
         && input.GrantPermissions[0].Actions[0] === 'quicksight:DescribeDashboard'
-        && input.GrantPermissions[1].Actions[3] === 'quicksight:UpdateDashboard') {
+      ) {
         return {};
       } else {
         throw new Error('dashboard permission is not the expected one.');

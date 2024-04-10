@@ -65,6 +65,13 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter QuickSightTimezoneParam', () => {
+    template.hasParameter('QuickSightTimezoneParam', {
+      Type: 'String',
+      Default: '[]',
+    });
+  });
+
   test('Should has Parameter redshiftEndpointParam', () => {
     template.hasParameter('RedshiftEndpointParam', {
       Type: 'String',
@@ -938,30 +945,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: {
-              'Fn::Join': [
-                '',
-                [
-                  "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
-                ],
-              ],
-            },
+            customSql: "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
             columns: [
               {
                 Name: 'event_timestamp',

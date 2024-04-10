@@ -95,11 +95,10 @@ export interface TimezoneInfo {
 export function timezonejsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
   const dict: { [key: string]: string } = {};
   for (const item of jsonArray) {
-      dict[item.appId] = item.timezone;
+    dict[item.appId] = item.timezone;
   }
   return dict;
 }
-
 
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
@@ -128,8 +127,8 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
 const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
   event: CloudFormationCustomResourceCreateEvent,
-  timezoneDict: { [key: string]: string }
-  ): Promise<CdkCustomResourceResponse> => {
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
 
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   let dashboards = [];
@@ -193,8 +192,8 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
 
 const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
   event: CloudFormationCustomResourceUpdateEvent,
-  timezoneDict: { [key: string]: string }
-  ): Promise<CdkCustomResourceResponse> => {
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   const oldProps = event.OldResourceProperties as QuicksightCustomResourceLambdaPropsType;
 
@@ -432,8 +431,8 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   ownerPrincipalArn: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
-  timezoneDict: { [key: string]: string }
-  )
+  timezoneDict: { [key: string]: string },
+)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
