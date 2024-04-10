@@ -48,12 +48,14 @@ const redshiftClient = getRedshiftClient(process.env.REDSHIFT_DATA_API_ROLE!);
 
 export const handler = async (event: ExecuteSegmentQueryEvent) => {
   try {
+    const { appId, segmentId, jobRunId } = event;
+
     // Update segment job status to 'In Progress'
     const command = new UpdateCommand({
       TableName: ddbTableName,
       Key: {
-        id: event.segmentId,
-        type: `SEGMENT_JOB#${event.jobRunId}`,
+        id: segmentId,
+        type: `SEGMENT_JOB#${jobRunId}`,
       },
       UpdateExpression: 'set jobStatus = :js',
       ExpressionAttributeValues: {
@@ -64,13 +66,20 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
     logger.info('Update segment job status to \'In Progress\'');
     await ddbDocClient.send(command);
 
-    // Construct and execute segment query
-    const segmentSP = await constructStorageProcedure(event.appId, event.segmentId, event.jobRunId);
-    const queryId = await executeStatements(redshiftClient, [
-      segmentSP,
-      `CALL ${event.appId}.process_user_segment()`,
-    ], serverlessRedshiftProps, provisionedRedshiftProps);
-    logger.info('Execute segment query: ', { queryId });
+    // Execute segment query by calling stored procedure
+    const response = await ddbDocClient.send(new GetCommand({
+      TableName: ddbTableName,
+      Key: {
+        id: appId,
+        type: `SEGMENT_SETTING#${segmentId}`,
+      },
+    }));
+    const segment = response.Item as SegmentDdbItem;
+    const escapedSql = segment.sql!.replace(/'/g, '\'\'');
+    const s3Path = `s3://${process.env.PIPELINE_S3_BUCKET}/${process.env.SEGMENTS_S3_PREFIX}app/${appId}/segment/${segmentId}/job/${jobRunId}/`;
+    const sp = `CALL ${appId}.sp_user_segment('${segmentId}', '${escapedSql}', '${s3Path}', '${process.env.REDSHIFT_ASSOCIATED_ROLE}')`;
+    const queryId = await executeStatements(redshiftClient, [sp], serverlessRedshiftProps, provisionedRedshiftProps);
+    logger.info('Execute segment query', { queryId, query: sp });
     const output: ExecuteSegmentQueryOutput = {
       appId: event.appId,
       segmentId: event.segmentId,
@@ -83,72 +92,4 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
     logger.error('Error when executing segment query.', err as Error);
     throw err;
   }
-};
-
-/**
- * Build segment storage procedure.
- * The SP will execute sql query to get user segment, unload segment and summary to S3
- */
-const constructStorageProcedure = async (appId: string, segmentId: string, jobRunId: string) => {
-  const response = await ddbDocClient.send(new GetCommand({
-    TableName: ddbTableName,
-    Key: {
-      id: appId,
-      type: `SEGMENT_SETTING#${segmentId}`,
-    },
-  }));
-  const segment = response.Item as SegmentDdbItem;
-
-  return `
-    CREATE OR REPLACE PROCEDURE ${appId}.process_user_segment AS
-    $$
-    BEGIN
-      -- Step 1: Create temporary table and insert segment user IDs
-      DROP TABLE IF EXISTS temp_segment_user;
-      CREATE TEMP TABLE temp_segment_user (user_id VARCHAR(255));
-      EXECUTE 'INSERT INTO temp_segment_user (user_id) ${segment.sql}';
-
-      -- Step 2: Refresh segment in segment_user table
-      EXECUTE 'DELETE FROM ${appId}.segment_user WHERE segment_id = ''${segmentId}''';
-      EXECUTE 'INSERT INTO ${appId}.segment_user (segment_id, user_id) SELECT ''${segmentId}'', user_id FROM temp_segment_user';
-
-      -- Step 3: UNLOAD full segment user info to S3
-      EXECUTE '
-        UNLOAD (''SELECT * FROM ${appId}.user_m_view_v2 WHERE user_pseudo_id IN (SELECT * FROM temp_segment_user)'')
-        TO ''s3://${process.env.PIPELINE_S3_BUCKET}/${process.env.SEGMENTS_S3_PREFIX}app/${appId}/segment/${segmentId}/job/${jobRunId}/segment_''
-        IAM_ROLE ''${process.env.REDSHIFT_DATA_API_ROLE}''
-        PARALLEL OFF ALLOWOVERWRITE HEADER EXTENSION ''csv'' FORMAT AS CSV
-      ';
-
-      -- Step 4: UNLOAD segment summary to S3
-      EXECUTE '
-        UNLOAD (''
-          WITH
-          segment_user AS (
-            SELECT
-              COUNT(DISTINCT user_id) AS segment_user_number
-            FROM
-              temp_segment_user
-          ),
-          total_user AS (
-            SELECT
-              COUNT(DISTINCT user_pseudo_id) AS total_user_number
-            FROM
-              ${appId}.user_m_view_v2
-          )
-          SELECT
-            segment_user_number,
-            total_user_number,
-            CAST(EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) * 1000 AS BIGINT) AS job_end_time
-          FROM
-            segment_user,
-            total_user
-        '')
-        TO ''s3://${process.env.PIPELINE_S3_BUCKET}/${process.env.SEGMENTS_S3_PREFIX}app/${appId}/segment/${segmentId}/job/${jobRunId}/segment-summary_''
-        IAM_ROLE ''${process.env.REDSHIFT_DATA_API_ROLE}''
-        PARALLEL OFF ALLOWOVERWRITE HEADER EXTENSION ''csv'' FORMAT AS CSV
-      ';
-    END;
-    $$ LANGUAGE plpgsql;
-  `;
 };

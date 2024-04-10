@@ -17,6 +17,7 @@ import {
   EventsInSequenceCondition,
   EventWithParameter,
   ExploreAggregationMethod,
+  ExploreAnalyticsNumericOperators,
   ExploreAnalyticsOperators,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
@@ -36,10 +37,7 @@ import {
   UserInSegmentCondition,
   UserSegmentFilterCondition,
 } from '@aws/clickstream-base-lib';
-import {
-  DateRangePickerProps,
-  SelectProps,
-} from '@cloudscape-design/components';
+import { DateRangePickerProps, SelectProps } from '@cloudscape-design/components';
 import {
   CategoryItemType,
   ERelationShip,
@@ -1183,7 +1181,7 @@ const ConvertUserDoneEvent = (
             item.userDoneEventCalculateMethod?.value
           )) as SegmentFilterEventMetricType,
       conditionOperator: item.userDoneEventOperation
-        ?.value as ExploreAnalyticsOperators,
+        ?.value as ExploreAnalyticsNumericOperators,
       inputValue: item.userDoneEventValue?.map(Number) ?? [],
       parameterType:
         item.userDoneEventCalculateMethod?.itemType === 'children'
@@ -1193,7 +1191,7 @@ const ConvertUserDoneEvent = (
         item.userDoneEventCalculateMethod?.itemType === 'children'
           ? item.userDoneEventCalculateMethod?.name
           : undefined,
-      dataType: MetadataValueType.INTEGER as any,
+      dataType: MetadataValueType.NUMBER as any,
     },
   };
 };

@@ -49,6 +49,7 @@ export interface UserSegmentsWorkflowProps {
   readonly securityGroupForLambda: ISecurityGroup;
   readonly clickstreamMetadataDdbTable: ITable;
   readonly dataAPIRole: IRole;
+  readonly redshiftAssociatedRole: IRole;
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
@@ -70,6 +71,9 @@ export class UserSegmentsWorkflow extends Construct {
   }
 
   private createWorkflow(id: string, props: UserSegmentsWorkflowProps): IStateMachine {
+    const pipelineBucket = Bucket.fromBucketName(this, 'PipelineS3Bucket', props.pipelineS3Bucket);
+    pipelineBucket.grantReadWrite(props.redshiftAssociatedRole, `${props.segmentsS3Prefix}*`);
+
     // Define task for segment job initialization
     const segmentJobInitFunc = this.constructNodejsFunction('segment-job-init', [
       new PolicyStatement({
@@ -108,6 +112,7 @@ export class UserSegmentsWorkflow extends Construct {
       REDSHIFT_DATABASE: props.databaseName,
       REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
+      REDSHIFT_ASSOCIATED_ROLE: props.redshiftAssociatedRole.roleArn,
       CLICKSTREAM_METADATA_DDB_ARN: props.clickstreamMetadataDdbTable.tableArn,
       PIPELINE_S3_BUCKET: props.pipelineS3Bucket,
       SEGMENTS_S3_PREFIX: props.segmentsS3Prefix,
@@ -132,7 +137,7 @@ export class UserSegmentsWorkflow extends Construct {
     });
     props.clickstreamMetadataDdbTable.grantWriteData(segmentJobStatusFunc);
     props.dataAPIRole.grantAssumeRole(segmentJobStatusFunc.grantPrincipal);
-    Bucket.fromBucketName(this, 'PipelineS3Bucket', props.pipelineS3Bucket).grantRead(segmentJobStatusFunc, `${props.segmentsS3Prefix}*`);
+    pipelineBucket.grantRead(segmentJobStatusFunc, `${props.segmentsS3Prefix}*`);
 
     // Define Succeed and Fail end state
     const succeedState = new Succeed(this, 'WorkflowEndState-Succeed');

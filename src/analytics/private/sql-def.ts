@@ -295,4 +295,7 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'segment-user.sql',
   },
+  {
+    sqlFile: 'sp-user-segment.sql',
+  },
 ];

@@ -39,6 +39,7 @@ const _handler = async (event: SegmentJobStatusEvent) => {
   try {
     // Check segment job status
     const response = await describeStatement(redshiftClient, event.queryId);
+    logger.info(`Query (${event.queryId}) result: `, { result: response });
     const status = response.Status;
     let jobStatus = SegmentJobStatus.IN_PROGRESS;
     if (status === StatusString.ABORTED || status === StatusString.FAILED) {
@@ -75,7 +76,7 @@ const _handler = async (event: SegmentJobStatusEvent) => {
       jobStatus,
     };
   } catch (err) {
-    logger.error('Error when executing segment query.', err as Error);
+    logger.error('Error when checking segment job status.', err as Error);
     throw err;
   }
 };

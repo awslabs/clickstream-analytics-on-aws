@@ -52,7 +52,7 @@ export class SegmentServ {
     try {
       const segment = this.constructSegmentFromInput(req, res);
 
-      // Construct storage procedure with segment sql query
+      // Construct segment sql query
       const userSegmentsSql = new UserSegmentsSql(segment);
       segment.sql = userSegmentsSql.buildCriteriaStatement();
 
