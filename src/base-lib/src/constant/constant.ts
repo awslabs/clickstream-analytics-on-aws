@@ -473,3 +473,5 @@ export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
   'quicksight:DeleteDataSource',
   'quicksight:UpdateDataSource',
 ];
+
+export const DEFAULT_TIMEZONE = 'UTC';
