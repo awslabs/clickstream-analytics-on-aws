@@ -39,6 +39,7 @@ export class ReportingCheck {
       || this.params.appId === undefined
       || this.params.computeMethod === undefined
       || this.params.dashboardCreateParameters === undefined
+      || this.params.timezone === undefined
     ) {
       this.status = {
         success: false,

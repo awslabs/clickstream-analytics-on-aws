@@ -647,6 +647,7 @@ export class ReportingService {
   private _buildSqlForPathAnalysis(query: any) {
     if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
       return buildEventPathAnalysisView({
+        timezone: query.timezone,
         dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -675,6 +676,7 @@ export class ReportingService {
     }
 
     return buildNodePathAnalysisView({
+      timezone: query.timezone,
       dbName: query.projectId,
       schemaName: query.appId,
       computeMethod: query.computeMethod,
@@ -798,6 +800,7 @@ export class ReportingService {
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
+        timezone: query.timezone,
         dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
