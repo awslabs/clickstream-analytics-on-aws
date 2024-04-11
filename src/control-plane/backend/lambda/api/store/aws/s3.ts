@@ -17,6 +17,7 @@ import {
   GetBucketLocationCommand,
   GetObjectCommand,
   GetBucketPolicyCommand,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
 import { awsAccountId } from '../../common/constants';
@@ -63,33 +64,6 @@ export const listBuckets = async (region: string) => {
   return buckets;
 };
 
-export async function getS3Object(region: string, bucket: string, key: string): Promise<any> {
-  const streamToString = (stream: any) => new Promise((resolve, reject) => {
-    const chunks: any = [];
-    stream.on('data', (chunk: any) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  });
-
-  const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: key,
-  });
-
-  try {
-    const s3Client = new S3Client({
-      ...aws_sdk_client_common_config,
-      region,
-    });
-    const { Body } = await s3Client.send(command);
-    const bodyContents = await streamToString(Body);
-    return bodyContents;
-  } catch (error) {
-    logger.error('get S3 bucket object error ', { error });
-    return undefined;
-  }
-}
-
 export const getS3BucketPolicy = async (region: string, bucket: string) => {
   try {
     const s3Client = new S3Client({
@@ -125,3 +99,57 @@ export const isBucketExist = async (region: string, bucket: string) => {
     return false;
   }
 };
+
+export async function putStringToS3(
+  content: string,
+  bucketName: string,
+  key: string,
+) {
+  const s3Client = new S3Client({
+    ...aws_sdk_client_common_config,
+  });
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: content,
+    }),
+  );
+}
+
+export async function readS3ObjectAsString(bucketName: string, key: string): Promise<string | undefined> {
+  try {
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+    });
+    const res = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    if (res.Body) {
+      const jsonStr = await res.Body.transformToString('utf-8');
+      return jsonStr;
+    } else {
+      return;
+    }
+  } catch (e) {
+    logger.error('readS3ObjectAsString error', { error: e });
+    throw e;
+  }
+}
+
+export async function readS3ObjectAsJson(bucketName: string, key: string) {
+  const content = await readS3ObjectAsString(bucketName, key);
+  if (content) {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      logger.error('readS3ObjectAsJson error', { error: e });
+      throw e;
+    }
+  } else {
+    return;
+  }
+}

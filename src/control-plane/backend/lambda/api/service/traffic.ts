@@ -11,47 +11,40 @@
  *  and limitations under the License.
  */
 
+import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '@aws/clickstream-base-lib';
+import { PipelineServ } from './pipeline';
 import { ApiSuccess } from '../common/types';
-import { ESourceCategory, ITrafficSource } from '../model/traffic';
+import { IPipeline } from '../model/pipeline';
+import { ITrafficSource } from '../model/traffic';
+import { putStringToS3, readS3ObjectAsJson } from '../store/aws/s3';
 
+const pipelineServ: PipelineServ = new PipelineServ();
 
 export class TrafficSourceServ {
+  private _getTrafficSourceBucketKey(projectId: string, appId: string, type: string): string {
+    if (type === 'ChannelGroups') {
+      return `clickstream/${projectId}/rules/${appId}/${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
+    }
+    return `clickstream/${projectId}/rules/${appId}/${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
+  }
+
+  private _getTrafficSourceBucket(pipeline: IPipeline): string {
+    return pipeline.dataProcessing?.pipelineBucket.name ?? pipeline?.bucket.name;
+  }
+
   public async detail(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      const sourceCategories = [];
-      const category = [
-        ESourceCategory.SEARCH,
-        ESourceCategory.SOCIAL,
-        ESourceCategory.SHOPPING,
-        ESourceCategory.VIDEO,
-      ];
-      for (let i = 0; i < 40; i++) {
-        sourceCategories.push({
-          url: `domain${i + 1}`,
-          source: `name${i + 1}`,
-          category: category[i % 4],
-          params: [`keywordPattern${i + 1}`],
-        });
+      const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiSuccess('The pipeline not found.'));
       }
-      const channelGroups = [];
-      for (let i = 0; i < 30; i++) {
-        channelGroups.push({
-          id: `id${i + 1}`,
-          channel: `channelGroup${i + 1}`,
-          displayName: {
-            'en-US': `displayName${i + 1}`,
-            'zh-CN': `displayName${i + 1}`,
-          },
-          description: {
-            'en-US': `description${i + 1}`,
-            'zh-CN': `description${i + 1}`,
-          },
-          condition: {
-            op: `condition${i + 1}`,
-          },
-        });
-      }
+      const channelGroups = await readS3ObjectAsJson(
+        this._getTrafficSourceBucket(pipeline),
+        this._getTrafficSourceBucketKey(projectId, appId, 'ChannelGroups'));
+      const sourceCategories = await readS3ObjectAsJson(
+        this._getTrafficSourceBucket(pipeline),
+        this._getTrafficSourceBucketKey(projectId, appId, 'SourceCategories'));
       const trafficSource: ITrafficSource = {
         projectId: projectId,
         appId: appId,
@@ -66,8 +59,21 @@ export class TrafficSourceServ {
 
   public async overwrite(req: any, res: any, next: any) {
     try {
-      const trafficSource = req.body;
-      console.log('trafficSource', trafficSource);
+      const trafficSource: ITrafficSource = {
+        ...req.body,
+      };
+      const pipeline = await pipelineServ.getPipelineByProjectId(trafficSource.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiSuccess('The pipeline not found.'));
+      }
+      await putStringToS3(
+        this._getTrafficSourceBucket(pipeline),
+        this._getTrafficSourceBucketKey(trafficSource.projectId, trafficSource.appId, 'ChannelGroups'),
+        JSON.stringify(trafficSource.channelGroups));
+      await putStringToS3(
+        this._getTrafficSourceBucket(pipeline),
+        this._getTrafficSourceBucketKey(trafficSource.projectId, trafficSource.appId, 'SourceCategories'),
+        JSON.stringify(trafficSource.sourceCategories));
       return res.json(new ApiSuccess('OK'));
     } catch (error) {
       next(error);

@@ -239,7 +239,7 @@ const AnalyticsDataManagement: React.FC = () => {
                             analysisStudioEnabled={analysisStudioEnabled}
                           />
                         ),
-                      }
+                      },
                     ]}
                   />
                 )}

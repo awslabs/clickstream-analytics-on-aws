@@ -30,10 +30,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import ChannelGroupModal from './modal/ChannelGroupModal';
-import {
-  IChannelGroup,
-  ITrafficSource,
-} from './reducer/trafficReducer';
+import { IChannelGroup, ITrafficSource } from './reducer/trafficReducer';
 import { getLngFromLocalStorage } from '../analytics-utils';
 
 interface ChannelGroupProps {

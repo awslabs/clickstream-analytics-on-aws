@@ -30,10 +30,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import SourceCategoryModal from './modal/SourceCategoryModal';
-import {
-  ISourceCategory,
-  ITrafficSource,
-} from './reducer/trafficReducer';
+import { ISourceCategory, ITrafficSource } from './reducer/trafficReducer';
 
 interface SourceCategoryProps {
   loading: boolean;

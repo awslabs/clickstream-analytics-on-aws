@@ -380,6 +380,7 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFI
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN = 'FlinkAppArn';
 export const OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON = 'SinkKinesisJson';
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH = 'FlinkAppIdStreamConfigS3Path';
+
 // Ingestion server
 export const INGESTION_SERVER_PING_PATH = '/ping';
 
@@ -477,3 +478,6 @@ export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
 ];
 
 export const DEFAULT_TIMEZONE = 'UTC';
+export const TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME = 'traffic_source_category_rule_v1.json';
+export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rule_v1.json';
+
