@@ -2,18 +2,18 @@
   "valid": {
     "nameEmpty": "Please input application name",
     "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters",
-    "timezoneInvalid": "Please select a timezone"
+    "timezoneInvalid": "Please specify a reporting time zone for this app"
   },
   "appName": "App Name",
   "appID": "App ID",
-  "appTimezone": "App Timezone",
-  "appDesc": "App Description",
+  "appTimezone": "App reporting time zone",
+  "appDesc": "App description",
   "appPackageName": "App package name",
   "androidPackageName": "Android package name",
   "iosAppBundleId": "App Bundle ID (iOS)",
   "createdTime": "Created",
   "labels": {
-    "timezonePlaceholder": "Select Timezone",
+    "timezonePlaceholder": "Select a reporting time zone",
     "empty": "No matches found"
   },
   "sdkGuide": {

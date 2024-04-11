@@ -411,7 +411,7 @@
   "upgrade": {
     "title": "Upgrade Pipeline",
     "tip": "Are you sure you want to upgrade the pipeline to this version?",
-    "needTimezone": "Please configure the timezone of the following applications first, and then return to the current page to upgrade.",
-    "needTimezoneWarning": "If the timezone is determined, it cannot be changed."
+    "needTimezone": "To upgrade the pipeline, please specify a reporting time zone for the app(s) registered in this pipeline.",
+    "needTimezoneWarning": "Once the reporting time zone for the app is configured, it cannot be modified."
   }
 }
