@@ -395,6 +395,9 @@ importers:
       moment:
         specifier: ^2.29.4
         version: 2.30.1
+      moment-timezone:
+        specifier: ^0.5.45
+        version: 0.5.45
       oidc-client-ts:
         specifier: ^2.2.2
         version: 2.4.0

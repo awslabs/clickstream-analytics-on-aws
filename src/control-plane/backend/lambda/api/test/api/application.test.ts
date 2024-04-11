@@ -12,17 +12,14 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
-import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { SNSClient } from '@aws-sdk/client-sns';
+import { ExecutionStatus, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
-  DynamoDBDocumentClient,
   PutCommand,
   ScanCommand,
   GetCommand, GetCommandInput, UpdateCommand, QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
+import { mockClients, resetAllMockClient } from './aws-sdk-mock-util';
 import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
@@ -30,23 +27,16 @@ import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
-const ddbMock = mockClient(DynamoDBDocumentClient);
-const sfnMock = mockClient(SFNClient);
-const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
-const snsMock = mockClient(SNSClient);
-
 describe('Application test', () => {
   beforeEach(() => {
-    ddbMock.reset();
-    sfnMock.reset();
-    cloudWatchEventsMock.reset();
+    resetAllMockClient();
   });
   it('Create application', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(QueryCommand)
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -100,8 +90,8 @@ describe('Application test', () => {
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
-    ddbMock.on(PutCommand).resolves({});
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -117,14 +107,14 @@ describe('Application test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Application created.');
     expect(res.body.success).toEqual(true);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock ddb error', async () => {
-    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
-    projectExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(QueryCommand)
+    tokenMock(mockClients.ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -178,7 +168,7 @@ describe('Application test', () => {
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -197,12 +187,12 @@ describe('Application test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock stack status error', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand)
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -248,12 +238,12 @@ describe('Application test', () => {
       success: false,
       message: 'The pipeline current status does not allow update.',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create application with mock pipeline error', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand).resolves({
       Items: [],
     });
     const res = await request(app)
@@ -273,12 +263,12 @@ describe('Application test', () => {
       success: false,
       message: 'The latest pipeline not found.',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create application 400', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(PutCommand).resolves({});
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -310,11 +300,11 @@ describe('Application test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create application Not Modified', async () => {
-    tokenMock(ddbMock, true);
-    projectExistedMock(ddbMock, true);
+    tokenMock(mockClients.ddbMock, true);
+    projectExistedMock(mockClients.ddbMock, true);
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -340,12 +330,12 @@ describe('Application test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create application with non-existent project', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
-    ddbMock.on(PutCommand).resolves({});
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, false);
+    mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -371,12 +361,12 @@ describe('Application test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create application with error id', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand)
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -400,8 +390,8 @@ describe('Application test', () => {
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
-    ddbMock.on(PutCommand).resolves({});
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -429,9 +419,9 @@ describe('Application test', () => {
     });
   });
   it('Create application with error mutil id', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand)
+    tokenMock(mockClients.ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -455,8 +445,8 @@ describe('Application test', () => {
           },
         ],
       });
-    sfnMock.on(StartExecutionCommand).resolves({});
-    ddbMock.on(PutCommand).resolves({});
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -476,8 +466,8 @@ describe('Application test', () => {
     });
   });
   it('Get application by ID', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(GetCommand).resolves({
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(GetCommand).resolves({
       Item: {
         deleted: false,
         updateAt: 1674202173912,
@@ -495,7 +485,7 @@ describe('Application test', () => {
         iosAppStoreId: 'iosAppStoreId',
       },
     });
-    ddbMock.on(QueryCommand).resolves({
+    mockClients.ddbMock.on(QueryCommand).resolves({
       Items: [
         {
           pipelineId: MOCK_PROJECT_ID,
@@ -525,6 +515,12 @@ describe('Application test', () => {
               status: ExecutionStatus.RUNNING,
             },
           },
+          timezone: [
+            {
+              appId: MOCK_APP_ID,
+              timezone: 'America/New_York',
+            },
+          ],
           ingestionServer: {
             sinkType: 's3',
           },
@@ -532,7 +528,7 @@ describe('Application test', () => {
         },
       ],
     });
-    let res = await request(app)
+    const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -548,6 +544,7 @@ describe('Application test', () => {
         iosAppStoreId: 'iosAppStoreId',
         iosBundleId: 'iosBundleId',
         createAt: 1674202173912,
+        timezone: 'America/New_York',
         pipeline: {
           customDomain: '',
           endpoint: 'http://xxx/xxx',
@@ -582,7 +579,7 @@ describe('Application test', () => {
     });
   });
   it('Get application by ID with mock error', async () => {
-    projectExistedMock(ddbMock, true);
+    projectExistedMock(mockClients.ddbMock, true);
     // Mock DynamoDB error
     const input: GetCommandInput = {
       TableName: clickStreamTableName,
@@ -592,7 +589,7 @@ describe('Application test', () => {
       },
     };
     // Mock DynamoDB error
-    ddbMock.on(GetCommand, input).rejects(new Error('Mock DynamoDB error'));
+    mockClients.ddbMock.on(GetCommand, input).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -604,7 +601,7 @@ describe('Application test', () => {
     });
   });
   it('Get application with no pid', async () => {
-    projectExistedMock(ddbMock, true);
+    projectExistedMock(mockClients.ddbMock, true);
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -622,8 +619,8 @@ describe('Application test', () => {
     });
   });
   it('Get non-existent application', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, false);
     const res = await request(app)
       .get(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -634,8 +631,8 @@ describe('Application test', () => {
     });
   });
   it('Get application list', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Application-01' },
         { name: 'Application-02' },
@@ -664,7 +661,7 @@ describe('Application test', () => {
     });
 
     // Mock DynamoDB error
-    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
+    mockClients.ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .get(`/api/app?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -676,8 +673,8 @@ describe('Application test', () => {
     });
   });
   it('Get application list with page', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand).resolves({
       Items: [
         { name: 'Application-01' },
         { name: 'Application-02' },
@@ -703,8 +700,8 @@ describe('Application test', () => {
     });
   });
   it('Get application list with no pid', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(ScanCommand).resolves({});
+    projectExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(ScanCommand).resolves({});
     const res = await request(app)
       .get('/api/app');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -722,11 +719,11 @@ describe('Application test', () => {
     });
   });
   it('Delete application', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(QueryCommand)
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -781,8 +778,8 @@ describe('Application test', () => {
           },
         ],
       });
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -794,11 +791,11 @@ describe('Application test', () => {
     });
   });
   it('Delete application with mock ddb error', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    createEventRuleMock(cloudWatchEventsMock);
-    createSNSTopicMock(snsMock);
-    ddbMock.on(QueryCommand)
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -824,7 +821,7 @@ describe('Application test', () => {
         ],
       });
     // Mock DynamoDB error
-    ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
+    mockClients.ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -836,9 +833,9 @@ describe('Application test', () => {
     });
   });
   it('Delete application that not belonging to pipeline', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand)
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -863,7 +860,7 @@ describe('Application test', () => {
           },
         ],
       });
-    ddbMock.on(UpdateCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -874,9 +871,9 @@ describe('Application test', () => {
     });
   });
   it('Delete application with error app id', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand)
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
           {
@@ -905,7 +902,7 @@ describe('Application test', () => {
           },
         ],
       });
-    ddbMock.on(UpdateCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -916,9 +913,9 @@ describe('Application test', () => {
     });
   });
   it('Delete application with error pipeline status', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
+    mockClients.ddbMock.on(QueryCommand).resolves({
       Items: [
         {
           name: 'Pipeline-01',
@@ -948,8 +945,8 @@ describe('Application test', () => {
     });
   });
   it('Delete application with no pid', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, true);
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, true);
     const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -973,8 +970,8 @@ describe('Application test', () => {
     });
   });
   it('Delete application with no existed', async () => {
-    projectExistedMock(ddbMock, true);
-    appExistedMock(ddbMock, false);
+    projectExistedMock(mockClients.ddbMock, true);
+    appExistedMock(mockClients.ddbMock, false);
     const res = await request(app)
       .delete(`/api/app/${MOCK_APP_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -991,6 +988,113 @@ describe('Application test', () => {
         },
       ],
     });
+  });
+  it('Set application timezone', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://example.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      });
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .put(`/api/app/${MOCK_APP_ID}/timezone`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        timezone: 'America/New_York',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toEqual('Application timezone updated.');
+    expect(res.body.success).toEqual(true);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+  });
+  it('Update application timezone when the application timezone has been set', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            timezone: [
+              {
+                appId: MOCK_APP_ID,
+                timezone: 'America/New_York',
+              },
+            ],
+          },
+        ],
+      });
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .put(`/api/app/${MOCK_APP_ID}/timezone`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        timezone: 'America/New_York',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Timezone not allowed to be modified.');
+    expect(res.body.success).toEqual(true);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
   afterAll((done) => {
     server.close();

@@ -115,6 +115,18 @@ describe('reporting test', () => {
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
     quickSightUserMock(ddbMock, false);
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
   });
 
   it('funnel bar visual - preview', async () => {
@@ -147,7 +159,6 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
         chartType: QuickSightChartType.BAR,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -226,7 +237,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -317,7 +328,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -382,7 +393,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -441,7 +452,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -511,7 +522,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
@@ -601,7 +612,7 @@ describe('reporting test', () => {
 
     const requestBody = {
       action: 'PREVIEW',
-      timezone: 'Asia/Shanghai',
+
       locale: ExploreLocales.ZH_CN,
       chartType: QuickSightChartType.LINE,
       viewName: 'testview0002',
@@ -699,7 +710,7 @@ describe('reporting test', () => {
 
     const requestBody = {
       action: 'PREVIEW',
-      timezone: 'Asia/Shanghai',
+
       locale: ExploreLocales.ZH_CN,
       chartType: QuickSightChartType.LINE,
       viewName: 'testview0002',
@@ -780,7 +791,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -863,7 +874,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -946,7 +957,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartType: QuickSightChartType.SANKEY,
@@ -1034,7 +1045,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -1135,7 +1146,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -1383,7 +1394,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'attribution analysis',
         chartSubTitle: 'detail information',
@@ -1627,7 +1638,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -1881,7 +1892,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -2116,10 +2127,6 @@ describe('reporting test', () => {
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
-    });
-
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
 
     quickSightMock.on(ListDashboardsCommand).resolves({
@@ -2423,7 +2430,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.BAR,
         viewName: 'testview0002',
         appId: 'app1',
@@ -2466,7 +2473,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2511,7 +2518,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2552,7 +2559,7 @@ describe('reporting test', () => {
   it('common parameter check - limit conditions', async () => {
     const funnelBody = {
       action: 'PREVIEW',
-      timezone: 'Asia/Shanghai',
+
       chartType: QuickSightChartType.BAR,
       viewName: 'testview0002',
       projectId: 'project01_wvzh',
@@ -2670,7 +2677,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2714,7 +2721,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.BAR,
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
@@ -2761,7 +2768,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2806,7 +2813,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2850,7 +2857,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2932,7 +2939,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2978,7 +2985,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -3022,7 +3029,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -3070,7 +3077,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -3120,7 +3127,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.LINE,
         projectId: 'project01_wvzh',
@@ -3168,7 +3175,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.LINE,
         projectId: 'project01_wvzh',
@@ -3217,7 +3224,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3269,7 +3276,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3361,7 +3368,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
@@ -3461,13 +3468,11 @@ describe('reporting test', () => {
       },
     });
 
-
     const res = await request(app)
       .post('/api/reporting/retention')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3572,7 +3577,7 @@ describe('reporting test', () => {
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
-        timezone: 'Asia/Shanghai',
+        timezone: 'Asia/Singapore',
         groupColumn: 'week',
         timeStart: undefined,
         timeEnd: undefined,
@@ -3663,7 +3668,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
-        timezone: 'Asia/Shanghai',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3768,7 +3773,7 @@ describe('reporting test', () => {
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
-        timezone: 'Asia/Shanghai',
+        timezone: 'Asia/Singapore',
         groupColumn: 'week',
         timeStart: undefined,
         timeEnd: undefined,
@@ -3876,7 +3881,7 @@ describe('reporting test in China region', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
-        timezone: 'Asia/Shanghai',
+
         chartType: QuickSightChartType.BAR,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',

@@ -12,6 +12,7 @@
  */
 
 import {
+  Alert,
   Box,
   Button,
   ColumnLayout,
@@ -32,18 +33,27 @@ import { alertMsg, defaultStr } from 'ts/utils';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
+  projectPipelineExtend?: IPipelineExtend;
   loadingRefresh: boolean;
+  loadingPipelineExtend: boolean;
   reloadPipeline: (refresh: string) => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
-  const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
+  const {
+    pipelineInfo,
+    projectPipelineExtend,
+    loadingPipelineExtend,
+    loadingRefresh,
+    reloadPipeline,
+  } = props;
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [disableRetry, setDisableRetry] = useState(false);
   const [loadingUpgrade, setLoadingUpgrade] = useState(false);
   const [disableUpgrade, setDisableUpgrade] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [needUpgradeAppIds, setNeedUpgradeAppIds] = useState<string[]>([]);
 
   const checkStackRollbackFailed = () => {
     const stackDetails = pipelineInfo?.stackDetails ?? [];
@@ -94,6 +104,30 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
     }
   };
 
+  const upgradeClick = () => {
+    const appIds = projectPipelineExtend?.createApplicationSchemasStatus?.map(
+      (item) => item.appId
+    );
+    if (appIds?.length === 0) {
+      setNeedUpgradeAppIds([]);
+      setShowUpgradeModal(true);
+      return;
+    }
+    const hadTimezoneAppIds: string[] = [];
+    for (const tz of pipelineInfo?.timezone ?? []) {
+      if (tz.timezone.trim()) {
+        hadTimezoneAppIds.push(tz.appId);
+      }
+    }
+    // find ip in appIds but not in hadTimezoneAppIds
+    const needUpgradeAppIds = appIds?.filter(
+      (id) => !hadTimezoneAppIds.includes(id)
+    );
+
+    setNeedUpgradeAppIds(needUpgradeAppIds ?? []);
+    setShowUpgradeModal(true);
+  };
+
   return (
     <>
       <Modal
@@ -111,6 +145,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 {t('button.cancel')}
               </Button>
               <Button
+                disabled={needUpgradeAppIds.length > 0}
                 variant="primary"
                 onClick={() => {
                   startUpgradePipeline();
@@ -124,8 +159,31 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
         }
         header={t('pipeline:upgrade.title')}
       >
-        {t('pipeline:upgrade.tip')} <br />
-        <b>{pipelineInfo?.templateInfo?.solutionVersion}</b>
+        {needUpgradeAppIds.length > 0 ? (
+          <>
+            {t('pipeline:upgrade.needTimezone')} <br />
+            <br />
+            {needUpgradeAppIds.map((id) => (
+              <Link
+                key={id}
+                external
+                href={`/project/${pipelineInfo?.projectId}/application/detail/${id}`}
+              >
+                {id}
+              </Link>
+            ))}
+            <br />
+            <br />
+            <Alert statusIconAriaLabel="Warning" type="warning">
+              {t('pipeline:upgrade.needTimezoneWarning')}
+            </Alert>
+          </>
+        ) : (
+          <>
+            {t('pipeline:upgrade.tip')} <br />
+            <b>{pipelineInfo?.templateInfo?.solutionVersion}</b>
+          </>
+        )}
       </Modal>
       <Container
         header={
@@ -178,9 +236,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     disabled={
                       disableUpgrade || pipelineInfo?.templateInfo?.isLatest
                     }
-                    onClick={() => {
-                      setShowUpgradeModal(true);
-                    }}
+                    loading={loadingRefresh && loadingPipelineExtend}
+                    onClick={upgradeClick}
                   >
                     {t('button.upgrade')}
                   </Button>

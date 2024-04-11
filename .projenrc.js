@@ -170,6 +170,7 @@ const depsForFrontendProject = [
   'terser-webpack-plugin@^5.2.5',
   'uuid@^9.0.0',
   'web-vitals@^3.3.2',
+  'moment-timezone@^0.5.45',
 ];
 
 const devDepsForFrontendProject = [
@@ -228,6 +229,7 @@ const depsForApiProject = [
   'i18next@^22.4.6',
   'i18next-fs-backend@^2.2.0',
   'fast-memoize@^2.5.1',
+  'moment-timezone@^0.5.45',
   ...smithyPackagesDeps,
   ...awsSDKPackagesDeps,
   ...awsSDKPackagesDepsForApiProject,
