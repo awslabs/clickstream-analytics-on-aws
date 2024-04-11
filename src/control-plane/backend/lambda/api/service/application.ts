@@ -203,6 +203,9 @@ export class ApplicationServ {
       if (latestPipeline.timezone) {
         const index = latestPipeline.timezone.findIndex(tz => tz.appId === id);
         if (index > -1) {
+          if (latestPipeline.timezone[index].timezone.trim()) {
+            return res.status(400).json(new ApiSuccess(null, 'Timezone not allowed to be modified.'));
+          }
           latestPipeline.timezone[index] = appTimezone;
         } else {
           latestPipeline.timezone.push(appTimezone);
