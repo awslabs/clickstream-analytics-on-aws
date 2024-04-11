@@ -1266,6 +1266,14 @@ export class CDataModelingStack extends JSONObject {
   @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
     TimeZoneWithAppId?: string;
 
+  @JSONObject.optional(72)
+  @JSONObject.gt(0)
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.dataFreshnessInHour ?? 72;
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    DataFreshnessInHour?: number;
+
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);

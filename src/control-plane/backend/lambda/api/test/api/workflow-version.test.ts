@@ -569,6 +569,9 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'TimeZoneWithAppId',
                           },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                       Reporting: removeParametersFromStack(ReportingStack, [
@@ -659,6 +662,9 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'TimeZoneWithAppId',
                           },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                       Reporting: removeParametersFromStack(
@@ -744,6 +750,9 @@ describe('Workflow test with pipeline version', () => {
                           },
                           {
                             ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
@@ -1020,6 +1029,9 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'TimeZoneWithAppId',
                           },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                     },
@@ -1107,6 +1119,9 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'TimeZoneWithAppId',
                           },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                     },
@@ -1185,6 +1200,9 @@ describe('Workflow test with pipeline version in China region', () => {
                           },
                           {
                             ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
