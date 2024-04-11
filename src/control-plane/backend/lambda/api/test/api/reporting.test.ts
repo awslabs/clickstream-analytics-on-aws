@@ -46,7 +46,7 @@ import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './p
 import { clickStreamTableName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EventAndCondition, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
+import { EVENT_USER_VIEW, EventAndCondition, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
@@ -2134,7 +2134,6 @@ describe('reporting test', () => {
       .send({
         projectId: 'project01_wvzh',
         appId: 'app1',
-        region: 'us-east-1',
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -2145,7 +2144,7 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
-      Sqls: expect.arrayContaining(['select * from app1.event limit 1']),
+      Sqls: expect.arrayContaining([`select * from app1.${EVENT_USER_VIEW} limit 1`]),
     });
   });
 
@@ -2156,7 +2155,6 @@ describe('reporting test', () => {
       .send({
         projectId: '\\x98',
         appId: 'app1',
-        region: 'us-east-1',
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
