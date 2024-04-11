@@ -53,12 +53,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     template.hasParameter('QuickSightVpcConnectionSubnetParam', {});
   });
 
-  test('Should has Parameter QuickSightPrincipalParam', () => {
-    template.hasParameter('QuickSightPrincipalParam', {
-      Type: 'String',
-    });
-  });
-
   test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
     template.hasParameter('QuickSightOwnerPrincipalParam', {
       Type: 'String',
@@ -139,10 +133,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
 
-    const param2 = template.toJSON().Parameters.QuickSightPrincipalParam;
-    const pattern2 = param2.AllowedPattern;
-    const regex2 = new RegExp(`${pattern2}`);
-
     const validValues = [
       'arn:aws:quicksight:us-east-1:111111111111:user/default/clickstream',
       'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser',
@@ -152,7 +142,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
     for (const v of validValues) {
       expect(v).toMatch(regex);
-      expect(v).toMatch(regex2);
     }
 
     const invalidValues = [
@@ -163,7 +152,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
-      expect(v).not.toMatch(regex2);
     }
   });
 
@@ -878,9 +866,6 @@ describe('DataReportingQuickSightStack resource test', () => {
       },
       quickSightUser: {
         Ref: 'QuickSightUserParam',
-      },
-      quickSightSharePrincipalArn: {
-        Ref: 'QuickSightPrincipalParam',
       },
       quickSightOwnerPrincipalArn: {
         Ref: 'QuickSightOwnerPrincipalParam',

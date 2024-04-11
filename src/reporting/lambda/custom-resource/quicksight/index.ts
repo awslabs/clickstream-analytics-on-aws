@@ -143,8 +143,8 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
         });
 
         const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
-        schemaName,
-        dashboardDefProps, timezoneDict);
+          schemaName,
+          dashboardDefProps, timezoneDict);
 
         dashboards.push({
           appId: schemaName,
@@ -266,7 +266,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       };
 
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
-        dashboardDefProps, oldDashboardDefProps, 
+        dashboardDefProps, oldDashboardDefProps,
         createdQuickSightResources);
 
       dashboards.push({
@@ -284,7 +284,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
         schemaName,
         dashboardDefProps,
-        timezoneDict
+        timezoneDict,
       );
 
       logger.info('Creating schema', {
@@ -602,7 +602,7 @@ export type CreatedQuickSightResources = {
 const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   dashboardDef: QuickSightDashboardDefProps,
   oldDashboardDef: QuickSightDashboardDefProps,
-  createdQuickSightResources: CreatedQuickSightResources
+  createdQuickSightResources: CreatedQuickSightResources,
 )
 : Promise<UpdateDashboardCommandOutput|undefined> => {
 
@@ -614,7 +614,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn,
     commonParams.awsAccountId,
     commonParams.ownerPrincipalArn,
-    commonParams.sharePrincipalArn
+    commonParams.sharePrincipalArn,
   );
 
   const oldDataSetTableNames: string[] = [];

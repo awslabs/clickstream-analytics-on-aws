@@ -86,7 +86,7 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-owner-principal-arn',
     quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
@@ -572,7 +572,7 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-owner-principal-arn',
     quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'test-database',
     templateArn: 'test-template-arn',
@@ -933,7 +933,7 @@ describe('QuickSight Lambda function', () => {
     awsPartition: 'aws',
     quickSightNamespace: 'default',
     quickSightUser: 'clickstream',
-    quickSightSharePrincipalArn: 'test-principal-arn',
+    quickSightSharePrincipalArn: 'test-owner-principal-arn',
     quickSightOwnerPrincipalArn: 'test-owner-principal-arn',
     databaseName: 'changed-database',
     templateArn: 'test-template-arn',
@@ -1625,11 +1625,27 @@ describe('QuickSight Lambda function', () => {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonPropsWithNewDataSet,
       schemas: 'test1,zzzz',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        },
+        {
+          "appId": "zzzz",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
       schemas: 'test1',
+      timezone: `[
+        {
+          "appId": "test1",
+          "timezone": "Asia/Shanghai"
+        }
+      ]`,
     },
   };
 
@@ -3020,9 +3036,7 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(CreateDataSetCommand).callsFakeOnce(input => {
       if ( input.Permissions[0].Principal === 'test-owner-principal-arn'
-        && input.Permissions[1].Principal === 'test-principal-arn'
         && input.Permissions[0].Actions[9] === 'quicksight:CancelIngestion'
-        && input.Permissions[1].Actions[4] === 'quicksight:ListIngestions'
       ) {
         return {
           Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -3037,8 +3051,7 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(UpdateDataSourcePermissionsCommand).callsFakeOnce(input => {
-      if ( input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
-        && input.GrantPermissions[1].Principal === 'test-principal-arn') {
+      if ( input.GrantPermissions[0].Principal === 'test-owner-principal-arn') {
         return {
           DataSourceArn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:datasource/datasource_1',
           DataSourceId: 'datasource_1',
@@ -3054,11 +3067,9 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(CreateDashboardCommand).callsFakeOnce(input => {
-      if ( input.Permissions.length === 2
+      if ( input.Permissions.length === 1
         && input.Permissions[0].Principal === 'test-owner-principal-arn'
-        && input.Permissions[1].Principal === 'test-principal-arn'
         && input.Permissions[0].Actions[0] === 'quicksight:DescribeDashboard'
-        && input.Permissions[1].Actions[3] === 'quicksight:UpdateDashboard'
       ) {
         return {
           DashboardId: 'dashboard_0',
@@ -3241,6 +3252,8 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(UpdateDataSetPermissionsCommand).callsFakeOnce(input => {
+
+      console.log(input);
       if ( input.GrantPermissions.length === 1
         && input.GrantPermissions[0].Principal === 'test-owner-principal-arn'
         && input.GrantPermissions[0].Actions[9] === 'quicksight:CancelIngestion'

@@ -80,15 +80,6 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'QuickSight Owner Principal Arn',
   };
 
-  const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
-    description: 'Arn of the QuickSight principal, dashboard resource will be share to this principal',
-    type: 'String',
-    allowedPattern: QUICKSIGHT_USER_ARN_PATTERN,
-  });
-  labels[quickSightPrincipalParam.logicalId] = {
-    default: 'QuickSight Principal Arn',
-  };
-
   const quickSightTemplateArnParam = new CfnParameter(scope, 'QuickSightTemplateArnParam', {
     description: 'Arn of the QuickSight template.',
     type: 'String',
@@ -170,7 +161,6 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightVpcConnectionSGParam.logicalId,
       quickSightVpcConnectionSubnetParam.logicalId,
       quickSightOwnerPrincipalParam.logicalId,
-      quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
       quickSightTimezoneParam.logicalId,
     ],
@@ -194,7 +184,6 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightVpcConnectionSGParam,
     quickSightVpcConnectionSubnetParam,
     quickSightOwnerPrincipalParam,
-    quickSightPrincipalParam,
     quickSightTemplateArnParam,
     quickSightTimezoneParam,
     redshiftEndpointParam,
