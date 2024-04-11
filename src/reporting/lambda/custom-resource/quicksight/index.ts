@@ -114,6 +114,8 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
   const timezoneDict = timezonejsonArrayToDict(JSON.parse(props.timezone));
 
+  logger.warn('timezoneDict:', timezoneDict);
+
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Update' ) {
@@ -789,7 +791,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
     };
 
-    logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
+    logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam, undefined, (value: string) => value ));
 
     let colGroups: ColumnGroup[] = [];
     if (props.columnGroups !== undefined) {

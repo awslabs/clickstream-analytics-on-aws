@@ -87,8 +87,8 @@ export function createQuicksightCustomResource(
 
   const eventViewColumns = `
     *, 
-    DATE_TRUNC('second', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) ::timestamp AS event_timestamp_local,
-    DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) ::timestamp AS event_date
+    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,
+    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date
   `;
 
   const dashboardDefProps: QuickSightDashboardDefProps = {
@@ -107,8 +107,8 @@ export function createQuicksightCustomResource(
           select 
             ${eventViewColumns} 
           from {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}
-          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) >= <<$startDate01>>
-          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))
+          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) >= <<$startDate01>>
+          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))
         `,
         columns: [
           ...clickstream_event_view_columns,
@@ -914,6 +914,7 @@ export function createQuicksightCustomResource(
       quickSightOwnerPrincipalArn: props.quickSightProps.ownerPrincipalArn,
       schemas: props.redshiftProps.databaseSchemaNames,
       dashboardDefProps,
+      timezone: props.timezone,
     },
   });
   return cr;
