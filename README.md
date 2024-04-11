@@ -72,7 +72,9 @@ npx cdk deploy ingestion-server-s3-stack --parameters ...
 
 ```shell
 # update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
-bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh -n modelRedshiftStackName -s Clickstream-DataModelingRedshift-xxx
+# update the existing web console
+bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console> -c
 ```
 
 ## Test
