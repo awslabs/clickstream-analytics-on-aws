@@ -217,7 +217,9 @@ const RegisterApp: React.FC = () => {
                       value: tz,
                     };
                   })}
-                  placeholder={defaultStr(t('application:labels.timezonePlaceholder'))}
+                  placeholder={defaultStr(
+                    t('application:labels.timezonePlaceholder')
+                  )}
                   empty={t('application:labels.empty')}
                 />
               </FormField>

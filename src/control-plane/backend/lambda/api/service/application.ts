@@ -218,7 +218,7 @@ export class ApplicationServ {
       }
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateAppTimezone();
-      return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
+      return res.status(201).json(new ApiSuccess({ id }, 'Application timezone updated.'));
     } catch (error) {
       next(error);
     }

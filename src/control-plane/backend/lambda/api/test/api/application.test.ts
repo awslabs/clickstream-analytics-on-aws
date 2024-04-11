@@ -990,22 +990,111 @@ describe('Application test', () => {
     });
   });
   it('Set application timezone', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://example.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+            },
+            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+          },
+        ],
+      });
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
     const res = await request(app)
-      .post(`/api/app/${MOCK_APP_ID}/`)
+      .put(`/api/app/${MOCK_APP_ID}/timezone`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: MOCK_PROJECT_ID,
-        name: MOCK_APP_NAME,
-        appId: MOCK_APP_ID,
-        description: 'Description of App-01',
-        platform: 'Web',
-        sdk: 'Clickstream SDK',
+        timezone: 'America/New_York',
       });
-    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 21);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
-    expect(res.body.message).toEqual('Application created.');
+    expect(res.body.message).toEqual('Application timezone updated.');
     expect(res.body.success).toEqual(true);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+  });
+  it('Update application timezone when the application timezone has been set', async () => {
+    projectExistedMock(mockClients.ddbMock, true);
+    createEventRuleMock(mockClients.cloudWatchEventsMock);
+    createSNSTopicMock(mockClients.snsMock);
+    mockClients.ddbMock.on(QueryCommand)
+      .resolvesOnce({
+        Items: [
+          {
+            name: 'Pipeline-01',
+            pipelineId: MOCK_PROJECT_ID,
+            status: {
+              status: PipelineStatusType.ACTIVE,
+            },
+            ingestionServer: {
+              sinkType: 's3',
+            },
+            timezone: [
+              {
+                appId: MOCK_APP_ID,
+                timezone: 'America/New_York',
+              },
+            ],
+          },
+        ],
+      });
+    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+    mockClients.ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .put(`/api/app/${MOCK_APP_ID}/timezone`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+        timezone: 'America/New_York',
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Timezone not allowed to be modified.');
+    expect(res.body.success).toEqual(true);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(mockClients.ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
   afterAll((done) => {
     server.close();
