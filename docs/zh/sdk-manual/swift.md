@@ -66,6 +66,7 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 
 在配置参数之后，您需要在 AppDelegate 的 `didFinishLaunchingWithOptions` 生命周期方法中进行初始化以使用 SDK。
 
+#### 3.1 使用默认配置初始化 SDK
 === "Swift"
     ```swift
     import Clickstream
@@ -82,7 +83,7 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 === "Objective-C"
     ```objective-c
     @import Clickstream;
-    
+
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;
         [ClickstreamObjc initSDKAndReturnError:&error];
@@ -93,7 +94,48 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
     }
     ```
 
-如果您的项目是使用 SwiftUI 开发的，您需要创建一个`application` 代理并通过 `UIApplicationDelegateAdaptor` 将其附加到您的 App。
+#### 3.2 使用自定义配置初始化 SDK
+
+=== "Swift"
+```swift
+import Clickstream
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        do {
+            let configuration = ClickstreamConfiguration()
+                .withAppId("your appId")
+                .withEndpoint("https://example.com/collect")
+                .withLogEvents(true)
+            try ClickstreamAnalytics.initSDK(configuration)
+        } catch {
+            assertionFailure("Fail to initialize ClickstreamAnalytics: \(error)")
+        }
+        return true
+    }
+    ```
+
+=== "Objective-C"
+```objective-c
+@import Clickstream;
+
+    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
+        NSError *error = nil;
+        ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+                                                   withAppId:@"your appId"]
+                                                   withEndpoint:@"https://example.com/collect"]
+                                                   withLogEvents:TRUE];
+        [ClickstreamObjc initSDK:configuration error: &error];
+        if (error) {
+            NSLog(@"Fail to initialize ClickstreamAnalytics: %@", error.localizedDescription);
+        }
+        return YES;
+    }
+    ```
+
+#### 3.3 SwiftUI 配置
+
+如果您的项目是使用 SwiftUI 开发的，您需要创建一个 `application` 代理并通过 `UIApplicationDelegateAdaptor` 将其附加到您的
+App。
 
 ```swift
 @main
@@ -107,7 +149,8 @@ struct YourApp: App {
 }
 ```
 
-对于 SwiftUI，我们尚不支持自动收集屏幕浏览事件，您需要通过设置 `configuration.isTrackScreenViewEvents = false` 来禁用屏幕浏览事件，请参阅[更新SDK配置](#sdk_1)。
+Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI 应用程序必须 [手动记录 Screen View 事件](#screen-view)
+，并在初始化 SDK 时通过设置 `configuration.withTrackScreenViewEvents(false)` 来禁用 Screen View 事件的自动跟踪。
 
 ### 4.开始使用
 

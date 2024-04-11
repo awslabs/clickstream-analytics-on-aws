@@ -66,6 +66,7 @@ Your `appId` and `endpoint` are already set up in it, here's an explanation of e
 
 Once you have configured the parameters, you need to initialize it in AppDelegate's `didFinishLaunchingWithOptions` lifecycle method to use the SDK.
 
+#### 3.1 Initialize the SDK with default configuration
 === "Swift"
     ```swift
     import Clickstream
@@ -82,7 +83,7 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
 === "Objective-C"
     ```objective-c
     @import Clickstream;
-    
+
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;
         [ClickstreamObjc initSDKAndReturnError:&error];
@@ -93,7 +94,48 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
     }
     ```
 
-If your project is developed with SwiftUI, you need to create an application delegate and attach it to your `App` through `UIApplicationDelegateAdaptor`.
+#### 3.2 Initialize the SDK with custom configuration
+
+=== "Swift"
+```swift
+import Clickstream
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        do {
+            let configuration = ClickstreamConfiguration()
+                .withAppId("your appId")
+                .withEndpoint("https://example.com/collect")
+                .withLogEvents(true)
+            try ClickstreamAnalytics.initSDK(configuration)
+        } catch {
+            assertionFailure("Fail to initialize ClickstreamAnalytics: \(error)")
+        }
+        return true
+    }
+    ```
+
+=== "Objective-C"
+```objective-c
+@import Clickstream;
+
+    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
+        NSError *error = nil;
+        ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+                                                   withAppId:@"your appId"]
+                                                   withEndpoint:@"https://example.com/collect"]
+                                                   withLogEvents:TRUE];
+        [ClickstreamObjc initSDK:configuration error: &error];
+        if (error) {
+            NSLog(@"Fail to initialize ClickstreamAnalytics: %@", error.localizedDescription);
+        }
+        return YES;
+    }
+    ```
+
+#### 3.3 SwiftUI configuration
+
+If your project is developed with SwiftUI, you need to create an application delegate and attach it to your `App`
+through `UIApplicationDelegateAdaptor`.
 
 ```swift
 @main
@@ -107,7 +149,9 @@ struct YourApp: App {
 }
 ```
 
-For SwiftUI, we do not yet support automatic collection of screen view events, you need to disable screen view event by setting `configuration.isTrackScreenViewEvents = false`, see the [configuration](#configuration-update) steps.
+Clickstream Swift SDK depends on method swizzling to automatically record screen views. SwiftUI apps
+must [record screen view events manually](#record-screen-view-events-manually), and disable automatic tracking of screen
+view events by setting configuration.withTrackScreenViewEvents(false) when the SDK is initialized.
 
 ### 4.Start  using
 
@@ -380,14 +424,14 @@ After initializing the SDK, you can use the following code to customize the conf
     // config the sdk after initialize.
     do {
         var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
-        configuration.appId = "your appId"
-        configuration.endpoint = "https://example.com/collect"
-        configuration.authCookie = "your authentication cookie"
-        configuration.sessionTimeoutDuration = 1800000
-        configuration.isTrackScreenViewEvents = false
-        configuration.isTrackUserEngagementEvents = false
-        configuration.isLogEvents = true
-        configuration.isCompressEvents = true
+        configuration.withAppId("your appId")
+            .withEndpoint("https://example.com/collect")
+            .withLogEvents(true)
+            .withCompressEvents(true)
+            .withTrackAppExceptionEvents(true)
+            .withTrackScreenViewEvents(true)
+            .withTrackUserEngagementEvents(true)
+            .withAuthCookie("your authentication cookie")
     } catch {
         print("Failed to config ClickstreamAnalytics: \(error)")
     }
@@ -399,19 +443,14 @@ After initializing the SDK, you can use the following code to customize the conf
     @import Clickstream;
     
     // config the sdk after initialize.
-    ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
-    if (configuration) {
-        [configuration setAppId:@"your appId"];
-        [configuration setEndpoint:@"https://example.com/collect"];
-        [configuration setAuthCookie:@"your authentication cookie"];
-        [configuration setSessionTimeoutDuration:1800000];
-        [configuration setIsTrackScreenViewEvents:0];
-        [configuration setIsTrackUserEngagementEvents:0];
-        [configuration setIsLogEvents:1];
-        [configuration setIsCompressEvents:1];
-    }else{
-        NSLog(@"Failed to get configuration: %@", error.localizedDescription);
-    }
+    ClickstreamConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
+    configuration = [[[[[[[configuration withAppId:@"your appId"]
+                        withEndpoint:@"https://example.com/collect"]
+                        withLogEvents:TRUE]
+                        withCompressEvents:TRUE]
+                        withTrackScreenViewEvents:TRUE]
+                        withTrackUserEngagementEvents:TRUE]
+                        withTrackAppExceptionEvents:TRUE];
     ```
 
 > Note: this configuration will override the default configuration in `amplifyconfiguration.json` file
@@ -423,7 +462,6 @@ Here is an explanation of each option.
 | appId                       | String         | true     | --            | the app id of your application in web console                                               |
 | endpoint                    | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
 | authCookie                  | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| sessionTimeoutDuration      | Int64          | false    | 1800000       | the duration for session timeout in milliseconds                                            |
 | isTrackScreenViewEvents     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
 | isTrackUserEngagementEvents | Bool           | false    | true          | whether to auto-record user engagement events                                               |
 | isLogEvents                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
