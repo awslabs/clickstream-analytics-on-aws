@@ -1040,7 +1040,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check CopyDataFromS3RoleDefaultPolicy', () => {
+  test('Check RedshiftAssociatedRoleDefaultPolicy', () => {
     for (const nestedTemplate of allNestedTemplates) {
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
         PolicyDocument: {
@@ -1355,6 +1355,48 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       'session/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+                's3:DeleteObject*',
+                's3:PutObject',
+                's3:PutObjectLegalHold',
+                's3:PutObjectRetention',
+                's3:PutObjectTagging',
+                's3:PutObjectVersionTagging',
+                's3:Abort*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      '*',
                     ],
                   ],
                 },

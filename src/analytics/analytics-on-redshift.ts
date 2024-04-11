@@ -548,9 +548,9 @@ function addCfnNag(stack: Stack) {
       ],
     },
     {
-      paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RedshiftAssociatedRole/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
+        ruleToSuppressRolePolicyWithHighSPCM('RedshiftAssociatedRole'),
       ],
     },
     {
