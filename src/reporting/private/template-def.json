@@ -7094,10 +7094,10 @@
                                     "Rows": [
                                         {
                                             "DateDimensionField": {
-                                                "FieldId": "b789f515-68ee-461e-b65e-61ead1c77cff.2.1711698508376",
+                                                "FieldId": "f674c811-6d20-4dc8-994d-d57ce0b3792e.2.1712814433901",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "First Visit Date (retention)"
+                                                    "ColumnName": "First Action Date"
                                                 }
                                             }
                                         }
@@ -7166,7 +7166,7 @@
                                             "Relative": "LARGE"
                                         }
                                     },
-                                    "Height": 30
+                                    "Height": 33
                                 },
                                 "RowHeaderStyle": {
                                     "FontConfiguration": {
@@ -7184,7 +7184,7 @@
                                             "Relative": "LARGE"
                                         }
                                     },
-                                    "Height": 30
+                                    "Height": 33
                                 },
                                 "RowAlternateColorOptions": {
                                     "Status": "ENABLED",
@@ -7215,8 +7215,7 @@
                             "FieldOptions": {
                                 "SelectedFieldOptions": [
                                     {
-                                        "FieldId": "b789f515-68ee-461e-b65e-61ead1c77cff.2.1711698508376",
-                                        "CustomLabel": "First Visit Date",
+                                        "FieldId": "f674c811-6d20-4dc8-994d-d57ce0b3792e.2.1712814433901",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
@@ -7227,6 +7226,120 @@
                                     {
                                         "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
                                         "Visibility": "VISIBLE"
+                                    }
+                                ],
+                                "DataPathOptions": [
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-30 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "139px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-27 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "137px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-31 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "131px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-25 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "127px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-26 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "126px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-29 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "123px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-28 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "119px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-04-01 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "118px"
                                     }
                                 ]
                             }
@@ -7960,10 +8073,10 @@
                                     "Colors": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "LogicalTable1.device_operating_system.0.1711011863662",
+                                                "FieldId": "LogicalTable1.platform.2.1712813109003",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "device_operating_system"
+                                                    "ColumnName": "platform"
                                                 }
                                             }
                                         }
@@ -8009,12 +8122,6 @@
                                     "TooltipFields": [
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.device_operating_system.0.1711011863662",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        },
-                                        {
-                                            "FieldTooltipItem": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711011876922",
                                                 "Visibility": "VISIBLE"
                                             }
@@ -8022,6 +8129,12 @@
                                         {
                                             "FieldTooltipItem": {
                                                 "FieldId": "LogicalTable1.event_date.2.1711700330552",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "LogicalTable1.platform.2.1712813109003",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -9901,11 +10014,6 @@
         },
         {
             "DataSetIdentifier": "Event_View",
-            "Name": "First Visit Date (retention)",
-            "Expression": "ifelse({first_visit_date} > {First Action Date}, {First Action Date}, {first_visit_date})"
-        },
-        {
-            "DataSetIdentifier": "Event_View",
             "Name": "New user",
             "Expression": "distinct_countIf({merged_user_id},{event_name}='_first_open')"
         },
@@ -9927,7 +10035,7 @@
         {
             "DataSetIdentifier": "Event_View",
             "Name": "Retention Rate",
-            "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{first_visit_date}]))"
+            "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{First Action Date}]))"
         },
         {
             "DataSetIdentifier": "Page_Screen_View_Detail",
