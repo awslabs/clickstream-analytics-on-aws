@@ -37,7 +37,10 @@ import {
   UserInSegmentCondition,
   UserSegmentFilterCondition,
 } from '@aws/clickstream-base-lib';
-import { DateRangePickerProps, SelectProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import {
   CategoryItemType,
   ERelationShip,
