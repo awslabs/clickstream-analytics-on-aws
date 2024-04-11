@@ -131,6 +131,7 @@ export function createRoleForS3SinkConnectorCustomResourceLambda(
         'kafkaconnect:ListCustomPlugins',
         'kafkaconnect:DeleteCustomPlugin',
         'kafkaconnect:UpdateConnector',
+        'kafkaconnect:TagResource',
       ],
       conditions: {
         StringEquals: {

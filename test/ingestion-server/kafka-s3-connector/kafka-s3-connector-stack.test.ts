@@ -302,6 +302,7 @@ test('IAM policy for custom resource lambda role has a specified resource and re
       'kafkaconnect:ListCustomPlugins',
       'kafkaconnect:DeleteCustomPlugin',
       'kafkaconnect:UpdateConnector',
+      'kafkaconnect:TagResource',
     ],
     Condition: {
       StringEquals: {

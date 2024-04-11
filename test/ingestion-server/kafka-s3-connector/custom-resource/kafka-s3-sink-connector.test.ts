@@ -12,6 +12,11 @@
  */
 
 import EventEmitter from 'events';
+import https from 'https';
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
+import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
 jest.setTimeout(60 * 1000);
 
 class NotFoundExceptionMock extends Error {
@@ -136,6 +141,9 @@ const KafkaClientMock = {
   UpdateConnectorCommand: jest.fn(() => {
     return { command: 'UpdateConnectorCommand' };
   }),
+  TagResourceCommand: jest.fn((cmd) => {
+    return { ...cmd, command: 'TagResourceCommand' };
+  }),
 };
 jest.mock('@aws-sdk/client-kafkaconnect', () => {
   return KafkaClientMock;
@@ -155,11 +163,11 @@ jest.mock('fs', () => {
         },
       };
     },
+    promises: {
+      readFile: jest.fn().mockResolvedValue('mock file content'),
+    },
   };
 });
-
-import https from 'https';
-import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 
 jest.mock('https');
 const emitter = new EventEmitter();
@@ -181,6 +189,14 @@ process.env.AWS_REGION = 'us-east-1';
 process.env.LOG_LEVEL = 'WARN';
 
 import { handler as msk_sink_handler } from '../../../../src/ingestion-server/kafka-s3-connector/custom-resource/kafka-s3-sink-connector';
+
+const lambdaClientMock = mockClient(LambdaClient);
+lambdaClientMock.on(ListTagsCommand).resolves({
+  Tags: {
+    tag1: 'value1',
+    tag2: 'value2',
+  },
+});
 
 test('Create connector, there is existing connector', async () => {
   KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
@@ -254,6 +270,11 @@ test('Create s3 sink - success', async () => {
 
 test('Update s3 sink - success', async () => {
   event.RequestType = 'Update';
+
+  KafkaClientMock.TagResourceCommand = jest.fn((cmd) => {
+    expect(cmd.tags.tag1).toEqual('value1');
+    return { ...cmd, command: 'TagResourceCommand' };
+  });
   const response = await msk_sink_handler(
     event as CloudFormationCustomResourceEvent,
     c,
@@ -455,6 +476,7 @@ test('Check connector hardcode configurations are correct', async () => {
     expect(cmd.connectorConfiguration['value.converter']).toEqual('org.apache.kafka.connect.json.JsonConverter');
     expect(cmd.connectorConfiguration['value.converter.schemas.enable']).toEqual('false');
     expect(cmd.connectorConfiguration['schema.compatibility']).toEqual('NONE');
+    expect(cmd.tags.tag1).toEqual('value1');
     return { ...cmd, command: 'CreateConnectorCommand' };
   });
   const response = await msk_sink_handler(
