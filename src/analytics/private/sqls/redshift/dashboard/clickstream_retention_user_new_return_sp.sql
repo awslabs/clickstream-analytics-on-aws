@@ -11,7 +11,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (event_date, platform, use
 select 
   day::date as event_date,
   platform,
-  case when day = first_visit_date then 'NEW' else 'RETURNING' end as user_type,
+  case when day = DATE(CONVERT_TIMEZONE(timezone, TIMESTAMP 'epoch' + (first_touch_time_msec/1000) * INTERVAL '1 second')) as first_date, then 'NEW' else 'RETURNING' end as user_type,
   count(distinct merged_user_id) as user_count
 from {{database_name}}.{{schema}}.{{baseView}}
 where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
