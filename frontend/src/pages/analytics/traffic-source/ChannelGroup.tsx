@@ -21,6 +21,7 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
+import { trafficSourceAction } from 'apis/traffic';
 import { cloneDeep } from 'lodash';
 import {
   TableEmptyState,
@@ -30,19 +31,25 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import ChannelGroupModal from './modal/ChannelGroupModal';
-import { IChannelGroup, ITrafficSource } from './reducer/trafficReducer';
+import {
+  IChannelGroup,
+  ITrafficSource,
+  ITrafficSourceAction,
+  TrafficSourceAction,
+} from './reducer/trafficReducer';
 import { getLngFromLocalStorage } from '../analytics-utils';
 
 interface ChannelGroupProps {
   loading: boolean;
+  setLoading: (loading: boolean) => void;
   state: ITrafficSource;
-  overwrite: (state: ITrafficSource) => Promise<boolean>;
+  dispatch: React.Dispatch<TrafficSourceAction>;
 }
 
 const ChannelGroup: React.FC<ChannelGroupProps> = (
   props: ChannelGroupProps
 ) => {
-  const { state, loading, overwrite } = props;
+  const { state, loading, setLoading, dispatch } = props;
   const { t } = useTranslation();
   const localeLng = getLngFromLocalStorage();
   const [selectedItems, setSelectedItems] = useState<IChannelGroup[]>([]);
@@ -81,13 +88,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
           <Button
             variant="primary"
             loading={loading}
-            onClick={async () => {
-              const success = await overwrite(reorderState);
-              if (success) {
-                setIsReordering(false);
-                setItemsSnap([]);
-              }
-            }}
+            onClick={() => actionReorder()}
           >
             {t('button.apply')}
           </Button>
@@ -107,12 +108,8 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
         <Button
           loading={loading}
           disabled={selectedItems.length <= 0}
-          onClick={async () => {
-            const newState = preDelete();
-            const success = await overwrite(newState);
-            if (success) {
-              setSelectedItems([]);
-            }
+          onClick={() => {
+            actionDelete();
           }}
         >
           {t('button.delete')}
@@ -189,6 +186,57 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
     );
   };
 
+  const textRenderer = (text: string) => {
+    return (
+      <div className="cs-analytics-traffic-overflow" title={text}>
+        {text}
+      </div>
+    );
+  };
+
+  const actionDelete = async () => {
+    setLoading(true);
+    try {
+      const channel = selectedItems[0];
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.DELETE,
+        projectId: state.projectId,
+        appId: state.appId,
+        channelGroup: channel,
+      });
+      if (success) {
+        dispatch({ type: 'DeleteItem', channel });
+        setItemsSnap([]);
+        setSelectedItems([]);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const actionReorder = async () => {
+    setLoading(true);
+    try {
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.REORDER,
+        projectId: state.projectId,
+        appId: state.appId,
+        channelGroups: reorderState.channelGroups,
+      });
+      if (success) {
+        dispatch({ type: 'SetState', data: reorderState });
+        setLoading(false);
+        setIsReordering(false);
+        setItemsSnap([]);
+        setSelectedItems([]);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'order',
@@ -197,7 +245,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
       cell: (e: IChannelGroup) => {
         return orderInArray(e.id);
       },
-      width: 90,
+      width: 100,
     },
     {
       id: 'channel',
@@ -206,7 +254,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
       cell: (e: IChannelGroup) => {
         return e.channel;
       },
-      width: 150,
+      width: 200,
     },
     {
       id: 'description',
@@ -214,15 +262,14 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
         'analytics:metadata.trafficSource.channelGroup.columnDescription'
       ),
       cell: (e: IChannelGroup) => {
-        return e.description[localeLng];
+        return textRenderer(e.description[localeLng]);
       },
-      minWidth: 380,
     },
     {
       id: 'actions',
       header: t('analytics:metadata.trafficSource.channelGroup.columnActions'),
       cell: (item: IChannelGroup) => cellRenderer(item),
-      width: 80,
+      width: 100,
     },
   ];
 
@@ -274,15 +321,6 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
     ];
     const newState = { ...cloneState, channelGroups: newChannelGroups };
     setReorderState(newState);
-    return newState;
-  };
-
-  const preDelete = () => {
-    const cloneState = cloneDeep(state);
-    const newChannelGroups = cloneState.channelGroups.filter(
-      (item) => item.id !== selectedItems[0].id
-    );
-    const newState = { ...cloneState, channelGroups: newChannelGroups };
     return newState;
   };
 
@@ -423,8 +461,9 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
       </div>
       <ChannelGroupModal
         state={state}
-        overwrite={overwrite}
         loading={loading}
+        setLoading={setLoading}
+        dispatch={dispatch}
         visible={visible}
         setVisible={setVisible}
         modalType={modalType}

@@ -23,7 +23,7 @@ import {
   SpaceBetween,
   TokenGroup,
 } from '@cloudscape-design/components';
-import { cloneDeep } from 'lodash';
+import { trafficSourceAction } from 'apis/traffic';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
@@ -31,13 +31,16 @@ import {
   ESourceCategory,
   ISourceCategory,
   ITrafficSource,
+  ITrafficSourceAction,
+  TrafficSourceAction,
 } from '../reducer/trafficReducer';
 
 interface SourceCategoryModalProps {
-  state: ITrafficSource;
-  overwrite: (state: ITrafficSource) => Promise<boolean>;
-
   loading: boolean;
+  setLoading: (loading: boolean) => void;
+  state: ITrafficSource;
+  dispatch: React.Dispatch<TrafficSourceAction>;
+
   visible: boolean;
   modalType: string;
   selectedItems: ISourceCategory[];
@@ -50,9 +53,9 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
 ) => {
   const {
     state,
-    overwrite,
-
+    dispatch,
     loading,
+    setLoading,
     visible,
     setVisible,
     modalType,
@@ -115,33 +118,58 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
     return true;
   };
 
-  const preAdd = () => {
-    const newState = cloneDeep(state);
-    newState.sourceCategories.unshift({
-      url: newDomain,
-      source: newSource,
-      category: selectedCategory?.value as ESourceCategory,
-      params: newPatterns.map((item) => item.label),
-    } as ISourceCategory);
-    return newState;
+  const actionNew = async () => {
+    setLoading(true);
+    try {
+      const category: ISourceCategory = {
+        url: newDomain,
+        source: newSource,
+        category: selectedCategory?.value as ESourceCategory,
+        params: newPatterns.map((item) => item.label),
+      };
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.NEW,
+        projectId: state.projectId,
+        appId: state.appId,
+        sourceCategory: category,
+      });
+      if (success) {
+        dispatch({ type: 'NewItem', category });
+        resetInput();
+        setSelectedItems([]);
+        setVisible(false);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
-  const preEdit = () => {
-    const cloneState = cloneDeep(state);
-    const newSourceCategories = cloneState.sourceCategories.map((item) => {
-      if (item.url === newDomain) {
-        return {
-          url: newDomain,
-          source: newSource,
-          category: selectedCategory?.value as ESourceCategory,
-          params: newPatterns.map((item) => item.label),
-        } as ISourceCategory;
+  const actionEdit = async () => {
+    setLoading(true);
+    try {
+      const category: ISourceCategory = {
+        url: newDomain,
+        source: newSource,
+        category: selectedCategory?.value as ESourceCategory,
+        params: newPatterns.map((item) => item.label),
+      };
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.UPDATE,
+        projectId: state.projectId,
+        appId: state.appId,
+        sourceCategory: category,
+      });
+      if (success) {
+        dispatch({ type: 'UpdateItem', category });
+        resetInput();
+        setSelectedItems([]);
+        setVisible(false);
       }
-      return item;
-    });
-
-    const newState = { ...cloneState, sourceCategories: newSourceCategories };
-    return newState;
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -187,20 +215,15 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
               <Button
                 variant="primary"
                 loading={loading}
-                onClick={async () => {
+                onClick={() => {
                   if (checkInput()) {
-                    let newState = preAdd();
                     if (
                       modalType ===
                       t('analytics:metadata.trafficSource.modalType.edit')
                     ) {
-                      newState = preEdit();
-                    }
-                    const success = await overwrite(newState);
-                    if (success) {
-                      setSelectedItems([]);
-                      resetInput();
-                      setVisible(false);
+                      actionEdit();
+                    } else {
+                      actionNew();
                     }
                   }
                 }}

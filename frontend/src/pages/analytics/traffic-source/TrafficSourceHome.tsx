@@ -12,7 +12,7 @@
  */
 
 import { Alert } from '@cloudscape-design/components';
-import { getTrafficSource, putTrafficSource } from 'apis/traffic';
+import { getTrafficSource } from 'apis/traffic';
 import React, { useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -44,6 +44,7 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
   );
 
   const fetchTrafficSource = async () => {
+    setLoading(true);
     try {
       if (!projectId || !appId) {
         return {};
@@ -53,28 +54,11 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
       if (success) {
         trafficSourceDispatch({ type: 'SetState', data });
       }
+      setLoading(false);
       return {};
     } catch (error) {
+      setLoading(false);
       return {};
-    }
-  };
-
-  const overwriteTrafficSource = async (state: ITrafficSource) => {
-    setLoading(true);
-    try {
-      const { success }: ApiResponse<ITrafficSource> = await putTrafficSource(
-        state
-      );
-      if (success) {
-        trafficSourceDispatch({ type: 'SetState', data: state });
-        setLoading(false);
-        return true;
-      }
-      setLoading(false);
-      return false;
-    } catch (error) {
-      setLoading(false);
-      return false;
     }
   };
 
@@ -90,14 +74,16 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
       <br />
       <ChannelGroup
         loading={loading}
+        setLoading={setLoading}
         state={trafficSourceState}
-        overwrite={overwriteTrafficSource}
+        dispatch={trafficSourceDispatch}
       />
       <br />
       <SourceCategory
         loading={loading}
+        setLoading={setLoading}
         state={trafficSourceState}
-        overwrite={overwriteTrafficSource}
+        dispatch={trafficSourceDispatch}
       />
     </>
   );

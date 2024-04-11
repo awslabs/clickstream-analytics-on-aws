@@ -139,13 +139,5 @@
       "docLinkName": "事件属性",
       "docLink": "/analytics/data-mgmt/#_6"
     }
-  },
-  "metadataUserParamInfo": {
-    "title": "用户属性",
-    "description": "用户属性用于记录用户的特征。用户属性分为两类：预置属性，即SDK预置收集的属性，比如_first_visit_date;自定义属性，即即用户自行上报的用户属性，比如邮箱地址。",
-    "links": {
-      "docLinkName": "用户属性",
-      "docLink": "/analytics/data-mgmt/#_7"
-    }
   }
 }

@@ -47,3 +47,10 @@ export enum ESourceCategory {
   INTERNAL = 'Internal',
   OTHER = 'Other',
 }
+
+export enum ITrafficSourceAction {
+  NEW = 'NEW',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  REORDER = 'REORDER',
+};

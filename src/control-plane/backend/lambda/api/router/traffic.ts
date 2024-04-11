@@ -29,14 +29,15 @@ router_traffic.get(
     return trafficSourceServ.detail(req, res, next);
   });
 
-router_traffic.put(
-  '/overwrite',
+router_traffic.post(
+  '/action',
   validate([
+    body('action').isString().notEmpty(),
     body('projectId').isString().notEmpty(),
     body('appId').isString().notEmpty(),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return trafficSourceServ.overwrite(req, res, next);
+    return trafficSourceServ.action(req, res, next);
   });
 
 export {

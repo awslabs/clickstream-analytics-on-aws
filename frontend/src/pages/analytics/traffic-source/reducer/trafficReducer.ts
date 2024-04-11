@@ -50,12 +50,36 @@ export enum ESourceCategory {
   OTHER = 'Other',
 }
 
+export enum ITrafficSourceAction {
+  NEW = 'NEW',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  REORDER = 'REORDER',
+}
+
 export type SetState = {
   type: 'SetState';
   data: ITrafficSource;
 };
 
-export type TrafficSourceAction = SetState;
+export type NewItem = {
+  type: 'NewItem';
+  channel?: IChannelGroup;
+  category?: ISourceCategory;
+};
+
+export type UpdateItem = {
+  type: 'UpdateItem';
+  channel?: IChannelGroup;
+  category?: ISourceCategory;
+};
+
+export type DeleteItem = {
+  type: 'DeleteItem';
+  channel?: IChannelGroup;
+  category?: ISourceCategory;
+};
+export type TrafficSourceAction = SetState | NewItem | UpdateItem | DeleteItem;
 
 export type TrafficSourceDispatchFunction = (
   action: TrafficSourceAction
@@ -69,8 +93,72 @@ export const trafficSourceReducer = (
   state: ITrafficSource,
   action: TrafficSourceAction
 ): ITrafficSource => {
-  if (action.type === 'SetState') {
-    return action.data;
+  switch (action.type) {
+    case 'SetState':
+      return action.data;
+    case 'NewItem':
+      return _newItem(state, action);
+    case 'UpdateItem':
+      return _updateItem(state, action);
+    case 'DeleteItem':
+      return _deleteItem(state, action);
+    default:
+      return state;
+  }
+};
+
+const _newItem = (state: ITrafficSource, action: NewItem) => {
+  if (action.channel) {
+    return {
+      ...state,
+      channelGroups: [action.channel, ...state.channelGroups],
+    };
+  }
+  if (action.category) {
+    return {
+      ...state,
+      sourceCategories: [action.category, ...state.sourceCategories],
+    };
+  }
+  return state;
+};
+
+const _updateItem = (state: ITrafficSource, action: UpdateItem) => {
+  if (action.channel) {
+    return {
+      ...state,
+      channelGroups: state.channelGroups.map((item) =>
+        item.id === action.channel?.id ? action.channel : item
+      ),
+    };
+  }
+  if (action.category) {
+    return {
+      ...state,
+      sourceCategories: state.sourceCategories.map((item) =>
+        item.url === action.category?.url ? action.category : item
+      ),
+    };
+  }
+  return state;
+};
+
+const _deleteItem = (state: ITrafficSource, action: DeleteItem) => {
+  if (action.channel) {
+    return {
+      ...state,
+      channelGroups: state.channelGroups.filter(
+        (item) => item.id !== action.channel?.id
+      ),
+    };
+  }
+  if (action.category) {
+    return {
+      ...state,
+      sourceCategories: state.sourceCategories.filter(
+        (item) => item.url !== action.category?.url
+      ),
+    };
   }
   return state;
 };

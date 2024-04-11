@@ -20,21 +20,24 @@ import {
   SpaceBetween,
   Textarea,
 } from '@cloudscape-design/components';
-import InfoLink from 'components/common/InfoLink';
-import { DispatchContext } from 'context/StateContext';
-import { HelpPanelType, StateActionType } from 'context/reducer';
-import { cloneDeep } from 'lodash';
+import { trafficSourceAction } from 'apis/traffic';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr, isJson } from 'ts/utils';
-import { IChannelGroup, ITrafficSource } from '../reducer/trafficReducer';
+import {
+  IChannelGroup,
+  ITrafficSource,
+  ITrafficSourceAction,
+  TrafficSourceAction,
+} from '../reducer/trafficReducer';
 
 interface ChannelGroupModalProps {
-  state: ITrafficSource;
-  overwrite: (state: ITrafficSource) => Promise<boolean>;
-
   loading: boolean;
+  setLoading: (loading: boolean) => void;
+  state: ITrafficSource;
+  dispatch: React.Dispatch<TrafficSourceAction>;
+
   visible: boolean;
   modalType: string;
   selectedItems: IChannelGroup[];
@@ -47,9 +50,9 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
 ) => {
   const {
     state,
-    overwrite,
-
+    dispatch,
     loading,
+    setLoading,
     visible,
     setVisible,
     modalType,
@@ -58,8 +61,6 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
   } = props;
   const { t } = useTranslation();
   const localeLng = getLngFromLocalStorage();
-  const helpPanelDispatch = React.useContext(DispatchContext);
-
   const [newName, setNewName] = useState('');
   const [inputNameError, setInputNameError] = useState(false);
 
@@ -88,21 +89,67 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
     return true;
   };
 
-  const preAdd = () => {
-    const newState = cloneDeep(state);
-    newState.channelGroups.unshift({
-      id: `channelGroup-${new Date().getTime()}`,
-      channel: newName,
-      displayName: { [localeLng]: newName },
-      description: { [localeLng]: newDescription },
-      condition: JSON.parse(newCondition),
-    });
-    return newState;
+  const actionNew = async () => {
+    setLoading(true);
+    try {
+      const channel: IChannelGroup = {
+        id: `rule#${new Date().getTime()}`,
+        channel: newName,
+        displayName: { 'en-US': newName, 'zh-CN': newName },
+        description: { 'en-US': newDescription, 'zh-CN': newDescription },
+        condition: JSON.parse(newCondition),
+      };
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.NEW,
+        projectId: state.projectId,
+        appId: state.appId,
+        channelGroup: channel,
+      });
+      if (success) {
+        dispatch({ type: 'NewItem', channel });
+        resetInput();
+        setSelectedItems([]);
+        setVisible(false);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
-  const preEdit = () => {
-    const cloneState = cloneDeep(state);
-    return cloneState;
+  const actionEdit = async () => {
+    setLoading(true);
+    try {
+      const selectedItem = selectedItems[0];
+      const channel: IChannelGroup = {
+        id: selectedItem.id,
+        channel: newName,
+        displayName: {
+          ...selectedItem.displayName,
+          [localeLng]: newName,
+        },
+        description: {
+          ...selectedItem.description,
+          [localeLng]: newDescription,
+        },
+        condition: JSON.parse(newCondition),
+      };
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.UPDATE,
+        projectId: state.projectId,
+        appId: state.appId,
+        channelGroup: channel,
+      });
+      if (success) {
+        dispatch({ type: 'UpdateItem', channel });
+        resetInput();
+        setSelectedItems([]);
+        setVisible(false);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -140,20 +187,15 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
               <Button
                 variant="primary"
                 loading={loading}
-                onClick={async () => {
+                onClick={() => {
                   if (checkInput()) {
-                    let newState = preAdd();
                     if (
                       modalType ===
                       t('analytics:metadata.trafficSource.modalType.edit')
                     ) {
-                      newState = preEdit();
-                    }
-                    const success = await overwrite(newState);
-                    if (success) {
-                      setSelectedItems([]);
-                      resetInput();
-                      setVisible(false);
+                      actionEdit();
+                    } else {
+                      actionNew();
                     }
                   }
                 }}
@@ -202,14 +244,15 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
               'analytics:metadata.trafficSource.channelGroup.descriptionDesc'
             )}
           >
-            <Input
+            <Textarea
+              onChange={({ detail }) => {
+                setNewDescription(detail.value);
+              }}
+              rows={3}
               placeholder={defaultStr(
                 t('analytics:header.inputSourcePlaceholder')
               )}
               value={newDescription}
-              onChange={(e) => {
-                setNewDescription(e.detail.value);
-              }}
             />
           </FormField>
           <FormField
@@ -221,22 +264,13 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
                 ? t('analytics:valid.inputChannelGroupConditionError')
                 : ''
             }
-            info={
-              <InfoLink
-                onFollow={() => {
-                  helpPanelDispatch?.({
-                    type: StateActionType.SHOW_HELP_PANEL,
-                    payload: HelpPanelType.CHANNEL_GROUP_CONDITION_INFO,
-                  });
-                }}
-              />
-            }
           >
             <Textarea
               onChange={({ detail }) => {
                 setInputConditionError(false);
                 setNewCondition(detail.value);
               }}
+              rows={8}
               value={newCondition}
               placeholder={defaultStr(
                 t('analytics:header.inputChannelGroupConditionPlaceholder')

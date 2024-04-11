@@ -21,7 +21,7 @@ import {
   PropertyFilter,
   ButtonDropdown,
 } from '@cloudscape-design/components';
-import { cloneDeep } from 'lodash';
+import { trafficSourceAction } from 'apis/traffic';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -30,18 +30,24 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 import SourceCategoryModal from './modal/SourceCategoryModal';
-import { ISourceCategory, ITrafficSource } from './reducer/trafficReducer';
+import {
+  ISourceCategory,
+  ITrafficSource,
+  ITrafficSourceAction,
+  TrafficSourceAction,
+} from './reducer/trafficReducer';
 
 interface SourceCategoryProps {
   loading: boolean;
+  setLoading: (loading: boolean) => void;
   state: ITrafficSource;
-  overwrite: (state: ITrafficSource) => Promise<boolean>;
+  dispatch: React.Dispatch<TrafficSourceAction>;
 }
 
 const SourceCategory: React.FC<SourceCategoryProps> = (
   props: SourceCategoryProps
 ) => {
-  const { state, loading, overwrite } = props;
+  const { state, loading, setLoading, dispatch } = props;
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState<ISourceCategory[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -86,23 +92,50 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
     );
   };
 
+  const textRenderer = (text: string) => {
+    return (
+      <div className="cs-analytics-traffic-overflow" title={text}>
+        {text}
+      </div>
+    );
+  };
+
+  const actionDelete = async () => {
+    setLoading(true);
+    try {
+      const category = selectedItems[0];
+      const { success }: ApiResponse<any> = await trafficSourceAction({
+        action: ITrafficSourceAction.DELETE,
+        projectId: state.projectId,
+        appId: state.appId,
+        sourceCategory: category,
+      });
+      if (success) {
+        dispatch({ type: 'DeleteItem', category });
+        setItemsSnap([]);
+        setSelectedItems([]);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'url',
       header: t('analytics:metadata.trafficSource.sourceCategory.columnDomain'),
       sortingField: 'url',
-      width: 150,
       cell: (e: ISourceCategory) => {
-        return e.url;
+        return textRenderer(e.url);
       },
     },
     {
       id: 'source',
       header: t('analytics:metadata.trafficSource.sourceCategory.columnName'),
       sortingField: 'source',
-      width: 150,
       cell: (e: ISourceCategory) => {
-        return e.source;
+        return textRenderer(e.source);
       },
     },
     {
@@ -111,7 +144,6 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
         'analytics:metadata.trafficSource.sourceCategory.columnCategory'
       ),
       sortingField: 'category',
-      width: 150,
       cell: (e: ISourceCategory) => {
         return e.category;
       },
@@ -132,7 +164,7 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
         'analytics:metadata.trafficSource.sourceCategory.columnActions'
       ),
       cell: (item: ISourceCategory) => cellRenderer(item),
-      width: 80,
+      width: 100,
     },
   ];
 
@@ -176,15 +208,6 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
       operators: [':', '!:', '=', '!='],
     },
   ];
-
-  const preDelete = () => {
-    const cloneState = cloneDeep(state);
-    const newSourceCategories = cloneState.sourceCategories.filter(
-      (item) => item.url !== selectedItems[0].url
-    );
-    const newState = { ...cloneState, sourceCategories: newSourceCategories };
-    return newState;
-  };
 
   const persistChanges = () => {
     setItemsSnap([]);
@@ -309,12 +332,8 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
                   <Button
                     loading={loading}
                     disabled={selectedItems.length <= 0}
-                    onClick={async () => {
-                      const newState = preDelete();
-                      const success = await overwrite(newState);
-                      if (success) {
-                        setSelectedItems([]);
-                      }
+                    onClick={() => {
+                      actionDelete();
                     }}
                   >
                     {t('button.delete')}
@@ -351,8 +370,9 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
       </div>
       <SourceCategoryModal
         state={state}
-        overwrite={overwrite}
         loading={loading}
+        setLoading={setLoading}
+        dispatch={dispatch}
         visible={visible}
         setVisible={setVisible}
         modalType={modalType}

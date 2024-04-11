@@ -18,6 +18,7 @@ import {
   GetObjectCommand,
   GetBucketPolicyCommand,
   PutObjectCommand,
+  NoSuchKey,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
 import { awsAccountId } from '../../common/constants';
@@ -135,7 +136,11 @@ export async function readS3ObjectAsString(bucketName: string, key: string): Pro
       return;
     }
   } catch (e) {
-    logger.error('readS3ObjectAsString error', { error: e });
+    if (e instanceof NoSuchKey) {
+      logger.warn('file does not exist');
+      return;
+    }
+    logger.error('readS3ObjectAsString error', { error: e, bucketName, key });
     throw e;
   }
 }
@@ -146,7 +151,7 @@ export async function readS3ObjectAsJson(bucketName: string, key: string) {
     try {
       return JSON.parse(content);
     } catch (e) {
-      logger.error('readS3ObjectAsJson error', { error: e });
+      logger.error('readS3ObjectAsJson error', { error: e, key });
       throw e;
     }
   } else {

@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { ITrafficSource } from 'pages/analytics/traffic-source/reducer/trafficReducer';
+import {
+  IChannelGroup,
+  ISourceCategory,
+  ITrafficSourceAction,
+} from 'pages/analytics/traffic-source/reducer/trafficReducer';
 import { apiRequest } from 'ts/request';
 
 const getTrafficSource = async (params: {
@@ -22,9 +26,16 @@ const getTrafficSource = async (params: {
   return result;
 };
 
-const putTrafficSource = async (data: ITrafficSource) => {
-  const result: any = await apiRequest('put', '/traffic/overwrite', data);
+const trafficSourceAction = async (data: {
+  action: ITrafficSourceAction;
+  projectId: string;
+  appId: string;
+  channelGroup?: IChannelGroup;
+  channelGroups?: IChannelGroup[];
+  sourceCategory?: ISourceCategory;
+}) => {
+  const result: any = await apiRequest('post', '/traffic/action', data);
   return result;
 };
 
-export { getTrafficSource, putTrafficSource };
+export { getTrafficSource, trafficSourceAction };
