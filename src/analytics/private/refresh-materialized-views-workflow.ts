@@ -53,9 +53,14 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
   }
 
   private createWorkflow(props: RefreshMaterializedViewsWorkflowProps): IStateMachine {
-    const logGroup = createLogGroup(this, { prefix: '/aws/vendedlogs/states/Clickstream/RefreshMaterializedViews' });
+    const stepFunctionLogGroup = createLogGroup(this, { prefix: '/aws/vendedlogs/states/Clickstream/RefreshMaterializedViews' });
 
-    const checkRefreshMvStatusFn = this.checkRefreshMvStatusFn(props, logGroup);
+    const lambdaLogGroup = createLogGroup(this, {
+      prefix: '/aws/lambda/Clickstream/RefreshMaterializedViews',
+      retention: RetentionDays.ONE_WEEK,
+    }, 'LambdaLogGroup');
+
+    const checkRefreshMvStatusFn = this.checkRefreshMvStatusFn(props, lambdaLogGroup);
     const checkRefreshMvStatusJob = new LambdaInvoke(this, `${this.node.id} - Check refresh MV status`, {
       lambdaFunction: checkRefreshMvStatusFn,
       payload: TaskInput.fromObject({
@@ -78,7 +83,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       resultPath: '$.waitTimeInfo',
     });
 
-    const refreshBasicViewFn = this.refreshBasicViewFn(props, logGroup);
+    const refreshBasicViewFn = this.refreshBasicViewFn(props, lambdaLogGroup);
     const refreshBasicViewFnJob = new LambdaInvoke(this, `${this.node.id} - refresh basic view`, {
       lambdaFunction: refreshBasicViewFn,
       payload: TaskInput.fromObject({
@@ -88,7 +93,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
-    const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props, logGroup);
+    const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props, lambdaLogGroup);
     const checkNextRefreshViewJob = new LambdaInvoke(this, `${this.node.id} - Check next view should be refreshed`, {
       lambdaFunction: checkNextRefreshViewFn,
       payload: TaskInput.fromObject({
@@ -104,7 +109,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Check next refresh view FAILED',
     });
 
-    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props, logGroup);
+    const checkStartSpRefreshFn = this.checkStartSpRefreshFn(props, lambdaLogGroup);
     const checkStartSpRefreshJob = new LambdaInvoke(this, `${this.node.id} - Check whether start SP refresh`, {
       lambdaFunction: checkStartSpRefreshFn,
       payload: TaskInput.fromObject({
@@ -134,7 +139,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
 
     const doRefreshJobSucceed = new Succeed(this, `${this.node.id} - Refresh job succeed`);
 
-    const refreshSpSubWorkflow = this.createSubWorkflow(props, logGroup);
+    const refreshSpSubWorkflow = this.createSubWorkflow(props, lambdaLogGroup, stepFunctionLogGroup);
 
     const subExecution = new StepFunctionsStartExecution(this, `${this.node.id} - refresh sp workflow`, {
       stateMachine: refreshSpSubWorkflow,
@@ -187,7 +192,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       .when(Condition.isPresent('$.timezoneWithAppIdList'), doRefreshJob)
       .otherwise(doRefreshJobSucceed);
 
-    const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props, logGroup);
+    const parseTimeZoneWithAppIdListFn = this.parseTimeZoneWithAppIdList(props, lambdaLogGroup);
     const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timezone with appId list from props`, {
       lambdaFunction: parseTimeZoneWithAppIdListFn,
       outputPath: '$.Payload',
@@ -207,7 +212,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     const refreshMaterializedViewsMachine = new StateMachine(this, 'RefreshMaterializedViewsMachine', {
       definitionBody: DefinitionBody.fromChainable(getAppIdList),
       logs: {
-        destination: logGroup,
+        destination: stepFunctionLogGroup,
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
@@ -465,9 +470,9 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     };
   }
 
-  private createSubWorkflow(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IStateMachine {
+  private createSubWorkflow(props: RefreshMaterializedViewsWorkflowProps, lambdaLogGroup: LogGroup, stepFunctionLogGroup: LogGroup): IStateMachine {
 
-    const refreshSpFn = this.refreshSpFn(props, logGroup);
+    const refreshSpFn = this.refreshSpFn(props, lambdaLogGroup);
     const refreshSpFnJob = new LambdaInvoke(this, `${this.node.id} - refresh SP`, {
       lambdaFunction: refreshSpFn,
       payload: TaskInput.fromObject({
@@ -477,7 +482,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
-    const checkRefreshSpStatusFn = this.checkRefreshSpStatusFn(props, logGroup);
+    const checkRefreshSpStatusFn = this.checkRefreshSpStatusFn(props, lambdaLogGroup);
     const checkRefreshSpStatusJob = new LambdaInvoke(this, `${this.node.id} - Check refresh SP status`, {
       lambdaFunction: checkRefreshSpStatusFn,
       payload: TaskInput.fromObject({
@@ -505,7 +510,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       error: 'Refresh SP Job FAILED',
     });
 
-    const checkNextRefreshSpFn = this.checkNextRefreshSpFn(props, logGroup);
+    const checkNextRefreshSpFn = this.checkNextRefreshSpFn(props, lambdaLogGroup);
     const checkNextRefreshSpJob = new LambdaInvoke(this, `${this.node.id} - Check next sp should be refreshed`, {
       lambdaFunction: checkNextRefreshSpFn,
       payload: TaskInput.fromObject({
@@ -544,7 +549,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     const subRefreshSpStateMachine = new StateMachine(this, 'RefreshSpStateMachine', {
       definitionBody: DefinitionBody.fromChainable(checkNextRefreshSpJob),
       logs: {
-        destination: logGroup,
+        destination: stepFunctionLogGroup,
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
