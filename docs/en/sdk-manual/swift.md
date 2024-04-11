@@ -97,8 +97,8 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
 #### 3.2 Initialize the SDK with custom configuration
 
 === "Swift"
-```swift
-import Clickstream
+    ```swift
+    import Clickstream
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         do {
@@ -115,8 +115,8 @@ import Clickstream
     ```
 
 === "Objective-C"
-```objective-c
-@import Clickstream;
+    ```objective-c
+    @import Clickstream;
 
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;

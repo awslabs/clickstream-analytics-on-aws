@@ -97,8 +97,8 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 #### 3.2 使用自定义配置初始化 SDK
 
 === "Swift"
-```swift
-import Clickstream
+    ```swift
+    import Clickstream
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         do {
@@ -115,8 +115,8 @@ import Clickstream
     ```
 
 === "Objective-C"
-```objective-c
-@import Clickstream;
+    ```objective-c
+    @import Clickstream;
 
     - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
         NSError *error = nil;
