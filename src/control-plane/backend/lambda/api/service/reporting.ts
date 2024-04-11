@@ -65,7 +65,7 @@ import {
   DashboardTitleProps,
   getTimezoneByAppId,
 } from './quicksight/reporting-utils';
-import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -1167,13 +1167,12 @@ export class ReportingService {
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
-      const region = req.body.region;
 
-      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
+      const latestPipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!latestPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const latestPipeline = latestPipelines[0];
+      const region = latestPipeline.region;
       const dataApiRole = getStackOutputFromPipelineStatus(
         latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
         PipelineStackType.DATA_MODELING_REDSHIFT,
@@ -1199,7 +1198,7 @@ export class ReportingService {
           PipelineStackType.DATA_MODELING_REDSHIFT,
           OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
-          Sqls: [`select * from ${appId}.event limit 1`],
+          Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
           WorkgroupName: workgroupName,
           Database: projectId,
           WithEvent: false,

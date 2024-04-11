@@ -136,7 +136,6 @@ const AnalyticsExplore: React.FC = () => {
       warmup({
         projectId: projectId,
         appId: appId,
-        region: region,
       }),
       clean(region),
     ]);
