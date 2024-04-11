@@ -511,6 +511,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'EMRServerlessApplicationId',
       'DataProcessingCronOrRateExpression',
       'MVRefreshInterval',
+      'TimeZoneWithAppId',
+      'DataFreshnessInHour',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -660,6 +662,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       appIds: 'app1',
       ...nestStackCommonTablesProps,
       mvRefreshInterval: 120,
+      dataFreshnessInHour: 72,
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
@@ -709,6 +713,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       appIds: 'app1',
       ...nestStackCommonTablesProps,
       mvRefreshInterval: 120,
+      dataFreshnessInHour: 72,
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
         subnetIds: 'subnet-1,subnet-2',
@@ -760,6 +766,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       projectId: 'project1',
       appIds: 'app1',
       ...nestStackCommonTablesProps,
+      dataFreshnessInHour: 72,
+      timezoneWithAppId: '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]',
       mvRefreshInterval: 120,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       scanMetadataWorkflowData: {
@@ -790,7 +798,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       Template.fromStack(stack.nestedStacks.redshiftProvisionedStack),
     ];
     for (const nestedTemplate of templates) {
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 6);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 8);
     }
   });
 
@@ -2287,6 +2295,41 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check ScanMetadataWorkflowUpdateWorkflowInfoRole', ()=>{
     for (const nestedTemplate of allNestedTemplates) {
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowUpdateWorkflowInfoRole');
+      expect(role.resource).toBeDefined();
+    }
+  });
+
+  test('Check RefreshMaterializedViewsWorkflowRefreshBasicViewRole', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'RefreshMaterializedViewsWorkflowRefreshBasicViewRole');
+      expect(role.resource).toBeDefined();
+    }
+  });
+
+  test('Check RefreshMaterializedViewsWorkflowRefreshMaterializedViewsMachineRole', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'RefreshMaterializedViewsWorkflowRefreshMaterializedViewsMachineRole');
+      expect(role.resource).toBeDefined();
+    }
+  });
+
+  test('Check RefreshMaterializedViewsWorkflowRefreshSpRole', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'RefreshMaterializedViewsWorkflowRefreshSpRole');
+      expect(role.resource).toBeDefined();
+    }
+  });
+
+  test('Check RefreshMaterializedViewsWorkflowCheckNextRefreshSpRole', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'RefreshMaterializedViewsWorkflowCheckNextRefreshSpRole');
+      expect(role.resource).toBeDefined();
+    }
+  });
+
+  test('Check RefreshMaterializedViewsWorkflowCheckNextRefreshViewRole', () => {
+    for (const nestedTemplate of allNestedTemplates) {
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'RefreshMaterializedViewsWorkflowCheckNextRefreshViewRole');
       expect(role.resource).toBeDefined();
     }
   });

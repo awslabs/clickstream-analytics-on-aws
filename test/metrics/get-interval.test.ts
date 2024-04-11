@@ -47,6 +47,7 @@ test('should get interval seconds for rate expression - hours', async () => {
     Data: {
       intervalSeconds: 7200,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -67,6 +68,7 @@ test('should get interval seconds for rate expression - days', async () => {
     Data: {
       intervalSeconds: 86400,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -87,6 +89,7 @@ test('should get interval seconds for rate expression - minutes', async () => {
     Data: {
       intervalSeconds: 120,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -107,6 +110,7 @@ test('should get interval seconds for rate expression - seconds', async () => {
     Data: {
       intervalSeconds: 60,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -128,6 +132,7 @@ test('should get interval seconds for rate expression - evaluationPeriods', asyn
     Data: {
       intervalSeconds: 28800,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -149,6 +154,7 @@ test('should get interval seconds for rate expression - evaluationPeriods 2', as
     Data: {
       intervalSeconds: 28800,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -169,6 +175,7 @@ test('should get interval seconds for rate expression - intervalSeconds must N *
     Data: {
       intervalSeconds: 60,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -189,6 +196,7 @@ test('should get interval seconds for rate expression - intervalSeconds must N *
     Data: {
       intervalSeconds: 60,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -209,6 +217,7 @@ test('should get interval seconds for rate expression - weeks', async () => {
     Data: {
       intervalSeconds: 3600 * 24,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -229,6 +238,7 @@ test('should get interval seconds for rate expression - month', async () => {
     Data: {
       intervalSeconds: 3600 * 24,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -249,6 +259,7 @@ test('should get interval seconds for cron expression', async () => {
     Data: {
       intervalSeconds: 120,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -269,6 +280,7 @@ test('should get interval seconds for cron expression 2', async () => {
     Data: {
       intervalSeconds: 120,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -289,6 +301,7 @@ test('should get interval seconds for cron expression 3', async () => {
     Data: {
       intervalSeconds: 3600,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -309,6 +322,7 @@ test('should get interval seconds for cron expression 4', async () => {
     Data: {
       intervalSeconds: 3600,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -329,6 +343,7 @@ test('should get interval seconds for cron expression 5', async () => {
     Data: {
       intervalSeconds: 3600 * 24,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -340,6 +355,7 @@ test('should get scanWorkflowMinIntervalSeconds as 1 day if scanWorkflowMinInter
       ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
       expression: 'cron (0 1 1 * ? * )',
       scanWorkflowMinInterval: '5000', // minutes
+      mvRefreshInterval: '200', // minutes
     },
   };
 
@@ -349,6 +365,7 @@ test('should get scanWorkflowMinIntervalSeconds as 1 day if scanWorkflowMinInter
     Data: {
       intervalSeconds: 3600 * 24,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
@@ -360,6 +377,7 @@ test('should get scanWorkflowMinIntervalSeconds from scanWorkflowMinInterval', a
       ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
       expression: 'cron (0 1 1 * ? * )',
       scanWorkflowMinInterval: '1000', // minutes
+      mvRefreshInterval: '100', // minutes
     },
   };
 
@@ -369,6 +387,7 @@ test('should get scanWorkflowMinIntervalSeconds from scanWorkflowMinInterval', a
     Data: {
       intervalSeconds: 3600 * 24,
       scanWorkflowMinIntervalSeconds: 60000,
+      mvRefreshIntervalSeconds: 6000,
     },
   });
 });
@@ -427,6 +446,7 @@ test('should get interval seconds for expression update', async () => {
     Data: {
       intervalSeconds: 120,
       scanWorkflowMinIntervalSeconds: 86400,
+      mvRefreshIntervalSeconds: 7200,
     },
   });
 });
