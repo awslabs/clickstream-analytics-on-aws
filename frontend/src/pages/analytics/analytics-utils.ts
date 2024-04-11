@@ -564,8 +564,8 @@ export const validateFilterConditions = (conditions: IConditionItemType[]) => {
       [
         ExploreAnalyticsOperators.NULL,
         ExploreAnalyticsOperators.NOT_NULL,
-        ExploreAnalyticsOperators.YES,
-        ExploreAnalyticsOperators.NO,
+        ExploreAnalyticsOperators.TRUE,
+        ExploreAnalyticsOperators.FALSE,
       ].includes(item.conditionOperator.value as ExploreAnalyticsOperators)
     ) {
       return true;
@@ -636,8 +636,8 @@ export const validConditionItemType = (condition: IConditionItemType) => {
     ![
       ExploreAnalyticsOperators.NULL,
       ExploreAnalyticsOperators.NOT_NULL,
-      ExploreAnalyticsOperators.YES,
-      ExploreAnalyticsOperators.NO,
+      ExploreAnalyticsOperators.TRUE,
+      ExploreAnalyticsOperators.FALSE,
     ].includes(condition.conditionOperator.value as ExploreAnalyticsOperators);
   return (
     isValidConditionOption &&

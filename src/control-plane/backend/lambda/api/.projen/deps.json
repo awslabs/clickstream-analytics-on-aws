@@ -266,6 +266,11 @@
       "type": "runtime"
     },
     {
+      "name": "@smithy/types",
+      "version": "^2.0.7",
+      "type": "runtime"
+    },
+    {
       "name": "@smithy/util-stream-node",
       "version": "^2.0.7",
       "type": "runtime"
@@ -278,6 +283,11 @@
     {
       "name": "cron-parser",
       "version": "^4.8.1",
+      "type": "runtime"
+    },
+    {
+      "name": "csv-parser",
+      "version": "^3.0.0",
       "type": "runtime"
     },
     {

@@ -239,7 +239,7 @@ export class SegmentServ {
       // @ts-ignore https://github.com/aws/aws-sdk-js-v3/issues/4451
       const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
         Bucket: pipeline.bucket.name,
-        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, pipeline.bucket.prefix ?? '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/output.csv`,
+        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, pipeline.bucket.prefix ?? '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/segment_000.csv`,
       }), { expiresIn: 600 });
 
       return res.status(200).json(new ApiSuccess({ presignedUrl }, 'Generate presigned URL successfully.'));
