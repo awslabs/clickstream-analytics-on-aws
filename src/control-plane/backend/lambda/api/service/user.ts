@@ -12,6 +12,7 @@
  */
 
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+import { logger } from '../common/powertools';
 import { SolutionInfo } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
@@ -68,6 +69,7 @@ export class UserService {
       }
       const ddbUser = await store.getUser(id);
       if (ddbUser) {
+        logger.debug('Found user from ddb.', { ddbUser });
         return res.json(new ApiSuccess(ddbUser));
       } else {
         const decodedToken = getTokenFromRequest(req);
@@ -83,6 +85,7 @@ export class UserService {
           operator: 'FromToken',
           deleted: false,
         };
+        logger.debug('Fetch user from access token.', { tokenUser });
         return res.json(new ApiSuccess(tokenUser));
       }
     } catch (error) {

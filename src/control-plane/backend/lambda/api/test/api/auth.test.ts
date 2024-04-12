@@ -23,7 +23,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import 'aws-sdk-client-mock-jest';
-import { MOCK_USER_ID, userMock } from './ddb-mock';
+import { MOCK_USER_ID, dictionaryMock, userMock } from './ddb-mock';
 import { amznRequestContextHeader } from '../../common/constants';
 import { IUserRole } from '../../common/types';
 import { app, server } from '../../index';
@@ -235,6 +235,8 @@ describe('Route role test', () => {
     ec2ClientMock.reset();
     quickSightClient.reset();
     jest.setTimeout(10000);
+
+    dictionaryMock(ddbMock, 'Solution');
   });
 
   it('Validate all routers for Admin.', async () => {
@@ -280,6 +282,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator.', async () => {
@@ -326,6 +329,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator & Analyst.', async () => {
@@ -372,6 +376,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for Operator & Analyst Reader.', async () => {
@@ -510,6 +515,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
   });
 
   it('Validate all routers for NoIdentity.', async () => {
@@ -557,6 +563,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/path').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(403);
   });
 
   afterAll((done) => {

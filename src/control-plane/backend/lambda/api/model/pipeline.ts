@@ -44,7 +44,6 @@ import {
   awsAccountId,
   awsPartition,
   awsRegion,
-  awsUrlSuffix,
   listenStackQueueArn,
   stackWorkflowS3Bucket,
 } from '../common/constants';
@@ -90,6 +89,7 @@ import {
   getStackPrefix,
   getStackTags,
   getStateMachineExecutionName,
+  getTemplateUrl,
   getUpdateTags,
   isEmpty,
   mergeIntoPipelineTags,
@@ -412,7 +412,7 @@ export class CPipeline {
   }
 
   private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
-    // generate parameters accroding to current control plane version
+    // generate parameters according to current control plane version
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
@@ -863,16 +863,8 @@ export class CPipeline {
     if (isEmpty(this.resources?.templates?.data[name])) {
       return undefined;
     }
-    const solutionName = this.resources?.solution?.data.name;
     const templateName = this.resources?.templates?.data[name] as string;
-    // default/ or cn/ or 'null',''
-    const prefix = isEmpty(this.resources?.solution?.data.prefix) ? '' : this.resources?.solution?.data.prefix;
-    const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
-    const s3Host = `https://${this.resources?.solution?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
-
-    let version = this.resources?.solution?.data.version === 'latest' ?
-      this.resources?.solution.data.target : this.resources?.solution?.data.version;
-    return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
+    return getTemplateUrl(templateName, this.resources?.solution);
   };
 
   private patchBuiltInTags() {

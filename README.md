@@ -4,7 +4,7 @@ An end-to-end solution to collect, ingest, analyze, and visualize clickstream da
 
 ## Solution Overview
 
-This solution collects, ingests, analyzes, and visualizes clickstreams from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
+This solution collects, ingests, analyzes, and visualizes clickstream events from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
 
 With this solution, you can quickly configure and deploy a data pipeline that fits your business and technical needs. It provides purpose-built software development kits (SDKs) that automatically collect common events and easy-to-use APIs to report custom events, enabling you to easily send your customers’ clickstream data to the data pipeline in your AWS account. The solution also offers pre-assembled dashboards that visualize key metrics about user lifecycle, including acquisition, engagement, activity, and retention, and adds visibility into user devices and geographies. You can combine user behavior data with business backend data to create a comprehensive data platform and generate insights that drive business growth.
 
@@ -72,7 +72,9 @@ npx cdk deploy ingestion-server-s3-stack --parameters ...
 
 ```shell
 # update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
-bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh -n modelRedshiftStackName -s Clickstream-DataModelingRedshift-xxx
+# update the existing web console
+bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console> -c
 ```
 
 ## Test

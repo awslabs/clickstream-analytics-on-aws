@@ -348,6 +348,8 @@ export class ClickStreamApiConstruct extends Construct {
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
         IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
         API_FUNCTION_LAMBDA_ROLE: role.roleArn,
+        TEMPLATE_FILE: `${Stack.of(this).stackName}.template.json`,
+        STACK_ID: Stack.of(this).stackId,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
