@@ -148,12 +148,12 @@ export const BUILTIN_EVENTS = [
 ];
 
 export enum ExploreAnalyticsType {
-  FUNNEL = 'is_null',
-  EVENT = 'is_not_null',
-  EVENT_PATH = '=',
-  NODE_PATH = '<>',
-  RETENTION = '>',
-  ATTRIBUTION = '>=',
+  FUNNEL = 'FUNNEL',
+  EVENT = 'EVENT',
+  EVENT_PATH = 'EVENT_PATH',
+  NODE_PATH = 'NODE_PATH',
+  RETENTION = 'RETENTION',
+  ATTRIBUTION = 'ATTRIBUTION',
 }
 
 const columnTemplate = `
