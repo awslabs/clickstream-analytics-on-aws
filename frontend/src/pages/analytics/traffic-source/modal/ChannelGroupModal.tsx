@@ -24,7 +24,8 @@ import { trafficSourceAction } from 'apis/traffic';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultStr, isJson } from 'ts/utils';
+import { defaultStr, isJson, ternary } from 'ts/utils';
+import { TrafficSourceModalType } from '../TrafficSourceHome';
 import {
   IChannelGroup,
   ITrafficSource,
@@ -39,7 +40,7 @@ interface ChannelGroupModalProps {
   dispatch: React.Dispatch<TrafficSourceAction>;
 
   visible: boolean;
-  modalType: string;
+  modalType: TrafficSourceModalType;
   selectedItems: IChannelGroup[];
   setVisible: (v: boolean) => void;
   setSelectedItems: (items: IChannelGroup[]) => void;
@@ -159,7 +160,7 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
       setNewDescription(selectedItem.description[localeLng]);
       setNewCondition(JSON.stringify(selectedItem.condition, null, 2));
     }
-    if (modalType === t('analytics:metadata.trafficSource.modalType.new')) {
+    if (modalType === TrafficSourceModalType.NEW) {
       resetInput();
     }
   }, [selectedItems, modalType]);
@@ -171,7 +172,6 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
           setVisible(false);
         }}
         visible={visible}
-        closeAriaLabel="Close modal"
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
@@ -189,10 +189,7 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
                 loading={loading}
                 onClick={() => {
                   if (checkInput()) {
-                    if (
-                      modalType ===
-                      t('analytics:metadata.trafficSource.modalType.edit')
-                    ) {
+                    if (modalType === TrafficSourceModalType.DETAIL) {
                       actionEdit();
                     } else {
                       actionNew();
@@ -205,11 +202,9 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
             </SpaceBetween>
           </Box>
         }
-        header={
-          defaultStr(t('analytics:metadata.trafficSource.channelGroup.title')) +
-          ' - ' +
-          modalType
-        }
+        header={`${defaultStr(
+          t('analytics:metadata.trafficSource.channelGroup.title')
+        )} - ${modalType}`}
       >
         <SpaceBetween direction="vertical" size="m">
           <FormField
@@ -219,11 +214,11 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
             description={t(
               'analytics:metadata.trafficSource.channelGroup.nameDesc'
             )}
-            errorText={
-              inputNameError
-                ? t('analytics:valid.inputChannelGroupNameError')
-                : ''
-            }
+            errorText={ternary(
+              inputNameError,
+              t('analytics:valid.inputChannelGroupNameError'),
+              undefined
+            )}
           >
             <Input
               placeholder={defaultStr(
@@ -259,11 +254,11 @@ const ChannelGroupModal: React.FC<ChannelGroupModalProps> = (
             label={t(
               'analytics:metadata.trafficSource.channelGroup.columnCondition'
             )}
-            errorText={
-              inputConditionError
-                ? t('analytics:valid.inputChannelGroupConditionError')
-                : ''
-            }
+            errorText={ternary(
+              inputConditionError,
+              t('analytics:valid.inputChannelGroupConditionError'),
+              undefined
+            )}
           >
             <Textarea
               onChange={({ detail }) => {

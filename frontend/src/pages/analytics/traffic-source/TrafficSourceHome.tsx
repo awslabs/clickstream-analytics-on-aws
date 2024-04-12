@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Alert } from '@cloudscape-design/components';
+import { Alert, SpaceBetween } from '@cloudscape-design/components';
 import { getTrafficSource } from 'apis/traffic';
 import React, { useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +29,12 @@ const initTrafficSource: ITrafficSource = {
 
 interface TrafficSourceHomeProps {
   analysisStudioEnabled: boolean;
+}
+
+export enum TrafficSourceModalType {
+  NEW = 'NEW',
+  DETAIL = 'DETAIL',
+  COPY = 'COPY',
 }
 
 const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
@@ -71,14 +77,14 @@ const TrafficSourceHome: React.FC<TrafficSourceHomeProps> = (
       <Alert statusIconAriaLabel="Info">
         {t('analytics:metadata.trafficSource.alert')}
       </Alert>
-      <br />
+      <SpaceBetween direction="vertical" size="l" />
       <ChannelGroup
         loading={loading}
         setLoading={setLoading}
         state={trafficSourceState}
         dispatch={trafficSourceDispatch}
       />
-      <br />
+      <SpaceBetween direction="vertical" size="l" />
       <SourceCategory
         loading={loading}
         setLoading={setLoading}

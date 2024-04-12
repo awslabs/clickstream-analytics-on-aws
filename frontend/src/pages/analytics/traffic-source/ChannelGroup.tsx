@@ -29,7 +29,9 @@ import {
 } from 'pages/common/common-components';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TABLE_FILTER_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { TrafficSourceModalType } from './TrafficSourceHome';
 import ChannelGroupModal from './modal/ChannelGroupModal';
 import {
   IChannelGroup,
@@ -46,6 +48,13 @@ interface ChannelGroupProps {
   dispatch: React.Dispatch<TrafficSourceAction>;
 }
 
+const CONTENT_DISPLAY = [
+  { id: 'order', visible: true },
+  { id: 'channel', visible: true },
+  { id: 'description', visible: true },
+  { id: 'actions', visible: true },
+];
+
 const ChannelGroup: React.FC<ChannelGroupProps> = (
   props: ChannelGroupProps
 ) => {
@@ -60,8 +69,8 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
   );
   const [visible, setVisible] = useState<boolean>(false);
 
-  const [modalType, setModalType] = useState<string>(
-    defaultStr(t('analytics:metadata.trafficSource.modalType.new'))
+  const [modalType, setModalType] = useState<TrafficSourceModalType>(
+    TrafficSourceModalType.NEW
   );
 
   const orderInArray = (id: string) => {
@@ -118,9 +127,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
           variant="primary"
           iconName="add-plus"
           onClick={() => {
-            setModalType(
-              defaultStr(t('analytics:metadata.trafficSource.modalType.new'))
-            );
+            setModalType(TrafficSourceModalType.NEW);
             setVisible(true);
           }}
         >
@@ -176,9 +183,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
             setIsReordering(true);
           } else if (e.detail.id === 'details') {
             setSelectedItems([item]);
-            setModalType(
-              defaultStr(t('analytics:metadata.trafficSource.modalType.edit'))
-            );
+            setModalType(TrafficSourceModalType.DETAIL);
             setVisible(true);
           }
         }}
@@ -273,13 +278,6 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
     },
   ];
 
-  const CONTENT_DISPLAY = [
-    { id: 'order', visible: true },
-    { id: 'channel', visible: true },
-    { id: 'description', visible: true },
-    { id: 'actions', visible: true },
-  ];
-
   const FILTERING_PROPERTIES = [
     {
       propertyLabel: t(
@@ -289,7 +287,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
       groupValuesLabel: t(
         'analytics:metadata.trafficSource.channelGroup.columnName'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -299,7 +297,7 @@ const ChannelGroup: React.FC<ChannelGroupProps> = (
       groupValuesLabel: t(
         'analytics:metadata.trafficSource.channelGroup.columnDescription'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

@@ -28,7 +28,9 @@ import {
 } from 'pages/common/common-components';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TABLE_FILTER_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
+import { TrafficSourceModalType } from './TrafficSourceHome';
 import SourceCategoryModal from './modal/SourceCategoryModal';
 import {
   ISourceCategory,
@@ -44,6 +46,14 @@ interface SourceCategoryProps {
   dispatch: React.Dispatch<TrafficSourceAction>;
 }
 
+const CONTENT_DISPLAY = [
+  { id: 'url', visible: true },
+  { id: 'source', visible: true },
+  { id: 'category', visible: true },
+  { id: 'pattern', visible: true },
+  { id: 'actions', visible: true },
+];
+
 const SourceCategory: React.FC<SourceCategoryProps> = (
   props: SourceCategoryProps
 ) => {
@@ -53,8 +63,8 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
 
-  const [modalType, setModalType] = useState<string>(
-    defaultStr(t('analytics:metadata.trafficSource.modalType.new'))
+  const [modalType, setModalType] = useState<TrafficSourceModalType>(
+    TrafficSourceModalType.NEW
   );
 
   const cellRenderer = (item: ISourceCategory) => {
@@ -77,13 +87,9 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
         variant="icon"
         onItemClick={(e) => {
           if (e.detail.id === 'details') {
-            setModalType(
-              defaultStr(t('analytics:metadata.trafficSource.modalType.edit'))
-            );
+            setModalType(TrafficSourceModalType.DETAIL);
           } else if (e.detail.id === 'copy') {
-            setModalType(
-              defaultStr(t('analytics:metadata.trafficSource.modalType.copy'))
-            );
+            setModalType(TrafficSourceModalType.COPY);
           }
           setSelectedItems([item]);
           setVisible(true);
@@ -168,14 +174,6 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
     },
   ];
 
-  const CONTENT_DISPLAY = [
-    { id: 'url', visible: true },
-    { id: 'source', visible: true },
-    { id: 'category', visible: true },
-    { id: 'pattern', visible: true },
-    { id: 'actions', visible: true },
-  ];
-
   const FILTERING_PROPERTIES = [
     {
       propertyLabel: t(
@@ -185,7 +183,7 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
       groupValuesLabel: t(
         'analytics:metadata.trafficSource.sourceCategory.columnDomain'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -195,7 +193,7 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
       groupValuesLabel: t(
         'analytics:metadata.trafficSource.sourceCategory.columnName'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -205,7 +203,7 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
       groupValuesLabel: t(
         'analytics:metadata.trafficSource.sourceCategory.columnCategory'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 
@@ -342,11 +340,7 @@ const SourceCategory: React.FC<SourceCategoryProps> = (
                     variant="primary"
                     iconName="add-plus"
                     onClick={() => {
-                      setModalType(
-                        defaultStr(
-                          t('analytics:metadata.trafficSource.modalType.new')
-                        )
-                      );
+                      setModalType(TrafficSourceModalType.NEW);
                       setVisible(true);
                     }}
                   >

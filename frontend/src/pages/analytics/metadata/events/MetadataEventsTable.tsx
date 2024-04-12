@@ -187,31 +187,31 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       propertyLabel: t('analytics:metadata.event.tableColumnName'),
       key: 'name',
       groupValuesLabel: t('analytics:metadata.event.tableColumnName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnDisplayName'),
       key: 'displayName',
       groupValuesLabel: t('analytics:metadata.event.tableColumnDisplayName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
       key: 'metadataSource',
       groupValuesLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnHasData'),
       key: 'hasData',
       groupValuesLabel: t('analytics:metadata.event.tableColumnHasData'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnPlatform'),
       key: 'platform',
       groupValuesLabel: t('analytics:metadata.event.tableColumnPlatform'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

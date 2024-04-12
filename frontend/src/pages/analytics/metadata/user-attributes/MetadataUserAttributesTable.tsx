@@ -23,7 +23,7 @@ import { t } from 'i18next';
 import { userAttributeDisplayname } from 'pages/analytics/analytics-utils';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { TABLE_FILTER_OPTIONS, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,
@@ -176,7 +176,7 @@ const MetadataUserAttributesTable: React.FC<
       propertyLabel: t('analytics:metadata.userAttribute.tableColumnName'),
       key: 'name',
       groupValuesLabel: t('analytics:metadata.userAttribute.tableColumnName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -186,7 +186,7 @@ const MetadataUserAttributesTable: React.FC<
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnDisplayName'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -196,7 +196,7 @@ const MetadataUserAttributesTable: React.FC<
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnMetadataSource'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.userAttribute.tableColumnDataType'),
@@ -204,7 +204,7 @@ const MetadataUserAttributesTable: React.FC<
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnDataType'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

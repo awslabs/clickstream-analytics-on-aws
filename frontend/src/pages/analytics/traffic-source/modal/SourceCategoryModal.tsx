@@ -22,11 +22,13 @@ import {
   SelectProps,
   SpaceBetween,
   TokenGroup,
+  TokenGroupProps,
 } from '@cloudscape-design/components';
 import { trafficSourceAction } from 'apis/traffic';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, ternary } from 'ts/utils';
+import { TrafficSourceModalType } from '../TrafficSourceHome';
 import {
   ESourceCategory,
   ISourceCategory,
@@ -42,11 +44,19 @@ interface SourceCategoryModalProps {
   dispatch: React.Dispatch<TrafficSourceAction>;
 
   visible: boolean;
-  modalType: string;
+  modalType: TrafficSourceModalType;
   selectedItems: ISourceCategory[];
   setVisible: (v: boolean) => void;
   setSelectedItems: (items: ISourceCategory[]) => void;
 }
+
+const categoryOptions = [
+  { label: ESourceCategory.SEARCH, value: ESourceCategory.SEARCH },
+  { label: ESourceCategory.SOCIAL, value: ESourceCategory.SOCIAL },
+  { label: ESourceCategory.SHOPPING, value: ESourceCategory.SHOPPING },
+  { label: ESourceCategory.VIDEO, value: ESourceCategory.VIDEO },
+  { label: ESourceCategory.INTERNAL, value: ESourceCategory.INTERNAL },
+];
 
 const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
   props: SourceCategoryModalProps
@@ -75,16 +85,8 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
   const [selectedCategoryError, setSelectedCategoryError] = useState(false);
 
   const [newPattern, setNewPattern] = useState<string>('');
-  const [newPatterns, setNewPatterns] = useState<{ label: string }[]>([]);
+  const [newPatterns, setNewPatterns] = useState<TokenGroupProps.Item[]>([]);
   const [inputPatternNumError, setInputPatternNumError] = useState(false);
-
-  const categoryOptions = [
-    { label: ESourceCategory.SEARCH, value: ESourceCategory.SEARCH },
-    { label: ESourceCategory.SOCIAL, value: ESourceCategory.SOCIAL },
-    { label: ESourceCategory.SHOPPING, value: ESourceCategory.SHOPPING },
-    { label: ESourceCategory.VIDEO, value: ESourceCategory.VIDEO },
-    { label: ESourceCategory.INTERNAL, value: ESourceCategory.INTERNAL },
-  ];
 
   const resetInput = () => {
     setNewDomain('');
@@ -121,11 +123,17 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
   const actionNew = async () => {
     setLoading(true);
     try {
+      const patternLabels: string[] = [];
+      newPatterns.forEach((item) => {
+        if (item.label) {
+          patternLabels.push(item.label);
+        }
+      });
       const category: ISourceCategory = {
         url: newDomain,
         source: newSource,
         category: selectedCategory?.value as ESourceCategory,
-        params: newPatterns.map((item) => item.label),
+        params: patternLabels,
       };
       const { success }: ApiResponse<any> = await trafficSourceAction({
         action: ITrafficSourceAction.NEW,
@@ -148,11 +156,17 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
   const actionEdit = async () => {
     setLoading(true);
     try {
+      const patternLabels: string[] = [];
+      newPatterns.forEach((item) => {
+        if (item.label) {
+          patternLabels.push(item.label);
+        }
+      });
       const category: ISourceCategory = {
         url: newDomain,
         source: newSource,
         category: selectedCategory?.value as ESourceCategory,
-        params: newPatterns.map((item) => item.label),
+        params: patternLabels,
       };
       const { success }: ApiResponse<any> = await trafficSourceAction({
         action: ITrafficSourceAction.UPDATE,
@@ -187,7 +201,7 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
         })
       );
     }
-    if (modalType === t('analytics:metadata.trafficSource.modalType.new')) {
+    if (modalType === TrafficSourceModalType.NEW) {
       resetInput();
     }
   }, [selectedItems, modalType]);
@@ -199,7 +213,6 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
           setVisible(false);
         }}
         visible={visible}
-        closeAriaLabel="Close modal"
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
@@ -217,10 +230,7 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
                 loading={loading}
                 onClick={() => {
                   if (checkInput()) {
-                    if (
-                      modalType ===
-                      t('analytics:metadata.trafficSource.modalType.edit')
-                    ) {
+                    if (modalType === TrafficSourceModalType.DETAIL) {
                       actionEdit();
                     } else {
                       actionNew();
@@ -233,13 +243,9 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
             </SpaceBetween>
           </Box>
         }
-        header={
-          defaultStr(
-            t('analytics:metadata.trafficSource.sourceCategory.title')
-          ) +
-          ' - ' +
-          modalType
-        }
+        header={`${defaultStr(
+          t('analytics:metadata.trafficSource.sourceCategory.title')
+        )} - ${modalType}`}
       >
         <SpaceBetween direction="vertical" size="m">
           <FormField
@@ -249,9 +255,11 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
             description={t(
               'analytics:metadata.trafficSource.sourceCategory.domainDesc'
             )}
-            errorText={
-              inputDomainError ? t('analytics:valid.inputDomainError') : ''
-            }
+            errorText={ternary(
+              inputDomainError,
+              t('analytics:valid.inputDomainError'),
+              undefined
+            )}
           >
             <Input
               placeholder={defaultStr(
@@ -271,9 +279,11 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
             description={t(
               'analytics:metadata.trafficSource.sourceCategory.sourceDesc'
             )}
-            errorText={
-              inputSourceError ? t('analytics:valid.inputSourceError') : ''
-            }
+            errorText={ternary(
+              inputSourceError,
+              t('analytics:valid.inputSourceError'),
+              undefined
+            )}
           >
             <Input
               placeholder={defaultStr(
@@ -293,11 +303,11 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
             description={t(
               'analytics:metadata.trafficSource.sourceCategory.categoryDesc'
             )}
-            errorText={
-              selectedCategoryError
-                ? t('analytics:valid.inputCategoryError')
-                : ''
-            }
+            errorText={ternary(
+              selectedCategoryError,
+              t('analytics:valid.inputCategoryError'),
+              undefined
+            )}
           >
             <Select
               placeholder={defaultStr(
@@ -318,11 +328,11 @@ const SourceCategoryModal: React.FC<SourceCategoryModalProps> = (
             description={t(
               'analytics:metadata.trafficSource.sourceCategory.patternDesc'
             )}
-            errorText={
-              inputPatternNumError
-                ? t('analytics:valid.inputPatternNumError')
-                : ''
-            }
+            errorText={ternary(
+              inputPatternNumError,
+              t('analytics:valid.inputPatternNumError'),
+              undefined
+            )}
           >
             <ColumnLayout columns={2} variant="text-grid">
               <Input

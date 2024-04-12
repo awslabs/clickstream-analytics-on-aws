@@ -125,7 +125,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       propertyLabel: t('analytics:metadata.dictionary.tableColumnValue'),
       key: 'value',
       groupValuesLabel: t('analytics:metadata.dictionary.tableColumnValue'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.dictionary.tableColumnDisplayValue'),
@@ -133,7 +133,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.dictionary.tableColumnDisplayValue'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 
