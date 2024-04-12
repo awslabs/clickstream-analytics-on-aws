@@ -204,7 +204,7 @@
       "alert": "Any change to traffic source setting will only apply to future data, historical data will not be re-categorized.",
       "channelGroup": {
         "title": "Channel group",
-        "description": "A channel group is a set of channels, which are rule-based categories of your traffic sources. Clickstream solution provides a default channel group to classify your traffic source, but you have the flexibility to customize it. Note that update",
+        "description": "A channel group is a set of channels, which are rule-based categories of your traffic sources. Clickstream solution provides a default channel group to classify your traffic source, but you have the flexibility to customize it.",
         "columnOrder": "Order",
         "columnName": "Group name",
         "columnDescription": "Description",

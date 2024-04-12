@@ -58,6 +58,7 @@ export class TrafficSourceServ {
   private async _saveTrafficSourceData(pipeline: IPipeline, appId: string, type: ITrafficSourceType, data: any): Promise<void> {
     await putStringToS3(
       JSON.stringify(data),
+      pipeline.region,
       this._getTrafficSourceBucket(pipeline),
       this._getTrafficSourceBucketKey(pipeline.projectId, appId, type),
     );

@@ -103,11 +103,13 @@ export const isBucketExist = async (region: string, bucket: string) => {
 
 export async function putStringToS3(
   content: string,
+  region: string,
   bucketName: string,
   key: string,
 ) {
   const s3Client = new S3Client({
     ...aws_sdk_client_common_config,
+    region,
   });
   await s3Client.send(
     new PutObjectCommand({
