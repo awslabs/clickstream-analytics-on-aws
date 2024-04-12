@@ -30,7 +30,7 @@ public class CategoryTrafficSource  {
     private String clidPlatform; // NOSONAR
     private String clid; // NOSONAR
     private String channelGroup; // NOSONAR
-    private String category;// NOSONAR
+    private String category; // NOSONAR
 
     public CategoryTrafficSource(final TrafficSourceUtm trafficSource, final String category, final String channel) {
         this.source = trafficSource.getSource();
