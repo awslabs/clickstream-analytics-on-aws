@@ -471,7 +471,11 @@ describe('Workflow test with pipeline version', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStack, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
-                      Reporting: setTagsToStack(ReportingStack, Tags),
+                      Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -819,7 +823,11 @@ describe('Workflow test with pipeline version', () => {
                     States: {
                       DataProcessing: DataProcessingStack,
                       DataModelingRedshift: DataModelingRedshiftStack,
-                      Reporting: ReportingStack,
+                      Reporting: removeParametersFromStack(ReportingStack, [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -887,6 +895,18 @@ describe('Workflow test with pipeline version in China region', () => {
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
+    const reportingStackCn = mergeParametersFromStack(
+      setTagsToStack(ReportingStackCn, Tags),
+      [
+        {
+          ParameterKey: 'QuickSightUserParam',
+          ParameterValue: 'GCRUser',
+        },
+        {
+          ParameterKey: 'QuickSightOwnerPrincipalParam',
+          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+        },
+      ]);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -907,22 +927,11 @@ describe('Workflow test with pipeline version in China region', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
-                      Reporting: mergeParametersFromStack(
-                        setTagsToStack(ReportingStackCn, Tags),
-                        [
-                          {
-                            ParameterKey: 'QuickSightUserParam',
-                            ParameterValue: 'GCRUser',
-                          },
-                          {
-                            ParameterKey: 'QuickSightPrincipalParam',
-                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                          },
-                          {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                          },
-                        ]),
+                      Reporting: removeParametersFromStack(reportingStackCn, [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -1267,6 +1276,18 @@ describe('Workflow test with pipeline version in China region', () => {
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
+    const reportingStackCn = mergeParametersFromStack(
+      ReportingStackCn,
+      [
+        {
+          ParameterKey: 'QuickSightUserParam',
+          ParameterValue: 'GCRUser',
+        },
+        {
+          ParameterKey: 'QuickSightOwnerPrincipalParam',
+          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+        },
+      ]);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1287,18 +1308,9 @@ describe('Workflow test with pipeline version in China region', () => {
                     States: {
                       DataProcessing: DataProcessingStackCn,
                       DataModelingRedshift: DataModelingRedshiftStackCn,
-                      Reporting: mergeParametersFromStack(ReportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightUserParam',
-                          ParameterValue: 'GCRUser',
-                        },
+                      Reporting: removeParametersFromStack(reportingStackCn, [
                         {
                           ParameterKey: 'QuickSightPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                         },
                       ]),
                     },

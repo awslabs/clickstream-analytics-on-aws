@@ -69,3 +69,16 @@ export function formatDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export interface TimezoneInfo {
+  appId: string;
+  timezone: string;
+}
+
+export function timezoneJsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
+  const dict: { [key: string]: string } = {};
+  for (const item of jsonArray) {
+    dict[item.appId] = item.timezone;
+  }
+  return dict;
+}
+
