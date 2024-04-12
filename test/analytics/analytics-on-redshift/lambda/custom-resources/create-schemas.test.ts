@@ -74,30 +74,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
     },
   };
 
-  const basicEventOneReportingView = {
-    ...basicCloudFormationEvent,
-    ResourceProperties: {
-      ...basicCloudFormationEvent.ResourceProperties,
-      ServiceToken: 'token-1',
-      projectId: 'project1',
-      odsTableNames,
-      databaseName: projectDBName,
-      dataAPIRole: `arn:aws:iam::1234567890:role/${roleName}`,
-      redshiftBIUserParameter: '/clickstream/report/user/1111',
-      redshiftBIUsernamePrefix: biUserNamePrefix,
-      reportingViewsDef: [
-        {
-          viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
-          type: 'mv',
-          scheduleRefresh: 'true',
-          timezoneSensitive: 'true',
-        },
-      ],
-      schemaDefs: [],
-      schemaHash: '123456789',
-    },
-  };
-
   const workgroupName = 'demo';
   const defaultDBName = 'defaultDB';
   const createSchemaPropsInServerless: ResourcePropertiesType = {
@@ -112,11 +88,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
   };
   const createServerlessEvent = {
     ...basicEvent,
-    ResourceProperties: createSchemaPropsInServerless,
-  };
-
-  const createServerlessOneReportingView = {
-    ...basicEventOneReportingView,
     ResourceProperties: createSchemaPropsInServerless,
   };
 
