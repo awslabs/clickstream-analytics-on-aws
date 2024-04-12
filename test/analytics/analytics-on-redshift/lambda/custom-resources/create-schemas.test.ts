@@ -31,10 +31,10 @@ import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalId
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
+import { logger } from '../../../../../src/common/powertools';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 import { loadSQLFromFS } from '../../../../fs-utils';
-import { logger } from '../../../../../src/common/powertools';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
@@ -311,8 +311,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     s3ClientMock.on(PutObjectCommand).callsFake((params) => {
       const body = params.Body as string;
-      if(body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV}`)) {
-        expect(body).toContain(`CONVERT_TIMEZONE('Asia/Shanghai'`);
+      if (body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV}`)) {
+        expect(body).toContain('CONVERT_TIMEZONE(\'Asia/Shanghai\'');
       }
       return {};
     });
