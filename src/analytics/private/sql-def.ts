@@ -103,78 +103,91 @@ export const reportingViewsDef: SQLViewDef[] = [
     spName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
     spName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
     spName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
     spName: CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE,
     spName: CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_EXIT,
     spName: CLICKSTREAM_ENGAGEMENT_EXIT_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_KPI,
     spName: CLICKSTREAM_ENGAGEMENT_KPI_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL,
     spName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW,
     spName: CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_DAU_WAU,
     spName: CLICKSTREAM_RETENTION_DAU_WAU_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_EVENT_OVERTIME,
     spName: CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_RETENTION_USER_NEW_RETURN,
     spName: CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
     spName: CLICKSTREAM_DEVICE_CRASH_RATE_SP,
     type: 'sp',
     scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_LIFECYCLE_VIEW_NAME,
@@ -201,6 +214,9 @@ export const reportingViewsDef: SQLViewDef[] = [
 export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'clickstream-log.sql',
+  },
+  {
+    sqlFile: 'refresh-mv-sp-status.sql',
   },
   {
     sqlFile: 'event.sql',
@@ -276,5 +292,10 @@ export const schemaDefs: SQLDef[] = [
     type: 'mv',
     scheduleRefresh: 'true',
   },
-
+  {
+    sqlFile: 'segment-user.sql',
+  },
+  {
+    sqlFile: 'sp-user-segment.sql',
+  },
 ];

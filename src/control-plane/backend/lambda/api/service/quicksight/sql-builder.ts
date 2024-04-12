@@ -102,6 +102,7 @@ export interface BaseSQLParameters {
   readonly groupColumn?: ExploreGroupColumn;
   readonly locale?: ExploreLocales;
   readonly groupCondition?: GroupingCondition;
+  readonly timezone: string;
 }
 
 export interface SQLParameters extends BaseSQLParameters {
@@ -1133,7 +1134,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
       joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_0.event_timestamp_0) <= cast(${sqlParameters.conversionIntervalInSeconds} as bigint) \n`);
     } else {
-      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and TO_CHAR(table_${index-1}.event_timestamp_${index-1}, 'YYYY-MM-DD') = TO_CHAR(table_${index}.event_timestamp_${index}, 'YYYY-MM-DD')  \n`);
+      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and CONVERT_TIMEZONE('${sqlParameters.timezone}', table_${index-1}.event_timestamp_${index-1})::DATE = CONVERT_TIMEZONE('${sqlParameters.timezone}', table_${index}.event_timestamp_${index})::DATE  \n`);
     }
   }
 
@@ -1196,7 +1197,7 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
   if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
     joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_0.event_timestamp_0) <= cast(${sqlParameters.conversionIntervalInSeconds} as bigint) \n`);
   } else {
-    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and TO_CHAR(table_${index-1}.event_timestamp_${index-1}, 'YYYY-MM-DD') = TO_CHAR(table_${index}.event_timestamp_${index}, 'YYYY-MM-DD')  \n`);
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and EXTRACT(epoch FROM table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1}) > 0 and CONVERT_TIMEZONE('${sqlParameters.timezone}', table_${index-1}.event_timestamp_${index-1})::DATE = CONVERT_TIMEZONE('${sqlParameters.timezone}', table_${index}.event_timestamp_${index})::DATE  \n`);
   }
 
   return joinConditionSQL;
@@ -1817,26 +1818,26 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
   return eventNameClause;
 }
 
-export function buildDateUnitsSql() {
+export function buildDateUnitsSql(timezone: string) {
 
   return `
     TO_CHAR(
-      event.event_timestamp,
+      CONVERT_TIMEZONE('${timezone}', event.event_timestamp),
       'YYYY-MM'
     ) as month,
     TO_CHAR(
       date_trunc(
         'week',
-        event.event_timestamp
+        CONVERT_TIMEZONE('${timezone}', event.event_timestamp)
       ),
       'YYYY-MM-DD'
     ) as week,
     TO_CHAR(
-      event.event_timestamp,
+      CONVERT_TIMEZONE('${timezone}', event.event_timestamp),
       'YYYY-MM-DD'
     ) as day,
     TO_CHAR(
-      event.event_timestamp,
+      CONVERT_TIMEZONE('${timezone}', event.event_timestamp),
       'YYYY-MM-DD HH24'
     ) || '00:00' as hour
   `;
@@ -1864,7 +1865,7 @@ function _buildBaseEventDataSql(analyticsType: ExploreAnalyticsType, eventNames:
         event.user_id,
         ${eventColumnSql}
         ${userColumnSql}
-        ${buildDateUnitsSql()}
+        ${buildDateUnitsSql(sqlParameters.timezone)}
       from
         ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
       where
@@ -1907,22 +1908,22 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   let eventDateSQL = '';
   if (timeWindowInSeconds) {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date ${_getStartDateForFixDateRange(sqlParameters.timeStart, timeWindowInSeconds)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
     } else {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= ${_getStartDateForRelativeDateRange(sqlParameters.lastN, sqlParameters.timeUnit, timeWindowInSeconds)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
     }
   } else {
     if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
-      eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and DATE(${prefix}event_timestamp) <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
+      eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date ${formatDateToYYYYMMDD(sqlParameters.timeStart!)} and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= date ${formatDateToYYYYMMDD(sqlParameters.timeEnd!)}`);
     } else {
       if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.WK) {
-        eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('week', current_date - interval '${sqlParameters.lastN! - 1} weeks') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
       } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.MM) {
-        eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('month', current_date - interval '${sqlParameters.lastN! - 1} months') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
       } else if (sqlParameters.timeUnit === ExploreRelativeTimeUnit.YY) {
-        eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('year', current_date - interval '${sqlParameters.lastN! - 1} years') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
       } else {
-        eventDateSQL = eventDateSQL.concat(`DATE(${prefix}event_timestamp) >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and DATE(${prefix}event_timestamp) <= CURRENT_DATE`);
+        eventDateSQL = eventDateSQL.concat(`CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE >= date_trunc('day', current_date - interval '${sqlParameters.lastN! - 1} days') and CONVERT_TIMEZONE('${sqlParameters.timezone}', ${prefix}event_timestamp)::DATE <= CURRENT_DATE`);
       }
     }
   }
@@ -2302,7 +2303,7 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
             ...condition,
             dataType: MetadataValueType.STRING,
             operator: ExploreAnalyticsOperators.EQUAL,
-            value: [condition.operator === ExploreAnalyticsOperators.YES ? 'true' : 'false'],
+            value: [condition.operator === ExploreAnalyticsOperators.TRUE ? 'true' : 'false'],
           };
           return _buildSqlFromStringCondition(new_condition, prefix);
         default:
@@ -2352,9 +2353,9 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
 
 function _buildSqlFromBooleanCondition(condition: Condition, prefix: string) : string {
   switch (condition.operator) {
-    case ExploreAnalyticsOperators.YES:
+    case ExploreAnalyticsOperators.TRUE:
       return `${prefix}${condition.property}  = TRUE `;
-    case ExploreAnalyticsOperators.NO:
+    case ExploreAnalyticsOperators.FALSE:
       return `(${prefix}${condition.property} is null or ${prefix}${condition.property} = FALSE )`;
     default:
       logger.error('unsupported condition', { condition });

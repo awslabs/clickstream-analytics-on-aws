@@ -35,8 +35,10 @@ const commonDeps = [
   'node-fetch@^2.6.4',
   'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
+  'moment-timezone@^0.5.45',
   'jsonpath-plus@^7.2.0',
   'hpagent@^1.2.0',
+  'csv-parser@^3.0.0',
 ];
 
 const commonDevDeps = [
@@ -56,6 +58,7 @@ const smithyPackagesVersion = '2.0.7';
 const smithyPackagesDeps = [
   '@smithy/node-http-handler',
   '@smithy/util-stream-node',
+  '@smithy/types',
 ].map(dep => `${dep}@^${smithyPackagesVersion}`);
 const awsSDKPackagesVersion = '3.523.0';
 const awsSDKPackagesDeps = [
@@ -169,6 +172,7 @@ const depsForFrontendProject = [
   'terser-webpack-plugin@^5.2.5',
   'uuid@^9.0.0',
   'web-vitals@^3.3.2',
+  'moment-timezone@^0.5.45',
 ];
 
 const devDepsForFrontendProject = [
@@ -227,6 +231,7 @@ const depsForApiProject = [
   'i18next@^22.4.6',
   'i18next-fs-backend@^2.2.0',
   'fast-memoize@^2.5.1',
+  'moment-timezone@^0.5.45',
   ...smithyPackagesDeps,
   ...awsSDKPackagesDeps,
   ...awsSDKPackagesDepsForApiProject,
@@ -576,7 +581,7 @@ const apiProject = new typescript.TypeScriptProject({
   packageManager: project.package.packageManager,
   projenCommand: project.projenCommand,
 });
-apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
+apiProject.setScript('dev', 'nodemon --watch \'**/*.ts\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('ncc-build', 'tsc && ncc build dist/index.js -o ncc');
 apiProject.setScript('start', 'pnpm run ncc-build && node ncc/index.js');
 apiProject.addFields({ version });

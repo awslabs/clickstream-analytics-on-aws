@@ -405,6 +405,7 @@ export class DynamoDbStore implements ClickStreamStore {
               dataProcessing: marshallPipeline.dataProcessing ?? { M: {} },
               dataModeling: marshallPipeline.dataModeling ?? { M: {} },
               reporting: marshallPipeline.reporting ?? { M: {} },
+              timezone: marshallPipeline.timezone ?? { L: [] },
               workflow: marshallPipeline.workflow ?? { M: {} },
               executionDetail: marshallPipeline.executionDetail ?? { M: {} },
               stackDetails: marshallPipeline.stackDetails ?? { L: [] },
@@ -478,16 +479,17 @@ export class DynamoDbStore implements ClickStreamStore {
               dataProcessing: marshallCurPipeline.dataProcessing,
               dataModeling: marshallCurPipeline.dataModeling,
               reporting: marshallCurPipeline.reporting,
-              workflow: marshallCurPipeline.workflow ?? { M: {} },
-              executionDetail: marshallPipeline.executionDetail ?? { M: {} },
-              stackDetails: marshallPipeline.stackDetails ?? { L: [] },
+              timezone: marshallCurPipeline.timezone,
+              workflow: marshallCurPipeline.workflow,
+              executionDetail: marshallPipeline.executionDetail,
+              stackDetails: marshallPipeline.stackDetails,
               templateVersion: { S: curPipeline.templateVersion ?? '' },
               lastAction: { S: curPipeline.lastAction ?? '' },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
-              operator: { S: pipeline.operator ?? '' },
+              operator: { S: pipeline.operator },
               deleted: { BOOL: true },
             },
           },
@@ -513,6 +515,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'dataProcessing = :dataProcessing, ' +
               'dataModeling = :dataModeling, ' +
               'reporting = :reporting, ' +
+              '#tz = :timezone,' +
               'workflow = :workflow, ' +
               'executionDetail = :executionDetail, ' +
               'stackDetails = :stackDetails, ' +
@@ -531,6 +534,7 @@ export class DynamoDbStore implements ClickStreamStore {
               '#bucket': 'bucket',
               '#pipelineOperator': 'operator',
               '#ConditionVersion': 'version',
+              '#tz': 'timezone',
             },
             ExpressionAttributeValues: {
               ':prefix': { S: pipeline.prefix },
@@ -544,16 +548,17 @@ export class DynamoDbStore implements ClickStreamStore {
               ':dataProcessing': marshallPipeline.dataProcessing,
               ':dataModeling': marshallPipeline.dataModeling,
               ':reporting': marshallPipeline.reporting,
+              ':timezone': marshallPipeline.timezone,
               ':ConditionVersionValue': { S: pipeline.version },
-              ':workflow': marshallPipeline.workflow ?? { M: {} },
-              ':executionDetail': marshallPipeline.executionDetail ?? { M: {} },
-              ':stackDetails': marshallPipeline.stackDetails ?? { L: [] },
+              ':workflow': marshallPipeline.workflow,
+              ':executionDetail': marshallPipeline.executionDetail,
+              ':stackDetails': marshallPipeline.stackDetails,
               ':templateVersion': { S: pipeline.templateVersion ?? '' },
               ':lastAction': { S: pipeline.lastAction ?? '' },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
-              ':operator': { S: pipeline.operator ?? '' },
+              ':operator': { S: pipeline.operator },
             },
           },
         },
@@ -582,6 +587,7 @@ export class DynamoDbStore implements ClickStreamStore {
           'dataProcessing = :dataProcessing, ' +
           'dataModeling = :dataModeling, ' +
           'reporting = :reporting, ' +
+          '#tz = :timezone,' +
           'workflow = :workflow, ' +
           'executionDetail = :executionDetail, ' +
           'stackDetails = :stackDetails, ' +
@@ -596,6 +602,7 @@ export class DynamoDbStore implements ClickStreamStore {
           '#bucket': 'bucket',
           '#pipelineOperator': 'operator',
           '#ConditionVersion': 'version',
+          '#tz': 'timezone',
         },
         ExpressionAttributeValues: {
           ':dataCollectionSDK': pipeline.dataCollectionSDK,
@@ -607,6 +614,7 @@ export class DynamoDbStore implements ClickStreamStore {
           ':dataProcessing': pipeline.dataProcessing ?? {},
           ':dataModeling': pipeline.dataModeling ?? {},
           ':reporting': pipeline.reporting ?? {},
+          ':timezone': pipeline.timezone ?? [],
           ':ConditionVersionValue': pipeline.version,
           ':workflow': pipeline.workflow ?? {},
           ':executionDetail': pipeline.executionDetail ?? {},

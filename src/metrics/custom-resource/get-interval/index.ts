@@ -59,10 +59,19 @@ async function _handler(event: CdkCustomResourceEvent) {
     }
   }
 
+  let mvRefreshIntervalSeconds = 7200;
+  if (event.ResourceProperties.mvRefreshInterval) {
+    const parsedValue = parseInt(event.ResourceProperties.mvRefreshInterval, 10);
+    if (!isNaN(parsedValue)) {
+      mvRefreshIntervalSeconds = Math.min(7200, parsedValue * 60);
+    }
+  }
+
   return {
     Data: {
       intervalSeconds,
       scanWorkflowMinIntervalSeconds: scanWorkflowMinIntervalSeconds,
+      mvRefreshIntervalSeconds: mvRefreshIntervalSeconds,
     },
   };
 }

@@ -24,7 +24,7 @@ import {
 import { NextFunction, Request, Response, Router } from 'express';
 import { body, param, query, ValidationChain, validationResult } from 'express-validator';
 import { isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { SegmentServ } from '../service/segment';
+import { SegmentServ } from '../service/segments/segment';
 
 export const router_segment: Router = Router();
 const segmentServ = new SegmentServ();

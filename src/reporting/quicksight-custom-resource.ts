@@ -83,7 +83,7 @@ export function createQuicksightCustomResource(
 
   const databaseName = props.databaseName;
   const eventViewProjectedColumns: string[] = [];
-  clickstream_event_view_columns.map( item => eventViewProjectedColumns.push(item.Name!));
+  clickstream_event_view_columns.forEach( item => eventViewProjectedColumns.push(item.Name!));
 
   const eventViewColumns = `
     *, 

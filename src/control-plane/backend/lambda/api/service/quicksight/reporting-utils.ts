@@ -33,6 +33,7 @@ import {
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
   ExploreAggregationMethod,
+  DEFAULT_TIMEZONE,
 } from '@aws/clickstream-base-lib';
 import {
   CreateDataSetCommandOutput, QuickSight,
@@ -60,6 +61,7 @@ import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, E
 import { AttributionSQLParameters } from './sql-builder-attribution';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
+import { IPipeline } from '../../model/pipeline';
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -1689,4 +1691,11 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
     suffix,
     smalMultiplesFieldId,
   };
+}
+
+export function getTimezoneByAppId(pipeline: IPipeline | undefined, appId: string): string {
+  if (!pipeline || !pipeline.timezone) {
+    return DEFAULT_TIMEZONE;
+  }
+  return pipeline.timezone.find((tz) => tz.appId === appId)?.timezone ?? DEFAULT_TIMEZONE;
 }

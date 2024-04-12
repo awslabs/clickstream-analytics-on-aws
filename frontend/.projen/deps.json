@@ -366,6 +366,11 @@
       "type": "runtime"
     },
     {
+      "name": "moment-timezone",
+      "version": "^0.5.45",
+      "type": "runtime"
+    },
+    {
       "name": "moment",
       "version": "^2.29.4",
       "type": "runtime"

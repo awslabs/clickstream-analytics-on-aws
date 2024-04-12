@@ -43,6 +43,8 @@ export interface RedshiftAnalyticsStackProps {
   projectId: string;
   appIds: string;
   dataProcessingCronOrRateExpression: string;
+  dataFreshnessInHour: number;
+  timezoneWithAppId: string;
   dataSourceConfiguration: {
     bucket: IBucket;
     prefix: string;
@@ -615,6 +617,14 @@ export function createStackParameters(scope: Construct): {
     default: 365,
   });
 
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
+
+  const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
+    description: 'The time zone with app id as json string',
+    type: 'String',
+    default: '',
+  });
+
   const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {
     description: 'The schedule expression of data processing.',
     type: 'String',
@@ -761,6 +771,8 @@ export function createStackParameters(scope: Construct): {
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsNumber,
+      timezoneWithAppId: timezoneWithAppIdParam.valueAsString,
       dataSourceConfiguration: {
         bucket: Bucket.fromBucketName(
           scope,

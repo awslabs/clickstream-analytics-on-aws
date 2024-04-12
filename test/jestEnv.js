@@ -32,6 +32,8 @@ process.env.FULL_SOLUTION_VERSION = 'v1.1.6-202311200542_dev'
 process.env.LISTEN_STACK_QUEUE_ARN = 'arn:aws:sqs:us-east-1:555555555555:queue-8ddb6980'
 process.env.IAM_ROLE_PREFIX = 'test-prefix'
 process.env.IAM_ROLE_BOUNDARY_ARN = ''
+process.env.TEMPLATE_FILE = 'cloudfront-s3-control-plane-stack-global.template.json'
+process.env.SOLUTION_VERSION = 'v1.1.5-202403071513'
 
 // web console bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'
@@ -57,6 +59,9 @@ process.env.REDSHIFT_DATABASE = 'project1'
 process.env.APP_IDS = 'app1,app2'
 process.env.REDSHIFT_MODE = 'Serverless';
 process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'workgroup-test';
+process.env.DATA_REFRESHNESS_IN_HOUR = '72';
+
+process.env.TIMEZONE_WITH_APPID_LIST = '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]'
 
 // streaming ingestion
 process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'

@@ -642,7 +642,7 @@ function createPipelineMock(
       ToPort: -1,
       CidrIpv4: '10.0.64.0/20',
     });
-  };
+  }
   mockClients.ec2Mock.on(DescribeSecurityGroupRulesCommand).
     resolves({
       SecurityGroupRules: mockSecurityGroupRules,

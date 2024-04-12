@@ -31,11 +31,12 @@ import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { cloneDeep } from 'lodash';
-import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { IDictionary } from '../model/dictionary';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -183,12 +184,14 @@ function getTokenFromRequest(req: any) {
 
 async function getRoleFromToken(decodedToken: any) {
   if (!decodedToken) {
+    logger.debug('No decoded token when fetching roles from token.');
     return [];
   }
 
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
+  logger.debug('User setting is ', { userSettings });
   const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
@@ -200,6 +203,10 @@ async function getRoleFromToken(decodedToken: any) {
 }
 
 function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+  logger.debug('mapping oidc roles with user setting.', {
+    userSettings,
+    oidcRoles,
+  });
   const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
     return userRoles;
@@ -398,44 +405,44 @@ function _getTransformerPluginInfoFromResources(
 }
 
 function _getClassNameByVersion(id: string, curClassName: string, templateVersion: string) {
-  const shortVersion = templateVersion?.split('-')[0];
+  const shortVersion = SolutionVersion.Of(templateVersion).shortVersion;
   const pluginHistoryClassNameWithVersion = [
     {
       id: 'BUILT-IN-1',
-      versions: SolutionVersion.V_1_0_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V1_VERSIONS],
       className: 'software.aws.solution.clickstream.Transformer',
     },
     {
       id: 'BUILT-IN-1',
-      versions: SolutionVersion.V_1_1_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
       className: 'software.aws.solution.clickstream.TransformerV2',
     },
     {
       id: 'BUILT-IN-2',
       versions: [
-        ...SolutionVersion.V_1_0_ALL,
-        ...SolutionVersion.V_1_1_ALL,
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
       ],
       className: 'software.aws.solution.clickstream.UAEnrichment',
     },
     {
       id: 'BUILT-IN-3',
       versions: [
-        ...SolutionVersion.V_1_0_ALL,
-        ...SolutionVersion.V_1_1_ALL,
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
       ],
       className: 'software.aws.solution.clickstream.IPEnrichment',
     },
     {
       id: 'BUILT-IN-4',
-      versions: SolutionVersion.V_1_1_ALL,
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
       className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
     },
   ];
   if (templateVersion !== FULL_SOLUTION_VERSION) {
     for (let plugin of pluginHistoryClassNameWithVersion) {
       const pluginVersions = plugin.versions.map(v => v.shortVersion);
-      if (plugin.id === id && pluginVersions.includes(shortVersion)) {
+      if (plugin.id === id && pluginVersions.some(v => v.equals(shortVersion))) {
         return plugin.className;
       }
     }
@@ -1477,6 +1484,18 @@ function readAndIterateFile(filePath: string): any[] {
   }
 }
 
+function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, useTarget = false) {
+  const solutionName = solutionMetadata?.data.name;
+  // default/ or cn/ or 'null',''
+  const prefix = isEmpty(solutionMetadata?.data.prefix) ? '' : solutionMetadata?.data.prefix;
+  const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
+  const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
+
+  let version = (useTarget || solutionMetadata?.data.version === 'latest') ?
+    solutionMetadata?.data.target : solutionMetadata?.data.version;
+  return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1541,4 +1560,5 @@ export {
   defaultValueFunc,
   getAppRegistryStackTags,
   readMetadataFromSqlFile,
+  getTemplateUrl,
 };

@@ -21,6 +21,7 @@ import {
 import {
   getAnalyticsDashboardList,
   getPipelineDetailByProjectId,
+  warmup,
 } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -146,6 +147,10 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   useEffect(() => {
     if (projectId && appId) {
       loadPipeline();
+      warmup({
+        projectId: projectId,
+        appId: appId,
+      });
     }
   }, [currentPage]);
 

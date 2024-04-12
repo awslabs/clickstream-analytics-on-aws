@@ -13,12 +13,16 @@
 
 import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '@aws/clickstream-base-lib';
 import { v4 as uuidv4 } from 'uuid';
+import { PipelineServ } from './pipeline';
 import { DataSetProps } from './quicksight/dashboard-ln';
-import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, encodeAttributionQueryValueForSql, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
+import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, encodeAttributionQueryValueForSql, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getTimezoneByAppId, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters, buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { ReportingService } from './reporting';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { IPipeline } from '../model/pipeline';
+
+const pipelineServ: PipelineServ = new PipelineServ();
 
 export class AttributionAnalysisService {
 
@@ -34,6 +38,11 @@ export class AttributionAnalysisService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
 
       encodeAttributionQueryValueForSql(query as AttributionSQLParameters);
 
@@ -49,11 +58,11 @@ export class AttributionAnalysisService {
 
       let result: CreateDashboardResult | undefined = undefined;
       if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
-        result = await this.createSinglePointModelVisual(sheetId, query as AttributionSQLParameters);
+        result = await this.createSinglePointModelVisual(sheetId, query as AttributionSQLParameters, pipeline);
       } else if (query.modelType == AttributionModelType.LINEAR) {
-        result = await this.createLinearModelVisual(sheetId, query as AttributionSQLParameters);
+        result = await this.createLinearModelVisual(sheetId, query as AttributionSQLParameters, pipeline);
       } else if (query.modelType == AttributionModelType.POSITION) {
-        result = await this.createPositionBasedModelVisual(sheetId, query as AttributionSQLParameters);
+        result = await this.createPositionBasedModelVisual(sheetId, query as AttributionSQLParameters, pipeline);
       } else {
         return res.status(400).send(new ApiFail('Invalid attribution analysis model type'));
       }
@@ -68,7 +77,7 @@ export class AttributionAnalysisService {
     }
   };
 
-  async createSinglePointModelVisual(sheetId: string, query: any) {
+  async createSinglePointModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
     const sql = buildSQLForSinglePointModel({
       ...query,
       schemaName: query.appId,
@@ -77,10 +86,10 @@ export class AttributionAnalysisService {
 
     logger.debug(`sql of single point model: ${sql}`);
 
-    return this.createModelVisual(sql, sheetId, query);
+    return this.createModelVisual(sql, sheetId, query, pipeline);
   };
 
-  async createLinearModelVisual(sheetId: string, query: any) {
+  async createLinearModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
     const sql = buildSQLForLinearModel({
       ...query,
       schemaName: query.appId,
@@ -88,10 +97,10 @@ export class AttributionAnalysisService {
     } as AttributionSQLParameters);
     logger.debug(`sql of linear model: ${sql}`);
 
-    return this.createModelVisual(sql, sheetId, query);
+    return this.createModelVisual(sql, sheetId, query, pipeline);
   };
 
-  async createPositionBasedModelVisual(sheetId: string, query: any) {
+  async createPositionBasedModelVisual(sheetId: string, query: any, pipeline: IPipeline) {
     const sql = buildSQLForPositionModel({
       ...query,
       schemaName: query.appId,
@@ -99,10 +108,10 @@ export class AttributionAnalysisService {
     } as AttributionSQLParameters);
     logger.debug(`sql of position based model: ${sql}`);
 
-    return this.createModelVisual(sql, sheetId, query);
+    return this.createModelVisual(sql, sheetId, query, pipeline);
   };
 
-  async createModelVisual(visualSql: string, sheetId: string, query: any) {
+  async createModelVisual(visualSql: string, sheetId: string, query: any, pipeline: IPipeline) {
 
     const viewName = getTempResourceName(query.viewName, query.action);
 
@@ -149,7 +158,7 @@ export class AttributionAnalysisService {
       filterGroup: visualRelatedParams.filterGroup,
     };
 
-    return new ReportingService().createDashboardVisuals(sheetId, viewName, query, datasetPropsArray, [visualProps]);
+    return new ReportingService().createDashboardVisuals(sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);
 
   };
 

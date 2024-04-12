@@ -698,4 +698,12 @@ export class Parameters {
       allowedPattern: DDB_TABLE_ARN_PATTERN,
     });
   }
+
+  public static createDataFreshnessInHourParameter(scope: Construct) {
+    return new CfnParameter(scope, 'DataFreshnessInHour', {
+      description: 'Data Freshness in hour, default is 72 hours (3 days)',
+      default: 72,
+      type: 'Number',
+    });
+  }
 }

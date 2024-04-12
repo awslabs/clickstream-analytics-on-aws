@@ -44,7 +44,6 @@ import {
   awsAccountId,
   awsPartition,
   awsRegion,
-  awsUrlSuffix,
   listenStackQueueArn,
   stackWorkflowS3Bucket,
 } from '../common/constants';
@@ -90,6 +89,7 @@ import {
   getStackPrefix,
   getStackTags,
   getStateMachineExecutionName,
+  getTemplateUrl,
   getUpdateTags,
   isEmpty,
   mergeIntoPipelineTags,
@@ -244,6 +244,11 @@ interface MSKClusterProps {
   readonly arn: string;
 }
 
+export interface IAppTimezone {
+  readonly appId: string;
+  readonly timezone: string;
+}
+
 export interface IPipeline {
   readonly id: string;
   readonly type: string;
@@ -261,6 +266,7 @@ export interface IPipeline {
   readonly dataProcessing?: DataProcessing;
   readonly dataModeling?: DataModeling;
   readonly reporting?: Reporting;
+  readonly timezone?: IAppTimezone[];
 
   lastAction?: string;
   status?: PipelineStatus;
@@ -406,7 +412,7 @@ export class CPipeline {
   }
 
   private async _mergeUpdateParameters(oldPipeline: IPipeline): Promise<void> {
-    // generate parameters accroding to current control plane version
+    // generate parameters according to current control plane version
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
@@ -575,16 +581,74 @@ export class CPipeline {
     await this._createRules();
     this.pipeline.lastAction = 'Update';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    const ingestionStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
-    const dataProcessingStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
-    const analyticsStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType);
-    const reportStackName = getStackName(
-      this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType);
+    // update appIds and timezone
+    const updateList: { stackType: PipelineStackType; parameterKey: string; parameterValue: string }[] = [];
+    updateList.push({
+      stackType: PipelineStackType.INGESTION,
+      parameterKey: 'AppIds',
+      parameterValue: appIds.join(','),
+    });
+    updateList.push({
+      stackType: PipelineStackType.DATA_PROCESSING,
+      parameterKey: 'AppIds',
+      parameterValue: appIds.join(','),
+    });
+    updateList.push({
+      stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
+      parameterKey: 'AppIds',
+      parameterValue: appIds.join(','),
+    });
+    updateList.push({
+      stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
+      parameterKey: 'TimeZoneWithAppId',
+      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
+    });
+    updateList.push({
+      stackType: PipelineStackType.REPORTING,
+      parameterKey: 'RedShiftDBSchemaParam',
+      parameterValue: appIds.join(','),
+    });
+    updateList.push({
+      stackType: PipelineStackType.REPORTING,
+      parameterKey: 'QuickSightTimezoneParam',
+      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
+    });
     // update workflow
-    this.stackManager.updateWorkflowForApp(appIds, ingestionStackName, dataProcessingStackName, analyticsStackName, reportStackName);
+    this.stackManager.updateWorkflowForApp(updateList);
+    // create new execution
+    const execWorkflow = this.stackManager.getExecWorkflow();
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
+    // update pipeline metadata
+    this.pipeline.workflow = this.stackManager.getWorkflow();
+    this.pipeline.updateAt = Date.now();
+    await store.updatePipelineAtCurrentVersion(this.pipeline);
+  }
+
+  public async updateAppTimezone(): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
+    this.pipeline.lastAction = 'Update';
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    // update appIds and timezone
+    const updateList: { stackType: PipelineStackType; parameterKey: string; parameterValue: string }[] = [];
+    updateList.push({
+      stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
+      parameterKey: 'TimeZoneWithAppId',
+      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
+    });
+    updateList.push({
+      stackType: PipelineStackType.REPORTING,
+      parameterKey: 'QuickSightTimezoneParam',
+      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
+    });
+    // update workflow
+    this.stackManager.updateWorkflowForApp(updateList);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -799,16 +863,8 @@ export class CPipeline {
     if (isEmpty(this.resources?.templates?.data[name])) {
       return undefined;
     }
-    const solutionName = this.resources?.solution?.data.name;
     const templateName = this.resources?.templates?.data[name] as string;
-    // default/ or cn/ or 'null',''
-    const prefix = isEmpty(this.resources?.solution?.data.prefix) ? '' : this.resources?.solution?.data.prefix;
-    const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
-    const s3Host = `https://${this.resources?.solution?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
-
-    let version = this.resources?.solution?.data.version === 'latest' ?
-      this.resources?.solution.data.target : this.resources?.solution?.data.version;
-    return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
+    return getTemplateUrl(templateName, this.resources?.solution);
   };
 
   private patchBuiltInTags() {
@@ -1276,9 +1332,7 @@ export class CPipeline {
     };
   };
 
-  public async getCreateApplicationSchemasStatus() {
-    const apps = await store.listApplication(this.pipeline.projectId, 'asc');
-    const appIds = apps.map(a => a.appId);
+  public async getCreateApplicationSchemasStatus(appIds: string[]) {
     const schemasStatus: CreateApplicationSchemasStatus[] = [];
     for (let appId of appIds) {
       schemasStatus.push({

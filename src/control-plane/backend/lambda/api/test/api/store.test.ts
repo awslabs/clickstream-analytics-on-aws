@@ -216,6 +216,20 @@ describe('App test', () => {
           templateVersion: {
             S: MOCK_SOLUTION_VERSION,
           },
+          timezone: {
+            L: [
+              {
+                M: {
+                  appId: {
+                    S: 'app_7777_7777',
+                  },
+                  timezone: {
+                    S: 'Asia/Singapore',
+                  },
+                },
+              },
+            ],
+          },
           ingestionServer: {
             M: {
               domain: {
@@ -491,6 +505,20 @@ describe('App test', () => {
       },
       templateVersion: {
         S: MOCK_SOLUTION_VERSION,
+      },
+      timezone: {
+        L: [
+          {
+            M: {
+              appId: {
+                S: 'app_7777_7777',
+              },
+              timezone: {
+                S: 'Asia/Singapore',
+              },
+            },
+          },
+        ],
       },
       ingestionServer: {
         M: {

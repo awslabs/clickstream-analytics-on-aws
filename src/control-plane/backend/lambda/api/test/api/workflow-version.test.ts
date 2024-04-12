@@ -566,6 +566,12 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'AppRegistryApplicationArn.#',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                       Reporting: removeParametersFromStack(ReportingStack, [
@@ -574,6 +580,9 @@ describe('Workflow test with pipeline version', () => {
                         },
                         {
                           ParameterKey: 'AppRegistryApplicationArn.#',
+                        },
+                        {
+                          ParameterKey: 'QuickSightTimezoneParam',
                         },
                       ],
                       ),
@@ -650,15 +659,26 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
-                      Reporting: mergeParametersFromStack(ReportingStack, [
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
-                        },
-                      ],
-                      ),
+                      Reporting: removeParametersFromStack(
+                        mergeParametersFromStack(ReportingStack, [
+                          {
+                            ParameterKey: 'QuickSightOwnerPrincipalParam',
+                            ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                          },
+                        ],
+                        ), [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ]),
                     },
                   },
                   {
@@ -728,9 +748,22 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
-                      Reporting: ReportingStack,
+                      Reporting: removeParametersFromStack(
+                        ReportingStack,
+                        [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ],
+                      ),
                     },
                   },
                   {
@@ -993,6 +1026,12 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'AppRegistryApplicationArn',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                     },
@@ -1077,6 +1116,12 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'ClickstreamMetadataDdbArn',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                     },
@@ -1153,22 +1198,35 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'ClickstreamMetadataDdbArn',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
-                      Reporting: mergeParametersFromStack(ReportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightUserParam',
-                          ParameterValue: 'GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                      ]),
+                      Reporting: removeParametersFromStack(
+                        mergeParametersFromStack(ReportingStackCn, [
+                          {
+                            ParameterKey: 'QuickSightUserParam',
+                            ParameterValue: 'GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightOwnerPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                        ]),
+                        [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ],
+                      ),
                     },
                   },
                   {
