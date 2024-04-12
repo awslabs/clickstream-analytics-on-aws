@@ -20,9 +20,11 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import request from 'supertest';
 import { mockClients, resetAllMockClient } from './aws-sdk-mock-util';
-import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock } from './ddb-mock';
+import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock, MOCK_EXECUTION_ID_OLD } from './ddb-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
+import { WorkflowStateType } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -40,45 +42,136 @@ describe('Application test', () => {
       .resolvesOnce({
         Items: [
           {
-            name: 'Pipeline-01',
-            pipelineId: MOCK_PROJECT_ID,
-            status: {
-              status: PipelineStatusType.ACTIVE,
-            },
-            ingestionServer: {
-              sinkType: 's3',
-            },
+            ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
             workflow: {
               Version: '2022-03-15',
               Workflow: {
+                Type: WorkflowStateType.PARALLEL,
+                End: true,
                 Branches: [
                   {
-                    StartAt: 'Ingestion',
                     States: {
                       Ingestion: {
+                        Type: WorkflowStateType.STACK,
                         Data: {
-                          Callback: {
-                            BucketName: 'EXAMPLE_BUCKET',
-                            BucketPrefix: '/ingestion',
-                          },
                           Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                             Action: 'Create',
-                            Parameters: [],
-                            StackName: 'clickstream-ingestion1',
-                            TemplateURL: 'https://example.com',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-Ingestion-kinesis-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
                           },
                         },
                         End: true,
-                        Type: 'Stack',
+                      },
+                    },
+                    StartAt: 'Ingestion',
+                  },
+                  {
+                    States: {
+                      DataProcessing: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        Next: 'DataModeling',
+                      },
+                      Reporting: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'RedShiftDBSchemaParam',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        End: true,
+                      },
+                      DataModeling: {
+                        Type: WorkflowStateType.STACK,
+                        Data: {
+                          Input: {
+                            Region: 'ap-southeast-1',
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                            Action: 'Create',
+                            Parameters: [
+                              {
+                                ParameterKey: 'AppIds',
+                                ParameterValue: '',
+                              },
+                            ],
+                            StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                          },
+                          Callback: {
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                            BucketName: 'EXAMPLE_BUCKET',
+                          },
+                        },
+                        Next: 'Reporting',
+                      },
+                    },
+                    StartAt: 'DataProcessing',
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [],
+                            StackName: `${getStackPrefix()}-Metrics-6666-6666`,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: WorkflowStateType.STACK,
                       },
                     },
                   },
                 ],
-                End: true,
-                Type: 'Parallel',
               },
             },
-            executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
         ],
       })
@@ -90,7 +183,28 @@ describe('Application test', () => {
           },
         ],
       });
-    mockClients.sfnMock.on(StartExecutionCommand).resolves({});
+
+    mockClients.sfnMock.on(StartExecutionCommand).callsFake(input => {
+      const executionInput = JSON.parse(input.input);
+      const ingestionInput = executionInput.Branches[0].States.Ingestion;
+      const dataProcessingInput = executionInput.Branches[1].States.DataProcessing;
+      const dataModelingInput = executionInput.Branches[1].States.DataModeling;
+      const reportingInput = executionInput.Branches[1].States.Reporting;
+      const metricsInput = executionInput.Branches[2].States.Metrics;
+      if (
+        ingestionInput.Type === WorkflowStateType.STACK && ingestionInput.Data.Input.Action === 'Update' &&
+        dataProcessingInput.Type === WorkflowStateType.STACK && dataProcessingInput.Data.Input.Action === 'Update' &&
+        dataModelingInput.Type === WorkflowStateType.STACK && dataModelingInput.Data.Input.Action === 'Update' &&
+        reportingInput.Type === WorkflowStateType.STACK && reportingInput.Data.Input.Action === 'Update' &&
+        metricsInput.Type === WorkflowStateType.PASS && metricsInput.Data.Input.Action === 'Create'
+      ) {
+        return {
+          executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
+        };
+      } else {
+        throw new Error('mocked StartExecutionCommand rejection');
+      }
+    });
     mockClients.ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
@@ -107,6 +221,7 @@ describe('Application test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.message).toEqual('Application created.');
     expect(res.body.success).toEqual(true);
+    expect(mockClients.sfnMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
     expect(mockClients.ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock ddb error', async () => {
