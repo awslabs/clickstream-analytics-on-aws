@@ -139,7 +139,8 @@ export class LambdaUtil {
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
     const ruleConfigDir = getRuleConfigDir(this.props.pipelineS3Prefix, this.props.projectId);
-    this.props.pipelineS3Bucket.grantRead(lambdaRole, `${ruleConfigDir}*`);
+    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${ruleConfigDir}*`);
+
     const fn = new SolutionNodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
       role: lambdaRole,
       securityGroups: [securityGroupForLambda],

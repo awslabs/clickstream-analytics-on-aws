@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
+import fs from 'fs';
+import path from 'path';
 import {
   Configuration,
   EMRServerlessClient,
@@ -22,9 +24,10 @@ import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
-import { listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
+import { isObjectExist, listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
+
 
 const emrClient = new EMRServerlessClient({
   ...aws_sdk_client_common_config,
@@ -56,6 +59,8 @@ export class EMRServerlessUtil {
         logger.warn('appIds is empty, please check env: APP_IDS');
         return;
       }
+      await putInitRuleConfig(config.ruleConfigDir, config.appIds);
+
       const runJobInfo = await EMRServerlessUtil.startJobRun(
         event,
         config,
@@ -570,3 +575,42 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
   };
 
 }
+async function putInitRuleConfig(ruleConfigDir: string, appIds: string) {
+  logger.info('putInitRuleConfig', { ruleConfigDir, appIds });
+
+  const categoryRuleFile = 'traffic_source_category_rule_v1.json';
+  const channelRuleFile = 'traffic_source_channel_rule_v1.json';
+  const categoryRuleFileFullPath = path.join(__dirname, categoryRuleFile);
+  const channelRuleFileFullPath = path.join(__dirname, channelRuleFile);
+
+  const categoryRuleContent = fs.readFileSync(categoryRuleFileFullPath, 'utf8');
+  const channelRuleContent = fs.readFileSync(channelRuleFileFullPath, 'utf8');
+
+  const d = new RegExp(/s3:\/\/([^/]+)\/(.*)/).exec(ruleConfigDir);
+
+  if (!d) {
+    logger.error('putInitRuleConfig invalid s3 uri ' + ruleConfigDir);
+    return;
+  }
+
+  const bucket = d[1];
+  let keyPefix = d[2];
+  if (keyPefix && !keyPefix.endsWith('/')) {
+    keyPefix += '/';
+  }
+
+  for (const appId of appIds.split(',')) {
+    const categoryRuleKey = `${keyPefix}${appId}/${categoryRuleFile}`;
+    const channelRuleKey = `${keyPefix}${appId}/${channelRuleFile}`;
+
+    if (! await isObjectExist(bucket, categoryRuleKey)) {
+      await putStringToS3(categoryRuleContent, bucket, categoryRuleKey);
+      logger.info(`put category rule config to s3://${bucket}/${categoryRuleKey}`);
+    }
+    if (! await isObjectExist(bucket, channelRuleKey)) {
+      await putStringToS3(channelRuleContent, bucket, channelRuleKey);
+      logger.info(`put channel rule config to s3://${bucket}/${channelRuleKey}`);
+    }
+  }
+}
+

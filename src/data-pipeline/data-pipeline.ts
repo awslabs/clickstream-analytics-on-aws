@@ -331,7 +331,7 @@ export function getRuleConfigDir(prefix: string, projectId: string) {
   if (prefix.startsWith(`clickstream/${projectId}/`)) {
     ruleConfigPrefix = `clickstream/${projectId}/rules/`;
   } else {
-    ruleConfigPrefix = prefix + "/" + projectId + "/rules/";
+    ruleConfigPrefix = prefix + '/' + projectId + '/rules/';
   }
   return ruleConfigPrefix;
 }
