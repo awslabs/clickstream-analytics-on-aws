@@ -13,6 +13,7 @@
 
 import {
   CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
+  CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME,
   OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
   Segment,
   SegmentDdbItem,
@@ -239,7 +240,7 @@ export class SegmentServ {
       // @ts-ignore https://github.com/aws/aws-sdk-js-v3/issues/4451
       const presignedUrl = await getSignedUrl(s3Client, new GetObjectCommand({
         Bucket: pipeline.bucket.name,
-        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, pipeline.bucket.prefix ?? '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/segment_000.csv`,
+        Key: `${getBucketPrefix(projectId as string, BucketPrefix.SEGMENTS, pipeline.bucket.prefix ?? '')}app/${appId}/segment/${segmentId}/job/${jobRunId}/${CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME}`,
       }), { expiresIn: 600 });
 
       return res.status(200).json(new ApiSuccess({ presignedUrl }, 'Generate presigned URL successfully.'));

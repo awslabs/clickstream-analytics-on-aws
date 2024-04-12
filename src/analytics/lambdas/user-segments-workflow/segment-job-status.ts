@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { SegmentJobStatus } from '@aws/clickstream-base-lib';
+import {
+  CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME,
+  CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME,
+  SegmentJobStatus,
+} from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { StatusString } from '@aws-sdk/client-redshift-data';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -82,7 +86,7 @@ const _handler = async (event: SegmentJobStatusEvent) => {
       // Retrieve segment result including sample data from S3, update job status table
       const summaryData = await s3Client.send(new GetObjectCommand({
         Bucket: process.env.PIPELINE_S3_BUCKET,
-        Key: `${s3Path}segment-summary_000.csv`,
+        Key: `${s3Path}${CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME}`,
       }));
       if (summaryData.Body) {
         // Parse segment summary file
@@ -94,7 +98,7 @@ const _handler = async (event: SegmentJobStatusEvent) => {
         const endTime = values[2];
 
         // Get sample data from segment output
-        const sampleData = await readSegmentSampleDataFromS3(process.env.PIPELINE_S3_BUCKET!, `${s3Path}segment_000.csv`);
+        const sampleData = await readSegmentSampleDataFromS3(process.env.PIPELINE_S3_BUCKET!, `${s3Path}${CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME}`);
 
         // Update segment job status in DDB
         const command = new UpdateCommand({

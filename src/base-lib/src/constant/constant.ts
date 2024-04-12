@@ -406,6 +406,8 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
 export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWorkflowStateMachine';
 export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
+export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME = 'segment_000.csv';
+export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME = 'segment-summary_000.csv';
 export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [
