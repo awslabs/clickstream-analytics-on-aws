@@ -68,7 +68,7 @@ export class StackManager {
       this.execWorkflow.Workflow = this.updateStackParameter(
         this.execWorkflow.Workflow, stackName, item.parameterKey, item.parameterValue, 'Update');
       // Update saveWorkflow AppIds Parameter
-      this.execWorkflow.Workflow = this.updateStackParameter(
+      this.workflow.Workflow = this.updateStackParameter(
         this.workflow.Workflow, stackName, item.parameterKey, item.parameterValue, 'Create');
     }
   }
