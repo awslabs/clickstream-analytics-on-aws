@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
@@ -1897,7 +1897,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -1941,8 +1940,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2093,7 +2091,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2138,8 +2135,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2312,7 +2308,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2356,8 +2351,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2512,7 +2506,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2555,8 +2548,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2762,7 +2754,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2806,8 +2797,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -3033,7 +3023,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -3076,8 +3065,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -7277,7 +7265,6 @@ describe('SQL Builder test', () => {
         },
       ],
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         lagSeconds: 3600,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
@@ -7328,8 +7315,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -12761,7 +12747,6 @@ describe('SQL Builder test', () => {
         },
       ],
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
@@ -12812,8 +12797,7 @@ describe('SQL Builder test', () => {
         where
           CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
           and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
             and geo_country = 'China'

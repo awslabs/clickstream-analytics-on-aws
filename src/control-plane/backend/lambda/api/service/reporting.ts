@@ -698,7 +698,6 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pathAnalysis: {
-          platform: query.pathAnalysis.platform,
           sessionType: query.pathAnalysis.sessionType,
           nodeType: query.pathAnalysis.nodeType,
           lagSeconds: query.pathAnalysis.lagSeconds,
@@ -726,7 +725,6 @@ export class ReportingService {
       timeUnit: query.timeUnit,
       groupColumn: query.groupColumn,
       pathAnalysis: {
-        platform: query.pathAnalysis.platform,
         sessionType: query.pathAnalysis.sessionType,
         nodeType: query.pathAnalysis.nodeType,
         lagSeconds: query.pathAnalysis.lagSeconds,
