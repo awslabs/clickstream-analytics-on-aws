@@ -35,7 +35,6 @@ export interface RedshiftSQLExecutionProps {
   readonly codePath: string;
   readonly functionEntry: string;
   readonly workflowBucketInfo: WorkflowBucketInfo;
-  readonly timeZoneWithAppId: string;
 }
 
 export abstract class RedshiftSQLExecution extends Construct {
@@ -165,6 +164,7 @@ export abstract class RedshiftSQLExecution extends Construct {
 export interface ApplicationSchemasAndReportingProps extends RedshiftSQLExecutionProps {
   readonly projectId: string;
   readonly appIds: string;
+  readonly timeZoneWithAppId: string;
   readonly databaseName: string;
   readonly odsTableNames: RedshiftOdsTables;
 }
