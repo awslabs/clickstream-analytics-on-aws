@@ -117,6 +117,7 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly reportingViewsDef: SQLViewDef[];
   readonly schemaDefs: SQLDef[];
   readonly schemaHash: string;
+  readonly timezoneWithAppId: string;
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;

@@ -35,6 +35,7 @@ export interface RedshiftSQLExecutionProps {
   readonly codePath: string;
   readonly functionEntry: string;
   readonly workflowBucketInfo: WorkflowBucketInfo;
+  readonly timeZoneWithAppId: string;
 }
 
 export abstract class RedshiftSQLExecution extends Construct {
@@ -220,6 +221,7 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
+      timezoneWithAppId: properties.timeZoneWithAppId,
     };
   }
 }

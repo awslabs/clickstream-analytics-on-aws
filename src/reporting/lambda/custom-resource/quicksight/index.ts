@@ -45,7 +45,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep } from '../../../../common/utils';
+import { sleep, timezonejsonArrayToDict } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
@@ -85,19 +85,6 @@ type ResourceCommonParams = {
 export type MustacheParamType = {
   schema: string;
   timezone: string;
-}
-
-export interface TimezoneInfo {
-  appId: string;
-  timezone: string;
-}
-
-export function timezonejsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
-  const dict: { [key: string]: string } = {};
-  for (const item of jsonArray) {
-    dict[item.appId] = item.timezone;
-  }
-  return dict;
 }
 
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {

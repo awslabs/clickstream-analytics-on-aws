@@ -78,6 +78,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const createSchemaPropsInServerless: ResourcePropertiesType = {
     ...basicEvent.ResourceProperties,
     appIds: 'app1',
+    timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"},{"appId":"app2","timezone":"Asia/Tokyo"}]',
     serverlessRedshiftProps: {
       workgroupName: workgroupName,
       databaseName: defaultDBName,
@@ -98,6 +99,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...createServerlessEvent.ResourceProperties,
       appIds: 'app2',
+      timezoneWithAppId: '[{"appId":"app2","timezone":"Asia/Tokyo"}]',
     },
     PhysicalResourceId: `${physicalIdPrefix}abcde`,
     RequestType: 'Update',
@@ -115,6 +117,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...basicEvent.ResourceProperties,
       appIds: 'app1',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"}]',
       provisionedRedshiftProps,
     },
   };
@@ -125,6 +128,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...createProvisionedEvent.ResourceProperties,
       appIds: 'app1,app2',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"},{"appId":"app2","timezone":"Asia/Tokyo"}]',
     },
     PhysicalResourceId: 'physical-resource-id',
     RequestType: 'Update',
