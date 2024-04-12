@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 import { SegmentJobStatus } from '@aws/clickstream-base-lib';
-import { MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_SEGMENT_ID, MOCK_SEGMENT_JOB_ID, MOCK_USER_ID } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_SEGMENT_ID, MOCK_SEGMENT_JOB_ID, MOCK_USER_ID } from '../ddb-mock';
 
 export const MOCK_EVENTBRIDGE_RULE_ARN = 'arn:aws:events:us-east-1:xxxxxxxx:rule/Clickstream-SegmentJob-01';
 export const MOCK_CREATE_USER_SEGMENT_SETTING_INPUT = {

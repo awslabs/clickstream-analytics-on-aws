@@ -38,6 +38,7 @@ const commonDeps = [
   'moment-timezone@^0.5.45',
   'jsonpath-plus@^7.2.0',
   'hpagent@^1.2.0',
+  'csv-parser@^3.0.0',
 ];
 
 const commonDevDeps = [
@@ -57,6 +58,7 @@ const smithyPackagesVersion = '2.0.7';
 const smithyPackagesDeps = [
   '@smithy/node-http-handler',
   '@smithy/util-stream-node',
+  '@smithy/types',
 ].map(dep => `${dep}@^${smithyPackagesVersion}`);
 const awsSDKPackagesVersion = '3.523.0';
 const awsSDKPackagesDeps = [

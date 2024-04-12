@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { ExploreAnalyticsOperators, MetadataSource, MetadataValueType } from '../constant';
+import {
+  ExploreAnalyticsNumericOperators,
+  ExploreAnalyticsOperators,
+  MetadataSource,
+  MetadataValueType,
+} from '../constant';
 
 export interface Segment {
   segmentId: string;
@@ -27,6 +32,8 @@ export interface Segment {
   refreshSchedule: RefreshSchedule;
   criteria: SegmentCriteria;
   eventBridgeRuleArn?: string;
+  sql?: string;
+  uiRenderingJson?: string;
 }
 
 export interface RefreshSchedule {
@@ -113,13 +120,13 @@ export interface ParameterCondition {
   parameterName: string;
   dataType: MetadataValueType;
   conditionOperator: ExploreAnalyticsOperators;
-  inputValue: number | number[] | string | string[];
+  inputValue: string[];
 }
 
 export interface MetricCondition {
   metricType: SegmentFilterEventMetricType;
-  conditionOperator: ExploreAnalyticsOperators;
-  inputValue: number | number[];
+  conditionOperator: ExploreAnalyticsNumericOperators;
+  inputValue: number[];
   parameterType?: MetadataSource;
   parameterName?: string;
   dataType?: MetadataValueType;

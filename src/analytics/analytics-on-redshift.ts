@@ -287,14 +287,14 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const redshiftRoleForCopyFromS3 = new Role(this, 'CopyDataFromS3Role', {
+    const redshiftAssociatedRole = new Role(this, 'RedshiftAssociatedRole', {
       assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
     });
-    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateS3CopyRole',
+    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateIAMRole',
       {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
-        role: redshiftRoleForCopyFromS3,
+        role: redshiftAssociatedRole,
       }).cr;
     crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForSQLExecution);
 
@@ -364,7 +364,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       emrServerlessApplicationId: props.emrServerlessApplicationId,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
-      redshiftRoleForCopyFromS3,
+      redshiftRoleForCopyFromS3: redshiftAssociatedRole,
       ddbStatusTable,
       tablesOdsSource: props.tablesOdsSource,
       workflowBucketInfo: props.workflowBucketInfo,
@@ -441,6 +441,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       },
       clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      redshiftAssociatedRole,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
@@ -547,9 +548,9 @@ function addCfnNag(stack: Stack) {
       ],
     },
     {
-      paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RedshiftAssociatedRole/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
+        ruleToSuppressRolePolicyWithHighSPCM('RedshiftAssociatedRole'),
       ],
     },
     {

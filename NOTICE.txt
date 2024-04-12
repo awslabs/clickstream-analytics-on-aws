@@ -53,6 +53,7 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/util-dynamodb under the Apache-2.0
 @smithy/node-http-handler under the Apache-2.0
 @smithy/util-stream-node under the Apache-2.0
+@smithy/types under the Apache-2.0
 @types/aws-lambda under the MIT
 aws-cdk-lib under the Apache-2.0
 cdk-bootstrapless-synthesizer under the Apache-2.0
@@ -102,6 +103,7 @@ case-sensitive-paths-webpack-plugin under the MIT
 classnames under the MIT
 css-loader under the MIT
 css-minimizer-webpack-plugin under the MIT
+csv-parser under the MIT
 dotenv under the BSD-2-Clause
 dotenv-expand under the BSD-2-Clause
 file-loader under the MIT

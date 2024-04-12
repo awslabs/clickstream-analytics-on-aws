@@ -17,6 +17,7 @@ import {
   EventsInSequenceCondition,
   EventWithParameter,
   ExploreAggregationMethod,
+  ExploreAnalyticsNumericOperators,
   ExploreAnalyticsOperators,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
@@ -566,8 +567,8 @@ export const validateFilterConditions = (conditions: IConditionItemType[]) => {
       [
         ExploreAnalyticsOperators.NULL,
         ExploreAnalyticsOperators.NOT_NULL,
-        ExploreAnalyticsOperators.YES,
-        ExploreAnalyticsOperators.NO,
+        ExploreAnalyticsOperators.TRUE,
+        ExploreAnalyticsOperators.FALSE,
       ].includes(item.conditionOperator.value as ExploreAnalyticsOperators)
     ) {
       return true;
@@ -638,8 +639,8 @@ export const validConditionItemType = (condition: IConditionItemType) => {
     ![
       ExploreAnalyticsOperators.NULL,
       ExploreAnalyticsOperators.NOT_NULL,
-      ExploreAnalyticsOperators.YES,
-      ExploreAnalyticsOperators.NO,
+      ExploreAnalyticsOperators.TRUE,
+      ExploreAnalyticsOperators.FALSE,
     ].includes(condition.conditionOperator.value as ExploreAnalyticsOperators);
   return (
     isValidConditionOption &&
@@ -1183,7 +1184,7 @@ const ConvertUserDoneEvent = (
             item.userDoneEventCalculateMethod?.value
           )) as SegmentFilterEventMetricType,
       conditionOperator: item.userDoneEventOperation
-        ?.value as ExploreAnalyticsOperators,
+        ?.value as ExploreAnalyticsNumericOperators,
       inputValue: item.userDoneEventValue?.map(Number) ?? [],
       parameterType:
         item.userDoneEventCalculateMethod?.itemType === 'children'
@@ -1193,7 +1194,7 @@ const ConvertUserDoneEvent = (
         item.userDoneEventCalculateMethod?.itemType === 'children'
           ? item.userDoneEventCalculateMethod?.name
           : undefined,
-      dataType: MetadataValueType.INTEGER as any,
+      dataType: MetadataValueType.NUMBER as any,
     },
   };
 };

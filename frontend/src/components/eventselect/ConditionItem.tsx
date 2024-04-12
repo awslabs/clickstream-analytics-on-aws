@@ -157,11 +157,11 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       label: t('analytics:operators.notContains'),
     },
     true: {
-      value: ExploreAnalyticsOperators.YES,
+      value: ExploreAnalyticsOperators.TRUE,
       label: t('analytics:operators.true'),
     },
     false: {
-      value: ExploreAnalyticsOperators.NO,
+      value: ExploreAnalyticsOperators.FALSE,
       label: t('analytics:operators.false'),
     },
   };

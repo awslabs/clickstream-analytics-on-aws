@@ -24,8 +24,6 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCom
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import request from 'supertest';
-import { MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_SEGMENT_ID, MOCK_SEGMENT_JOB_ID } from './ddb-mock';
-import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW, stackDetailsWithOutputs } from './pipeline-mock';
 import {
   MOCK_CREATE_USER_SEGMENT_SETTING_INPUT,
   MOCK_EVENTBRIDGE_RULE_ARN,
@@ -33,8 +31,10 @@ import {
   MOCK_UPDATE_USER_SEGMENT_SETTING_INPUT,
   MOCK_USER_SEGMENT_DDB_ITEM,
 } from './segments-mock';
-import { clickStreamTableName } from '../../common/constants';
-import { app } from '../../index';
+import { clickStreamTableName } from '../../../common/constants';
+import { app } from '../../../index';
+import { MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_SEGMENT_ID, MOCK_SEGMENT_JOB_ID } from '../ddb-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW, stackDetailsWithOutputs } from '../pipeline-mock';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const eventBridgeClientMock = mockClient(EventBridgeClient);
