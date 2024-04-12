@@ -17,7 +17,7 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV, CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -34,6 +34,7 @@ import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/priv
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 import { loadSQLFromFS } from '../../../../fs-utils';
+import { logger } from '../../../../../src/common/powertools';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
@@ -73,6 +74,30 @@ describe('Custom resource - Create schemas for applications in Redshift database
     },
   };
 
+  const basicEventOneReportingView = {
+    ...basicCloudFormationEvent,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      ServiceToken: 'token-1',
+      projectId: 'project1',
+      odsTableNames,
+      databaseName: projectDBName,
+      dataAPIRole: `arn:aws:iam::1234567890:role/${roleName}`,
+      redshiftBIUserParameter: '/clickstream/report/user/1111',
+      redshiftBIUsernamePrefix: biUserNamePrefix,
+      reportingViewsDef: [
+        {
+          viewName: CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
+          type: 'mv',
+          scheduleRefresh: 'true',
+          timezoneSensitive: 'true',
+        },
+      ],
+      schemaDefs: [],
+      schemaHash: '123456789',
+    },
+  };
+
   const workgroupName = 'demo';
   const defaultDBName = 'defaultDB';
   const createSchemaPropsInServerless: ResourcePropertiesType = {
@@ -87,6 +112,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
   };
   const createServerlessEvent = {
     ...basicEvent,
+    ResourceProperties: createSchemaPropsInServerless,
+  };
+
+  const createServerlessOneReportingView = {
+    ...basicEventOneReportingView,
     ResourceProperties: createSchemaPropsInServerless,
   };
 
@@ -251,6 +281,41 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    const resp = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      Sql: `CREATE DATABASE ${projectDBName};`,
+      WorkgroupName: workgroupName,
+      Database: defaultDBName,
+      ClusterIdentifier: undefined,
+      DbUser: undefined,
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(2, ExecuteStatementCommand, {
+      Sql: expect.stringMatching(`CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD .*`),
+    });
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+
+  });
+
+  test('Created database, timezone check', async () => {
+
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    s3ClientMock.on(PutObjectCommand).callsFake((params) => {
+      const body = params.Body as string;
+      if(body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV}`)) {
+        expect(body).toContain(`CONVERT_TIMEZONE('Asia/Shanghai'`);
+      }
+      return {};
+    });
 
     const resp = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
 

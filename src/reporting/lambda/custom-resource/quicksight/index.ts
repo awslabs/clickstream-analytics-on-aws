@@ -45,7 +45,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep, timezonejsonArrayToDict } from '../../../../common/utils';
+import { sleep, timezoneJsonArrayToDict } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
@@ -99,7 +99,7 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   const sharePrincipalArn = props.quickSightSharePrincipalArn;
   const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
-  const timezoneDict = timezonejsonArrayToDict(JSON.parse(props.timezone));
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(props.timezone));
 
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);

@@ -74,7 +74,7 @@ export interface TimezoneInfo {
   timezone: string;
 }
 
-export function timezonejsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
+export function timezoneJsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
   const dict: { [key: string]: string } = {};
   for (const item of jsonArray) {
     dict[item.appId] = item.timezone;
