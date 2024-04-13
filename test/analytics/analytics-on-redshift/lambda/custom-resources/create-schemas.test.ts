@@ -91,6 +91,18 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: createSchemaPropsInServerless,
   };
 
+  const createServerlessEventWithoutTimezone = {
+    ...basicEvent,
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      serverlessRedshiftProps: {
+        workgroupName: workgroupName,
+        databaseName: defaultDBName,
+        dataAPIRoleArn: 'arn:aws:iam::1234567890:role/RedshiftDBUserRole',
+      },
+    },
+  };
+
   const updateServerlessEvent: CdkCustomResourceEvent = {
     ...createServerlessEvent,
     OldResourceProperties: {
@@ -310,6 +322,32 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   });
 
+  test('Created database, timezone check - without timezone', async () => {
+
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    const resp = await handler(createServerlessEventWithoutTimezone, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      Sql: `CREATE DATABASE ${projectDBName};`,
+      WorkgroupName: workgroupName,
+      Database: defaultDBName,
+      ClusterIdentifier: undefined,
+      DbUser: undefined,
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(2, ExecuteStatementCommand, {
+      Sql: expect.stringMatching(`CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD .*`),
+    });
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 0);
+
+  });
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait success', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });

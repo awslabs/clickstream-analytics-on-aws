@@ -622,7 +622,7 @@ export function createStackParameters(scope: Construct): {
   const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
     description: 'The time zone with app id as json string',
     type: 'String',
-    default: '',
+    default: '[]',
   });
 
   const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {

@@ -313,6 +313,13 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     });
   });
 
+  test('Should has parameter TimeZoneWithAppId', () => {
+    template.hasParameter('TimeZoneWithAppId', {
+      Type: 'String',
+      Default: '[]',
+    });
+  });
+
   test('Should has parameter MaxFilesLimit', () => {
     template.hasParameter('MaxFilesLimit', {
       Type: 'Number',
