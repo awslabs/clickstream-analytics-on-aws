@@ -284,7 +284,7 @@ describe('Route role test', () => {
     expect((await request(app).post('/api/reporting/retention').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/system/info').set(amznRequestContextHeader, context)).statusCode).toBe(200);
     expect((await request(app).get('/api/traffic/detail').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).m).set(amznRequestContextHeader, context)).statusCode).toBe(400);
+    expect((await request(app).post('/api/traffic/action').set(amznRequestContextHeader, context)).statusCode).toBe(400);
   });
 
   it('Validate all routers for Operator.', async () => {
