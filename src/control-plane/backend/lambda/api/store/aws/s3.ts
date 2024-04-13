@@ -120,10 +120,11 @@ export async function putStringToS3(
   );
 }
 
-export async function readS3ObjectAsString(bucketName: string, key: string): Promise<string | undefined> {
+export async function readS3ObjectAsString(region: string, bucketName: string, key: string): Promise<string | undefined> {
   try {
     const s3Client = new S3Client({
       ...aws_sdk_client_common_config,
+      region,
     });
     const res = await s3Client.send(
       new GetObjectCommand({
@@ -147,8 +148,8 @@ export async function readS3ObjectAsString(bucketName: string, key: string): Pro
   }
 }
 
-export async function readS3ObjectAsJson(bucketName: string, key: string) {
-  const content = await readS3ObjectAsString(bucketName, key);
+export async function readS3ObjectAsJson(region: string, bucketName: string, key: string) {
+  const content = await readS3ObjectAsString(region, bucketName, key);
   if (content) {
     try {
       return JSON.parse(content);

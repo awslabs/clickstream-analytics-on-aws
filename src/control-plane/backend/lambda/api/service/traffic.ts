@@ -49,6 +49,7 @@ export class TrafficSourceServ {
 
   private async _getTrafficSourceData(pipeline: IPipeline, appId: string, type: ITrafficSourceType): Promise<IChannelGroup[] | ISourceCategory[]> {
     const data = await readS3ObjectAsJson(
+      pipeline.region,
       this._getTrafficSourceBucket(pipeline),
       this._getTrafficSourceBucketKey(pipeline.projectId, appId, type),
     ) ?? [];
