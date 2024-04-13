@@ -304,8 +304,12 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
   const odsTableNames = props.odsTableNames;
 
   logger.info('createOrUpdateViewForReporting()', { newAddedAppIdList });
-
-  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(props.timezoneWithAppId));
+  let timezoneWithAppId = props.timezoneWithAppId;
+  if (timezoneWithAppId === undefined || timezoneWithAppId === '') {
+    logger.info('timezoneWithAppId is empty, set to \'[]\'');
+    timezoneWithAppId = '[]';
+  }
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezoneWithAppId));
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of newAddedAppIdList) {
