@@ -99,7 +99,11 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   const sharePrincipalArn = props.quickSightSharePrincipalArn;
   const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
-  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(props.timezone));
+  let timezone = props.timezone;
+  if(timezone === undefined || timezone === '') {
+    timezone = '[]'
+  }
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
 
   if (event.RequestType === 'Create') {
     return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
