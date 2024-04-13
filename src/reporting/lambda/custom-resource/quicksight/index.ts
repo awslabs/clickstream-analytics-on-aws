@@ -100,8 +100,8 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
   let timezone = props.timezone;
-  if(timezone === undefined || timezone === '') {
-    timezone = '[]'
+  if (timezone === undefined || timezone === '') {
+    timezone = '[]';
   }
   const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
 
