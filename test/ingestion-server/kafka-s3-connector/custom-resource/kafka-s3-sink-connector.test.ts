@@ -144,6 +144,12 @@ const KafkaClientMock = {
   TagResourceCommand: jest.fn((cmd) => {
     return { ...cmd, command: 'TagResourceCommand' };
   }),
+  UntagResourceCommand: jest.fn((cmd) => {
+    return { ...cmd, command: 'UntagResourceCommand' };
+  }),
+  ListTagsForResourceCommand: jest.fn(() => {
+    return { command: 'ListTagsForResourceCommand' };
+  }),
 };
 jest.mock('@aws-sdk/client-kafkaconnect', () => {
   return KafkaClientMock;
@@ -270,11 +276,6 @@ test('Create s3 sink - success', async () => {
 
 test('Update s3 sink - success', async () => {
   event.RequestType = 'Update';
-
-  KafkaClientMock.TagResourceCommand = jest.fn((cmd) => {
-    expect(cmd.tags.tag1).toEqual('value1');
-    return { ...cmd, command: 'TagResourceCommand' };
-  });
   const response = await msk_sink_handler(
     event as CloudFormationCustomResourceEvent,
     c,
@@ -500,3 +501,89 @@ test('Create s3 sink - failed', async () => {
   expect(error).toBeTruthy();
 });
 
+test('Update s3 sink but no tag need to update', async () => {
+  event.RequestType = 'Update';
+  KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
+    if (command.command == 'ListTagsForResourceCommand') {
+      return {
+        tags:
+        {
+          tag1: 'value1',
+          tag2: 'value2',
+        },
+      };
+    }
+    if (command.command == 'UntagResourceCommand') {
+      throw new Error('UntagResourceCommand error');
+    }
+    return {
+      connectors: [
+        {
+          connectorArn: 'arn:aws:test-connector',
+          currentVersion: '1',
+          connectorState: 'RUNNING',
+        },
+      ],
+      customPlugins: [
+        {
+          customPluginArn: 'arn:aws:test-plugin',
+          customPluginState: 'ACTIVE',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
+        },
+      ],
+    };
+  });
+
+  const response = await msk_sink_handler(
+    event as CloudFormationCustomResourceEvent,
+    c,
+  );
+  expect(response.Data.connectorName).not.toBeNull();
+});
+
+test('Update s3 sink and update tags', async () => {
+  event.RequestType = 'Update';
+  KafkaConnectClientMock.send = jest.fn().mockImplementation((command: any) => {
+    if (command.command == 'ListTagsForResourceCommand') {
+      return {
+        tags:
+        {
+          tag1: 'value1',
+        },
+      };
+    }
+    return {
+      connectors: [
+        {
+          connectorArn: 'arn:aws:test-connector',
+          currentVersion: '1',
+          connectorState: 'RUNNING',
+        },
+      ],
+      customPlugins: [
+        {
+          customPluginArn: 'arn:aws:test-plugin',
+          customPluginState: 'ACTIVE',
+          name: '54bce910-Plugin-create-test-custom-resource54bce910',
+        },
+      ],
+    };
+  });
+
+  KafkaClientMock.TagResourceCommand = jest.fn((cmd) => {
+    expect(cmd.tags.tag1).toEqual('value1');
+    expect(cmd.tags.tag2).toEqual('value2');
+    return { ...cmd, command: 'TagResourceCommand' };
+  });
+
+  KafkaClientMock.UntagResourceCommand = jest.fn((cmd) => {
+    expect(cmd.tagKeys).toEqual(['tag1']);
+    return { ...cmd, command: 'UntagResourceCommand' };
+  });
+
+  const response = await msk_sink_handler(
+    event as CloudFormationCustomResourceEvent,
+    c,
+  );
+  expect(response.Data.connectorName).not.toBeNull();
+});

@@ -28,6 +28,8 @@ import {
   NotFoundException,
   UpdateConnectorCommand,
   TagResourceCommand,
+  ListTagsForResourceCommand,
+  UntagResourceCommand,
 } from '@aws-sdk/client-kafkaconnect';
 import {
   S3Client,
@@ -426,6 +428,16 @@ async function updateConnector(event: ResourceEvent, context: Context) {
   );
   if (listRes.connectors?.length == 1) {
     const connectorArn = listRes.connectors[0].connectorArn;
+    const describeResp = await kafkaConnectClient.send(
+      new DescribeConnectorCommand({
+        connectorArn,
+      }),
+    );
+    if (describeResp.connectorState === 'UPDATING') {
+      logger.info('connector is already updating');
+      await waitUpdateComplete(connectorArn);
+      return;
+    }
     await updateConnectorTags(context, connectorArn);
     logger.info('connectorArn: ' + connectorArn);
     const currentVersion = listRes.connectors[0].currentVersion;
@@ -446,23 +458,8 @@ async function updateConnector(event: ResourceEvent, context: Context) {
       connectorArn,
       currentVersion,
     });
-
     await kafkaConnectClient.send(command);
-
-    let n = 0;
-    while (n < MAX_N) {
-      n++;
-      await sleep(SLEEP_SEC * 1000);
-      const res = await kafkaConnectClient.send(
-        new DescribeConnectorCommand({
-          connectorArn,
-        }),
-      );
-      logger.info(`${n} connectorState: ${res.connectorState}`);
-      if (res.connectorState !== 'UPDATING') {
-        break;
-      }
-    }
+    await waitUpdateComplete(connectorArn);
   }
 }
 
@@ -614,11 +611,52 @@ async function download(url: string, outPath: string) {
 }
 
 async function updateConnectorTags(context: Context, connectorArn?: string) {
-  const tags = await getFunctionTags(context);
-  logger.info('funcTags', { tags });
-  const command = new TagResourceCommand({
+  const lambdaTags = await getFunctionTags(context);
+  logger.info('funcTags', { lambdaTags });
+
+  const existingTagsResponse = await kafkaConnectClient.send(new ListTagsForResourceCommand({
     resourceArn: connectorArn,
-    tags: tags,
-  });
-  await kafkaConnectClient.send(command);
+  }));
+  const existingTags = existingTagsResponse.tags || {};
+  const newTags = lambdaTags || {};
+
+  if (Object.keys(newTags).length === Object.keys(existingTags).length &&
+    Object.keys(newTags).every(key => newTags[key] === existingTags[key])) {
+    logger.info('No changes to tags required.');
+    return;
+  }
+
+  const existingTagKeys = Object.keys(existingTags);
+  if (existingTagKeys.length > 0) {
+    logger.info('Untagging existing tags', { existingTagKeys });
+    await kafkaConnectClient.send(new UntagResourceCommand({
+      resourceArn: connectorArn,
+      tagKeys: existingTagKeys,
+    }));
+  }
+
+  if (Object.keys(newTags).length > 0) {
+    logger.info('Tagging with new tags', { newTags });
+    await kafkaConnectClient.send(new TagResourceCommand({
+      resourceArn: connectorArn,
+      tags: newTags,
+    }));
+  }
+}
+
+async function waitUpdateComplete(connectorArn?: string) {
+  let n = 0;
+  while (n < MAX_N) {
+    n++;
+    await sleep(SLEEP_SEC * 1000);
+    const res = await kafkaConnectClient.send(
+      new DescribeConnectorCommand({
+        connectorArn,
+      }),
+    );
+    logger.info(`${n} connectorState: ${res.connectorState}`);
+    if (res.connectorState !== 'UPDATING') {
+      break;
+    }
+  }
 }
