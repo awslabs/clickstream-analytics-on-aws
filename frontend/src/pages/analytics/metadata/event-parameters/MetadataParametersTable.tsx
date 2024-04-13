@@ -22,7 +22,7 @@ import LabelTag from 'pages/common/LabelTag';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { EVENT_PARAMETER_DISPLAY_PREFIX, TABLE_FILTER_OPTIONS } from 'ts/const';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,
