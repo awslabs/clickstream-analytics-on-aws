@@ -4,7 +4,7 @@ WITH
 except_user as (
     select
       user_pseudo_id
-    FROM shop.clickstream_retention_base_view_test
+    FROM {{database_name}}.{{schema}}.clickstream_retention_base_view
     group by 1
     having(min(day_diff)) > 0
 ),
