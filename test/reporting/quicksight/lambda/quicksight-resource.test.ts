@@ -1507,6 +1507,15 @@ describe('QuickSight Lambda function', () => {
     },
   };
 
+  const basicEventWithoutTimezone = {
+    ...basicCloudFormationEvent,
+    ResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      ...commonProps,
+      schemas: '',
+    },
+  };
+
   const eventForTimezoneCheck = {
     ...basicCloudFormationEvent,
     ResourceProperties: {
@@ -4623,6 +4632,12 @@ describe('QuickSight Lambda function', () => {
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
     logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Timezone check - without timezone', async () => {
+    await handler(basicEventWithoutTimezone, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
 
   });
 
