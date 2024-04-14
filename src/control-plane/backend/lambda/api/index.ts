@@ -27,6 +27,7 @@ import { router_project } from './router/project';
 import { router_reporting } from './router/reporting';
 import { router_segment } from './router/segment';
 import { router_system } from './router/system';
+import { router_traffic } from './router/traffic';
 import { router_user } from './router/user';
 
 const app: express.Express = express();
@@ -61,6 +62,7 @@ app.use('/api/reporting', router_reporting);
 app.use('/api/user', router_user);
 app.use('/api/segments', router_segment);
 app.use('/api/system', router_system);
+app.use('/api/traffic', router_traffic);
 
 // Implement the “catch-all” errorHandler function
 app.use(errorHandler);

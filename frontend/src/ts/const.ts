@@ -566,3 +566,5 @@ export const INIT_SEGMENT_OBJ: ExtendSegment = {
   autoRefreshDayOption: null,
   expireDate: '',
 };
+
+export const TABLE_FILTER_OPTIONS = [':', '!:', '=', '!='];
