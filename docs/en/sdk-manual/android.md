@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.12.0'
+   implementation 'software.aws.solution:clickstream:0.13.0'
 }
 ```
 
@@ -58,14 +58,14 @@ In the file, your `appId` and `endpoint` are already set up in it. The explanati
 
 ### 3. Initialize the SDK
 
-Initialize the SDK in the application `onCreate()` method.
+It is recommended that you initialize the SDK in your application's `onCreate()` method. Please note that the
+initialization code needs to run in the main thread.
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 public void onCreate() {
     super.onCreate();
-
     try{
         ClickstreamAnalytics.init(getApplicationContext());
         Log.i("MyApp", "Initialized ClickstreamAnalytics");
@@ -100,23 +100,48 @@ ClickstreamAnalytics.recordEvent("button_click");
 
 #### Add global attribute
 
-```java
-import software.aws.solution.clickstream.ClickstreamAttribute;
-import software.aws.solution.clickstream.ClickstreamAnalytics;
+1. Add global attributes when initializing the SDK.
+   The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+   ```java
+   import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
-    .add("channel", "Play Store")
-    .add("level", 5.1)
-    .add("class", 6)
-    .add("isOpenNotification", true)
-    .build();
-ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+   ClickstreamAttribute globalAttributes = ClickstreamAttribute.builder()
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE, "amazon")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM, "cpc")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN, "summer_promotion")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID, "summer_promotion_01")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM, "running_shoes")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT, "banner_ad_1")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID, "amazon_ad_123")
+         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM, "amazon_ads")
+         .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+         .build();
+   ClickstreamConfiguration configuration = new ClickstreamConfiguration()
+         .withAppId("your appId")
+         .withEndpoint("http://example.com/collect")
+         .withInitialGlobalAttributes(globalAttributes);
+   ClickstreamAnalytics.init(getApplicationContext(), configuration);
+   ```
 
-// for delete an global attribute
-ClickstreamAnalytics.deleteGlobalAttributes("level");
-```
+2. Add global attributes after initializing the SDK
+   ```java
+   import software.aws.solution.clickstream.ClickstreamAttribute;
+   import software.aws.solution.clickstream.ClickstreamAnalytics;
+   
+   ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
+       .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+       .add("level", 5.1)
+       .add("class", 6)
+       .add("isOpenNotification", true)
+       .build();
+   ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+   
+   // for delete an global attribute
+   ClickstreamAnalytics.deleteGlobalAttributes("level");
+   ```
 
-Please add the global attribute after the SDK initialization is completed, the global attribute will be added to the attribute object in all events.
+It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
+that occur after it is set.
 
 #### Login and logout
 
@@ -158,23 +183,23 @@ You can add the following code to log an event with an item.
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
 import software.aws.solution.clickstream.ClickstreamItem;
 
-ClickstreamItem item_book = ClickstreamItem.builder()
-    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
-    .add(ClickstreamAnalytics.Item.ITEM_NAME, "Nature")
-    .add(ClickstreamAnalytics.Item.ITEM_CATEGORY, "book")
-    .add(ClickstreamAnalytics.Item.PRICE, 99)
-    .add("book_publisher", "Nature Research")
-    .build();
+ClickstreamItem item_book=ClickstreamItem.builder()
+        .add(ClickstreamAnalytics.Item.ITEM_ID,"123")
+        .add(ClickstreamAnalytics.Item.ITEM_NAME,"Nature")
+        .add(ClickstreamAnalytics.Item.ITEM_CATEGORY,"book")
+        .add(ClickstreamAnalytics.Item.PRICE,99)
+        .add("book_publisher","Nature Research")
+        .build();
 
-ClickstreamEvent event = ClickstreamEvent.builder()
-    .name("view_item")
-    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
-    .add(ClickstreamAnalytics.Item.CURRENCY, "USD")
-    .add("event_category", "recommended")
-    .setItems(new ClickstreamItem[] {item_book})
-    .build();
+        ClickstreamEvent event=ClickstreamEvent.builder()
+        .name("view_item")
+        .add(ClickstreamAnalytics.Attr.VALUE,99)
+        .add(ClickstreamAnalytics.Attr.CURRENCY,"USD")
+        .add("event_category","recommended")
+        .setItems(new ClickstreamItem[]{item_book})
+        .build();
 
-ClickstreamAnalytics.recordEvent(event);
+        ClickstreamAnalytics.recordEvent(event);
 ```
 
 For logging more attribute in an item, please refer to [item attributes](#item-attributes).
@@ -226,15 +251,57 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 ClickstreamAnalytics.disable();
 
 // enable SDK
-ClickstreamAnalytics.enable();
+        ClickstreamAnalytics.enable();
 ```
+
+#### Other configuration
+
+In addition to the required appId and endpoint, you can configure other information to get more customized usage when
+initializing the SDK:
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytics;
+ClickstreamConfiguration configuration=new ClickstreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withAuthCookie("your authentication cookie")
+        .withSendEventsInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(false)
+        .withTrackUserEngagementEvents(false)
+        .withTrackAppExceptionEvents(false)
+        .withLogEvents(true)
+        .withCustomDns(CustomOkhttpDns.getInstance())
+        .withCompressEvents(true);
+        ClickstreamAnalytics.init(getApplicationContext(),configuration);
+```
+
+Here is an explanation of each method.
+
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| withLogEvents()                 | boolean        | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
+| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
+
+By default, we will use the configurations in `amplifyconfiguration.json` file. If you add a custom configuration, the
+added configuration items will override the default values.
+
+You can also add all the configuration parameters you need in the `init` method without using
+the `amplifyconfiguration.json` file.
 
 #### Configuration update
 
-After initializing the SDK, you can use the following code to customize the configuration of the SDK.
-
-!!! info "Important"
-    This configuration will override the default configuration in `amplifyconfiguration.json` file.
+You can update the default configuration after initializing the SDK, below are the additional configuration options you
+can customize.
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
@@ -254,27 +321,12 @@ ClickstreamAnalytics.getClickStreamConfiguration()
         .withCompressEvents(true);
 ```
 
-Here is an explanation of each method.
-
-| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
-|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
-| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
-| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                                                      |
-| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
-| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
-| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
-| withLogEvents()                 | boolean        | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
-| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
-
 #### Debug events
 
 You can follow the steps below to view the event raw JSON and debug your events.
 
-1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` API and set the `withLogEvents()` method with true in debug mode, for example:
+1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` API and set the `withLogEvents()` method with true in
+   debug mode, for example:
     ```java
     import software.aws.solution.clickstream.ClickstreamAnalytics;
     
@@ -505,18 +557,23 @@ All user attributes will be stored in `user` object, and all custom and global a
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto track | Description                                                                                                                                                |
-|--------------------------|-----------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | String    | false      | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
-| _traffic_source_name     | String    | false      | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion        |
-| _traffic_source_source   | String    | false      | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
-| _channel                 | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                      |
-| _session_id              | String    | true       | Added in all events.                                                                                                                                       |
-| _session_start_timestamp | long      | true       | Added in all events.                                                                                                                                       |
-| _session_duration        | long      | true       | Added in all events.                                                                                                                                       |
-| _session_number          | int       | true       | Added in all events.                                                                                                                                       |
-| _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
-| _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
+| Attribute name                | Data type  | Auto track | Description                                                                                                                                                       |
+|-------------------------------|------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_source        | String     | false      | Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _traffic_source_medium        | String     | false      | Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_campaign      | String     | false      | Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials                     |
+| _traffic_source_campaign_id   | String     | false      | Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2                      |
+| _traffic_source_term          | String     | false      | Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker                            |
+| _traffic_source_content       | String     | false      | Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2                              |
+| _traffic_source_clid          | String     | false      | Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456                              |
+| _traffic_source_clid_platform | String     | false      | Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads                  |
+| _app_install_channel          | String     | false      | Reserved for install source, it is the channel for app was downloaded                                                                                             |
+| _session_id                   | String     | true       | Added in all events.                                                                                                                                              |
+| _session_start_timestamp      | long       | true       | Added in all events.                                                                                                                                              |
+| _session_duration             | long       | true       | Added in all events.                                                                                                                                              |
+| _session_number               | int        | true       | Added in all events.                                                                                                                                              |
+| _screen_name                  | String     | true       | Added in all events.                                                                                                                                              |
+| _screen_unique_id             | String     | true       | Added in all events.                                                                                                                                              |
 
 
 ### Item attributes
