@@ -38,7 +38,7 @@ def get_event_for_user(user):
         event["system_language"] = user.web_device.system_language
         event["country_code"] = user.web_device.country_code
     else:
-        event = copy.deepcopy(EventSample.sampleWebEvent)
+        event = copy.deepcopy(EventSample.sampleAppEvent)
         event["device_id"] = user.mobile_device.device_id
         event["platform"] = user.platform
         event["os_version"] = user.mobile_device.os_version
