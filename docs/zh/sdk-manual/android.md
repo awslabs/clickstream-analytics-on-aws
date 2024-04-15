@@ -19,7 +19,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.12.0'
+    implementation 'software.aws.solution:clickstream:0.13.0'
 }
 ```
 
