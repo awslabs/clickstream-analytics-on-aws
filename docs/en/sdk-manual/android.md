@@ -197,7 +197,7 @@ ClickstreamItem item_book = ClickstreamItem.builder()
         .add("book_publisher", "Nature Research")
         .build();
 
-        ClickstreamEvent event = ClickstreamEvent.builder()
+ClickstreamEvent event = ClickstreamEvent.builder()
         .name("view_item")
         .add(ClickstreamAnalytics.Attr.VALUE, 99)
         .add(ClickstreamAnalytics.Attr.CURRENCY, "USD")
