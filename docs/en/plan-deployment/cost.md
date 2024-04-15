@@ -30,7 +30,7 @@ The following are cost estimations for monthly data volumes of 10/100/1000 RPS (
 
 Ingestion module includes the following cost components:
 
-- Application load balancer
+- Application load balancer and public IPv4 addresses
 - EC2 for ECS
 - Data sink (Kinesis Data Streams | Kafka | Direct to S3)
 - S3 storage
@@ -41,21 +41,22 @@ Key assumptions include:
 - MSK configurations (m5.large * 2)
 - KDS configuration (on-demand, provision)
 - 10/100/1000RPS
+- Three public subnets are used
 
 | Request Per Second | ALB cost | EC2 cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
 | ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
-| 10RPS (49GB/month)             |  $18  |  $122 |  Kinesis (On-Demand) |    $38       |   $3  |     $181  |
-|                    |  $18  |  $122 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $165  |
-|                    |  $18  |  $122 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $560   |
-|                         | $18    |  $122 |  None              |             |  $3    |      $143   |
-|100RPS (490GB/month)          |  $43  |  $122  |  Kinesis(On-demand)              |      $115       |  $4   |     $284 |
-|                         | $43    |   $122 |  Kinesis (Provisioned 2 shard)   |      $26       | $4    |     $195  |
-|           |   $43  |  $122  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $4   |     $586
-|           |   $43  |  $122 |      None              |             |  $4    |     $169
-|1000RPS (4900GB/month)          |   $252  |   $122 |      Kinesis(On-demand)              |      $1051       |  $14   |    $1439 |
-|                         |  $252   |  $122  |  Kinesis (Provisioned 10 shard)   |    $180         |   $14  |     $568  |
-|           |  $252   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $590       |  $14  |     $978
-|           |  $252   | $122   |      None              |            |  $14   |     $388 
+| 10RPS (49GB/month)             |  $28.8  |  $122 |  Kinesis (On-Demand) |    $38       |   $3  |     $191.8  |
+|                    |  $28.8  |  $122 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $175.8  |
+|                    |  $28.8  |  $122 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $570.8   |
+|                         | $28.8    |  $122 |  None              |             |  $3    |      $153.8   |
+|100RPS (490GB/month)          |  $53.8  |  $122  |  Kinesis(On-demand)              |      $115       |  $4   |     $294.8 |
+|                         | $53.8    |   $122 |  Kinesis (Provisioned 2 shard)   |      $26       | $4    |     $205.8  |
+|           |   $53.8  |  $122  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $4   |     $596.8
+|           |   $53.8  |  $122 |      None              |             |  $4    |     $179.8
+|1000RPS (4900GB/month)          |   $262.8  |   $122 |      Kinesis(On-demand)              |      $1051       |  $14   |    $1449.8 |
+|                         |  $262.8   |  $122  |  Kinesis (Provisioned 10 shard)   |    $180         |   $14  |     $578.8  |
+|           |  $262.8   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $590       |  $14  |     $988.8
+|           |  $262.8   | $122   |      None              |            |  $14   |     $398.8 
 
 ### Data transfer
 There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 2KB request payload.
@@ -136,17 +137,17 @@ You will be charged with additional cost only if you choose to enable the follow
 
 ### Amazon Global Accelerator
 
-It incurs a fixed hourly charge and a per-day volume data transfer cost.
+It incurs a fixed hourly charge, a per-day volume data transfer cost and two public IPv4 addresses cost.
 
 Key assumptions:
 
 - Ingestion deployment in `us-east-1`
 
-| Request Per Second | Fixed hourly cost | Data transfer cost | Total cost (USD/Month) |
-| --------------------- | ----------------- | ------------------ | ---------- |
-| 10RPS           |        $18           |          $0.6          |       $18.6     |
-| 100RPS         |          $18         |           $6         |      $24      |
-| 1000RPS       |            $18       |            $60        |      $78      |
+| Request Per Second | Fixed hourly cost | Two public IPv4 addresses cost | Data transfer cost | Total cost (USD/Month) |
+| --------------------- | ----------------- | ----------------- | ------------------ | ---------- |
+| 10RPS           |        $18           |        $7.2           |          $0.6          |       $25.8     |
+| 100RPS         |          $18         |        $7.2           |           $6         |      $31.2      |
+| 1000RPS       |            $18       |        $7.2           |            $60        |      $85.2      |
 
 ### Application Load Balancer Access log
 
