@@ -16,7 +16,8 @@ import { QuickSight } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { NetworkInterfaceCheckCustomResourceLambdaProps, sleep } from '../../../private/dashboard';
+import { sleep } from '../../../../common/utils';
+import { NetworkInterfaceCheckCustomResourceLambdaProps } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
 

@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { ExploreRequestAction, ExploreVisualName } from '@aws/clickstream-base-lib';
 import { CategoricalAggregationFunction, OtherCategories, ResizeOption, SelectedTooltipType, SheetContentType, SortDirection, TooltipTitleType, Visibility } from '@aws-sdk/client-quicksight';
-import { ExploreRequestAction, ExploreVisualName } from '../../common/explore-types';
 import { applyChangeToDashboard } from '../../service/quicksight/reporting-utils';
 
 describe('QuickSight visual management test', () => {

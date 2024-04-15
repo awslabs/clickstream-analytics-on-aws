@@ -28,7 +28,12 @@ process.env.CLICK_STREAM_TABLE_NAME = 'click-stream-table-name'
 process.env.ANALYTICS_METADATA_TABLE_NAME = 'analytics-metadata-table-name'
 process.env.DICTIONARY_TABLE_NAME = 'dictionary-table-name'
 process.env.QUICKSIGHT_EMBED_ROLE_ARN = 'arn:aws:iam::555555555555:role/QuickSightEmbeddingRole'
-process.env.FULL_SOLUTION_VERSION = 'v1.1.0-202311200542_dev'
+process.env.FULL_SOLUTION_VERSION = 'v1.1.6-202311200542_dev'
+process.env.LISTEN_STACK_QUEUE_ARN = 'arn:aws:sqs:us-east-1:555555555555:queue-8ddb6980'
+process.env.IAM_ROLE_PREFIX = 'test-prefix'
+process.env.IAM_ROLE_BOUNDARY_ARN = ''
+process.env.TEMPLATE_FILE = 'cloudfront-s3-control-plane-stack-global.template.json'
+process.env.SOLUTION_VERSION = 'v1.1.5-202403071513'
 
 // web console bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'
@@ -46,10 +51,24 @@ process.env.ODS_EVENT_BUCKET_PREFIX='project1/raw/'
 process.env.REDSHIFT_ODS_TABLE_NAME='ods_external_events'
 process.env.REDSHIFT_ROLE = 'arn:aws:iam::xxxxxxxxxxxx:role/redshift-serverless-s3-copyrole'
 process.env.METADATA_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata';
+process.env.CLICKSTREAM_METADATA_DDB_ARN = 'arn:aws:dynamodb:us-east-1:123456789012:table/ClickStreamApiClickstreamMetadata';
 process.env.WORKFLOW_INFO_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:111122223333:table/ScanMetadataWorkflowInfo';
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
 process.env.APP_IDS = 'app1,app2'
+process.env.REDSHIFT_MODE = 'Serverless';
+process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'workgroup-test';
+process.env.DATA_REFRESHNESS_IN_HOUR = '72';
+
+process.env.TIMEZONE_WITH_APPID_LIST = '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]'
+
+// streaming ingestion
+process.env.STATE_MACHINE_ARN= 'arn:aws:states:us-east-1:111122223333:workflow/abc'
+process.env.S3_BUCKET = 'test-pipe-line-bucket';
+process.env.S3_PREFIX = 'pipeline-prefix/';
 
 process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING = 'true'
+
+// env variables for ingestion stack
+process.env.PING_PATH = '/ping'

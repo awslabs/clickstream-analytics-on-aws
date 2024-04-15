@@ -13,27 +13,33 @@
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
-import { BuiltInTagKeys } from '../../common/model-ln';
+import { BuiltInTagKeys, PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import {
+  DataCollectionSDK,
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
-  PipelineStackType,
-  PipelineStatusType,
   WorkflowStateType,
 } from '../../common/types';
+import { getStackPrefix } from '../../common/utils';
 import { IPipeline } from '../../model/pipeline';
 
-const BASE_PIPELINE_ATTRIBUTES = {
+export const BASE_PIPELINE_ATTRIBUTES = {
   id: MOCK_PROJECT_ID,
   projectId: MOCK_PROJECT_ID,
   prefix: 'PIPELINE',
   pipelineId: MOCK_PIPELINE_ID,
   region: 'ap-southeast-1',
   versionTag: 'latest',
-  dataCollectionSDK: 'clickstream',
+  dataCollectionSDK: DataCollectionSDK.CLICKSTREAM,
+  timezone: [
+    {
+      timezone: 'Asia/Singapore',
+      appId: MOCK_APP_ID,
+    },
+  ],
   status: {
     status: PipelineStatusType.ACTIVE,
     stackDetails: [],
@@ -41,6 +47,13 @@ const BASE_PIPELINE_ATTRIBUTES = {
       name: MOCK_EXECUTION_ID,
       status: 'SUCCEEDED',
     },
+  },
+  statusType: PipelineStatusType.ACTIVE,
+  stackDetails: [],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    status: ExecutionStatus.SUCCEEDED,
   },
   network: {
     publicSubnetIds: [
@@ -98,7 +111,6 @@ const BASE_PIPELINE_ATTRIBUTES = {
       Branches: [],
     },
   },
-  executionName: MOCK_EXECUTION_ID,
   type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
   deleted: false,
   createAt: 1681353806173,
@@ -547,7 +559,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -569,7 +581,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                       ParameterValue: 'HTTPS',
                     },
                   ],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -591,7 +603,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -608,7 +620,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -630,7 +642,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                       ParameterValue: 'rate(16 minutes)',
                     },
                   ],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -655,7 +667,7 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW: IPipelin
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -833,7 +845,7 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
 
 export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE: IPipeline = {
   ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
-  dataCollectionSDK: 'thirdparty',
+  dataCollectionSDK: DataCollectionSDK.THIRDPARTY,
   dataProcessing: {
     dataFreshnessInHour: 7,
     scheduleExpression: 'rate(6 minutes)',
@@ -926,11 +938,22 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline
   },
 };
 
+export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_CN: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+  reporting: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+      user: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+    },
+  },
+};
+
 export const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [
     {
-      stackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.KAFKA_CONNECTOR,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -938,7 +961,8 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
-      stackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.INGESTION,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -946,7 +970,8 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
-      stackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-DataProcessing-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.DATA_PROCESSING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -954,7 +979,8 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
-      stackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -962,7 +988,8 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
-      stackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Reporting-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.REPORTING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -979,7 +1006,8 @@ export const BASE_STATUS = {
       ],
     },
     {
-      stackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Metrics-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
+      stackName: `${getStackPrefix()}-Metrics-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.METRICS,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
@@ -1028,6 +1056,12 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
   status: {
     ...BASE_STATUS,
   },
+  stackDetails: stackDetailsWithOutputs,
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    status: ExecutionStatus.SUCCEEDED,
+  },
   workflow: {
     Version: '2022-03-15',
     Workflow: {
@@ -1044,7 +1078,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1066,7 +1100,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                       ParameterValue: 'HTTPS',
                     },
                   ],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1088,7 +1122,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1105,7 +1139,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1127,7 +1161,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                       ParameterValue: 'rate(16 minutes)',
                     },
                   ],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1152,7 +1186,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1187,7 +1221,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1204,7 +1238,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1226,7 +1260,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1243,7 +1277,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1265,7 +1299,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                       ParameterValue: 'rate(6 minutes)',
                     },
                   ],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1295,7 +1329,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1330,7 +1364,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1347,7 +1381,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kafka-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1369,7 +1403,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1386,7 +1420,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-reporting-quicksight-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1403,7 +1437,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1428,7 +1462,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
                 },
               },
@@ -1461,7 +1495,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1478,7 +1512,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1505,7 +1539,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                       ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
                     },
                   ],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1531,7 +1565,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                       ParameterValue: 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
                     },
                   ],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1548,7 +1582,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
@@ -1573,7 +1607,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_EMAILS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1679,7 +1713,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1696,7 +1730,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1718,7 +1752,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1735,7 +1769,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1757,7 +1791,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                       ParameterValue: 'rate(16 minutes)',
                     },
                   ],
-                  StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
+                  StackName: `${getStackPrefix()}-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
@@ -1782,7 +1816,7 @@ const BASE_RETRY_PIPELINE: IPipeline = {
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `${getStackPrefix()}-Metrics-6666-6666`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1798,78 +1832,69 @@ const BASE_RETRY_PIPELINE: IPipeline = {
 
 export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...BASE_RETRY_PIPELINE,
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      {
-        ...BASE_STATUS.stackDetails[0],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[1],
-      BASE_STATUS.stackDetails[2],
-      {
-        ...BASE_STATUS.stackDetails[3],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      {
-        ...BASE_STATUS.stackDetails[4],
-        stackStatus: undefined,
-      },
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    {
+      ...BASE_STATUS.stackDetails[0],
+      stackStatus: StackStatus.CREATE_FAILED,
     },
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      stackStatus: StackStatus.CREATE_FAILED,
+    },
+    {
+      ...BASE_STATUS.stackDetails[4],
+      stackStatus: undefined,
+    },
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
   },
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
   ...BASE_RETRY_PIPELINE,
   lastAction: 'Update',
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      BASE_STATUS.stackDetails[0],
-      {
-        ...BASE_STATUS.stackDetails[1],
-        stackStatus: StackStatus.UPDATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[2],
-      BASE_STATUS.stackDetails[3],
-      BASE_STATUS.stackDetails[4],
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    {
+      ...BASE_STATUS.stackDetails[1],
+      stackStatus: StackStatus.UPDATE_FAILED,
     },
+    BASE_STATUS.stackDetails[2],
+    BASE_STATUS.stackDetails[3],
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
   },
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
   ...BASE_RETRY_PIPELINE,
   lastAction: 'Upgrade',
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      BASE_STATUS.stackDetails[0],
-      BASE_STATUS.stackDetails[1],
-      BASE_STATUS.stackDetails[2],
-      {
-        ...BASE_STATUS.stackDetails[3],
-        stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
-      },
-      BASE_STATUS.stackDetails[4],
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
     },
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
   },
 };
 

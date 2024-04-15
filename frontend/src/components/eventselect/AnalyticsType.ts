@@ -11,13 +11,17 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
 import {
-  ConditionCategory,
-  MetadataPlatform,
+  Segment,
   MetadataSource,
+  ConditionCategoryFrontend,
   MetadataValueType,
-} from 'ts/explore-types';
+  MetadataPlatform,
+} from '@aws/clickstream-base-lib';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 
 export interface IConditionItemType {
   eventType: string;
@@ -37,13 +41,20 @@ export interface IAnalyticsItem extends SelectProps.Option {
   name?: string;
   modifyTime?: string;
   metadataSource?: MetadataSource;
-  category?: ConditionCategory;
+  category?: ConditionCategoryFrontend;
   valueType?: MetadataValueType;
   platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
   groupName?: string;
   itemType?: string;
   subList?: IAnalyticsItem[];
+  // for segment sequence event filter
+  sequenceEventOption?: IAnalyticsItem | null;
+  filterGroupRelationShip?: ERelationShip;
+  sequenceEventAttributeOption?: CategoryItemType[];
+  sequenceEventConditionFilterList?: IConditionItemType[];
+  // for validation
+  seqEventEmptyError?: string;
 }
 
 export interface IProjectSelectItem extends SelectProps.Option {
@@ -85,6 +96,59 @@ export interface IEventAnalyticsItem {
   enableChangeRelation?: boolean;
 }
 
+// for segment group
+export interface ExtendSegment extends Segment {
+  refreshType: 'manual' | 'auto' | 'custom';
+  autoRefreshOption: SelectProps.Option;
+  autoRefreshDayOption: SelectProps.Option | null;
+  expireDate: string;
+  // validation
+  nameError?: string;
+  cronError?: string;
+}
+
+export interface IEventSegmentationItem {
+  groupDateRange?: DateRangePickerProps.ChangeDetail | null;
+  groupName?: string;
+  userEventType: IAnalyticsItem | null;
+  segmentEventRelationShip?: ERelationShip;
+  subItemList: IEventSegmentationItem[];
+  eventConditionRelationShip?: ERelationShip | null;
+  sequenceEventList: IAnalyticsItem[];
+  userDoneEvent?: IAnalyticsItem | null;
+  userDoneEventConditionList: IConditionItemType[];
+  userDoneEventCalculateMethod?: IAnalyticsItem | null;
+  userDoneEventOperation?: SelectProps.Option | null;
+  userDoneEventValue?: Array<string>;
+  userIsParamOption?: IAnalyticsItem | null;
+  userISOperator?: SelectProps.Option | null;
+  userIsValue?: any;
+  userSequenceSession?: SelectProps.Option | null;
+  userSequenceFlow?: SelectProps.Option | null;
+  userInFilterGroup?: SelectProps.Option | null;
+  // Options
+  eventAttributeOption?: CategoryItemType[];
+  eventCalculateMethodOption?: IAnalyticsItem[];
+  // validation
+  userDoneEventError?: string;
+  userDoneEventOperatorError?: string;
+  userDoneEventValueError?: string;
+  groupEmptyError?: string;
+}
+
+export interface IEventSegmentationObj {
+  filterGroupRelationShip: ERelationShip;
+  subItemList: IEventSegmentationItem[];
+  // select options
+  eventOption: CategoryItemType[];
+  eventOperationOptions: SelectProps.Option[];
+  userIsAttributeOptions: CategoryItemType[];
+  attributeOperationOptions: SelectProps.Option[];
+  userGroupOptions: SelectProps.Option[];
+  eventSessionOptions: SelectProps.Option[];
+  eventFlowOptions: SelectProps.Option[];
+}
+
 export interface IRetentionAnalyticsItem {
   startEventOption: IAnalyticsItem | null;
   revisitEventOption: IAnalyticsItem | null;
@@ -110,7 +174,7 @@ export const DEFAULT_EVENT_ITEM = {
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
   isMultiSelect: true,
-  enableChangeRelation: false,
+  enableChangeRelation: true,
 };
 
 export const DEFAULT_RETENTION_ITEM = {

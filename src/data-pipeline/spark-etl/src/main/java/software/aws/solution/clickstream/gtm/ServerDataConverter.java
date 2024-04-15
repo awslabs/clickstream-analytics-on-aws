@@ -29,12 +29,10 @@ import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import software.aws.solution.clickstream.ETLMetric;
-import software.aws.solution.clickstream.KvConverter;
+import software.aws.solution.clickstream.util.ETLMetric;
+import software.aws.solution.clickstream.transformer.KvConverter;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,77 +44,78 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.udf;
-import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
-import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
-import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
-import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.CORRUPT_RECORD;
-import static software.aws.solution.clickstream.DatasetUtil.DATA;
-import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
-import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.ENGAGEMENT_TIME_MSEC;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PAGE_VIEW;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAMS;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_USER_ENGAGEMENT;
-import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.GA_ENGAGEMENT_TIME_MSEC;
-import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
-import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_BRAND;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_BRANDS;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_ID;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_LOCATION;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_TITLE;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_ID;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_SESSION_NUM;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_UC;
-import static software.aws.solution.clickstream.DatasetUtil.GTM_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.ID;
-import static software.aws.solution.clickstream.DatasetUtil.INT_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.IP;
-import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
-import static software.aws.solution.clickstream.DatasetUtil.ITEM_ID;
-import static software.aws.solution.clickstream.DatasetUtil.JOB_NAME_COL;
-import static software.aws.solution.clickstream.DatasetUtil.KEY;
-import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
-import static software.aws.solution.clickstream.DatasetUtil.MOBILE;
-import static software.aws.solution.clickstream.DatasetUtil.MODEL;
-import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.PAGE_TITLE;
-import static software.aws.solution.clickstream.DatasetUtil.PAGE_URL;
-import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.PLATFORM_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.PRICE;
-import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.SESSION_DURATION;
-import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID;
-import static software.aws.solution.clickstream.DatasetUtil.SESSION_NUMBER;
-import static software.aws.solution.clickstream.DatasetUtil.SESSION_START_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.UA;
-import static software.aws.solution.clickstream.DatasetUtil.USER;
-import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
-import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.X_GA_JS_CLIENT_ID;
+import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.util.DatasetUtil.CLIENT_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA_OUT;
+import static software.aws.solution.clickstream.util.DatasetUtil.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.ENGAGEMENT_TIME_MSEC;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_OPEN;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_ITEMS;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_NAME;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PAGE_VIEW;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAMS;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SESSION_START;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_USER_ENGAGEMENT;
+import static software.aws.solution.clickstream.util.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.GA_ENGAGEMENT_TIME_MSEC;
+import static software.aws.solution.clickstream.util.DatasetUtil.GA_SESSION_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.GA_SESSION_NUMBER;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_BRAND;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_BRANDS;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_CLIENT_BRAND;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_CLIENT_PLATFORM;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_LANGUAGE;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_PAGE_LOCATION;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_PAGE_REFERRER;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_PAGE_TITLE;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_REQUEST_START_TIME_MS;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_SCREEN_HEIGHT;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_SCREEN_WIDTH;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_SESSION_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_SESSION_NUM;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_UC;
+import static software.aws.solution.clickstream.util.DatasetUtil.GTM_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.INT_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.IP;
+import static software.aws.solution.clickstream.util.DatasetUtil.ITEMS;
+import static software.aws.solution.clickstream.util.DatasetUtil.ITEM_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.JOB_NAME_COL;
+import static software.aws.solution.clickstream.util.DatasetUtil.KEY;
+import static software.aws.solution.clickstream.util.DatasetUtil.MAX_STRING_VALUE_LEN;
+import static software.aws.solution.clickstream.util.DatasetUtil.MOBILE;
+import static software.aws.solution.clickstream.util.DatasetUtil.MODEL;
+import static software.aws.solution.clickstream.util.DatasetUtil.PAGE_REFERRER;
+import static software.aws.solution.clickstream.util.DatasetUtil.PAGE_TITLE;
+import static software.aws.solution.clickstream.util.DatasetUtil.PAGE_URL;
+import static software.aws.solution.clickstream.util.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.util.DatasetUtil.PLATFORM_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.PRICE;
+import static software.aws.solution.clickstream.util.DatasetUtil.PROPERTIES;
+import static software.aws.solution.clickstream.util.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.util.DatasetUtil.SESSION_DURATION;
+import static software.aws.solution.clickstream.util.DatasetUtil.SESSION_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.SESSION_NUMBER;
+import static software.aws.solution.clickstream.util.DatasetUtil.SESSION_START_TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.STRING_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_PROPERTIES;
+import static software.aws.solution.clickstream.util.DatasetUtil.VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.X_GA_JS_CLIENT_ID;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
-import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
-import static software.aws.solution.clickstream.MaxLengthTransformer.checkStringValueLength;
+import static software.aws.solution.clickstream.transformer.KvConverter.getValueTypeResult;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformer.checkStringValueLength;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
 @Slf4j
 public class ServerDataConverter {
@@ -337,7 +336,7 @@ public class ServerDataConverter {
         });
     }
 
-    private static ServerDataConverter.RowResult parseJsonNode(final JsonNode jsonNode) {
+    public static ServerDataConverter.RowResult parseJsonNode(final JsonNode jsonNode) {
         String userId = null;
         String eventName = null;
         String ip = null;
@@ -485,7 +484,7 @@ public class ServerDataConverter {
         return new ScreenResolution(screenWidth, screenHeight);
     }
 
-    private static String mapEventNameToClickstream(final String eventName) {
+    public static String mapEventNameToClickstream(final String eventName) {
         if (eventName == null) {
             return null;
         }
@@ -498,7 +497,7 @@ public class ServerDataConverter {
         return PROPS_NAME_MAP.getOrDefault(gaPropName, gaPropName1);
     }
 
-    private static Map<String, String> createEventNameMap() {
+    public static Map<String, String> createEventNameMap() {
         Map<String, String> eventNameMap = new HashMap<>();
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
@@ -756,16 +755,6 @@ public class ServerDataConverter {
             saveCorruptDataset(corruptDataset, corruptDatasetCount);
         }
         return okDataset;
-    }
-
-    public static String deCodeUri(final String uri) {
-        String result = "";
-        try {
-            result = URLDecoder.decode(uri, StandardCharsets.UTF_8.toString());
-        } catch (Exception e) {
-            log.warn(e.getMessage() + ", uri:" + uri);
-        }
-        return result;
     }
 
     @AllArgsConstructor

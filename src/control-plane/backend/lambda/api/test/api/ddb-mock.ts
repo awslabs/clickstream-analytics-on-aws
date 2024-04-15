@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand, TagResourceCommand as EventTagResourceCommand } from '@aws-sdk/client-cloudwatch-events';
 import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   ConnectivityType,
@@ -23,12 +24,13 @@ import {
 } from '@aws-sdk/client-ec2';
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
-import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
+import { DescribeAccountSubscriptionCommand, Edition, RegisterUserCommand, ResourceExistsException } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand, TagResourceCommand as SNSTagResourceCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -52,6 +54,8 @@ const MOCK_EVENT_PARAMETER_NAME = 'install_source';
 const MOCK_USER_ATTRIBUTE_NAME = '_user_id';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
 const MOCK_USER_ID = 'fake@example.com';
+const MOCK_SEGMENT_ID = 'segment_uuid';
+const MOCK_SEGMENT_JOB_ID = 'segment_job_uuid';
 
 export const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowLogDeliveryPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
@@ -360,16 +364,20 @@ function dictionaryMock(ddbMock: any, name?: string): any {
 }
 
 function createPipelineMock(
-  ddbMock: any,
-  kafkaMock: any,
-  redshiftServerlessMock: any,
-  redshiftMock: any,
-  ec2Mock: any,
-  sfnMock: any,
-  secretsManagerMock: any,
-  quickSightMock: any,
-  s3Mock: any,
-  iamMock: any,
+  mockClients: {
+    ddbMock: any;
+    kafkaMock: any;
+    redshiftServerlessMock: any;
+    redshiftMock: any;
+    ec2Mock: any;
+    sfnMock: any;
+    secretsManagerMock: any;
+    quickSightMock: any;
+    s3Mock: any;
+    iamMock: any;
+    cloudWatchEventsMock: any;
+    snsMock: any;
+  },
   props?: {
     noApp?: boolean;
     update?: boolean;
@@ -395,7 +403,7 @@ function createPipelineMock(
       location?: BucketLocationConstraint;
     };
   }): any {
-  iamMock.on(SimulateCustomPolicyCommand).resolves({
+  mockClients.iamMock.on(SimulateCustomPolicyCommand).resolves({
     EvaluationResults: [
       {
         EvalActionName: '',
@@ -404,7 +412,7 @@ function createPipelineMock(
     ],
   });
   // project
-  ddbMock.on(GetCommand, {
+  mockClients.ddbMock.on(GetCommand, {
     TableName: clickStreamTableName,
     Key: {
       id: MOCK_PROJECT_ID,
@@ -417,9 +425,9 @@ function createPipelineMock(
       emails: 'u1@example.com,u2@example.com,u2@example.com,u3@example.com',
     },
   });
-  ddbMock.on(TransactWriteItemsCommand).resolves({});
+  mockClients.ddbMock.on(TransactWriteItemsCommand).resolves({});
   // pipeline
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -439,7 +447,7 @@ function createPipelineMock(
       Items: [],
     });
   if (props?.update) {
-    ddbMock.on(GetCommand, {
+    mockClients.ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
         id: MOCK_PROJECT_ID,
@@ -450,7 +458,7 @@ function createPipelineMock(
     });
   }
   //app
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -474,7 +482,7 @@ function createPipelineMock(
     }],
   });
   //plugin
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -505,7 +513,7 @@ function createPipelineMock(
       },
     ],
   });
-  kafkaMock.on(ListNodesCommand).resolves({
+  mockClients.kafkaMock.on(ListNodesCommand).resolves({
     NodeInfoList: [
       {
         BrokerNodeInfo: {
@@ -519,7 +527,7 @@ function createPipelineMock(
       },
     ],
   });
-  redshiftServerlessMock.on(GetWorkgroupCommand).resolves({
+  mockClients.redshiftServerlessMock.on(GetWorkgroupCommand).resolves({
     workgroup: {
       workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
       workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
@@ -532,14 +540,14 @@ function createPipelineMock(
       securityGroupIds: ['sg-00000000000000031', 'sg-00000000000000032'],
     },
   });
-  redshiftServerlessMock.on(GetNamespaceCommand).resolves({
+  mockClients.redshiftServerlessMock.on(GetNamespaceCommand).resolves({
     namespace: {
       namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
       namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
       namespaceName: 'test-ns',
     },
   });
-  redshiftMock.on(DescribeClustersCommand).resolves({
+  mockClients.redshiftMock.on(DescribeClustersCommand).resolves({
     Clusters: [
       {
         ClusterIdentifier: 'cluster-1',
@@ -556,7 +564,7 @@ function createPipelineMock(
       },
     ],
   });
-  redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
+  mockClients.redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
     ClusterSubnetGroups: [
       {
         ClusterSubnetGroupName: 'group-1',
@@ -634,12 +642,12 @@ function createPipelineMock(
       ToPort: -1,
       CidrIpv4: '10.0.64.0/20',
     });
-  };
-  ec2Mock.on(DescribeSecurityGroupRulesCommand).
+  }
+  mockClients.ec2Mock.on(DescribeSecurityGroupRulesCommand).
     resolves({
       SecurityGroupRules: mockSecurityGroupRules,
     });
-  ec2Mock.on(DescribeAvailabilityZonesCommand).
+  mockClients.ec2Mock.on(DescribeAvailabilityZonesCommand).
     resolves({
       AvailabilityZones: props?.twoAZsInRegion ? [
         {
@@ -661,7 +669,7 @@ function createPipelineMock(
       ],
     });
 
-  ec2Mock.on(DescribeNatGatewaysCommand).
+  mockClients.ec2Mock.on(DescribeNatGatewaysCommand).
     resolves({
       NatGateways: [
         {
@@ -855,11 +863,11 @@ function createPipelineMock(
       defaultSubnets[6],
     ];
   }
-  ec2Mock.on(DescribeSubnetsCommand)
+  mockClients.ec2Mock.on(DescribeSubnetsCommand)
     .resolves({
       Subnets: mockSubnets,
     });
-  ec2Mock.on(DescribeRouteTablesCommand).resolves({
+  mockClients.ec2Mock.on(DescribeRouteTablesCommand).resolves({
     RouteTables: [
       {
         Associations: [{
@@ -925,36 +933,82 @@ function createPipelineMock(
       },
     ].concat(vpcEndpoints);
   }
-  ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
+  mockClients.ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
     VpcEndpoints: mockVpcEndpoints,
   });
-  secretsManagerMock.on(GetSecretValueCommand).resolves({
+  mockClients.secretsManagerMock.on(GetSecretValueCommand).resolves({
     SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
   });
-  sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-  quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
-    AccountInfo: {
-      AccountName: 'ck',
-      Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
-    },
-  });
-  s3Mock.on(GetBucketPolicyCommand).resolves({
+  mockClients.sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+  mockClients.s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
   });
   if (props?.bucket?.notExist) {
     const mockNoSuchBucketError = new Error('NoSuchBucket');
     mockNoSuchBucketError.name = 'NoSuchBucket';
-    s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
+    mockClients.s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
   } else {
-    s3Mock.on(GetBucketLocationCommand).resolves({
+    mockClients.s3Mock.on(GetBucketLocationCommand).resolves({
       LocationConstraint: props?.bucket?.location ?? BucketLocationConstraint.ap_southeast_1,
     });
+  }
+  createEventRuleMock(mockClients.cloudWatchEventsMock);
+  createSNSTopicMock(mockClients.snsMock);
+  mockQuickSight(mockClients.quickSightMock, props?.quickSightStandard, props?.quickSightUserExisted);
+}
+
+function mockQuickSight(quickSightMock: any, standard?: boolean, userExisted?: boolean): any {
+  quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
+    AccountInfo: {
+      AccountName: 'ck',
+      Edition: standard ? Edition.STANDARD : Edition.ENTERPRISE,
+    },
+  });
+  if (userExisted) {
+    quickSightMock.on(RegisterUserCommand).rejects(
+      new ResourceExistsException(
+        {
+          message: 'ResourceExistsException',
+          $metadata: {},
+        },
+      ),
+    );
+  } else {
+    quickSightMock.on(RegisterUserCommand).resolves({});
   }
 }
 
 function createPipelineMockForBJSRegion(s3Mock: any) {
   s3Mock.on(GetBucketPolicyCommand).resolves({ Policy: AllowIAMUserPutObjectPolicyInCnNorth1 });
+}
+
+function createEventRuleMock(cloudWatchEventsMock: any): any {
+  cloudWatchEventsMock.on(PutRuleCommand).resolves({
+    RuleArn: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
+  });
+  cloudWatchEventsMock.on(EventTagResourceCommand).resolves({});
+  cloudWatchEventsMock.on(PutTargetsCommand).resolves({});
+}
+
+function deleteEventRuleMock(cloudWatchEventsMock: any): any {
+  cloudWatchEventsMock.on(ListTargetsByRuleCommand).resolves({
+    Targets: [{
+      Id: '1',
+      Arn: 'arn:aws:states:ap-southeast-1:111122223333:stateMachine:ck-clickstream-branch-main',
+    }],
+  });
+  cloudWatchEventsMock.on(RemoveTargetsCommand).resolves({});
+  cloudWatchEventsMock.on(DeleteRuleCommand).resolves({});
+}
+
+function createSNSTopicMock(snsMock: any): any {
+  snsMock.on(CreateTopicCommand).resolves({
+    TopicArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+  });
+  snsMock.on(SNSTagResourceCommand).resolves({});
+  snsMock.on(SetTopicAttributesCommand).resolves({});
+  snsMock.on(SubscribeCommand).resolves({});
 }
 
 export {
@@ -974,6 +1028,8 @@ export {
   MOCK_USER_ATTRIBUTE_NAME,
   MOCK_DASHBOARD_ID,
   MOCK_USER_ID,
+  MOCK_SEGMENT_ID,
+  MOCK_SEGMENT_JOB_ID,
   tokenMock,
   tokenMockTwice,
   userMock,
@@ -987,5 +1043,8 @@ export {
   metadataEventExistedMock,
   metadataEventAttributeExistedMock,
   metadataUserAttributeExistedMock,
+  deleteEventRuleMock,
+  createEventRuleMock,
+  createSNSTopicMock,
   quickSightUserMock,
 };

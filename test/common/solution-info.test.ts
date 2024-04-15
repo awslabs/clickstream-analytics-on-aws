@@ -11,11 +11,53 @@
  *  and limitations under the License.
  */
 
-import { versionDetail } from '../../src/common/solution-info';
+import { SolutionVersion, versionDetail } from '../../src/common/solution-info';
 
 test ('parse solution version', () => {
   expect(versionDetail('v1.1.0-dev-main-202311081606-58f342d5'))
     .toEqual('(Version v1.1.0)(Build dev-main-202311081606-58f342d5)');
 
   expect(versionDetail('v1.1.0')).toEqual('(Version v1.1.0)');
+  expect(versionDetail('v1.1.0-202311081606')).toEqual('(Version v1.1.0)(Build 202311081606)');
+});
+
+test ('compare solution version', () => {
+  expect(
+    SolutionVersion.Of('v1.1.0-dev-main-202311081606-1111111')
+      .equalTo(SolutionVersion.Of('v1.1.0-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+  expect(
+    SolutionVersion.Of('v1.1.0-dev-main-202311081606-1111111')
+      .equalTo(SolutionVersion.Of('v1.1.1-dev-main-202311081606-2222222')),
+  ).toEqual(false);
+  expect(
+    SolutionVersion.Of('v1.1.0-dev-main-202311081606-1111111')
+      .greaterThan(SolutionVersion.Of('v1.0.1-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+  expect(
+    SolutionVersion.Of('v1.1.0-dev-main-202311081606-1111111')
+      .greaterThanOrEqualTo(SolutionVersion.Of('v1.1.0-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+  expect(
+    SolutionVersion.Of('v1.1.0-dev-main-202311081606-1111111')
+      .lessThan(SolutionVersion.Of('v1.1.1-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+  expect(
+    SolutionVersion.Of('v1.1.1-dev-main-202311081606-1111111')
+      .lessThanOrEqualTo(SolutionVersion.Of('v1.1.1-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+  expect(
+    SolutionVersion.Of('v1.10.0-dev-main-202311081606-1111111')
+      .greaterThan(SolutionVersion.Of('v1.2.11-dev-main-202311081606-2222222')),
+  ).toEqual(true);
+
+  expect(
+    SolutionVersion.Of('v1.1.6-202404071513')
+      .greaterThan(SolutionVersion.Of('v1.1.6-202311200542_dev')),
+  ).toEqual(false);
+
+  expect(
+    SolutionVersion.Of('v1.1.6-202404071513')
+      .fullVersionGreaterThan(SolutionVersion.Of('v1.1.6-202311200542_dev')),
+  ).toEqual(true);
 });

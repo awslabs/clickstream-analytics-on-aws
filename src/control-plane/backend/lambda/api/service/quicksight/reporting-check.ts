@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
-
+import { validSpecialCharacters } from '../../common/request-valid';
 
 export interface CheckParamsStatus {
   readonly success: boolean;
@@ -62,6 +62,12 @@ export class ReportingCheck {
           message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
         };
       }
+      if (!validSpecialCharacters(this.params.chartTitle) || !validSpecialCharacters(this.params.chartSubTitle)) {
+        this.status = {
+          success: false,
+          message: 'The input cannot contain special characters(! @ # $ % ^ & * + = { } [ ] : ; < > , . ? ~ / \' " |).',
+        };
+      }
     }
     return this;
   }
@@ -74,10 +80,12 @@ export class ReportingCheck {
       };
     }
 
-    if (this.params.groupCondition !== undefined && this.params.groupCondition.dataType !== MetadataValueType.STRING) {
+    if (this.params.groupCondition !== undefined &&
+       !(this.params.groupCondition.dataType === MetadataValueType.STRING ||
+        this.params.groupCondition.dataType === MetadataValueType.BOOLEAN)) {
       this.status = {
         success: false,
-        message: 'Grouping function is not supported on no-string attribute.',
+        message: 'Grouping function only supports string and boolean data type.',
       };
     }
     return this;

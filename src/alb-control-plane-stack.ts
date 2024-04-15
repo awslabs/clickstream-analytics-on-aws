@@ -12,12 +12,13 @@
  */
 
 import path from 'path';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
 import {
   Duration,
   Stack,
   StackProps,
   Fn,
-  CfnOutput, Aws,
+  CfnOutput, Aws, Aspects, CfnCondition,
 } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -27,12 +28,16 @@ import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { RoleNamePrefixAspect, RolePermissionBoundaryAspect } from './common/aspects';
 import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
   addCfnNagToStack,
+  ruleToSuppressRolePolicyWithHighSPCM,
+  ruleForLambdaVPCAndReservedConcurrentExecutions,
+  ruleToSuppressRolePolicyWithWildcardResources,
+  ruleToSuppressRolePolicyWithWildcardAction,
 } from './common/cfn-nag';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from './common/constant';
 import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
@@ -79,6 +84,11 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     let vpc:IVpc|undefined = undefined;
 
@@ -157,6 +167,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
           CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '819200',
           CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '1024000',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
       },
     });
@@ -209,6 +220,25 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     const healthCheckPath = '/';
 
     const pluginPrefix = 'plugins/';
+
+    const isEmptyRolePrefixCondition = new CfnCondition(
+      this,
+      'IsEmptyRolePrefixCondition',
+      {
+        expression: Fn.conditionEquals(iamRolePrefixParam.valueAsString, ''),
+      },
+    );
+    const conditionStringRolePrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      iamRolePrefixParam.valueAsString,
+    ).toString();
+    const conditionStringStackPrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      `${iamRolePrefixParam.valueAsString}-${SolutionInfo.SOLUTION_SHORT_NAME}`,
+    ).toString();
+
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'alb',
       applicationLoadBalancer: {
@@ -223,12 +253,16 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       pluginPrefix: pluginPrefix,
       healthCheckPath: healthCheckPath,
       adminUserEmail: emailParameter.valueAsString,
+      iamRolePrefix: iamRolePrefixParam.valueAsString,
+      iamRoleBoundaryArn: iamRoleBoundaryArnParam.valueAsString,
+      conditionStringRolePrefix: conditionStringRolePrefix,
+      conditionStringStackPrefix: conditionStringStackPrefix,
     });
 
     controlPlane.addRoute('api-targets', {
       routePath: '/api/*',
       priority: controlPlane.rootPathPriority - 1,
-      target: [new LambdaTarget(clickStreamApi.clickStreamApiFunction)],
+      target: [new LambdaTarget(clickStreamApi.apiFunction)],
       healthCheck: {
         enabled: true,
         path: healthCheckPath,
@@ -275,6 +309,8 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
     // nag
     addCfnNag(this);
+    Aspects.of(this).add(new RoleNamePrefixAspect(iamRolePrefixParam.valueAsString));
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -282,33 +318,49 @@ function addCfnNag(stack: Stack) {
   const cfnNagList = [
     {
       paths_endswith: [
-        'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason:
-          'This policy needs to be able to call other AWS service by design',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
       ],
     },
     {
       paths_endswith: [
-        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W89',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
-        },
-        {
-          id: 'W92',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+        ruleToSuppressRolePolicyWithWildcardAction('ActionFunctionRole'),
       ],
     },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackWorkflowStateMachine/StackWorkflowStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunctionRoleDefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('ApiFunctionRoleDefaultPolicy', 'lambda'),
+      ],
+    },
+    ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'ApiFunction'),
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
@@ -324,6 +376,10 @@ function addCfnNag(stack: Stack) {
       // The non-container Lambda function is not configured to use the latest runtime version
       reason:
         'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
+    },
+    {
+      id: 'AwsSolutions-SQS3',
+      reason: 'The SQS is a dead-letter queue (DLQ), and does not need a DLQ enabled',
     },
   ]);
 }

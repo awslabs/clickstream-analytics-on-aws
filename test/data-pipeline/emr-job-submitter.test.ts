@@ -34,22 +34,36 @@ const emrMock = {
             project_id: 'project_007',
             tag_key1: 'tag_value1',
           },
+          application: {
+            runtimeConfiguration: [
+              {
+                classification: 'spark-defaults',
+                properties: {
+                  'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+                  'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+                },
+              },
+            ],
+          },
         };
       }),
     };
   }),
   StartJobRunCommand: jest.fn(() => { return { name: 'StartJobRunCommand' }; }),
   StartJobRunCommandInput: jest.fn(() => { return { name: 'StartJobRunCommandInput' }; }),
+  GetApplicationCommand: jest.fn(() => { return { name: 'GetApplicationCommand' }; }),
+
 };
 
 jest.mock('@aws-sdk/client-emr-serverless', () => {
   return emrMock;
 });
 
+const putStringToS3Mock = jest.fn(() => { });
 jest.mock('../../src/common/s3', () => {
   return {
     readS3ObjectAsJson: jest.fn(() => undefined),
-    putStringToS3: jest.fn(() => { }),
+    putStringToS3: putStringToS3Mock,
     listObjectsByPrefix: jest.fn((b, k, f) => {
       [
         {
@@ -208,6 +222,14 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
           },
         },
+        applicationConfiguration: [{
+          classification: 'spark-defaults',
+          properties: {
+            'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+            'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+          },
+        }],
+
       },
     };
     //@ts-ignore
@@ -284,8 +306,16 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             logUri: 's3://test-pipe-line-bucket/pipeline-prefix/pipeline-logs/test_proj_001/',
           },
         },
+        applicationConfiguration: [{
+          classification: 'spark-defaults',
+          properties: {
+            'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+            'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+          },
+        }],
       },
-    };
+    }
+      ;
     //@ts-ignore
     const actParam = emrMock.StartJobRunCommand.mock.calls[0][0] as any;
     expect(actParam).toEqual(expectedStartParam);
@@ -386,6 +416,26 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
       'abc/test_prefix/year=2023/month=11/day=21/',
       'abc/test_prefix/year=2023/month=11/day=22/',
     ]);
+  });
+
+  test('Write 2 state files in S3', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+    await EMRServerlessUtil.start({
+      startTimestamp: new Date(startTimestamp).getTime(),
+    }, context);
+    expect(putStringToS3Mock.mock.calls.length).toEqual(2);
+    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('pipeline-prefix/job-info/test_proj_001/job-jobId007.json');
+    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('pipeline-prefix/job-info/test_proj_001/job-latest.json');
+  });
+
+  test('Write 1 state file in S3 when event.reRunJob=true', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+    await EMRServerlessUtil.start({
+      startTimestamp: new Date(startTimestamp).getTime(),
+      reRunJob: true,
+    }, context);
+    expect(putStringToS3Mock.mock.calls.length).toEqual(1);
+    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('pipeline-prefix/job-info/test_proj_001/job-jobId007.json');
   });
 
 });

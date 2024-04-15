@@ -55,6 +55,59 @@
       "docLink": "/retention-analysis.html"
     }
   },
+  "attributionInfo": {
+    "title": "Attribution analysis",
+    "description": "Attribution is the act of assigning credit for conversions to different ads, clicks, and factors along a user's path to completing a conversion. An attribution model can be a set of rules, or a data-driven algorithm that determines how credit for conversions is assigned to touchpoints on conversion paths.",
+    "links": {
+      "docLinkName": "Attribution analysis",
+      "docLink": "/attribution-analysis.html"
+    }
+  },
+  "attributionModelInfo": {
+    "title": "Attribution model",
+    "description": "Attribution models are a set of rules or data-driven algorithms used to determine how conversions are assigned to touchpoints on the conversion path.",
+    "links": {
+      "docLinkName": "Attribution model",
+      "docLink": "/attribution-analysis.html"
+    },
+    "firstTouch": {
+      "title": "First-Touch Attribution: ",
+      "description": "Among all attribution positions contributing to a specific target event, the first attribution position receives 100% contribution."
+    },
+    "lastTouch": {
+      "title": "Last-Touch Attribution: ",
+      "description": "Among all attribution positions contributing to a specific target event, the last attribution position receives 100% contribution."
+    },
+    "linearTouch": {
+      "title": "Linear Attribution: ",
+      "description": "Among all attribution positions contributing to a specific target event, contribution is evenly distributed across all attribution positions."
+    },
+    "positionBasedTouch": {
+      "title": "Position-Based Attribution: ",
+      "description": "Among all attribution positions contributing to a specific target event, users can customize the contribution distribution for each position. For example, the first and last attribution positions receive 40% contribution each, while the remaining positions evenly split the remaining 20% contribution."
+    },
+    "columnTitlesDescription": "The title of each column in the attribution result table is as follows.",
+    "touchpointName": {
+      "title": "Touchpoint Name: ",
+      "description": "The touchpoint event name for attribution."
+    },
+    "totalTriggerCount": {
+      "title": "Total Trigger Count: ",
+      "description": "Number of times the touchpoint has been triggered within the calculation period."
+    },
+    "numberTriggersConversion": {
+      "title": "Number of Triggers with Conversion: ",
+      "description": "Within the conversion window, number of time the touchpoint  occurred simultaneously with the conversion goal."
+    },
+    "contribution": {
+      "title": "Contribution(number/sum...value): ",
+      "description": "The contribution of this touchpoint can be attributed to the conversion goal based on the select."
+    },
+    "contributionRate": {
+      "title": "Contribution Rate: ",
+      "description": "After calculation through the attribution model, the contribution of this touchpoint is expressed as a percentage of the overall total, with the calculation logic being the conversion goal metrics under the current attributed event divided by the sum of all conversion goals."
+    }
+  },
   "analyzesInfo": {
     "title": "Analyses",
     "description": "The analyses module is QuickSight's analysis author interface, where you can use all of QuickSight's features for customized analysis. The solution pre-loaded multiple clickstream data sets (such as events, event attributes, user attributes, etc.) for you, and you can also add new data sets to join clickstream data for custom analysis.",

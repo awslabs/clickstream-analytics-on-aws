@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '../../../src/common/constant';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
 
 describe('DataReportingQuickSightStack parameter test', () => {
@@ -53,15 +53,16 @@ describe('DataReportingQuickSightStack parameter test', () => {
     template.hasParameter('QuickSightVpcConnectionSubnetParam', {});
   });
 
-  test('Should has Parameter QuickSightPrincipalParam', () => {
-    template.hasParameter('QuickSightPrincipalParam', {
+  test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
+    template.hasParameter('QuickSightOwnerPrincipalParam', {
       Type: 'String',
     });
   });
 
-  test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
-    template.hasParameter('QuickSightOwnerPrincipalParam', {
+  test('Should has Parameter QuickSightTimezoneParam', () => {
+    template.hasParameter('QuickSightTimezoneParam', {
       Type: 'String',
+      Default: '[]',
     });
   });
 
@@ -132,10 +133,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
 
-    const param2 = template.toJSON().Parameters.QuickSightPrincipalParam;
-    const pattern2 = param2.AllowedPattern;
-    const regex2 = new RegExp(`${pattern2}`);
-
     const validValues = [
       'arn:aws:quicksight:us-east-1:111111111111:user/default/clickstream',
       'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser',
@@ -145,7 +142,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
     for (const v of validValues) {
       expect(v).toMatch(regex);
-      expect(v).toMatch(regex2);
     }
 
     const invalidValues = [
@@ -156,7 +152,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
-      expect(v).not.toMatch(regex2);
     }
   });
 
@@ -347,26 +342,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'logs:CreateLogGroup',
             ],
             Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':logs:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':log-group:/aws/lambda/*',
-                ],
-              ],
-            },
+            Resource: '*',
           },
           {
             Action: [
@@ -586,6 +562,13 @@ describe('DataReportingQuickSightStack resource test', () => {
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       },
     },
+    LoggingConfig: {
+      LogFormat: 'JSON',
+      ApplicationLogLevel: 'INFO',
+      LogGroup: {
+        Ref: 'QuicksightCustomResourceLambdalog376BFB51',
+      },
+    },
     Handler: 'index.handler',
     MemorySize: 256,
     Timeout: 900,
@@ -652,26 +635,9 @@ describe('DataReportingQuickSightStack resource test', () => {
     Timeout: 900,
   }, 1);
 
-  template.resourcePropertiesCountIs('Custom::LogRetention', {
-    ServiceToken: {
-      'Fn::GetAtt': [
-        Match.stringLikeRegexp('LogRetention[a-zA-Z0-9]+'),
-        'Arn',
-      ],
-    },
-    LogGroupName: {
-      'Fn::Join': [
-        '',
-        [
-          '/aws/lambda/',
-          {
-            Ref: Match.stringLikeRegexp('QuicksightCustomResourceLambda[a-zA-Z0-9]+'),
-          },
-        ],
-      ],
-    },
+  template.resourcePropertiesCountIs('AWS::Logs::LogGroup', {
     RetentionInDays: 7,
-  }, 1);
+  }, 2);
 
   template.resourcePropertiesCountIs('AWS::QuickSight::Template', {
     AwsAccountId: {
@@ -901,9 +867,6 @@ describe('DataReportingQuickSightStack resource test', () => {
       quickSightUser: {
         Ref: 'QuickSightUserParam',
       },
-      quickSightSharePrincipalArn: {
-        Ref: 'QuickSightPrincipalParam',
-      },
       quickSightOwnerPrincipalArn: {
         Ref: 'QuickSightOwnerPrincipalParam',
       },
@@ -965,299 +928,40 @@ describe('DataReportingQuickSightStack resource test', () => {
         },
         dataSets: [
           {
-            tableName: 'User_Dim_View',
-            importMode: 'DIRECT_QUERY',
-            columns: [
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_visit_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'first_visit_install_source',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_visit_device_language',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_visit_country',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_visit_city',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_traffic_source_source',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_traffic_source_medium',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_traffic_source_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'first_referer',
-                Type: 'STRING',
-              },
-              {
-                Name: 'device_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'registration_status',
-                Type: 'STRING',
-              },
-            ],
-            customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view_v1',
-            columnGroups: [
-              {
-                geoSpatialColumnGroupName: 'geo',
-                geoSpatialColumnGroupColumns: [
-                  'first_visit_country',
-                  'first_visit_city',
-                ],
-              },
-            ],
-            projectedColumns: [
-              'user_pseudo_id',
-              'user_id',
-              'first_visit_date',
-              'first_visit_install_source',
-              'first_visit_device_language',
-              'first_platform',
-              'first_visit_country',
-              'first_visit_city',
-              'first_traffic_source_source',
-              'first_traffic_source_medium',
-              'first_traffic_source_name',
-              'first_referer',
-              'registration_status',
-              'device_id',
-            ],
-            tagColumnOperations: [
-              {
-                columnName: 'first_visit_city',
-                columnGeographicRoles: [
-                  'CITY',
-                ],
-              },
-              {
-                columnName: 'first_visit_country',
-                columnGeographicRoles: [
-                  'COUNTRY',
-                ],
-              },
-            ],
-          },
-          {
-            tableName: 'Retention_View',
-            importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v2',
-            columns: [
-              {
-                Name: 'first_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'day_diff',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'returned_user_count',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'total_users',
-                Type: 'INTEGER',
-              },
-            ],
-            projectedColumns: [
-              'first_date',
-              'day_diff',
-              'returned_user_count',
-              'total_users',
-            ],
-          },
-          {
-            tableName: 'Session_View',
-            importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_session_view_v2 where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
-            columns: [
-              {
-                Name: 'session_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'session_duration',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'session_views',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'engaged_session',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'bounced_session',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'session_start_timestamp',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'session_engagement_time',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'session_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'session_date_hour',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'entry_view',
-                Type: 'STRING',
-              },
-              {
-                Name: 'exit_view',
-                Type: 'STRING',
-              },
-            ],
-            dateTimeDatasetParameter: [
-              {
-                name: 'startDate',
-                timeGranularity: 'DAY',
-              },
-              {
-                name: 'endDate',
-                timeGranularity: 'DAY',
-              },
-            ],
-            projectedColumns: [
-              'session_id',
-              'user_pseudo_id',
-              'platform',
-              'session_duration',
-              'session_views',
-              'engaged_session',
-              'bounced_session',
-              'session_start_timestamp',
-              'session_engagement_time',
-              'session_date',
-              'session_date_hour',
-              'entry_view',
-              'exit_view',
-            ],
-          },
-          {
-            tableName: 'User_Attr_View',
-            importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_user_attr_view_v1',
-            columns: [
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'custom_attr_key',
-                Type: 'STRING',
-              },
-              {
-                Name: 'custom_attr_value',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_first_touch_timestamp',
-                Type: 'INTEGER',
-              },
-              {
-                Name: '_first_visit_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: '_first_referer',
-                Type: 'STRING',
-              },
-              {
-                Name: '_first_traffic_source_type',
-                Type: 'STRING',
-              },
-              {
-                Name: '_first_traffic_medium',
-                Type: 'STRING',
-              },
-              {
-                Name: '_first_traffic_source',
-                Type: 'STRING',
-              },
-              {
-                Name: '_channel',
-                Type: 'STRING',
-              },
-            ],
-            projectedColumns: [
-              'user_pseudo_id',
-              'user_id',
-              'user_first_touch_timestamp',
-              '_first_visit_date',
-              '_first_referer',
-              '_first_traffic_source_type',
-              '_first_traffic_medium',
-              '_first_traffic_source',
-              '_channel',
-              'custom_attr_key',
-              'custom_attr_value',
-            ],
-          },
-          {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_event_view_v2 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
             columns: [
               {
-                Name: 'event_date',
+                Name: 'event_timestamp',
                 Type: 'DATETIME',
+              },
+              {
+                Name: 'event_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_time_msec',
+                Type: 'INTEGER',
               },
               {
                 Name: 'event_name',
                 Type: 'STRING',
               },
               {
-                Name: 'event_id',
+                Name: 'user_pseudo_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_value',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_value_currency',
                 Type: 'STRING',
               },
               {
@@ -1265,44 +969,8 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
               {
-                Name: 'event_previous_timestamp',
+                Name: 'ingest_time_msec',
                 Type: 'INTEGER',
-              },
-              {
-                Name: 'event_timestamp',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'event_value_in_usd',
-                Type: 'DECIMAL',
-              },
-              {
-                Name: 'app_info_app_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'app_info_package_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'app_info_install_source',
-                Type: 'STRING',
-              },
-              {
-                Name: 'app_info_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'app_info_sdk_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'app_info_sdk_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'device_id',
-                Type: 'STRING',
               },
               {
                 Name: 'device_mobile_brand_name',
@@ -1315,14 +983,6 @@ describe('DataReportingQuickSightStack resource test', () => {
               {
                 Name: 'device_manufacturer',
                 Type: 'STRING',
-              },
-              {
-                Name: 'device_screen_width',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'device_screen_height',
-                Type: 'INTEGER',
               },
               {
                 Name: 'device_carrier',
@@ -1341,31 +1001,11 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'host_name',
+                Name: 'device_vendor_id',
                 Type: 'STRING',
               },
               {
-                Name: 'ua_browser',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_browser_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_os',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_os_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_device',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_device_category',
+                Name: 'device_advertising_id',
                 Type: 'STRING',
               },
               {
@@ -1377,23 +1017,47 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
               {
+                Name: 'device_ua_os',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_os_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_browser',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_browser_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_device',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_device_category',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_screen_width',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'device_screen_height',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'device_viewport_width',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'device_viewport_height',
+                Type: 'INTEGER',
+              },
+              {
                 Name: 'geo_continent',
-                Type: 'STRING',
-              },
-              {
-                Name: 'geo_country',
-                Type: 'STRING',
-              },
-              {
-                Name: 'geo_city',
-                Type: 'STRING',
-              },
-              {
-                Name: 'geo_metro',
-                Type: 'STRING',
-              },
-              {
-                Name: 'geo_region',
                 Type: 'STRING',
               },
               {
@@ -1401,23 +1065,23 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'geo_country',
+                Type: 'STRING',
+              },
+              {
+                Name: 'geo_region',
+                Type: 'STRING',
+              },
+              {
+                Name: 'geo_metro',
+                Type: 'STRING',
+              },
+              {
+                Name: 'geo_city',
+                Type: 'STRING',
+              },
+              {
                 Name: 'geo_locale',
-                Type: 'STRING',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'project_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'traffic_source_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'traffic_source_medium',
                 Type: 'STRING',
               },
               {
@@ -1425,25 +1089,381 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'user_first_touch_timestamp',
+                Name: 'traffic_source_medium',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_campaign',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_content',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_term',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_campaign_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_clid_platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_clid',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_channel_group',
+                Type: 'STRING',
+              },
+              {
+                Name: 'traffic_source_category',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_first_touch_time_msec',
                 Type: 'INTEGER',
+              },
+              {
+                Name: 'app_package_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_title',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_install_source',
+                Type: 'STRING',
+              },
+              {
+                Name: 'project_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_screen_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_screen_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_screen_unique_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_previous_screen_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_previous_screen_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_previous_screen_unique_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'screen_view_previous_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'screen_view_engagement_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'screen_view_entrances',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_page_referrer',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_page_referrer_title',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_previous_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'page_view_engagement_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'page_view_page_title',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_page_url',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_page_url_path',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_hostname',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_latest_referrer',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_latest_referrer_host',
+                Type: 'STRING',
+              },
+              {
+                Name: 'page_view_entrances',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_start_is_first_time',
+                Type: 'STRING',
+              },
+              {
+                Name: 'upgrade_previous_app_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'upgrade_previous_os_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'search_key',
+                Type: 'STRING',
+              },
+              {
+                Name: 'search_term',
+                Type: 'STRING',
+              },
+              {
+                Name: 'outbound_link_classes',
+                Type: 'STRING',
+              },
+              {
+                Name: 'outbound_link_domain',
+                Type: 'STRING',
+              },
+              {
+                Name: 'outbound_link_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'outbound_link_url',
+                Type: 'STRING',
+              },
+              {
+                Name: 'outbound_link',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_engagement_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'scroll_engagement_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'sdk_error_code',
+                Type: 'STRING',
+              },
+              {
+                Name: 'sdk_error_message',
+                Type: 'STRING',
+              },
+              {
+                Name: 'sdk_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'sdk_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_exception_message',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_exception_stack',
+                Type: 'STRING',
+              },
+              {
+                Name: 'custom_parameters_json_str',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_duration',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'session_number',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'session_start_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'session_source',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_medium',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_campaign',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_content',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_term',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_campaign_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_clid_platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_clid',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_channel_group',
+                Type: 'STRING',
+              },
+              {
+                Name: 'session_source_category',
+                Type: 'STRING',
               },
               {
                 Name: 'user_id',
                 Type: 'STRING',
               },
               {
-                Name: 'user_pseudo_id',
+                Name: 'first_touch_time_msec',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'first_visit_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'first_referrer',
                 Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_category',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_source',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_medium',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_campaign',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_content',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_term',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_campaign_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_clid_platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_clid',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_traffic_channel_group',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_app_install_source',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_properties_json_str',
+                Type: 'STRING',
+              },
+              {
+                Name: 'merged_user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'latest_user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'new_user_indicator',
+                Type: 'STRING',
+              },
+              {
+                Name: 'view_session_indicator',
+                Type: 'STRING',
+              },
+              {
+                Name: 'view_event_indicator',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_timestamp_local',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
               },
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate',
+                name: 'startDate01',
                 timeGranularity: 'DAY',
               },
               {
-                name: 'endDate',
+                name: 'endDate01',
                 timeGranularity: 'DAY',
               },
             ],
@@ -1468,233 +1488,198 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
             ],
             projectedColumns: [
-              'event_date',
-              'event_name',
-              'event_id',
-              'event_bundle_sequence_id',
-              'event_previous_timestamp',
               'event_timestamp',
-              'event_value_in_usd',
-              'app_info_app_id',
-              'app_info_package_id',
-              'app_info_install_source',
-              'app_info_version',
-              'app_info_sdk_name',
-              'app_info_sdk_version',
-              'device_id',
+              'event_id',
+              'event_time_msec',
+              'event_name',
+              'user_pseudo_id',
+              'session_id',
+              'event_value',
+              'event_value_currency',
+              'event_bundle_sequence_id',
+              'ingest_time_msec',
               'device_mobile_brand_name',
               'device_mobile_model_name',
               'device_manufacturer',
-              'device_screen_width',
-              'device_screen_height',
               'device_carrier',
               'device_network_type',
               'device_operating_system',
               'device_operating_system_version',
-              'ua_browser',
-              'ua_browser_version',
-              'host_name',
-              'ua_os',
-              'ua_os_version',
-              'ua_device',
-              'ua_device_category',
+              'device_vendor_id',
+              'device_advertising_id',
               'device_system_language',
               'device_time_zone_offset_seconds',
+              'device_ua_os',
+              'device_ua_os_version',
+              'device_ua_browser',
+              'device_ua_browser_version',
+              'device_ua_device',
+              'device_ua_device_category',
+              'device_screen_width',
+              'device_screen_height',
+              'device_viewport_width',
+              'device_viewport_height',
               'geo_continent',
-              'geo_country',
-              'geo_city',
-              'geo_metro',
-              'geo_region',
               'geo_sub_continent',
+              'geo_country',
+              'geo_region',
+              'geo_metro',
+              'geo_city',
               'geo_locale',
-              'platform',
-              'project_id',
-              'traffic_source_name',
-              'traffic_source_medium',
               'traffic_source_source',
-              'user_first_touch_timestamp',
+              'traffic_source_medium',
+              'traffic_source_campaign',
+              'traffic_source_content',
+              'traffic_source_term',
+              'traffic_source_campaign_id',
+              'traffic_source_clid_platform',
+              'traffic_source_clid',
+              'traffic_source_channel_group',
+              'traffic_source_category',
+              'user_first_touch_time_msec',
+              'app_package_id',
+              'app_version',
+              'app_title',
+              'app_install_source',
+              'project_id',
+              'platform',
+              'app_id',
+              'screen_view_screen_name',
+              'screen_view_screen_id',
+              'screen_view_screen_unique_id',
+              'screen_view_previous_screen_name',
+              'screen_view_previous_screen_id',
+              'screen_view_previous_screen_unique_id',
+              'screen_view_previous_time_msec',
+              'screen_view_engagement_time_msec',
+              'screen_view_entrances',
+              'page_view_page_referrer',
+              'page_view_page_referrer_title',
+              'page_view_previous_time_msec',
+              'page_view_engagement_time_msec',
+              'page_view_page_title',
+              'page_view_page_url',
+              'page_view_page_url_path',
+              'page_view_hostname',
+              'page_view_latest_referrer',
+              'page_view_latest_referrer_host',
+              'page_view_entrances',
+              'app_start_is_first_time',
+              'upgrade_previous_app_version',
+              'upgrade_previous_os_version',
+              'search_key',
+              'search_term',
+              'outbound_link_classes',
+              'outbound_link_domain',
+              'outbound_link_id',
+              'outbound_link_url',
+              'outbound_link',
+              'user_engagement_time_msec',
+              'scroll_engagement_time_msec',
+              'sdk_error_code',
+              'sdk_error_message',
+              'sdk_version',
+              'sdk_name',
+              'app_exception_message',
+              'app_exception_stack',
+              'custom_parameters_json_str',
+              'session_duration',
+              'session_number',
+              'session_start_time_msec',
+              'session_source',
+              'session_medium',
+              'session_campaign',
+              'session_content',
+              'session_term',
+              'session_campaign_id',
+              'session_clid_platform',
+              'session_clid',
+              'session_channel_group',
+              'session_source_category',
               'user_id',
-              'user_pseudo_id',
+              'first_touch_time_msec',
+              'first_visit_date',
+              'first_referrer',
+              'first_traffic_category',
+              'first_traffic_source',
+              'first_traffic_medium',
+              'first_traffic_campaign',
+              'first_traffic_content',
+              'first_traffic_term',
+              'first_traffic_campaign_id',
+              'first_traffic_clid_platform',
+              'first_traffic_clid',
+              'first_traffic_channel_group',
+              'first_app_install_source',
+              'user_properties_json_str',
+              'merged_user_id',
+              'latest_user_id',
+              'new_user_indicator',
+              'view_session_indicator',
+              'view_event_indicator',
+              'event_timestamp_local',
+              'event_date',
             ],
           },
           {
-            tableName: 'Device_View',
+            tableName: 'Day_User_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_device_view_v1 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_view_cnt_mv where event_date >= <<$startDate02>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate02>>))",
             columns: [
-              {
-                Name: 'device_id',
-                Type: 'STRING',
-              },
               {
                 Name: 'event_date',
                 Type: 'DATETIME',
               },
               {
-                Name: 'mobile_brand_name',
+                Name: 'platform',
                 Type: 'STRING',
               },
               {
-                Name: 'mobile_model_name',
+                Name: 'Active users',
                 Type: 'STRING',
               },
               {
-                Name: 'manufacturer',
-                Type: 'STRING',
-              },
-              {
-                Name: 'screen_width',
+                Name: 'New users',
                 Type: 'INTEGER',
               },
               {
-                Name: 'screen_height',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'carrier',
-                Type: 'STRING',
-              },
-              {
-                Name: 'network_type',
-                Type: 'STRING',
-              },
-              {
-                Name: 'operating_system',
-                Type: 'STRING',
-              },
-              {
-                Name: 'operating_system_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'host_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_browser',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_browser_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_os',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_os_version',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_device',
-                Type: 'STRING',
-              },
-              {
-                Name: 'ua_device_category',
-                Type: 'STRING',
-              },
-              {
-                Name: 'system_language',
-                Type: 'STRING',
-              },
-              {
-                Name: 'time_zone_offset_seconds',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'advertising_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'user_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'usage_num',
+                Name: 'view_count',
                 Type: 'INTEGER',
               },
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate',
+                name: 'startDate02',
                 timeGranularity: 'DAY',
               },
               {
-                name: 'endDate',
+                name: 'endDate02',
                 timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
-              'device_id',
               'event_date',
-              'mobile_brand_name',
-              'mobile_model_name',
-              'manufacturer',
-              'screen_width',
-              'screen_height',
-              'carrier',
-              'network_type',
-              'operating_system',
-              'operating_system_version',
-              'host_name',
-              'ua_browser',
-              'ua_browser_version',
-              'ua_os',
-              'ua_os_version',
-              'ua_device',
-              'ua_device_category',
-              'system_language',
-              'time_zone_offset_seconds',
-              'advertising_id',
-              'user_pseudo_id',
-              'user_id',
-              'usage_num',
+              'platform',
+              'Active users',
+              'New users',
+              'view_count',
             ],
           },
           {
-            tableName: 'Event_Parameter_View',
+            tableName: 'Day_Traffic_Source_User',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1 where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_traffic_source_user where event_date >= <<$startDate05>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate05>>))",
             columns: [
-              {
-                Name: 'event_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_name',
-                Type: 'STRING',
-              },
               {
                 Name: 'event_date',
                 Type: 'DATETIME',
               },
               {
-                Name: 'event_param_key',
+                Name: 'aggregation_type',
                 Type: 'STRING',
               },
               {
-                Name: 'event_param_double_value',
-                Type: 'DECIMAL',
-              },
-              {
-                Name: 'event_param_float_value',
-                Type: 'DECIMAL',
-              },
-              {
-                Name: 'event_param_int_value',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'event_param_string_value',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_param_value',
+                Name: 'aggregation_dim',
                 Type: 'STRING',
               },
               {
@@ -1705,79 +1690,576 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Name: 'user_id',
                 Type: 'STRING',
               },
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_timestamp',
-                Type: 'INTEGER',
-              },
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate',
+                name: 'startDate05',
                 timeGranularity: 'DAY',
               },
               {
-                name: 'endDate',
+                name: 'endDate05',
                 timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
-              'event_id',
-              'event_name',
               'event_date',
               'platform',
+              'aggregation_dim',
+              'aggregation_type',
               'user_id',
-              'user_pseudo_id',
-              'event_timestamp',
-              'event_param_key',
-              'event_param_double_value',
-              'event_param_float_value',
-              'event_param_int_value',
-              'event_param_string_value',
-              'event_param_value',
             ],
           },
           {
-            tableName: 'Lifecycle_Daily_View',
+            tableName: 'Day_User_Acquisition',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v2  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_day_user_acquisition where event_date >= <<$startDate07>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate07>>))",
             columns: [
               {
-                Name: 'time_period',
+                Name: 'event_date',
                 Type: 'DATETIME',
               },
               {
-                Name: 'this_day_value',
+                Name: 'aggregation_type',
                 Type: 'STRING',
               },
               {
-                Name: 'sum',
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'new_user_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'session_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'engagement_session_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'engagement_rate',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'avg_user_engagement_time_minutes',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate07',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate07',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'aggregation_type',
+              'aggregation_dim',
+              'platform',
+              'new_user_count',
+              'session_count',
+              'engagement_session_count',
+              'engagement_rate',
+              'avg_user_engagement_time_minutes',
+              'event_count',
+              'user_id',
+            ],
+          },
+          {
+            tableName: 'Country_New_User',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_country_new_user where event_date >= <<$startDate08>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate08>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'geo_country',
+                Type: 'STRING',
+              },
+              {
+                Name: 'geo_city',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_count',
                 Type: 'INTEGER',
               },
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate',
+                name: 'startDate08',
                 timeGranularity: 'DAY',
               },
               {
-                name: 'endDate',
+                name: 'endDate08',
+                timeGranularity: 'DAY',
+              },
+            ],
+            tagColumnOperations: [
+              {
+                columnName: 'geo_country',
+                columnGeographicRoles: [
+                  'COUNTRY',
+                ],
+              },
+              {
+                columnName: 'geo_city',
+                columnGeographicRoles: [
+                  'CITY',
+                ],
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'geo_country',
+              'geo_city',
+              'user_count',
+            ],
+          },
+          {
+            tableName: 'Day_User_View_Engagement',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_user_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'view_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate09',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate09',
                 timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
-              'time_period',
-              'this_day_value',
-              'sum',
+              'event_date',
+              'platform',
+              'event_count',
+              'view_count',
+            ],
+          },
+          {
+            tableName: 'Engagement_KPI',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_kpi where event_date >= <<$startDate10>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate10>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'avg_session_per_user',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'avg_engagement_time_per_session_minutes',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'avg_engagement_time_per_user_minutes',
+                Type: 'DECIMAL',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate10',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate10',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'avg_session_per_user',
+              'avg_engagement_time_per_session_minutes',
+              'avg_engagement_time_per_user_minutes',
+            ],
+          },
+          {
+            tableName: 'Page_Screen_View',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view where event_date >= <<$startDate11>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate11>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
+                Name: 'view_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate11',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate11',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'aggregation_type',
+              'aggregation_dim',
+              'view_count',
+            ],
+          },
+          {
+            tableName: 'Page_Screen_View_Detail',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_page_screen_view_detail where event_date >= <<$startDate12>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate12>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_engagement_time_minutes',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_id',
+                Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate12',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate12',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'aggregation_type',
+              'aggregation_dim',
+              'user_id',
+              'user_engagement_time_minutes',
+              'event_id',
+            ],
+          },
+          {
+            tableName: 'Entrance',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_entrance where event_date >= <<$startDate13>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate13>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
+                Name: 'entrance_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate13',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate13',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'aggregation_type',
+              'aggregation_dim',
+              'entrance_count',
+            ],
+          },
+          {
+            tableName: 'Exit',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_exit where event_date >= <<$startDate14>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate14>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'aggregation_dim',
+                Type: 'STRING',
+              },
+              {
+                Name: 'exit_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate14',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate14',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'aggregation_type',
+              'aggregation_dim',
+              'exit_count',
+            ],
+          },
+          {
+            tableName: 'User_New_Return',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_retention_user_new_return where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_type',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate15',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate15',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'user_type',
+              'user_count',
+            ],
+          },
+          {
+            tableName: 'Event_Overtime',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_retention_event_overtime where event_date >= <<$startDate16>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate16>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate16',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate16',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'event_count',
+            ],
+          },
+          {
+            tableName: 'DAU_WAU',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_retention_dau_wau where event_date >= <<$startDate17>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate17>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'merged_user_id',
+                Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate17',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate17',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'merged_user_id',
+            ],
+          },
+          {
+            tableName: 'Retention_View',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
+            columns: [
+              {
+                Name: 'first_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'day_diff',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'returned_user_count',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'total_users',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate19',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate19',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'first_date',
+              'day_diff',
+              'returned_user_count',
+              'total_users',
             ],
           },
           {
             tableName: 'Lifecycle_Weekly_View',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v2 where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v3 where time_period >= <<$startDate20>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate20>>))",
             columns: [
               {
                 Name: 'time_period',
@@ -1794,11 +2276,11 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate',
+                name: 'startDate20',
                 timeGranularity: 'DAY',
               },
               {
-                name: 'endDate',
+                name: 'endDate20',
                 timeGranularity: 'DAY',
               },
             ],
@@ -1806,6 +2288,50 @@ describe('DataReportingQuickSightStack resource test', () => {
               'time_period',
               'this_week_value',
               'sum',
+            ],
+          },
+          {
+            tableName: 'Crash_Rate',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_device_crash_rate where event_date >= <<$startDate18>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate18>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'merged_user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'crashed_user_id',
+                Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate18',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate18',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'app_version',
+              'merged_user_id',
+              'crashed_user_id',
             ],
           },
         ],

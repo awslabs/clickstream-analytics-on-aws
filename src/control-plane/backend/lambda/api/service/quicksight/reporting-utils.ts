@@ -14,6 +14,28 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import {
+  AnalysisType,
+  AttributionModelType,
+  ExploreAttributionTimeWindowType,
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreLocales,
+  ExplorePathNodeType,
+  ExplorePathSessionDef,
+  ExploreRelativeTimeUnit,
+  ExploreRequestAction,
+  ExploreTimeScopeType,
+  ExploreVisualName,
+  MetadataValueType,
+  QuickSightChartType,
+  DATASET_ADMIN_PERMISSION_ACTIONS,
+  QUICKSIGHT_DATASET_INFIX,
+  QUICKSIGHT_RESOURCE_NAME_PREFIX,
+  QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
+  ExploreAggregationMethod,
+  DEFAULT_TIMEZONE,
+} from '@aws/clickstream-base-lib';
+import {
   CreateDataSetCommandOutput, QuickSight,
   ColumnGroup,
   TransformOperation,
@@ -35,11 +57,11 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
-import { DATASET_ADMIN_PERMISSION_ACTIONS, QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreAggregationMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { AttributionSQLParameters } from './sql-builder-attribution';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
+import { IPipeline } from '../../model/pipeline';
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -167,6 +189,15 @@ export type MustacheEventTableAnalysisType = MustacheBaseType & {
   nameDimFieldId: string;
 }
 
+export type MustacheAttributionAnalysisType = MustacheBaseType & {
+  touchPointNameFieldId: string;
+  totalTriggerCountFieldId: string;
+  triggerCountFieldId: string;
+  contributionFieldId: string;
+  contributionRateFieldId: string;
+  totalConversionCountFieldId: string;
+}
+
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
@@ -284,7 +315,7 @@ export const attributionVisualColumns: InputColumn[] = [
   },
 ];
 
-export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, publishUserArn: string,
+export const createDataSet = async (quickSight: QuickSight, awsAccountId: string | undefined, publishUserArn: string,
   dataSourceArn: string,
   props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
@@ -395,7 +426,7 @@ const _getDataSetId = (requestAction: ExploreRequestAction) : string => {
   return datasetId;
 };
 
-export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
+export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string | undefined, dashboardId: string)
 : Promise<DashboardDefProps> => {
   const dashboard = await quickSight.describeDashboardDefinition({
     AwsAccountId: awsAccountId,
@@ -860,6 +891,27 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
+export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType) : Visual {
+
+  const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    touchPointNameFieldId: uuidv4(),
+    totalTriggerCountFieldId: uuidv4(),
+    triggerCountFieldId: uuidv4(),
+    contributionFieldId: uuidv4(),
+    contributionRateFieldId: uuidv4(),
+    totalConversionCountFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheAttributionAnalysisType)) as Visual;
+}
+
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
@@ -1134,7 +1186,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 }
 
-export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
+export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[] | AttributionTouchPoint[]) {
 
   let hasEventAttribute = false;
   const eventAttributes: ColumnAttribute[] = [];
@@ -1250,10 +1302,6 @@ export function formatDatesInObject(inputObject: any): any {
   }
 }
 
-export function sleep(ms: number) {
-  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
-};
-
 export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
   let unit = 'DAY';
   if (timeUnit == ExploreRelativeTimeUnit.WK) {
@@ -1319,6 +1367,9 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
       case AnalysisType.RETENTION:
         title = t('dashboard.title.retentionAnalysis');
         break;
+      case AnalysisType.ATTRIBUTION:
+        title = t('dashboard.title.attributionAnalysis');
+        break;
     }
   }
 
@@ -1377,6 +1428,61 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   }
 
   checkChain.NodesLimit();
+
+  return checkChain.status;
+}
+
+export function checkAttributionAnalysisParameter(params: any): CheckParamsStatus {
+
+  const checkChain = new ReportingCheck(params);
+  _checkCommonPartParameter(checkChain);
+
+  if (params.targetEventAndCondition === undefined
+    || params.modelType === undefined
+    || params.eventAndConditions === undefined
+    || params.timeWindowType === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.eventAndConditions.length < 1) {
+    return {
+      success: false,
+      message: 'At least specify 1 event for attribution analysis',
+    };
+  }
+
+  if (params.modelType === AttributionModelType.POSITION && (params.modelWeights === undefined || params.modelWeights.length < 1) ) {
+    return {
+      success: false,
+      message: 'missing weights for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds === undefined) {
+    return {
+      success: false,
+      message: 'missing time window parameter for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds !== undefined
+    && params.timeWindowInSeconds > 10 * 365 * 24 * 60 * 60) {
+    return {
+      success: false,
+      message: 'time window too long for attribution analysis, max is 10 years',
+    };
+  }
+
+  if (params.computeMethod !== ExploreComputeMethod.EVENT_CNT && params.computeMethod !== ExploreComputeMethod.SUM_VALUE) {
+    return {
+      success: false,
+      message: 'unsupported compute method for attribution analysis',
+    };
+  }
 
   return checkChain.status;
 }
@@ -1508,6 +1614,21 @@ export function encodeQueryValueForSql(params: SQLParameters) {
   }
 }
 
+export function encodeAttributionQueryValueForSql(params: AttributionSQLParameters) {
+  if (params.eventAndConditions !== undefined) {
+    for (const item of (params.eventAndConditions)) {
+      _encodeFilterValue(item.sqlCondition?.conditions);
+      item.eventName = _encodeSqlSpecialChars(item.eventName);
+    }
+  }
+
+  _encodeFilterValue(params.targetEventAndCondition?.sqlCondition?.conditions);
+  params.targetEventAndCondition.eventName = _encodeSqlSpecialChars(params.targetEventAndCondition.eventName);
+
+  _encodeFilterValue(params.globalEventCondition?.conditions);
+
+}
+
 function _encodeFilterValue(conditions: Condition[] | undefined) {
   if (conditions !== undefined) {
     for (const condition of conditions) {
@@ -1570,4 +1691,11 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
     suffix,
     smalMultiplesFieldId,
   };
+}
+
+export function getTimezoneByAppId(pipeline: IPipeline | undefined, appId: string): string {
+  if (!pipeline || !pipeline.timezone) {
+    return DEFAULT_TIMEZONE;
+  }
+  return pipeline.timezone.find((tz) => tz.appId === appId)?.timezone ?? DEFAULT_TIMEZONE;
 }

@@ -1,0 +1,69 @@
+{
+  "event_timestamp" : "2023-08-29 04:04:25",
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_properties" : {
+    "age" : {
+      "value" : "19",
+      "type" : "number",
+      "set_time_msec" : null
+    },
+    "email" : {
+      "value" : "yxxxxn@example.com",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "firstName" : {
+      "value" : "LoginName",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "gender" : {
+      "value" : "M",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "lastName" : {
+      "value" : "LoginTest",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "persona" : {
+      "value" : "",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "user_id" : {
+      "value" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+      "type" : "string",
+      "set_time_msec" : null
+    },
+    "username" : {
+      "value" : "NameL2",
+      "type" : "string",
+      "set_time_msec" : null
+    }
+  },
+  "user_properties_json_str" : "{\"firstName\":{\"set_time_msec\":null,\"value\":\"LoginName\"},\"lastName\":{\"set_time_msec\":null,\"value\":\"LoginTest\"},\"persona\":{\"set_time_msec\":null,\"value\":\"\"},\"gender\":{\"set_time_msec\":null,\"value\":\"M\"},\"user_id\":{\"set_time_msec\":null,\"value\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\"},\"email\":{\"set_time_msec\":null,\"value\":\"yxxxxn@example.com\"},\"age\":{\"set_time_msec\":null,\"value\":19},\"username\":{\"set_time_msec\":null,\"value\":\"NameL2\"}}",
+  "first_touch_time_msec" : 1693281865635,
+  "first_visit_date" : "2023-08-29",
+  "first_referrer" : null,
+  "first_traffic_source" : "direct",
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : "direct",
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "GMTServerLogin",
+  "event_name" : null,
+  "created_time" : "_CREATED_TIME_"
+}

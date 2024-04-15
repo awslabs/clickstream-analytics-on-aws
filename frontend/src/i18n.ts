@@ -49,7 +49,9 @@ i18n
     },
     supportedLngs: ['en-US', 'zh-CN'],
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      loadPath:
+        '/locales/{{lng}}/{{ns}}.json?v=' +
+        process.env.REACT_APP_SOLUTION_VERSION,
     },
   });
 

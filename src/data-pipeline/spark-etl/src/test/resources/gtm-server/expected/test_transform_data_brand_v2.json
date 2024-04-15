@@ -1,0 +1,217 @@
+{
+  "event_timestamp" : "2023-08-29 04:04:25",
+  "event_id" : "43cc3b89d7dfccbc2c906eb125ea25dbbrand-0-1693281535-11",
+  "event_time_msec" : 1693281865000,
+  "event_name" : "_profile_set",
+  "event_value" : 0.0,
+  "event_value_currency" : null,
+  "event_bundle_sequence_id" : null,
+  "ingest_time_msec" : 1693281865000,
+  "device_mobile_brand_name" : "Chromium",
+  "device_mobile_model_name" : null,
+  "device_manufacturer" : null,
+  "device_carrier" : null,
+  "device_network_type" : null,
+  "device_operating_system" : "\"macOS\"",
+  "device_operating_system_version" : null,
+  "device_vendor_id" : null,
+  "device_advertising_id" : null,
+  "device_system_language" : "en-us",
+  "device_time_zone_offset_seconds" : null,
+  "device_ua_browser" : null,
+  "device_ua_browser_version" : null,
+  "device_ua_os" : null,
+  "device_ua_os_version" : null,
+  "device_ua_device" : null,
+  "device_ua_device_category" : null,
+  "device_ua" : {
+    "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62"
+  },
+  "device_screen_width" : 3440,
+  "device_screen_height" : 1440,
+  "device_viewport_width" : null,
+  "device_viewport_height" : null,
+  "geo_continent" : null,
+  "geo_sub_continent" : null,
+  "geo_country" : "SG",
+  "geo_region" : null,
+  "geo_metro" : null,
+  "geo_city" : null,
+  "geo_locale" : null,
+  "traffic_source_source" : "direct",
+  "traffic_source_medium" : null,
+  "traffic_source_campaign" : "direct",
+  "traffic_source_content" : null,
+  "traffic_source_term" : null,
+  "traffic_source_campaign_id" : null,
+  "traffic_source_clid_platform" : null,
+  "traffic_source_clid" : null,
+  "traffic_source_channel_group" : null,
+  "traffic_source_category" : null,
+  "user_first_touch_time_msec" : null,
+  "app_package_id" : null,
+  "app_version" : null,
+  "app_title" : null,
+  "app_install_source" : null,
+  "platform" : "Web",
+  "project_id" : "test_project_id_gtm_server",
+  "app_id" : "brandAppId1",
+  "screen_view_screen_name" : null,
+  "screen_view_screen_id" : null,
+  "screen_view_screen_unique_id" : null,
+  "screen_view_previous_screen_name" : null,
+  "screen_view_previous_screen_id" : null,
+  "screen_view_previous_screen_unique_id" : null,
+  "screen_view_previous_time_msec" : null,
+  "screen_view_engagement_time_msec" : null,
+  "screen_view_entrances" : null,
+  "page_view_page_referrer" : null,
+  "page_view_page_referrer_title" : null,
+  "page_view_previous_time_msec" : null,
+  "page_view_engagement_time_msec" : null,
+  "page_view_page_title" : "Retail Demo Store",
+  "page_view_page_url" : "http://d3mpqdtjegq8im.cloudfront.net/",
+  "page_view_page_url_path" : null,
+  "page_view_page_url_query_parameters" : null,
+  "page_view_hostname" : "d3mpqdtjegq8im.cloudfront.net",
+  "page_view_latest_referrer" : null,
+  "page_view_latest_referrer_host" : null,
+  "page_view_entrances" : null,
+  "app_start_is_first_time" : null,
+  "upgrade_previous_app_version" : null,
+  "upgrade_previous_os_version" : null,
+  "search_key" : null,
+  "search_term" : null,
+  "outbound_link_classes" : null,
+  "outbound_link_domain" : null,
+  "outbound_link_id" : null,
+  "outbound_link_url" : null,
+  "outbound_link" : null,
+  "user_engagement_time_msec" : 8129,
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "session_id" : "1693281535",
+  "session_start_time_msec" : 1693281865635,
+  "session_duration" : null,
+  "session_number" : 11,
+  "scroll_engagement_time_msec" : null,
+  "sdk_error_code" : null,
+  "sdk_error_message" : null,
+  "sdk_version" : null,
+  "sdk_name" : null,
+  "app_exception_message" : null,
+  "app_exception_stack" : null,
+  "custom_parameters_json_str" : "{\"lastName\":\"\",\"gender\":\"\",\"origin\":\"firebase\",\"client_id\":\"rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179\",\"ip_override\":\"72.21.198.67\",\"email\":\"yxxxxn@example.com\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62\",\"x-ga-measurement_id\":\"G-000000003\",\"x-ga-request_count\":7,\"x-sst-system_properties\":{\"uc\":\"SG\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":1693281865635,\"etld\":\"google.com.sg\"},\"persona\":\"\",\"Channel\":\"Server\",\"screen_resolution\":\"3440x1440\",\"x-ga-page_id\":1304853089,\"x-ga-system_properties\":{\"dbg\":null,\"fid\":\"fEj96vkOHt5jN-csBLEy_A\",\"ee\":true,\"fv\":null,\"ss\":null},\"firstName\":\"\",\"client_hints\":{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Microsoft Edge\",\"version\":\"116\"}]},\"x-ga-mp2-user_properties\":{\"_user_id\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\",\"username\":\"NameL2\",\"email\":\"yxxxxn@example.com\",\"firstName\":\"\",\"lastName\":\"\",\"gender\":\"\",\"age\":0,\"persona\":\"\"},\"TestBy\":\"NameL\",\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je38n0\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"807802863.1690769179\",\"age\":0,\"username\":\"NameL2\"}",
+  "custom_parameters" : {
+    "Channel" : {
+      "value" : "Server",
+      "type" : "string"
+    },
+    "TestBy" : {
+      "value" : "NameL",
+      "type" : "string"
+    },
+    "age" : {
+      "value" : "0",
+      "type" : "number"
+    },
+    "client_hints" : {
+      "value" : "{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Microsoft Edge\",\"version\":\"116\"}]}",
+      "type" : "object"
+    },
+    "client_id" : {
+      "value" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+      "type" : "string"
+    },
+    "email" : {
+      "value" : "yxxxxn@example.com",
+      "type" : "string"
+    },
+    "firstName" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "gender" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "ip_override" : {
+      "value" : "72.21.198.67",
+      "type" : "string"
+    },
+    "lastName" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "origin" : {
+      "value" : "firebase",
+      "type" : "string"
+    },
+    "persona" : {
+      "value" : "",
+      "type" : "string"
+    },
+    "screen_resolution" : {
+      "value" : "3440x1440",
+      "type" : "string"
+    },
+    "user_agent" : {
+      "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62",
+      "type" : "string"
+    },
+    "username" : {
+      "value" : "NameL2",
+      "type" : "string"
+    },
+    "x-ga-gtm_version" : {
+      "value" : "45je38n0",
+      "type" : "string"
+    },
+    "x-ga-js_client_id" : {
+      "value" : "807802863.1690769179",
+      "type" : "string"
+    },
+    "x-ga-measurement_id" : {
+      "value" : "G-000000003",
+      "type" : "string"
+    },
+    "x-ga-mp2-seg" : {
+      "value" : "1",
+      "type" : "string"
+    },
+    "x-ga-mp2-user_properties" : {
+      "value" : "{\"_user_id\":\"0eb41e46-2373-4883-8daf-e1975ccb3821\",\"username\":\"NameL2\",\"email\":\"yxxxxn@example.com\",\"firstName\":\"\",\"lastName\":\"\",\"gender\":\"\",\"age\":0,\"persona\":\"\"}",
+      "type" : "object"
+    },
+    "x-ga-page_id" : {
+      "value" : "1304853089",
+      "type" : "number"
+    },
+    "x-ga-protocol_version" : {
+      "value" : "2",
+      "type" : "string"
+    },
+    "x-ga-request_count" : {
+      "value" : "7",
+      "type" : "number"
+    },
+    "x-ga-system_properties" : {
+      "value" : "{\"dbg\":null,\"fid\":\"fEj96vkOHt5jN-csBLEy_A\",\"ee\":true,\"fv\":null,\"ss\":null}",
+      "type" : "object"
+    },
+    "x-sst-system_properties" : {
+      "value" : "{\"uc\":\"SG\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":1693281865635,\"etld\":\"google.com.sg\"}",
+      "type" : "object"
+    }
+  },
+  "process_info" : {
+    "ingest_time" : "2023-08-29T04:04:25Z",
+    "input_file_name" : "server-brand.json",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_",
+    "rid" : "43cc3b89d7dfccbc2c906eb125ea25dbbrand"
+  },
+  "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62",
+  "ip" : "72.21.198.67",
+  "created_time" : "_CREATED_TIME_"
+}

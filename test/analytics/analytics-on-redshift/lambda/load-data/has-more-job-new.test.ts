@@ -13,17 +13,17 @@
 
 process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/';
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { handler, HasMoreWorkEvent } from '../../../../../src/analytics/lambdas/load-data-workflow/has-more-job-new';
 import { JobStatus } from '../../../../../src/analytics/private/constant';
-import { PARTITION_APP } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 
-const ddbClientMock = mockClient(DynamoDBClient);
 
+const ddbClientMock = mockClient(DynamoDBClient);
 const context = getMockContext();
 
 const inputEvent: HasMoreWorkEvent = {
@@ -93,6 +93,10 @@ test('Should get all JOB_NEW files', async () => {
       event_parameter: 1,
       item: 1,
       user: 1,
+      event_v2: 1,
+      item_v2: 1,
+      user_v2: 1,
+      session: 1,
     },
     jobNewCount: 5,
     hasMoreWork: true,

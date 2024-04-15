@@ -1,0 +1,30 @@
+{
+  "event_timestamp" : "2023-04-24 06:51:49",
+  "user_pseudo_id" : "uuid1-231jdf",
+  "user_id" : "312121-1",
+  "user_properties" : null,
+  "user_properties_json_str" : null,
+  "first_touch_time_msec" : 1667877267895,
+  "first_visit_date" : "2022-11-08",
+  "first_referrer" : null,
+  "first_traffic_source" : "TSS",
+  "first_traffic_medium" : "TSM",
+  "first_traffic_campaign" : null,
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : "C001",
+  "process_info" : {
+    "first_event_name" : "_first_open",
+    "latest_event_name" : null,
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "uba-app",
+  "event_name" : null,
+  "created_time" : "_CREATED_TIME_"
+}

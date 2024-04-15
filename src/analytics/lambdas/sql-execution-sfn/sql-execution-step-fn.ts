@@ -14,7 +14,7 @@
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
-import { exeucteBySqlorS3File, getRedshiftClient } from '../redshift-data';
+import { executeBySqlOrS3File, getRedshiftClient } from '../redshift-data';
 
 interface EventType {
   queryId?: string;
@@ -85,7 +85,7 @@ async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient
       databaseName,
     };
   }
-  const res = await exeucteBySqlorS3File(sqlOrs3File, redShiftClient, serverlessRedshiftProps, provisionedRedshiftProps, databaseName);
+  const res = await executeBySqlOrS3File(sqlOrs3File, redShiftClient, serverlessRedshiftProps, provisionedRedshiftProps, databaseName);
   logger.info('submitSql() return queryId: ' + res.queryId);
   return {
     queryId: res.queryId,

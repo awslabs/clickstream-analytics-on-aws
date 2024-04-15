@@ -36,6 +36,7 @@ import MetadataDetails from './MetadataDetails';
 import MetadataParametersTable from '../metadata/event-parameters/MetadataParametersTable';
 import MetadataEventsTable from '../metadata/events/MetadataEventsTable';
 import MetadataUserAttributesTable from '../metadata/user-attributes/MetadataUserAttributesTable';
+import TrafficSourceHome from '../traffic-source/TrafficSourceHome';
 
 const AnalyticsDataManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -119,15 +120,13 @@ const AnalyticsDataManagement: React.FC = () => {
                 type: StateActionType.SHOW_HELP_PANEL,
                 payload: HelpPanelType.ANALYTICS_METADATA,
               });
+            } else if (!e.detail.open) {
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
-              if (!e.detail.open) {
-                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-              } else {
-                dispatch?.({
-                  type: StateActionType.SHOW_HELP_PANEL,
-                  payload: state?.helpPanelType,
-                });
-              }
+              dispatch?.({
+                type: StateActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
             }
           }}
           tools={<HelpInfo />}
@@ -229,6 +228,15 @@ const AnalyticsDataManagement: React.FC = () => {
                                 setCurType('userAttribute');
                               }
                             }}
+                          />
+                        ),
+                      },
+                      {
+                        label: t('analytics:metadata.trafficSource.title'),
+                        id: 'fourth',
+                        content: (
+                          <TrafficSourceHome
+                            analysisStudioEnabled={analysisStudioEnabled}
                           />
                         ),
                       },

@@ -28,18 +28,45 @@ export enum WorkflowStatus {
   NO_JOBS = 'NO_JOBS',
 }
 
+export enum RefreshWorkflowSteps {
+  REFRESH_SP_STEP = 'REFRESH_SP',
+  REFRESH_MV_STEP = 'REFRESH_MV',
+  END_STEP = 'END',
+}
+
 export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
+
+export const REDSHIFT_EVENT_TABLE_NAME = 'event';
+export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';
+export const REDSHIFT_USER_TABLE_NAME = 'user';
+export const REDSHIFT_ITEM_TABLE_NAME = 'item';
+
+export const REDSHIFT_EVENT_V2_TABLE_NAME = 'event_v2';
+export const REDSHIFT_ITEM_V2_TABLE_NAME = 'item_v2';
+export const REDSHIFT_USER_V2_TABLE_NAME = 'user_v2';
+export const REDSHIFT_SESSION_TABLE_NAME = 'session';
+
+export const REDSHIFT_TABLE_NAMES = [
+  REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
+  REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
+  REDSHIFT_EVENT_V2_TABLE_NAME, REDSHIFT_ITEM_V2_TABLE_NAME,
+  REDSHIFT_USER_V2_TABLE_NAME, REDSHIFT_SESSION_TABLE_NAME,
+];
 
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
 
-export const SP_SCAN_METADATA = 'scan_metadata';
+export const SP_SCAN_METADATA = 'sp_scan_metadata';
+export const PROPERTY_ARRAY_TEMP_TABLE = 'property_array_temp_table';
+
 export const SP_CLEAR_EXPIRED_EVENTS = 'sp_clear_expired_events';
+
 
 export const SQL_TEMPLATE_PARAMETER = {
   sp_scan_metadata: 'sp_scan_metadata',
   sp_clickstream_log: 'sp_clickstream_log',
   sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
   table_clickstream_log: 'clickstream_log',
+  table_refresh_mv_sp_status: 'refresh_mv_sp_status',
   table_ods_events: 'ods_events',
 };
 

@@ -1,25 +1,31 @@
 {
   "analytics": "Analytics",
-  "countGroup": "COUNT by ...",
-  "countGroupLabel": "COUNT {{label}}",
-  "minGroup": "MIN by ...",
-  "minGroupLabel": "MIN by {{label}}",
-  "maxGroup": "MAX by ...",
-  "maxGroupLabel": "MAX by {{label}}",
-  "sumGroup": "SUM by ...",
-  "sumGroupLabel": "SUM by {{label}}",
-  "avgGroup": "AVG by ...",
-  "avgGroupLabel": "AVG by {{label}}",
-  "medianGroup": "MEDIAN by ...",
-  "medianGroupLabel": "MEDIAN by {{label}}",
+  "groupLabel": {
+    "COUNT_PROPERTY": "COUNT {{label}}",
+    "min": "MIN by {{label}}",
+    "max": "MAX by {{label}}",
+    "sum": "SUM by {{label}}",
+    "avg": "AVG by {{label}}",
+    "median": "MEDIAN by {{label}}"
+  },
   "category": {
     "app_info": "Application",
     "device": "Device",
     "event": "Event",
+    "event_outer": "Event preset",
     "geo": "Geography",
     "other": "Other",
     "traffic_source": "Traffic",
-    "user": "User"
+    "user": "User",
+    "user_outer": "User preset",
+    "page_view": "Page view",
+    "screen_view": "Screen view",
+    "sdk": "SDK",
+    "search": "Search",
+    "session": "Session",
+    "outbound": "Outbound",
+    "upgrade": "Upgrade",
+    "outer": "Solution properties"
   },
   "dashboard": {
     "title": "Dashboards",
@@ -59,6 +65,7 @@
     "funnelAnalysis": "Funnel analysis",
     "eventAnalysis": "Event analysis",
     "pathAnalysis": "Path analysis",
+    "attributionAnalysis": "Attribution analysis",
     "retentionAnalysis": "Retention analysis",
     "userAnalytics": "User analytics",
     "userSearch": "User search",
@@ -85,7 +92,14 @@
     "inputVisualName": "Visualization name",
     "inputVisualNamePlaceholder": "Input visualization name",
     "inputVisualDescription": "Visualization description",
-    "inputVisualDescriptionPlaceholder": "Input visualization description"
+    "inputVisualDescriptionPlaceholder": "Input visualization description",
+    "inputDomainPlaceholder": "E.g., google.com",
+    "inputSourcePlaceholder": "E.g., Google",
+    "inputCategoryPlaceholder": "Choose a category",
+    "inputPatternPlaceholder": "E.g., q",
+    "inputChannelGroupNamePlaceholder": "E.g., Organic Search",
+    "inputChannelGroupDescriptionPlaceholder": "E.g., Search engine traffic",
+    "inputChannelGroupConditionPlaceholder": "{}"
   },
   "options": {
     "eventNumber": "Event number",
@@ -114,7 +128,12 @@
     "platformIOS": "iOS",
     "platformWechatMinPro": "Wechat MiniProgram",
     "directlyFollowed": "Directly followed",
-    "indirectlyFollowed": "Indirectly followed"
+    "indirectlyFollowed": "Indirectly followed",
+    "firstTouchAttributionModel": "First touch",
+    "lastTouchAttributionModel": "Last touch",
+    "linearAttributionModel": "Linear",
+    "positionBasedAttributionModel": "Position based",
+    "timeDecayAttributionModel": "Time decay"
   },
   "metadata": {
     "description": "You can view and manage metadata for events and user attributes here.",
@@ -180,6 +199,48 @@
         "title": "User attribute details"
       }
     },
+    "trafficSource": {
+      "title": "Traffic source",
+      "alert": "Any change to traffic source setting will only apply to future data, historical data will not be re-categorized.",
+      "channelGroup": {
+        "title": "Channel group",
+        "description": "A channel group is a set of channels, which are rule-based categories of your traffic sources. Clickstream solution provides a default channel group to classify your traffic source, but you have the flexibility to customize it.",
+        "columnOrder": "Order",
+        "columnName": "Group name",
+        "columnDescription": "Description",
+        "columnCondition": "Condition",
+        "columnActions": "Actions",
+        "filteringAriaLabel": "Find channel groups",
+        "filteringPlaceholder": "Find channel groups",
+        "loadingText": "Loading channel groups",
+        "nameDesc": "The name of the channel group.",
+        "descriptionDesc": "The description of the channel group."
+      },
+      "sourceCategory": {
+        "title": "Source category",
+        "description": "Clickstream solution categorizes the traffic source into Search, Social, Video, Shopping, and Internal based on this table, you can add or modify for your need.",
+        "columnDomain": "Domain",
+        "columnName": "Source name",
+        "columnCategory": "Category",
+        "columnPattern": "Keyword pattern",
+        "columnActions": "Actions",
+        "filteringAriaLabel": "Find source categories",
+        "filteringPlaceholder": "Find source categories",
+        "loadingText": "Loading source categories",
+        "domainDesc": "The url of the traffic source domain, this will be used to match against the latest_referrer_host to  determine the category type.",
+        "sourceDesc": "The name for the traffic source, this will be used to match against traffic_source_source field to determine the category type.",
+        "categoryDesc": "Category for the source.",
+        "patternDesc": "The pattern to extract the keyword, only apply for SEARCH traffic."
+      },
+      "detailAction": "View details",
+      "copyAction": "Copy to new",
+      "reorderAction": "Reorder",
+      "modalType": {
+        "new": "New",
+        "edit": "Edit",
+        "copy": "Copy"
+      }
+    },
     "dictionary": {
       "tableColumnValue": "Value",
       "tableColumnDisplayValue": "Display value"
@@ -220,7 +281,14 @@
     "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same",
     "errorProjectOrApp": "Non-existent projects or applications: ",
     "notSupportProjectOrApp": "This project or application does not support Analytics Studio: ",
-    "metadataNotAllowEditError": "The preset metadata does not support editing."
+    "metadataNotAllowEditError": "The preset metadata does not support editing.",
+    "inputSpecialCharactersError": "The input cannot contain special characters(! @ # $ % ^ & * + = : ; ? ~ ' \" |).",
+    "inputDomainError": "Please input domain name.",
+    "inputSourceError": "Please input source name.",
+    "inputCategoryError": "Please select a category.",
+    "inputPatternNumError": "The keyword pattern can't be more than ten.",
+    "inputChannelGroupNameError": "Please input channel group name.",
+    "inputChannelGroupConditionError": "Input must be in JSON format."
   },
   "operators": {
     "null": "is null",
@@ -234,7 +302,9 @@
     "in": "in",
     "notIn": "not in",
     "contains": "contains",
-    "notContains": "not contains"
+    "notContains": "not contains",
+    "true": "is true",
+    "false": "is false"
   },
   "labels": {
     "eventTitle": "Event",
@@ -288,7 +358,15 @@
     "participateNodes": "Select nodes to participate in the analysis",
     "includingOtherEvents": "Including other events",
     "mergeConsecutiveEvents": "Merge consecutive events",
-    "groupApplyToFirst": "Apply grouping to the first step only"
+    "groupApplyToFirst": "Apply grouping to the first step only",
+    "setConversionGoal": "Set conversion goal",
+    "setConversionWindow": "Set conversion window",
+    "selectTouchpointEvent": "Select touchpoint event",
+    "attributionDateRange": "Date range",
+    "attributionModel": "Attribution model",
+    "attributionFirst": "First",
+    "attributionInBetween": "In-between",
+    "attributionLast": "Last"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure metrics to query",
@@ -314,6 +392,81 @@
     "retentionMetricInfo": "Select starting and returning events, support filtering event with parameter.",
     "introducingAnalyticsHeader": "Introducing analytics",
     "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards.",
-    "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps."
+    "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps.",
+    "attributionSetConversionGoalInfo": "Conversion goal typically represent events that can embody a specific business objective. Common events include purchases, successful payments, registrations, and so on.",
+    "attributionSetConversionWindowInfo": "Only events that occur within the conversion window, close to the time of the target conversion events, will be included in the analysis.",
+    "attributionSelectTouchpointEventInfo": "Events to be included in the attribution analysis, e.g., click events for promotion spot, landing page visits."
+  },
+  "segment": {
+    "title": "User Segments",
+    "desc": "User Segments description",
+    "options": {
+      "withInSession": "Within a session",
+      "withOutSession": "Without a session",
+      "directlyFollow": "Directly followed",
+      "indirectlyFollow": "Indirectly followed"
+    },
+    "type": {
+      "userDone": "User has done",
+      "userNotDone": "User has not done",
+      "userIs": "User is",
+      "userIsNot": "User is not",
+      "doneInSequence": "User has done in sequence",
+      "userInGroup": "User in segment group",
+      "userNotInGroup": "User not in segment group"
+    },
+    "calculateOption": {
+      "NUMBER_OF_TOTAL": "Total number (PV)",
+      "NUMBER_OF_TIMES_PER_DAY": "Number of times per day",
+      "NUMBER_OF_CONSECUTIVE_DAYS": "Number of consecutive days",
+      "NUMBER_OF_DAYS_HAVING_EVENT": "Distribution of days",
+      "SUM_OF_EVENT_PARAMETER": "Sum by {{type}} (SUM)",
+      "MIN_OF_EVENT_PARAMETER": "Find the minimum by {{type}} (MIN)",
+      "MAX_OF_EVENT_PARAMETER": "Find the maximum by {{type}} (MAX)",
+      "AVG_OF_EVENT_PARAMETER": "Average by {{type}} (AVG)",
+      "NUMBER_OF_DISTINCT_EVENT_PARAMETER": "Count of distinct {{type}} (COUNT(DISTINCT))"
+    },
+    "calculateOperator": {
+      "=": "=",
+      "<>": "≠",
+      ">": ">",
+      ">=": ">=",
+      "<": "<",
+      "<=": "<=",
+      "between": "Between"
+    },
+    "comp": {
+      "title": "Create Segment",
+      "desc": "Create a segment by selecting the users that shared the same attributes of behaviors within a period of time.",
+      "userSegmentSettings": "User segment settings",
+      "segmentName": "Segment name",
+      "segmentNameDesc": "Provide a name for the segment",
+      "segmentNamePlaceholder": "Input segment name",
+      "segmentDescription": "Description",
+      "segmentDescriptionDesc": "Provide a useful description for the segment",
+      "segmentDescriptionPlaceholder": "Input segment description",
+      "refreshMethod": "Refresh method",
+      "refreshMethodDesc": "Specify how you want to update the segment. For auto-refresh, please specify a schedule.",
+      "refreshMethodManual": "Manual",
+      "refreshMethodAuto": "Automatic",
+      "expirationSettings": "Expiration settings",
+      "expirationSettingsDesc": "You can avoid unnecessary cost by setting expiration date for a segment after which the segment will stop auto refresh.",
+      "filterGroup": "Filter group",
+      "filterGroupDesc": "Users who meet the following conditions will be included in the segment.",
+      "provideDesc": "Provide a short description",
+      "selectUserGroup": "Please select user segment group",
+      "segmentDescPlaceholder": "Provide a short description",
+      "filterByTimeRange": "Filter by a date and time range"
+    },
+    "valid": {
+      "nameEmptyError": "Please input segment name.",
+      "cronEmptyError": "Please input cron expression.",
+      "eventEmptyError": "Please select event",
+      "eventOperatorEmptyError": "Please select operator",
+      "eventValueEmptyError": "Please input value",
+      "eventValueBetweenError": "Max value can not be less than min value",
+      "attributeEmptyError": "Please select attribute",
+      "groupEmptyError": "Please select filter group"
+    }
   }
 }

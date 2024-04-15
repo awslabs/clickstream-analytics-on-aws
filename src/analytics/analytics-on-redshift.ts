@@ -12,32 +12,64 @@
  */
 
 import { join } from 'path';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
 import {
-  Stack,
+  Arn,
+  ArnFormat,
+  Aws,
+  CfnResource,
+  CustomResource,
+  Fn,
   NestedStack,
   NestedStackProps,
-  Arn, ArnFormat, Aws, Fn, CustomResource, RemovalPolicy, CfnResource,
+  RemovalPolicy,
+  Stack,
 } from 'aws-cdk-lib';
-import { ITable, Table, AttributeType, BillingMode, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
-import {
-  SubnetSelection,
-  IVpc,
-} from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
+import { AttributeType, BillingMode, ITable, Table, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
+import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { AccountPrincipal, IRole, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IStateMachine, TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { DYNAMODB_TABLE_INDEX_NAME } from './private/constant';
+import {
+  DYNAMODB_TABLE_INDEX_NAME,
+  REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
+  REDSHIFT_EVENT_TABLE_NAME,
+  REDSHIFT_ITEM_TABLE_NAME,
+  REDSHIFT_USER_TABLE_NAME,
+  REDSHIFT_EVENT_V2_TABLE_NAME,
+  REDSHIFT_ITEM_V2_TABLE_NAME,
+  REDSHIFT_USER_V2_TABLE_NAME,
+  REDSHIFT_SESSION_TABLE_NAME,
+} from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, WorkflowBucketInfo, LoadDataConfig } from './private/model';
-import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
+import {
+  ClearExpiredEventsWorkflowData,
+  ExistingRedshiftServerlessProps,
+  LoadDataConfig,
+  NewRedshiftServerlessProps,
+  ProvisionedRedshiftProps,
+  ScanMetadataWorkflowData,
+  TablesODSSource,
+  WorkflowBucketInfo,
+} from './private/model';
+import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
+import { RefreshMaterializedViewsWorkflow } from './private/refresh-materialized-views-workflow';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME, SCAN_METADATA_WORKFLOW_PREFIX } from '../common/constant';
+import { UserSegmentsWorkflow } from './private/segments/user-segments-workflow';
+import {
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention,
+  addCfnNagToStack,
+  ruleForLambdaVPCAndReservedConcurrentExecutions,
+  ruleRolePolicyWithWildcardResources,
+  ruleToSuppressRolePolicyWithHighSPCM,
+  ruleToSuppressRolePolicyWithWildcardResources,
+} from '../common/cfn-nag';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
@@ -47,7 +79,12 @@ export interface RedshiftOdsTables {
   readonly event_parameter: string;
   readonly user: string;
   readonly item: string;
+  readonly event_v2: string;
+  readonly item_v2: string;
+  readonly user_v2: string;
+  readonly session: string;
 }
+
 export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly vpc: IVpc;
   readonly subnetSelection: SubnetSelection;
@@ -64,6 +101,10 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
+  readonly clickstreamMetadataDdbTable: ITable;
+  readonly segmentsS3Prefix: string;
+  readonly dataFreshnessInHour: number;
+  readonly timezoneWithAppId: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -73,6 +114,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
+  readonly refreshMaterializedViewsWorkflowArn: string;
+  readonly userSegmentsWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -208,6 +251,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
       user: REDSHIFT_USER_TABLE_NAME,
       item: REDSHIFT_ITEM_TABLE_NAME,
+      event_v2: REDSHIFT_EVENT_V2_TABLE_NAME,
+      item_v2: REDSHIFT_ITEM_V2_TABLE_NAME,
+      user_v2: REDSHIFT_USER_V2_TABLE_NAME,
+      session: REDSHIFT_SESSION_TABLE_NAME,
     };
 
     const functionEntry = join(
@@ -226,9 +273,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       codePath,
       functionEntry,
       workflowBucketInfo: props.workflowBucketInfo,
+      timeZoneWithAppId: props.timezoneWithAppId,
     });
 
-    this.sqlExecutionWorkflow =this.applicationSchema.sqlExecutionStepFunctions;
+    this.sqlExecutionWorkflow = this.applicationSchema.sqlExecutionStepFunctions;
 
     // for upgrading backward compatibility
     (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)
@@ -240,11 +288,15 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const { cr: crForModifyClusterIAMRoles, redshiftRoleForCopyFromS3 } = createCustomResourceAssociateIAMRole(this,
+    const redshiftAssociatedRole = new Role(this, 'RedshiftAssociatedRole', {
+      assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
+    });
+    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateIAMRole',
       {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
-      });
+        role: redshiftAssociatedRole,
+      }).cr;
     crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForSQLExecution);
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
@@ -261,10 +313,29 @@ export class RedshiftAnalyticsStack extends NestedStack {
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      sqlCodePath: codePath,
       scanMetadataWorkflowData: props.scanMetadataWorkflowData,
     });
 
     this.scanMetadataWorkflowArn = scanMetadataWorkflow.scanMetadataWorkflow.stateMachineArn;
+
+    const refreshMaterializedViewsWorkflow = new RefreshMaterializedViewsWorkflow(this, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX, {
+      appIds: props.appIds,
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timezoneWithAppId: props.timezoneWithAppId,
+    });
+
+    this.refreshMaterializedViewsWorkflowArn = refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine.stateMachineArn;
 
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
@@ -280,7 +351,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
 
-
     const loadDataProps = {
       projectId: props.projectId,
       appIds: props.appIds,
@@ -295,11 +365,13 @@ export class RedshiftAnalyticsStack extends NestedStack {
       emrServerlessApplicationId: props.emrServerlessApplicationId,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
-      redshiftRoleForCopyFromS3,
+      redshiftRoleForCopyFromS3: redshiftAssociatedRole,
       ddbStatusTable,
       tablesOdsSource: props.tablesOdsSource,
       workflowBucketInfo: props.workflowBucketInfo,
       loadDataConfig: props.loadDataConfig,
+      refreshViewStateMachineArn: this.refreshMaterializedViewsWorkflowArn,
+      pipelineEmrStatusS3Prefix: props.scanMetadataWorkflowData.pipelineS3Prefix,
       nextStateStateMachines: [
         {
           name: 'Scan Metadata Async',
@@ -321,6 +393,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
 
@@ -336,6 +410,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
@@ -349,10 +425,31 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
     }
+
+    // User segments workflow
+    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'ClickstreamUserSegmentsWorkflow', {
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      redshiftAssociatedRole,
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      pipelineS3Bucket: props.scanMetadataWorkflowData.pipelineS3Bucket,
+      segmentsS3Prefix: props.segmentsS3Prefix,
+    });
+    this.userSegmentsWorkflowArn = userSegmentsWorkflow.userSegmentsWorkflow.stateMachineArn;
 
     addCfnNag(this);
   }
@@ -382,8 +479,7 @@ function createDDBStatusTable(scope: Construct, tableId: string): ITable {
   });
 
   return itemsTable;
-};
-
+}
 
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
@@ -414,49 +510,58 @@ function addCfnNag(stack: Stack) {
           reason:
             'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
         },
-        {
-          id: 'W12',
-          reason: 'When updating the IAM roles of namespace of Redshift Serverless, we have to PassRole to existing undeterministical roles associated on namespace.',
-        },
+        ruleToSuppressRolePolicyWithWildcardResources('Associate Role to Redshift', 'passRole'),
       ],
     },
-
     {
       paths_endswith: ['LoadDataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
           'LoadDataStateMachine/Role/DefaultPolicy/Resource',
           'loadDataFlow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('LoadData'),
       ],
     },
-
     {
       paths_endswith: ['ScanMetadataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
           'ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
           'ScanMetadataWorkflow', 'logs/xray').rules_to_suppress,
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('ScanMetadata'),
       ],
     },
-
     {
-      paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
+        ...ruleRolePolicyWithWildcardResources(
+          'RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource',
+          'RefreshMaterializedViewsWorkflow', 'logs/xray').rules_to_suppress,
+        ruleToSuppressRolePolicyWithHighSPCM('RefreshMaterializedViewsWorkflow'),
       ],
     },
-
+    {
+      paths_endswith: ['RefreshSpStateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'RefreshSpStateMachine/Role/DefaultPolicy/Resource',
+          'RefreshSpStateMachine', 'logs/xray').rules_to_suppress,
+      ],
+    },
+    {
+      paths_endswith: ['RedshiftAssociatedRole/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('RedshiftAssociatedRole'),
+      ],
+    },
+    {
+      paths_endswith: ['ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource',
+          'UserSegmentsStateMachine', 'logs/xray').rules_to_suppress,
+        ruleToSuppressRolePolicyWithHighSPCM('UserSegments'),
+      ],
+    },
   ]);
-
 }

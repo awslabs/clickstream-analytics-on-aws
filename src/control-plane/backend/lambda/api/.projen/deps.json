@@ -1,6 +1,11 @@
 {
   "dependencies": [
     {
+      "name": "@types/aws-lambda",
+      "version": "^8.10.110",
+      "type": "build"
+    },
+    {
       "name": "@types/express",
       "version": "^4.17.16",
       "type": "build"
@@ -12,6 +17,16 @@
     {
       "name": "@types/jsonpath-plus",
       "version": "^5.0.2",
+      "type": "build"
+    },
+    {
+      "name": "@types/jsonwebtoken",
+      "version": "^9.0.0",
+      "type": "build"
+    },
+    {
+      "name": "@types/lodash",
+      "version": "^4.14.202",
       "type": "build"
     },
     {
@@ -45,13 +60,18 @@
       "type": "build"
     },
     {
+      "name": "@vercel/ncc",
+      "version": "^0.38.1",
+      "type": "build"
+    },
+    {
       "name": "aws-sdk-client-mock-jest",
-      "version": "^2.1.1",
+      "version": "^3.0.1",
       "type": "build"
     },
     {
       "name": "aws-sdk-client-mock",
-      "version": "^2.1.1",
+      "version": "^3.0.1",
       "type": "build"
     },
     {
@@ -66,6 +86,11 @@
     {
       "name": "jest-junit",
       "version": "^15",
+      "type": "build"
+    },
+    {
+      "name": "lodash",
+      "version": "^4.17.21",
       "type": "build"
     },
     {
@@ -112,102 +137,127 @@
     },
     {
       "name": "@aws-sdk/client-acm",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudformation",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-cloudwatch-events",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudwatch",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-dynamodb",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ec2",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-eventbridge",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-iam",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-quicksight",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-data",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-serverless",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-route-53",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-s3",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-secrets-manager",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sfn",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-sns",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sts",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/credential-providers",
-      "version": "^3.398.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/lib-dynamodb",
-      "version": "^3.405.0",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/s3-request-presigner",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/types",
-      "version": "^3.398.0",
+      "version": "^3.523.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/util-dynamodb",
-      "version": "^3.398.0",
+      "version": "^3.523.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws/clickstream-base-lib",
+      "version": "workspace:*",
       "type": "runtime"
     },
     {
@@ -216,13 +266,13 @@
       "type": "runtime"
     },
     {
-      "name": "@smithy/util-stream-node",
+      "name": "@smithy/types",
       "version": "^2.0.7",
       "type": "runtime"
     },
     {
-      "name": "@types/aws-lambda",
-      "version": "^8.10.110",
+      "name": "@smithy/util-stream-node",
+      "version": "^2.0.7",
       "type": "runtime"
     },
     {
@@ -233,6 +283,11 @@
     {
       "name": "cron-parser",
       "version": "^4.8.1",
+      "type": "runtime"
+    },
+    {
+      "name": "csv-parser",
+      "version": "^3.0.0",
       "type": "runtime"
     },
     {
@@ -248,6 +303,11 @@
     {
       "name": "fast-memoize",
       "version": "^2.5.1",
+      "type": "runtime"
+    },
+    {
+      "name": "hpagent",
+      "version": "^1.2.0",
       "type": "runtime"
     },
     {
@@ -278,6 +338,11 @@
     {
       "name": "jwks-rsa",
       "version": "^3.0.1",
+      "type": "runtime"
+    },
+    {
+      "name": "moment-timezone",
+      "version": "^0.5.45",
       "type": "runtime"
     },
     {
@@ -316,5 +381,5 @@
       "type": "runtime"
     }
   ],
-  "//": "~~ Generated by projen. To modify, edit .projenrc.js and run \"npx projen\"."
+  "//": "~~ Generated by projen. To modify, edit .projenrc.js and run \"pnpm dlx projen\"."
 }

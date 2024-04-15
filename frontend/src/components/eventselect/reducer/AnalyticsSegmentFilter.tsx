@@ -11,11 +11,15 @@
  *  and limitations under the License.
  */
 
-import { Button } from '@cloudscape-design/components';
+import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ERelationShip, SegmentationFilterDataType } from '../AnalyticsType';
+import {
+  ERelationShip,
+  IAnalyticsItem,
+  SegmentationFilterDataType,
+} from '../AnalyticsType';
 import ConditionItem from '../ConditionItem';
 import RelationAnd from '../comps/RelationAnd';
 import RelationOr from '../comps/RelationOr';
@@ -24,13 +28,38 @@ interface SegmentationFilterProps {
   filterDataState: SegmentationFilterDataType;
   filterDataDispatch: any;
   maxSelectNum?: number;
+  hideAddButton?: boolean;
+  // For Segment Components
+  addSegmentCondition?: () => void;
+  changeSegmentConditionRelation?: (relation: ERelationShip) => void;
+  updateSegmentConditionItem?: (
+    index: number,
+    item: IAnalyticsItem | null
+  ) => void;
+  updateSegmentConditionOperator?: (
+    index: number,
+    operator: SelectProps.Option | null
+  ) => void;
+  updateSegmentConditionValue?: (index: number, value: string[]) => void;
+  removeSegmentConditionItem?: (index: number) => void;
 }
 
 const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
   props: SegmentationFilterProps
 ) => {
   const { t } = useTranslation();
-  const { filterDataState, filterDataDispatch, maxSelectNum } = props;
+  const {
+    filterDataState,
+    filterDataDispatch,
+    maxSelectNum,
+    hideAddButton,
+    addSegmentCondition,
+    changeSegmentConditionRelation,
+    updateSegmentConditionItem,
+    updateSegmentConditionOperator,
+    updateSegmentConditionValue,
+    removeSegmentConditionItem,
+  } = props;
 
   return (
     <div className="cs-analytics-dropdown">
@@ -46,6 +75,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                       type: 'changeRelationShip',
                       relation: ERelationShip.OR,
                     });
+                  changeSegmentConditionRelation?.(ERelationShip.OR);
                 }}
               />
             )}
@@ -59,6 +89,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                       type: 'changeRelationShip',
                       relation: ERelationShip.AND,
                     });
+                  changeSegmentConditionRelation?.(ERelationShip.AND);
                 }}
               />
             )}
@@ -75,6 +106,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         type: 'removeEventCondition',
                         index: index,
                       });
+                      removeSegmentConditionItem?.(index);
                     }}
                     changeCurCategoryOption={(category) => {
                       filterDataDispatch({
@@ -82,6 +114,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         option: category,
                       });
+                      updateSegmentConditionItem?.(index, category);
                     }}
                     changeConditionOperator={(item) => {
                       filterDataDispatch({
@@ -89,6 +122,7 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         operator: item,
                       });
+                      updateSegmentConditionOperator?.(index, item);
                     }}
                     changeConditionValue={(value) => {
                       filterDataDispatch({
@@ -96,25 +130,29 @@ const AnalyticsSegmentFilter: React.FC<SegmentationFilterProps> = (
                         index: index,
                         value: value,
                       });
+                      updateSegmentConditionValue?.(index, value);
                     }}
                   />
                 );
               })}
           </div>
         </div>
-        <div className="mt-10">
-          <Button
-            iconName="add-plus"
-            onClick={() => {
-              filterDataDispatch({
-                type: 'addEventCondition',
-              });
-            }}
-            disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
-          >
-            {t('common:button.addFilter')}
-          </Button>
-        </div>
+        {!hideAddButton && (
+          <div className="mt-10">
+            <Button
+              iconName="add-plus"
+              onClick={() => {
+                filterDataDispatch({
+                  type: 'addEventCondition',
+                });
+                addSegmentCondition?.();
+              }}
+              disabled={filterDataState.data.length >= (maxSelectNum ?? 10)}
+            >
+              {t('common:button.addFilter')}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Box, SpaceBetween } from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
@@ -24,7 +25,6 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { IUserRole } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { UserTableHeader } from './UserTableHeader';
 
 interface UserTableProps {

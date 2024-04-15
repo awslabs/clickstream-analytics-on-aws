@@ -11,6 +11,11 @@
  *  and limitations under the License.
  */
 
+import {
+  CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
+  CLICKSTREAM_DEPRECATED_VIEW_LIST,
+  CLICKSTREAM_EVENT_VIEW_NAME,
+} from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
   CreateSecretCommand,
@@ -26,15 +31,13 @@ import {
   UpdateSecretCommand,
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../common/constant';
+import { createSchemasInRedshiftAsync } from '../../../common/custom-resource-exec-in-redshift';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
-import { putStringToS3 } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { generateRandomStr, sleep } from '../../../common/utils';
+import { generateRandomStr, timezoneJsonArrayToDict } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
@@ -47,15 +50,6 @@ export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
 const secretManagerClient = new SecretsManagerClient({
   ...aws_sdk_client_common_config,
 });
-
-const sfnClient = new SFNClient({
-  ...aws_sdk_client_common_config,
-});
-
-const STATE_MACHINE_ARN = process.env.STATE_MACHINE_ARN!;
-const S3_BUCKET = process.env.S3_BUCKET!;
-const S3_PREFIX = process.env.S3_PREFIX!;
-const PROJECT_ID = process.env.PROJECT_ID!;
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
@@ -130,23 +124,21 @@ async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: strin
   }
 
   // 2. create schemas in Redshift for applications
-  const schmeaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
+  const schemaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
 
   // 3. create views for reporting
   const viewSqlsByAppId: Map<string, string[]> = getCreateOrUpdateViewForReportingSQL(newAddedAppIdList, props, biUsername);
 
-  const allSqlsByAppId = mergeMap(schmeaSqlsByAppId, viewSqlsByAppId);
+  const allSqlsByAppId = mergeMap(schemaSqlsByAppId, viewSqlsByAppId);
 
-  await createSchemasInRedshiftAsync(allSqlsByAppId);
-
+  await createSchemasInRedshiftAsync(props.projectId, allSqlsByAppId);
 }
-
 
 function getNewAddedAppIdList(event: CdkCustomResourceEvent): string[] {
   const requestType = event.RequestType;
   const props = event.ResourceProperties as ResourcePropertiesType;
   const appIdList = splitString(props.appIds ?? '');
-  const lastModifiedTime = props.lastModifiedTime;
+  const schemaHash = props.schemaHash;
   const isUpdate = requestType == 'Update';
 
   const applyAllAppSql = process.env.APPLY_ALL_APP_SQL === 'true';
@@ -156,9 +148,9 @@ function getNewAddedAppIdList(event: CdkCustomResourceEvent): string[] {
   if (isUpdate && !applyAllAppSql) {
     const oldAppIds = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).appIds;
     const oldAppIdList = splitString(oldAppIds ?? '');
-    const oldLastModifiedTime = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).lastModifiedTime;
-    logger.info('getNewAddedAppIdList()', { requestType, oldAppIdList, oldLastModifiedTime, appIdList, lastModifiedTime });
-    if (lastModifiedTime === oldLastModifiedTime) {
+    const oldSchemaHash = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).schemaHash;
+    logger.info('getNewAddedAppIdList()', { requestType, oldAppIdList, oldSchemaHash, appIdList, schemaHash });
+    if (schemaHash === oldSchemaHash) {
       newAddedAppIdList = [];
       for (const appId of appIdList) {
         if (!oldAppIdList.includes(appId)) {
@@ -224,7 +216,6 @@ async function _createBIUserCredentialSecret(secretName: string, biUsername: str
 
   return credential;
 }
-
 
 async function deleteBIUserCredentialSecret(secretName: string, biUsername: string) {
   const params: DeleteSecretCommandInput = {
@@ -292,7 +283,9 @@ function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: Resourc
   return sqlStatementsByApp;
 }
 
-export const TABLES_VIEWS_FOR_REPORTING = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
+export const TABLES_VIEWS_FOR_REPORTING = [
+  'event_v2', 'user_v2', 'session', 'item_v2', 'user_m_view_v2', 'session_m_view', 'session_m_max_view', 'session_m_max_view',
+];
 function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 
   const statements: string[] = [];
@@ -311,6 +304,12 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
   const odsTableNames = props.odsTableNames;
 
   logger.info('createOrUpdateViewForReporting()', { newAddedAppIdList });
+  let timezoneWithAppId = props.timezoneWithAppId;
+  if (timezoneWithAppId === undefined || timezoneWithAppId === '') {
+    logger.info('timezoneWithAppId is empty, set to \'[]\'');
+    timezoneWithAppId = '[]';
+  }
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezoneWithAppId));
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of newAddedAppIdList) {
@@ -324,17 +323,26 @@ function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      timezone: timezoneDict[app] ?? 'UTC',
+      baseView: CLICKSTREAM_EVENT_VIEW_NAME,
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName);
+      if (viewDef.type === undefined || viewDef.type !== 'sp') {
+        views.push(viewDef.viewName);
+      }
       sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
     //drop old views
+    for (const view of CLICKSTREAM_DEPRECATED_VIEW_LIST) {
+      sqlStatements.push(`DROP VIEW IF EXISTS ${app}.${view} CASCADE;`);
+    }
+
+    //drop old materialized views
     for (const view of CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST) {
-      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view};`);
+      sqlStatements.push(`DROP MATERIALIZED VIEW IF EXISTS ${app}.${view} CASCADE;`);
     }
 
     sqlStatementsByApp.set(app, sqlStatements);
@@ -380,58 +388,6 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
   }
 };
 
-const createSchemasInRedshiftAsync = async (sqlStatementsByApp: Map<string, string[]>) => {
-
-  const createSchemasInRedshiftForApp = async (appId: string, sqlStatements: string[]) => {
-    logger.info(`creating schema in serverless Redshift for ${appId}`);
-    await executeSqlsByStateMachine(sqlStatements, appId);
-  };
-
-  for (const [appId, sqlStatements] of sqlStatementsByApp) {
-    await createSchemasInRedshiftForApp(appId, sqlStatements);
-    await sleep(process.env.SUBMIT_SQL_INTERVAL_MS ? parseInt(process.env.SUBMIT_SQL_INTERVAL_MS) : 1000);
-  }
-
-};
-
-const executeSqlsByStateMachine = async (sqlStatements: string[], appId: string) => {
-
-  const s3Paths = [];
-  let index = 0;
-  const timestamp = new Date().toISOString().replace(/[:.-]/g, '');
-
-  for (const sqlStatement of sqlStatements) {
-    const bucketName = S3_BUCKET;
-    const fileName = `${appId}-${timestamp}/${index++}.sql`;
-    const key = `${S3_PREFIX}tmp/${PROJECT_ID}/sqls/${fileName}`;
-
-    await putStringToS3(sqlStatement, bucketName, key);
-
-    const s3Path = `s3://${bucketName}/${key}`;
-    s3Paths.push(s3Path);
-  }
-
-  const params = {
-    stateMachineArn: STATE_MACHINE_ARN,
-    name: `${appId}-${timestamp}-${index}`,
-    input: JSON.stringify({
-      sqls: s3Paths,
-    }),
-  };
-  logger.info('executeSqlsByStateMachine()', { params });
-  try {
-    const res = await sfnClient.send(new StartExecutionCommand(params));
-    logger.info('executeSqlsByStateMachine()', { res });
-    return res;
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error happened when executing sqls in state machine.', err);
-    }
-    throw err;
-  }
-};
-
-
 function mergeMap(map1: Map<string, string[]>, map2: Map<string, string[]>): Map<string, string[]> {
   const mergedMap = new Map<string, string[]>();
   for (const [key, value] of map1) {
@@ -455,4 +411,3 @@ function generateRedshiftUserPassword(length: number): string {
 function isSuppressALLError(): boolean {
   return process.env.SUPPRESS_ALL_ERROR === 'true';
 }
-

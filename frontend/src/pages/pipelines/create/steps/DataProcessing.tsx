@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AutosuggestProps,
   Button,
@@ -53,7 +54,6 @@ import {
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   DATA_MODELING_LINK_CN,
   DATA_MODELING_LINK_EN,
@@ -92,8 +92,8 @@ interface DataProcessingProps {
 
   changeRedshiftType: (type: string) => void;
   changeServerlessRedshiftVPC: (vpc: SelectProps.Option) => void;
-  changeSecurityGroup: (sg: SelectProps.Option[]) => void;
-  changeReshiftSubnets: (subnets: SelectProps.Option[]) => void;
+  changeSecurityGroup: (sg: readonly SelectProps.Option[]) => void;
+  changeRedshiftSubnets: (subnets: readonly SelectProps.Option[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
   changeDataLoadCronExp: (cron: string) => void;
@@ -134,7 +134,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeRedshiftType,
     changeServerlessRedshiftVPC,
     changeSecurityGroup,
-    changeReshiftSubnets,
+    changeRedshiftSubnets: changeReshiftSubnets,
     changeBaseCapacity,
     changeDBUser,
     dataProcessorIntervalCronInvalidError,
@@ -474,7 +474,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                 errorText={dataProcessorIntervalInvalidErrorText()}
               >
                 <div className="flex">
-                  <div style={{ width: 200 }}>
+                  <div className="w-200">
                     <Select
                       selectedOption={selectedExecution}
                       onChange={({ detail }) => {
@@ -859,9 +859,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 'finished'
                               )}
                               onChange={(e) => {
-                                changeSecurityGroup(
-                                  e.detail.selectedOptions as any
-                                );
+                                changeSecurityGroup(e.detail.selectedOptions);
                               }}
                             />
                           </FormField>
@@ -911,9 +909,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 'finished'
                               )}
                               onChange={(e) => {
-                                changeReshiftSubnets(
-                                  e.detail.selectedOptions as any
-                                );
+                                changeReshiftSubnets(e.detail.selectedOptions);
                               }}
                             />
                           </FormField>

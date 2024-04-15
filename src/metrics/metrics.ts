@@ -13,21 +13,19 @@
  */
 
 import { join } from 'path';
+import { ALARM_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Stack } from 'aws-cdk-lib';
 import { Dashboard, PeriodOverride } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { PARAMETERS_DESCRIPTION } from './settings';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { ALARM_NAME_PREFIX } from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
 import { SolutionNodejsFunction } from '../private/function';
 
@@ -162,7 +160,6 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
   ]);
 
   const fn = new SolutionNodejsFunction(scope, 'PutDashboardLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -172,7 +169,9 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(1),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
     environment: {
       DASHBOARD_NAME: props.dashboard.dashboardName,
@@ -180,7 +179,6 @@ function createPutDashboardLambda(scope: Construct, props: CustomResourceProps):
       LEGEND_POSITION: props.legendPosition,
       COLUMN_NUMBER: props.columnNumber + '',
       SNS_TOPIC_ARN: props.snsTopic.topicArn,
-      ...POWERTOOLS_ENVS,
     },
   });
   fn.node.addDependency(role);

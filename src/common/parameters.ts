@@ -12,39 +12,45 @@
  */
 
 import {
-  CfnParameter, CfnRule, Fn,
-} from 'aws-cdk-lib';
-
-import { Construct, IConstruct } from 'constructs';
-import {
+  APP_ID_PATTERN,
+  DDB_TABLE_ARN_PATTERN,
   DOMAIN_NAME_PATTERN,
+  EMAIL_PATTERN,
   HOST_ZONE_ID_PATTERN,
+  IAM_CERTIFICATE_ID_PATTERN,
+  IAM_ROLE_PREFIX_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  OIDC_CLIENT_ID_PATTERN,
+  OIDC_ISSUER_PATTERN,
   PARAMETER_GROUP_LABEL_DOMAIN,
+  PARAMETER_GROUP_LABEL_IAM_ROLE,
+  PARAMETER_GROUP_LABEL_OIDC,
   PARAMETER_GROUP_LABEL_VPC,
   PARAMETER_LABEL_HOST_ZONE_ID,
   PARAMETER_LABEL_HOST_ZONE_NAME,
+  PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+  PARAMETER_LABEL_IAM_ROLE_PREFIX,
+  PARAMETER_LABEL_OIDC_CLIENT_ID,
+  PARAMETER_LABEL_OIDC_ISSUER,
   PARAMETER_LABEL_PRIVATE_SUBNETS,
   PARAMETER_LABEL_PUBLIC_SUBNETS,
   PARAMETER_LABEL_RECORD_NAME,
   PARAMETER_LABEL_VPCID,
-  RECORD_NAME_PATTERN,
-  SUBNETS_PATTERN,
-  VPC_ID_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
-  IAM_CERTIFICATE_ID_PATTERN,
-  OIDC_ISSUER_PATTERN,
-  OIDC_CLIENT_ID_PATTERN,
-  PARAMETER_LABEL_OIDC_ISSUER,
-  PARAMETER_LABEL_OIDC_CLIENT_ID,
-  PARAMETER_GROUP_LABEL_OIDC,
-  S3_BUCKET_NAME_PATTERN,
   PROJECT_ID_PATTERN,
-  APP_ID_PATTERN,
-  EMAIL_PATTERN,
+  RECORD_NAME_PATTERN,
+  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
+  S3_BUCKET_NAME_PATTERN,
   S3_PREFIX_PATTERN,
   SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
-} from './constant';
+  SUBNETS_PATTERN,
+  VPC_ID_PATTERN,
+} from '@aws/clickstream-base-lib';
+import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
+
+import { Construct, IConstruct } from 'constructs';
+import { KINESIS_MODE, REDSHIFT_MODE } from './model';
 
 export enum SubnetParameterType {
   'List',
@@ -58,6 +64,7 @@ interface ParameterProps {
   default?: string;
   allowedPattern?: string;
   constraintDescription?: string;
+  allowedValues?: string[];
 }
 
 export interface NetworkParameters {
@@ -463,6 +470,240 @@ export class Parameters {
       default: '',
       allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
       constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
+    });
+  }
+
+  public static createRedshiftModeParameter(scope: Construct, id?: string, props: ParameterProps ={}) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'RedshiftMode', {
+      description: 'Select Redshift cluster mode',
+      type: 'String',
+      default: REDSHIFT_MODE.NEW_SERVERLESS,
+      allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
+      ...props,
+    });
+  }
+
+  public static createRedshiftCommonParameters(scope: Construct) {
+    // Set Redshift common parameters
+    const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
+      description: 'The name of the default database in Redshift',
+      type: 'String',
+      default: 'dev',
+      allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
+    });
+
+    return {
+      redshiftDefaultDatabaseParam,
+    };
+  }
+
+  public static createRedshiftWorkgroupParameter(scope: Construct, id: string): CfnParameter {
+    return new CfnParameter(scope, id, {
+      description: 'The name of the Redshift serverless workgroup.',
+      type: 'String',
+      default: 'default',
+      allowedPattern: '^([a-z0-9-]{3,64})?$',
+    });
+  }
+
+  public static createRedshiftServerlessDataRoleParameter(scope: Construct) {
+    const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftServerlessIAMRole', {
+      description: 'The ARN of IAM role of Redshift serverless user with superuser privilege.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^(arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/.*)?$',
+    });
+
+    return redshiftServerlessIAMRoleParam;
+  }
+
+  public static createRedshiftDataAPIRoleParameter(scope: Construct) {
+    const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftDataAPIRole', {
+      description: 'The role ARN for on-behalf executing queries in Redshift.',
+      type: 'String',
+      allowedPattern: 'arn:aws(-cn|-us-gov)?:iam::[0-9]{12}:role/.*',
+    });
+
+    return redshiftServerlessIAMRoleParam;
+  }
+
+  public static createRedshiftServerlessWorkgroupAndNamespaceParameters(scope: Construct) {
+    const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
+      description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^([a-z0-9-]{24,})?$',
+    });
+
+    const redshiftServerlessNamespaceIdParam = new CfnParameter(scope, 'RedshiftServerlessNamespaceId', {
+      description: 'The id of the namespace in Redshift serverless.',
+      type: 'String',
+      default: '',
+      allowedPattern: '^([a-z0-9-]{24,})?$',
+    });
+
+    return {
+      redshiftServerlessWorkgroupIdParam,
+      redshiftServerlessNamespaceIdParam,
+    };
+  }
+
+  public static createRedshiftServerlessParametersRule(scope: Construct, parameters: {
+    redshiftModeParam: CfnParameter;
+    redshiftServerlessWorkgroupNameParam: CfnParameter;
+    redshiftDataAPIRoleParam: CfnParameter;
+  }) {
+    new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
+      ruleCondition: Fn.conditionEquals(parameters.redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
+      assertions: [
+        {
+          assert: Fn.conditionAnd(
+            Fn.conditionNot(
+              Fn.conditionEquals(parameters.redshiftServerlessWorkgroupNameParam.valueAsString, ''),
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(parameters.redshiftDataAPIRoleParam.valueAsString, ''),
+            ),
+          ),
+          assertDescription:
+              'Workgroup and Data API Role Arn are required for using existing Redshift Serverless.',
+        },
+      ],
+    }).overrideLogicalId('ExistingRedshiftServerlessParameters');
+  }
+
+  public static createProvisionedRedshiftParameters(scope: Construct, redshiftModeParam?: CfnParameter) {
+    const redshiftClusterIdentifierParam = new CfnParameter(scope, 'RedshiftClusterIdentifier', {
+      description: 'The cluster identifier of Redshift.',
+      type: 'String',
+      allowedPattern: REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
+      default: '',
+    });
+
+    const redshiftDbUserParam = new CfnParameter(scope, 'RedshiftDbUser', {
+      description: 'The name of Redshift database user.',
+      type: 'String',
+      allowedPattern: REDSHIFT_DB_USER_NAME_PATTERN,
+      default: '',
+    });
+
+    if (redshiftModeParam) {
+      new CfnRule(scope, 'RedshiftProvisionedParameters', {
+        ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
+        assertions: [
+          {
+            assert: Fn.conditionAnd(
+              Fn.conditionNot(
+                Fn.conditionEquals(redshiftClusterIdentifierParam.valueAsString, ''),
+              ),
+              Fn.conditionNot(
+                Fn.conditionEquals(redshiftDbUserParam.valueAsString, ''),
+              ),
+            ),
+            assertDescription:
+                'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
+          },
+        ],
+      }).overrideLogicalId('RedshiftProvisionedParameters');
+    }
+
+    return {
+      redshiftClusterIdentifierParam,
+      redshiftDbUserParam,
+    };
+  }
+
+  public static createKinesisParameters(scope: Construct) {
+    const kinesisStreamModeParam = new CfnParameter(scope, 'KinesisStreamMode', {
+      description: 'Kinesis Data Stream mode',
+      type: 'String',
+      allowedValues: [KINESIS_MODE.ON_DEMAND, KINESIS_MODE.PROVISIONED],
+      default: KINESIS_MODE.ON_DEMAND,
+    });
+
+    const kinesisShardCountParam = new CfnParameter(scope, 'KinesisShardCount', {
+      description:
+      'Number of Kinesis Data Stream shards, only apply for Provisioned mode',
+      type: 'Number',
+      default: '3',
+      minValue: 1,
+    });
+
+    const kinesisDataRetentionHoursParam = new CfnParameter(
+      scope,
+      'KinesisDataRetentionHours',
+      {
+        description: 'Data retention hours in Kinesis Data Stream, from 24 hours by default, up to 8760 hours (365 days)',
+        type: 'Number',
+        default: '24',
+        minValue: 24,
+        maxValue: 8760,
+      },
+    );
+
+    return {
+      kinesisStreamModeParam,
+      kinesisShardCountParam,
+      kinesisDataRetentionHoursParam,
+    };
+  }
+
+  public static createRedshiftUserKeyParameter(scope: Construct) {
+    return new CfnParameter(scope, 'RedshiftParameterKeyParam', {
+      description: 'Parameter key name which stores redshift user and password.',
+      type: 'String',
+    });
+  }
+
+  public static createIAMRolePrefixAndBoundaryParameters(scope: Construct, paramGroups?: any[], paramLabels?: any) {
+    const groups: any[] = paramGroups ?? [];
+    const labels: any = paramLabels ?? {};
+
+    const iamRolePrefixParam = new CfnParameter(scope, 'IamRolePrefix', {
+      description: 'The prefix of all IAM Roles.',
+      type: 'String',
+      allowedPattern: IAM_ROLE_PREFIX_PATTERN,
+      default: '',
+    });
+    labels[iamRolePrefixParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_PREFIX,
+    };
+
+    const iamRoleBoundaryArnParam = new CfnParameter(scope, 'IamRoleBoundaryArn', {
+      description: 'Set permissions boundaries for IAM Roles.',
+      type: 'String',
+      default: '',
+    });
+    labels[iamRoleBoundaryArnParam.logicalId] = {
+      default: PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN,
+    };
+
+    groups.push({
+      Label: { default: PARAMETER_GROUP_LABEL_IAM_ROLE },
+      Parameters: [iamRolePrefixParam.logicalId, iamRoleBoundaryArnParam.logicalId],
+    });
+
+    return {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+      paramLabels: labels,
+      paramGroups: groups,
+    };
+  }
+
+  public static createClickstreamMetadataDdbArnParameter(scope: Construct) {
+    return new CfnParameter(scope, 'ClickstreamMetadataDdbArn', {
+      description: 'The arn of ClickstreamMetadata Dynamodb table.',
+      type: 'String',
+      allowedPattern: DDB_TABLE_ARN_PATTERN,
+    });
+  }
+
+  public static createDataFreshnessInHourParameter(scope: Construct) {
+    return new CfnParameter(scope, 'DataFreshnessInHour', {
+      description: 'Data Freshness in hour, default is 72 hours (3 days)',
+      default: 72,
+      type: 'Number',
     });
   }
 }

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataPlatform, MetadataSource } from '@aws/clickstream-base-lib';
 import { Input } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import { UserContext } from 'context/UserContext';
@@ -18,8 +19,7 @@ import { HelpPanelType } from 'context/reducer';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_DISPLAY_PREFIX } from 'ts/const';
-import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
+import { EVENT_DISPLAY_PREFIX, TABLE_FILTER_OPTIONS } from 'ts/const';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,
@@ -187,31 +187,31 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       propertyLabel: t('analytics:metadata.event.tableColumnName'),
       key: 'name',
       groupValuesLabel: t('analytics:metadata.event.tableColumnName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnDisplayName'),
       key: 'displayName',
       groupValuesLabel: t('analytics:metadata.event.tableColumnDisplayName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
       key: 'metadataSource',
       groupValuesLabel: t('analytics:metadata.event.tableColumnMetadataSource'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnHasData'),
       key: 'hasData',
       groupValuesLabel: t('analytics:metadata.event.tableColumnHasData'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.event.tableColumnPlatform'),
       key: 'platform',
       groupValuesLabel: t('analytics:metadata.event.tableColumnPlatform'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

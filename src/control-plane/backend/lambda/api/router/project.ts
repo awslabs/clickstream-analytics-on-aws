@@ -16,7 +16,7 @@ import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isEmails, isProjectExisted, isProjectNotExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
 import { ProjectServ } from '../service/project';
 
-const router_project = express.Router();
+const router_project: express.Router = express.Router();
 const projectServ: ProjectServ = new ProjectServ();
 
 router_project.get(

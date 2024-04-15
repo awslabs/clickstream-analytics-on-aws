@@ -44,7 +44,7 @@ export const handler = async (event: EventType, context: Context) => {
     Status: 'SUCCESS',
   };
 
-  if ('Delete' == (event as any).RequestType) {
+  if ('RequestType' in event && 'Delete' == event.RequestType) {
     return response;
   }
 
@@ -71,9 +71,9 @@ async function _handler(event: EventType, date: Date, context: Context) {
   let sinkS3Bucket = process.env.SINK_S3_BUCKET_NAME!;
   let sinkS3Prefix = process.env.SINK_S3_PREFIX!;
 
-  if ((event as any).RequestType) {
+  if ('RequestType' in event) {
     // update/create by custom resource
-    const cfEvent = event as CloudFormationCustomResourceEvent;
+    const cfEvent = event;
     interface ResourcePropertiesType extends InitPartitionCustomResourceProps {
       ServiceToken: string;
     }

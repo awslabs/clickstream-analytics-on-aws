@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
 import { Aspects, CfnResource, Duration, IAspect, Stack } from 'aws-cdk-lib';
 import { AutoScalingGroup } from 'aws-cdk-lib/aws-autoscaling';
 import {
@@ -27,7 +28,7 @@ import {
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct, IConstruct } from 'constructs';
 import { ECSClusterProps, EcsServiceResult } from './ecs-cluster';
-import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
+import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../../../common/cfn-nag';
 import { DefaultFleetProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 
@@ -61,15 +62,9 @@ export function createECSService(
     retention: RetentionDays.ONE_MONTH,
   });
 
-  addCfnNagSuppressRules(proxyLogGroup.node.defaultChild as CfnResource, [{
-    id: 'W84',
-    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
-  }]);
+  addCfnNagSuppressRules(proxyLogGroup.node.defaultChild as CfnResource, [ruleToSuppressCloudWatchLogEncryption()]);
 
-  addCfnNagSuppressRules(workerLogGroup.node.defaultChild as CfnResource, [{
-    id: 'W84',
-    reason: 'By default, log group data is always encrypted in CloudWatch Logs',
-  }]);
+  addCfnNagSuppressRules(workerLogGroup.node.defaultChild as CfnResource, [ruleToSuppressCloudWatchLogEncryption()]);
 
   const proxyContainer = taskDefinition.addContainer('proxy', {
     image: props.proxyImage,
@@ -84,6 +79,7 @@ export function createECSService(
     environment: {
       NGINX_WORKER_CONNECTIONS: `${workerConnections}`,
       SERVER_ENDPOINT_PATH: props.serverEndpointPath,
+      PING_ENDPOINT_PATH: INGESTION_SERVER_PING_PATH,
       SERVER_CORS_ORIGIN: props.serverCorsOrigin,
     },
     logging: LogDriver.awsLogs({

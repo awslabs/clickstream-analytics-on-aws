@@ -11,16 +11,15 @@
  *  and limitations under the License.
  */
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { SFNClient, ListExecutionsCommand, ExecutionStatus } from '@aws-sdk/client-sfn';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/skip-running-workflow';
-import { JobStatus } from '../../../../../src/analytics/private/constant';
-import { PARTITION_APP, REDSHIFT_TABLE_NAMES } from '../../../../../src/common/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../../../../src/analytics/private/constant';
 import { getMockContext } from '../../../../common/lambda-context';
-
 
 const ddbClientMock = mockClient(DynamoDBClient);
 const snfClientMock = mockClient(SFNClient);
@@ -129,10 +128,14 @@ test('Should have other running workflow', async () => {
     { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[1] },
     { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[2] },
     { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[3] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[4] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[5] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[6] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[7] },
   ]);
   expect(response.HasRunningWorkflow).toBeTruthy();
   expect(response.SkipRunningWorkflow).toBeTruthy();
-  expect(response.PendingCount).toEqual(17);
+  expect(response.PendingCount).toEqual(29);
 
   expect(snfClientMock).toReceiveNthCommandWith(1, ListExecutionsCommand, {
     stateMachineArn: 'arn:aws:states:us-east-1:xxxxxxxxx:stateMachine:stateMachineNameTest',
@@ -193,7 +196,7 @@ test('Should get no other running workflow', async () => {
   };
 
   const response = await handler(event, context);
-  expect(response.FilesCountInfo.length).toEqual(4);
+  expect(response.FilesCountInfo.length).toEqual(8);
   expect(response.HasRunningWorkflow).toBeFalsy();
   expect(response.SkipRunningWorkflow).toBeFalsy();
 
@@ -233,6 +236,10 @@ test('Should skip running workflow', async () => {
     { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[1] },
     { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[2] },
     { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[3] },
+    { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[4] },
+    { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[5] },
+    { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[6] },
+    { countEnQ: 0, countNew: 0, countProcessing: 0, tableName: tableNames[7] },
   ]);
   expect(response.HasRunningWorkflow).toBeFalsy();
   expect(response.SkipRunningWorkflow).toBeTruthy();

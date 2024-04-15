@@ -19,6 +19,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.util.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -27,8 +28,8 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.DatasetUtil.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
+import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.TRANSFORM_METHOD_NAME;
 
 

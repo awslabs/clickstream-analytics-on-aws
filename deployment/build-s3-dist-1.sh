@@ -53,9 +53,11 @@ echo "${BUILD_VERSION}" > ${GLOBAL_S3_ASSETS_PATH}/version
 
 title "cdk synth"
 
+run npm install -g pnpm@8.15.3
 run cd ${SRC_PATH}
-run yarn install --check-files --frozen-lockfile
-run npx projen
+run pnpm install --frozen-lockfile
+run pnpm projen
+run pnpm nx build @aws/clickstream-base-lib
 
 echo "IS_IN_GCR_PIPELINE: $IS_IN_GCR_PIPELINE"
 
@@ -75,7 +77,7 @@ run mkdir -p ${GLOBAL_S3_ASSETS_PATH}/${CN_ASSETS}
 export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${CN_ASSETS}"
 
 update_dict $TARGET ${CN_ASSETS}
-run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${CN_ASSETS}
+run pnpm dlx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${CN_ASSETS}
 
 if [ ! -z "$AWS_ASSET_PUBLISH_ROLE" ]; then
     run export BSS_FILE_ASSET_PUBLISHING_ROLE_ARN="$AWS_ASSET_PUBLISH_ROLE"
@@ -93,7 +95,7 @@ export BSS_FILE_ASSET_PREFIX="${FILE_ASSET_PREFIX}${prefixes[0]}"
 
 update_dict $TARGET ${prefixes[0]}
 
-run npx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
+run pnpm dlx cdk synth --json --output ${GLOBAL_S3_ASSETS_PATH}/${prefixes[0]}
 
 node ./deployment/post-build-1/index.js
 

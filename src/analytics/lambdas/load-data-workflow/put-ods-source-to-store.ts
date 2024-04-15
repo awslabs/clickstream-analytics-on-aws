@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, S3ObjectCreatedNotificationEventDetail } from 'aws-lambda';
-import { PARTITION_APP } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
@@ -27,7 +27,7 @@ const ddbClient = new DynamoDBClient({
   region: REGION,
 });
 
-const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
+const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const S3_FILE_SUFFIX = process.env.S3_FILE_SUFFIX;
 const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
 const APP_IDS = process.env.APP_IDS;
@@ -69,13 +69,13 @@ const APP_IDS = process.env.APP_IDS;
  */
 export const handler = async (event: EventBridgeEvent<'Object Created', S3ObjectCreatedNotificationEventDetail>) => {
   // Create a Date object from the date string
-  let date = new Date(event.time);
+  const date = new Date(event.time);
   // Get the timestamp as a number
-  let timestamp = date.getTime();
+  const timestamp = date.getTime();
   const s3Bucket = event.detail.bucket.name;
   const s3Object = event.detail.object.key;
   const s3ObjSize = JSON.stringify(event.detail.object.size);
-  let tableName = DYNAMODB_TABLE_NAME!;
+  const tableName = DYNAMODB_TABLE_NAME;
   const jobStatus = JobStatus.JOB_NEW;
   const appIdList = APP_IDS?.split(',') || [];
   if (checkS3FileValidity(s3Object, appIdList)) {

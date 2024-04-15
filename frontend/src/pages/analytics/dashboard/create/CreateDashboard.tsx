@@ -12,6 +12,10 @@
  */
 
 import {
+  SPECIAL_CHARACTERS_PATTERN,
+  XSS_PATTERN,
+} from '@aws/clickstream-base-lib';
+import {
   Box,
   Button,
   ColumnLayout,
@@ -26,8 +30,7 @@ import { createAnalyticsDashboard } from 'apis/analytics';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
-import { defaultStr } from 'ts/utils';
+import { alertMsg, defaultStr } from 'ts/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CreateDashboardProps {
@@ -64,6 +67,13 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
   const confirmCreateDashboard = async () => {
     setLoadingCreate(true);
     try {
+      if (
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(curDashboard.name) ||
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(curDashboard.description)
+      ) {
+        alertMsg(t('analytics:valid.inputSpecialCharactersError'));
+        return;
+      }
       const params: IAnalyticsDashboard = {
         ...curDashboard,
         projectId: projectId,
@@ -143,6 +153,12 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 )}
                 value={defaultStr(curDashboard.name)}
                 onChange={(e) => {
+                  if (
+                    new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                    e.detail.value.length > MAX_USER_INPUT_LENGTH
+                  ) {
+                    return false;
+                  }
                   setDashboardNameRequiredError(false);
                   setCurDashboard((prev) => {
                     return {

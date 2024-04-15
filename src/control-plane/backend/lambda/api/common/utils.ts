@@ -11,13 +11,8 @@
  *  and limitations under the License.
  */
 
-import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
-import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { ipv4 as ip } from 'cidr-block';
-import { JSONPath } from 'jsonpath-plus';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -26,13 +21,23 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
-} from './constants-ln';
-import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, MetadataVersionType } from './model-ln';
+  ConditionCategory,
+  MetadataValueType,
+} from '@aws/clickstream-base-lib';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
+import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { ipv4 as ip } from 'cidr-block';
+import { JSONPath } from 'jsonpath-plus';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { cloneDeep } from 'lodash';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
+import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusDetail, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
+import { SolutionInfo, SolutionVersion } from './solution-info-ln';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { IDictionary } from '../model/dictionary';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -179,12 +184,14 @@ function getTokenFromRequest(req: any) {
 
 async function getRoleFromToken(decodedToken: any) {
   if (!decodedToken) {
+    logger.debug('No decoded token when fetching roles from token.');
     return [];
   }
 
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
+  logger.debug('User setting is ', { userSettings });
   const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
@@ -196,6 +203,10 @@ async function getRoleFromToken(decodedToken: any) {
 }
 
 function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+  logger.debug('mapping oidc roles with user setting.', {
+    userSettings,
+    oidcRoles,
+  });
   const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
     return userRoles;
@@ -230,22 +241,53 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixes.set(BucketPrefix.LOAD_WORKFLOW, `clickstream/${projectId}/data/load-workflow/`);
     prefixes.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
     prefixes.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
+    prefixes.set(BucketPrefix.SEGMENTS, `clickstream/${projectId}/data/segments-output/`);
     return prefixes.get(key) ?? '';
   }
   return value!;
 }
 
+function getStackPrefix(prefix?: string): string {
+  if (!prefix || prefix === '') {
+    return SolutionInfo.SOLUTION_SHORT_NAME;
+  }
+  return `${prefix}-${SolutionInfo.SOLUTION_SHORT_NAME}`;
+}
+
+function getRolePrefix(prefix?: string): string {
+  if (!prefix || prefix === '') {
+    return SolutionInfo.SOLUTION_SHORT_NAME;
+  }
+  return prefix;
+}
+
 function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
   const names: Map<string, string> = new Map();
-  names.set(PipelineStackType.INGESTION, `Clickstream-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
-  names.set(PipelineStackType.KAFKA_CONNECTOR, `Clickstream-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
-  names.set(PipelineStackType.DATA_PROCESSING, `Clickstream-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
-  names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `Clickstream-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
-  names.set(PipelineStackType.REPORTING, `Clickstream-${PipelineStackType.REPORTING}-${pipelineId}`);
-  names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
-  names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
-  names.set(PipelineStackType.APP_REGISTRY, `Clickstream-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
+  names.set(PipelineStackType.INGESTION, `${getStackPrefix()}-${PipelineStackType.INGESTION}-${sinkType}-${pipelineId}`);
+  names.set(PipelineStackType.KAFKA_CONNECTOR, `${getStackPrefix()}-${PipelineStackType.KAFKA_CONNECTOR}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_PROCESSING, `${getStackPrefix()}-${PipelineStackType.DATA_PROCESSING}-${pipelineId}`);
+  names.set(PipelineStackType.DATA_MODELING_REDSHIFT, `${getStackPrefix()}-${PipelineStackType.DATA_MODELING_REDSHIFT}-${pipelineId}`);
+  names.set(PipelineStackType.REPORTING, `${getStackPrefix()}-${PipelineStackType.REPORTING}-${pipelineId}`);
+  names.set(PipelineStackType.METRICS, `${getStackPrefix()}-${PipelineStackType.METRICS}-${pipelineId}`);
+  names.set(PipelineStackType.ATHENA, `${getStackPrefix()}-${PipelineStackType.ATHENA}-${pipelineId}`);
+  names.set(PipelineStackType.APP_REGISTRY, `${getStackPrefix()}-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
+}
+
+function getSinkType(pipeline: IPipeline): string | undefined {
+  if (pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
+    switch (pipeline?.ingestionServer.sinkType) {
+      case PipelineSinkType.S3:
+        return SINK_TYPE_MODE.SINK_TYPE_S3;
+      case PipelineSinkType.KAFKA:
+        return SINK_TYPE_MODE.SINK_TYPE_MSK;
+      case PipelineSinkType.KINESIS:
+        return SINK_TYPE_MODE.SINK_TYPE_KDS;
+      default:
+        return undefined;
+    }
+  }
+  return undefined;
 }
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {
@@ -266,7 +308,7 @@ function getKafkaTopic(pipeline: IPipeline): string {
 function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const transformerAndEnrichClassNames: string[] = [];
   const s3PathPluginJars: string[] = [];
-  let s3PathPluginFiles: string[] = [];
+  const s3PathPluginFiles: string[] = [];
   // Transformer
   const { transformerClassNames, transformerPluginJars, transformerPluginFiles } = _getTransformerPluginInfo(pipeline, resources);
   transformerAndEnrichClassNames.push(...transformerClassNames);
@@ -275,7 +317,8 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   // Enrich
   if (pipeline.dataProcessing?.enrichPlugin) {
     for (let enrichPluginId of pipeline.dataProcessing?.enrichPlugin) {
-      const { classNames, pluginJars, pluginFiles } = _getEnrichPluginInfo(resources, enrichPluginId);
+      const { classNames, pluginJars, pluginFiles } = _getEnrichPluginInfo(
+        resources, enrichPluginId, pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
       transformerAndEnrichClassNames.push(...classNames);
       s3PathPluginJars.push(...pluginJars);
       s3PathPluginFiles.push(...pluginFiles);
@@ -289,7 +332,7 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   };
 }
 
-function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: string) {
+function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -303,7 +346,7 @@ function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: str
     }
   }
   if (enrich?.mainFunction) {
-    classNames.push(enrich?.mainFunction);
+    classNames.push(_getClassNameByVersion(enrich?.id, enrich?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
@@ -316,7 +359,13 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
       const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
       if (defaultTransformer?.mainFunction) {
-        transformerClassNames.push(_getTransformClassNameByVersion(defaultTransformer?.mainFunction, pipeline.templateVersion));
+        transformerClassNames.push(
+          _getClassNameByVersion(
+            defaultTransformer?.id,
+            defaultTransformer?.mainFunction,
+            pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+          ),
+        );
       }
     } else {
       throw new ClickStreamBadRequestError('Transform plugin is required.');
@@ -325,7 +374,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(
       resources,
       pipeline.dataProcessing?.transformPlugin,
-      pipeline.templateVersion,
+      pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
     );
     transformerClassNames= transformerClassNames.concat(classNames);
     transformerPluginJars = transformerPluginJars.concat(pluginJars);
@@ -334,7 +383,9 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
 }
 
-function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string, templateVersion?: string) {
+function _getTransformerPluginInfoFromResources(
+  resources: CPipelineResources,
+  transformPluginId: string, templateVersion: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -348,19 +399,55 @@ function _getTransformerPluginInfoFromResources(resources: CPipelineResources, t
     }
   }
   if (transform?.mainFunction) {
-    classNames.push(_getTransformClassNameByVersion(transform?.mainFunction, templateVersion));
+    classNames.push(_getClassNameByVersion(transform?.id, transform?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
 }
 
-function _getTransformClassNameByVersion(mainFunction: string, templateVersion?: string) {
-  if (templateVersion?.startsWith('v1.0')) {
-    return mainFunction.replace(
-      'software.aws.solution.clickstream.TransformerV2',
-      'software.aws.solution.clickstream.Transformer',
-    );
+function _getClassNameByVersion(id: string, curClassName: string, templateVersion: string) {
+  const shortVersion = SolutionVersion.Of(templateVersion).shortVersion;
+  const pluginHistoryClassNameWithVersion = [
+    {
+      id: 'BUILT-IN-1',
+      versions: [...SolutionVersion.DATA_MODEL_V1_VERSIONS],
+      className: 'software.aws.solution.clickstream.Transformer',
+    },
+    {
+      id: 'BUILT-IN-1',
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
+      className: 'software.aws.solution.clickstream.TransformerV2',
+    },
+    {
+      id: 'BUILT-IN-2',
+      versions: [
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
+      ],
+      className: 'software.aws.solution.clickstream.UAEnrichment',
+    },
+    {
+      id: 'BUILT-IN-3',
+      versions: [
+        ...SolutionVersion.DATA_MODEL_V1_VERSIONS,
+        ...SolutionVersion.DATA_MODEL_V2_VERSIONS,
+      ],
+      className: 'software.aws.solution.clickstream.IPEnrichment',
+    },
+    {
+      id: 'BUILT-IN-4',
+      versions: [...SolutionVersion.DATA_MODEL_V2_VERSIONS],
+      className: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
+    },
+  ];
+  if (templateVersion !== FULL_SOLUTION_VERSION) {
+    for (let plugin of pluginHistoryClassNameWithVersion) {
+      const pluginVersions = plugin.versions.map(v => v.shortVersion);
+      if (plugin.id === id && pluginVersions.some(v => v.equals(shortVersion))) {
+        return plugin.className;
+      }
+    }
   }
-  return mainFunction;
+  return curClassName;
 }
 
 function getSubnetType(routeTable: RouteTable) {
@@ -397,7 +484,7 @@ function getSubnetRouteTable(routeTables: RouteTable[], subnetId: string) {
 function checkVpcEndpoint(
   allSubnets: ClickStreamSubnet[],
   isolatedSubnetsAZ: string[],
-  routeTable: RouteTable,
+  routeTable: RouteTable | undefined,
   vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
   subnet: ClickStreamSubnet,
@@ -414,7 +501,7 @@ function checkVpcEndpoint(
     } else {
       const vpcEndpoint = vpcEndpoints[index];
       if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Gateway) {
-        if (!checkRoutesGatewayId(routeTable.Routes!, vpcEndpoint.VpcEndpointId!)) {
+        if (!checkRoutesGatewayId(routeTable?.Routes, vpcEndpoint.VpcEndpointId!)) {
           invalidServices.push({
             service: service,
             reason: 'The route of vpc endpoint need attached in the route table',
@@ -465,12 +552,14 @@ function checkInterfaceVPCEndpointSubnets(allSubnets: ClickStreamSubnet[], isola
   return true;
 }
 
-function checkRoutesGatewayId(routes: Route[], gatewayId: string) {
+function checkRoutesGatewayId(routes: Route[] | undefined, gatewayId: string) {
   let result = false;
-  for (let route of routes) {
-    if (route.GatewayId === gatewayId) {
-      result = true;
-      break;
+  if (routes) {
+    for (let route of routes) {
+      if (route.GatewayId === gatewayId) {
+        result = true;
+        break;
+      }
     }
   }
   return result;
@@ -574,15 +663,15 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
-function getStackOutputFromPipelineStatus(status: PipelineStatus | undefined, stackType: PipelineStackType, key: string): string {
-  if (!status || isEmpty(status)) {
+function getStackOutputFromPipelineStatus(stackDetails: PipelineStatusDetail[] | undefined, stackType: PipelineStackType, key: string): string {
+  if (isEmpty(stackDetails) || !stackDetails) {
     return '';
   }
-  const stackTypes = status.stackDetails.map(s => s.stackType);
+  const stackTypes = stackDetails.map(s => s.stackType);
   if (!stackTypes.includes(stackType)) {
     return '';
   }
-  for (let stackDetail of status.stackDetails) {
+  for (let stackDetail of stackDetails) {
     if (stackDetail.stackType === stackType) {
       const outputs = stackDetail.outputs;
       for (let output of outputs) {
@@ -607,10 +696,11 @@ function getVersionFromTags(tags: Tag[] | undefined) {
   return version;
 }
 
-function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
+function getReportingDashboardsUrl(
+  stackDetails: PipelineStatusDetail[] | undefined, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
   let dashboards: ReportingDashboardOutput[] = [];
   const dashboardsOutputs = getStackOutputFromPipelineStatus(
-    status,
+    stackDetails,
     stackType,
     key,
   );
@@ -780,7 +870,7 @@ function rawToParameter(metadataArray: IMetadataRaw[], associated: boolean): IMe
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
       eventNames: meta.summary.associatedEvents ?? [],
@@ -816,7 +906,7 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     return parameters;
   }
   for (let meta of metadataArray) {
-    const category = meta.category ?? ConditionCategory.OTHER;
+    const category = meta.category ?? ConditionCategory.EVENT_OUTER;
     const valueType = meta.valueType ?? MetadataValueType.STRING;
     const parameter: IMetadataEventParameter = {
       id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
@@ -870,7 +960,7 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       name: meta.name,
       eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
@@ -932,7 +1022,7 @@ IMetadataEventParameter | undefined {
     eventName: '',
     hasData: lastDayData.hasData,
     platform: filteredMetadata[0].summary.platform ?? [],
-    category: filteredMetadata[0].category ?? ConditionCategory.OTHER,
+    category: filteredMetadata[0].category ?? ConditionCategory.EVENT_OUTER,
     valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
     associatedEvents: groupEvents,
@@ -949,7 +1039,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      category: meta.category ?? ConditionCategory.OTHER,
+      category: meta.category ?? ConditionCategory.EVENT_OUTER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
@@ -1026,19 +1116,37 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   return pathNodes;
 }
 
-function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+function getAppRegistryApplicationArn(pipeline: IPipeline | undefined): string {
+  if (!pipeline) {
+    return '';
+  }
   return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
 
+function getIamRoleBoundaryArn(): string | undefined {
+  const iamRoleBoundaryArn = process.env.IAM_ROLE_BOUNDARY_ARN;
+  if (!iamRoleBoundaryArn || iamRoleBoundaryArn.trim() === '') {
+    return undefined;
+  } else {
+    return iamRoleBoundaryArn.trim();
+  }
+}
+
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
-  const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
-  const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  const redshiftStackVersionStr = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
+  const reportStackVersionStr = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  if (!redshiftStackVersionStr || !reportStackVersionStr) {
+    return false;
+  }
+  const redshiftStackVersion = SolutionVersion.Of(redshiftStackVersionStr);
+  const reportStackVersion = SolutionVersion.Of(reportStackVersionStr);
+  const pipelineVersion = SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION);
   if (
     pipeline?.reporting?.quickSight?.accountName &&
-    !pipeline?.templateVersion?.startsWith('v1.0') &&
-    redshiftStackVersion && !redshiftStackVersion.startsWith('v1.0') &&
-    reportStackVersion && !reportStackVersion.startsWith('v1.0')
+    pipelineVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    redshiftStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6) &&
+    reportStackVersion.greaterThanOrEqualTo(SolutionVersion.V_1_1_6)
   ) {
     return true;
   }
@@ -1046,7 +1154,13 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
 };
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
-  if (pipeline.status?.stackDetails) {
+  if (pipeline.stackDetails) {
+    for (let stackDetail of pipeline.stackDetails) {
+      if (stackDetail.stackType === stackType) {
+        return stackDetail.stackTemplateVersion;
+      }
+    }
+  } else if (pipeline.status?.stackDetails) {
     for (let stackDetail of pipeline.status?.stackDetails) {
       if (stackDetail.stackType === stackType) {
         return stackDetail.stackTemplateVersion;
@@ -1056,13 +1170,16 @@ function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): str
   return undefined;
 }
 
-function isFinallyPipelineStatus(status: PipelineStatusType) {
+function isFinallyPipelineStatus(statusType: PipelineStatusType | undefined) {
+  if (!statusType) {
+    return false;
+  }
   const finallyPipelineStatus = [
     PipelineStatusType.ACTIVE,
     PipelineStatusType.FAILED,
     PipelineStatusType.WARNING,
   ];
-  return finallyPipelineStatus.includes(status);
+  return finallyPipelineStatus.includes(statusType);
 }
 
 function getStackTags(pipeline: IPipeline) {
@@ -1119,6 +1236,72 @@ function getDefaultTags(projectId: string) {
   return tags;
 }
 
+function getAppRegistryStackTags(stackTags: Tag[] | undefined): Tag[] {
+  if (!stackTags) {
+    return [];
+  }
+  const tags = cloneDeep(stackTags);
+  const index = tags.findIndex(tag => tag.Key?.startsWith('#'));
+  if (index !== -1) {
+    tags.splice(index, 1);
+  }
+  return tags;
+}
+
+/**
+ * Merge one tag into stackTags
+ * @param stackTags stack tags array, could be undefined
+ * @param newTag
+ * @returns Tag[]
+ */
+function mergeIntoStackTags(stackTags: Tag[] | undefined, newTag: Tag): Tag[] {
+  if (stackTags === undefined) {
+    return [newTag];
+  }
+
+  const index = stackTags.findIndex(tag => tag.Key === newTag.Key);
+  if (index !== -1) {
+    stackTags.splice(index, 1);
+  }
+
+  stackTags.push(newTag);
+
+  return stackTags;
+}
+
+/**
+ * Merge one tag into pipelineTags
+ * @param pipelineTags pipeline tags array
+ * @param newTag Tag type
+ * @returns ITag[]
+ */
+function mergeIntoPipelineTags(pipelineTags: ITag[], newTag: Tag): ITag[] {
+  const index = pipelineTags.findIndex(tag => tag.key === newTag.Key);
+  if (index !== -1) {
+    pipelineTags.splice(index, 1);
+  }
+
+  pipelineTags.push({
+    key: newTag.Key!,
+    value: newTag.Value!,
+  });
+
+  return pipelineTags;
+}
+
+/**
+ * Filter out dynamic pipeline tags with prefix '#.'
+ * @param pipeline
+ * @returns IPipeline
+ */
+function filterDynamicPipelineTags(pipeline: IPipeline): IPipeline {
+  const tags = pipeline.tags.filter(tag => !tag.key.startsWith('#.') && !tag.value.startsWith('#.'));
+  return {
+    ...pipeline,
+    tags,
+  };
+}
+
 function getStateMachineExecutionName(pipelineId: string) {
   return `main-${pipelineId}-${new Date().getTime()}`;
 }
@@ -1159,9 +1342,9 @@ function _getPipelineStatus(pipeline: IPipeline) {
   let lastAction = pipeline.lastAction;
   if (!lastAction || lastAction === '') {
     lastAction = getPipelineLastActionFromStacksStatus(
-      pipeline.status?.stackDetails, pipeline.templateVersion);
+      pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
   }
-  const executionDetail = pipeline.status?.executionDetail;
+  const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
   const stackStatus = _getPipelineStatusFromStacks(pipeline);
   const executionStatus = executionDetail?.status;
   if (executionStatus === ExecutionStatus.FAILED ||
@@ -1202,7 +1385,7 @@ function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
 
 function _getPipelineStatusFromStacks(pipeline: IPipeline) {
   let status = 'COMPLETE';
-  const stackDetails = pipeline.status?.stackDetails;
+  const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
   if (!stackDetails || stackDetails.length === 0) {
     return status;
   }
@@ -1245,19 +1428,72 @@ function _getRunningStatus(lastAction: string) {
 function getMetadataVersionType(pipeline: IPipeline) {
   const version = pipeline.templateVersion?.split('-')[0] ?? '';
   const unSupportVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'];
-  const oldVersions = ['v1.1.0', 'v1.1.1'];
+  const v1Versions = ['v1.1.0', 'v1.1.1'];
+  const v2Versions = ['v1.1.2', 'v1.1.3', 'v1.1.4', 'v1.1.5'];
   if (unSupportVersions.includes(version)) {
     return MetadataVersionType.UNSUPPORTED;
-  } else if (oldVersions.includes(version)) {
+  } else if (v1Versions.includes(version)) {
     return MetadataVersionType.V1;
+  } else if (v2Versions.includes(version)) {
+    return MetadataVersionType.V2;
   }
-  return MetadataVersionType.V2;
+  return MetadataVersionType.V3;
 }
 
 function getLocalDateISOString(date: Date, offsetDay?: number) {
   const timezoneOffset = date.getTimezoneOffset();
   date = new Date(date.getTime() - (timezoneOffset*60*1000) + (offsetDay ?? 0)*24*60*60*1000);
   return date.toISOString().split('T')[0];
+}
+
+function defaultValueFunc(exceptValue: any, defaultValue: any) {
+  return exceptValue || defaultValue;
+}
+
+function readMetadataFromSqlFile(builtInList: IMetadataBuiltInList | undefined): IMetadataBuiltInList {
+  if (!builtInList) {
+    builtInList = {} as IMetadataBuiltInList;
+  }
+  const event_parameters = readAndIterateFile(join(__dirname, './sqls/redshift/event-v2.sql'));
+  const user_attributes = readAndIterateFile(join(__dirname, './sqls/redshift/user-v2.sql'));
+  builtInList = {
+    ...builtInList,
+    PresetEventParameters: event_parameters,
+    PublicEventParameters: [],
+    PresetUserAttributes: user_attributes,
+  };
+  return builtInList;
+}
+
+function readAndIterateFile(filePath: string): any[] {
+  try {
+    const fileContent = readFileSync(filePath, 'utf-8');
+    const lines = fileContent.split('\n');
+    const metadata: any[] = [];
+    for (const line of lines) {
+      if (line.includes('-- METADATA ')) {
+        const metaStr = line.split('-- METADATA ')[1].trim();
+        const meta = JSON.parse(metaStr);
+        metadata.push(meta);
+      }
+    }
+    return metadata;
+  } catch (error) {
+    logger.warn('readAndIterateFile error', { error, filePath });
+    return [];
+  }
+}
+
+function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, useTarget = false) {
+  const solutionName = solutionMetadata?.data.name;
+  // default/ or cn/ or 'null',''
+  const prefix = isEmpty(solutionMetadata?.data.prefix) ? '' : solutionMetadata?.data.prefix;
+  const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
+  const s3Host = `https://${solutionMetadata?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
+
+  let version = (useTarget || solutionMetadata?.data.version === 'latest') ?
+    solutionMetadata?.data.target : solutionMetadata?.data.version;
+  return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
 }
 
 export {
@@ -1270,6 +1506,8 @@ export {
   getEmailFromRequestContext,
   getTokenFromRequestContext,
   getBucketPrefix,
+  getStackPrefix,
+  getRolePrefix,
   getStackName,
   getKafkaTopic,
   getPluginInfo,
@@ -1300,12 +1538,16 @@ export {
   getCurMonthStr,
   getVersionFromTags,
   getAppRegistryApplicationArn,
+  getIamRoleBoundaryArn,
   deserializeContext,
   pipelineAnalysisStudioEnabled,
   isFinallyPipelineStatus,
   getStackTags,
   getUpdateTags,
   getDefaultTags,
+  mergeIntoStackTags,
+  mergeIntoPipelineTags,
+  filterDynamicPipelineTags,
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,
@@ -1314,4 +1556,9 @@ export {
   rawToParameter,
   rawToAttribute,
   getLocalDateISOString,
+  getSinkType,
+  defaultValueFunc,
+  getAppRegistryStackTags,
+  readMetadataFromSqlFile,
+  getTemplateUrl,
 };

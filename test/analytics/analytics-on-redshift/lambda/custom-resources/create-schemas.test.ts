@@ -17,7 +17,7 @@ process.env.S3_BUCKET = 'test-bucket';
 process.env.S3_PREFIX='test-prefix/';
 process.env.PROJECT_ID='project1';
 
-import { readFileSync } from 'fs';
+import { CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV, CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST, CLICKSTREAM_DEPRECATED_VIEW_LIST } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -27,13 +27,14 @@ import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceRes
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
-import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
+import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST } from '../../../../../src/common/constant';
+import { logger } from '../../../../../src/common/powertools';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
+import { loadSQLFromFS } from '../../../../fs-utils';
 
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
@@ -69,7 +70,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       redshiftBIUsernamePrefix: biUserNamePrefix,
       reportingViewsDef,
       schemaDefs,
-      lastModifiedTime: 1699345775001,
+      schemaHash: '123456789',
     },
   };
 
@@ -78,6 +79,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const createSchemaPropsInServerless: ResourcePropertiesType = {
     ...basicEvent.ResourceProperties,
     appIds: 'app1',
+    timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"},{"appId":"app2","timezone":"Asia/Tokyo"}]',
     serverlessRedshiftProps: {
       workgroupName: workgroupName,
       databaseName: defaultDBName,
@@ -89,6 +91,18 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: createSchemaPropsInServerless,
   };
 
+  const createServerlessEventWithoutTimezone = {
+    ...basicEvent,
+    ResourceProperties: {
+      ...basicEvent.ResourceProperties,
+      serverlessRedshiftProps: {
+        workgroupName: workgroupName,
+        databaseName: defaultDBName,
+        dataAPIRoleArn: 'arn:aws:iam::1234567890:role/RedshiftDBUserRole',
+      },
+    },
+  };
+
   const updateServerlessEvent: CdkCustomResourceEvent = {
     ...createServerlessEvent,
     OldResourceProperties: {
@@ -98,6 +112,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...createServerlessEvent.ResourceProperties,
       appIds: 'app2',
+      timezoneWithAppId: '[{"appId":"app2","timezone":"Asia/Tokyo"}]',
     },
     PhysicalResourceId: `${physicalIdPrefix}abcde`,
     RequestType: 'Update',
@@ -115,6 +130,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...basicEvent.ResourceProperties,
       appIds: 'app1',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"}]',
       provisionedRedshiftProps,
     },
   };
@@ -125,6 +141,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     ResourceProperties: {
       ...createProvisionedEvent.ResourceProperties,
       appIds: 'app1,app2',
+      timezoneWithAppId: '[{"appId":"app1","timezone":"Asia/Shanghai"},{"appId":"app2","timezone":"Asia/Tokyo"}]',
     },
     PhysicalResourceId: 'physical-resource-id',
     RequestType: 'Update',
@@ -134,9 +151,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const biUserSQLCount = 1;
   const appReportingCount = reportingViewsDef.length;
   const appSchemaCount = schemaDefs.length;
+  const spCount = reportingViewsDef.filter(i => i.type === 'sp').length;
 
   const baseCount = databaseSQLCount + biUserSQLCount; // total: 2
-  const appNewCount = appReportingCount * 2 + appSchemaCount + 7 + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length; // total: 42
+  const appNewCount = appReportingCount * 2 + appSchemaCount
+  + TABLES_VIEWS_FOR_REPORTING.length //grant sql for bi user to access on base tables and views
+  - spCount // # of Sp. sp does't need to be granted
+  + CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST.length // materialized views need to remove
+  + CLICKSTREAM_DEPRECATED_VIEW_LIST.length // views need to remove
+  + 1 // create schema for app
+  ;
 
   const defs: { [key: string]: string } = {};
 
@@ -148,14 +172,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
-      ...(schemaDefs.reduce((acc: { [key: string]: string }, item, _index) => {
-        acc[`/opt/${item.sqlFile}`] = testSqlContent(rootPath + item.sqlFile);
-        return acc;
-      }, {} as { [key: string]: string })),
-      ...(reportingViewsDef.reduce((acc, item, _index) => {
-        acc[`/opt/dashboard/${item.viewName}.sql`] = testSqlContent(`${rootPath}dashboard/${item.viewName}.sql`);
-        return acc;
-      }, {} as { [key: string]: string })),
+      ...loadSQLFromFS(schemaDefs, rootPath),
+      ...loadSQLFromFS(reportingViewsDef.map(i => {
+        if (i.type === 'sp') {
+          return { sqlFile: i.spName + '.sql' };
+        } else {
+          return { sqlFile: i.viewName + '.sql' };
+        }
+      }), rootPath, 'dashboard/'),
       ...defs,
     });
   });
@@ -263,6 +287,67 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   });
 
+  test('Created database, timezone check', async () => {
+
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    s3ClientMock.on(PutObjectCommand).callsFake((params) => {
+      const body = params.Body as string;
+      if (body.includes(`CREATE MATERIALIZED VIEW project1.app1.${CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV}`)) {
+        expect(body).toContain('CONVERT_TIMEZONE(\'Asia/Shanghai\'');
+      }
+      return {};
+    });
+
+    const resp = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      Sql: `CREATE DATABASE ${projectDBName};`,
+      WorkgroupName: workgroupName,
+      Database: defaultDBName,
+      ClusterIdentifier: undefined,
+      DbUser: undefined,
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(2, ExecuteStatementCommand, {
+      Sql: expect.stringMatching(`CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD .*`),
+    });
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+
+  });
+
+  test('Created database, timezone check - without timezone', async () => {
+
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    const resp = await handler(createServerlessEventWithoutTimezone, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      Sql: `CREATE DATABASE ${projectDBName};`,
+      WorkgroupName: workgroupName,
+      Database: defaultDBName,
+      ClusterIdentifier: undefined,
+      DbUser: undefined,
+    });
+
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(2, ExecuteStatementCommand, {
+      Sql: expect.stringMatching(`CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD .*`),
+    });
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 0);
+
+  });
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait success', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
@@ -379,13 +464,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   });
 
-  test('Updated schemas and views in Redshift provisioned cluster with same lastModifiedTime', async () => {
+  test('Updated schemas and views in Redshift provisioned cluster with same lastSchemaHash', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash;
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 
@@ -404,9 +489,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash;
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 
@@ -419,13 +504,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 2);
   });
 
-  test('Updated schemas and views in Redshift provisioned cluster with lastModifiedTime changed', async () => {
+  test('Updated schemas and views in Redshift provisioned cluster with last schema hash changed', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime + 1;
+    const lastSchemaHash = 'this is a hash code';
+    updateAdditionalProvisionedEvent.OldResourceProperties.schemaHash = lastSchemaHash;
+    updateAdditionalProvisionedEvent.ResourceProperties.schemaHash = lastSchemaHash + '1';
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 
@@ -493,9 +578,3 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
 
 });
-
-
-const testSqlContent = (filePath: string) => {
-  const sqlTemplate = readFileSync(filePath, 'utf8');
-  return sqlTemplate;
-};

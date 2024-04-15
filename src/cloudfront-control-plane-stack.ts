@@ -12,7 +12,8 @@
  */
 
 import { join } from 'path';
-import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
+import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from '@aws/clickstream-base-lib';
+import { Aspects, Aws, CfnCondition, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -30,17 +31,16 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct, IConstruct } from 'constructs';
-import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
-import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
+import { RoleNamePrefixAspect, RolePermissionBoundaryAspect } from './common/aspects';
+import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleToSuppressRolePolicyWithHighSPCM, ruleToSuppressRolePolicyWithWildcardAction, ruleToSuppressRolePolicyWithWildcardResources, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
+import { createLambdaRole } from './common/lambda';
 import { Parameters } from './common/parameters';
-import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStackWithRegion } from './common/stack';
@@ -78,6 +78,18 @@ interface OIDCInfo {
   readonly adminEmail: string;
 }
 
+interface BackendApiProps {
+  readonly authorizer: IAuthorizer;
+  readonly oidcInfo: OIDCInfo;
+  readonly pluginPrefix: string;
+  readonly bucket: IBucket;
+  readonly iamRolePrefix: string;
+  readonly iamRoleBoundaryArn: string;
+  readonly conditionStringRolePrefix: string;
+  readonly conditionStringStackPrefix: string;
+  readonly targetToCNRegions?: boolean;
+}
+
 export class CloudFrontControlPlaneStack extends Stack {
 
   private paramGroups: any[] = [];
@@ -87,6 +99,11 @@ export class CloudFrontControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + '- Control Plane';
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     let domainProps: DomainProps | undefined = undefined;
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
@@ -199,17 +216,21 @@ export class CloudFrontControlPlaneStack extends Stack {
 
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommands: [
+          'npm install -g pnpm@8.15.3 --prefix /tmp/node/.npm-global',
+          'export PATH=/tmp/node/.npm-global/bin:$PATH',
           'export APP_PATH=/tmp/app',
           'mkdir $APP_PATH',
-          'cd ./frontend/',
-          'find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\;',
+          'tar --exclude=\'node_modules\' --exclude=\'cdk.out\' --exclude=\'build\' -cf - . | (cd $APP_PATH && tar -xf -)',
           'cd $APP_PATH',
-          'yarn install --loglevel error',
-          'yarn run build --loglevel error',
+          'pnpm install',
+          'pnpm projen',
+          'pnpm nx run-many --target=build',
+          'cd ./frontend',
           'cp -r ./build/* /asset-output/',
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
         user: 'node',
         autoInvalidFilePaths: ['/index.html', '/asset-manifest.json', '/robots.txt', SOLUTION_CONFIG_PATH, '/locales/*'],
@@ -229,8 +250,35 @@ export class CloudFrontControlPlaneStack extends Stack {
     const oidcInfo = this.oidcInfo(createCognitoUserPool ? controlPlane.controlPlaneUrl : undefined);
     const authorizer = this.createAuthorizer(oidcInfo);
     const pluginPrefix = 'plugins/';
-    const clickStreamApi = this.createBackendApi(authorizer, oidcInfo, pluginPrefix,
-      solutionBucket.bucket, props?.targetToCNRegions);
+
+    const isEmptyRolePrefixCondition = new CfnCondition(
+      this,
+      'IsEmptyRolePrefixCondition',
+      {
+        expression: Fn.conditionEquals(iamRolePrefixParam.valueAsString, ''),
+      },
+    );
+    const conditionStringRolePrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      iamRolePrefixParam.valueAsString,
+    ).toString();
+    const conditionStringStackPrefix = Fn.conditionIf(
+      isEmptyRolePrefixCondition.logicalId,
+      SolutionInfo.SOLUTION_SHORT_NAME,
+      `${iamRolePrefixParam.valueAsString}-${SolutionInfo.SOLUTION_SHORT_NAME}`,
+    ).toString();
+    const clickStreamApi = this.createBackendApi({
+      authorizer,
+      oidcInfo,
+      pluginPrefix,
+      bucket: solutionBucket.bucket,
+      iamRolePrefix: iamRolePrefixParam.valueAsString,
+      iamRoleBoundaryArn: iamRoleBoundaryArnParam.valueAsString,
+      conditionStringRolePrefix,
+      conditionStringStackPrefix,
+      targetToCNRegions: props?.targetToCNRegions,
+    });
 
     if (!clickStreamApi.lambdaRestApi) {
       throw new Error('Backend api create error.');
@@ -322,6 +370,8 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     // nag
     addCfnNag(this);
+    Aspects.of(this).add(new RoleNamePrefixAspect(iamRolePrefixParam.valueAsString));
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 
   private oidcInfo(controlPlaneUrl?: string): OIDCInfo {
@@ -360,16 +410,18 @@ export class CloudFrontControlPlaneStack extends Stack {
 
   private createAuthorizer(oidcInfo: OIDCInfo): TokenAuthorizer {
     const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
-      runtime: Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
         ISSUER: oidcInfo.issuer,
-        ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(15),
       memorySize: 512,
-      logRetention: RetentionDays.TEN_YEARS,
+      logConf: {
+        retention: RetentionDays.TEN_YEARS,
+      },
+      applicationLogLevel: 'WARN',
+      role: createLambdaRole(this, 'AuthorizerFunctionRole', false, []),
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
       ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
@@ -384,19 +436,22 @@ export class CloudFrontControlPlaneStack extends Stack {
     return authorizer;
   }
 
-  private createBackendApi(authorizer: IAuthorizer, oidcInfo: OIDCInfo, pluginPrefix: string,
-    bucket: IBucket, targetToCNRegions?: boolean): ClickStreamApiConstruct {
+  private createBackendApi(props: BackendApiProps): ClickStreamApiConstruct {
     const clickStreamApi = new ClickStreamApiConstruct(this, 'ClickStreamApi', {
       fronting: 'cloudfront',
       apiGateway: {
         stageName: 'api',
-        authorizer: authorizer,
+        authorizer: props.authorizer,
       },
-      targetToCNRegions: targetToCNRegions,
-      stackWorkflowS3Bucket: bucket,
-      pluginPrefix: pluginPrefix,
+      targetToCNRegions: props.targetToCNRegions,
+      stackWorkflowS3Bucket: props.bucket,
+      pluginPrefix: props.pluginPrefix,
       healthCheckPath: '/',
-      adminUserEmail: oidcInfo.adminEmail,
+      adminUserEmail: props.oidcInfo.adminEmail,
+      iamRolePrefix: props.iamRolePrefix,
+      iamRoleBoundaryArn: props.iamRoleBoundaryArn,
+      conditionStringRolePrefix: props.conditionStringRolePrefix,
+      conditionStringStackPrefix: props.conditionStringStackPrefix,
     });
 
     return clickStreamApi;
@@ -433,45 +488,49 @@ function addCfnNag(stack: Stack) {
   const cfnNagList = [
     {
       paths_endswith: [
-        'ClickStreamApi/ApiGatewayAccessLogs/Resource',
-      ],
-      rules_to_suppress: [
-        {
-          id: 'W84',
-          reason:
-            'By default CloudWatchLogs LogGroups data is encrypted using the CloudWatch server-side encryption keys (AWS Managed Keys)',
-        },
-      ],
-    },
-    {
-      paths_endswith: [
         'ClickStreamApi/ClickStreamApiFunctionRole/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W76',
-          reason:
-          'This policy needs to be able to call other AWS service by design',
-        },
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
       ],
     },
     {
       paths_endswith: [
-        'AWS679f53fac002430cb0da5b7982bd2287/Resource',
+        'ClickStreamApi/StackWorkflowStateMachine/StackWorkflowStateMachine/Role/DefaultPolicy/Resource',
       ],
       rules_to_suppress: [
-        {
-          id: 'W89',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to be deployed in VPC',
-        },
-        {
-          id: 'W92',
-          reason:
-          'Lambda function is only used as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions',
-        },
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
       ],
     },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/ActionFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('DefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardAction('ActionFunctionRole'),
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/StackActionStateMachine/StackActionStateMachine/Role/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithWildcardResources('DefaultPolicy', 'states'),
+      ],
+    },
+    {
+      paths_endswith: [
+        'ClickStreamApi/ApiFunctionRole/DefaultPolicy/Resource',
+      ],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('ApiFunctionRoleDefaultPolicy'),
+        ruleToSuppressRolePolicyWithWildcardResources('ApiFunctionRoleDefaultPolicy', 'lambda'),
+      ],
+    },
+    ruleForLambdaVPCAndReservedConcurrentExecutions('AWS679f53fac002430cb0da5b7982bd2287/Resource', 'AddAdminUserFunction'),
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
@@ -487,6 +546,10 @@ function addCfnNag(stack: Stack) {
       // The non-container Lambda function is not configured to use the latest runtime version
       reason:
         'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
+    },
+    {
+      id: 'AwsSolutions-SQS3',
+      reason: 'The SQS is a dead-letter queue (DLQ), and does not need a DLQ enabled',
     },
   ]);
 }

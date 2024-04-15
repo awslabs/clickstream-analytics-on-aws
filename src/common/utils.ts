@@ -35,9 +35,9 @@ export function generateRandomStr(length: number, charSet?: string): string {
     strCharset = charSet ?? lowerCase + upperCase + numStr + other;
     // Fix ERROR: password must contain a number
     password = lowerCase[Math.floor(randomInt(0, lowerCase.length))]
-  + upperCase[Math.floor(randomInt(0, upperCase.length))]
-  + numStr[Math.floor(randomInt(0, numStr.length))]
-  + other[Math.floor(randomInt(0, other.length))];
+      + upperCase[Math.floor(randomInt(0, upperCase.length))]
+      + numStr[Math.floor(randomInt(0, numStr.length))]
+      + other[Math.floor(randomInt(0, other.length))];
   }
 
   while (password.length < length) {
@@ -46,6 +46,39 @@ export function generateRandomStr(length: number, charSet?: string): string {
   return password;
 }
 
-export function sleep(ms: number) {
-  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
-};
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function parseDynamoDBTableARN(ddbArn: string) {
+  const arnComponents = ddbArn.split(':');
+  const region = arnComponents[3];
+  const tableName = arnComponents[5].split('/')[1];
+
+  return {
+    ddbRegion: region,
+    ddbTableName: tableName,
+  };
+}
+
+export function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+export interface TimezoneInfo {
+  appId: string;
+  timezone: string;
+}
+
+export function timezoneJsonArrayToDict(jsonArray: TimezoneInfo[]): { [key: string]: string } {
+  const dict: { [key: string]: string } = {};
+  for (const item of jsonArray) {
+    dict[item.appId] = item.timezone;
+  }
+  return dict;
+}
+

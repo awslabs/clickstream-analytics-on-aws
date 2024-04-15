@@ -11,13 +11,15 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '../common/constants-ln';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '@aws/clickstream-base-lib';
+import moment from 'moment-timezone';
+import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
-import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { isEmpty, paginateData } from '../common/utils';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getPipelineStatusType, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
-import { CPipeline } from '../model/pipeline';
+import { CPipeline, IAppTimezone } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -43,13 +45,16 @@ export class ApplicationServ {
       req.body.id = projectId;
       req.body.operator = res.get('X-Click-Stream-Operator');
       let app: IApplication = req.body;
-      // Check pipeline status
       const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
       if (latestPipelines.length === 0) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const latestPipeline = latestPipelines[0];
-      if (latestPipeline.status?.status !== PipelineStatusType.ACTIVE) {
+      let latestPipeline = latestPipelines[0];
+      // Check pipeline status
+      const statusType = getPipelineStatusType(latestPipeline);
+      if (statusType === PipelineStatusType.CREATING ||
+        statusType === PipelineStatusType.DELETING ||
+        statusType === PipelineStatusType.UPDATING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
@@ -57,11 +62,21 @@ export class ApplicationServ {
       const appIds: string[] = apps.map(a => a.appId);
       appIds.push(appId);
       validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
-
-      const id = await store.addApplication(app);
-
+      // set timezone
+      if (app.timezone) {
+        const timezone = app.timezone;
+        if (latestPipeline.timezone) {
+          latestPipeline.timezone.push({ appId, timezone });
+        } else {
+          latestPipeline = {
+            ...latestPipeline,
+            timezone: [{ appId, timezone }],
+          };
+        }
+      }
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateApp(appIds);
+      const id = await store.addApplication(app);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -82,13 +97,14 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('Pipeline info no found'));
       }
       const pipeline = new CPipeline(latestPipelines[0]);
-      const outputs = await pipeline.getStackOutputBySuffixes(
+      const outputs = pipeline.getStackOutputBySuffixes(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_URL_SUFFIX,
           OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
         ],
       );
+      const timezone = latestPipelines[0].timezone?.find(tz => tz.appId === result.appId)?.timezone ?? '';
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,
@@ -97,10 +113,13 @@ export class ApplicationServ {
         androidPackage: result.androidPackage,
         iosBundleId: result.iosBundleId,
         iosAppStoreId: result.iosAppStoreId,
+        timezone: timezone,
         createAt: result.createAt,
         pipeline: {
           id: latestPipelines[0].pipelineId,
-          status: latestPipelines[0].status,
+          statusType: getPipelineStatusType(latestPipelines[0]),
+          executionDetail: latestPipelines[0].executionDetail ?? latestPipelines[0].status?.executionDetail,
+          stackDetails: latestPipelines[0].stackDetails ?? latestPipelines[0].status?.stackDetails,
           endpoint: outputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: outputs.get(OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
           customDomain: latestPipelines[0].ingestionServer.domain?.domainName ?? '',
@@ -121,7 +140,11 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
       const latestPipeline = latestPipelines[0];
-      if (latestPipeline.status?.status !== PipelineStatusType.ACTIVE) {
+      // Check pipeline status
+      const statusType = getPipelineStatusType(latestPipeline);
+      if (statusType === PipelineStatusType.CREATING ||
+        statusType === PipelineStatusType.DELETING ||
+        statusType === PipelineStatusType.UPDATING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
       }
 
@@ -136,13 +159,66 @@ export class ApplicationServ {
       if (!isEmpty(appIds)) {
         validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
       }
-
-      const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteApplication(pid, id, operator);
+      if (latestPipeline.timezone) {
+        const timezoneIndex = latestPipeline.timezone.findIndex(tz => tz.appId === id);
+        if (timezoneIndex > -1) {
+          latestPipeline.timezone.splice(timezoneIndex, 1);
+        }
+      }
 
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateApp(appIds);
+
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deleteApplication(pid, id, operator);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async updateTimezone(req: any, res: any, next: any) {
+    try {
+      const { id } = req.params;
+      const { projectId, timezone } = req.body;
+      if (!timezone || !moment.tz.names().includes(timezone)) {
+        return res.status(400).json(new ApiFail('Invalid timezone.'));
+      }
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      let latestPipeline = latestPipelines[0];
+      // Check pipeline status
+      const statusType = getPipelineStatusType(latestPipeline);
+      if (statusType === PipelineStatusType.CREATING ||
+        statusType === PipelineStatusType.DELETING ||
+        statusType === PipelineStatusType.UPDATING) {
+        return res.status(400).json(new ApiFail('The pipeline current status does not allow update.'));
+      }
+      const appTimezone : IAppTimezone = {
+        appId: id,
+        timezone: timezone,
+      };
+      if (latestPipeline.timezone) {
+        const index = latestPipeline.timezone.findIndex(tz => tz.appId === id);
+        if (index > -1) {
+          if (latestPipeline.timezone[index].timezone.trim()) {
+            return res.status(400).json(new ApiSuccess(null, 'Timezone not allowed to be modified.'));
+          }
+          latestPipeline.timezone[index] = appTimezone;
+        } else {
+          latestPipeline.timezone.push(appTimezone);
+        }
+      } else {
+        latestPipeline = {
+          ...latestPipeline,
+          timezone: [appTimezone],
+        };
+      }
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.updateAppTimezone();
+      return res.status(201).json(new ApiSuccess({ id }, 'Application timezone updated.'));
     } catch (error) {
       next(error);
     }

@@ -18,7 +18,7 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays, LogGroup } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
@@ -32,7 +32,6 @@ import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { getPutMetricsPolicyStatements } from '../../common/metrics';
 import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface LoadOdsDataToRedshiftWorkflowProps {
@@ -52,10 +51,13 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly redshiftRoleForCopyFromS3: IRole;
   readonly ddbStatusTable: ITable;
   readonly mvRefreshInterval: number;
+  readonly refreshViewStateMachineArn: string;
 
   readonly tablesOdsSource: TablesODSSource; // data S3 bucket
   readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
   readonly workflowBucketInfo: WorkflowBucketInfo; // bucket to store workflow logs, temp files
+
+  readonly pipelineEmrStatusS3Prefix: string; // prefix for EMR status files
 
   readonly nextStateStateMachines: { name: string; stateMachine: IStateMachine;
     input?: TaskInput; integrationPattern?: IntegrationPattern; resultPath?: string; }[];
@@ -129,7 +131,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `s3EventFn-${redshiftTable}`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'put-ods-source-to-store.ts',
@@ -137,7 +138,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(1),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 2,
       role: createLambdaRole(this, `s3EventFnRole-${redshiftTable}`, true, []),
       ...props.networkConfig,
@@ -148,8 +151,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         APP_IDS: props.appIds,
         DYNAMODB_TABLE_NAME: taskTable.tableName,
         REDSHIFT_ODS_TABLE_NAME: redshiftTable,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     return fn;
@@ -498,7 +501,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'create-load-manifest.ts',
@@ -506,7 +508,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 1024,
       timeout: Duration.minutes(5),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, `${resourceId}Role`, true, [...cloudwatchPolicyStatements]),
       ...props.networkConfig,
@@ -518,8 +522,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         QUERY_RESULT_LIMIT: loadDataConfig.maxFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     // Update the job_status from NEW to ENQUEUE.
@@ -537,7 +541,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'load-manifest-to-redshift.ts',
@@ -545,7 +548,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, `${resourceId}Role`, true, [...cloudwatchPolicyStatements]),
       ...props.networkConfig,
@@ -557,8 +562,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     // Update the job_status from ENQUEUE to PROCESSING.
     ddbTable.grantReadWriteData(fn);
@@ -585,7 +590,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-load-status.ts',
@@ -593,7 +597,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(2),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, `${resourceId}Role`, true, []),
       ...props.networkConfig,
@@ -603,8 +609,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     ddbTable.grantWriteData(fn);
@@ -622,7 +628,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'has-more-job-new.ts',
@@ -630,7 +635,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 1024,
       timeout: Duration.minutes(2),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, `${resourceId}Role`, true, []),
       ...props.networkConfig,
@@ -639,9 +646,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        ...POWERTOOLS_ENVS,
       },
-
+      applicationLogLevel: 'WARN',
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -653,7 +659,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckSkippingRunningWorkflowFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'skip-running-workflow.ts',
@@ -661,7 +666,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(2),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckSkippingRunningWorkflowFnRole', true, []),
       ...props.networkConfig,
@@ -670,9 +677,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        ...POWERTOOLS_ENVS,
       },
-
+      applicationLogLevel: 'WARN',
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -683,8 +689,19 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const resourceId = 'RefreshViews';
 
     const fnSG = props.securityGroupForLambda;
+
+    const policyStatements = [
+      new PolicyStatement({
+        actions: [
+          'states:StartExecution',
+        ],
+        resources: [
+          props.refreshViewStateMachineArn,
+        ],
+      }),
+    ];
+
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'refresh-views.ts',
@@ -692,32 +709,29 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+      },
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, `${resourceId}Role`, true, []),
+      role: createLambdaRole(this, `${resourceId}Role`, true, policyStatements),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        APP_IDS: props.appIds,
-
-        REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
-        REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
-        REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
-        REDSHIFT_DATABASE: props.databaseName,
-        REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
         ENABLE_REFRESH: 'true',
         REFRESH_INTERVAL_MINUTES: props.mvRefreshInterval.toString(),
         PIPELINE_S3_BUCKET_NAME: props.workflowBucketInfo.s3Bucket.bucketName,
         PIPELINE_S3_BUCKET_PREFIX: props.workflowBucketInfo.prefix,
+        REFRESH_STATE_MACHINE_ARN: props.refreshViewStateMachineArn,
+        PIPELINE_EMR_STATUS_S3_PREFIX: props.pipelineEmrStatusS3Prefix,
         REDSHIFT_ROLE: copyRole.roleArn,
-        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     props.workflowBucketInfo.s3Bucket.grantPut(fn, `${props.workflowBucketInfo.prefix}*`);
     props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.workflowBucketInfo.prefix}*`);
+    props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.pipelineEmrStatusS3Prefix}*`);
     return fn;
   }
 }

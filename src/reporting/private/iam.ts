@@ -11,30 +11,17 @@
  *  and limitations under the License.
  */
 
+import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, Aws } from 'aws-cdk-lib';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 
 export function createRoleForQuicksightCustomResourceLambda(
   scope: Construct,
   parentTemplateArn: string,
 ) {
-  const logGroupArn = Arn.format(
-    {
-      resource: 'log-group',
-      service: 'logs',
-      resourceName: '/aws/lambda/*',
-      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-      region: Aws.REGION,
-      account: Aws.ACCOUNT_ID,
-      partition: Aws.PARTITION,
-    },
-  );
-
   const arnPrefix = `arn:${Aws.PARTITION}:quicksight:${Aws.REGION}:${Aws.ACCOUNT_ID}`;
-
   const policyStatements = [
     new PolicyStatement({
       effect: Effect.ALLOW,
@@ -125,8 +112,7 @@ export function createRoleForQuicksightCustomResourceLambda(
 
   ];
 
-  const principal = new ServicePrincipal('lambda.amazonaws.com');
-  return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
+  return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements);
 
 }
 

@@ -11,18 +11,20 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { StackManager } from './stack';
-import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { FULL_SOLUTION_VERSION } from '../common/constants';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
-import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
+import { SolutionVersion } from '../common/solution-info-ln';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
+import { checkFolder, createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, getDashboardDetail, listDashboardsByApp } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -39,7 +41,7 @@ export class ProjectServ {
 
   private getPresetAppDashboard(pipeline: IPipeline, appId: string) {
     const stackDashboards = getReportingDashboardsUrl(
-      pipeline.status!, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
+      pipeline.stackDetails ?? pipeline.status?.stackDetails, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
     if (stackDashboards.length === 0) {
       return undefined;
     }
@@ -71,7 +73,14 @@ export class ProjectServ {
       }
       // check folder and move preset dashboard to folder
       const presetAppDashboard = this.getPresetAppDashboard(pipeline, appId);
-      await checkFolder(pipeline.region, projectId, appId, presetAppDashboard?.id);
+      await checkFolder(
+        pipeline.region,
+        projectId,
+        appId,
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+        presetAppDashboard?.id,
+      );
       const result = await listDashboardsByApp(pipeline.region, projectId, appId);
       const items = paginateData(result, true, pageSize, pageNumber);
       return res.json(new ApiSuccess({
@@ -93,11 +102,8 @@ export class ProjectServ {
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const stackManager: StackManager = new StackManager(pipeline);
-      const status = await stackManager.getPipelineStatus();
-
       const defaultDataSourceArn = getStackOutputFromPipelineStatus(
-        status,
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
         PipelineStackType.REPORTING,
         OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
@@ -109,7 +115,12 @@ export class ProjectServ {
       if (dashboard.sheets.length === 0) {
         return res.status(400).json(new ApiFail('Dashboard sheets is required.'));
       }
-      await createPublishDashboard(dashboard, defaultDataSourceArn);
+      await createPublishDashboard(
+        dashboard,
+        defaultDataSourceArn,
+        pipeline.templateVersion ?? FULL_SOLUTION_VERSION,
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       return res.status(201).json(new ApiSuccess({ id: dashboardId }, 'Dashboard created.'));
     } catch (error) {
       next(error);
@@ -129,9 +140,13 @@ export class ProjectServ {
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found.'));
       }
+      const principals = await getClickstreamUserArn(
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       const embed = await generateEmbedUrlForRegisteredUser(
         pipeline.region,
-        pipeline.reporting?.quickSight?.user ?? '',
+        principals.publishUserArn,
         allowedDomain,
         dashboardId,
       );
@@ -187,17 +202,20 @@ export class ProjectServ {
     try {
       const { projectId } = req.params;
       const { allowedDomain } = req.query;
-      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
+      const pipeline = await this.getPipelineByProjectId(projectId);
+      if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const latestPipeline = latestPipelines[0];
-      if (!latestPipeline.reporting?.quickSight?.accountName) {
+      if (!pipeline.reporting?.quickSight?.accountName) {
         return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
       }
+      const principals = await getClickstreamUserArn(
+        SolutionVersion.Of(pipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        pipeline.reporting?.quickSight?.user ?? '',
+      );
       const embed = await generateEmbedUrlForRegisteredUser(
-        latestPipeline.region,
-        latestPipeline.reporting?.quickSight?.user ?? '',
+        pipeline.region,
+        principals.publishUserArn,
         allowedDomain,
       );
       return res.json(new ApiSuccess(embed));
@@ -279,20 +297,20 @@ export class ProjectServ {
       const latestPipelines = await store.listPipeline(id, 'latest', 'asc');
       if (latestPipelines.length === 1) {
         const latestPipeline = latestPipelines[0];
-        const pipeline = new CPipeline(latestPipeline);
-        const stackManager: StackManager = new StackManager(latestPipeline);
-        const latestPipelineStatus = await stackManager.getPipelineStatus();
-        if (!isFinallyPipelineStatus(latestPipelineStatus.status)) {
+        const statusType = getPipelineStatusType(latestPipeline);
+        if (!isFinallyPipelineStatus(statusType)) {
           return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
         }
+        const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
+      } else if (latestPipelines.length === 0) {
+        const operator = res.get('X-Click-Stream-Operator');
+        await store.deleteProject(id, operator);
       }
       const existProjects = await store.listProjects('asc');
       if (existProjects.length === 1) {
         await deleteClickstreamUser();
       }
-      const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteProject(id, operator);
       return res.json(new ApiSuccess(null, 'Project deleted.'));
     } catch (error) {
       next(error);

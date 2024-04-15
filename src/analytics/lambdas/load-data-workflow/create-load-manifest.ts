@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
@@ -21,7 +22,6 @@ import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Context } from 'aws-lambda';
 import { composeJobStatus } from './put-ods-source-to-store';
-import { PARTITION_APP } from '../../../common/constant';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';

@@ -14,6 +14,7 @@ This software includes third party software subject to the following copyrights:
 
 @aws-cdk/aws-glue-alpha under the Apache-2.0
 @aws-cdk/aws-servicecatalogappregistry-alpha under the Apache-2.0
+@aws-cdk/aws-kinesisanalytics-flink-alpha under the Apache-2.0
 @aws-lambda-powertools/logger under the MIT
 @aws-lambda-powertools/metrics under the MIT-0
 @aws-sdk/client-acm under the Apache-2.0
@@ -25,6 +26,7 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/client-ecs under the Apache-2.0
 @aws-sdk/client-elastic-load-balancing-v2 under the Apache-2.0
 @aws-sdk/client-emr-serverless under the Apache-2.0
+@aws-sdk/client-eventbridge under the Apache-2.0
 @aws-sdk/client-glue under the Apache-2.0
 @aws-sdk/client-iam under the Apache-2.0
 @aws-sdk/client-kafka under the Apache-2.0
@@ -42,12 +44,16 @@ This software includes third party software subject to the following copyrights:
 @aws-sdk/client-sqs under the Apache-2.0
 @aws-sdk/client-ssm under the Apache-2.0
 @aws-sdk/client-sts under the Apache-2.0
+@aws-sdk/client-cloudwatch-events under the Apache-2.0
+@aws-sdk/client-kinesis under the Apache-2.0
 @aws-sdk/credential-providers under the Apache-2.0
 @aws-sdk/lib-dynamodb under the Apache-2.0
-@aws-sdk/util-dynamodb under the Apache-2.0
+@aws-sdk/s3-request-presigner under the Apache-2.0
 @aws-sdk/types under the Apache-2.0
+@aws-sdk/util-dynamodb under the Apache-2.0
 @smithy/node-http-handler under the Apache-2.0
 @smithy/util-stream-node under the Apache-2.0
+@smithy/types under the Apache-2.0
 @types/aws-lambda under the MIT
 aws-cdk-lib under the Apache-2.0
 cdk-bootstrapless-synthesizer under the Apache-2.0
@@ -67,12 +73,15 @@ node-fetch under the MIT
 p-limit under the MIT
 ts-json-object under the MIT
 uuid under the MIT
+moment-timezone under the MIT
 @aws-sdk/lib-storage under the Apache-2.0
 @aws-sdk/xhr-http-handler under the Apache-2.0
 @babel/core under the MIT
+@aws/clickstream-base-lib under the Apache-2.0
 @cloudscape-design/components under the Apache-2.0
 @cloudscape-design/design-tokens under the Apache-2.0
 @cloudscape-design/global-styles under the Apache-2.0
+@cloudscape-design/collection-hooks under the Apache-2.0
 @pmmmwh/react-refresh-webpack-plugin under the MIT
 @svgr/webpack under the MIT
 @testing-library/jest-dom under the MIT
@@ -94,6 +103,7 @@ case-sensitive-paths-webpack-plugin under the MIT
 classnames under the MIT
 css-loader under the MIT
 css-minimizer-webpack-plugin under the MIT
+csv-parser under the MIT
 dotenv under the BSD-2-Clause
 dotenv-expand under the BSD-2-Clause
 file-loader under the MIT
@@ -149,3 +159,4 @@ amazon-quicksight-embedding-sdk under the Apache-2.0
 sql-formatter under the MIT
 i18next-fs-backend under the MIT
 fast-memoize under the MIT
+hpagent under the MIT

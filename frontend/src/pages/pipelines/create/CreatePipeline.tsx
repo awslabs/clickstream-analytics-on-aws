@@ -11,7 +11,14 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Wizard } from '@cloudscape-design/components';
+import {
+  CORS_PATTERN,
+  DOMAIN_NAME_PATTERN,
+  KAFKA_BROKERS_PATTERN,
+  KAFKA_TOPIC_PATTERN,
+  REDSHIFT_DB_USER_NAME_PATTERN,
+} from '@aws/clickstream-base-lib';
+import { AppLayout, SelectProps, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -45,6 +52,8 @@ import {
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
   DEFAULT_TRANSFORM_SDK_IDS,
+  EIngestionType,
+  ENetworkType,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -64,13 +73,6 @@ import {
   SDK_LIST,
   SinkType,
 } from 'ts/const';
-import {
-  CORS_PATTERN,
-  DOMAIN_NAME_PATTERN,
-  KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
-} from 'ts/constant-ln';
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   checkStringValidRegex,
@@ -261,8 +263,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const validateIngestionSubnets = () => {
     // Validate public subnets
     if (
-      pipelineInfo.selectedPublicSubnet.length < 2 ||
-      !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2)
+      pipelineInfo.network.type !== ENetworkType.Private &&
+      (pipelineInfo.selectedPublicSubnet.length < 2 ||
+        !validateSubnetCrossInAZs(pipelineInfo.selectedPublicSubnet, 2))
     ) {
       setPublicSubnetError(true);
       return false;
@@ -279,6 +282,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
     // Validate private subnet in the same AZ with public subnets
     if (
+      pipelineInfo.network.type !== ENetworkType.Private &&
       !validatePublicSubnetInSameAZWithPrivateSubnets(
         pipelineInfo.selectedPublicSubnet,
         pipelineInfo.selectedPrivateSubnet
@@ -1292,7 +1296,18 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               kafkaSGEmptyError={kafkaSGEmptyError}
               bufferKDSModeEmptyError={bufferKDSModeEmptyError}
               bufferKDSShardNumFormatError={bufferKDSShardNumFormatError}
-              changePublicSubnets={(subnets) => {
+              changeNetworkType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    network: {
+                      ...prev.network,
+                      type: type,
+                    },
+                  };
+                });
+              }}
+              changePublicSubnets={(subnets: readonly SelectProps.Option[]) => {
                 setPublicSubnetError(false);
                 setPipelineInfo((prev) => {
                   return {
@@ -1307,7 +1322,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changePrivateSubnets={(subnets) => {
+              changePrivateSubnets={(
+                subnets: readonly SelectProps.Option[]
+              ) => {
                 setPrivateSubnetError(false);
                 setPrivateSubnetDiffWithPublicError(false);
                 setPipelineInfo((prev) => {
@@ -1319,6 +1336,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       privateSubnetIds: subnets.map((element) =>
                         defaultStr(element.value)
                       ),
+                    },
+                  };
+                });
+              }}
+              changeIngestionType={(type) => {
+                setPipelineInfo((prev) => {
+                  return {
+                    ...prev,
+                    ingestionServer: {
+                      ...prev.ingestionServer,
+                      ingestionType: type,
                     },
                   };
                 });
@@ -2101,7 +2129,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeReshiftSubnets={(subnets) => {
+              changeRedshiftSubnets={(subnets) => {
                 setRedshiftServerlessSubnetEmptyError(false);
                 setRedshiftServerlessSubnetInvalidError(false);
                 setPipelineInfo((prev) => {
@@ -2210,7 +2238,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 ) => {
   const { t } = useTranslation();
   const { update } = props;
-  const { id, pid } = useParams();
+  const { pid } = useParams();
 
   const [loadingData, setLoadingData] = useState(true);
   const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
@@ -2587,7 +2615,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.redshiftBaseCapacity = generateRedshiftRPUOptionListByRegion(
         pipelineInfo.region
       ).filter(
-        (type) =>
+        (type: SelectProps.Option) =>
           type.value ===
           pipelineInfo.dataModeling.redshift.newServerless.baseCapacity.toString()
       )[0];
@@ -2654,12 +2682,20 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           data.network.privateSubnetIds,
           []
         ),
+        type: defaultStr(
+          data.network.type,
+          ENetworkType.General
+        ) as ENetworkType,
       },
       bucket: {
         name: defaultStr(data.bucket?.name),
         prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
+        ingestionType: defaultStr(
+          data.ingestionServer.ingestionType,
+          EIngestionType.EC2
+        ) as EIngestionType,
         size: {
           serverMin: defaultGenericsValue(
             data.ingestionServer.size.serverMin,
@@ -2814,13 +2850,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
-      status: {
-        status: defaultStr(data.status?.status),
-        stackDetails: data.status?.stackDetails ?? [],
-      },
+      statusType: data.statusType,
+      stackDetails: defaultGenericsValue(data.stackDetails, []),
+      executionDetail: data.executionDetail,
       workflow: data.workflow,
-      executionName: data.executionName,
-      executionArn: data.executionArn,
       version: defaultStr(data.version),
       versionTag: defaultStr(data.versionTag),
       createAt: defaultGenericsValue(data.createAt, 0),
@@ -2844,9 +2877,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         setLoadingData(true);
         const { success, data }: ApiResponse<IExtPipeline> =
           await getPipelineDetail({
-            id: defaultStr(id),
-            pid: defaultStr(pid),
-            cache: true,
+            projectId: defaultStr(pid),
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);

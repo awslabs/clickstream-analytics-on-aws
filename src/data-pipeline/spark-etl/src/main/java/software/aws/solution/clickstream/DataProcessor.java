@@ -18,6 +18,7 @@ package software.aws.solution.clickstream;
 import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.SparkSession;
+import software.aws.solution.clickstream.util.*;
 
 import java.util.Arrays;
 
@@ -112,6 +113,7 @@ public final class DataProcessor {
                     .config("spark.hadoop.hive.metastore.client.factory.class",
                             "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory")
                     .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                    .config("spark.sql.mapKeyDedupPolicy", "LAST_WIN")
                     .enableHiveSupport().appName(APP_NAME).getOrCreate();
         }
 

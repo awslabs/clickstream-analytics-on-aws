@@ -13,9 +13,24 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import {
+  DASHBOARD_READER_PERMISSION_ACTIONS,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+  QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX,
+  ExploreLocales,
+  AnalysisType,
+  ExplorePathNodeType,
+  ExploreRequestAction,
+  ExploreTimeScopeType,
+  ExploreVisualName,
+  QuickSightChartType,
+  ExploreComputeMethod,
+} from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
+import { PipelineServ } from './pipeline';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import {
   createDataSet,
@@ -23,7 +38,6 @@ import {
   applyChangeToDashboard,
   getDashboardDefinitionFromArn,
   CreateDashboardResult,
-  sleep,
   DashboardCreateParameters,
   getFunnelVisualDef,
   getVisualRelatedDefs,
@@ -49,15 +63,17 @@ import {
   getEventNormalTableVisualDef,
   getEventPropertyCountPivotTableVisualDef,
   DashboardTitleProps,
+  getTimezoneByAppId,
 } from './quicksight/reporting-utils';
-import { EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
-import { awsAccountId } from '../common/constants';
-import { DASHBOARD_READER_PERMISSION_ACTIONS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX, REDSHIFT_EVENT_TABLE_NAME } from '../common/constants-ln';
-import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
+import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { SolutionVersion } from '../common/solution-info-ln';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
+import { sleep } from '../common/utils-ln';
 import { IPipeline } from '../model/pipeline';
 import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -65,6 +81,39 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const sdkClient: SDKClient = new SDKClient();
 const store: ClickStreamStore = new DynamoDbStore();
+const pipelineServ: PipelineServ = new PipelineServ();
+
+interface BuildDashboardProps {
+  query: any;
+  visualPropsArray: VisualProps[];
+  quickSight: QuickSight;
+  sheetId: string;
+  resourceName: string;
+  principals: QuickSightUserArns;
+  dashboardCreateParameters: DashboardCreateParameters;
+  templateVersion: string;
+}
+
+interface CreateDashboardProps {
+  quickSight: QuickSight;
+  resourceName: string;
+  principals: QuickSightUserArns;
+  dashboard: DashboardVersionDefinition;
+  query: any;
+  dashboardCreateParameters: DashboardCreateParameters;
+  sheetId: string;
+  templateVersion: string;
+}
+
+interface BuildFunnelQuickSightDashboardProps {
+  viewName: string;
+  sql: string;
+  tableVisualViewName: string;
+  sqlTable: string;
+  query: any;
+  sheetId: string;
+  pipeline: IPipeline;
+}
 
 export class ReportingService {
 
@@ -79,6 +128,12 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
+      console.log('query', query.timezone);
 
       encodeQueryValueForSql(query as SQLParameters);
 
@@ -110,8 +165,15 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
-        sqlTable, query, sheetId, query.computeMethod);
+      const result = await this._buildFunnelQuickSightDashboard({
+        viewName,
+        sql,
+        tableVisualViewName,
+        sqlTable,
+        query,
+        sheetId,
+        pipeline,
+      });
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
       }
@@ -122,9 +184,7 @@ export class ReportingService {
     }
   };
 
-  private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
-    sqlTable: string, query: any, sheetId: string, computeMethod: ExploreComputeMethod) {
-
+  private async _buildFunnelQuickSightDashboard(props: BuildFunnelQuickSightDashboardProps): Promise<CreateDashboardResult> {
     const datasetColumns = [...funnelVisualColumns];
     const visualProjectedColumns = [
       'event_name',
@@ -132,7 +192,7 @@ export class ReportingService {
     ];
 
     let countColName = 'event_id';
-    if (computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    if (props.query.computeMethod === ExploreComputeMethod.EVENT_CNT) {
       datasetColumns.push({
         Name: 'event_id',
         Type: 'STRING',
@@ -147,7 +207,7 @@ export class ReportingService {
       countColName = 'user_pseudo_id';
     }
 
-    const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
+    const hasGrouping = props.query.chartType == QuickSightChartType.BAR && props.query.groupCondition !== undefined;
     if (hasGrouping) {
       datasetColumns.push({
         Name: 'group_col',
@@ -160,22 +220,22 @@ export class ReportingService {
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
     datasetPropsArray.push({
-      tableName: viewName,
+      tableName: props.viewName,
       columns: datasetColumns,
       importMode: 'DIRECT_QUERY',
-      customSql: sql,
+      customSql: props.sql,
       projectedColumns: visualProjectedColumns,
     });
 
-    const projectedColumns: string[] = [query.groupColumn];
+    const projectedColumns: string[] = [props.query.groupColumn];
     const tableViewCols: InputColumn[] = [{
-      Name: query.groupColumn,
+      Name: props.query.groupColumn,
       Type: 'STRING',
     }];
 
     let groupingConditionCol = '';
-    if (query.groupCondition !== undefined) {
-      groupingConditionCol = query.groupCondition.property;
+    if (props.query.groupCondition !== undefined) {
+      groupingConditionCol = props.query.groupCondition.property;
       tableViewCols.push({
         Name: groupingConditionCol,
         Type: 'STRING',
@@ -184,8 +244,8 @@ export class ReportingService {
       projectedColumns.push(groupingConditionCol);
     }
 
-    const maxIndex = query.eventAndConditions.length - 1;
-    for (const [index, item] of query.eventAndConditions.entries()) {
+    const maxIndex = props.query.eventAndConditions.length - 1;
+    for (const [index, item] of props.query.eventAndConditions.entries()) {
       projectedColumns.push(`${index+1}_${item.eventName}`);
       tableViewCols.push({
         Name: `${index+1}_${item.eventName}`,
@@ -210,31 +270,32 @@ export class ReportingService {
 
     }
     datasetPropsArray.push({
-      tableName: tableVisualViewName,
+      tableName: props.tableVisualViewName,
       columns: tableViewCols,
       importMode: 'DIRECT_QUERY',
-      customSql: sqlTable,
+      customSql: props.sqlTable,
       projectedColumns: ['event_date'].concat(projectedColumns),
     });
 
     const visualId = uuidv4();
-    const locale = query.locale ?? ExploreLocales.EN_US;
-    const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
-    const quickSightChartType = query.chartType;
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping, countColName);
+    const locale = props.query.locale ?? ExploreLocales.EN_US;
+    const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, props.query);
+    const quickSightChartType = props.query.chartType;
+    const visualDef = getFunnelVisualDef(
+      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn, hasGrouping, countColName);
     const visualRelatedParams = await getVisualRelatedDefs({
-      timeScopeType: query.timeScopeType,
-      sheetId,
+      timeScopeType: props.query.timeScopeType,
+      sheetId: props.sheetId,
       visualId,
-      viewName,
-      lastN: query.lastN,
-      timeUnit: query.timeUnit,
-      timeStart: query.timeStart,
-      timeEnd: query.timeEnd,
+      viewName: props.viewName,
+      lastN: props.query.lastN,
+      timeUnit: props.query.timeUnit,
+      timeStart: props.query.timeStart,
+      timeEnd: props.query.timeEnd,
     }, locale);
 
     const visualProps = {
-      sheetId: sheetId,
+      sheetId: props.sheetId,
       name: ExploreVisualName.CHART,
       visualId: visualId,
       visual: visualDef,
@@ -242,27 +303,27 @@ export class ReportingService {
       filterControl: visualRelatedParams.filterControl,
       parameterDeclarations: visualRelatedParams.parameterDeclarations,
       filterGroup: visualRelatedParams.filterGroup,
-      eventCount: query.eventAndConditions.length,
+      eventCount: props.query.eventAndConditions.length,
       colSpan: quickSightChartType === QuickSightChartType.FUNNEL ? 20: undefined,
     };
 
     const tableVisualId = uuidv4();
     const eventNames = [];
     const percentageCols = ['rate'];
-    for (const [index, e] of query.eventAndConditions.entries()) {
+    for (const [index, e] of props.query.eventAndConditions.entries()) {
       eventNames.push(e.eventName);
       if (index > 0) {
         percentageCols.push(e.eventName + '_rate');
       }
     }
-    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps,
-      query.groupColumn, groupingConditionCol);
-    const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
+    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, eventNames, titleProps,
+      props.query.groupColumn, groupingConditionCol);
+    const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, percentageCols);
 
-    visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
+    visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
     const tableVisualProps = {
-      sheetId: sheetId,
+      sheetId: props.sheetId,
       name: ExploreVisualName.TABLE,
       visualId: tableVisualId,
       visual: tableVisualDef,
@@ -270,9 +331,9 @@ export class ReportingService {
       ColumnConfigurations: columnConfigurations,
     };
 
-    const result: CreateDashboardResult = await this.createDashboardVisuals(
-      sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
-    return result;
+    return this.createDashboardVisuals(
+      props.sheetId, props.viewName, props.query, props.pipeline,
+      datasetPropsArray, [visualProps, tableVisualProps]);
   }
 
   async createEventVisual(req: any, res: any, next: any) {
@@ -283,7 +344,6 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
-
       encodeQueryValueForSql(query as SQLParameters);
       const eventAndConditions = query.eventAndConditions as EventAndCondition[];
       let hasComputeOnProperty = false;
@@ -305,7 +365,7 @@ export class ReportingService {
     }
   };
 
-  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, grouppingColName?: string) {
+  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string) {
     const projectedColumns = ['event_date', 'event_name'];
     const datasetColumns: InputColumn[] = [
       {
@@ -318,13 +378,13 @@ export class ReportingService {
       },
     ];
 
-    if (grouppingColName != undefined) {
+    if (groupingColName != undefined) {
       datasetColumns.push({
-        Name: grouppingColName,
+        Name: groupingColName,
         Type: 'STRING',
       });
 
-      projectedColumns.push(grouppingColName);
+      projectedColumns.push(groupingColName);
     }
 
     if (!computeMethodProps.isMixedMethod) {
@@ -396,6 +456,12 @@ export class ReportingService {
       logger.info('start to create event analysis visuals', { request: req.body });
 
       const query = req.body;
+
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
@@ -472,7 +538,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
       const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
 
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -483,7 +549,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps, tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
@@ -495,22 +561,21 @@ export class ReportingService {
   };
 
   async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
-    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, grouppingColName?: string) {
+    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string) {
 
     let tableVisualDef: Visual;
     if (computeMethodProps.isSameAggregationMethod) {
-      console.log('create pivot table for aggregation: ', computeMethodProps.aggregationMethodName);
       tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn
-        , grouppingColName, computeMethodProps.aggregationMethodName);
+        , groupingColName, computeMethodProps.aggregationMethodName);
     } else if (
       (computeMethodProps.isMixedMethod && computeMethodProps.isCountMixedMethod)
       ||(!computeMethodProps.isMixedMethod && !computeMethodProps.hasAggregationPropertyMethod)) {
 
       logger.info('create pivot table for mix mode');
-      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, grouppingColName);
+      tableVisualDef = getEventPropertyCountPivotTableVisualDef(tableVisualId, viewName, titleProps, groupColumn, groupingColName);
     } else {
       logger.info('create normal table for mix mode');
-      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, grouppingColName);
+      tableVisualDef = getEventNormalTableVisualDef(computeMethodProps, tableVisualId, viewName, titleProps, groupingColName);
     }
 
     return tableVisualDef;
@@ -521,6 +586,12 @@ export class ReportingService {
       logger.info('start to create event analysis visuals', { request: req.body });
 
       const query = req.body;
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
@@ -537,12 +608,12 @@ export class ReportingService {
 
       const computeMethodProps = getComputeMethodProps(sqlParameters);
 
-      let grouppingColName;
+      let groupingColName;
       if ( query.groupCondition !== undefined) {
-        grouppingColName = buildColNameWithPrefix(query.groupCondition);
+        groupingColName = buildColNameWithPrefix(query.groupCondition);
       }
 
-      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, grouppingColName);
+      const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, groupingColName);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -581,7 +652,7 @@ export class ReportingService {
 
       const tableVisualId = uuidv4();
       const tableVisualDef = await this._getVisualDefOfEventVisualOnEventProperty(computeMethodProps, tableVisualId,
-        viewName, titleProps, query.groupColumn, grouppingColName);
+        viewName, titleProps, query.groupColumn, groupingColName);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -595,7 +666,7 @@ export class ReportingService {
       };
 
       result = await this.createDashboardVisuals(
-        sheetId, viewName, query, datasetPropsArray, [tableVisualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, [tableVisualProps]);
 
       logger.info('create Dashboard result: ', { result } );
 
@@ -611,6 +682,7 @@ export class ReportingService {
   private _buildSqlForPathAnalysis(query: any) {
     if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
       return buildEventPathAnalysisView({
+        timezone: query.timezone,
         dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -626,7 +698,6 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pathAnalysis: {
-          platform: query.pathAnalysis.platform,
           sessionType: query.pathAnalysis.sessionType,
           nodeType: query.pathAnalysis.nodeType,
           lagSeconds: query.pathAnalysis.lagSeconds,
@@ -639,6 +710,7 @@ export class ReportingService {
     }
 
     return buildNodePathAnalysisView({
+      timezone: query.timezone,
       dbName: query.projectId,
       schemaName: query.appId,
       computeMethod: query.computeMethod,
@@ -653,7 +725,6 @@ export class ReportingService {
       timeUnit: query.timeUnit,
       groupColumn: query.groupColumn,
       pathAnalysis: {
-        platform: query.pathAnalysis.platform,
         sessionType: query.pathAnalysis.sessionType,
         nodeType: query.pathAnalysis.nodeType,
         lagSeconds: query.pathAnalysis.lagSeconds,
@@ -676,6 +747,11 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
 
       encodeQueryValueForSql(query as SQLParameters);
 
@@ -735,7 +811,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, datasetPropsArray, [visualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
@@ -756,12 +832,18 @@ export class ReportingService {
         logger.debug(checkResult.message);
         return res.status(400).json(new ApiFail(checkResult.message));
       }
+      const pipeline = await pipelineServ.getPipelineByProjectId(query.projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+      query.timezone = getTimezoneByAppId(pipeline, query.appId);
 
       encodeQueryValueForSql(query as SQLParameters);
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
+        timezone: query.timezone,
         dbName: query.projectId,
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -848,7 +930,7 @@ export class ReportingService {
       const tableVisualId = uuidv4();
       const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, hasGrouping);
 
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
       const tableVisualProps = {
         sheetId: sheetId,
@@ -859,7 +941,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps, tableVisualProps]);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
@@ -870,18 +952,22 @@ export class ReportingService {
     }
   };
 
-  public async createDashboardVisuals(sheetId: string, resourceName: string, query: any,
+  public async createDashboardVisuals(
+    sheetId: string, resourceName: string, query: any, pipeline: IPipeline,
     datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
-    const principals = await getClickstreamUserArn();
+    const principals = await getClickstreamUserArn(
+      SolutionVersion.Of(pipeline?.templateVersion ?? FULL_SOLUTION_VERSION),
+      pipeline?.reporting?.quickSight?.user ?? '',
+    );
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
-        quickSight, awsAccountId!,
+        quickSight, awsAccountId,
         principals.publishUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
@@ -900,8 +986,16 @@ export class ReportingService {
 
     logger.info('Got first element of visual props', { visualPropsArray: visualPropsArray[0] });
 
-    const result = await this._buildDashboard(query, visualPropsArray, quickSight,
-      sheetId, resourceName, principals, dashboardCreateParameters);
+    const result = await this._buildDashboard({
+      query,
+      visualPropsArray,
+      quickSight,
+      sheetId,
+      resourceName,
+      principals,
+      dashboardCreateParameters,
+      templateVersion: pipeline?.templateVersion ?? FULL_SOLUTION_VERSION,
+    });
     for (let visualProps of visualPropsArray) {
       const visual: VisualMapProps = {
         name: visualProps.name,
@@ -913,20 +1007,18 @@ export class ReportingService {
     return result;
   };
 
-  private async _buildDashboard(query: any, visualPropsArray: VisualProps[], quickSight: QuickSight,
-    sheetId: string, resourceName: string, principals: QuickSightUserArns,
-    dashboardCreateParameters: DashboardCreateParameters) {
+  private async _buildDashboard(props: BuildDashboardProps) {
     // generate dashboard definition
     let dashboardDef: DashboardVersionDefinition;
     let dashboardName: string | undefined;
-    if (!query.dashboardId) {
+    if (!props.query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
-      const sid = visualPropsArray[0].sheetId;
+      const sid = props.visualPropsArray[0].sheetId;
       dashboardDef.Sheets![0].SheetId = sid;
-      dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
+      dashboardDef.Sheets![0].Name = props.query.sheetName ?? 'sheet1';
       dashboardDef.Options!.WeekStart = DayOfWeek.MONDAY;
     } else {
-      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      const dashboardDefProps = await getDashboardDefinitionFromArn(props.quickSight, awsAccountId, props.query.dashboardId);
       dashboardDef = dashboardDefProps.def;
       dashboardName = dashboardDefProps.name;
       if (dashboardDef.Options === undefined) {
@@ -937,40 +1029,48 @@ export class ReportingService {
 
     const dashboard = applyChangeToDashboard({
       action: 'ADD',
-      requestAction: query.action,
-      visuals: visualPropsArray,
+      requestAction: props.query.action,
+      visuals: props.visualPropsArray,
       dashboardDef: dashboardDef,
     });
     logger.info('final dashboard def:', { dashboard });
 
     let result: CreateDashboardResult;
-    if (!query.dashboardId) {
+    if (!props.query.dashboardId) {
       //create QuickSight analysis
-      result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
-        query, dashboardCreateParameters, sheetId);
+      result = await this._createDashboard({
+        quickSight: props.quickSight,
+        resourceName: props.resourceName,
+        principals: props.principals,
+        dashboard,
+        query: props.query,
+        dashboardCreateParameters: props.dashboardCreateParameters,
+        sheetId: props.sheetId,
+        templateVersion: props.templateVersion,
+      });
     } else {
       //update QuickSight dashboard
-      const newDashboard = await quickSight.updateDashboard({
+      const newDashboard = await props.quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
-        DashboardId: query.dashboardId,
+        DashboardId: props.query.dashboardId,
         Name: dashboardName,
         Definition: dashboard,
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      await this._publishNewVersionDashboard(quickSight, query, versionNumber!);
+      await this._publishNewVersionDashboard(props.quickSight, props.query, versionNumber);
 
       result = {
-        dashboardId: query.dashboardId,
+        dashboardId: props.query.dashboardId,
         dashboardArn: newDashboard.Arn!,
-        dashboardName: query.dashboardName,
-        dashboardVersion: Number.parseInt(versionNumber!),
+        dashboardName: props.query.dashboardName,
+        dashboardVersion: versionNumber ? Number.parseInt(versionNumber) : 1,
         dashboardEmbedUrl: '',
-        analysisId: query.analysisId,
+        analysisId: props.query.analysisId,
         analysisArn: '',
-        analysisName: query.analysisName,
-        sheetId,
+        analysisName: props.query.analysisName,
+        sheetId: props.sheetId,
         visualIds: [],
       };
     }
@@ -978,7 +1078,7 @@ export class ReportingService {
   }
 
   private async _publishNewVersionDashboard(quickSight: QuickSight, query: any,
-    versionNumber: string) {
+    versionNumber: string | undefined) {
     let cnt = 0;
     for (const _i of Array(100).keys()) {
       cnt += 1;
@@ -986,7 +1086,7 @@ export class ReportingService {
         const response = await quickSight.updateDashboardPublishedVersion({
           AwsAccountId: awsAccountId,
           DashboardId: query.dashboardId,
-          VersionNumber: Number.parseInt(versionNumber),
+          VersionNumber: versionNumber ? Number.parseInt(versionNumber) : undefined,
         });
 
         if (response.DashboardId) {
@@ -1006,42 +1106,39 @@ export class ReportingService {
     }
   }
 
-  private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
-    dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
+  private async _createDashboard(props: CreateDashboardProps) {
     const analysisId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
-    const newAnalysis = await quickSight.createAnalysis({
+    const newAnalysis = await props.quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
-      Name: `${resourceName}`,
-      Definition: dashboard as AnalysisDefinition,
+      Name: `${props.resourceName}`,
+      Definition: props.dashboard as AnalysisDefinition,
     });
 
     //create QuickSight dashboard
-    const embedUserArn = await _getEmbedUserArnFromPipeline(query.projectId);
-    let ownerArn = principals.publishUserArn;
-    if (process.env.AWS_REGION?.startsWith('cn')) {
-      ownerArn = embedUserArn;
-    }
+    const dashboardPermissions = [
+      {
+        Principal: props.principals.exploreUserArn,
+        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
+      },
+    ];
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
-    const newDashboard = await quickSight.createDashboard({
+    const newDashboard = await props.quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
-      Name: `${resourceName}`,
-      Definition: dashboard,
-      Permissions: [{
-        Principal: ownerArn,
-        Actions: DASHBOARD_READER_PERMISSION_ACTIONS,
-      }],
+      Name: `${props.resourceName}`,
+      Definition: props.dashboard,
+      Permissions: dashboardPermissions,
     });
 
     let dashboardEmbedUrl = '';
-    if (query.action === ExploreRequestAction.PREVIEW) {
-      const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, dashboardId);
+    if (props.query.action === ExploreRequestAction.PREVIEW) {
+      const dashboardSuccess = await waitDashboardSuccess(props.dashboardCreateParameters.region, dashboardId);
       if (dashboardSuccess) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          ownerArn,
-          dashboardCreateParameters.allowedDomain,
+          props.dashboardCreateParameters.region,
+          props.principals.exploreUserArn,
+          props.dashboardCreateParameters.allowedDomain,
           dashboardId,
         );
         dashboardEmbedUrl = embedUrl.EmbedUrl!;
@@ -1050,13 +1147,13 @@ export class ReportingService {
     const result = {
       dashboardId,
       dashboardArn: newDashboard.Arn!,
-      dashboardName: `${resourceName}`,
+      dashboardName: `${props.resourceName}`,
       dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
       dashboardEmbedUrl: dashboardEmbedUrl,
       analysisId,
       analysisArn: newAnalysis.Arn!,
-      analysisName: `${resourceName}`,
-      sheetId,
+      analysisName: `${props.resourceName}`,
+      sheetId: props.sheetId,
       visualIds: [],
     };
     return result;
@@ -1068,18 +1165,14 @@ export class ReportingService {
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
-      const region = req.body.region;
 
-      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
-      if (latestPipelines.length === 0) {
+      const latestPipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!latestPipeline) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
-      const latestPipeline = latestPipelines[0];
-      if (latestPipeline.status === undefined) {
-        return res.status(404).send(new ApiFail('Pipeline status not found'));
-      }
+      const region = latestPipeline.region;
       const dataApiRole = getStackOutputFromPipelineStatus(
-        latestPipeline.status,
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX);
       const redshiftDataClient = sdkClient.RedshiftDataClient(
@@ -1091,16 +1184,19 @@ export class ReportingService {
       const quickSight = sdkClient.QuickSight({ region: region });
 
       //warmup principal
-      await getClickstreamUserArn();
+      await getClickstreamUserArn(
+        SolutionVersion.Of(latestPipeline.templateVersion ?? FULL_SOLUTION_VERSION),
+        latestPipeline.reporting?.quickSight?.user ?? '',
+      );
 
       //warm up redshift serverless
       if (latestPipeline.dataModeling?.redshift?.newServerless) {
         const workgroupName = getStackOutputFromPipelineStatus(
-          latestPipeline.status,
+          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.DATA_MODELING_REDSHIFT,
           OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
-          Sqls: [`select * from ${appId}.${REDSHIFT_EVENT_TABLE_NAME} limit 1`],
+          Sqls: [`select * from ${appId}.${EVENT_USER_VIEW} limit 1`],
           WorkgroupName: workgroupName,
           Database: projectId,
           WithEvent: false,
@@ -1231,7 +1327,7 @@ async function _cleanAnalyses(quickSight: QuickSight) {
         AnalysisId: analysisId,
         ForceDeleteWithoutRecovery: true,
       });
-      deletedAnalyses.push(analysisId!);
+      if (analysisId) {deletedAnalyses.push(analysisId);}
       logger.info(`analysis ${analysisSummary.Name} removed`);
     }
   }
@@ -1261,7 +1357,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
       });
-      deletedDashBoards.push(dashboardId!);
+      if (dashboardId) {deletedDashBoards.push(dashboardId);}
       logger.info(`dashboard ${dashboardSummary.Name} removed`);
     }
   }
@@ -1281,13 +1377,4 @@ function _needExploreUserVersion(pipeline: IPipeline) {
   const oldVersions = ['v1.1.0', 'v1.1.1', 'v1.1.2', 'v1.1.3', 'v1.1.4'];
   return oldVersions.includes(version);
 
-}
-
-async function _getEmbedUserArnFromPipeline(projectId: string) {
-  let embedUserArn = '';
-  const pipelines = await store.listPipeline(projectId, 'latest', 'asc');
-  if (pipelines.length > 0) {
-    embedUserArn = pipelines[0].reporting?.quickSight?.user ?? '';
-  }
-  return embedUserArn;
 }

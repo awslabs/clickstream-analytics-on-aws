@@ -12,10 +12,10 @@
  */
 
 import { CloudFormationClient, DescribeStacksCommand, DescribeTypeCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { PipelineStackType, PipelineStatusDetail } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
-import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
-import { getVersionFromTags } from '../../common/utils';
+import { getStackPrefix, getVersionFromTags } from '../../common/utils';
 
 export const describeStack = async (region: string, stackName: string) => {
   try {
@@ -41,9 +41,12 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
     const stackDetails: PipelineStatusDetail[] = [];
     for (let stackName of stackNames) {
       const stack = await describeStack(region, stackName);
+      const name = stack?.StackName ?? stackName;
+      const cutPrefixName = name.substring(getStackPrefix().length);
       stackDetails.push({
-        stackName: stackName,
-        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackId: stack?.StackId ?? '',
+        stackName: name,
+        stackType: cutPrefixName.split('-')[1] as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
         stackTemplateVersion: getVersionFromTags(stack?.Tags),

@@ -25,8 +25,8 @@ MAX_BATCH_REQUEST_NUMBER = 20
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
 PROCESS_NUMBER = 50
 # control the speed for event send.
-MAX_UPLOAD_THREAD_NUMBER = 1
-REQUEST_SLEEP_TIME = 0.2
+MAX_UPLOAD_THREAD_NUMBER = 10
+REQUEST_SLEEP_TIME = 0.1
 GZIP_TIMES_PER_DAY = 1
 
 # for real-time event consts
@@ -38,7 +38,7 @@ BATCH_EVENT_DURATION_IN_MINUTES = 20
 IS_LOG_FULL_REQUEST_MESSAGE = True
 
 # common settings
-SESSION_TIMES = range(1, 5)
+SESSION_TIMES = range(1, 4)
 IS_GZIP = True
 
 # notepad configure
@@ -49,9 +49,12 @@ ACTION_TIMES = range(0, 30)
 PER_ACTION_DURATION_REALTIME = range(0, 5)
 
 # shopping configure
-ALL_USER_SHOPPING = 10000
-RANDOM_DAU_SHOPPING = range(1000, 2000)
+ALL_USER_SHOPPING = 5000
+RANDOM_DAU_SHOPPING = range(300, 400)
 PLATFORM = enums.Platform.All
+# the number of products on one page of the shopping application, the minimum value is 2
+MAIN_PAGE_PRODUCT_COUNT = 4
+DEFAULT_PRODUCT_COUNT = 2
 
 # following value will be replaced by amplifyconfiguration.json file.
 APP_ID = ""

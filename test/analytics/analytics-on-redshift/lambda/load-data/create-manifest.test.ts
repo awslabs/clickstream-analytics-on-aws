@@ -12,6 +12,9 @@
  */
 
 import {
+  PARTITION_APP,
+} from '@aws/clickstream-base-lib';
+import {
   DynamoDBClient,
 } from '@aws-sdk/client-dynamodb';
 import {
@@ -26,8 +29,10 @@ import {
   mockClient,
 } from 'aws-sdk-client-mock';
 
+// must keep it before some imports
 const addMetricMock = jest.fn(() => { });
 const publishStoredMetricsMock = jest.fn(() => { });
+
 const MetricsMock = jest.fn(() => {
   return {
     addMetric: addMetricMock,
@@ -46,7 +51,6 @@ jest.mock('@aws-lambda-powertools/metrics', () => {
   };
 });
 
-
 import {
   handler,
   ODSEventItem,
@@ -57,9 +61,6 @@ import {
 } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 import {
-  PARTITION_APP,
-} from '../../../../../src/common/constant';
-import {
   AnalyticsCustomMetricsName,
   MetricsNamespace,
   MetricsService,
@@ -67,6 +68,7 @@ import {
 import {
   getMockContext,
 } from '../../../../common/lambda-context';
+
 
 //@ts-ignore
 expect(MetricsMock.mock.calls[0][0]).toEqual({

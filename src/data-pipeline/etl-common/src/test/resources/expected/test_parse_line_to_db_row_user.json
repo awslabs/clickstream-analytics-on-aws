@@ -1,0 +1,46 @@
+{
+  "event_timestamp" : 1682319109447,
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198",
+  "user_id" : "312121",
+  "user_properties" : {
+    "_user_ltv_revenue" : {
+      "set_time_msec" : 1667877566697,
+      "value" : 123.45
+    },
+    "_user_first_touch_timestamp" : {
+      "set_time_msec" : 1667877566697,
+      "value" : 1667877267895
+    },
+    "_user_ltv_currency" : {
+      "set_time_msec" : 1667877566697,
+      "value" : "USD"
+    },
+    "_user_id" : {
+      "set_time_msec" : 1667877566697,
+      "value" : "312121"
+    },
+    "_user_name" : {
+      "set_time_msec" : 1667877566697,
+      "value" : "example"
+    },
+    "_user_age" : {
+      "set_time_msec" : 1667877566697,
+      "value" : 20
+    }
+  },
+  "first_touch_time_msec" : 1667877267895,
+  "first_visit_date" : 1667877267895,
+  "first_referrer" : "www.google.com",
+  "first_traffic_source" : "direct",
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : "direct",
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : "C001",
+  "process_info" : null
+}

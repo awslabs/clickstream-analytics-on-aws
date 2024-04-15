@@ -38,7 +38,7 @@ import BasicInfo from '../comps/BasicInfo';
 
 const PipelineDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { id, pid } = useParams();
+  const { pid } = useParams();
   const location = useLocation();
   const [loadingData, setLoadingData] = useState(true);
   const [projectInfo, setProjectInfo] = useState<IProject>();
@@ -46,27 +46,25 @@ const PipelineDetail: React.FC = () => {
   const [projectPipelineExtend, setProjectPipelineExtend] =
     useState<IPipelineExtend>();
   const [loadingPipeline, setLoadingPipeline] = useState(false);
+  const [loadingPipelineExtend, setLoadingPipelineExtend] = useState(false);
 
   const { activeTab } = location.state || {};
   const [detailActiveTab, setDetailActiveTab] = useState(
     activeTab || 'ingestion'
   );
 
-  const getProjectPipelineDetail = async () => {
+  const getProjectPipelineDetail = async (refresh: string) => {
     try {
       setLoadingPipeline(true);
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: defaultStr(id),
-          pid: defaultStr(pid),
+          projectId: defaultStr(pid),
+          refresh,
         });
       if (success) {
         setProjectPipeline(data);
         setLoadingData(false);
         setLoadingPipeline(false);
-        if (data.dataModeling.redshift) {
-          getProjectPipelineExtend();
-        }
       }
     } catch (error) {
       setLoadingPipeline(false);
@@ -75,6 +73,7 @@ const PipelineDetail: React.FC = () => {
 
   const getProjectPipelineExtend = async () => {
     try {
+      setLoadingPipelineExtend(true);
       const { success, data }: ApiResponse<IPipelineExtend> =
         await getPipelineExtend({
           projectId: defaultStr(pid),
@@ -82,8 +81,9 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectPipelineExtend(data);
       }
+      setLoadingPipelineExtend(false);
     } catch (error) {
-      console.error(error);
+      setLoadingPipelineExtend(false);
     }
   };
 
@@ -95,7 +95,6 @@ const PipelineDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        getProjectPipelineDetail();
       }
     } catch (error) {
       setLoadingData(false);
@@ -118,8 +117,9 @@ const PipelineDetail: React.FC = () => {
   ];
 
   useEffect(() => {
-    getProjectPipelineDetail();
+    getProjectPipelineDetail('false');
     getProjectDetailById();
+    getProjectPipelineExtend();
   }, []);
 
   return (
@@ -139,9 +139,11 @@ const PipelineDetail: React.FC = () => {
             <SpaceBetween direction="vertical" size="l">
               <BasicInfo
                 pipelineInfo={projectPipeline}
+                projectPipelineExtend={projectPipelineExtend}
                 loadingRefresh={loadingPipeline}
-                reloadPipeline={() => {
-                  getProjectPipelineDetail();
+                loadingPipelineExtend={loadingPipelineExtend}
+                reloadPipeline={(refresh: string) => {
+                  getProjectPipelineDetail(refresh);
                 }}
               />
               <Container disableContentPaddings>

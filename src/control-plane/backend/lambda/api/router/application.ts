@@ -16,7 +16,7 @@ import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isApplicationExisted, isProjectExisted, isRequestIdExisted, isValidAppId, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { ApplicationServ } from '../service/application';
 
-const router_app = express.Router();
+const router_app: express.Router = express.Router();
 const appServ: ApplicationServ = new ApplicationServ();
 
 router_app.get(
@@ -76,6 +76,17 @@ router_app.delete(
     return appServ.delete(req, res, next);
   });
 
+router_app.put(
+  '/:id/timezone',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId')
+      .custom(isProjectExisted),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return appServ.updateTimezone(req, res, next);
+  });
 
 export {
   router_app,

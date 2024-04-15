@@ -1,0 +1,182 @@
+{
+  "event_timestamp" : "2024-01-10 06:13:50",
+  "event_id" : "55384aaeda62c5b20a462076ec59f3f5-0-1704867229-9",
+  "event_time_msec" : 1704867230000,
+  "event_name" : "_user_engagement",
+  "event_value" : 0.0,
+  "event_value_currency" : null,
+  "event_bundle_sequence_id" : null,
+  "ingest_time_msec" : 1704867230000,
+  "device_mobile_brand_name" : "Not_A Brand",
+  "device_mobile_model_name" : "",
+  "device_manufacturer" : null,
+  "device_carrier" : null,
+  "device_network_type" : null,
+  "device_operating_system" : "macOS",
+  "device_operating_system_version" : "13.6.3",
+  "device_vendor_id" : null,
+  "device_advertising_id" : null,
+  "device_system_language" : "en-us",
+  "device_time_zone_offset_seconds" : null,
+  "device_ua_browser" : "Microsoft Edge",
+  "device_ua_browser_version" : "120.0.2210.121",
+  "device_ua_os" : "macOS",
+  "device_ua_os_version" : "13.6.3",
+  "device_ua_device" : null,
+  "device_ua_device_category" : null,
+  "device_ua" : {
+    "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+  },
+  "device_screen_width" : 3440,
+  "device_screen_height" : 1440,
+  "device_viewport_width" : null,
+  "device_viewport_height" : null,
+  "geo_continent" : null,
+  "geo_sub_continent" : null,
+  "geo_country" : "US",
+  "geo_region" : "CA",
+  "geo_metro" : null,
+  "geo_city" : null,
+  "geo_locale" : null,
+  "traffic_source_source" : "direct",
+  "traffic_source_medium" : null,
+  "traffic_source_campaign" : "direct",
+  "traffic_source_content" : null,
+  "traffic_source_term" : null,
+  "traffic_source_campaign_id" : null,
+  "traffic_source_clid_platform" : null,
+  "traffic_source_clid" : null,
+  "traffic_source_channel_group" : null,
+  "traffic_source_category" : null,
+  "user_first_touch_time_msec" : null,
+  "app_package_id" : null,
+  "app_version" : null,
+  "app_title" : null,
+  "app_install_source" : null,
+  "platform" : "Web",
+  "project_id" : "sessionStartAppId",
+  "app_id" : "sessionStartAppId",
+  "screen_view_screen_name" : null,
+  "screen_view_screen_id" : null,
+  "screen_view_screen_unique_id" : null,
+  "screen_view_previous_screen_name" : null,
+  "screen_view_previous_screen_id" : null,
+  "screen_view_previous_screen_unique_id" : null,
+  "screen_view_previous_time_msec" : null,
+  "screen_view_engagement_time_msec" : null,
+  "screen_view_entrances" : null,
+  "page_view_page_referrer" : null,
+  "page_view_page_referrer_title" : null,
+  "page_view_previous_time_msec" : null,
+  "page_view_engagement_time_msec" : null,
+  "page_view_page_title" : "Retail Demo Store",
+  "page_view_page_url" : "https://d3mpqdtjegq8im.cloudfront.net/",
+  "page_view_page_url_path" : null,
+  "page_view_page_url_query_parameters" : null,
+  "page_view_hostname" : "d3mpqdtjegq8im.cloudfront.net",
+  "page_view_latest_referrer" : null,
+  "page_view_latest_referrer_host" : null,
+  "page_view_entrances" : null,
+  "app_start_is_first_time" : null,
+  "upgrade_previous_app_version" : null,
+  "upgrade_previous_os_version" : null,
+  "search_key" : null,
+  "search_term" : null,
+  "outbound_link_classes" : null,
+  "outbound_link_domain" : null,
+  "outbound_link_id" : null,
+  "outbound_link_url" : null,
+  "outbound_link" : null,
+  "user_engagement_time_msec" : null,
+  "user_id" : null,
+  "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+  "session_id" : "1704867229",
+  "session_start_time_msec" : 1704867230837,
+  "session_duration" : null,
+  "session_number" : 9,
+  "scroll_engagement_time_msec" : null,
+  "sdk_error_code" : null,
+  "sdk_error_message" : null,
+  "sdk_version" : null,
+  "sdk_name" : null,
+  "app_exception_message" : null,
+  "app_exception_stack" : null,
+  "custom_parameters_json_str" : "{\"x-sst-system_properties\":{\"uc\":\"US\",\"ngs\":null,\"gse\":null,\"gcd\":\"11l1l1l1l1\",\"tft\":1704857853989,\"consent\":{\"consentGrantedState\":{\"ad_storage\":true,\"analytics_storage\":true,\"ad_user_data\":true,\"ad_personalization\":true},\"isUpdate\":false,\"updateType\":\"\"},\"request_start_time_ms\":1704867230837},\"x-ga-tfd\":9376618,\"event_location\":{\"region\":\"CA\",\"country\":\"US\"},\"x-ga-mp2-gcd\":\"11l1l1l1l1\",\"screen_resolution\":\"3440x1440\",\"x-ga-page_id\":1704857853989,\"client_id\":\"cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225\",\"x-ga-dma\":\"0\",\"ip_override\":\"52.94.133.141\",\"x-ga-system_properties\":{\"dbg\":null,\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":\"1\"},\"client_hints\":{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Not_A Brand\",\"version\":\"8.0.0.0\"},{\"brand\":\"Chromium\",\"version\":\"120.0.6099.200\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120.0.2210.121\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"macOS\",\"platform_version\":\"13.6.3\",\"wow64\":false,\"brands\":[{\"brand\":\"Not_A Brand\",\"version\":\"8\"},{\"brand\":\"Chromium\",\"version\":\"120\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120\"}]},\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je4180v9137682176\",\"x-ga-mp2-seg\":\"0\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0\",\"x-ga-measurement_id\":\"G-5HX07RSCP2\",\"x-ga-request_count\":3}",
+  "custom_parameters" : {
+    "client_hints" : {
+      "value" : "{\"architecture\":\"x86\",\"bitness\":\"64\",\"full_version_list\":[{\"brand\":\"Not_A Brand\",\"version\":\"8.0.0.0\"},{\"brand\":\"Chromium\",\"version\":\"120.0.6099.200\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120.0.2210.121\"}],\"mobile\":false,\"model\":\"\",\"platform\":\"macOS\",\"platform_version\":\"13.6.3\",\"wow64\":false,\"brands\":[{\"brand\":\"Not_A Brand\",\"version\":\"8\"},{\"brand\":\"Chromium\",\"version\":\"120\"},{\"brand\":\"Microsoft Edge\",\"version\":\"120\"}]}",
+      "type" : "object"
+    },
+    "client_id" : {
+      "value" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
+      "type" : "string"
+    },
+    "event_location" : {
+      "value" : "{\"region\":\"CA\",\"country\":\"US\"}",
+      "type" : "object"
+    },
+    "ip_override" : {
+      "value" : "52.94.133.141",
+      "type" : "string"
+    },
+    "screen_resolution" : {
+      "value" : "3440x1440",
+      "type" : "string"
+    },
+    "user_agent" : {
+      "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+      "type" : "string"
+    },
+    "x-ga-dma" : {
+      "value" : "0",
+      "type" : "string"
+    },
+    "x-ga-gtm_version" : {
+      "value" : "45je4180v9137682176",
+      "type" : "string"
+    },
+    "x-ga-measurement_id" : {
+      "value" : "G-5HX07RSCP2",
+      "type" : "string"
+    },
+    "x-ga-mp2-gcd" : {
+      "value" : "11l1l1l1l1",
+      "type" : "string"
+    },
+    "x-ga-mp2-seg" : {
+      "value" : "0",
+      "type" : "string"
+    },
+    "x-ga-page_id" : {
+      "value" : "1704857853989",
+      "type" : "number"
+    },
+    "x-ga-protocol_version" : {
+      "value" : "2",
+      "type" : "string"
+    },
+    "x-ga-request_count" : {
+      "value" : "3",
+      "type" : "number"
+    },
+    "x-ga-system_properties" : {
+      "value" : "{\"dbg\":null,\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":\"1\"}",
+      "type" : "object"
+    },
+    "x-ga-tfd" : {
+      "value" : "9376618",
+      "type" : "number"
+    },
+    "x-sst-system_properties" : {
+      "value" : "{\"uc\":\"US\",\"ngs\":null,\"gse\":null,\"gcd\":\"11l1l1l1l1\",\"tft\":1704857853989,\"consent\":{\"consentGrantedState\":{\"ad_storage\":true,\"analytics_storage\":true,\"ad_user_data\":true,\"ad_personalization\":true},\"isUpdate\":false,\"updateType\":\"\"},\"request_start_time_ms\":1704867230837}",
+      "type" : "object"
+    }
+  },
+  "process_info" : {
+    "ingest_time" : "2024-01-10T06:13:50Z",
+    "input_file_name" : "_TEST_INPUT_FILE_NAME_",
+    "rid" : "55384aaeda62c5b20a462076ec59f3f5"
+  },
+  "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+  "ip" : "52.94.133.141"
+}

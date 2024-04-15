@@ -11,93 +11,71 @@
  *  and limitations under the License.
  */
 
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { Context } from 'aws-lambda';
-
-import { checkLoadStatus } from './check-load-status';
-import { CLICKSTREAM_EVENT_ATTR_VIEW_NAME, CLICKSTREAM_LIFECYCLE_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME, CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
-import { sleep } from '../../../common/utils';
-import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { getLatestEmrJobEndTime } from '../../../data-pipeline/utils/utils-common';
+import { WorkflowStatus } from '../../private/constant';
 
-const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
-const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
-const APP_IDS = process.env.APP_IDS!;
-const SLEEP_SEC = process.env.SLEEP_SEC?? '30';
+const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
+
+const sfnClient = new SFNClient({
+  region: REGION,
+  ...aws_sdk_client_common_config,
+});
+
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3BucketPrefix = process.env.PIPELINE_S3_BUCKET_PREFIX!;
-
-const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
+const pipelineEmrStatusS3Prefix = process.env.PIPELINE_EMR_STATUS_S3_PREFIX!;
+const stateMachineArn = process.env.REFRESH_STATE_MACHINE_ARN!;
+const projectId = process.env.PROJECT_ID!;
 
 export const handler = async (_e: any, _c: Context) => {
-
-  const redshiftProps = getRedshiftProps(
-    process.env.REDSHIFT_MODE!,
-    REDSHIFT_DATABASE,
-    REDSHIFT_DATA_API_ROLE_ARN,
-    process.env.REDSHIFT_DB_USER!,
-    process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME!,
-    process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
-  );
-
-  const appIds = APP_IDS.split(',');
-  const queryIds: string[] = [];
 
   const ENABLE_REFRESH = process.env.ENABLE_REFRESH ?? 'false';
   const REFRESH_INTERVAL_MINUTES = process.env.REFRESH_INTERVAL_MINUTES ?? '120';
 
   if (ENABLE_REFRESH === 'true') {
-    for (let rawAppId of appIds) {
-      const schema = rawAppId.replace(/\./g, '_').replace(/-/g, '_');
-      const refreshInfo = await getMVRefreshInfoFromS3(pipelineS3BucketPrefix, REDSHIFT_DATABASE, schema);
+    const refreshInfo = await getMVRefreshInfoFromS3(pipelineS3BucketPrefix);
 
-      if (refreshInfo === undefined || Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000) {
-        const sqlStatementForApp = `
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_DURATION_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_PAGE_ATTR_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_VIEW_NAME};
-          REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_VIEW_NAME};
-        `;
+    if (refreshInfo === undefined
+      || (refreshInfo !== undefined && Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000)) {
+      const latestJobTimestamp = await getLatestEmrJobEndTime(pipelineS3BucketName, pipelineEmrStatusS3Prefix, projectId);
 
-        const sqlStatements = sqlStatementForApp.split(';').map(s => s.trim()).filter(s => s.length > 0);
-        logger.info('sqlStatements', { sqlStatements });
-        const queryId = await executeStatements(
-          redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-        if (queryId) {
-          queryIds.push(queryId);
-        }
+      const input = JSON.stringify({
+        latestJobTimestamp: latestJobTimestamp,
+      });
 
-        logger.info(`Refresh mv for app: ${schema} finished`);
+      const startExecutionCommand = new StartExecutionCommand({
+        stateMachineArn,
+        input,
+      });
 
-        await updateMVRefreshInfoToS3(Date.now(), pipelineS3BucketPrefix, REDSHIFT_DATABASE, schema);
-      } else {
-        logger.info(`Skip mv refresh for app: ${schema}`);
-      }
+      await sfnClient.send(startExecutionCommand);
+
+      logger.info('Trigger to refresh mv and sp');
+
+      await updateMVRefreshInfoToS3(Date.now(), pipelineS3BucketPrefix);
+      return {
+        status: WorkflowStatus.SUCCEED,
+      };
+    } else {
+      logger.info(`Skip mv and sp refresh because the interval ${REFRESH_INTERVAL_MINUTES} minutes is not reached yet.`);
     }
-  }
-
-  const execInfo = [];
-  await sleep(1000 * parseInt(SLEEP_SEC));
-
-  for (const queryId of queryIds) {
-    const statusRes = await checkLoadStatus(queryId);
-    logger.info(`queryId: ${queryId} ${statusRes.Status}`);
-    execInfo.push({
-      queryId,
-      status: statusRes.Status,
-    });
+  } else {
+    logger.info('Skip mv and sp refresh because ENABLE_REFRESH is not true.');
   }
   return {
-    execInfo,
+    status: WorkflowStatus.SKIP,
   };
 
 };
 
-async function getMVRefreshInfoFromS3(pipelineS3Prefix: string, projectId: string, appId: string) {
+async function getMVRefreshInfoFromS3(pipelineS3Prefix: string) {
   try {
-    const s3Key = getMVRefreshInfoKey(pipelineS3Prefix, projectId, appId);
+    const s3Key = getMVRefreshInfoKey(pipelineS3Prefix);
     return await readS3ObjectAsJson(
       pipelineS3BucketName,
       s3Key,
@@ -108,12 +86,12 @@ async function getMVRefreshInfoFromS3(pipelineS3Prefix: string, projectId: strin
   }
 }
 
-async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix: string, projectId: string, appId: string) {
+async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix: string) {
   const info = {
     lastRefreshTime: lastRefreshTime,
   };
   try {
-    const s3Key = getMVRefreshInfoKey(pipelineS3Prefix, projectId, appId);
+    const s3Key = getMVRefreshInfoKey(pipelineS3Prefix);
     await putStringToS3(JSON.stringify(info), pipelineS3BucketName, s3Key);
   } catch (error) {
     logger.error('Error when write mv refresh info data to s3:', { error });
@@ -121,6 +99,6 @@ async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix
   }
 }
 
-export function getMVRefreshInfoKey(bucketPrefix: string, projectId: string, appId: string) {
-  return `${bucketPrefix}refresh-mv-info/${projectId}/${appId}/refresh-time-info.json`;
+export function getMVRefreshInfoKey(bucketPrefix: string) {
+  return `${bucketPrefix}refresh-mv-info/${projectId}/refresh-time-info.json`;
 }

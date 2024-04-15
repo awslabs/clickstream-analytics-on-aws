@@ -12,12 +12,11 @@
  */
 
 import crypto from 'crypto';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   QuickSight,
   DashboardSourceEntity,
-  AnalysisSourceEntity,
   CreateDataSetCommandOutput,
-  CreateAnalysisCommandOutput,
   CreateDashboardCommandOutput,
   ResourceNotFoundException,
   ColumnGroup,
@@ -44,14 +43,12 @@ import {
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { ANALYSIS_ADMIN_PERMISSION_ACTIONS, DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../../../../common/constant';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep } from '../../../../common/utils';
+import { sleep, timezoneJsonArrayToDict } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
-  waitForAnalysisChangeCompleted,
   waitForAnalysisDeleteCompleted,
   waitForDashboardChangeCompleted,
   waitForDashboardDeleteCompleted,
@@ -82,10 +79,12 @@ type ResourceCommonParams = {
   schema: string;
   sharePrincipalArn: string;
   ownerPrincipalArn: string;
+  timezoneDict: { [key: string]: string };
 }
 
 export type MustacheParamType = {
   schema: string;
+  timezone: string;
 }
 
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {
@@ -100,41 +99,57 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   const sharePrincipalArn = props.quickSightSharePrincipalArn;
   const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
+  let timezone = props.timezone;
+  if (timezone === undefined || timezone === '') {
+    timezone = '[]';
+  }
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
+
   if (event.RequestType === 'Create') {
-    return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event);
+    return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Update' ) {
-    return _onUpdate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event);
+    return _onUpdate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Delete' ) {
     return _onDelete(quickSight, awsAccountId, event);
   } else {
     logger.warn('Invalid request type.');
   }
-
 };
 
 const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
-  event: CloudFormationCustomResourceCreateEvent): Promise<CdkCustomResourceResponse> => {
+  event: CloudFormationCustomResourceCreateEvent,
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
 
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   let dashboards = [];
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
-    for (const schemaName of databaseSchemaNames.split(',')) {
-      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-      logger.info('creating quicksight dashboard with params', {
-        schemaName: schemaName,
-        dashboardDefProps: dashboardDefProps,
-      });
+    try {
+      for (const schemaName of databaseSchemaNames.split(',')) {
+        const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+        logger.info('creating quicksight dashboard with params', {
+          schemaName: schemaName,
+          dashboardDefProps: dashboardDefProps,
+        });
 
-      const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
-        schemaName,
-        dashboardDefProps);
+        const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
+          schemaName,
+          dashboardDefProps, timezoneDict);
 
-      dashboards.push({
-        appId: schemaName,
-        dashboardId: dashboard?.DashboardId,
-      });
-    };
+        dashboards.push({
+          appId: schemaName,
+          dashboardId: dashboard?.DashboardId,
+        });
+      };
+    } catch (err: any) {
+      logger.error('Create QuickSight dashboard failed', err);
+      //remove created Quicksight resources
+      for (const schemaName of databaseSchemaNames.split(',')) {
+        await deleteQuickSightDashboard(quickSight, awsAccountId, props.dashboardDefProps.databaseName, schemaName, props.dashboardDefProps);
+      }
+      throw err;
+    }
   } else {
     logger.info('empty database schema.');
   }
@@ -158,7 +173,7 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
         dashboardDefProps: dashboardDefProps,
       });
 
-      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, schemaName, dashboardDefProps);
+      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, dashboardDefProps.databaseName, schemaName, dashboardDefProps);
       logger.info(`delete dashboard: ${dashboard?.DashboardId}`);
     };
   } else {
@@ -167,32 +182,48 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
 };
 
 const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
-  event: CloudFormationCustomResourceUpdateEvent): Promise<CdkCustomResourceResponse> => {
+  event: CloudFormationCustomResourceUpdateEvent,
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   const oldProps = event.OldResourceProperties as QuicksightCustomResourceLambdaPropsType;
 
   let dashboards = [];
+  let databaseSchemaNameArray: string[] = [];
+  let oldDatabaseSchemaNameArray: string[] = [];
+  let updateSchemas: string[] = [];
+  let deleteSchemas: string[] = [];
+  let createSchemas: string[] = [];
 
-  const databaseSchemaNameArray: string[] = [];
-  if ( props.schemas.trim().length > 0 ) {
-    databaseSchemaNameArray.push(...props.schemas.trim().split(','));
-  };
-
-  const oldDatabaseSchemaNameArray: string[] = [];
-  if ( oldProps.schemas.trim().length > 0 ) {
-    oldDatabaseSchemaNameArray.push(...oldProps.schemas.trim().split(','));
-  };
-
-  logger.info('Filtering params:', {
-    propsSchemas: props.schemas,
-    oldPropsSchemas: oldProps.schemas,
-    databaseSchemaNameArray: databaseSchemaNameArray,
-    oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
+  const deleteDatabase = oldProps.dashboardDefProps.databaseName;
+  logger.info('database:', {
+    database: props.dashboardDefProps.databaseName,
+    oldDatabase: oldProps.dashboardDefProps.databaseName,
   });
 
-  const updateSchemas = databaseSchemaNameArray.filter(item => oldDatabaseSchemaNameArray.includes(item));
-  const deleteSchemas = oldDatabaseSchemaNameArray.filter(item => !databaseSchemaNameArray.includes(item));
-  const createSchemas = databaseSchemaNameArray.filter(item => !oldDatabaseSchemaNameArray.includes(item));
+  if (props.dashboardDefProps.databaseName !== oldProps.dashboardDefProps.databaseName) {
+    createSchemas.push(...props.schemas.trim().split(','));
+    deleteSchemas.push(...oldProps.schemas.trim().split(','));
+  } else {
+    if ( props.schemas.trim().length > 0 ) {
+      databaseSchemaNameArray.push(...props.schemas.trim().split(','));
+    };
+
+    if ( oldProps.schemas.trim().length > 0 ) {
+      oldDatabaseSchemaNameArray.push(...oldProps.schemas.trim().split(','));
+    };
+
+    updateSchemas = databaseSchemaNameArray.filter(item => oldDatabaseSchemaNameArray.includes(item));
+    deleteSchemas = oldDatabaseSchemaNameArray.filter(item => !databaseSchemaNameArray.includes(item));
+    createSchemas = databaseSchemaNameArray.filter(item => !oldDatabaseSchemaNameArray.includes(item));
+
+    logger.info('Filtering params:', {
+      propsSchemas: props.schemas,
+      oldPropsSchemas: oldProps.schemas,
+      databaseSchemaNameArray: databaseSchemaNameArray,
+      oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
+    });
+  }
 
   logger.info('schemas to process', {
     updateSchemas: updateSchemas,
@@ -200,65 +231,105 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     createSchemas: createSchemas,
   });
 
-  for (const schemaName of updateSchemas) {
-    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-    const oldDashboardDefProps: QuickSightDashboardDefProps = oldProps.dashboardDefProps;
-
-    logger.info('Updating schema', {
-      schemaName: schemaName,
-      dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: oldDashboardDefProps,
-    });
-
-    const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
-      schemaName,
-      dashboardDefProps, oldDashboardDefProps, ownerPrincipalArn, sharePrincipalArn);
-
-    dashboards.push({
-      appId: schemaName,
-      dashboardId: dashboard?.DashboardId,
-    });
+  const createdQuickSightResources: CreatedQuickSightResources = {
+    createdSchemas: [],
+    createdDataSets: [],
   };
 
-  //create before delete
-  for (const schemaName of createSchemas) {
-    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-    const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
-      schemaName,
-      dashboardDefProps);
+  try {
+    for (const schemaName of updateSchemas) {
+      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      const oldDashboardDefProps: QuickSightDashboardDefProps = oldProps.dashboardDefProps;
 
-    logger.info('Creating schema', {
-      schemaName: schemaName,
-      dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: dashboard?.DashboardId,
-    });
+      logger.info('Updating schema', {
+        schemaName: schemaName,
+        dashboardDefProps: dashboardDefProps,
+        oldDashboardDefProps: oldDashboardDefProps,
+      });
 
-    dashboards.push({
-      appId: schemaName,
-      dashboardId: dashboard?.DashboardId,
-    });
-  };
+      const commonParams: ResourceCommonParams = {
+        awsAccountId: awsAccountId,
+        databaseName: dashboardDefProps.databaseName,
+        schema: schemaName,
+        sharePrincipalArn: sharePrincipalArn,
+        ownerPrincipalArn: ownerPrincipalArn,
+        timezoneDict: timezoneDict,
+      };
 
-  for (const schemaName of deleteSchemas) {
-    const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
+        dashboardDefProps, oldDashboardDefProps,
+        createdQuickSightResources);
 
-    const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
-      schemaName,
-      dashboardDefProps);
+      dashboards.push({
+        appId: schemaName,
+        dashboardId: dashboard?.DashboardId,
+      });
+    };
 
-    logger.info('Deleting schema', {
-      schemaName: schemaName,
-      dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: dashboard?.DashboardId,
-    });
+    for (const schemaName of createSchemas) {
+      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      createdQuickSightResources.createdSchemas.push({
+        schema: schemaName,
+        dashboardDefProps: dashboardDefProps,
+      });
+      const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
+        schemaName,
+        dashboardDefProps,
+        timezoneDict,
+      );
 
-  };
+      logger.info('Creating schema', {
+        schemaName: schemaName,
+        dashboardDefProps: dashboardDefProps,
+        oldDashboardDefProps: dashboard?.DashboardId,
+      });
+
+      dashboards.push({
+        appId: schemaName,
+        dashboardId: dashboard?.DashboardId,
+      });
+    };
+
+    for (const schemaName of deleteSchemas) {
+      const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
+      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
+        deleteDatabase,
+        schemaName,
+        dashboardDefProps);
+      logger.info('Deleting schema', {
+        schemaName: schemaName,
+        dashboardDefProps: dashboardDefProps,
+        oldDashboardDefProps: dashboard?.DashboardId,
+      });
+
+    };
+  } catch (err: any) {
+    logger.error('Update QuickSight dashboard failed', err);
+    //remove created Quicksight resources
+    await cleanQuickSightResource(createdQuickSightResources, quickSight, awsAccountId, props.dashboardDefProps.databaseName);
+
+    throw err;
+  }
 
   return {
     Data: {
       dashboards: JSON.stringify(dashboards),
     },
   };
+};
+
+const cleanQuickSightResource = async (createdQuickSightResources: CreatedQuickSightResources, quickSight: QuickSight,
+  awsAccountId: string, databaseName: string) => {
+  if (createdQuickSightResources.createdSchemas.length > 0) {
+    for (const schema of createdQuickSightResources.createdSchemas) {
+      await deleteQuickSightDashboard(quickSight, awsAccountId, schema.dashboardDefProps.databaseName, schema.schema, schema.dashboardDefProps);
+    }
+  }
+  if (createdQuickSightResources.createdDataSets.length > 0) {
+    for (const dataSet of createdQuickSightResources.createdDataSets) {
+      await deleteDataSet(quickSight, awsAccountId, dataSet.schema, databaseName, dataSet.dataSetProps);
+    }
+  }
 };
 
 const getFolderPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
@@ -324,23 +395,6 @@ const getDataSourcePermission = (sharePrincipalArn: string, ownerPrincipalArn: s
   ];
 };
 
-const getAnalysisPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
-  if (sharePrincipalArn === ownerPrincipalArn) {
-    return [
-      {
-        Principal: sharePrincipalArn,
-        Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-      },
-    ];
-  }
-  return [
-    {
-      Principal: ownerPrincipalArn,
-      Actions: ANALYSIS_ADMIN_PERMISSION_ACTIONS,
-    },
-  ];
-};
-
 const getDashboardPermission = (sharePrincipalArn: string, ownerPrincipalArn: string): ResourcePermission[] => {
   if (sharePrincipalArn === ownerPrincipalArn) {
     return [
@@ -367,7 +421,9 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   sharePrincipalArn: string,
   ownerPrincipalArn: string,
   schema: string,
-  dashboardDef: QuickSightDashboardDefProps)
+  dashboardDef: QuickSightDashboardDefProps,
+  timezoneDict: { [key: string]: string },
+)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
@@ -379,6 +435,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     sharePrincipalArn,
     databaseName,
     schema,
+    timezoneDict,
   };
 
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
@@ -413,9 +470,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     });
   }
 
-  const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-  logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
-
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
@@ -440,29 +494,43 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
 const deleteQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
+  deleteDatabase: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<DeleteDashboardCommandOutput|undefined> => {
-  // Delete Folder
-  await deleteFolder(quickSight, accountId, dashboardDef.databaseName, schema);
 
-  // Delete Dashboard
-  const dashboardId = buildDashBoardId(dashboardDef.databaseName, schema);
-  const result = deleteDashboardById(quickSight, accountId, dashboardId.id);
+  try {
+    // Delete Folder
+    await deleteFolder(quickSight, accountId, deleteDatabase, schema);
 
-  //delete Analysis
-  const analysisId = buildAnalysisId(dashboardDef.databaseName, schema);
-  await deleteAnalysisById(quickSight, accountId, analysisId.id);
+    // Delete Dashboard
+    const dashboardId = buildDashBoardId(deleteDatabase, schema);
+    const result = await deleteDashboardById(quickSight, accountId, dashboardId.id);
 
-  //delete DataSets
-  const dataSets = dashboardDef.dataSets;
-  const databaseName = dashboardDef.databaseName;
-  for ( const dataSet of dataSets) {
-    await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    //delete Analysis
+    const analysisId = buildAnalysisId(deleteDatabase, schema);
+    await deleteAnalysisById(quickSight, accountId, analysisId.id);
+
+    //delete DataSets
+    const dataSets = dashboardDef.dataSets;
+    const databaseName = deleteDatabase;
+    for ( const dataSet of dataSets) {
+      await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    }
+    return result;
+
+  } catch (err: any) {
+    logger.error('Delete QuickSight dashboard failed, skip retry. Manually delete it if necessary.', err);
+    logger.error('Delete fail at:', {
+      deleteDatabase,
+      schema,
+    });
+
+    return {
+      $metadata: {},
+      DashboardId: 'NULL',
+    };
   }
-
-  return result;
-
 };
 
 const getMemberType = function(memberArn: string, memberId: string): MemberType | undefined {
@@ -507,13 +575,25 @@ const getLatestTemplateVersion = async (quickSight: QuickSight,
   return maxNumber;
 };
 
-const updateQuickSightDashboard = async (quickSight: QuickSight,
-  accountId: string,
-  schema: string,
+export type CreatedQuickSightDataSets = {
+  schema: string;
+  dataSetProps: DataSetProps;
+}
+
+export type CreatedQuickSightDashboards = {
+  schema: string;
+  dashboardDefProps: QuickSightDashboardDefProps;
+}
+
+export type CreatedQuickSightResources = {
+  createdSchemas: CreatedQuickSightDashboards[];
+  createdDataSets: CreatedQuickSightDataSets[];
+}
+
+const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   dashboardDef: QuickSightDashboardDefProps,
   oldDashboardDef: QuickSightDashboardDefProps,
-  ownerPrincipalArn : string,
-  sharePrincipalArn : string,
+  createdQuickSightResources: CreatedQuickSightResources,
 )
 : Promise<UpdateDashboardCommandOutput|undefined> => {
 
@@ -521,15 +601,12 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   const dataSets = dashboardDef.dataSets;
   const oldDataSets = oldDashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
-  const commonParams: ResourceCommonParams = {
-    awsAccountId: accountId,
-    ownerPrincipalArn,
-    sharePrincipalArn,
-    databaseName,
-    schema,
-  };
 
-  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn,
+    commonParams.awsAccountId,
+    commonParams.ownerPrincipalArn,
+    commonParams.sharePrincipalArn,
+  );
 
   const oldDataSetTableNames: string[] = [];
   const dataSetTableNames: string[] = [];
@@ -555,6 +632,10 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
       createdDataset = await updateDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     } else {
       logger.info(`create data set : ${dataSet.tableName}`);
+      createdQuickSightResources.createdDataSets.push({
+        schema: commonParams.schema,
+        dataSetProps: dataSet,
+      });
       createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     }
     datasetRefs.push({
@@ -566,10 +647,10 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   //remove unused datasets
   for (const dataSet of needDeleteDataSets) {
     logger.info(`delete data set : ${dataSet.tableName}`);
-    await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    await deleteDataSet(quickSight, commonParams.awsAccountId, commonParams.schema, databaseName, dataSet);
   }
 
-  const latestVersion = await getLatestTemplateVersion(quickSight, accountId, dashboardDef.templateId);
+  const latestVersion = await getLatestTemplateVersion(quickSight, commonParams.awsAccountId, dashboardDef.templateId);
 
   logger.info('template info', {
     templateId: dashboardDef.templateId,
@@ -588,15 +669,14 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
 
   const analysisExist = await existAnalysis(quickSight, commonParams.awsAccountId, analysisId.id);
   if (analysisExist) {
-    const analysis = await updateAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-    logger.info(`Analysis ${analysis?.AnalysisId} update completed.`);
+    await deleteAnalysisById(quickSight, commonParams.awsAccountId, analysisId.id);
+    logger.info(`Analysis ${analysisId.id} delete completed.`);
   } else {
-    const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-    logger.info(`Analysis ${analysis?.AnalysisId} create completed.`);
-
-    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, analysisId.id.replace(`/${analysisId.idSuffix}/g`, ''), analysis?.AnalysisId);
+    const prefix = analysisId.id.replace(analysisId.idSuffix, '');
+    const foundAnalysisId = await findAnalysisWithPrefix(quickSight, commonParams.awsAccountId, prefix, analysisId.id);
     if (foundAnalysisId !== undefined) {
       await deleteAnalysisById(quickSight, commonParams.awsAccountId, foundAnalysisId);
+      logger.info(`Analysis ${analysisId.id} (old version) delete completed.`);
     }
   }
 
@@ -607,6 +687,10 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
   } else {
+    createdQuickSightResources.createdSchemas.push({
+      schema: commonParams.schema,
+      dashboardDefProps: dashboardDef,
+    });
     dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
 
@@ -693,6 +777,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
+      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
@@ -790,33 +875,6 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
   } catch (err: any) {
     logger.error('Create QuickSight dataset failed', err);
-    throw err;
-  }
-};
-
-const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
-: Promise<CreateAnalysisCommandOutput|undefined> => {
-
-  try {
-    const identifier = buildAnalysisId(commonParams.databaseName, commonParams.schema);
-    const analysisId = identifier.id;
-
-    logger.info(`start to create analysis: ${analysisId}`);
-    const analysis = await quickSight.createAnalysis({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
-      Permissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
-      SourceEntity: sourceEntity,
-    });
-    await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-    logger.info('Create analysis finished', { Id: analysisId });
-
-    return analysis;
-
-  } catch (err: any) {
-    logger.error('Create QuickSight analysis failed due to', err);
     throw err;
   }
 };
@@ -985,6 +1043,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
+      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
@@ -1092,40 +1151,6 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
   }
 };
 
-const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
-  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
-: Promise<CreateAnalysisCommandOutput|undefined> => {
-
-  try {
-    const identifier = buildAnalysisId(commonParams.databaseName, commonParams.schema);
-    const analysisId = identifier.id;
-
-    logger.info('start to update analysis');
-    const analysis = await quickSight.updateAnalysis({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
-      SourceEntity: sourceEntity,
-    });
-    logger.info(`update analysis finished. Id: ${analysisId}`);
-
-    await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-    await quickSight.updateAnalysisPermissions({
-      AwsAccountId: commonParams.awsAccountId,
-      AnalysisId: analysisId,
-      GrantPermissions: getAnalysisPermission(commonParams.sharePrincipalArn, commonParams.ownerPrincipalArn),
-    });
-
-    logger.info(`grant analysis permissions to new principal ${commonParams.ownerPrincipalArn}`);
-
-    return analysis;
-
-  } catch (err: any) {
-    logger.error(`Update QuickSight analysis failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
 const publishNewVersionDashboard = async(quickSight: QuickSight, dashboardId: string,
   versionNumber: string, awsAccountId: string) => {
   let cnt = 0;
@@ -1177,7 +1202,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
 
     const versionNumber = dashboard.VersionArn?.substring(dashboard.VersionArn?.lastIndexOf('/') + 1);
     logger.info(`quicksight versionNumber: ${versionNumber}`);
-    await publishNewVersionDashboard(quickSight, dashboardId, versionNumber!, commonParams.awsAccountId);
+    await publishNewVersionDashboard(quickSight, dashboardId, versionNumber ?? '1', commonParams.awsAccountId);
     logger.info('Publish new dashboard version finished.');
 
     await quickSight.updateDashboardPermissions({

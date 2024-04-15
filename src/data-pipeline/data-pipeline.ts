@@ -11,14 +11,16 @@
  *  and limitations under the License.
  */
 
+import path from 'path';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
-import { Fn, Stack, CfnResource, Duration } from 'aws-cdk-lib';
+import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import {
   InitPartitionCustomResourceProps,
@@ -27,13 +29,13 @@ import {
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
 import { createMetricsWidget } from './utils/metrics';
-import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
-import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
+import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
+import { SolutionInfo } from '../common/solution-info';
+import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
@@ -95,7 +97,7 @@ export class DataPipelineConstruct extends Construct {
 
     this.serviceSecurityGroup = createSGForEgressToAwsService(this, 'LambdaEgressToAWSServiceSG', props.vpc);
 
-    const dlQueue = this.createDLQueue();
+    const dlQueue = createDLQueue(this, 'ClickstreamDataPipelineDLQ');
 
     const pluginPrefix = Fn.join('', [this.props.pipelineS3Prefix, Fn.join('/', [
       'plugins',
@@ -104,18 +106,32 @@ export class DataPipelineConstruct extends Construct {
       'built-in',
     ])]);
 
+    const version = SolutionInfo.SOLUTION_VERSION_SHORT;
+
+    let commonLibCommands = [
+      'cd /tmp/data-pipeline/etl-common/',
+      `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
+    ];
+
     const {
       entryPointJar,
       jars: builtInJars,
       files: builtInFiles,
-    } = uploadBuiltInSparkJarsAndFiles(
+    } = uploadBuiltInJarsAndRemoteFiles(
       scope,
-      this.props.pipelineS3Bucket,
-      pluginPrefix,
+      {
+        sourcePath: path.resolve(__dirname, '..'), // src/ directory
+        buildDirectory: path.join( 'data-pipeline', 'spark-etl'),
+        jarName: 'spark-etl',
+        shadowJar: false,
+        destinationBucket: this.props.pipelineS3Bucket,
+        destinationKeyPrefix: pluginPrefix,
+        commonLibs: commonLibCommands,
+      },
     );
 
     const s3PathPluginJars = [builtInJars];
-    const s3PathPluginFiles = [builtInFiles];
+    const s3PathPluginFiles = [...builtInFiles];
 
     if (props.s3PathPluginJars) {
       // Custom resource - copies Data Processing jars and files to pipelineS3Bucket
@@ -306,19 +322,5 @@ export class DataPipelineConstruct extends Construct {
       })],
 
     });
-  }
-
-  private createDLQueue() {
-    const sqs = new Queue(this, 'ClickstreamDataPipelineDLQ', {
-      encryption: QueueEncryption.SQS_MANAGED,
-      enforceSSL: true,
-    });
-
-    addCfnNagSuppressRules((sqs.node.defaultChild as CfnResource), [{
-      id: 'W48',
-      reason: 'SQS already set SQS_MANAGED encryption',
-    }]);
-
-    return sqs;
   }
 }

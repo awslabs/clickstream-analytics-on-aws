@@ -11,11 +11,13 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '@aws/clickstream-base-lib';
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
-import { ApiFail, ApiSuccess, FetchType, PipelineStackType } from '../common/types';
+import { PipelineStackType } from '../common/model-ln';
+import { httpsAgent } from '../common/sdk-client-config-ln';
+import { ApiFail, ApiSuccess, FetchType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
@@ -325,7 +327,7 @@ export class EnvironmentServ {
     }
     const pipeline = new CPipeline(latestPipeline);
     if (type === FetchType.PIPELINE_ENDPOINT) {
-      const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
+      const ingestionOutputs = pipeline.getStackOutputBySuffixes(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_URL_SUFFIX,
@@ -333,7 +335,7 @@ export class EnvironmentServ {
       );
       url = ingestionOutputs.get(OUTPUT_INGESTION_SERVER_URL_SUFFIX) ?? '';
     } else if (type === FetchType.PIPELINE_DNS) {
-      const ingestionOutputs = await pipeline.getStackOutputBySuffixes(
+      const ingestionOutputs = pipeline.getStackOutputBySuffixes(
         PipelineStackType.INGESTION,
         [
           OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
@@ -363,6 +365,7 @@ export class EnvironmentServ {
       }
       const response = await fetch(url, {
         method: 'GET',
+        agent: httpsAgent,
       });
       const data = await response.text();
       return res.json(new ApiSuccess({

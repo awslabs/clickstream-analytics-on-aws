@@ -24,8 +24,9 @@ import {
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
+import { PipelineStatusType } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
-import { KeyVal, PipelineStatusType } from '../../common/types';
+import { KeyVal } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
@@ -396,7 +397,7 @@ export class DynamoDbStore implements ClickStreamStore {
               projectId: { S: pipeline.projectId },
               region: { S: pipeline.region },
               dataCollectionSDK: { S: pipeline.dataCollectionSDK },
-              status: marshallPipeline.status,
+              statusType: { S: pipeline.statusType ?? PipelineStatusType.UPDATING },
               tags: marshallPipeline.tags,
               network: marshallPipeline.network,
               bucket: marshallPipeline.bucket,
@@ -404,9 +405,10 @@ export class DynamoDbStore implements ClickStreamStore {
               dataProcessing: marshallPipeline.dataProcessing ?? { M: {} },
               dataModeling: marshallPipeline.dataModeling ?? { M: {} },
               reporting: marshallPipeline.reporting ?? { M: {} },
+              timezone: marshallPipeline.timezone ?? { L: [] },
               workflow: marshallPipeline.workflow ?? { M: {} },
-              executionName: { S: pipeline.executionName ?? '' },
-              executionArn: { S: pipeline.executionArn ?? '' },
+              executionDetail: marshallPipeline.executionDetail ?? { M: {} },
+              stackDetails: marshallPipeline.stackDetails ?? { L: [] },
               templateVersion: { S: pipeline.templateVersion ?? '' },
               lastAction: { S: pipeline.lastAction ?? 'Create' },
               version: { S: Date.now().toString() },
@@ -469,7 +471,7 @@ export class DynamoDbStore implements ClickStreamStore {
               projectId: { S: curPipeline.projectId },
               region: { S: curPipeline.region },
               dataCollectionSDK: { S: curPipeline.dataCollectionSDK },
-              status: marshallCurPipeline.status,
+              statusType: { S: curPipeline.statusType ?? PipelineStatusType.UPDATING },
               tags: marshallCurPipeline.tags,
               network: marshallCurPipeline.network,
               bucket: marshallCurPipeline.bucket,
@@ -477,17 +479,18 @@ export class DynamoDbStore implements ClickStreamStore {
               dataProcessing: marshallCurPipeline.dataProcessing,
               dataModeling: marshallCurPipeline.dataModeling,
               reporting: marshallCurPipeline.reporting,
-              workflow: marshallCurPipeline.workflow ?? { M: {} },
-              executionName: { S: curPipeline.executionName ?? '' },
-              executionArn: { S: curPipeline.executionArn ?? '' },
+              timezone: marshallCurPipeline.timezone,
+              workflow: marshallCurPipeline.workflow,
+              executionDetail: marshallPipeline.executionDetail,
+              stackDetails: marshallPipeline.stackDetails,
               templateVersion: { S: curPipeline.templateVersion ?? '' },
               lastAction: { S: curPipeline.lastAction ?? '' },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
-              operator: { S: pipeline.operator ?? '' },
-              deleted: { BOOL: pipeline.deleted },
+              operator: { S: pipeline.operator },
+              deleted: { BOOL: true },
             },
           },
         },
@@ -504,7 +507,7 @@ export class DynamoDbStore implements ClickStreamStore {
               '#prefix = :prefix, ' +
               '#region = :region, ' +
               'dataCollectionSDK = :dataCollectionSDK, ' +
-              '#status = :status, ' +
+              '#statusType = :statusType, ' +
               '#tags = :tags, ' +
               '#network = :network, ' +
               '#bucket = :bucket, ' +
@@ -512,9 +515,10 @@ export class DynamoDbStore implements ClickStreamStore {
               'dataProcessing = :dataProcessing, ' +
               'dataModeling = :dataModeling, ' +
               'reporting = :reporting, ' +
+              '#tz = :timezone,' +
               'workflow = :workflow, ' +
-              'executionName = :executionName, ' +
-              'executionArn = :executionArn, ' +
+              'executionDetail = :executionDetail, ' +
+              'stackDetails = :stackDetails, ' +
               'templateVersion = :templateVersion, ' +
               'lastAction = :lastAction, ' +
               'version = :version, ' +
@@ -524,18 +528,19 @@ export class DynamoDbStore implements ClickStreamStore {
             ExpressionAttributeNames: {
               '#prefix': 'prefix',
               '#region': 'region',
-              '#status': 'status',
+              '#statusType': 'statusType',
               '#tags': 'tags',
               '#network': 'network',
               '#bucket': 'bucket',
               '#pipelineOperator': 'operator',
               '#ConditionVersion': 'version',
+              '#tz': 'timezone',
             },
             ExpressionAttributeValues: {
               ':prefix': { S: pipeline.prefix },
               ':region': { S: pipeline.region },
               ':dataCollectionSDK': { S: pipeline.dataCollectionSDK },
-              ':status': marshallPipeline.status,
+              ':statusType': { S: pipeline.statusType ?? PipelineStatusType.UPDATING },
               ':tags': marshallPipeline.tags,
               ':network': marshallPipeline.network,
               ':bucket': marshallPipeline.bucket,
@@ -543,16 +548,17 @@ export class DynamoDbStore implements ClickStreamStore {
               ':dataProcessing': marshallPipeline.dataProcessing,
               ':dataModeling': marshallPipeline.dataModeling,
               ':reporting': marshallPipeline.reporting,
+              ':timezone': marshallPipeline.timezone,
               ':ConditionVersionValue': { S: pipeline.version },
-              ':workflow': marshallPipeline.workflow ?? { M: {} },
-              ':executionName': { S: pipeline.executionName ?? '' },
-              ':executionArn': { S: pipeline.executionArn ?? '' },
+              ':workflow': marshallPipeline.workflow,
+              ':executionDetail': marshallPipeline.executionDetail,
+              ':stackDetails': marshallPipeline.stackDetails,
               ':templateVersion': { S: pipeline.templateVersion ?? '' },
               ':lastAction': { S: pipeline.lastAction ?? '' },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
-              ':operator': { S: pipeline.operator ?? '' },
+              ':operator': { S: pipeline.operator },
             },
           },
         },
@@ -562,61 +568,69 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async updatePipelineAtCurrentVersion(pipeline: IPipeline): Promise<void> {
-    const params: UpdateCommand = new UpdateCommand({
-      TableName: clickStreamTableName,
-      Key: {
-        id: pipeline.projectId,
-        type: pipeline.type,
-      },
-      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
-      // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET ' +
-        'dataCollectionSDK = :dataCollectionSDK, ' +
-        '#status = :status, ' +
-        '#tags = :tags, ' +
-        '#network = :network, ' +
-        '#bucket = :bucket, ' +
-        'ingestionServer = :ingestionServer, ' +
-        'dataProcessing = :dataProcessing, ' +
-        'dataModeling = :dataModeling, ' +
-        'reporting = :reporting, ' +
-        'workflow = :workflow, ' +
-        'executionName = :executionName, ' +
-        'executionArn = :executionArn, ' +
-        'templateVersion = :templateVersion, ' +
-        'lastAction = :lastAction, ' +
-        'updateAt = :updateAt, ' +
-        '#pipelineOperator = :operator ',
-      ExpressionAttributeNames: {
-        '#status': 'status',
-        '#tags': 'tags',
-        '#network': 'network',
-        '#bucket': 'bucket',
-        '#pipelineOperator': 'operator',
-        '#ConditionVersion': 'version',
-      },
-      ExpressionAttributeValues: {
-        ':dataCollectionSDK': pipeline.dataCollectionSDK,
-        ':status': pipeline.status,
-        ':tags': pipeline.tags,
-        ':network': pipeline.network,
-        ':bucket': pipeline.bucket,
-        ':ingestionServer': pipeline.ingestionServer,
-        ':dataProcessing': pipeline.dataProcessing ?? {},
-        ':dataModeling': pipeline.dataModeling ?? {},
-        ':reporting': pipeline.reporting ?? {},
-        ':ConditionVersionValue': pipeline.version,
-        ':workflow': pipeline.workflow ?? {},
-        ':executionName': pipeline.executionName ?? '',
-        ':executionArn': pipeline.executionArn ?? '',
-        ':templateVersion': pipeline.templateVersion ?? '',
-        ':lastAction': pipeline.lastAction ?? '',
-        ':updateAt': pipeline.updateAt,
-        ':operator': pipeline.operator,
-      },
-      ReturnValues: 'ALL_NEW',
-    });
-    await docClient.send(params);
+    try {
+      const params: UpdateCommand = new UpdateCommand({
+        TableName: clickStreamTableName,
+        Key: {
+          id: pipeline.projectId,
+          type: pipeline.type,
+        },
+        ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+        // Define expressions for the new or updated attributes
+        UpdateExpression: 'SET ' +
+          'dataCollectionSDK = :dataCollectionSDK, ' +
+          '#statusType = :statusType, ' +
+          '#tags = :tags, ' +
+          '#network = :network, ' +
+          '#bucket = :bucket, ' +
+          'ingestionServer = :ingestionServer, ' +
+          'dataProcessing = :dataProcessing, ' +
+          'dataModeling = :dataModeling, ' +
+          'reporting = :reporting, ' +
+          '#tz = :timezone,' +
+          'workflow = :workflow, ' +
+          'executionDetail = :executionDetail, ' +
+          'stackDetails = :stackDetails, ' +
+          'templateVersion = :templateVersion, ' +
+          'lastAction = :lastAction, ' +
+          'updateAt = :updateAt, ' +
+          '#pipelineOperator = :operator ',
+        ExpressionAttributeNames: {
+          '#statusType': 'statusType',
+          '#tags': 'tags',
+          '#network': 'network',
+          '#bucket': 'bucket',
+          '#pipelineOperator': 'operator',
+          '#ConditionVersion': 'version',
+          '#tz': 'timezone',
+        },
+        ExpressionAttributeValues: {
+          ':dataCollectionSDK': pipeline.dataCollectionSDK,
+          ':statusType': pipeline.statusType,
+          ':tags': pipeline.tags,
+          ':network': pipeline.network,
+          ':bucket': pipeline.bucket,
+          ':ingestionServer': pipeline.ingestionServer,
+          ':dataProcessing': pipeline.dataProcessing ?? {},
+          ':dataModeling': pipeline.dataModeling ?? {},
+          ':reporting': pipeline.reporting ?? {},
+          ':timezone': pipeline.timezone ?? [],
+          ':ConditionVersionValue': pipeline.version,
+          ':workflow': pipeline.workflow ?? {},
+          ':executionDetail': pipeline.executionDetail ?? {},
+          ':stackDetails': pipeline.stackDetails ?? [],
+          ':templateVersion': pipeline.templateVersion ?? '',
+          ':lastAction': pipeline.lastAction ?? '',
+          ':updateAt': pipeline.updateAt,
+          ':operator': pipeline.operator,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      await docClient.send(params);
+    } catch (err) {
+      logger.error('Failed to update pipeline: ', { err });
+      throw err;
+    }
   };
 
   public async deletePipeline(projectId: string, pipelineId: string, operator: string): Promise<void> {
@@ -636,10 +650,6 @@ export class DynamoDbStore implements ClickStreamStore {
     const records = await scan(input);
     const pipelines = records as IPipeline[];
     for (let index in pipelines) {
-      const status = pipelines[index].status;
-      if (status) {
-        status.status = PipelineStatusType.DELETING;
-      }
       const params: UpdateCommand = new UpdateCommand({
         TableName: clickStreamTableName,
         Key: {
@@ -647,15 +657,14 @@ export class DynamoDbStore implements ClickStreamStore {
           type: pipelines[index].type,
         },
         // Define expressions for the new or updated attributes
-        UpdateExpression: 'SET deleted= :d, #status =:status, #operator= :operator',
+        UpdateExpression: 'SET #statusType =:statusType, #operator= :operator',
         ExpressionAttributeNames: {
-          '#status': 'status',
+          '#statusType': 'statusType',
           '#operator': 'operator',
         },
         ExpressionAttributeValues: {
-          ':d': true,
           ':operator': operator,
-          ':status': status,
+          ':statusType': PipelineStatusType.DELETING,
         },
         ReturnValues: 'ALL_NEW',
       });

@@ -17,6 +17,11 @@ export interface WaitTimeInfo {
   loopCount: number;
 }
 
+export const DEFAULT_WAIT_TIME_INFO: WaitTimeInfo = {
+  waitTime: 30,
+  loopCount: 0,
+};
+
 function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 600) {
   if (loopCount > 4) {
     const additionalTime = (loopCount - 4) * 10;
@@ -27,7 +32,11 @@ function calculateWaitTime(waitTime: number, loopCount: number, maxWaitTime = 60
 }
 
 export function handleBackoffTimeInfo<T, R>(handler: (event: T, context: Context) => Promise<R>) {
-  return async (event: T & { waitTimeInfo: WaitTimeInfo }, context: Context): Promise<R & { waitTimeInfo: WaitTimeInfo }> => {
+  return async (event: T & { waitTimeInfo?: WaitTimeInfo }, context: Context): Promise<R & { waitTimeInfo: WaitTimeInfo }> => {
+    if (event.waitTimeInfo === undefined) {
+      event.waitTimeInfo = DEFAULT_WAIT_TIME_INFO;
+    }
+
     const updatedWaitTimeInfo = calculateWaitTime(event.waitTimeInfo.waitTime, event.waitTimeInfo.loopCount);
 
     const { waitTimeInfo, ...restEvent } = event;

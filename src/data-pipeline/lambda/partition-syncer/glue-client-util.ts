@@ -12,13 +12,13 @@
  */
 
 
+import { PARTITION_APP } from '@aws/clickstream-base-lib';
 import {
   BatchCreatePartitionCommand,
   BatchCreatePartitionCommandInput,
   GlueClient,
   PartitionInput,
 } from '@aws-sdk/client-glue';
-import { PARTITION_APP } from '../../../common/constant';
 import { putStringToS3 } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { SinkTableEnum } from '../../data-pipeline';

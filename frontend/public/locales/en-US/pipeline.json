@@ -149,6 +149,11 @@
     "enableEdpDesc": "The solution provides an auto-generated URL as ingestion endpoint, but you can also use a custom endpoint. Please note, the host name must be registered in Amazon Route53 service",
     "edpSettings": "Ingestion endpoint settings",
     "edpSettingsDesc": "The solution will spin up a web service as an ingestion endpoint to collect data sent from your SDKs.",
+    "networkType": "Network type",
+    "networkTypeGeneral": "General",
+    "networkTypeGeneralDesc": "Subnet contains both public, private and isolated subnets",
+    "networkTypePrivate": "Private",
+    "networkTypePrivateDesc": "Subnet contains only private and isolated subnets",
     "enableHttps": "Enable HTTPS",
     "domainName": "Domain name",
     "domainNameDesc": "Specify a domain name for your ingestion endpoint, the solution will create entry in Route53 for you automatically.",
@@ -165,6 +170,9 @@
     "minSize": "Minimum capacity",
     "maxSize": "Maximum capacity",
     "warmPool": "Warm pool",
+    "ingestionCapacityFargateDesc": "ECS task will be created to process the requests and ingest data each task uses approximately 512 MiB of memory and 0.25vCPUs. 1 task generally can support ~100 requests per second.",
+    "ingestionTypeFargateDesc": "Use if you have tiny, batch, or burst traffic or for zero maintenance overhead.",
+    "ingestionTypeEC2Desc": "Use for large & stable workloads with consistent traffic demands.",
     "subnet": "Subnets",
     "subnetDesc": "Specify the subnets you want the ingestion endpoint to run in",
     "subnetPlaceholder": "Choose the subnet(s)",
@@ -402,6 +410,8 @@
   },
   "upgrade": {
     "title": "Upgrade Pipeline",
-    "tip": "Are you sure you want to upgrade the pipeline to this version?"
+    "tip": "Are you sure you want to upgrade the pipeline to this version?",
+    "needTimezone": "To upgrade the pipeline, please specify a reporting time zone for the app(s) registered in this pipeline.",
+    "needTimezoneWarning": "Once the reporting time zone for the app is configured, it cannot be modified."
   }
 }

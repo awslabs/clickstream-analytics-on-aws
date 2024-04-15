@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -25,7 +26,6 @@ import { getAnalyticsDashboardList } from 'apis/analytics';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 
 interface ISaveToDashboardModalProps {

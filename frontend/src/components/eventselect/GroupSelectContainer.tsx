@@ -24,12 +24,19 @@ interface DropDownContainerProps {
   selectedItem: IAnalyticsItem | null;
   changeSelectItem: (item: IAnalyticsItem) => void;
   loading?: boolean;
+  showDropdownAtTop?: boolean;
 }
 
 const GroupSelectContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
-  const { categories, selectedItem, changeSelectItem, loading } = props;
+  const {
+    categories,
+    selectedItem,
+    changeSelectItem,
+    loading,
+    showDropdownAtTop,
+  } = props;
   const [mouseoverCurrentCategory, setMouseoverCurrentCategory] =
     useState<IAnalyticsItem | null>(selectedItem);
   const [curPreviewOption, setCurPreviewOption] =
@@ -50,7 +57,11 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
   };
 
   return (
-    <div className="cs-dropdown-pop">
+    <div
+      className={classNames('cs-dropdown-pop', {
+        'bottom-100p': showDropdownAtTop,
+      })}
+    >
       <div className="cs-dropdown-pop-wrapper group-select">
         <div className="cs-dropdown-pop-container">
           <div className="cs-dropdown-container">
@@ -64,6 +75,7 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
                       {categories.map((category, index) => {
                         return (
                           <div
+                            role="none"
                             title={category.label}
                             key={identity(index)}
                             className={classNames({
@@ -115,6 +127,7 @@ const GroupSelectContainer: React.FC<DropDownContainerProps> = (
                         ?.subList?.map((item, index) => {
                           return (
                             <div
+                              role="none"
                               title={item.label}
                               key={identity(index)}
                               className={classNames({

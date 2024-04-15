@@ -11,8 +11,6 @@
  *  and limitations under the License.
  */
 
-import { CfnParameter } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
 import {
   QUICKSIGHT_USER_NAME_PATTERN,
   QUICKSIGHT_NAMESPACE_PATTERN,
@@ -22,7 +20,10 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   QUICKSIGHT_USER_ARN_PATTERN,
-} from '../common/constant';
+} from '@aws/clickstream-base-lib';
+import { CfnParameter } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { Parameters } from '../common/parameters';
 
 export function createStackParametersQuickSight(scope: Construct, paramGroups?: any[], paramLabels?: any) {
 
@@ -79,15 +80,6 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'QuickSight Owner Principal Arn',
   };
 
-  const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
-    description: 'Arn of the QuickSight principal, dashboard resource will be share to this principal',
-    type: 'String',
-    allowedPattern: QUICKSIGHT_USER_ARN_PATTERN,
-  });
-  labels[quickSightPrincipalParam.logicalId] = {
-    default: 'QuickSight Principal Arn',
-  };
-
   const quickSightTemplateArnParam = new CfnParameter(scope, 'QuickSightTemplateArnParam', {
     description: 'Arn of the QuickSight template.',
     type: 'String',
@@ -95,6 +87,15 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   });
   labels[quickSightTemplateArnParam.logicalId] = {
     default: 'QuickSight Template Arn',
+  };
+
+  const quickSightTimezoneParam = new CfnParameter(scope, 'QuickSightTimezoneParam', {
+    description: 'The time zone with app id',
+    type: 'String',
+    default: '[]',
+  });
+  labels[quickSightTimezoneParam.logicalId] = {
+    default: 'Dashboard Timezone Setting',
   };
 
   const redshiftDBParam = new CfnParameter(scope, 'RedshiftDBParam', {
@@ -147,10 +148,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Redshift Endpoint Port',
   };
 
-  const redshiftParameterKeyParam = new CfnParameter(scope, 'RedshiftParameterKeyParam', {
-    description: 'Parameter key name which stores redshift user and password.',
-    type: 'String',
-  });
+  const redshiftParameterKeyParam = Parameters.createRedshiftUserKeyParameter(scope);
   labels[redshiftParameterKeyParam.logicalId] = {
     default: 'Parameter Key Name',
   };
@@ -163,8 +161,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightVpcConnectionSGParam.logicalId,
       quickSightVpcConnectionSubnetParam.logicalId,
       quickSightOwnerPrincipalParam.logicalId,
-      quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
+      quickSightTimezoneParam.logicalId,
     ],
   });
 
@@ -186,8 +184,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightVpcConnectionSGParam,
     quickSightVpcConnectionSubnetParam,
     quickSightOwnerPrincipalParam,
-    quickSightPrincipalParam,
     quickSightTemplateArnParam,
+    quickSightTimezoneParam,
     redshiftEndpointParam,
     redshiftDBParam,
     redshiftDefaultDBParam,

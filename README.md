@@ -4,7 +4,7 @@ An end-to-end solution to collect, ingest, analyze, and visualize clickstream da
 
 ## Solution Overview
 
-This solution collects, ingests, analyzes, and visualizes clickstreams from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
+This solution collects, ingests, analyzes, and visualizes clickstream events from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
 
 With this solution, you can quickly configure and deploy a data pipeline that fits your business and technical needs. It provides purpose-built software development kits (SDKs) that automatically collect common events and easy-to-use APIs to report custom events, enabling you to easily send your customers’ clickstream data to the data pipeline in your AWS account. The solution also offers pre-assembled dashboards that visualize key metrics about user lifecycle, including acquisition, engagement, activity, and retention, and adds visibility into user devices and geographies. You can combine user behavior data with business backend data to create a comprehensive data platform and generate insights that drive business growth.
 
@@ -29,9 +29,10 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [Swift][swift-sdk]
 - [Web][web-sdk]
 - [Flutter][flutter-sdk]
-- [React Native][react-native-sdk]
 - [WeChat Mini Program][wechat-sdk]
 - [HTTP API][http-api]
+
+See [this repo][sdk-samples] for different kinds of SDK samples.
 
 ## Deployment
 
@@ -47,7 +48,8 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 - Configure [credential of aws cli][configure-aws-cli]
 - Install Node.js LTS version 18.17.0 or later
 - Install Docker Engine
-- Install the dependencies of the solution by executing the command `yarn install --check-files && npx projen`
+- Install pnpm `npm install -g pnpm@8.15.3`
+- Install the dependencies of the solution by executing the command `pnpm install && pnpm projen && pnpm nx build @aws/clickstream-base-lib`
 - Initialize the CDK toolkit stack into AWS environment (only for deploying via [AWS CDK][aws-cdk] for the first time), and run `npx cdk bootstrap`
 
 #### Deploy the web console
@@ -57,10 +59,48 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 npx cdk deploy cloudfront-s3-control-plane-stack-global --parameters Email=<your email> --require-approval never
 ```
 
+#### Deploy pipeline stacks
+
+```shell
+# deploy the ingestion server with s3 sink
+# 1. check stack name in src/main.ts for other stacks
+# 2. check the stack for required CloudFormation parameters
+npx cdk deploy ingestion-server-s3-stack --parameters ...
+```
+
+#### Deploy local code for updating existing stacks created by the web console
+
+```shell
+# update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh -n modelRedshiftStackName -s Clickstream-DataModelingRedshift-xxx
+# update the existing web console
+bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console> -c
+```
+
 ## Test
 
 ```shell
-yarn test
+pnpm test
+```
+
+## Local development for web console
+
+- Step1: Deploy the solution control plane(create DynamoDB tables, State Machine and other resources). 
+- Step2: Open **Amazon Cognito** console, select the corresponding **User pool**, click the **App integration** tab, select application details in the **App client list**, edit **Hosted UI**, and set a new URL: `http://localhost:3000/signin` into **Allowed callback URLs**.
+- Step3: Goto the folder: `src/control-plane/local`
+
+```shell
+cd src/control-plane/local
+```
+
+```shell
+# run backend server local
+bash start.sh -s backend
+```
+
+```shell
+# run frontend server local
+bash start.sh -s frontend
 ```
 
 ## Security
@@ -119,12 +159,12 @@ Upon successfully cloning the repository into your local development environment
 │   ├── scripts
 │   ├── src
 │   ├── tsconfig.json
-│   └── yarn.lock
 ├── package.json
 ├── sonar-project.properties
 ├── src                                [all backend source code]
 │   ├── alb-control-plane-stack.ts
 │   ├── analytics
+│   ├── base-lib
 │   ├── cloudfront-control-plane-stack.ts
 │   ├── common
 │   ├── control-plane
@@ -154,13 +194,11 @@ Upon successfully cloning the repository into your local development environment
 │   └── utils.ts
 ├── tsconfig.dev.json
 ├── tsconfig.json
-└── yarn.lock
 ```
 
 [android-sdk]: https://github.com/awslabs/clickstream-android
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
 [flutter-sdk]: https://github.com/awslabs/clickstream-flutter
-[react-native-sdk]: https://github.com/awslabs/clickstream-react-native
 [web-sdk]: https://github.com/awslabs/clickstream-web
 [wechat-sdk]: https://github.com/awslabs/clickstream-wechat
 [http-api]: https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/http-api/
@@ -168,3 +206,4 @@ Upon successfully cloning the repository into your local development environment
 [aws-cdk]: https://aws.amazon.com/cdk/
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html
 [doc-deployment]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/deployment.html
+[sdk-samples]: https://github.com/aws-samples/clickstream-sdk-samples

@@ -11,16 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Select, SelectProps } from '@cloudscape-design/components';
+import { ExploreComputeMethod } from '@aws/clickstream-base-lib';
+import { Select } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import ErrorText from 'components/common/ErrorText';
 import { StateContext } from 'context/StateContext';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ExploreAggregationMethod,
-  ExploreComputeMethod,
-} from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
@@ -35,7 +32,7 @@ interface EventItemProps {
   categoryOption: IAnalyticsItem | null;
   calcMethodOption?: IAnalyticsItem | null;
   calcMethodOptions?: IAnalyticsItem[];
-  changeCurCategoryOption: (category: SelectProps.Option | null) => void;
+  changeCurCategoryOption: (category: IAnalyticsItem | null) => void;
   changeCurCalcMethodOption?: (method: IAnalyticsItem | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;
@@ -65,6 +62,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showGroupSelectDropdown, setShowGroupSelectDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
+  const [showDropdownAtTop, setShowDropdownAtTop] = useState(false);
   const defaultComputeMethodOptions: IAnalyticsItem[] = [
     {
       value: ExploreComputeMethod.USER_ID_CNT,
@@ -98,6 +96,19 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       };
     }, [ref]);
   }
+
+  const handleClickEvent = () => {
+    if (!wrapperRef.current) return;
+    const element: any = wrapperRef.current;
+    const distanceToBottom =
+      window.innerHeight - element.getBoundingClientRect().bottom;
+    if (distanceToBottom < 350) {
+      setShowDropdownAtTop(true);
+    } else {
+      setShowDropdownAtTop(false);
+    }
+  };
+
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef);
   return (
@@ -109,16 +120,12 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         })}
       >
         <div
+          role="none"
           className="flex-1 cs-dropdown-event-input"
-          onClick={() => {
+          onClick={(e) => {
             setShowDropdown((prev) => !prev);
             setShowGroupSelectDropdown(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              setShowDropdown((prev) => !prev);
-              setShowGroupSelectDropdown(false);
-            }
+            handleClickEvent();
           }}
         >
           <Select
@@ -146,90 +153,46 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             )}
         </div>
         {isMultiSelect && (
-          <>
-            <div
-              className="second-select-option"
-              title={calcMethodOption?.label}
-              onClick={() => {
-                setShowGroupSelectDropdown((prev) => !prev);
-                setShowDropdown(false);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setShowGroupSelectDropdown((prev) => !prev);
-                  setShowDropdown(false);
-                }
-              }}
-            >
-              <Select selectedOption={calcMethodOption ?? null} />
-              {showGroupSelectDropdown && (
-                <GroupSelectContainer
-                  categories={calcMethodOptions ?? defaultComputeMethodOptions}
-                  selectedItem={calcMethodOption ?? null}
-                  changeSelectItem={(item) => {
-                    if (item) {
-                      const newItem: any = { ...item };
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreComputeMethod.COUNT_PROPERTY
-                      ) {
-                        newItem.label = t('analytics:countGroupLabel', {
+          <div
+            role="none"
+            className="second-select-option"
+            title={calcMethodOption?.label}
+            onClick={(e) => {
+              setShowGroupSelectDropdown((prev) => !prev);
+              setShowDropdown(false);
+              handleClickEvent();
+            }}
+          >
+            <Select selectedOption={calcMethodOption ?? null} />
+            {showGroupSelectDropdown && (
+              <GroupSelectContainer
+                showDropdownAtTop={showDropdownAtTop}
+                categories={calcMethodOptions ?? defaultComputeMethodOptions}
+                selectedItem={calcMethodOption ?? null}
+                changeSelectItem={(item) => {
+                  if (item) {
+                    const newItem: any = { ...item };
+                    if (item.itemType === 'children') {
+                      newItem.label = t(
+                        `analytics:groupLabel.${item.groupName}`,
+                        {
                           label: item.label,
-                        });
-                      }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreAggregationMethod.MIN
-                      ) {
-                        newItem.label = t('analytics:minGroupLabel', {
-                          label: item.label,
-                        });
-                      }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreAggregationMethod.MAX
-                      ) {
-                        newItem.label = t('analytics:maxGroupLabel', {
-                          label: item.label,
-                        });
-                      }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreAggregationMethod.SUM
-                      ) {
-                        newItem.label = t('analytics:sumGroupLabel', {
-                          label: item.label,
-                        });
-                      }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreAggregationMethod.AVG
-                      ) {
-                        newItem.label = t('analytics:avgGroupLabel', {
-                          label: item.label,
-                        });
-                      }
-                      if (
-                        item.itemType === 'children' &&
-                        item.groupName === ExploreAggregationMethod.MEDIAN
-                      ) {
-                        newItem.label = t('analytics:medianGroupLabel', {
-                          label: item.label,
-                        });
-                      }
-                      changeCurCalcMethodOption?.(newItem);
-                    } else {
-                      changeCurCalcMethodOption?.(null);
+                        }
+                      );
                     }
-                  }}
-                />
-              )}
-            </div>
-          </>
+                    changeCurCalcMethodOption?.(newItem);
+                  } else {
+                    changeCurCalcMethodOption?.(null);
+                  }
+                }}
+              />
+            )}
+          </div>
         )}
       </div>
       {showDropdown && (
         <DropDownContainer
+          showDropdownAtTop={showDropdownAtTop}
           loading={loading}
           selectedItem={categoryOption}
           changeSelectItem={(item) => {

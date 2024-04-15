@@ -12,6 +12,10 @@
  */
 
 import {
+  KDS_ON_DEMAND_MODE,
+  KDS_PROVISIONED_MODE,
+} from '@aws/clickstream-base-lib';
+import {
   CfnCondition,
   CfnParameter,
   CfnStack,
@@ -33,6 +37,7 @@ import {
   addCfnNagToStack,
   ruleRolePolicyWithWildcardResources,
 } from '../../common/cfn-nag';
+import { SINK_TYPE_MODE } from '../../common/model';
 
 import { SolutionInfo } from '../../common/solution-info';
 import { getExistVpc } from '../../common/vpc-utils';
@@ -41,6 +46,7 @@ export interface CreateKinesisNestStackProps {
   projectIdParam: CfnParameter;
   vpcIdParam: CfnParameter;
   privateSubnetIdsParam: CfnParameter;
+  sinkType?: string;
   kinesisParams: {
     kinesisDataS3BucketParam: CfnParameter;
     kinesisDataS3PrefixParam: CfnParameter;
@@ -75,9 +81,10 @@ export function createKinesisNestStack(
     scope,
     'onDemandStackCondition',
     {
-      expression:
-        Fn.conditionEquals(streamModeStr, 'ON_DEMAND'),
-
+      expression: Fn.conditionAnd(
+        Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_KDS),
+        Fn.conditionEquals(streamModeStr, KDS_ON_DEMAND_MODE),
+      ),
     },
   );
 
@@ -85,9 +92,10 @@ export function createKinesisNestStack(
     scope,
     'provisionedStackCondition',
     {
-      expression:
-        Fn.conditionEquals(streamModeStr, 'PROVISIONED'),
-
+      expression: Fn.conditionAnd(
+        Fn.conditionEquals(props.sinkType, SINK_TYPE_MODE.SINK_TYPE_KDS),
+        Fn.conditionEquals(streamModeStr, KDS_PROVISIONED_MODE),
+      ),
     },
   );
 

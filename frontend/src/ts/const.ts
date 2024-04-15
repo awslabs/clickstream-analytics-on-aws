@@ -1,5 +1,3 @@
-import { SelectProps } from '@cloudscape-design/components';
-
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -12,6 +10,14 @@ import { SelectProps } from '@cloudscape-design/components';
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { SelectProps } from '@cloudscape-design/components';
+import {
+  ERelationShip,
+  ExtendSegment,
+  IEventSegmentationItem,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
+
 export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
@@ -20,6 +26,7 @@ export const ANALYTICS_NAV_STATUS = 'ClickStreamAnalyticsNavigationStatus';
 export const ANALYTICS_NAV_ITEM = 'ClickStreamAnalyticsNavigationItem';
 export const CLICK_STREAM_USER_DATA = 'ClickStreamAnalyticsUserInformation';
 export const CONFIG_URL = '/aws-exports.json';
+export const LAST_VISIT_URL = 'ClickStreamAnalyticsLastVisitUrl';
 
 export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
   String.fromCharCode(65 + index)
@@ -81,6 +88,7 @@ export enum EPipelineStatus {
   Creating = 'Creating',
   Updating = 'Updating',
   Deleting = 'Deleting',
+  Deleted = 'Deleted',
   Pending = 'Pending',
 }
 
@@ -419,3 +427,144 @@ export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';
 
 export const POSITIVE_INTEGER_REGEX = new RegExp(`${'^$|^[1-9]\\d*$'}`);
 export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);
+export const PERCENTAGE_REGEX = new RegExp(
+  `${'^$|^(100|[1-9]?\\d)$|^(100|[1-9]?\\d)\\.\\d{1,2}$'}`
+);
+
+export enum EIngestionType {
+  Fargate = 'Fargate',
+  EC2 = 'EC2',
+}
+
+export enum ENetworkType {
+  General = 'General',
+  Private = 'Private',
+}
+
+// For segment selection
+
+export enum ConditionType {
+  USER_DONE = 'USER_DONE',
+  USER_NOT_DONE = 'USER_NOT_DONE',
+  USER_DONE_IN_SEQUENCE = 'USER_DONE_IN_SEQUENCE',
+  USER_IS = 'USER_IS',
+  USER_IS_NOT = 'USER_IS_NOT',
+  USER_IN_GROUP = 'USER_IN_GROUP',
+  USER_NOT_IN_GROUP = 'USER_NOT_IN_GROUP',
+}
+
+export const CONDITION_LIST: SelectProps.Option[] = [
+  {
+    label: 'analytics:segment.type.userDone',
+    value: ConditionType.USER_DONE,
+  },
+  {
+    label: 'analytics:segment.type.userNotDone',
+    value: ConditionType.USER_NOT_DONE,
+  },
+  {
+    label: 'analytics:segment.type.doneInSequence',
+    value: ConditionType.USER_DONE_IN_SEQUENCE,
+  },
+  { label: 'analytics:segment.type.userIs', value: ConditionType.USER_IS },
+  {
+    label: 'analytics:segment.type.userIsNot',
+    value: ConditionType.USER_IS_NOT,
+  },
+  {
+    label: 'analytics:segment.type.userInGroup',
+    value: ConditionType.USER_IN_GROUP,
+  },
+  {
+    label: 'analytics:segment.type.userNotInGroup',
+    value: ConditionType.USER_NOT_IN_GROUP,
+  },
+];
+
+export const enumToSelectOptions = (
+  enumObj: {
+    [s: string]: string;
+  },
+  prefix: string
+): SelectProps.Option[] => {
+  return Object.entries(enumObj).map(([key, value]) => ({
+    label: `analytics:segment.${prefix}.${value}`,
+    value,
+  }));
+};
+
+export const SEGMENT_AUTO_REFRESH_OPTIONS = [
+  { label: 'Daily', value: 'Daily' },
+  { label: 'Weekly', value: 'Weekly' },
+  { label: 'Monthly', value: 'Monthly' },
+  { label: 'Custom(Cron)', value: 'Custom' },
+];
+
+export const DEFAULT_SEGMENT_ITEM: IEventSegmentationItem = {
+  userEventType: CONDITION_LIST[0],
+  subItemList: [],
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+};
+
+export const DEFAULT_FILTER_GROUP_ITEM: IEventSegmentationItem = {
+  userEventType: null,
+  segmentEventRelationShip: ERelationShip.OR,
+  userDoneEventConditionList: [],
+  sequenceEventList: [],
+  subItemList: [{ ...DEFAULT_SEGMENT_ITEM }],
+  groupDateRange: null,
+};
+
+export const DEFAULT_SEGMENT_GROUP_DATA: IEventSegmentationObj = {
+  filterGroupRelationShip: ERelationShip.AND,
+  subItemList: [{ ...DEFAULT_FILTER_GROUP_ITEM }],
+  eventOption: [],
+  userIsAttributeOptions: [],
+  eventOperationOptions: [],
+  attributeOperationOptions: [],
+  userGroupOptions: [],
+  eventSessionOptions: [],
+  eventFlowOptions: [],
+};
+
+export const darkBackgroundColors = [
+  '#033160',
+  '#A82A0C',
+  '#037F0C',
+  '#1D3557',
+  '#780000',
+  '#0B3C5D',
+  '#F13C20',
+  '#343A40',
+  '#10316B',
+  '#8D0801',
+];
+
+export const INIT_SEGMENT_OBJ: ExtendSegment = {
+  segmentId: '',
+  segmentType: 'User',
+  name: '',
+  description: '',
+  projectId: '',
+  appId: '',
+  createBy: '',
+  createAt: 0,
+  lastUpdateBy: '',
+  lastUpdateAt: 0,
+  refreshSchedule: {
+    cron: 'Manual',
+    expireAfter: 0,
+  },
+  criteria: {
+    filterGroups: [],
+    operator: 'and',
+  },
+  // extends fields
+  refreshType: 'manual',
+  autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
+  autoRefreshDayOption: null,
+  expireDate: '',
+};
+
+export const TABLE_FILTER_OPTIONS = [':', '!:', '=', '!='];

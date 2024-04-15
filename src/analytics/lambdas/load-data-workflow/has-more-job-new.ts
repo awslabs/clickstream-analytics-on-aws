@@ -15,9 +15,8 @@
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
-import { REDSHIFT_TABLE_NAMES } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
-import { JobStatus } from '../../private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;

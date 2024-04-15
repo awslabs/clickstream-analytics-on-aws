@@ -36,7 +36,7 @@ const s3Client = new S3Client({
   region: REGION,
 });
 
-const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
+const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 
 const MAX_RETRY = 5;
@@ -65,7 +65,7 @@ async function _handler(event: CheckLoadStatusEvent, context: Context) {
   const queryId = event.detail.id;
   const retryCount = event.detail.retryCount;
   const appId = event.detail.appId;
-  const dynamodbTableName = DYNAMODB_TABLE_NAME!;
+  const dynamodbTableName = DYNAMODB_TABLE_NAME;
   const manifestFileName = event.detail.manifestFileName;
   let jobList = event.detail.jobList;
   logger.debug(`query_id:${queryId}`);

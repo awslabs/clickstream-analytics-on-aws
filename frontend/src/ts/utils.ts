@@ -12,6 +12,10 @@
  */
 
 import {
+  IMetadataBuiltInList,
+  ServerlessRedshiftRPUByRegionMapping,
+} from '@aws/clickstream-base-lib';
+import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
@@ -25,8 +29,6 @@ import {
   ExecutionType,
   IUserRole,
 } from './const';
-import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
-import { IMetadataBuiltInList } from './explore-types';
 
 /**
  * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
@@ -62,7 +64,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
     ServerlessRedshiftRPUByRegionMapping as RPURegionListType
   )[region];
   if (region && minMaxObject && minMaxObject.min > 0) {
-    const options = [];
+    const options: SelectProps.Option[] = [];
     for (let i = minMaxObject.min; i <= minMaxObject.max; i += STEP) {
       options.push({ label: i.toString(), value: i.toString() });
     }
@@ -295,9 +297,9 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return (
     update &&
-    (pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-      pipelineInfo?.status?.status === EPipelineStatus.Active ||
-      pipelineInfo?.status?.status === EPipelineStatus.Warning)
+    (pipelineInfo?.statusType === EPipelineStatus.Failed ||
+      pipelineInfo?.statusType === EPipelineStatus.Active ||
+      pipelineInfo?.statusType === EPipelineStatus.Warning)
   );
 };
 
@@ -313,9 +315,9 @@ export const isReportingDisabled = (
       !pipelineInfo?.serviceStatus?.QUICK_SIGHT ||
       !pipelineInfo.enableRedshift ||
       !(
-        pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-        pipelineInfo?.status?.status === EPipelineStatus.Active ||
-        pipelineInfo?.status?.status === EPipelineStatus.Warning
+        pipelineInfo?.statusType === EPipelineStatus.Failed ||
+        pipelineInfo?.statusType === EPipelineStatus.Active ||
+        pipelineInfo?.statusType === EPipelineStatus.Warning
       )
     );
   }
@@ -323,7 +325,7 @@ export const isReportingDisabled = (
 
 // Validate subnets cross N AZs
 export const validateSubnetCrossInAZs = (
-  subnets: SelectProps.Option[],
+  subnets: readonly SelectProps.Option[],
   nAZ: number
 ) => {
   const subnetsAZs = subnets.map(
@@ -338,8 +340,8 @@ export const validateSubnetCrossInAZs = (
 
 // Validate Private Subnet in same AZ with Public Subnets
 export const validatePublicSubnetInSameAZWithPrivateSubnets = (
-  publicSubnets: SelectProps.Option[],
-  privateSubnets: SelectProps.Option[]
+  publicSubnets: readonly SelectProps.Option[],
+  privateSubnets: readonly SelectProps.Option[]
 ) => {
   const publicSubnetsAZs = publicSubnets.map(
     (element) => element?.description?.split(':')[0]
@@ -356,7 +358,7 @@ export const getValueFromStackOutputs = (
   keys: string[]
 ) => {
   const res: Map<string, string> = new Map<string, string>();
-  const stackDetail = pipeline.status?.stackDetails?.find(
+  const stackDetail = pipeline.stackDetails?.find(
     (s) => s.stackType === stackType
   );
   if (!stackDetail) {
@@ -447,8 +449,8 @@ const patchBuiltInMetadata = (
     );
     if (presetParameter) {
       const localeLng = getLngFromLocalStorage();
-      parameter.displayName = (presetParameter.displayName as any)[localeLng];
-      parameter.description = (presetParameter.description as any)[localeLng];
+      parameter.displayName = presetParameter.displayName[localeLng];
+      parameter.description = presetParameter.description[localeLng];
     }
   }
 };
@@ -525,4 +527,13 @@ export const getProjectAppFromOptions = (
       }
     }
   }
+};
+
+export const isJson = (str) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 };

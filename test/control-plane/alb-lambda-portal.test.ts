@@ -252,18 +252,9 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
     });
     template.hasResource('AWS::Lambda::Function', { // create dependencies on execution role with sufficient policy to create ENI
       DependsOn: [
-        'frontendfunceni3AD2BF09',
+        'testportalportalfnroleDefaultPolicy69F46B1D',
         'testportalportalfnrole5B2099BA',
       ],
-    });
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      Environment: {
-        Variables: {
-          LOG_LEVEL: 'WARN',
-          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-        },
-      },
     });
 
   });
@@ -274,13 +265,21 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
 
     expect(findResourcesName(template, 'AWS::IAM::Policy'))
       .toEqual([
-        'frontendfunclogsB07272B7',
-        'frontendfunceni3AD2BF09',
+        'testportalportalfnroleDefaultPolicy69F46B1D',
       ]);
     // create eni for running inside vpc
     template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
       PolicyDocument: {
         Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
           {
             Action: [
               'ec2:CreateNetworkInterface',
@@ -295,50 +294,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         ],
         Version: '2012-10-17',
       },
-      Roles: [
-        {
-          Ref: 'testportalportalfnrole5B2099BA',
-        },
-      ],
-    }),
-    );
-
-    template.hasResourceProperties('AWS::IAM::Policy', Match.objectLike({
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'logs:CreateLogStream',
-              'logs:PutLogEvents',
-              'logs:CreateLogGroup',
-            ],
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':logs:',
-                  {
-                    Ref: 'AWS::Region',
-                  },
-                  ':',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':log-group:/aws/lambda/',
-                  { Ref: 'testportalportalfn1F095E03' },
-                  ':*',
-                ],
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
+      PolicyName: 'testportalportalfnroleDefaultPolicy69F46B1D',
       Roles: [
         {
           Ref: 'testportalportalfnrole5B2099BA',

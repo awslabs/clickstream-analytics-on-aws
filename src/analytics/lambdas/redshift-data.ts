@@ -187,17 +187,17 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
 };
 
 
-export async function exeucteBySqlorS3File(sqlOrS3File: string,
+export async function executeBySqlOrS3File(sqlOrS3File: string,
   redShiftClient: RedshiftDataClient, serverlessRedshiftProps?: RedshiftServerlessProps,
   provisionedRedshiftProps?: ProvisionedRedshiftProps,
   databaseName?: string,
 ): Promise<{ queryId: string}> {
-  logger.info('exeucteBySqlorS3File() sqlOrS3File: ' + sqlOrS3File);
+  logger.info('executeBySqlOrS3File() sqlOrS3File: ' + sqlOrS3File);
 
   const sqlStatements = await getSqlStatement(sqlOrS3File);
 
   const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
-  logger.info('exeucteBySqlorS3File() get queryId: ' + queryId);
+  logger.info('executeBySqlOrS3File() get queryId: ' + queryId);
 
   return {
     queryId: queryId!,

@@ -1,0 +1,1 @@
+GRANT SELECT ON {{app_schema}}.ods_events_streaming_view TO {{user_bi}};

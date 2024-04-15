@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   Alert,
   Button,
@@ -38,6 +39,8 @@ import {
   DEFAULT_KDS_SINK_INTERVAL,
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
+  EIngestionType,
+  ENetworkType,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
   MAX_MSK_BATCH_SIZE,
@@ -52,7 +55,6 @@ import {
   ProtocalType,
   SinkType,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_EN,
   PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN,
@@ -68,8 +70,10 @@ import BufferS3 from './buffer/BufferS3';
 interface ConfigIngestionProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
-  changePublicSubnets: (subnets: SelectProps.Option[]) => void;
-  changePrivateSubnets: (subnets: SelectProps.Option[]) => void;
+  changeNetworkType: (type: ENetworkType) => void;
+  changePublicSubnets: (subnets: readonly SelectProps.Option[]) => void;
+  changePrivateSubnets: (subnets: readonly SelectProps.Option[]) => void;
+  changeIngestionType: (type: string) => void;
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;
@@ -136,8 +140,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   const {
     update,
     pipelineInfo,
+    changeNetworkType,
     changePublicSubnets,
     changePrivateSubnets,
+    changeIngestionType,
     changeServerMin,
     changeServerMax,
     changeWarmSize,
@@ -303,31 +309,56 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
         }
       >
         <SpaceBetween direction="vertical" size="l">
-          <FormField
-            label={t('pipeline:create.publicSubnet')}
-            description={t('pipeline:create.publicSubnetDesc')}
-            stretch
-            errorText={ternary(
-              publicSubnetError,
-              t('pipeline:valid.publicSubnetEmpty'),
-              undefined
-            )}
-          >
-            <Multiselect
-              filteringType="auto"
-              disabled={isDisabled(update, pipelineInfo)}
-              selectedOptions={pipelineInfo.selectedPublicSubnet}
-              tokenLimit={3}
-              deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
-              options={publicSubnetOptionList}
-              placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
-              selectedAriaLabel="Selected"
-              statusType={ternary(loadingSubnet, 'loading', 'finished')}
-              onChange={(e) => {
-                changePublicSubnets(e.detail.selectedOptions as any);
-              }}
+          <FormField label={t('pipeline:create.networkType')} stretch>
+            <Tiles
+              onChange={({ detail }) =>
+                changeNetworkType(detail.value as ENetworkType)
+              }
+              value={pipelineInfo.network.type ?? ENetworkType.General}
+              columns={2}
+              items={[
+                {
+                  label: t('pipeline:create.networkTypeGeneral'),
+                  description: t('pipeline:create.networkTypeGeneralDesc'),
+                  value: ENetworkType.General,
+                  disabled: isDisabled(update, pipelineInfo),
+                },
+                {
+                  label: t('pipeline:create.networkTypePrivate'),
+                  description: t('pipeline:create.networkTypePrivateDesc'),
+                  value: ENetworkType.Private,
+                  disabled: isDisabled(update, pipelineInfo),
+                },
+              ]}
             />
           </FormField>
+          {pipelineInfo.network.type !== ENetworkType.Private && (
+            <FormField
+              label={t('pipeline:create.publicSubnet')}
+              description={t('pipeline:create.publicSubnetDesc')}
+              stretch
+              errorText={ternary(
+                publicSubnetError,
+                t('pipeline:valid.publicSubnetEmpty'),
+                undefined
+              )}
+            >
+              <Multiselect
+                filteringType="auto"
+                disabled={isDisabled(update, pipelineInfo)}
+                selectedOptions={pipelineInfo.selectedPublicSubnet}
+                tokenLimit={3}
+                deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
+                options={publicSubnetOptionList}
+                placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
+                selectedAriaLabel="Selected"
+                statusType={ternary(loadingSubnet, 'loading', 'finished')}
+                onChange={(e) => {
+                  changePublicSubnets(e.detail.selectedOptions);
+                }}
+              />
+            </FormField>
+          )}
 
           <FormField
             label={t('pipeline:create.privateSubnet')}
@@ -357,16 +388,41 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               selectedAriaLabel="Selected"
               statusType={ternary(loadingSubnet, 'loading', 'finished')}
               onChange={(e) => {
-                changePrivateSubnets(e.detail.selectedOptions as any);
+                changePrivateSubnets(e.detail.selectedOptions);
               }}
             />
           </FormField>
 
-          <FormField
-            label={t('pipeline:create.ingestionCapacity')}
-            description={t('pipeline:create.ingestionCapacityDesc')}
-            stretch
-          >
+          <FormField label={t('pipeline:create.ingestionCapacity')} stretch>
+            <Tiles
+              onChange={({ detail }) => changeIngestionType(detail.value)}
+              value={pipelineInfo.ingestionServer.ingestionType}
+              columns={2}
+              items={[
+                {
+                  label: 'ECS on Fargate',
+                  description: t('pipeline:create.ingestionTypeFargateDesc'),
+                  value: EIngestionType.Fargate,
+                  disabled: isDisabled(update, pipelineInfo),
+                },
+                {
+                  label: 'ECS on EC2',
+                  description: t('pipeline:create.ingestionTypeEC2Desc'),
+                  value: EIngestionType.EC2,
+                  disabled: isDisabled(update, pipelineInfo),
+                },
+              ]}
+            />
+
+            <FormField
+              description={
+                pipelineInfo.ingestionServer.ingestionType ===
+                EIngestionType.EC2
+                  ? t('pipeline:create.ingestionCapacityDesc')
+                  : t('pipeline:create.ingestionCapacityFargateDesc')
+              }
+              stretch
+            />
             <ColumnLayout columns={3}>
               <FormField
                 stretch
@@ -412,28 +468,35 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }}
                 />
               </FormField>
-              <FormField
-                stretch
-                errorText={ternary(
-                  warmPoolError,
-                  t('pipeline:valid.warmPoolError'),
-                  undefined
-                )}
-              >
-                <div>{t('pipeline:create.warmPool')}</div>
-                <Input
-                  type="number"
-                  value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
-                  onChange={(e) => {
-                    if (
-                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
-                    ) {
-                      return false;
-                    }
-                    changeWarmSize(e.detail.value);
-                  }}
-                />
-              </FormField>
+              {pipelineInfo.ingestionServer.ingestionType ===
+                EIngestionType.EC2 && (
+                <>
+                  <FormField
+                    stretch
+                    errorText={ternary(
+                      warmPoolError,
+                      t('pipeline:valid.warmPoolError'),
+                      undefined
+                    )}
+                  >
+                    <div>{t('pipeline:create.warmPool')}</div>
+                    <Input
+                      type="number"
+                      value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
+                      onChange={(e) => {
+                        if (
+                          !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
+                            e.detail.value
+                          )
+                        ) {
+                          return false;
+                        }
+                        changeWarmSize(e.detail.value);
+                      }}
+                    />
+                  </FormField>
+                </>
+              )}
             </ColumnLayout>
           </FormField>
 

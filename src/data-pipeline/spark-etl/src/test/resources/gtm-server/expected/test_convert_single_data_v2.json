@@ -1,0 +1,219 @@
+{
+  "appId" : "GMTServer1",
+  "compression" : null,
+  "data" : "{\"x-ga-protocol_version\":\"2\",\"x-ga-measurement_id\":\"G-000000001\",\"x-ga-gtm_version\":\"45je3820\",\"x-ga-page_id\":616150298,\"x-ga-system_properties\":{\"dbg\":\"1\"},\"client_id\":\"rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179\",\"language\":\"en-us\",\"screen_resolution\":\"3440x1440\",\"x-sst-system_properties\":{\"uc\":\"US\",\"ngs\":\"1\"},\"x-ga-request_count\":1,\"ga_session_id\":\"1691480516\",\"ga_session_number\":2,\"x-ga-mp2-seg\":\"1\",\"page_location\":\"http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745\",\"page_referrer\":\"https://tagassistant.google.com/\",\"page_title\":\"Retail Demo Store\",\"event_name\":\"page_view\",\"ip_override\":\"52.94.133.137\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200\",\"client_hints\":{\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}],\"mobile\":false,\"platform\":\"\\\"macOS\\\"\"},\"x-ga-js_client_id\":\"807802863.1690769179\"}",
+  "date" : "2023-08-08T08:03:16+00:00",
+  "fakeIp" : null,
+  "ingest_time" : 1691481796000,
+  "ip" : "52.44.165.253",
+  "method" : "POST",
+  "path" : "/collect",
+  "platform" : null,
+  "rid" : "7da14049fe2aca7ea98c9f4b2b3c6f4a",
+  "server_ingest_time" : 1691481796000,
+  "source_type" : "http_server",
+  "timestamp" : "2023-08-08T08:03:16.128829759Z",
+  "ua" : null,
+  "uri" : "/collect?appId=testGTM",
+  "input_file_name" : "_TEST_INPUT_FILE_NAME_",
+  "dataOut" : {
+    "_corrupt_record" : null,
+    "events" : [ {
+      "event_timestamp" : "2023-08-08 08:03:16",
+      "event_id" : "7da14049fe2aca7ea98c9f4b2b3c6f4a-0-1691480516-2",
+      "event_time_msec" : 1691481796000,
+      "event_name" : "_page_view",
+      "event_value" : 0.0,
+      "event_value_currency" : null,
+      "event_bundle_sequence_id" : null,
+      "ingest_time_msec" : 1691481796000,
+      "device_mobile_brand_name" : "Not/A)Brand",
+      "device_mobile_model_name" : null,
+      "device_manufacturer" : null,
+      "device_carrier" : null,
+      "device_network_type" : null,
+      "device_operating_system" : "\"macOS\"",
+      "device_operating_system_version" : null,
+      "device_vendor_id" : null,
+      "device_advertising_id" : null,
+      "device_system_language" : "en-us",
+      "device_time_zone_offset_seconds" : null,
+      "device_ua_browser" : null,
+      "device_ua_browser_version" : null,
+      "device_ua_os" : null,
+      "device_ua_os_version" : null,
+      "device_ua_device" : null,
+      "device_ua_device_category" : null,
+      "device_ua" : {
+        "string" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200"
+      },
+      "device_screen_width" : 3440,
+      "device_screen_height" : 1440,
+      "device_viewport_width" : null,
+      "device_viewport_height" : null,
+      "geo_continent" : null,
+      "geo_sub_continent" : null,
+      "geo_country" : "US",
+      "geo_region" : null,
+      "geo_metro" : null,
+      "geo_city" : null,
+      "geo_locale" : null,
+      "traffic_source_source" : "google",
+      "traffic_source_medium" : "organic",
+      "traffic_source_campaign" : null,
+      "traffic_source_content" : null,
+      "traffic_source_term" : null,
+      "traffic_source_campaign_id" : null,
+      "traffic_source_clid_platform" : null,
+      "traffic_source_clid" : null,
+      "traffic_source_channel_group" : null,
+      "traffic_source_category" : "search",
+      "user_first_touch_time_msec" : null,
+      "app_package_id" : null,
+      "app_version" : null,
+      "app_title" : null,
+      "app_install_source" : null,
+      "platform" : "Web",
+      "project_id" : "test_project_id_gtm_server",
+      "app_id" : "GMTServer1",
+      "screen_view_screen_name" : null,
+      "screen_view_screen_id" : null,
+      "screen_view_screen_unique_id" : null,
+      "screen_view_previous_screen_name" : null,
+      "screen_view_previous_screen_id" : null,
+      "screen_view_previous_screen_unique_id" : null,
+      "screen_view_previous_time_msec" : null,
+      "screen_view_engagement_time_msec" : null,
+      "screen_view_entrances" : null,
+      "page_view_page_referrer" : "https://tagassistant.google.com/",
+      "page_view_page_referrer_title" : null,
+      "page_view_previous_time_msec" : null,
+      "page_view_engagement_time_msec" : null,
+      "page_view_page_title" : "Retail Demo Store",
+      "page_view_page_url" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745",
+      "page_view_page_url_path" : null,
+      "page_view_page_url_query_parameters" : {
+        "gtm_debug" : "1691481790745"
+      },
+      "page_view_hostname" : "d3mpqdtjegq8im.cloudfront.net",
+      "page_view_latest_referrer" : null,
+      "page_view_latest_referrer_host" : null,
+      "page_view_entrances" : null,
+      "app_start_is_first_time" : null,
+      "upgrade_previous_app_version" : null,
+      "upgrade_previous_os_version" : null,
+      "search_key" : null,
+      "search_term" : null,
+      "outbound_link_classes" : null,
+      "outbound_link_domain" : null,
+      "outbound_link_id" : null,
+      "outbound_link_url" : null,
+      "outbound_link" : null,
+      "user_engagement_time_msec" : null,
+      "user_id" : null,
+      "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+      "session_id" : "1691480516",
+      "session_start_time_msec" : null,
+      "session_duration" : null,
+      "session_number" : 2,
+      "scroll_engagement_time_msec" : null,
+      "sdk_error_code" : null,
+      "sdk_error_message" : null,
+      "sdk_version" : null,
+      "sdk_name" : null,
+      "app_exception_message" : null,
+      "app_exception_stack" : null,
+      "custom_parameters_json_str" : "{\"x-sst-system_properties\":{\"uc\":\"US\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":null},\"screen_resolution\":\"3440x1440\",\"x-ga-page_id\":616150298,\"client_id\":\"rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179\",\"ip_override\":\"52.94.133.137\",\"x-ga-system_properties\":{\"dbg\":\"1\",\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":null},\"client_hints\":{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]},\"x-ga-protocol_version\":\"2\",\"x-ga-gtm_version\":\"45je3820\",\"x-ga-mp2-seg\":\"1\",\"x-ga-js_client_id\":\"807802863.1690769179\",\"user_agent\":\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200\",\"x-ga-measurement_id\":\"G-000000001\",\"x-ga-request_count\":1}",
+      "custom_parameters" : {
+        "client_hints" : {
+          "value" : "{\"architecture\":null,\"bitness\":null,\"full_version_list\":null,\"mobile\":false,\"model\":null,\"platform\":\"\\\"macOS\\\"\",\"platform_version\":null,\"wow64\":false,\"brands\":[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]}",
+          "type" : "object"
+        },
+        "client_id" : {
+          "value" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+          "type" : "string"
+        },
+        "ip_override" : {
+          "value" : "52.94.133.137",
+          "type" : "string"
+        },
+        "screen_resolution" : {
+          "value" : "3440x1440",
+          "type" : "string"
+        },
+        "user_agent" : {
+          "value" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200",
+          "type" : "string"
+        },
+        "x-ga-gtm_version" : {
+          "value" : "45je3820",
+          "type" : "string"
+        },
+        "x-ga-js_client_id" : {
+          "value" : "807802863.1690769179",
+          "type" : "string"
+        },
+        "x-ga-measurement_id" : {
+          "value" : "G-000000001",
+          "type" : "string"
+        },
+        "x-ga-mp2-seg" : {
+          "value" : "1",
+          "type" : "string"
+        },
+        "x-ga-page_id" : {
+          "value" : "616150298",
+          "type" : "number"
+        },
+        "x-ga-protocol_version" : {
+          "value" : "2",
+          "type" : "string"
+        },
+        "x-ga-request_count" : {
+          "value" : "1",
+          "type" : "number"
+        },
+        "x-ga-system_properties" : {
+          "value" : "{\"dbg\":\"1\",\"fid\":null,\"ee\":false,\"fv\":null,\"ss\":null}",
+          "type" : "object"
+        },
+        "x-sst-system_properties" : {
+          "value" : "{\"uc\":\"US\",\"ngs\":\"1\",\"gse\":null,\"gcd\":null,\"tft\":0,\"consent\":null,\"request_start_time_ms\":null}",
+          "type" : "object"
+        }
+      },
+      "process_info" : {
+        "ingest_time" : "2023-08-08T08:03:16Z",
+        "input_file_name" : "_TEST_INPUT_FILE_NAME_",
+        "rid" : "7da14049fe2aca7ea98c9f4b2b3c6f4a"
+      },
+      "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200",
+      "ip" : "52.94.133.137"
+    } ],
+    "user" : {
+      "event_timestamp" : "2023-08-08 08:03:16",
+      "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+      "user_id" : null,
+      "user_properties" : null,
+      "user_properties_json_str" : null,
+      "first_touch_time_msec" : 1691481796000,
+      "first_visit_date" : "2023-08-08",
+      "first_referrer" : "https://tagassistant.google.com/",
+      "first_traffic_source" : "google",
+      "first_traffic_medium" : "organic",
+      "first_traffic_campaign" : null,
+      "first_traffic_content" : null,
+      "first_traffic_term" : null,
+      "first_traffic_campaign_id" : null,
+      "first_traffic_clid_platform" : null,
+      "first_traffic_clid" : null,
+      "first_traffic_channel_group" : null,
+      "first_traffic_category" : "search",
+      "first_app_install_source" : null,
+      "process_info" : null,
+      "app_id" : "GMTServer1",
+      "event_name" : "_page_view"
+    },
+    "items" : [ ]
+  }
+}

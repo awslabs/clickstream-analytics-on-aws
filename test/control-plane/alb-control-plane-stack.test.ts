@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_CONTROL_PLANE_URL } from '@aws/clickstream-base-lib';
 import {
   Aws,
 } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName, findResourceByKeyAndType } from './test-utils';
 import { ApplicationLoadBalancerControlPlaneStack } from '../../src/alb-control-plane-stack';
-import { OUTPUT_CONTROL_PLANE_URL } from '../../src/common/constant';
 import { SolutionInfo } from '../../src/common/solution-info';
 import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-config';
 import { TestApp, removeFolder } from '../common/jest';
@@ -637,6 +637,8 @@ describe('ALBPortalStack - exist vpc & private & no custom domain', () => {
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
         'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
+        'ClickStreamApiBackendEventBusListenStateFunctionE05DD00F',
+        'ClickStreamApiBackendEventBusListenStackFunction2C052556',
         'ClickStreamApiApiFunction684A4D61',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
