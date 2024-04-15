@@ -1224,7 +1224,6 @@ describe('Data Processing job submitter', () => {
                     Match.anyValue(),
                     '/',
                     Match.anyValue(),
-                    '/',
                     Match.anyValue(),
                     '/rules/*',
                   ],

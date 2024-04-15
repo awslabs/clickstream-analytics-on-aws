@@ -332,7 +332,7 @@ export function getRuleConfigDir(prefix: string, projectId: string) {
     const tsServ = new TrafficSourceServ();
     ruleConfigPrefix = tsServ.getConfigRuleKeyPrefix(projectId);
   } else {
-    ruleConfigPrefix = prefix + '/' + projectId + '/rules/';
+    ruleConfigPrefix = prefix + projectId + '/rules/';
   }
   return ruleConfigPrefix;
 }

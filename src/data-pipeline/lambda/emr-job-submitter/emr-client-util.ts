@@ -13,6 +13,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import './traffic_source_category_rule_v1.json';
+import './traffic_source_channel_rule_v1.json';
 import {
   Configuration,
   EMRServerlessClient,
