@@ -19,11 +19,11 @@ import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
 import { ClickstreamSinkTables, SinkTableEnum } from '../data-pipeline';
-import { getEventParameterTableColumns } from '../tables/event-parameter-table';
-import { getEventTableColumns } from '../tables/event-table';
+import { getSessionTableColumns } from '../tables/session-table';
+import { getEventTableColumns } from '../tables/event_v2-table';
 import { getIngestionEventsTableColumns } from '../tables/ingestion-events-table';
-import { getItemTableColumns } from '../tables/item-table';
-import { getUserTableColumns } from '../tables/user-table';
+import { getItemTableColumns } from '../tables/item_v2-table';
+import { getUserTableColumns } from '../tables/user_v2-table';
 
 interface Props {
   readonly sourceS3Bucket: IBucket;
@@ -34,10 +34,10 @@ interface Props {
 
 const glueTablesLogicId = {
   ingestion_events: 'SourceTable617AB4E1',
-  event: 'eventSinkTableA33E3CC9',
-  event_parameter: 'eventparameterSinkTable03A457D7',
-  user: 'userSinkTable993D48C3',
-  item: 'itemSinkTable7F9A1F7C',
+  event_v2: 'eventV2SinkTableA33E3CC9',
+  session: 'sessionSinkTable03A457D7',
+  user_v2: 'userV2SinkTable993D48C3',
+  item_v2: 'itemV2SinkTable7F9A1F7C',
 };
 
 export class GlueUtil {
@@ -92,25 +92,25 @@ export class GlueUtil {
 
   public createSinkTables(glueDatabase: Database, projectId: string): ClickstreamSinkTables {
     const colMap = {
-      event: getEventTableColumns(),
-      event_parameter: getEventParameterTableColumns(),
-      user: getUserTableColumns(),
-      item: getItemTableColumns(),
+      event_v2: getEventTableColumns(),
+      session: getSessionTableColumns(),
+      user_v2: getUserTableColumns(),
+      item_v2: getItemTableColumns(),
     };
 
-    const glueTables = [SinkTableEnum.EVENT,
-      SinkTableEnum.EVENT_PARAMETER,
-      SinkTableEnum.USER,
-      SinkTableEnum.ITEM].map(t => {
+    const glueTables = [SinkTableEnum.EVENT_V2,
+      SinkTableEnum.SESSION,
+      SinkTableEnum.USER_V2,
+      SinkTableEnum.ITEM_V2].map(t => {
       const glueTable = this.createSinkTable(glueDatabase, projectId, t, colMap[t]);
       return glueTable;
     });
 
     return {
-      eventTable: glueTables[0],
-      eventParameterTable: glueTables[1],
-      userTable: glueTables[2],
-      itemTable: glueTables[3],
+      eventV2Table: glueTables[0],
+      sessionTable: glueTables[1],
+      userV2Table: glueTables[2],
+      itemV2Table: glueTables[3],
     };
 
   }
