@@ -1710,6 +1710,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#delete-global-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete global attribute
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#login-and-logout" class="md-nav__link">
     <span class="md-ellipsis">
       Login and logout
@@ -1758,6 +1767,15 @@
   <a href="#disable-sdk" class="md-nav__link">
     <span class="md-ellipsis">
       Disable SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other configuration
     </span>
   </a>
   
@@ -3176,6 +3194,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#delete-global-attribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete global attribute
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#login-and-logout" class="md-nav__link">
     <span class="md-ellipsis">
       Login and logout
@@ -3224,6 +3251,15 @@
   <a href="#disable-sdk" class="md-nav__link">
     <span class="md-ellipsis">
       Disable SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other configuration
     </span>
   </a>
   
@@ -3474,7 +3510,7 @@
 <h3 id="1-include-the-sdk">1. Include the SDK</h3>
 <p>Add the Clickstream SDK dependency to your <code>app</code> module's <code>build.gradle</code> file, for example:</p>
 <div class="language-groovy highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.12.0&#39;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">   </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.13.0&#39;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="o">}</span>
 </span></code></pre></div>
 <p>You can synchronize your project with the latest version: <a href="https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a> </p>
@@ -3505,19 +3541,19 @@
 <li><strong>isTrackAppExceptionEvents</strong>: whether auto track exception event in app, and the default value is <code>false</code></li>
 </ul>
 <h3 id="3-initialize-the-sdk">3. Initialize the SDK</h3>
-<p>Initialize the SDK in the application <code>onCreate()</code> method.</p>
+<p>It is recommended that you initialize the SDK in your application's <code>onCreate()</code> method. Please note that the
+initialization code needs to run in the main thread.</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">onCreate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="kd">super</span><span class="p">.</span><span class="na">onCreate</span><span class="p">();</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="k">try</span><span class="p">{</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">());</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Initialized ClickstreamAnalytics&quot;</span><span class="p">);</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">AmplifyException</span><span class="w"> </span><span class="n">error</span><span class="p">){</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Could not initialize ClickstreamAnalytics&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="k">try</span><span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">());</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">i</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Initialized ClickstreamAnalytics&quot;</span><span class="p">);</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">AmplifyException</span><span class="w"> </span><span class="n">error</span><span class="p">){</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">        </span><span class="n">Log</span><span class="p">.</span><span class="na">e</span><span class="p">(</span><span class="s">&quot;MyApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Could not initialize ClickstreamAnalytics&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="4-start-using">4. Start using</h3>
 <h4 id="record-event">Record event</h4>
@@ -3538,39 +3574,70 @@
 </span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">recordEvent</span><span class="p">(</span><span class="s">&quot;button_click&quot;</span><span class="p">);</span>
 </span></code></pre></div>
 <h4 id="add-global-attribute">Add global attribute</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAttribute</span><span class="p">;</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">ClickstreamAttribute</span><span class="w"> </span><span class="n">globalAttribute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAttribute</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;channel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Play Store&quot;</span><span class="p">)</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;level&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">5.1</span><span class="p">)</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;isOpenNotification&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">addGlobalAttributes</span><span class="p">(</span><span class="n">globalAttribute</span><span class="p">);</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="c1">// for delete an global attribute</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">deleteGlobalAttributes</span><span class="p">(</span><span class="s">&quot;level&quot;</span><span class="p">);</span>
+<ol>
+<li>
+<p>Add global attributes when initializing the SDK.</p>
+<p>The following example code shows how to add traffic source fields as global attributes when initializing the SDK.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">ClickstreamAttribute</span><span class="w"> </span><span class="n">globalAttributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAttribute</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_SOURCE</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;amazon&quot;</span><span class="p">)</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_MEDIUM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;cpc&quot;</span><span class="p">)</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_CAMPAIGN</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;summer_promotion&quot;</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_CAMPAIGN_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;summer_promotion_01&quot;</span><span class="p">)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_TERM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;running_shoes&quot;</span><span class="p">)</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_CONTENT</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;banner_ad_1&quot;</span><span class="p">)</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_CLID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;amazon_ad_123&quot;</span><span class="p">)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">TRAFFIC_SOURCE_CLID_PLATFORM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;amazon_ads&quot;</span><span class="p">)</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">      </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">APP_INSTALL_CHANNEL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Amazon Store&quot;</span><span class="p">)</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">      </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="n">ClickstreamConfiguration</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">      </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">      </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;http://example.com/collect&quot;</span><span class="p">)</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">      </span><span class="p">.</span><span class="na">withInitialGlobalAttributes</span><span class="p">(</span><span class="n">globalAttributes</span><span class="p">);</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">(),</span><span class="w"> </span><span class="n">configuration</span><span class="p">);</span>
 </span></code></pre></div>
-<p>Please add the global attribute after the SDK initialization is completed, the global attribute will be added to the attribute object in all events.</p>
+</li>
+<li>
+<p>Add global attributes after initializing the SDK.
+    <div class="language-java highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAttribute</span><span class="p">;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">ClickstreamAttribute</span><span class="w"> </span><span class="n">globalAttribute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAttribute</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">APP_INSTALL_CHANNEL</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Amazon Store&quot;</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;level&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">5.1</span><span class="p">)</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;class&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;isOpenNotification&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">addGlobalAttributes</span><span class="p">(</span><span class="n">globalAttribute</span><span class="p">);</span>
+</span></code></pre></div></p>
+</li>
+</ol>
+<p>It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
+that occur after it is set.</p>
+<h4 id="delete-global-attribute">Delete global attribute</h4>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">deleteGlobalAttributes</span><span class="p">(</span><span class="s">&quot;level&quot;</span><span class="p">);</span>
+</span></code></pre></div>
 <h4 id="login-and-logout">Login and logout</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1">// when user login success</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">setUserId</span><span class="p">(</span><span class="s">&quot;UserId&quot;</span><span class="p">);</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1">// when user logout</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1">// when user login success</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">setUserId</span><span class="p">(</span><span class="s">&quot;UserId&quot;</span><span class="p">);</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1">// when user logout</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
 </span></code></pre></div>
 <h4 id="add-user-attribute">Add user attribute</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytcs</span><span class="p">;</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamUserAttribute</span><span class="p">;</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">ClickstreamUserAttribute</span><span class="w"> </span><span class="n">clickstreamUserAttribute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamUserAttribute</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;_user_age&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">)</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;_user_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;carl&quot;</span><span class="p">)</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">addUserAttributes</span><span class="p">(</span><span class="n">clickstreamUserAttribute</span><span class="p">);</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytcs</span><span class="p">;</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamUserAttribute</span><span class="p">;</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">ClickstreamUserAttribute</span><span class="w"> </span><span class="n">clickstreamUserAttribute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamUserAttribute</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;_user_age&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">)</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;_user_name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;carl&quot;</span><span class="p">)</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">addUserAttributes</span><span class="p">(</span><span class="n">clickstreamUserAttribute</span><span class="p">);</span>
 </span></code></pre></div>
 <p>Current logged-in user's attributes will be cached in disk, so the next time app launch you don't need to set all user's attribute again, of course you can use the same API <code>ClickstreamAnalytics.addUserAttributes()</code> to update the current user's attribute when it changes.</p>
 <div class="admonition info">
@@ -3579,26 +3646,26 @@
 </div>
 <h4 id="record-event-with-items">Record event with items</h4>
 <p>You can add the following code to log an event with an item.</p>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytcs</span><span class="p">;</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamItem</span><span class="p">;</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">ClickstreamItem</span><span class="w"> </span><span class="n">item_book</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">)</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_NAME</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature&quot;</span><span class="p">)</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_CATEGORY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;book&quot;</span><span class="p">)</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">PRICE</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">)</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;book_publisher&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature Research&quot;</span><span class="p">)</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">ClickstreamEvent</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamEvent</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">.</span><span class="na">name</span><span class="p">(</span><span class="s">&quot;view_item&quot;</span><span class="p">)</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">)</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">CURRENCY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USD&quot;</span><span class="p">)</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;event_category&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;recommended&quot;</span><span class="p">)</span>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">.</span><span class="na">setItems</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span><span class="n">item_book</span><span class="p">})</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
-</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">recordEvent</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytcs</span><span class="p">;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamItem</span><span class="p">;</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">ClickstreamItem</span><span class="w"> </span><span class="n">item_book</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_NAME</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature&quot;</span><span class="p">)</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_CATEGORY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;book&quot;</span><span class="p">)</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">PRICE</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">)</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;book_publisher&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature Research&quot;</span><span class="p">)</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="n">ClickstreamEvent</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamEvent</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">        </span><span class="p">.</span><span class="na">name</span><span class="p">(</span><span class="s">&quot;view_item&quot;</span><span class="p">)</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">VALUE</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">)</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Attr</span><span class="p">.</span><span class="na">CURRENCY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USD&quot;</span><span class="p">)</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">        </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;event_category&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;recommended&quot;</span><span class="p">)</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">        </span><span class="p">.</span><span class="na">setItems</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="o">[]</span><span class="p">{</span><span class="n">item_book</span><span class="p">})</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">        </span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">recordEvent</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
 </span></code></pre></div>
 <p>For logging more attribute in an item, please refer to <a href="#item-attributes">item attributes</a>.</p>
 <div class="admonition warning">
@@ -3613,52 +3680,50 @@
 <li><code>SCREEN_NAME</code> Required. Your screen's name.</li>
 <li><code>SCREEN_UNIQUE_ID</code> Optional. Set the hashcode of your Fragment or View. If you do not set, SDK will set a default value based on the current Activity's hashCode.</li>
 </ul>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>import software.aws.solution.clickstream.ClickstreamAnalytcs;
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>ClickstreamEvent event = ClickstreamEvent.builder()
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>     .name(ClickstreamAnalytics.Event.SCREEN_VIEW)
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>     .add(ClickstreamAnalytics.Attr.SCREEN_NAME, &quot;HomeFragment&quot;)
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>     .add(ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID, String.valueOf(HomeFragment.hashCode()))
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>     .build();
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>ClickstreamAnalytics.recordEvent(event);
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>import software.aws.solution.clickstream.ClickstreamAnalytcs;
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>ClickstreamEvent event = ClickstreamEvent.builder()
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>     .name(ClickstreamAnalytics.Event.SCREEN_VIEW)
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>     .add(ClickstreamAnalytics.Attr.SCREEN_NAME, &quot;HomeFragment&quot;)
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>     .add(ClickstreamAnalytics.Attr.SCREEN_UNIQUE_ID, String.valueOf(HomeFragment.hashCode()))
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>     .build();
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>ClickstreamAnalytics.recordEvent(event);
 </span></code></pre></div>
 <h4 id="send-event-immediately">Send event immediately</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1">// for send event immediately.</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">flushEvent</span><span class="p">();</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// for send event immediately.</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">flushEvent</span><span class="p">();</span>
 </span></code></pre></div>
 <h4 id="disable-sdk">Disable SDK</h4>
 <p>You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and sending of any events. Of course you can enable the SDK when you need to continue logging events.</p>
 <p>Please note that the disable and enable code needs to be run in the main thread.</p>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="c1">// disable SDK</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">disable</span><span class="p">();</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1">// enable SDK</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">enable</span><span class="p">();</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1">// disable SDK</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">disable</span><span class="p">();</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1">// enable SDK</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">enable</span><span class="p">();</span>
 </span></code></pre></div>
-<h4 id="configuration-update">Configuration update</h4>
-<p>After initializing the SDK, you can use the following code to customize the configuration of the SDK.</p>
-<div class="admonition info">
-<p class="admonition-title">Important</p>
-<p>This configuration will override the default configuration in <code>amplifyconfiguration.json</code> file.</p>
-</div>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1">// config the SDK after initialize.</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">        </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;https://example.com/collect&quot;</span><span class="p">)</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">        </span><span class="p">.</span><span class="na">withAuthCookie</span><span class="p">(</span><span class="s">&quot;your authentication cookie&quot;</span><span class="p">)</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">        </span><span class="p">.</span><span class="na">withSendEventsInterval</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">        </span><span class="p">.</span><span class="na">withSessionTimeoutDuration</span><span class="p">(</span><span class="mi">1800000</span><span class="p">)</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackScreenViewEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackUserEngagementEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackAppExceptionEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">())</span>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">        </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<h4 id="other-configuration">Other configuration</h4>
+<p>In addition to the required appId and endpoint, you can configure other information to get more customized usage when
+initializing the SDK:</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">ClickstreamConfiguration</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">        </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;https://example.com/collect&quot;</span><span class="p">)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">        </span><span class="p">.</span><span class="na">withAuthCookie</span><span class="p">(</span><span class="s">&quot;your authentication cookie&quot;</span><span class="p">)</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">        </span><span class="p">.</span><span class="na">withSendEventsInterval</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">        </span><span class="p">.</span><span class="na">withSessionTimeoutDuration</span><span class="p">(</span><span class="mi">1800000</span><span class="p">)</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackScreenViewEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackUserEngagementEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackAppExceptionEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">())</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">        </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">(),</span><span class="w"> </span><span class="n">configuration</span><span class="p">);</span>
 </span></code></pre></div>
 <p>Here is an explanation of each method.</p>
 <table>
@@ -3751,25 +3816,48 @@
 </tr>
 </tbody>
 </table>
+<p>By default, we will use the configurations in <code>amplifyconfiguration.json</code> file. If you add a custom configuration, the
+added configuration items will override the default values.</p>
+<p>You can also add all the configuration parameters you need in the <code>init</code> method without using
+the <code>amplifyconfiguration.json</code> file.</p>
+<h4 id="configuration-update">Configuration update</h4>
+<p>You can update the default configuration after initializing the SDK, below are the additional configuration options you
+can customize.</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1">// config the SDK after initialize.</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">        </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;https://example.com/collect&quot;</span><span class="p">)</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">        </span><span class="p">.</span><span class="na">withAuthCookie</span><span class="p">(</span><span class="s">&quot;your authentication cookie&quot;</span><span class="p">)</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackScreenViewEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackUserEngagementEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackAppExceptionEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">())</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">        </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</span></code></pre></div>
 <h4 id="debug-events">Debug events</h4>
 <p>You can follow the steps below to view the event raw JSON and debug your events.</p>
 <ol>
-<li>Using <code>ClickstreamAnalytics.getClickStreamConfiguration()</code> API and set the <code>withLogEvents()</code> method with true in debug mode, for example:
-    <div class="language-java highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1">// log the event in debug mode.</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">            </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="n">BuildConfig</span><span class="p">.</span><span class="na">DEBUG</span><span class="p">);</span>
+<li>Enable the <code>withLogEvents</code> configuration when initializing the SDK
+    <div class="language-java highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="c1">// log the event in debug mode.</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">ClickstreamConfiguration</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="p">...</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">init</span><span class="p">(</span><span class="n">getApplicationContext</span><span class="p">(),</span><span class="w"> </span><span class="n">configuration</span><span class="p">);</span>
 </span></code></pre></div></li>
 <li>Integrate the SDK and launch your app by Android Studio, then open the  <strong>Logcat</strong> window.</li>
 <li>Input <code>EventRecorder</code> to the filter, and you will see the JSON content of all events recorded by Clickstream Android SDK.</li>
 </ol>
 <h4 id="configure-custom-dns">Configure custom DNS</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1">// config custom DNS.</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="c1">// config custom DNS.</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
 </span></code></pre></div>
 <p>If you want to use custom DNS for network request, you can create your <code>CustomOkhttpDns</code> which implementation <code>okhttp3.Dns</code>, then configure <code>.withCustomDns(CustomOkhttpDns.getInstance())</code> to make it works, you can refer to the <a href="https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516">example code</a> .</p>
 <h2 id="data-format-definition">Data format definition</h2>
@@ -4055,56 +4143,56 @@
 <p><strong>engagement_time_msec</strong>: We calculate the milliseconds from when a screen is visible to when the user leave the screen.</p>
 <h2 id="event-attributes">Event attributes</h2>
 <h3 id="sample-event-structure">Sample event structure</h3>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f24bec657ea8eff7&quot;</span><span class="p">,</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Android&quot;</span><span class="p">,</span>
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10&quot;</span><span class="p">,</span>
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TAS-AN00&quot;</span><span class="p">,</span>
-</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh_CN_#Hans&quot;</span><span class="p">,</span>
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CDMA&quot;</span><span class="p">,</span>
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mobile&quot;</span><span class="p">,</span>
-</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">    </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2259</span><span class="p">,</span>
-</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="w">    </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1080</span><span class="p">,</span>
-</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">    </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
-</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="w">    </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh&quot;</span><span class="p">,</span>
-</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a><span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN&quot;</span><span class="p">,</span>
-</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="w">    </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.1&quot;</span><span class="p">,</span>
-</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a><span class="w">    </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
-</span><span id="__span-14-22"><a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a><span class="w">    </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-</span><span id="__span-14-23"><a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a><span class="w">    </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.notepad.app&quot;</span><span class="p">,</span>
-</span><span id="__span-14-24"><a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a><span class="w">    </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Notepad&quot;</span><span class="p">,</span>
-</span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a><span class="w">    </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;notepad-4a929eb9&quot;</span><span class="p">,</span>
-</span><span id="__span-14-26"><a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-27"><a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a><span class="w">        </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-28"><a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
-</span><span id="__span-14-29"><a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-14-30"><a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-14-31"><a id="__codelineno-14-31" name="__codelineno-14-31" href="#__codelineno-14-31"></a><span class="w">        </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-32"><a id="__codelineno-14-32" name="__codelineno-14-32" href="#__codelineno-14-32"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
-</span><span id="__span-14-33"><a id="__codelineno-14-33" name="__codelineno-14-33" href="#__codelineno-14-33"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-14-34"><a id="__codelineno-14-34" name="__codelineno-14-34" href="#__codelineno-14-34"></a><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-14-35"><a id="__codelineno-14-35" name="__codelineno-14-35" href="#__codelineno-14-35"></a><span class="w">        </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-36"><a id="__codelineno-14-36" name="__codelineno-14-36" href="#__codelineno-14-36"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877267895</span><span class="p">,</span>
-</span><span id="__span-14-37"><a id="__codelineno-14-37" name="__codelineno-14-37" href="#__codelineno-14-37"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-14-38"><a id="__codelineno-14-38" name="__codelineno-14-38" href="#__codelineno-14-38"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-14-39"><a id="__codelineno-14-39" name="__codelineno-14-39" href="#__codelineno-14-39"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-14-40"><a id="__codelineno-14-40" name="__codelineno-14-40" href="#__codelineno-14-40"></a><span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-41"><a id="__codelineno-14-41" name="__codelineno-14-41" href="#__codelineno-14-41"></a><span class="w">        </span><span class="nt">&quot;event_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span><span class="p">,</span>
-</span><span id="__span-14-42"><a id="__codelineno-14-42" name="__codelineno-14-42" href="#__codelineno-14-42"></a><span class="w">        </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CNY&quot;</span><span class="p">,</span>
-</span><span id="__span-14-43"><a id="__codelineno-14-43" name="__codelineno-14-43" href="#__codelineno-14-43"></a><span class="w">        </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
-</span><span id="__span-14-44"><a id="__codelineno-14-44" name="__codelineno-14-44" href="#__codelineno-14-44"></a><span class="w">        </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
-</span><span id="__span-14-45"><a id="__codelineno-14-45" name="__codelineno-14-45" href="#__codelineno-14-45"></a><span class="w">        </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
-</span><span id="__span-14-46"><a id="__codelineno-14-46" name="__codelineno-14-46" href="#__codelineno-14-46"></a><span class="w">        </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-14-47"><a id="__codelineno-14-47" name="__codelineno-14-47" href="#__codelineno-14-47"></a><span class="w">        </span><span class="nt">&quot;_screen_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ProductDetailActivity&quot;</span><span class="p">,</span>
-</span><span id="__span-14-48"><a id="__codelineno-14-48" name="__codelineno-14-48" href="#__codelineno-14-48"></a><span class="w">        </span><span class="nt">&quot;_screen_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;126861252&quot;</span>
-</span><span id="__span-14-49"><a id="__codelineno-14-49" name="__codelineno-14-49" href="#__codelineno-14-49"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-14-50"><a id="__codelineno-14-50" name="__codelineno-14-50" href="#__codelineno-14-50"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">    </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f24bec657ea8eff7&quot;</span><span class="p">,</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Android&quot;</span><span class="p">,</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10&quot;</span><span class="p">,</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">    </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">    </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TAS-AN00&quot;</span><span class="p">,</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">    </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh_CN_#Hans&quot;</span><span class="p">,</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">    </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CDMA&quot;</span><span class="p">,</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">    </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mobile&quot;</span><span class="p">,</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">    </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2259</span><span class="p">,</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">    </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1080</span><span class="p">,</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">    </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">    </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh&quot;</span><span class="p">,</span>
+</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN&quot;</span><span class="p">,</span>
+</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">    </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.1&quot;</span><span class="p">,</span>
+</span><span id="__span-17-21"><a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">    </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
+</span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">    </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+</span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">    </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.notepad.app&quot;</span><span class="p">,</span>
+</span><span id="__span-17-24"><a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">    </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Notepad&quot;</span><span class="p">,</span>
+</span><span id="__span-17-25"><a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="w">    </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;notepad-4a929eb9&quot;</span><span class="p">,</span>
+</span><span id="__span-17-26"><a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-27"><a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="w">        </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-28"><a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
+</span><span id="__span-17-29"><a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-17-30"><a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-17-31"><a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="w">        </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-32"><a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-17-33"><a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-17-34"><a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-17-35"><a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a><span class="w">        </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-36"><a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877267895</span><span class="p">,</span>
+</span><span id="__span-17-37"><a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a><span class="w">            </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-17-38"><a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-17-39"><a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-17-40"><a id="__codelineno-17-40" name="__codelineno-17-40" href="#__codelineno-17-40"></a><span class="w">    </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-41"><a id="__codelineno-17-41" name="__codelineno-17-41" href="#__codelineno-17-41"></a><span class="w">        </span><span class="nt">&quot;event_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span><span class="p">,</span>
+</span><span id="__span-17-42"><a id="__codelineno-17-42" name="__codelineno-17-42" href="#__codelineno-17-42"></a><span class="w">        </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CNY&quot;</span><span class="p">,</span>
+</span><span id="__span-17-43"><a id="__codelineno-17-43" name="__codelineno-17-43" href="#__codelineno-17-43"></a><span class="w">        </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
+</span><span id="__span-17-44"><a id="__codelineno-17-44" name="__codelineno-17-44" href="#__codelineno-17-44"></a><span class="w">        </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
+</span><span id="__span-17-45"><a id="__codelineno-17-45" name="__codelineno-17-45" href="#__codelineno-17-45"></a><span class="w">        </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
+</span><span id="__span-17-46"><a id="__codelineno-17-46" name="__codelineno-17-46" href="#__codelineno-17-46"></a><span class="w">        </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-17-47"><a id="__codelineno-17-47" name="__codelineno-17-47" href="#__codelineno-17-47"></a><span class="w">        </span><span class="nt">&quot;_screen_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ProductDetailActivity&quot;</span><span class="p">,</span>
+</span><span id="__span-17-48"><a id="__codelineno-17-48" name="__codelineno-17-48" href="#__codelineno-17-48"></a><span class="w">        </span><span class="nt">&quot;_screen_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;126861252&quot;</span>
+</span><span id="__span-17-49"><a id="__codelineno-17-49" name="__codelineno-17-49" href="#__codelineno-17-49"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-17-50"><a id="__codelineno-17-50" name="__codelineno-17-50" href="#__codelineno-17-50"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>All user attributes will be stored in <code>user</code> object, and all custom and global attributes are in <code>attributes</code> object.</p>
 <h3 id="common-attribute">Common attribute</h3>
@@ -4328,25 +4416,55 @@
 </thead>
 <tbody>
 <tr>
-<td>_traffic_source_medium</td>
-<td>String</td>
-<td>false</td>
-<td>Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine</td>
-</tr>
-<tr>
-<td>_traffic_source_name</td>
-<td>String</td>
-<td>false</td>
-<td>Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion</td>
-</tr>
-<tr>
 <td>_traffic_source_source</td>
 <td>String</td>
 <td>false</td>
-<td>Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu</td>
+<td>Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu</td>
 </tr>
 <tr>
-<td>_channel</td>
+<td>_traffic_source_medium</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign_id</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2</td>
+</tr>
+<tr>
+<td>_traffic_source_term</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker</td>
+</tr>
+<tr>
+<td>_traffic_source_content</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2</td>
+</tr>
+<tr>
+<td>_traffic_source_clid</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456</td>
+</tr>
+<tr>
+<td>_traffic_source_clid_platform</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads</td>
+</tr>
+<tr>
+<td>_app_install_channel</td>
 <td>String</td>
 <td>false</td>
 <td>Reserved for install source, it is the channel for app was downloaded</td>

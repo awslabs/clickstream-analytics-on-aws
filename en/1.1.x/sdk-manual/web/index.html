@@ -3442,23 +3442,34 @@
 <h4 id="add-global-attribute">Add global attribute</h4>
 <ol>
 <li>
-<p>Add global attributes when initializing the SDK
-   <div class="language-typescript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">   </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">   </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">   </span><span class="nx">globalAttributes</span><span class="o">:</span><span class="p">{</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">     </span><span class="nx">_traffic_source_medium</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">     </span><span class="nx">_traffic_source_name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">   </span><span class="p">}</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">});</span>
-</span></code></pre></div></p>
+<p>Add global attributes when initializing the SDK.</p>
+<p>The following example code shows how to add traffic source fields as global attributes when initializing the SDK.</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">   </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">   </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">   </span><span class="nx">globalAttributes</span><span class="o">:</span><span class="p">{</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_SOURCE</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon&#39;</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_MEDIUM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;cpc&#39;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CAMPAIGN</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;summer_promotion&#39;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CAMPAIGN_ID</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;summer_promotion_01&#39;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_TERM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;running_shoes&#39;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CONTENT</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;banner_ad_1&#39;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CLID</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon_ad_123&#39;</span><span class="p">,</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CLID_PLATFORM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon_ads&#39;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">   </span><span class="p">}</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="p">});</span>
+</span></code></pre></div>
 </li>
 <li>
-<p>Add global attributes after initializing the SDK
-   <div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setGlobalAttributes</span><span class="p">({</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nx">_traffic_source_medium</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">});</span>
+<p>Add global attributes after initializing the SDK.
+    <div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setGlobalAttributes</span><span class="p">({</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_MEDIUM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">});</span>
 </span></code></pre></div></p>
 </li>
 </ol>
@@ -3485,7 +3496,7 @@
 </div>
 <h4 id="record-event-with-items">Record event with items</h4>
 <p>You can add the following code to log an event with an item.</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Item</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Item</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">itemBook</span><span class="o">:</span><span class="w"> </span><span class="kt">Item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;123&#39;</span><span class="p">,</span>
@@ -3498,11 +3509,12 @@
 </span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span>
 </span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;view_item&#39;</span><span class="p">,</span>
 </span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="nx">attributes</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="nx">currency</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="nx">event_category</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;recommended&#39;</span><span class="p">,</span>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">itemBook</span><span class="p">],</span>
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="p">});</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">CURRENCY</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">VALUE</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="mf">99</span><span class="p">,</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">    </span><span class="nx">event_category</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;recommended&#39;</span><span class="p">,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">itemBook</span><span class="p">],</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">});</span>
 </span></code></pre></div>
 <p>For logging more attribute in an item, please refer to <a href="#item-attributes">item attributes</a>.</p>
 <div class="admonition warning">
@@ -4187,22 +4199,52 @@
 </thead>
 <tbody>
 <tr>
-<td>_traffic_source_medium</td>
-<td>string</td>
-<td>false</td>
-<td>Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine.</td>
-</tr>
-<tr>
-<td>_traffic_source_name</td>
-<td>string</td>
-<td>false</td>
-<td>Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion.</td>
-</tr>
-<tr>
 <td>_traffic_source_source</td>
-<td>string</td>
+<td>String</td>
 <td>false</td>
-<td>Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu.</td>
+<td>Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu</td>
+</tr>
+<tr>
+<td>_traffic_source_medium</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign_id</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2</td>
+</tr>
+<tr>
+<td>_traffic_source_term</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker</td>
+</tr>
+<tr>
+<td>_traffic_source_content</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2</td>
+</tr>
+<tr>
+<td>_traffic_source_clid</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456</td>
+</tr>
+<tr>
+<td>_traffic_source_clid_platform</td>
+<td>String</td>
+<td>false</td>
+<td>Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads</td>
 </tr>
 <tr>
 <td>_session_id</td>
