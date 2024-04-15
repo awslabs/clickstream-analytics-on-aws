@@ -101,47 +101,53 @@ ClickstreamAnalytics.recordEvent("button_click");
 #### Add global attribute
 
 1. Add global attributes when initializing the SDK.
-   The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
-   ```java
-   import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
 
-   ClickstreamAttribute globalAttributes = ClickstreamAttribute.builder()
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE, "amazon")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM, "cpc")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN, "summer_promotion")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID, "summer_promotion_01")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM, "running_shoes")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT, "banner_ad_1")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID, "amazon_ad_123")
-         .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM, "amazon_ads")
-         .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
-         .build();
-   ClickstreamConfiguration configuration = new ClickstreamConfiguration()
-         .withAppId("your appId")
-         .withEndpoint("http://example.com/collect")
-         .withInitialGlobalAttributes(globalAttributes);
-   ClickstreamAnalytics.init(getApplicationContext(), configuration);
-   ```
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    ClickstreamAttribute globalAttributes = ClickstreamAttribute.builder()
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE, "amazon")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM, "cpc")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN, "summer_promotion")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID, "summer_promotion_01")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM, "running_shoes")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT, "banner_ad_1")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID, "amazon_ad_123")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM, "amazon_ads")
+          .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+          .build();
+    ClickstreamConfiguration configuration = new ClickstreamConfiguration()
+          .withAppId("your appId")
+          .withEndpoint("http://example.com/collect")
+          .withInitialGlobalAttributes(globalAttributes);
+    ClickstreamAnalytics.init(getApplicationContext(), configuration);
+    ```
 
-2. Add global attributes after initializing the SDK
-   ```java
-   import software.aws.solution.clickstream.ClickstreamAttribute;
-   import software.aws.solution.clickstream.ClickstreamAnalytics;
-   
-   ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
-       .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
-       .add("level", 5.1)
-       .add("class", 6)
-       .add("isOpenNotification", true)
-       .build();
-   ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
-   
-   // for delete an global attribute
-   ClickstreamAnalytics.deleteGlobalAttributes("level");
-   ```
+2. Add global attributes after initializing the SDK.
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAttribute;
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
+        .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+        .add("level", 5.1)
+        .add("class", 6)
+        .add("isOpenNotification", true)
+        .build();
+    ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+    ```
 
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
 that occur after it is set.
+
+#### Delete global attribute
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytics;
+
+ClickstreamAnalytics.deleteGlobalAttributes("level");
+```
 
 #### Login and logout
 
@@ -183,19 +189,19 @@ You can add the following code to log an event with an item.
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
 import software.aws.solution.clickstream.ClickstreamItem;
 
-ClickstreamItem item_book=ClickstreamItem.builder()
-        .add(ClickstreamAnalytics.Item.ITEM_ID,"123")
-        .add(ClickstreamAnalytics.Item.ITEM_NAME,"Nature")
-        .add(ClickstreamAnalytics.Item.ITEM_CATEGORY,"book")
-        .add(ClickstreamAnalytics.Item.PRICE,99)
-        .add("book_publisher","Nature Research")
+ClickstreamItem item_book = ClickstreamItem.builder()
+        .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
+        .add(ClickstreamAnalytics.Item.ITEM_NAME, "Nature")
+        .add(ClickstreamAnalytics.Item.ITEM_CATEGORY, "book")
+        .add(ClickstreamAnalytics.Item.PRICE, 99)
+        .add("book_publisher", "Nature Research")
         .build();
 
-        ClickstreamEvent event=ClickstreamEvent.builder()
+        ClickstreamEvent event = ClickstreamEvent.builder()
         .name("view_item")
-        .add(ClickstreamAnalytics.Attr.VALUE,99)
-        .add(ClickstreamAnalytics.Attr.CURRENCY,"USD")
-        .add("event_category","recommended")
+        .add(ClickstreamAnalytics.Attr.VALUE, 99)
+        .add(ClickstreamAnalytics.Attr.CURRENCY, "USD")
+        .add("event_category", "recommended")
         .setItems(new ClickstreamItem[]{item_book})
         .build();
 
@@ -275,7 +281,7 @@ ClickstreamConfiguration configuration = new ClickstreamConfiguration()
         .withCustomDns(CustomOkhttpDns.getInstance())
         .withCompressEvents(true);
 
-ClickstreamAnalytics.init(getApplicationContext(),configuration);
+ClickstreamAnalytics.init(getApplicationContext(), configuration);
 ```
 
 Here is an explanation of each method.
@@ -325,14 +331,15 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 You can follow the steps below to view the event raw JSON and debug your events.
 
-1. Using `ClickstreamAnalytics.getClickStreamConfiguration()` API and set the `withLogEvents()` method with true in
-   debug mode, for example:
+1. Enable the `withLogEvents` configuration when initializing the SDK
     ```java
     import software.aws.solution.clickstream.ClickstreamAnalytics;
     
     // log the event in debug mode.
-    ClickstreamAnalytics.getClickStreamConfiguration()
-                .withLogEvents(BuildConfig.DEBUG);
+    ClickstreamConfiguration configuration = new ClickstreamConfiguration()
+        ...
+        .withLogEvents(true);
+    ClickstreamAnalytics.init(getApplicationContext(), configuration);
     ```
 2. Integrate the SDK and launch your app by Android Studio, then open the  **Logcat** window.
 3. Input `EventRecorder` to the filter, and you will see the JSON content of all events recorded by Clickstream Android SDK.

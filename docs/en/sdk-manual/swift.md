@@ -112,7 +112,7 @@ struct YourApp: App {
 
 Clickstream Swift SDK depends on method swizzling to automatically record screen views. SwiftUI apps
 must [record screen view events manually](#record-screen-view-events-manually), and disable automatic tracking of screen
-view events by setting configuration.withTrackScreenViewEvents(false) when the SDK is initialized.
+view events by setting `configuration.withTrackScreenViewEvents(false)` when the SDK is initialized.
 
 ### 4.Start using
 
@@ -154,7 +154,8 @@ Add the following code where you need to record event.
 #### Add global attribute
 
 1. Add global attributes when initializing the SDK.
-   The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
 
     === "Swift"
          ```swift
@@ -199,7 +200,7 @@ Add the following code where you need to record event.
          [ClickstreamObjc initSDK:configuration error: &error];
          ```
 
-2. Add global attributes after initializing the SDK
+2. Add global attributes after initializing the SDK.
 
     === "Swift"
          ```swift
@@ -301,8 +302,8 @@ You can add the following code to log an event with an item.
     import Clickstream
     
     let attributes: ClickstreamAttribute = [
-        ClickstreamAnalytics.Item.ITEM_ID: "123",
-        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        ClickstreamAnalytics.Attr.VALUE: 99.9,
+        ClickstreamAnalytics.Attr.CURRENCY: "USD",
         "event_category": "recommended"
     ]
     

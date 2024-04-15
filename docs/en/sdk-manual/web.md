@@ -76,25 +76,38 @@ ClickstreamAnalytics.record({ name: 'button_click' });
 ```
 
 #### Add global attribute
-1. Add global attributes when initializing the SDK
-   ```typescript
-   ClickstreamAnalytics.init({
-      appId: "your appId",
-      endpoint: "https://example.com/collect",
-      globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
-      }
-   });
-   ```
+1. Add global attributes when initializing the SDK.
 
-2. Add global attributes after initializing the SDK
-   ``` typescript
-   ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
-     level: 10,
-   });
-   ```
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+   
+    ```typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.init({
+       appId: "your appId",
+       endpoint: "https://example.com/collect",
+       globalAttributes:{
+         [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+         [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+         [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+         [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+         [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+         [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+       }
+    });
+    ```
+
+2. Add global attributes after initializing the SDK.
+    ``` typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-web';
+    
+    ClickstreamAnalytics.setGlobalAttributes({
+      [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
+      level: 10,
+    });
+    ```
 
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events that occur after it is set, you also can remove a global attribute by setting its value to `null`.
 
@@ -130,7 +143,7 @@ Current logged-in user's attributes will be cached in localStorage, so the next 
 You can add the following code to log an event with an item.
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-web';
 
 const itemBook: Item = {
   id: '123',
@@ -143,7 +156,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.CURRENCY]: 'USD',
+    [Attr.VALUE]: 99,
     event_category: 'recommended',
   },
   items: [itemBook],
@@ -252,7 +266,7 @@ Clickstream Web SDK supports the following data types:
 | Data type | Range                       | Sample                 |
 |-----------|-----------------------------|------------------------|
 | number    | 5e-324~1.79e+308            | 12, 26854775808, 3.14  |
-| boolean   | true, false                  | true                   |
+| boolean   | true, false                 | true                   |
 | string    | max support 1024 characters | "clickstream"          |
 
 ### Naming rules
@@ -451,19 +465,24 @@ All user attributes will be stored in `user` object, and all custom attributes a
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto   track | Description                                                                                                                                                 |
-|--------------------------|-----------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | string    | false        | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine. |
-| _traffic_source_name     | string    | false        | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion.        |
-| _traffic_source_source   | string    | false        | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu.        |
-| _session_id              | string    | true         | Added in all events.                                                                                                                                        |
-| _session_start_timestamp | number    | true         | Added in all events. The value is millisecond.                                                                                                              |
-| _session_duration        | number    | true         | Added in all events. The value is millisecond.                                                                                                              |
-| _session_number          | number    | true         | Added in all events.                                                                                                                                        |
-| _page_title              | string    | true         | Added in all events.                                                                                                                                        |
-| _page_url                | string    | true         | Added in all events.                                                                                                                                        |
-| _latest_referrer         | string    | true         | Added in all events. The last off-site url.                                                                                                                 |
-| _latest_referrer_host    | string    | true         | Added in all events. The last off-site domain name.                                                                                                         |
+| Attribute name                | Data type | Auto   track | Description                                                                                                                                                       |
+|-------------------------------|-----------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_source        | String    | false        | Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _traffic_source_medium        | String    | false        | Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_campaign      | String    | false        | Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials                     |
+| _traffic_source_campaign_id   | String    | false        | Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2                      |
+| _traffic_source_term          | String    | false        | Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker                            |
+| _traffic_source_content       | String    | false        | Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2                              |
+| _traffic_source_clid          | String    | false        | Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456                              |
+| _traffic_source_clid_platform | String    | false        | Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads                  |
+| _session_id                   | string    | true         | Added in all events.                                                                                                                                              |
+| _session_start_timestamp      | number    | true         | Added in all events. The value is millisecond.                                                                                                                    |
+| _session_duration             | number    | true         | Added in all events. The value is millisecond.                                                                                                                    |
+| _session_number               | number    | true         | Added in all events.                                                                                                                                              |
+| _page_title                   | string    | true         | Added in all events.                                                                                                                                              |
+| _page_url                     | string    | true         | Added in all events.                                                                                                                                              |
+| _latest_referrer              | string    | true         | Added in all events. The last off-site url.                                                                                                                       |
+| _latest_referrer_host         | string    | true         | Added in all events. The last off-site domain name.                                                                                                               |
 
 ### Item attributes
 

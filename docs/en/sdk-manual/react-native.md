@@ -77,25 +77,39 @@ ClickstreamAnalytics.record({name: 'button_click'});
 
 #### Add global attribute
 
-1. Add global attributes when initializing the SDK
-   ```typescript
-   ClickstreamAnalytics.init({
-      appId: "your appId",
-      endpoint: "https://example.com/collect",
-      globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
-      }
-   });
-   ```
+1. Add global attributes when initializing the SDK.
+
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+
+    ```typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-react-native';
+    
+    ClickstreamAnalytics.init({
+       appId: "your appId",
+       endpoint: "https://example.com/collect",
+       globalAttributes:{
+         [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+         [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+         [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+         [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+         [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+         [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+         [Attr.APP_INSTALL_CHANNEL]: 'amazon_store',
+       }
+    });
+    ```
 
 2. Add global attributes after initializing the SDK
-   ``` typescript
-   ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
-     level: 10,
-   });
-   ```
+    ``` typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-react-native';
+    
+    ClickstreamAnalytics.setGlobalAttributes({
+      [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
+      level: 10,
+    });
+    ```
 
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
 that occur after it is set.
@@ -142,7 +156,7 @@ user's attribute when it changes.
 You can add the following code to log an event with an item.
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-react-native';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-react-native';
 
 const itemBook: Item = {
   id: '123',
@@ -154,7 +168,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.VALUE]: 99,
+    [Attr.CURRENCY]: 'USD',
     event_category: 'recommended',
   },
   items: [itemBook],
@@ -323,7 +338,7 @@ React Native SDK version dependencies
 
 | React Native SDK Version | Android SDK Version | Swift SDK Version |
 |--------------------------|---------------------|-------------------|
-| 0.1.0                    | 0.12.0              | 0.11.0            |
+| 0.1.0 ~ 0.2.0            | 0.12.0              | 0.11.0            |
 
 ## Sample project
 Sample [React Native Project](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/react-native) for SDK integration.

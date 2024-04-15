@@ -66,7 +66,6 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 
 在配置参数之后，您需要在 AppDelegate 的 `didFinishLaunchingWithOptions` 生命周期方法中进行初始化以使用 SDK。
 
-#### 3.1 使用默认配置初始化 SDK
 === "Swift"
     ```swift
     import Clickstream
@@ -94,45 +93,7 @@ Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
     }
     ```
 
-#### 3.2 使用自定义配置初始化 SDK
-
-=== "Swift"
-    ```swift
-    import Clickstream
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        do {
-            let configuration = ClickstreamConfiguration()
-                .withAppId("your appId")
-                .withEndpoint("https://example.com/collect")
-                .withLogEvents(true)
-            try ClickstreamAnalytics.initSDK(configuration)
-        } catch {
-            assertionFailure("Fail to initialize ClickstreamAnalytics: \(error)")
-        }
-        return true
-    }
-    ```
-
-=== "Objective-C"
-    ```objective-c
-    @import Clickstream;
-
-    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
-        NSError *error = nil;
-        ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
-                                                   withAppId:@"your appId"]
-                                                   withEndpoint:@"https://example.com/collect"]
-                                                   withLogEvents:TRUE];
-        [ClickstreamObjc initSDK:configuration error: &error];
-        if (error) {
-            NSLog(@"Fail to initialize ClickstreamAnalytics: %@", error.localizedDescription);
-        }
-        return YES;
-    }
-    ```
-
-#### 3.3 SwiftUI 配置
+#### SwiftUI 配置
 
 如果您的项目是使用 SwiftUI 开发的，您需要创建一个 `application` 代理并通过 `UIApplicationDelegateAdaptor` 将其附加到您的
 App。
@@ -190,18 +151,89 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     ```
 
 #### 添加全局属性
+1. 在 SDK 初始化时添加全局属性。
 
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+
+    === "Swift"
+         ```swift
+         import Clickstream
+
+         let configuration = ClickstreamConfiguration()
+             .withAppId("your appId")
+             .withEndpoint("https://example.com/collect")
+             .withInitialGlobalAttributes([
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+                 ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
+         ])
+         try ClickstreamAnalytics.initSDK(configuration)
+         ```
+
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+
+         NSDictionary *globalAttributes = @{
+             Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
+             Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
+             Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
+             Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
+             Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
+             Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+         };
+         ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+             withAppId:@"your appId"]
+             withEndpoint:@"https://example.com/collect"]
+             withInitialGlobalAttributesObjc:globalAttributes];
+         [ClickstreamObjc initSDK:configuration error: &error];
+         ```
+
+2. 在 SDK 初始化完成后添加全局属性。
+
+    === "Swift"
+         ```swift
+         import Clickstream
+
+         let globalAttribute: ClickstreamAttribute = [
+             ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
+             "class": 6,
+             "level": 5.1,
+             "isOpenNotification": true,
+         ]
+         ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
+         
+         // for delete an global attribute
+         ClickstreamAnalytics.deleteGlobalAttributes("level")
+         ```
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+
+         NSDictionary *attributes =@{
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+             @"class": @6,
+             @"level": @5.1,
+             @"isOpenNotification": @YES
+         };
+         [ClickstreamObjc addGlobalAttributes :attributes];
+         ```
+
+建议在 SDK 初始化时添加全局属性，全局属性将会出现在其设置后生成的每一个事件中。
+
+#### 删除全局属性
 === "Swift"
     ```swift
     import Clickstream
-    
-    let globalAttribute: ClickstreamAttribute = [
-        "channel": "apple",
-        "class": 6,
-        "level": 5.1,
-        "isOpenNotification": true,
-    ]
-    ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
     
     // 删除全局属性
     ClickstreamAnalytics.deleteGlobalAttributes("level")
@@ -210,19 +242,9 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     ```objective-c
     @import Clickstream;
     
-    NSDictionary *attributes =@{
-        @"channel": @"apple",
-        @"class": @6,
-        @"level": @5.1,
-        @"isOpenNotification": @YES
-    };
-    [ClickstreamObjc addGlobalAttributes :attributes];
-    
     // 删除全局属性
     [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
     ```
-
-请在SDK初始化完成后添加全局属性，全局属性将添加到所有事件的属性对象中。
 
 #### 登录和登出
 
@@ -290,8 +312,8 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     import Clickstream
     
     let attributes: ClickstreamAttribute = [
-        ClickstreamAnalytics.Item.ITEM_ID: "123",
-        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        ClickstreamAnalytics.Attr.VALUE: 99.9,
+        ClickstreamAnalytics.Attr.CURRENCY: "USD",
         "event_category": "recommended"
     ]
     
@@ -311,8 +333,8 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     @import Clickstream;
     
     NSDictionary *attributes = @{
-        ClickstreamItemKey.ITEM_ID: @"123",
-        ClickstreamItemKey.CURRENCY: @"USD",
+        Attr.VALUE: @99.9,
+        Attr.CURRENCY: @"USD",
         "event_category": @"recommended"
     };
     NSDictionary *item_book = @{
@@ -411,6 +433,61 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     [ClickstreamObjc enable];
     ```
 
+#### 其他配置项
+除了必需的 `appId` 和 `endpoint` 之外，您还可以在初始化 SDK 时配置其他参数以满足更多定制化的使用：
+
+=== "Swift"
+    ```swift
+    import Clickstream
+
+    let configuration = ClickstreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withLogEvents(true)
+        .withCompressEvents(true)
+        .withSendEventInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(true)
+        .withTrackUserEngagementEvents(true)
+        .withTrackAppExceptionEvents(true)
+        .withAuthCookie("your authentication cookie")
+        .withInitialGlobalAttributes([ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon"])
+    try ClickstreamAnalytics.initSDK(configuration)
+    ```
+
+=== "Objective-C"
+    ```objective-c
+    @import Clickstream;
+
+    ClickstreamConfiguration *configuration = [[[[[[[[[[[[[ClickstreamConfiguration alloc] init]
+        withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withSendEventInterval: 10000]
+        withSessionTimeoutDuration: 1800000]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE]
+        withAuthCookie: @"your auth cookie"]
+        withInitialGlobalAttributesObjc:@{Attr.TRAFFIC_SOURCE_SOURCE: @"amazon"}];
+    [ClickstreamObjc initSDK:configuration error: &error];
+    ```
+以下是每个方法的说明:
+
+| 名称                              | 参数类型   | 是否必填 | 默认值     | 描述                                |
+|---------------------------------|--------|------|---------|-----------------------------------|
+| withAppId()                     | String | 是    | --      | 在解决方案控制平面中您应用程序的 ID               |
+| withEndpoint()                  | String | 是    | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
+| withLogEvents()                 | Bool   | 否    | false   | 是否自动打印事件 json以调试事件, [了解更多](#_9)   |
+| withCompressEvents()            | Bool   | 否    | true    | 上传事件时是否通过gzip压缩事件内容               |
+| withSendEventsInterval()        | Int    | 否    | 100000  | 事件发送间隔（毫秒）                        |
+| withSessionTimeoutDuration()    | Int64  | 否    | 1800000 | 会话超时的时长（毫秒）                       |
+| withTrackScreenViewEvents()     | Bool   | 否    | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
+| withTrackUserEngagementEvents() | Bool   | 否    | true    | 是否自动记录 user engagement（用户参与） 事件   |
+| withTrackAppExceptionEvents()   | Bool   | 否    | true    | 是否自动记录应用崩溃事件                      |
+| withAuthCookie()                | String | 否    | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
+
 #### SDK 配置更新
 
 在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
@@ -423,14 +500,14 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     // 在初始化后更新SDK配置
     do {
         var configuration = try ClickstreamAnalytics.getClickstreamConfiguration()
-        configuration.appId = "your appId"
-        configuration.endpoint = "https://example.com/collect"
-        configuration.authCookie = "your authentication cookie"
-        configuration.sessionTimeoutDuration = 1800000
-        configuration.isTrackScreenViewEvents = false
-        configuration.isTrackUserEngagementEvents = false
-        configuration.isLogEvents = true
-        configuration.isCompressEvents = true
+        configuration.withAppId("your appId")
+            .withEndpoint("https://example.com/collect")
+            .withLogEvents(true)
+            .withCompressEvents(true)
+            .withTrackAppExceptionEvents(true)
+            .withTrackScreenViewEvents(true)
+            .withTrackUserEngagementEvents(true)
+            .withAuthCookie("your authentication cookie")
     } catch {
         print("Failed to config ClickstreamAnalytics: \(error)")
     }
@@ -442,36 +519,15 @@ Clickstream Swift SDK 依靠方法交换来自动记录屏幕视图。 SwiftUI �
     @import Clickstream;
     
     // 在初始化后更新SDK配置
-    ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
-    if (configuration) {
-        [configuration setAppId:@"your appId"];
-        [configuration setEndpoint:@"https://example.com/collect"];
-        [configuration setAuthCookie:@"your authentication cookie"];
-        [configuration setSessionTimeoutDuration:1800000];
-        [configuration setIsTrackScreenViewEvents:0];
-        [configuration setIsTrackUserEngagementEvents:0];
-        [configuration setIsLogEvents:1];
-        [configuration setIsCompressEvents:1];
-    }else{
-        NSLog(@"Failed to get configuration: %@", error.localizedDescription);
-    }
+    ClickstreamConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
+    configuration = [[[[[[[configuration withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE];
     ```
-
-!!! info "重要提示"
-    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
-
-以下是每个配置项的说明
-
-| 名称                          | 参数类型     | 是否必填     | 默认值     | 描述                                |
-|-----------------------------|----------|----------|---------|-----------------------------------|
-| appId                       | String   | 是        | --      | 在解决方案控制平面中您应用程序的 ID               |
-| endpoint                    | String   | 是        | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
-| authCookie                  | String   | 否        | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
-| sessionTimeoutDuration      | Int64    | 否        | 1800000 | 会话超时的时长（毫秒）                       |
-| isTrackScreenViewEvents     | Bool     | 否        | true    | 是否自动记录 screen view（屏幕浏览） 事件       |
-| isTrackUserEngagementEvents | Bool     | 否        | true    | 是否自动记录 user engagement（用户参与） 事件   |
-| isLogEvents                 | Bool     | 否        | false   | 是否自动打印事件 json以调试事件, [了解更多](#_9)   |
-| isCompressEvents            | Bool     | 否        | true    | 上传事件时是否通过gzip压缩事件内容               |
 
 #### 调试事件
 
@@ -693,18 +749,23 @@ Clickstream Swift SDK 支持以下数据类型：
 
 ### 事件属性
 
-| 属性名称                     | 数据类型     | 是否自动采集 | 描述                                                       |
-|--------------------------|----------|--------|----------------------------------------------------------|
-| _traffic_source_medium   | String   | 否      | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎            |
-| _traffic_source_name     | String   | 否      | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                    |
-| _traffic_source_source   | String   | 否      | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu |
-| _channel                 | String   | 否      | 预留安装源，app下载的渠道                                           |
-| _session_id              | String   | 是      | 在所有事件中添加                                                 |
-| _session_start_timestamp | long     | 是      | 在所有事件中添加                                                 |
-| _session_duration        | long     | 是      | 在所有事件中添加                                                 |
-| _session_number          | int      | 是      | 在所有事件中添加                                                 |
-| _screen_name             | String   | 是      | 在所有事件中添加                                                 |
-| _screen_unique_id        | String   | 是      | 在所有事件中添加                                                 |
+| 属性名称                          | 数据类型     | 是否自动采集 | 描述                                                          |
+|-------------------------------|----------|--------|-------------------------------------------------------------|
+| _traffic_source_source        | String   | 否      | 流量来源保留字段。事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu   |
+| _traffic_source_medium        | String   | 否      | 流量来源保留字段。使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎              |
+| _traffic_source_campaign      | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的活动，例如：summer_sale, holiday_specials |
+| _traffic_source_campaign_id   | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的营销活动 ID，例如：campaign_1, campaign_2     |
+| _traffic_source_term          | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的术语，例如：running_shoes, fitness_tracker  |
+| _traffic_source_content       | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的内容，例如：banner_ad_1, text_ad_2          |
+| _traffic_source_clid          | String   | 否      | 流量来源保留字段。使用此属性来存储流量源的 CLID，例如：amazon_ad_123, google_ad_456  |
+| _traffic_source_clid_platform | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的clid平台，例如：amazon_ads, google_ads    |
+| _app_install_channel          | String   | 否      | 预留安装源，app下载的渠道                                              |
+| _session_id                   | String   | 是      | 在所有事件中添加                                                    |
+| _session_start_timestamp      | long     | 是      | 在所有事件中添加                                                    |
+| _session_duration             | long     | 是      | 在所有事件中添加                                                    |
+| _session_number               | int      | 是      | 在所有事件中添加                                                    |
+| _screen_name                  | String   | 是      | 在所有事件中添加                                                    |
+| _screen_unique_id             | String   | 是      | 在所有事件中添加                                                    |
 
 ### Item 属性
 
