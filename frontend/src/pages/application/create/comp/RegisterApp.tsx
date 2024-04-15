@@ -34,7 +34,7 @@ import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MAX_USER_INPUT_LENGTH } from 'ts/const';
+import { FILTER_TIME_ZONE, MAX_USER_INPUT_LENGTH } from 'ts/const';
 import { defaultStr, validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
@@ -211,12 +211,15 @@ const RegisterApp: React.FC = () => {
                       };
                     });
                   }}
-                  options={moment.tz.names().flatMap((tz) => {
-                    return {
-                      label: tz,
-                      value: tz,
-                    };
-                  })}
+                  options={moment.tz
+                    .names()
+                    .filter((tz) => !FILTER_TIME_ZONE.includes(tz))
+                    .flatMap((tz) => {
+                      return {
+                        label: tz,
+                        value: tz,
+                      };
+                    })}
                   placeholder={defaultStr(
                     t('application:labels.timezonePlaceholder')
                   )}

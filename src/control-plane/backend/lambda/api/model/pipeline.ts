@@ -374,6 +374,10 @@ export class CPipeline {
     await this._createRules();
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
+    this.pipeline = {
+      ...this.pipeline,
+      timezone: oldPipeline.timezone,
+    };
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     // update parameters
@@ -631,35 +635,6 @@ export class CPipeline {
   }
 
   public async updateAppTimezone(): Promise<void> {
-    // create rule to listen CFN stack
-    await this._createRules();
-    this.pipeline.lastAction = 'Update';
-    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    // update appIds and timezone
-    const updateList: { stackType: PipelineStackType; parameterKey: string; parameterValue: string }[] = [];
-    updateList.push({
-      stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
-      parameterKey: 'TimeZoneWithAppId',
-      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
-    });
-    updateList.push({
-      stackType: PipelineStackType.REPORTING,
-      parameterKey: 'QuickSightTimezoneParam',
-      parameterValue: this.pipeline.timezone ? JSON.stringify(this.pipeline.timezone) : '',
-    });
-    // update workflow
-    this.stackManager.updateWorkflowForApp(updateList);
-    // create new execution
-    const execWorkflow = this.stackManager.getExecWorkflow();
-    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
-    this.pipeline.statusType = PipelineStatusType.UPDATING;
-    // update pipeline metadata
-    this.pipeline.workflow = this.stackManager.getWorkflow();
     this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
