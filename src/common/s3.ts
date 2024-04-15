@@ -28,7 +28,6 @@ import {
 import { logger } from './powertools';
 import { aws_sdk_client_common_config } from './sdk-client-config';
 
-
 const s3Client = new S3Client({
   ...aws_sdk_client_common_config,
 });
@@ -67,6 +66,33 @@ export async function readS3ObjectAsString(bucketName: string, key: string): Pro
     return handleNoSuchKeyError(e);
   }
 }
+
+
+export async function isObjectExist(bucketName: string, key: string): Promise<boolean> {
+  logger.info(`isObjectExist: s3://${bucketName}/${key}`);
+  let objectExist = false;
+  try {
+    const res = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    if (res.Body) {
+      objectExist = true;
+    }
+  } catch (e) {
+    if (e instanceof NoSuchKey) {
+      objectExist = false;
+    } else {
+      logger.error('Error ' + e + ' when checking object exist');
+      throw e;
+    }
+  }
+  logger.info(`objectExist: ${objectExist}`);
+  return objectExist;
+}
+
 
 export async function readS3ObjectAsJson(bucketName: string, key: string) {
   logger.info(`readS3ObjectAsJson: s3://${bucketName}/${key}`);

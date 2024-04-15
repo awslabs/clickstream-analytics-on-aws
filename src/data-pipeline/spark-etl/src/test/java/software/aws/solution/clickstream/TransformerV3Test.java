@@ -18,6 +18,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
@@ -35,7 +36,11 @@ import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
 @Slf4j
 class TransformerV3Test extends BaseSparkTest {
 
-    private final TransformerV3 transformer = new TransformerV3();
+    private TransformerV3 transformer;
+    @BeforeEach
+    void setupTransformer() {
+        this.transformer = new TransformerV3(getTestTransformConfig("uba-app"));
+    }
 
     @Test
     public void should_transform_event_v2() throws IOException {

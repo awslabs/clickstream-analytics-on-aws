@@ -13,29 +13,36 @@
 
 package software.aws.solution.clickstream.common;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
-import software.aws.solution.clickstream.common.enrich.DefaultTrafficSourceHelper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper;
+import software.aws.solution.clickstream.common.enrich.UrlParseResult;
 import software.aws.solution.clickstream.common.enrich.ts.CategoryTrafficSource;
-import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceParserResult;
-import software.aws.solution.clickstream.common.ingest.*;
+import software.aws.solution.clickstream.common.ingest.ClickstreamIngestRow;
 import software.aws.solution.clickstream.common.model.ClickstreamEvent;
-import software.aws.solution.clickstream.common.model.UriInfo;
 
-import java.util.*;
+import java.util.Base64;
+import java.util.Iterator;
+import java.util.Map;
 
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
 import static software.aws.solution.clickstream.common.Util.decompress;
-import static software.aws.solution.clickstream.common.Util.getStackTrace;
 
 @Slf4j
 public abstract class BaseEventParser implements EventParser {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final String UPLOAD_TIMESTAMP = "upload_timestamp";
     public static final int ADJUST_THRESHOLD = 600_000; // 10 minutes
-
     public static final String INPUT_FILE_NAME = "input_file_name";
+    public static final String PLATFORM_WEB = "Web";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static void addDataResult(final ParseRowResult rowResult, final ParseDataResult result) {
+        rowResult.getClickstreamEventList().addAll(result.getClickstreamEventList());
+        rowResult.getClickstreamUserList().add(result.getClickstreamUser());
+        rowResult.getClickstreamItemList().addAll(result.getClickstreamItemList());
+    }
 
     public ClickstreamIngestRow ingestLineToRow(final String ingestLine) throws JsonProcessingException {
         return OBJECT_MAPPER.readValue(ingestLine, ClickstreamIngestRow.class);
@@ -86,68 +93,49 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER;
     }
 
-    private static void addDataResult(final ParseRowResult rowResult, final ParseDataResult result) {
-        rowResult.getClickstreamEventList().addAll(result.getClickstreamEventList());
-        rowResult.getClickstreamUserList().add(result.getClickstreamUser());
-        rowResult.getClickstreamItemList().addAll(result.getClickstreamItemList());
+    protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
+        String appId = clickstreamEvent.getAppId();
+        RuleConfig ruleConfig = getAppRuleConfig() !=null ? getAppRuleConfig().get(appId) : null;
+        if (ruleConfig == null) {
+            log.warn("RuleConfig is not set for appId: " + appId);
+        }
+
+        RuleBasedTrafficSourceHelper rsHelper = RuleBasedTrafficSourceHelper.getInstance(appId, ruleConfig);
+
+        CategoryTrafficSource ts = rsHelper.parse(clickstreamEvent.getPageViewPageUrl(),
+                clickstreamEvent.getPageViewPageReferrer(),
+                clickstreamEvent.getPageViewLatestReferrer(),
+                clickstreamEvent.getPageViewLatestReferrerHost());
+
+        clickstreamEvent.setTrafficSourceSource(ts.getSource());
+        clickstreamEvent.setTrafficSourceMedium(ts.getMedium());
+        clickstreamEvent.setTrafficSourceCampaign(ts.getCampaign());
+        clickstreamEvent.setTrafficSourceContent(ts.getContent());
+        clickstreamEvent.setTrafficSourceTerm(ts.getTerm());
+        clickstreamEvent.setTrafficSourceCampaignId(ts.getCampaignId());
+        clickstreamEvent.setTrafficSourceClidPlatform(ts.getClidPlatform());
+        clickstreamEvent.setTrafficSourceClid(ts.getClid());
+        clickstreamEvent.setTrafficSourceChannelGroup(ts.getChannelGroup());
+        clickstreamEvent.setTrafficSourceCategory(ts.getCategory());
+
     }
 
-
-    protected void setTrafficSourceBySourceParser(final ClickstreamEvent clickstreamEvent) {
-        DefaultTrafficSourceHelper trafficSourceParser = DefaultTrafficSourceHelper.getInstance();
-        TrafficSourceParserResult parserResult = null;
-        try {
-            if (clickstreamEvent.getPageViewPageUrl() != null) {
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewPageUrl(), clickstreamEvent.getPageViewPageReferrer());
-            } else if (clickstreamEvent.getPageViewLatestReferrer() != null) {
-                parserResult = trafficSourceParser.parse(clickstreamEvent.getPageViewLatestReferrer(), null);
-            }
-        } catch (Exception e) {
-            log.error("cannot parse traffic source: " + clickstreamEvent.getPageViewPageUrl() + ", error: " + e.getMessage());
-            log.error(getStackTrace(e));
+    protected void setPageViewUrl(final ClickstreamEvent clickstreamEvent, final String url) {
+        if (url == null) {
             return;
         }
+        clickstreamEvent.setPageViewPageUrl(deCodeUri(url));
+        UrlParseResult urlParseResult = Util.parseUrl(url);
 
-        if (parserResult != null) {
-            CategoryTrafficSource cTrafficSource = parserResult.getTrafficSource();
-            clickstreamEvent.setTrafficSourceCampaign(cTrafficSource.getTrafficSource().getCampaign());
-            clickstreamEvent.setTrafficSourceContent(cTrafficSource.getTrafficSource().getContent());
-            clickstreamEvent.setTrafficSourceMedium(cTrafficSource.getTrafficSource().getMedium());
-            clickstreamEvent.setTrafficSourceSource(cTrafficSource.getTrafficSource().getSource());
-            clickstreamEvent.setTrafficSourceTerm(cTrafficSource.getTrafficSource().getTerm());
-            clickstreamEvent.setTrafficSourceClid(cTrafficSource.getTrafficSource().getClid());
-            clickstreamEvent.setTrafficSourceClidPlatform(cTrafficSource.getTrafficSource().getClidPlatform());
-            clickstreamEvent.setTrafficSourceCampaignId(cTrafficSource.getTrafficSource().getCampaignId());
-            clickstreamEvent.setTrafficSourceChannelGroup(cTrafficSource.getChannelGroup());
-            clickstreamEvent.setTrafficSourceCategory(cTrafficSource.getCategory());
-
-            UriInfo uriInfo = parserResult.getUriInfo();
-            if (uriInfo != null) {
-                if (clickstreamEvent.getPageViewHostname() == null) {
-                    clickstreamEvent.setPageViewHostname(uriInfo.getHost());
-                }
-                if (clickstreamEvent.getPageViewPageUrlPath() == null) {
-                    clickstreamEvent.setPageViewPageUrlPath(uriInfo.getPath());
-                }
-                if (clickstreamEvent.getPageViewPageUrlQueryParameters() == null) {
-                    clickstreamEvent.setPageViewPageUrlQueryParameters(uriInfo.getParameters());
-                }
-            }
-
+        if (urlParseResult.getPath()!=null && !urlParseResult.getPath().equals("/")) {
+            clickstreamEvent.setPageViewPageUrlPath(urlParseResult.getPath());
+        }
+        clickstreamEvent.setPageViewHostname(urlParseResult.getHostName());
+        if (urlParseResult.getQueryParameters() != null && !urlParseResult.getQueryParameters().isEmpty()) {
+            clickstreamEvent.setPageViewPageUrlQueryParameters(Util.convertUriParamsToStrMap(urlParseResult.getQueryParameters()));
         }
     }
 
+    protected abstract Map<String, RuleConfig> getAppRuleConfig();
 
-    @Getter
-    @Setter
-    static class TimeShiftInfo {
-        Long ingestTimestamp;
-        Long uploadTimestamp;
-        Long eventTimestamp;
-        Long originEventTimestamp;
-        Long timeDiff;
-        boolean isAdjusted;
-        String uri;
-        Integer adjustThreshold;
-    }
 }

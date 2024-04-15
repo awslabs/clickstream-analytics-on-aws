@@ -57,7 +57,7 @@ public final class DataProcessor {
     }
     public static void runWithSpark(final String[] args, final SparkSession sparkSession){
         int argsLen = 17;
-        Preconditions.checkArgument(args.length == 17, "This job can only accept input argument with length " + argsLen);
+        Preconditions.checkArgument(args.length == 18, "This job can only accept input argument with length " + argsLen);
         String debug = args[0];
         String database = args[1];
         String sourceTable = args[2];
@@ -75,6 +75,7 @@ public final class DataProcessor {
         String rePartitions = args[14];
         String nUserKeepDays = args[15];
         String nItemKeepDays = args[16];
+        String configRuleDir = args[17];
 
         ETLRunnerConfig runnerConfig;
         runnerConfig = new ETLRunnerConfig(
@@ -84,7 +85,8 @@ public final class DataProcessor {
                         validAppIds,
                         Long.valueOf(dataFreshnessInHour),
                         Integer.valueOf(nUserKeepDays),
-                        Integer.valueOf(nItemKeepDays)
+                        Integer.valueOf(nItemKeepDays),
+                        configRuleDir
                         ),
                 new ETLRunnerConfig.InputOutputConfig(
                         debug,

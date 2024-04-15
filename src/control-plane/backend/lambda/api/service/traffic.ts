@@ -36,11 +36,15 @@ export interface ITrafficSourceActionRequest {
 }
 
 export class TrafficSourceServ {
+  public getConfigRuleKeyPrefix(projectId: string): string {
+    return `clickstream/${projectId}/rules`;
+  }
+
   private _getTrafficSourceBucketKey(projectId: string, appId: string, type: ITrafficSourceType): string {
     if (type === ITrafficSourceType.CHANNEL) {
-      return `clickstream/${projectId}/rules/${appId}/${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
+      return `${this.getConfigRuleKeyPrefix(projectId)}/${appId}/${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
     }
-    return `clickstream/${projectId}/rules/${appId}/${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
+    return `${this.getConfigRuleKeyPrefix(projectId)}/${appId}/${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
   }
 
   private _getTrafficSourceBucket(pipeline: IPipeline): string {

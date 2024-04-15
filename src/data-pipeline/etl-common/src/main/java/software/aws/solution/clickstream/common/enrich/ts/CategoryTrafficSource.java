@@ -13,13 +13,35 @@
 
 package software.aws.solution.clickstream.common.enrich.ts;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
-@AllArgsConstructor
+@Setter
+@ToString
 public class CategoryTrafficSource  {
-    private TrafficSource trafficSource;
-    private String channelGroup;
-    private String category;
+    private String source; // NOSONAR
+    private String medium;  // NOSONAR
+    private String campaign; // NOSONAR
+    private String content; // NOSONAR
+    private String term; // NOSONAR
+    private String campaignId; // NOSONAR
+    private String clidPlatform; // NOSONAR
+    private String clid; // NOSONAR
+    private String channelGroup; // NOSONAR
+    private String category; // NOSONAR
+
+    public CategoryTrafficSource(final TrafficSourceUtm trafficSource, final String category, final String channel) {
+        this.source = trafficSource.getSource();
+        this.medium = trafficSource.getMedium();
+        this.campaign = trafficSource.getCampaign();
+        this.content = trafficSource.getContent();
+        this.term = trafficSource.getTerm();
+        this.campaignId = trafficSource.getCampaignId();
+        this.clidPlatform = trafficSource.getClidPlatform();
+        this.clid = trafficSource.getClid();
+        this.category = category;
+        this.channelGroup = channel;
+    }
 }

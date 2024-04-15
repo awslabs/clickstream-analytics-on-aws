@@ -37,14 +37,23 @@ import static software.aws.solution.clickstream.common.Util.deCodeUri;
 @Slf4j
 public final class GTMEventParser extends BaseEventParser {
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
-    private static final GTMEventParser INSTANCE = new GTMEventParser();
-    private GTMEventParser() {
-    }
+    private static GTMEventParser instance;
 
+    private final Map<String, RuleConfig> appRuleConfig;
+    private GTMEventParser(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
+    }
     public static GTMEventParser getInstance() {
-        return INSTANCE;
+        // use default config rule in java resource file
+        return getInstance(null);
     }
 
+    public static GTMEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+        if (instance == null) {
+            instance = new GTMEventParser(appRuleConfig);
+        }
+        return instance;
+    }
 
     public static Map<String, String> createEventNameMap() {
         Map<String, String> eventNameMap = new HashMap<>();
@@ -130,9 +139,9 @@ public final class GTMEventParser extends BaseEventParser {
 
         clickstreamEvent.setAppId(extraParams.getAppId());
 
-        String platform = "Web";
+        String platform = PLATFORM_WEB;
         if (gtmEvent.getClientHints() != null) {
-            platform = gtmEvent.getClientHints().isMobile() ? "Mobile" : "Web";
+            platform = gtmEvent.getClientHints().isMobile() ? "Mobile" :PLATFORM_WEB;
         }
         clickstreamEvent.setPlatform(platform);
 
@@ -140,7 +149,8 @@ public final class GTMEventParser extends BaseEventParser {
 
         clickstreamEvent.setPageViewPageReferrer(deCodeUri(gtmEvent.getPageReferrer()));
         clickstreamEvent.setPageViewPageTitle(deCodeUri(gtmEvent.getPageTitle()));
-        clickstreamEvent.setPageViewPageUrl(deCodeUri(gtmEvent.getPageLocation()));
+
+        setPageViewUrl(clickstreamEvent, gtmEvent.getPageLocation());
 
         clickstreamEvent.setUserEngagementTimeMsec(gtmEvent.getEngagementTimeMsec());
         clickstreamEvent.setUserId(gtmEvent.getUserId());
@@ -368,5 +378,10 @@ public final class GTMEventParser extends BaseEventParser {
             }
         }
         return clickstreamItems;
+    }
+
+    @Override
+    protected Map<String, RuleConfig> getAppRuleConfig() {
+        return this.appRuleConfig;
     }
 }

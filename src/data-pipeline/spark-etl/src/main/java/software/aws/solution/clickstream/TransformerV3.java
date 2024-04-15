@@ -13,11 +13,13 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.Getter;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.*;
 import software.aws.solution.clickstream.common.Constant;
-import software.aws.solution.clickstream.common.enrich.DefaultTrafficSourceHelper;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper;
 import software.aws.solution.clickstream.model.*;
 import software.aws.solution.clickstream.transformer.*;
 import software.aws.solution.clickstream.util.*;
@@ -35,7 +37,7 @@ import static software.aws.solution.clickstream.model.ModelV2.*;
 
 
 @Slf4j
-public class TransformerV3 {
+public class TransformerV3 implements TransformerInterfaceV3 {
     public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
     public static final String ETL_USER_V2_PROPS = "etl_user_v2_props";
     public static final String INPUT_FILE_NAME = "input_file_name";
@@ -46,8 +48,21 @@ public class TransformerV3 {
     public static final String USER_LATEST_EVENT_NAME = "latest_event_name";
     public static final String CLIENT_TIMESTAMP = "client_timestamp";
     public static final String DATA_STR = "data_str";
-    private final DataConverterV3 dataConverter = new DataConverterV3();
     private final Cleaner cleaner = new Cleaner();
+    @Getter
+    private Map<String, RuleConfig> appRuleConfig;
+
+    public TransformerV3() {
+    }
+    public TransformerV3(final TransformConfig transformConfig) {
+        config(transformConfig);
+    }
+
+    @Override
+    public void config(final TransformConfig transformConfig) {
+        this.appRuleConfig = transformConfig.getAppRuleConfig();
+        log.info("appRuleConfig is set");
+    }
 
     public static Dataset<Row> addProcessInfo(final Dataset<Row> dataset) {
         String jobName = ContextUtil.getJobName();
@@ -252,6 +267,7 @@ public class TransformerV3 {
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
 
+    @Override
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
         Dataset<Row> cleanedDataset = cleaner.clean(dataset, DATA_SCHEMA_V2_FILE_PATH);
         cleanedDataset = cleanedDataset.drop(DATA)
@@ -267,6 +283,12 @@ public class TransformerV3 {
         } else if (!Arrays.asList(dataset.columns()).contains(UPLOAD_TIMESTAMP)) {
             cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, lit(null).cast(DataTypes.LongType));
         }
+
+        if (this.getAppRuleConfig() == null) {
+            throw new IllegalArgumentException("appRuleConfig is null");
+        }
+
+        DataConverterV3 dataConverter = new DataConverterV3(this.getAppRuleConfig());
 
         Dataset<Row> convertedDataset = dataConverter.transform(cleanedDataset);
         convertedDataset.cache();
@@ -441,7 +463,7 @@ public class TransformerV3 {
         log.info("sessionDatasetMobile count: {}", sessionDatasetMobile.count());
 
         Dataset<Row> sessionDatasetMobileNonDirectAgg = sessionDatasetMobile
-                .filter(col(Constant.SESSION_SOURCE).isNotNull().and(col(Constant.SESSION_SOURCE).notEqual(DefaultTrafficSourceHelper.DIRECT)))
+                .filter(col(Constant.SESSION_SOURCE).isNotNull().and(col(Constant.SESSION_SOURCE).notEqual(RuleBasedTrafficSourceHelper.DIRECT)))
                 .groupBy(Constant.APP_ID, Constant.USER_PSEUDO_ID, Constant.SESSION_ID)
                 .agg(
                         max(col(Constant.EVENT_TIMESTAMP)).alias(Constant.EVENT_TIMESTAMP),
@@ -471,6 +493,7 @@ public class TransformerV3 {
         return addProcessInfo(runMaxLengthTransformerForSession(sessionDatasetAgg));
     }
 
+    @Override
     public Dataset<Row> postTransform(final Dataset<Row> dataset) {
         SparkSession sparkSession = dataset.sparkSession();
         mergeIncrementalTables(sparkSession);

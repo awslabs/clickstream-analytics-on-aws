@@ -27,7 +27,7 @@ import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
-import { ClickstreamSinkTables } from '../data-pipeline';
+import { ClickstreamSinkTables, getRuleConfigDir } from '../data-pipeline';
 
 interface Props {
   readonly vpc: IVpc;
@@ -138,6 +138,9 @@ export class LambdaUtil {
     this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
+    const ruleConfigDir = getRuleConfigDir(this.props.pipelineS3Prefix, this.props.projectId);
+    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${ruleConfigDir}*`);
+
     const fn = new SolutionNodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
       role: lambdaRole,
       securityGroups: [securityGroupForLambda],
@@ -171,6 +174,7 @@ export class LambdaUtil {
         OUTPUT_FORMAT: this.props.outputFormat,
         USER_KEEP_DAYS: this.props.userKeepDays + '',
         ITEM_KEEP_DAYS: this.props.itemKeepDays + '',
+        RULE_CONFIG_DIR: `s3://${this.props.pipelineS3Bucket.bucketName}/${ruleConfigDir}`,
       },
       ...functionSettings,
       memorySize: 1024,
