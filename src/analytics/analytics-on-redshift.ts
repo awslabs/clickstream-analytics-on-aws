@@ -273,6 +273,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       codePath,
       functionEntry,
       workflowBucketInfo: props.workflowBucketInfo,
+      timeZoneWithAppId: props.timezoneWithAppId,
     });
 
     this.sqlExecutionWorkflow = this.applicationSchema.sqlExecutionStepFunctions;

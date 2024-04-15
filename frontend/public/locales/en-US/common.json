@@ -208,7 +208,11 @@
     "actions": "Actions",
     "createSegment": "Create Segment",
     "filterGroup": "Filter group",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "addSourceCategory": "Add new category",
+    "addChannelGroup": "Add new group",
+    "reorder": "Reorder",
+    "apply": "Apply"
   },
   "item": "item",
   "items": "items",

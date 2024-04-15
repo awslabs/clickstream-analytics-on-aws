@@ -45,6 +45,7 @@ routerRoles.set('DELETE /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
 routerRoles.set('ALL /api/segments/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('ALL /api/traffic/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 
 
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';

@@ -456,6 +456,7 @@ export class ClickStreamApiConstruct extends Construct {
           'redshift-data:BatchExecuteStatement',
           's3:ListBucket',
           's3:GetObject',
+          's3:PutObject',
           'ds:AuthorizeApplication',
           'ds:UnauthorizeApplication',
           'ds:CheckAlias',

@@ -97,6 +97,7 @@ import {
   REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
   REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
   mergeParameters,
+  removeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
 // eslint-disable-next-line import/order
@@ -2348,10 +2349,16 @@ describe('Workflow test', () => {
                           Input: {
                             Action: 'Create',
                             Region: 'ap-southeast-1',
-                            Parameters: [
-                              ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
-                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                            ],
+                            Parameters: removeParameters(
+                              [
+                                ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                              [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
                             StackName: `${getStackPrefix()}-Reporting-6666-6666`,
                             Tags: Tags,
                             TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
@@ -2701,10 +2708,16 @@ describe('Workflow test', () => {
                           Input: {
                             Action: 'Create',
                             Region: 'ap-southeast-1',
-                            Parameters: [
-                              ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
-                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                            ],
+                            Parameters: removeParameters(
+                              [
+                                ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                              [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
                             StackName: `${getStackPrefix()}-Reporting-6666-6666`,
                             Tags: Tags,
                             TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',

@@ -1107,6 +1107,16 @@ ul.menu-list li.checkbox-item {
 }
 
 // Analytics Layout Style
+.cs-analytics-traffic-table {
+  [class^='awsui_body-cell'] {
+    overflow: visible !important;
+  }
+}
+
+.cs-analytics-traffic-overflow {
+  overflow: hidden;
+}
+
 .gs-analytics {
   header {
     background-color: #015292 !important;

@@ -45,7 +45,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep } from '../../../../common/utils';
+import { sleep, timezoneJsonArrayToDict } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,
@@ -79,10 +79,12 @@ type ResourceCommonParams = {
   schema: string;
   sharePrincipalArn: string;
   ownerPrincipalArn: string;
+  timezoneDict: { [key: string]: string };
 }
 
 export type MustacheParamType = {
   schema: string;
+  timezone: string;
 }
 
 export const handler = async (event: ResourceEvent, _context: Context): Promise<CdkCustomResourceResponse|void> => {
@@ -97,20 +99,27 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   const sharePrincipalArn = props.quickSightSharePrincipalArn;
   const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
+  let timezone = props.timezone;
+  if (timezone === undefined || timezone === '') {
+    timezone = '[]';
+  }
+  const timezoneDict = timezoneJsonArrayToDict(JSON.parse(timezone));
+
   if (event.RequestType === 'Create') {
-    return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event);
+    return _onCreate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Update' ) {
-    return _onUpdate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event);
+    return _onUpdate(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn, event, timezoneDict);
   } else if (event.RequestType === 'Delete' ) {
     return _onDelete(quickSight, awsAccountId, event);
   } else {
     logger.warn('Invalid request type.');
   }
-
 };
 
 const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
-  event: CloudFormationCustomResourceCreateEvent): Promise<CdkCustomResourceResponse> => {
+  event: CloudFormationCustomResourceCreateEvent,
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
 
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   let dashboards = [];
@@ -126,7 +135,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
         const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
           schemaName,
-          dashboardDefProps);
+          dashboardDefProps, timezoneDict);
 
         dashboards.push({
           appId: schemaName,
@@ -173,7 +182,9 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
 };
 
 const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrincipalArn: string, ownerPrincipalArn: string,
-  event: CloudFormationCustomResourceUpdateEvent): Promise<CdkCustomResourceResponse> => {
+  event: CloudFormationCustomResourceUpdateEvent,
+  timezoneDict: { [key: string]: string },
+): Promise<CdkCustomResourceResponse> => {
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
   const oldProps = event.OldResourceProperties as QuicksightCustomResourceLambdaPropsType;
 
@@ -242,6 +253,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
         schema: schemaName,
         sharePrincipalArn: sharePrincipalArn,
         ownerPrincipalArn: ownerPrincipalArn,
+        timezoneDict: timezoneDict,
       };
 
       const dashboard = await updateQuickSightDashboard(quickSight, commonParams,
@@ -262,7 +274,9 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       });
       const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
         schemaName,
-        dashboardDefProps);
+        dashboardDefProps,
+        timezoneDict,
+      );
 
       logger.info('Creating schema', {
         schemaName: schemaName,
@@ -278,7 +292,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
 
     for (const schemaName of deleteSchemas) {
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-
       const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
         deleteDatabase,
         schemaName,
@@ -408,7 +421,9 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   sharePrincipalArn: string,
   ownerPrincipalArn: string,
   schema: string,
-  dashboardDef: QuickSightDashboardDefProps)
+  dashboardDef: QuickSightDashboardDefProps,
+  timezoneDict: { [key: string]: string },
+)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
@@ -420,6 +435,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     sharePrincipalArn,
     databaseName,
     schema,
+    timezoneDict,
   };
 
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn, sharePrincipalArn);
@@ -589,7 +605,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight, commonParams: R
   await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn,
     commonParams.awsAccountId,
     commonParams.ownerPrincipalArn,
-    commonParams.sharePrincipalArn);
+    commonParams.sharePrincipalArn,
+  );
 
   const oldDataSetTableNames: string[] = [];
   const dataSetTableNames: string[] = [];
@@ -760,6 +777,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
+      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
@@ -1025,6 +1043,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
 
     const mustacheParam: MustacheParamType = {
       schema: commonParams.databaseName.concat('.').concat(commonParams.schema),
+      timezone: commonParams.timezoneDict[commonParams.schema] ?? 'UTC',
     };
 
     logger.info('SQL to run:', Mustache.render(props.customSql, mustacheParam));
