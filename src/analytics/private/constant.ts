@@ -58,7 +58,7 @@ export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
 export const SP_SCAN_METADATA = 'sp_scan_metadata';
 export const PROPERTY_ARRAY_TEMP_TABLE = 'property_array_temp_table';
 
-export const SP_CLEAR_EXPIRED_EVENTS = 'sp_clear_expired_events';
+export const SP_CLEAR_EXPIRED_DATA = 'sp_clear_expired_data';
 
 
 export const SQL_TEMPLATE_PARAMETER = {
