@@ -219,24 +219,6 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'refresh-mv-sp-status.sql',
   },
   {
-    sqlFile: 'event.sql',
-  },
-  {
-    sqlFile: 'event-parameter.sql',
-  },
-  {
-    sqlFile: 'user.sql',
-  },
-  {
-    sqlFile: 'item.sql',
-  },
-  {
-    sqlFile: 'item-m-view.sql',
-  },
-  {
-    sqlFile: 'user-m-view.sql',
-  },
-  {
     sqlFile: 'sp-clickstream-log.sql',
   },
   {
