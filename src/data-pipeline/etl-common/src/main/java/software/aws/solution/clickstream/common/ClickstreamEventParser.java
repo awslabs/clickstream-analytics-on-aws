@@ -157,7 +157,7 @@ public final class ClickstreamEventParser extends BaseEventParser {
             }
             if (user.getUserFirstTouchTimestamp() != null) {
                 userProperties.put("_user_first_touch_timestamp", user.getUserFirstTouchTimestamp().toClickstreamUserPropValue());
-                clickstreamUser.setFirstVisitDate(new java.sql.Date(user.getUserFirstTouchTimestamp().getValue() + timeShiftInfo.getTimeDiff()));
+                clickstreamUser.setFirstVisitDate(new java.sql.Date(user.getUserFirstTouchTimestamp().getValue() + timeShiftInfo.getTimeDiff())); // NOSONAR
                 clickstreamUser.setFirstTouchTimeMsec(user.getUserFirstTouchTimestamp().getValue() + timeShiftInfo.getTimeDiff());
             }
 

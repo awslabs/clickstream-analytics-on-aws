@@ -23,27 +23,27 @@ import software.aws.solution.clickstream.common.enrich.ts.TrafficSourceUtm;
 @ToString
 public class ChannelRuleEvaluatorInput {
     // traffic_source_category
-    private String trafficSourceCategory;
+    private String trafficSourceCategory; // NOSONAR
     // traffic_source_source
-    private String trafficSourceSource;
+    private String trafficSourceSource;  // NOSONAR
     //traffic_source_medium
-    private String trafficSourceMedium;
+    private String trafficSourceMedium;  // NOSONAR
     // traffic_source_campaign
-    private String trafficSourceCampaign;
+    private String trafficSourceCampaign;  // NOSONAR
     // traffic_source_content
-    private String trafficSourceContent;
+    private String trafficSourceContent;  // NOSONAR
     // traffic_source_term
-    private String trafficSourceTerm;
+    private String trafficSourceTerm;  // NOSONAR
     // traffic_source_campaign_id
-    private String trafficSourceCampaignId;
+    private String trafficSourceCampaignId;  // NOSONAR
     // traffic_source_clid_platform
-    private String trafficSourceClidPlatform;
+    private String trafficSourceClidPlatform;  // NOSONAR
     // traffic_source_clid
-    private String trafficSourceClid;
+    private String trafficSourceClid;  // NOSONAR
     // page_view_latest_referrer
-    private String pageViewLatestReferrer;
+    private String pageViewLatestReferrer;  // NOSONAR
     // page_view_latest_referrer_host
-    private String pageViewLatestReferrerHost;
+    private String pageViewLatestReferrerHost;  // NOSONAR
 
     public static ChannelRuleEvaluatorInput from(final TrafficSourceUtm trafficSource,
                                                  final String trafficSourceCategory,

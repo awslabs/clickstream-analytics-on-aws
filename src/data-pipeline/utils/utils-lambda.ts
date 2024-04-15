@@ -16,6 +16,7 @@ import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Duration, Stack, CfnResource } from 'aws-cdk-lib';
 
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { Rule } from 'aws-cdk-lib/aws-events';
 import { Tracing, Function } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -26,6 +27,7 @@ import { RoleUtil } from './utils-role';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { getShortIdOfStack } from '../../common/stack';
+import { ITrafficSourceType, TrafficSourceServ } from '../../control-plane/backend/lambda/api/service/traffic';
 import { SolutionNodejsFunction } from '../../private/function';
 import { ClickstreamSinkTables, getRuleConfigDir } from '../data-pipeline';
 

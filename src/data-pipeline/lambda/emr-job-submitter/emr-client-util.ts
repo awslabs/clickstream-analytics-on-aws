@@ -22,6 +22,7 @@ import {
 } from '@aws-sdk/client-emr-serverless';
 import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
+import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '../../../base-lib/src';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { isObjectExist, listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
@@ -578,8 +579,9 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
 async function putInitRuleConfig(ruleConfigDir: string, appIds: string) {
   logger.info('putInitRuleConfig', { ruleConfigDir, appIds });
 
-  const categoryRuleFile = 'traffic_source_category_rule_v1.json';
-  const channelRuleFile = 'traffic_source_channel_rule_v1.json';
+  const categoryRuleFile = `${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
+  const channelRuleFile = `${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
+
   const categoryRuleFileFullPath = path.join(__dirname, categoryRuleFile);
   const channelRuleFileFullPath = path.join(__dirname, channelRuleFile);
 

@@ -22,7 +22,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class SourceCategoryAndTerms {
-    private String source;
-    private String category;
-    private String terms;
+    private String source;  // NOSONAR
+    private String category;  // NOSONAR
+    private String terms;  // NOSONAR
 }

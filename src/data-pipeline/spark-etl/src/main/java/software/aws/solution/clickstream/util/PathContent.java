@@ -19,6 +19,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PathContent {
-    private String path;
-    private String content;
+    private String path;  // NOSONAR
+    private String content;  // NOSONAR
 }
