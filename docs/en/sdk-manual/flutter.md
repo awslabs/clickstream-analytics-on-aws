@@ -77,7 +77,7 @@ analytics.record(name: "button_click");
 
 1. Add global attributes when initializing the SDK.
 
-   The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
 
     ```dart
     analytics.init({
