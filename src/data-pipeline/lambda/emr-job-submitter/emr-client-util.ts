@@ -11,10 +11,6 @@
  *  and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
-import './traffic_source_category_rule_v1.json';
-import './traffic_source_channel_rule_v1.json';
 import {
   Configuration,
   EMRServerlessClient,
@@ -24,6 +20,8 @@ import {
 } from '@aws-sdk/client-emr-serverless';
 import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
+import { CATEGORY_RULE } from './traffic_source_category_rule_v1';
+import { CHANNEL_RULE } from './traffic_source_channel_rule_v1';
 import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '../../../base-lib/src';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
@@ -584,11 +582,8 @@ async function putInitRuleConfig(ruleConfigDir: string, appIds: string) {
   const categoryRuleFile = `${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
   const channelRuleFile = `${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
 
-  const categoryRuleFileFullPath = path.join(__dirname, categoryRuleFile);
-  const channelRuleFileFullPath = path.join(__dirname, channelRuleFile);
-
-  const categoryRuleContent = fs.readFileSync(categoryRuleFileFullPath, 'utf8');
-  const channelRuleContent = fs.readFileSync(channelRuleFileFullPath, 'utf8');
+  const categoryRuleContent = JSON.stringify(CATEGORY_RULE);
+  const channelRuleContent = JSON.stringify(CHANNEL_RULE);
 
   const d = new RegExp(/s3:\/\/([^/]+)\/(.*)/).exec(ruleConfigDir);
 
