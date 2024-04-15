@@ -203,7 +203,6 @@ async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: 
   let value = '';
   if (stackJson) {
     const values = JSONPath({ path: paramValue, json: stackJson });
-    console.log(values);
     if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
       value = values[0] as string;
     }
