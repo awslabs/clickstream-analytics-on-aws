@@ -5,6 +5,7 @@ on:
     branches:
       - main  # Set a branch name to trigger deployment
       - v1.1.x
+      - v1.1.5-doc
     paths:
       - docs/**
       - src/analytics/private/sqls/**
@@ -49,10 +50,10 @@ jobs:
           mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
 
-      - name: Publish doc - 1.1.x
-        if: ${{ github.ref == 'refs/heads/v1.1.x' }}
+      - name: Publish doc - 1.1.5
+        if: ${{ github.ref == 'refs/heads/v1.1.5-doc' }}
         env:
-          VERSION: 1.1.x
+          VERSION: 1.1.5
           LINK_EN: ${{ vars.LINK_EN }}
           LINK_ZH: ${{ vars.LINK_ZH }}
         run: |
