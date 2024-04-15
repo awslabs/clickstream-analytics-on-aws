@@ -568,4 +568,4 @@ export const INIT_SEGMENT_OBJ: ExtendSegment = {
 };
 
 export const TABLE_FILTER_OPTIONS = [':', '!:', '=', '!='];
-export const FILTER_TIME_ZONE = ['Hongkong'];
+export const FILTER_TIME_ZONE = [];
