@@ -156,81 +156,81 @@ Add the following code where you need to record event.
 1. Add global attributes when initializing the SDK.
    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
 
-   === "Swift"
-   ```swift
-   import Clickstream
-
-        let configuration = ClickstreamConfiguration()
-            .withAppId("your appId")
-            .withEndpoint("https://example.com/collect")
-            .withInitialGlobalAttributes([
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
-                ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
-                ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
-        ])
-        try ClickstreamAnalytics.initSDK(configuration)
-        ```
-
-   === "Objective-C"
-   ```objective-c
-   @import Clickstream;
-
-        NSDictionary *globalAttributes = @{
-            Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
-            Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
-            Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
-            Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
-            Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
-            Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
-            Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
-            Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
-            Attr.APP_INSTALL_CHANNEL: @"App Store",
-        };
-        ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
-            withAppId:@"your appId"]
-            withEndpoint:@"https://example.com/collect"]
-            withInitialGlobalAttributesObjc:globalAttributes];
-        [ClickstreamObjc initSDK:configuration error: &error];
-        ```
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let configuration = ClickstreamConfiguration()
+             .withAppId("your appId")
+             .withEndpoint("https://example.com/collect")
+             .withInitialGlobalAttributes([
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+                 ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
+         ])
+         try ClickstreamAnalytics.initSDK(configuration)
+         ```
+    
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *globalAttributes = @{
+             Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
+             Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
+             Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
+             Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
+             Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
+             Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+         };
+         ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+             withAppId:@"your appId"]
+             withEndpoint:@"https://example.com/collect"]
+             withInitialGlobalAttributesObjc:globalAttributes];
+         [ClickstreamObjc initSDK:configuration error: &error];
+         ```
 
 2. Add global attributes after initializing the SDK
 
-   === "Swift"
-   ```swift
-   import Clickstream
-
-        let globalAttribute: ClickstreamAttribute = [
-            ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
-            "class": 6,
-            "level": 5.1,
-            "isOpenNotification": true,
-        ]
-        ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
-        
-        // for delete an global attribute
-        ClickstreamAnalytics.deleteGlobalAttributes("level")
-        ```
-   === "Objective-C"
-   ```objective-c
-   @import Clickstream;
-
-        NSDictionary *attributes =@{
-            Attr.APP_INSTALL_CHANNEL: @"App Store",
-            @"class": @6,
-            @"level": @5.1,
-            @"isOpenNotification": @YES
-        };
-        [ClickstreamObjc addGlobalAttributes :attributes];
-        
-        // for delete an global attribute
-        [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
-        ```
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let globalAttribute: ClickstreamAttribute = [
+             ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
+             "class": 6,
+             "level": 5.1,
+             "isOpenNotification": true,
+         ]
+         ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
+         
+         // for delete an global attribute
+         ClickstreamAnalytics.deleteGlobalAttributes("level")
+         ```
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *attributes =@{
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+             @"class": @6,
+             @"level": @5.1,
+             @"isOpenNotification": @YES
+         };
+         [ClickstreamObjc addGlobalAttributes :attributes];
+         
+         // for delete an global attribute
+         [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
+         ```
 
 It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
 that occur after it is set.
@@ -428,8 +428,8 @@ In addition to the required appId and endpoint, you can configure other informat
 initializing the SDK:
 
 === "Swift"
-```swift
-import Clickstream
+    ```swift
+    import Clickstream
 
     let configuration = ClickstreamConfiguration()
         .withAppId("your appId")
@@ -447,8 +447,8 @@ import Clickstream
     ```
 
 === "Objective-C"
-```objective-c
-@import Clickstream;
+    ```objective-c
+    @import Clickstream;
 
     ClickstreamConfiguration *configuration = [[[[[[[[[[[[[ClickstreamConfiguration alloc] init]
         withAppId:@"your appId"]

@@ -251,7 +251,7 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 ClickstreamAnalytics.disable();
 
 // enable SDK
-        ClickstreamAnalytics.enable();
+ClickstreamAnalytics.enable();
 ```
 
 #### Other configuration
@@ -261,7 +261,8 @@ initializing the SDK:
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
-ClickstreamConfiguration configuration=new ClickstreamConfiguration()
+
+ClickstreamConfiguration configuration = new ClickstreamConfiguration()
         .withAppId("your appId")
         .withEndpoint("https://example.com/collect")
         .withAuthCookie("your authentication cookie")
@@ -273,7 +274,8 @@ ClickstreamConfiguration configuration=new ClickstreamConfiguration()
         .withLogEvents(true)
         .withCustomDns(CustomOkhttpDns.getInstance())
         .withCompressEvents(true);
-        ClickstreamAnalytics.init(getApplicationContext(),configuration);
+
+ClickstreamAnalytics.init(getApplicationContext(),configuration);
 ```
 
 Here is an explanation of each method.
@@ -311,8 +313,6 @@ ClickstreamAnalytics.getClickStreamConfiguration()
         .withAppId("your appId")
         .withEndpoint("https://example.com/collect")
         .withAuthCookie("your authentication cookie")
-        .withSendEventsInterval(10000)
-        .withSessionTimeoutDuration(1800000)
         .withTrackScreenViewEvents(false)
         .withTrackUserEngagementEvents(false)
         .withTrackAppExceptionEvents(false)
