@@ -15,6 +15,10 @@ import {
   CLICKSTREAM_DEPRECATED_MATERIALIZED_VIEW_LIST,
   CLICKSTREAM_DEPRECATED_VIEW_LIST,
   CLICKSTREAM_EVENT_VIEW_NAME,
+  aws_sdk_client_common_config,
+  generateRandomStr,
+  logger,
+  timezoneJsonArrayToDict,
 } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import {
@@ -35,9 +39,6 @@ import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResp
 import { createSchemasInRedshiftAsync } from '../../../common/custom-resource-exec-in-redshift';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { generateRandomStr, timezoneJsonArrayToDict } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';

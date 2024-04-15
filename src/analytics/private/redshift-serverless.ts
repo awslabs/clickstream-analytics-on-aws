@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { Arn, ArnFormat, Aws, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 import { AccountPrincipal, IRole, PolicyDocument, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
@@ -25,7 +26,6 @@ import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleRolePolicyWit
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { BuiltInTagKeys } from '../../common/model';
-import { SolutionInfo } from '../../common/solution-info';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export class RedshiftServerless extends Construct {

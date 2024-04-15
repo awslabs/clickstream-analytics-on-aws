@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import memoize from 'fast-memoize';
-import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from './sdk-client-config-ln';
 
 // Create DynamoDB Client and patch it for tracing
 const ddbClient = new DynamoDBClient({

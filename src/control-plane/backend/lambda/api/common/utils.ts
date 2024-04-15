@@ -23,6 +23,8 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
   ConditionCategory,
   MetadataValueType,
+  SolutionInfo,
+  SolutionVersion,
 } from '@aws/clickstream-base-lib';
 import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
@@ -34,7 +36,6 @@ import { cloneDeep } from 'lodash';
 import { FULL_SOLUTION_VERSION, amznRequestContextHeader, awsUrlSuffix } from './constants';
 import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType, SINK_TYPE_MODE } from './model-ln';
 import { logger } from './powertools';
-import { SolutionInfo, SolutionVersion } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, IngestionType, PipelineSinkType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IDictionary } from '../model/dictionary';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter, IMetadataBuiltInList } from '../model/metadata';

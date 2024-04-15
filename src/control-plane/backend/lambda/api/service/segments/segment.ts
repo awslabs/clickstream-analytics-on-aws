@@ -19,6 +19,7 @@ import {
   SegmentDdbItem,
   SegmentJobStatus,
   SegmentJobTriggerType,
+  aws_sdk_client_common_config,
 } from '@aws/clickstream-base-lib';
 import {
   DeleteRuleCommand,
@@ -35,7 +36,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserSegmentsSql } from './user-segments-sql';
 import { PipelineStackType } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, BucketPrefix } from '../../common/types';
 import { getBucketPrefix } from '../../common/utils';
 import { CPipeline } from '../../model/pipeline';

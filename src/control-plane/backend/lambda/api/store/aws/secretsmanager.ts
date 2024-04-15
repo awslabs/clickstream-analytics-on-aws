@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { SecretsManagerClient, GetSecretValueCommand, SecretListEntry, paginateListSecrets } from '@aws-sdk/client-secrets-manager';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { SSMSecret } from '../../common/types';
 
 export const listSecrets = async (region: string) => {

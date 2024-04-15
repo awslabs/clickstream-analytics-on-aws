@@ -12,7 +12,7 @@
  */
 
 
-import { PARTITION_APP } from '@aws/clickstream-base-lib';
+import { PARTITION_APP, aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   BatchCreatePartitionCommand,
   BatchCreatePartitionCommandInput,
@@ -20,7 +20,6 @@ import {
   PartitionInput,
 } from '@aws-sdk/client-glue';
 import { putStringToS3 } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { SinkTableEnum } from '../../data-pipeline';
 import { getSinkTableLocationPrefix } from '../../utils/utils-common';
 

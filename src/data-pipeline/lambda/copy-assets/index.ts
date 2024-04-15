@@ -12,8 +12,8 @@
  */
 
 import path from 'path';
+import { logger } from '@aws/clickstream-base-lib';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
 import { copyS3Object, deleteObjectsByPrefix } from '../../../common/s3';
 import { getPluginS3Prefix } from '../../utils/utils-common';
 

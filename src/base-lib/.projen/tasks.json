@@ -109,13 +109,13 @@
       },
       "steps": [
         {
-          "exec": "pnpm dlx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,jest,projen,ts-jest,typescript"
+          "exec": "pnpm dlx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,jest,projen,ts-jest,typescript,@aws-sdk/types,@smithy/node-http-handler"
         },
         {
           "exec": "pnpm i --no-frozen-lockfile"
         },
         {
-          "exec": "pnpm update @types/jest @types/node constructs jest jest-junit projen ts-jest typescript"
+          "exec": "pnpm update @types/jest @types/jsonwebtoken @types/node-fetch @types/node constructs jest jest-junit projen ts-jest typescript @aws-lambda-powertools/logger @aws-sdk/types @smithy/node-http-handler hpagent jsonwebtoken jwks-rsa node-cache node-fetch"
         },
         {
           "exec": "pnpm dlx projen"

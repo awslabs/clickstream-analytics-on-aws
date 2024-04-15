@@ -11,12 +11,10 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '@aws/clickstream-base-lib';
-import fetch from 'node-fetch';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, fetchRemoteUrl } from '@aws/clickstream-base-lib';
 import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
-import { httpsAgent } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, FetchType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
@@ -363,10 +361,7 @@ export class EnvironmentServ {
       } else {
         url = await this.getUrlFromPipeline(type, projectId, pipelineId);
       }
-      const response = await fetch(url, {
-        method: 'GET',
-        agent: httpsAgent,
-      });
+      const response = await fetchRemoteUrl(url);
       const data = await response.text();
       return res.json(new ApiSuccess({
         ok: response.status < 500,

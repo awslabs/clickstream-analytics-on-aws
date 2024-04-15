@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, paginateListNodes, NodeInfo, ClientAuthentication } from '@aws-sdk/client-kafka';
 import { getSubnet } from './ec2';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { MSKCluster } from '../../common/types';
 
 export const listMSKCluster = async (region: string, vpcId: string) => {

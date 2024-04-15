@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   ACMClient,
   paginateListCertificates,
@@ -19,7 +20,6 @@ import {
   KeyAlgorithm,
 } from '@aws-sdk/client-acm';
 
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { Certificate } from '../../common/types';
 
 export const ListCertificates = async (region: string) => {

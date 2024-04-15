@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, marshallOptions, unmarshallOptions } from '@aws/clickstream-base-lib';
 import { CloudFormationClient, DescribeStacksCommand, Stack, StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand, ResourceNotFoundException } from '@aws-sdk/client-cloudwatch-events';
 import { ConditionalCheckFailedException, DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
@@ -18,8 +19,6 @@ import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, Unsubsc
 import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, UpdateCommand, UpdateCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { BuiltInTagKeys, ExecutionDetail, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from '../../../../common/model';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { CFN_TOPIC_PREFIX } from '../api/common/constants';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
 import { getStackPrefix } from '../api/common/utils';

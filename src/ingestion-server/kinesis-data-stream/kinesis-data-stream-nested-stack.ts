@@ -14,6 +14,7 @@
 import {
   KDS_ON_DEMAND_MODE,
   KDS_PROVISIONED_MODE,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import {
   CfnCondition,
@@ -39,7 +40,6 @@ import {
 } from '../../common/cfn-nag';
 import { SINK_TYPE_MODE } from '../../common/model';
 
-import { SolutionInfo } from '../../common/solution-info';
 import { getExistVpc } from '../../common/vpc-utils';
 
 export interface CreateKinesisNestStackProps {

@@ -11,13 +11,11 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { RedshiftClient, DescribeClustersCommand, ModifyClusterIamRolesCommand, ClusterIamRole } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, GetWorkgroupCommand, UpdateNamespaceCommand } from '@aws-sdk/client-redshift-serverless';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { sleep } from '../../../common/utils';
 import { AssociateIAMRoleToRedshift } from '../../private/model';
 
 type ResourcePropertiesType = AssociateIAMRoleToRedshift & {

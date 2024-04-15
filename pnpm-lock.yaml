@@ -169,9 +169,6 @@ importers:
       fast-memoize:
         specifier: ^2.5.1
         version: 2.5.2
-      hpagent:
-        specifier: ^1.2.0
-        version: 1.2.0
       i18next:
         specifier: ^22.4.6
         version: 22.5.1
@@ -196,9 +193,6 @@ importers:
       mustache:
         specifier: ^4.2.0
         version: 4.2.0
-      node-cache:
-        specifier: ^5.1.2
-        version: 5.1.2
       node-fetch:
         specifier: ^2.6.4
         version: 2.7.0
@@ -611,13 +605,44 @@ importers:
         version: 6.6.0(webpack@5.91.0)
 
   src/base-lib:
+    dependencies:
+      '@aws-lambda-powertools/logger':
+        specifier: ^1.17.0
+        version: 1.18.1
+      '@aws-sdk/types':
+        specifier: ^3.535.0
+        version: 3.535.0
+      '@smithy/node-http-handler':
+        specifier: ^2.5.0
+        version: 2.5.0
+      hpagent:
+        specifier: ^1.2.0
+        version: 1.2.0
+      jsonwebtoken:
+        specifier: ^9.0.0
+        version: 9.0.2
+      jwks-rsa:
+        specifier: ^3.0.1
+        version: 3.1.0
+      node-cache:
+        specifier: ^5.1.2
+        version: 5.1.2
+      node-fetch:
+        specifier: ^2.6.4
+        version: 2.7.0
     devDependencies:
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.12
+      '@types/jsonwebtoken':
+        specifier: ^9.0.0
+        version: 9.0.6
       '@types/node':
         specifier: ^18
         version: 18.19.17
+      '@types/node-fetch':
+        specifier: ^2.6.4
+        version: 2.6.11
       constructs:
         specifier: ^10.0.0
         version: 10.3.0
@@ -747,9 +772,6 @@ importers:
       fast-memoize:
         specifier: ^2.5.1
         version: 2.5.2
-      hpagent:
-        specifier: ^1.2.0
-        version: 1.2.0
       i18next:
         specifier: ^22.4.6
         version: 22.5.1
@@ -774,9 +796,6 @@ importers:
       mustache:
         specifier: ^4.2.0
         version: 4.2.0
-      node-cache:
-        specifier: ^5.1.2
-        version: 5.1.2
       node-fetch:
         specifier: ^2.6.4
         version: 2.7.0

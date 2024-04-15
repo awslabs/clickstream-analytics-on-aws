@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { AssetHashType, BundlingOptions, DockerImage, Size } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import { SolutionInfo } from './solution-info';
 
 export interface BuildJarProps {
   readonly sourcePath: string;
