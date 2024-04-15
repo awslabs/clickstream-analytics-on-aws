@@ -82,6 +82,11 @@ for param in $(echo "$parameters" | jq -c '.[]'); do
   if [ -z "$param_value" ]; then
     continue
   fi
+  # Check if parameter value is a valid JSON
+  if echo "$param_value" | jq . > /dev/null 2>&1; then
+    # Escaping JSON string for command line
+    param_value=$(echo "$param_value" | jq -c . | sed 's/"/\\"/g')
+  fi  
   param_string="${param_string} --parameters ${param_name}=\"${param_value}\""
 done
 
