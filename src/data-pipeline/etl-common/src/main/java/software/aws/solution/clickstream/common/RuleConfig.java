@@ -11,20 +11,20 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common.model;
+package software.aws.solution.clickstream.common;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.util.*;
-
+import java.io.Serializable;
 
 @Getter
 @Setter
 @ToString
-public class UriInfo {
-    private String protocol;
-    private String host;
-    private String path;
-    private String query;
-    private Map<String, String> parameters;
+public class RuleConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String optChannelRuleJson;
+    private String optCategoryRuleJson;
 }
+

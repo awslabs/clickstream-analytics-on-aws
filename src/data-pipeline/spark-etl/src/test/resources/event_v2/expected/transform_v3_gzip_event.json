@@ -46,7 +46,7 @@
   "traffic_source_campaign_id" : null,
   "traffic_source_clid_platform" : null,
   "traffic_source_clid" : null,
-  "traffic_source_channel_group" : null,
+  "traffic_source_channel_group" : "Unassigned",
   "traffic_source_category" : null,
   "user_first_touch_time_msec" : 1667877267895,
   "app_package_id" : "com.xiaowei.demoapplication",

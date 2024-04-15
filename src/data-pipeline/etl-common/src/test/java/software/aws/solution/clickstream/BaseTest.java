@@ -18,9 +18,13 @@ import com.google.common.io.*;
 import org.apache.logging.log4j.*;
 import org.apache.logging.log4j.core.config.*;
 import org.junit.jupiter.api.*;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.Util;
 
 import java.io.*;
 import java.nio.charset.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class BaseTest {
     @BeforeAll
@@ -43,6 +47,24 @@ public class BaseTest {
         ObjectMapper om = new ObjectMapper();
         JsonNode node = om.readTree(jsonStr);
         return node.toPrettyString();
+    }
+
+    public void writeStringToFile(String fileName, String content) {
+        // write string to file
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get(fileName))) {
+            outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write to file: " + fileName, e);
+        }
+    }
+
+    public RuleConfig getRuleConfigV0() throws IOException {
+        RuleConfig ruleConfig = new RuleConfig();
+        String channelRuleFile = "ts/traffic_source_channel_rule_v0.json";
+        String categoryRuleFile = "ts/traffic_source_category_rule_v0.json";
+        ruleConfig.setOptCategoryRuleJson(Util.readResourceFile(categoryRuleFile));
+        ruleConfig.setOptChannelRuleJson(Util.readResourceFile(channelRuleFile));
+        return ruleConfig;
     }
 
 }
