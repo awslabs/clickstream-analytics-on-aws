@@ -60,6 +60,9 @@ export class ApplicationServ {
 
       const apps = await store.listApplication(latestPipeline.projectId, 'asc');
       const appIds: string[] = apps.map(a => a.appId);
+      if (appIds.includes(appId)) {
+        return res.status(400).json(new ApiFail('The app already exists.'));
+      }
       appIds.push(appId);
       validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
       // set timezone

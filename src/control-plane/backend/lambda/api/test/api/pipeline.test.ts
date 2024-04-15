@@ -3165,8 +3165,8 @@ describe('Pipeline test', () => {
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
-        dataProcessingInput.M.Tags.L[3].M.Key.S === 'customerKey3' &&
-        reportInput.M.Tags.L[3].M.Key.S === 'customerKey3',
+        dataProcessingInput.M.Tags.L[5].M.Key.S === 'customerKey3' &&
+        reportInput.M.Tags.L[5].M.Key.S === 'customerKey3',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3380,6 +3380,7 @@ describe('Pipeline test', () => {
         tags: [
           { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
         ],
+        timezone: undefined,
       },
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
@@ -3415,6 +3416,7 @@ describe('Pipeline test', () => {
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
+        expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
@@ -3561,6 +3563,7 @@ describe('Pipeline test', () => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
+        expressionAttributeValues[':timezone'].L.length === 1 &&
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[0].M.value.S === FULL_SOLUTION_VERSION &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2',
