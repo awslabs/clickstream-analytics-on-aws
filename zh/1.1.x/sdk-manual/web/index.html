@@ -3423,23 +3423,34 @@
 <h4 id="_4">添加全局属性</h4>
 <ol>
 <li>
-<p>在 SDK 初始化时添加全局属性。
-   <div class="language-typescript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">   </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">   </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">   </span><span class="nx">globalAttributes</span><span class="o">:</span><span class="p">{</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">     </span><span class="nx">_traffic_source_medium</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">     </span><span class="nx">_traffic_source_name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">   </span><span class="p">}</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">});</span>
+<p>在 SDK 初始化时添加全局属性。</p>
+<p>以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">   </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">   </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">   </span><span class="nx">globalAttributes</span><span class="o">:</span><span class="p">{</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_SOURCE</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon&#39;</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_MEDIUM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;cpc&#39;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CAMPAIGN</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;summer_promotion&#39;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CAMPAIGN_ID</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;summer_promotion_01&#39;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_TERM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;running_shoes&#39;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CONTENT</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;banner_ad_1&#39;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CLID</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon_ad_123&#39;</span><span class="p">,</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">     </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_CLID_PLATFORM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;amazon_ads&#39;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">   </span><span class="p">}</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="p">});</span>
 </span></code></pre></div></p>
 </li>
 <li>
 <p>在 SDK 初始化完成后添加全局属性。
-   <div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setGlobalAttributes</span><span class="p">({</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nx">_traffic_source_medium</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">});</span>
+    <div class="language-typescript highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setGlobalAttributes</span><span class="p">({</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">TRAFFIC_SOURCE_MEDIUM</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="kt">10</span><span class="p">,</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">});</span>
 </span></code></pre></div></p>
 </li>
 </ol>
@@ -3466,7 +3477,7 @@
 </div>
 <h4 id="item">记录带有 Item 的事件</h4>
 <p>您可以添加以下代码来记录带有 Item 的事件。</p>
-<div class="language-typescript highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Item</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">Item</span><span class="p">,</span><span class="w"> </span><span class="nx">Attr</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@aws/clickstream-web&#39;</span><span class="p">;</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">itemBook</span><span class="o">:</span><span class="w"> </span><span class="kt">Item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;123&#39;</span><span class="p">,</span>
@@ -3479,11 +3490,12 @@
 </span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span>
 </span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;view_item&#39;</span><span class="p">,</span>
 </span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="nx">attributes</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="nx">currency</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
-</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="nx">event_category</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;recommended&#39;</span><span class="p">,</span>
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">itemBook</span><span class="p">],</span>
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="p">});</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">CURRENCY</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;USD&#39;</span><span class="p">,</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">    </span><span class="p">[</span><span class="nx">Attr</span><span class="p">.</span><span class="nx">VALUE</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="mf">99</span><span class="p">,</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">    </span><span class="nx">event_category</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;recommended&#39;</span><span class="p">,</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">itemBook</span><span class="p">],</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">});</span>
 </span></code></pre></div>
 <p>要记录 Item 中的更多属性，请参阅 <a href="#item_1">Item 属性</a>.</p>
 <div class="admonition warning">
@@ -4158,68 +4170,111 @@
 <tr>
 <th>属性名称</th>
 <th>数据类型</th>
+<th>是否自动采集</th>
 <th>描述</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>_traffic_source_medium</td>
-<td>string</td>
-<td>保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎</td>
-</tr>
-<tr>
-<td>_traffic_source_name</td>
-<td>string</td>
-<td>保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销</td>
-</tr>
-<tr>
 <td>_traffic_source_source</td>
-<td>string</td>
-<td>保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu</td>
+</tr>
+<tr>
+<td>_traffic_source_medium</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储您的流量来源的活动，例如：summer_sale, holiday_specials</td>
+</tr>
+<tr>
+<td>_traffic_source_campaign_id</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储流量来源的营销活动 ID，例如：campaign_1, campaign_2</td>
+</tr>
+<tr>
+<td>_traffic_source_term</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储流量来源的术语，例如：running_shoes, fitness_tracker</td>
+</tr>
+<tr>
+<td>_traffic_source_content</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储流量来源的内容，例如：banner_ad_1, text_ad_2</td>
+</tr>
+<tr>
+<td>_traffic_source_clid</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储流量源的 CLID，例如：amazon_ad_123, google_ad_456</td>
+</tr>
+<tr>
+<td>_traffic_source_clid_platform</td>
+<td>String</td>
+<td>否</td>
+<td>流量来源保留字段。使用此属性来存储您的流量来源的clid平台，例如：amazon_ads, google_ads</td>
 </tr>
 <tr>
 <td>_entrances</td>
 <td>string</td>
+<td>是</td>
 <td>在 <code>_page_view</code> 事件中添加。会话中的第一个 <code>_page_view</code> 事件具有值 1，其他事件为 0</td>
 </tr>
 <tr>
 <td>_session_id</td>
 <td>string</td>
+<td>是</td>
 <td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_session_start_timestamp</td>
 <td>number</td>
+<td>是</td>
 <td>在所有事件中添加，单位：毫秒</td>
 </tr>
 <tr>
 <td>_session_duration</td>
 <td>number</td>
+<td>是</td>
 <td>在所有事件中添加，单位：毫秒</td>
 </tr>
 <tr>
 <td>_session_number</td>
 <td>number</td>
+<td>是</td>
 <td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_page_title</td>
 <td>string</td>
+<td>是</td>
 <td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_page_url</td>
 <td>string</td>
+<td>是</td>
 <td>在所有事件中添加</td>
 </tr>
 <tr>
 <td>_latest_referrer</td>
 <td>string</td>
+<td>是</td>
 <td>在所有事件中添加，最近一次站外链接</td>
 </tr>
 <tr>
 <td>_latest_referrer_host</td>
 <td>string</td>
+<td>是</td>
 <td>在所有事件中添加，最近一次站外域名</td>
 </tr>
 </tbody>

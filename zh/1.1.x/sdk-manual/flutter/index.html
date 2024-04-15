@@ -3295,25 +3295,34 @@ appId 和 endpoint 的值。</p>
 </span></code></pre></div>
 <h4 id="_4">添加全局属性</h4>
 <ol>
-<li>在初始化 SDK 时添加全局属性。</li>
-</ol>
+<li>
+<p>在初始化 SDK 时添加全局属性。</p>
+<p>以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
 <div class="language-dart highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">({</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nl">globalAttributes:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">});</span>
-</span></code></pre></div>
-<ol>
-<li>在初始化 SDK 后添加全局属性。
-   <div class="language-dart highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">addGlobalAttributes</span><span class="p">({</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="s2">&quot;level&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">10</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">});</span>
-</span></code></pre></div></li>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_SOURCE:</span><span class="w"> </span><span class="s2">&quot;amazon&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_MEDIUM:</span><span class="w"> </span><span class="s2">&quot;cpc&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_CAMPAIGN:</span><span class="w"> </span><span class="s2">&quot;summer_promotion&quot;</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_CAMPAIGN_ID:</span><span class="w"> </span><span class="s2">&quot;summer_promotion_01&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_TERM:</span><span class="w"> </span><span class="s2">&quot;running_shoes&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_CONTENT:</span><span class="w"> </span><span class="s2">&quot;banner_ad_1&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_CLID:</span><span class="w"> </span><span class="s2">&quot;amazon_ad_123&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_CLID_PLATFORM:</span><span class="w"> </span><span class="s2">&quot;amazon_ads&quot;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="n">Attr</span><span class="p">.</span><span class="nl">APP_INSTALL_CHANNEL:</span><span class="w"> </span><span class="s2">&quot;amazon_store&quot;</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">});</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p>在初始化 SDK 后添加全局属性。
+    <div class="language-dart highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">addGlobalAttributes</span><span class="p">({</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="n">Attr</span><span class="p">.</span><span class="nl">TRAFFIC_SOURCE_MEDIUM:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;level&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">10</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">});</span>
+</span></code></pre></div></p>
+</li>
 </ol>
 <p>建议在初始化 SDK 时设置全局属性，设置后记录的所有事件都会包含全局属性。</p>
 <h4 id="_5">删除全局属性</h4>
@@ -3354,11 +3363,12 @@ API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
 </span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span>
 </span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;view_item&quot;</span><span class="p">,</span><span class="w"> </span>
 </span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="s2">&quot;currency&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="s2">&quot;event_category&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span>
-</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="nl">items:</span><span class="w"> </span><span class="p">[</span><span class="n">itemBook</span><span class="p">]</span>
-</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="p">);</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="n">Attr</span><span class="p">.</span><span class="nl">VALUE:</span><span class="w"> </span><span class="m">99</span><span class="p">,</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="n">Attr</span><span class="p">.</span><span class="nl">CURRENCY:</span><span class="w"> </span><span class="s2">&quot;USD&quot;</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">        </span><span class="s2">&quot;event_category&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">    </span><span class="nl">items:</span><span class="w"> </span><span class="p">[</span><span class="n">itemBook</span><span class="p">]</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">);</span>
 </span></code></pre></div>
 <p>要记录 Item 中的更多属性，请参阅 <a href="../android/#item_1">Item 属性</a>。</p>
 <div class="admonition warning">
@@ -3721,7 +3731,7 @@ API <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更
 </thead>
 <tbody>
 <tr>
-<td>0.3.0</td>
+<td>0.3.0 ~ 0.4.0</td>
 <td>0.12.0</td>
 <td>0.11.0</td>
 </tr>
