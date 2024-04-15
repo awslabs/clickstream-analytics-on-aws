@@ -179,7 +179,7 @@ describe('Application test', () => {
         Items: [
           {
             name: MOCK_APP_NAME,
-            appId: MOCK_APP_ID,
+            appId: `${MOCK_APP_ID}_0`,
           },
         ],
       });
@@ -279,7 +279,7 @@ describe('Application test', () => {
         Items: [
           {
             name: MOCK_APP_NAME,
-            appId: MOCK_APP_ID,
+            appId: `${MOCK_APP_ID}_0`,
           },
         ],
       });
