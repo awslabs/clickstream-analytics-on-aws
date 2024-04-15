@@ -19,7 +19,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.12.0'
+    implementation 'software.aws.solution:clickstream:0.13.0'
 }
 ```
 
@@ -101,23 +101,53 @@ ClickstreamAnalytics.recordEvent("button_click");
 
 #### 添加全局属性
 
+1. 在 SDK 初始化时添加全局属性。
+   
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    ClickstreamAttribute globalAttributes = ClickstreamAttribute.builder()
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE, "amazon")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM, "cpc")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN, "summer_promotion")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID, "summer_promotion_01")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM, "running_shoes")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT, "banner_ad_1")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID, "amazon_ad_123")
+          .add(ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM, "amazon_ads")
+          .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+          .build();
+    ClickstreamConfiguration configuration = new ClickstreamConfiguration()
+          .withAppId("your appId")
+          .withEndpoint("http://example.com/collect")
+          .withInitialGlobalAttributes(globalAttributes);
+    ClickstreamAnalytics.init(getApplicationContext(), configuration);
+    ```
+
+2. 在 SDK 初始化完成后添加全局属性。
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAttribute;
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
+    
+    ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
+        .add(ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL, "Amazon Store")
+        .add("level", 5.1)
+        .add("class", 6)
+        .add("isOpenNotification", true)
+        .build();
+    ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+    ```
+
+建议在 SDK 初始化时添加全局属性，全局属性将会出现在其设置后生成的每一个事件中。
+
+#### 删除全局属性
 ```java
-import software.aws.solution.clickstream.ClickstreamAttribute;
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
-    .add("channel", "Play Store")
-    .add("level", 5.1)
-    .add("class", 6)
-    .add("isOpenNotification", true)
-    .build();
-ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
-
-// 删除全局属性
 ClickstreamAnalytics.deleteGlobalAttributes("level");
 ```
-
-请在SDK初始化完成后添加全局属性，全局属性将添加到所有事件的属性对象中。
 
 #### 登录和登出
 
@@ -169,8 +199,8 @@ ClickstreamItem item_book = ClickstreamItem.builder()
 
 ClickstreamEvent event = ClickstreamEvent.builder()
     .name("view_item")
-    .add(ClickstreamAnalytics.Item.ITEM_ID, "123")
-    .add(ClickstreamAnalytics.Item.CURRENCY, "USD")
+    .add(ClickstreamAnalytics.Attr.VALUE, 99)
+    .add(ClickstreamAnalytics.Attr.CURRENCY, "USD")
     .add("event_category", "recommended")
     .setItems(new ClickstreamItem[] {item_book})
     .build();
@@ -230,18 +260,13 @@ ClickstreamAnalytics.disable();
 ClickstreamAnalytics.enable();
 ```
 
-#### SDK 配置更新
+#### 其他配置项
 
-在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
-
-!!! info "重要提示"
-    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
-
+除了必需的 `appId` 和 `endpoint` 之外，您还可以在初始化 SDK 时配置其他参数以满足更多定制化的使用：
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-// 在初始化后更新SDK配置
-ClickstreamAnalytics.getClickStreamConfiguration()
+ClickstreamConfiguration configuration = new ClickstreamConfiguration()
         .withAppId("your appId")
         .withEndpoint("https://example.com/collect")
         .withAuthCookie("your authentication cookie")
@@ -253,6 +278,8 @@ ClickstreamAnalytics.getClickStreamConfiguration()
         .withLogEvents(true)
         .withCustomDns(CustomOkhttpDns.getInstance())
         .withCompressEvents(true);
+
+ClickstreamAnalytics.init(getApplicationContext(), configuration);
 ```
 
 以下是每个方法的说明
@@ -271,20 +298,48 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 | withCustomDns()                 | String   | 否    | --      | 设置自定义 DNS 的方法, [了解更多](#dns)       |
 | withCompressEvents()            | boolean  | 否    | true    | 上传事件时是否通过gzip压缩事件内容               |
 
+默认情况下，我们将使用 `amplifyconfiguration.json` 文件中的配置。 如果添加自定义配置，添加的配置项将覆盖默认值。
+
+您还可以在 `init` 方法中添加所需的全部配置参数，从而无需添加 `amplifyconfiguration.json` 文件。
+
+#### SDK 配置更新
+
+在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
+
+!!! info "重要提示"
+    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytics;
+
+// 在初始化后更新SDK配置
+ClickstreamAnalytics.getClickStreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withAuthCookie("your authentication cookie")
+        .withTrackScreenViewEvents(false)
+        .withTrackUserEngagementEvents(false)
+        .withTrackAppExceptionEvents(false)
+        .withLogEvents(true)
+        .withCustomDns(CustomOkhttpDns.getInstance())
+        .withCompressEvents(true);
+```
+
+
 #### 调试事件
 
 您可以按照以下步骤查看事件原始 json 并调试您的事件。
 
-1.使用 `ClickstreamAnalytics.getClickStreamConfiguration()` 并在调试模式下将 `withLogEvents()` 方法设置为 true，例如：
+1.初始化 SDK 时启用 `withLogEvents` 配置
+    ```java
+    import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-   ```java
-   import software.aws.solution.clickstream.ClickstreamAnalytics;
-
-   // 在调试模式下打开事件json内容的打印
-   ClickstreamAnalytics.getClickStreamConfiguration()
-           .withLogEvents(BuildConfig.DEBUG);
-   ```
-
+    // 在调试模式下打开事件json内容的打印
+    ClickstreamConfiguration configuration = new ClickstreamConfiguration()
+        ...
+        .withLogEvents(true);
+    ClickstreamAnalytics.init(getApplicationContext(), configuration);
+    ```
 2.集成 SDK 并通过 Android Studio 启动您的应用程序，然后打开 **Logcat** 窗口。
 
 3.在filter中输入`EventRecorder`，您将看到Clickstream Android SDK记录的所有事件的json内容。
@@ -513,18 +568,23 @@ Clickstream Android SDK 支持以下数据类型：
 
 ### 事件属性
 
-| 属性名称                     | 数据类型    | 是否自动采集  | 描述                                                       |
-|--------------------------|---------|---------|----------------------------------------------------------|
-| _traffic_source_medium   | String  | 否       | 保留给流量媒介，使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎            |
-| _traffic_source_name     | String  | 否       | 保留给流量名称，使用此属性存储事件记录时获取用户的营销活动，例如：夏季促销                    |
-| _traffic_source_source   | String  | 否       | 保留给流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu |
-| _channel                 | String  | 否       | 预留安装源，app下载的渠道                                           |
-| _session_id              | String  | 是       | 在所有事件中添加                                                 |
-| _session_start_timestamp | long    | 是       | 在所有事件中添加                                                 |
-| _session_duration        | long    | 是       | 在所有事件中添加                                                 |
-| _session_number          | int     | 是       | 在所有事件中添加                                                 |
-| _screen_name             | String  | 是       | 在所有事件中添加                                                 |
-| _screen_unique_id        | String  | 是       | 在所有事件中添加                                                 |
+| 属性名称                          | 数据类型     | 是否自动采集 | 描述                                                          |
+|-------------------------------|----------|--------|-------------------------------------------------------------|
+| _traffic_source_source        | String   | 否      | 流量来源保留字段。事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu   |
+| _traffic_source_medium        | String   | 否      | 流量来源保留字段。使用此属性存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎              |
+| _traffic_source_campaign      | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的活动，例如：summer_sale, holiday_specials |
+| _traffic_source_campaign_id   | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的营销活动 ID，例如：campaign_1, campaign_2     |
+| _traffic_source_term          | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的术语，例如：running_shoes, fitness_tracker  |
+| _traffic_source_content       | String   | 否      | 流量来源保留字段。使用此属性来存储流量来源的内容，例如：banner_ad_1, text_ad_2          |
+| _traffic_source_clid          | String   | 否      | 流量来源保留字段。使用此属性来存储流量源的 CLID，例如：amazon_ad_123, google_ad_456  |
+| _traffic_source_clid_platform | String   | 否      | 流量来源保留字段。使用此属性来存储您的流量来源的clid平台，例如：amazon_ads, google_ads    |
+| _app_install_channel          | String   | 否      | 预留安装源，app下载的渠道                                              |
+| _session_id                   | String   | 是      | 在所有事件中添加                                                    |
+| _session_start_timestamp      | long     | 是      | 在所有事件中添加                                                    |
+| _session_duration             | long     | 是      | 在所有事件中添加                                                    |
+| _session_number               | int      | 是      | 在所有事件中添加                                                    |
+| _screen_name                  | String   | 是      | 在所有事件中添加                                                    |
+| _screen_unique_id             | String   | 是      | 在所有事件中添加                                                    |
 
 ### Item 属性
 

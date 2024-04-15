@@ -74,24 +74,38 @@ ClickstreamAnalytics.record({name: 'button_click'});
 
 #### 添加全局属性
 1. 在初始化 SDK 时添加全局属性。
-   ```typescript
-   ClickstreamAnalytics.init({
-      appId: "your appId",
-      endpoint: "https://example.com/collect",
-      globalAttributes:{
-        _traffic_source_medium: "Search engine",
-        _traffic_source_name: "Summer promotion",
-      }
-   });
-   ```
+
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+
+    ```typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-react-native';
+    
+    ClickstreamAnalytics.init({
+       appId: "your appId",
+       endpoint: "https://example.com/collect",
+       globalAttributes:{
+         [Attr.TRAFFIC_SOURCE_SOURCE]: 'amazon',
+         [Attr.TRAFFIC_SOURCE_MEDIUM]: 'cpc',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN]: 'summer_promotion',
+         [Attr.TRAFFIC_SOURCE_CAMPAIGN_ID]: 'summer_promotion_01',
+         [Attr.TRAFFIC_SOURCE_TERM]: 'running_shoes',
+         [Attr.TRAFFIC_SOURCE_CONTENT]: 'banner_ad_1',
+         [Attr.TRAFFIC_SOURCE_CLID]: 'amazon_ad_123',
+         [Attr.TRAFFIC_SOURCE_CLID_PLATFORM]: 'amazon_ads',
+         [Attr.APP_INSTALL_CHANNEL]: 'amazon_store',
+       }
+    });
+    ```
 
 2. 在初始化 SDK 后添加全局属性。
-   ``` typescript
-   ClickstreamAnalytics.setGlobalAttributes({
-     _traffic_source_medium: "Search engine",
-     level: 10,
-   });
-   ```
+    ``` typescript
+    import { ClickstreamAnalytics, Attr } from '@aws/clickstream-react-native';
+    
+    ClickstreamAnalytics.setGlobalAttributes({
+      [Attr.TRAFFIC_SOURCE_MEDIUM]: "Search engine",
+      level: 10,
+    });
+    ```
 
 建议在初始化 SDK 时设置全局属性，设置后记录的所有事件都会包含全局属性。
 
@@ -137,7 +151,7 @@ API `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更
 最多可以添加 10 个自定义属性。
 
 ```typescript
-import { ClickstreamAnalytics, Item } from '@aws/clickstream-react-native';
+import { ClickstreamAnalytics, Item, Attr } from '@aws/clickstream-react-native';
 
 const itemBook: Item = {
   id: '123',
@@ -149,7 +163,8 @@ const itemBook: Item = {
 ClickstreamAnalytics.record({
   name: 'view_item',
   attributes: {
-    currency: 'USD',
+    [Attr.VALUE]: 99,
+    [Attr.CURRENCY]: 'USD',
     event_category: 'recommended',
   },
   items: [itemBook],
@@ -316,7 +331,7 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 | React Native SDK 版本 | Android SDK 版本 | Swift SDK 版本 |
 |---------------------|----------------|--------------|
-| 0.1.0               | 0.12.0         | 0.11.0       |
+| 0.1.0 ~ 0.2.0       | 0.12.0         | 0.11.0       |
 
 ## 示例项目
 集成 SDK 的示例 [React Native 项目](https://github.com/aws-samples/clickstream-sdk-samples/tree/main/react-native)

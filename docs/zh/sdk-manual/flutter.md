@@ -75,25 +75,32 @@ analytics.record(name: "button_click");
 
 1. 在初始化 SDK 时添加全局属性。
 
-   ```dart
-   analytics.init({
-     appId: "your appId",
-     endpoint: "https://example.com/collect",
-     globalAttributes: {
-       "_traffic_source_medium": "Search engine",
-       "_traffic_source_name": "Summer promotion",
-     }
-   });
-   ```
+    以下示例代码展示了如何在初始化 SDK 时添加 traffic source 相关字段作为全局属性。
+    ```dart
+    analytics.init({
+      appId: "your appId",
+      endpoint: "https://example.com/collect",
+      globalAttributes: {
+        Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+        Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+        Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+        Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+        Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+        Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+        Attr.APP_INSTALL_CHANNEL: "amazon_store"
+      }
+    });
+    ```
 
 2. 在初始化 SDK 后添加全局属性。
-   ```dart
-   analytics.addGlobalAttributes({
-     "_traffic_source_medium": "Search engine",
-     "_traffic_source_name": "Summer promotion",
-     "level": 10
-   });
-   ```
+    ```dart
+    analytics.addGlobalAttributes({
+      Attr.TRAFFIC_SOURCE_MEDIUM: "Search engine",
+      "level": 10
+    });
+    ```
 
 建议在初始化 SDK 时设置全局属性，设置后记录的所有事件都会包含全局属性。
 
@@ -148,7 +155,8 @@ var itemBook = ClickstreamItem(
 analytics.record(
     name: "view_item", 
     attributes: {
-        "currency": "USD",
+        Attr.VALUE: 99,
+        Attr.CURRENCY: "USD"
         "event_category": "recommended"
     }, 
     items: [itemBook]
@@ -344,11 +352,11 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#_18)
 
 原生 SDK 版本依赖关系
 
-| Flutter SDK 版本 | Android SDK 版本 | Swift SDK 版本 |
-|----------------|----------------|--------------|
-| 0.3.0          | 0.12.0         | 0.11.0       |
-| 0.2.0          | 0.10.0         | 0.9.1        |
-| 0.1.0          | 0.9.0          | 0.8.0        |
+| Flutter SDK 版本   | Android SDK 版本     | Swift SDK 版本 |
+|------------------|--------------------|--------------|
+| 0.3.0 ~ 0.4.0    | 0.12.0             | 0.11.0       |
+| 0.2.0            | 0.10.0             | 0.9.1        |
+| 0.1.0            | 0.9.0              | 0.8.0        |
 
 ## 参考链接
 

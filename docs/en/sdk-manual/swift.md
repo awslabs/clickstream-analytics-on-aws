@@ -66,7 +66,6 @@ Your `appId` and `endpoint` are already set up in it, here's an explanation of e
 
 Once you have configured the parameters, you need to initialize it in AppDelegate's `didFinishLaunchingWithOptions` lifecycle method to use the SDK.
 
-#### 3.1 Initialize the SDK with default configuration
 === "Swift"
     ```swift
     import Clickstream
@@ -94,45 +93,7 @@ Once you have configured the parameters, you need to initialize it in AppDelegat
     }
     ```
 
-#### 3.2 Initialize the SDK with custom configuration
-
-=== "Swift"
-    ```swift
-    import Clickstream
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        do {
-            let configuration = ClickstreamConfiguration()
-                .withAppId("your appId")
-                .withEndpoint("https://example.com/collect")
-                .withLogEvents(true)
-            try ClickstreamAnalytics.initSDK(configuration)
-        } catch {
-            assertionFailure("Fail to initialize ClickstreamAnalytics: \(error)")
-        }
-        return true
-    }
-    ```
-
-=== "Objective-C"
-    ```objective-c
-    @import Clickstream;
-
-    - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions { 
-        NSError *error = nil;
-        ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
-                                                   withAppId:@"your appId"]
-                                                   withEndpoint:@"https://example.com/collect"]
-                                                   withLogEvents:TRUE];
-        [ClickstreamObjc initSDK:configuration error: &error];
-        if (error) {
-            NSLog(@"Fail to initialize ClickstreamAnalytics: %@", error.localizedDescription);
-        }
-        return YES;
-    }
-    ```
-
-#### 3.3 SwiftUI configuration
+#### SwiftUI configuration
 
 If your project is developed with SwiftUI, you need to create an application delegate and attach it to your `App`
 through `UIApplicationDelegateAdaptor`.
@@ -151,9 +112,9 @@ struct YourApp: App {
 
 Clickstream Swift SDK depends on method swizzling to automatically record screen views. SwiftUI apps
 must [record screen view events manually](#record-screen-view-events-manually), and disable automatic tracking of screen
-view events by setting configuration.withTrackScreenViewEvents(false) when the SDK is initialized.
+view events by setting `configuration.withTrackScreenViewEvents(false)` when the SDK is initialized.
 
-### 4.Start  using
+### 4.Start using
 
 #### Record event
 
@@ -192,38 +153,88 @@ Add the following code where you need to record event.
 
 #### Add global attribute
 
-=== "Swift"
-    ```swift
-    import Clickstream
-    
-    let globalAttribute: ClickstreamAttribute = [
-        "channel": "apple",
-        "class": 6,
-        "level": 5.1,
-        "isOpenNotification": true,
-    ]
-    ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
-    
-    // for delete an global attribute
-    ClickstreamAnalytics.deleteGlobalAttributes("level")
-    ```
-=== "Objective-C"
-    ```objective-c
-    @import Clickstream;
-    
-    NSDictionary *attributes =@{
-        @"channel": @"apple",
-        @"class": @6,
-        @"level": @5.1,
-        @"isOpenNotification": @YES
-    };
-    [ClickstreamObjc addGlobalAttributes :attributes];
-    
-    // for delete an global attribute
-    [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
-    ```
+1. Add global attributes when initializing the SDK.
 
-Please add the global attribute after the SDK initialization is completed, the global attribute will be added to the attribute object in all events.
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
+
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let configuration = ClickstreamConfiguration()
+             .withAppId("your appId")
+             .withEndpoint("https://example.com/collect")
+             .withInitialGlobalAttributes([
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+                 ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+                 ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store"
+         ])
+         try ClickstreamAnalytics.initSDK(configuration)
+         ```
+    
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *globalAttributes = @{
+             Attr.TRAFFIC_SOURCE_SOURCE: @"amazon",
+             Attr.TRAFFIC_SOURCE_MEDIUM: @"cpc",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN: @"summer_promotion",
+             Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: @"summer_promotion_01",
+             Attr.TRAFFIC_SOURCE_TERM: @"running_shoes",
+             Attr.TRAFFIC_SOURCE_CONTENT: @"banner_ad_1",
+             Attr.TRAFFIC_SOURCE_CLID: @"amazon_ad_123",
+             Attr.TRAFFIC_SOURCE_CLID_PLATFORM: @"amazon_ads",
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+         };
+         ClickstreamConfiguration *configuration = [[[[[ClickstreamConfiguration alloc] init]
+             withAppId:@"your appId"]
+             withEndpoint:@"https://example.com/collect"]
+             withInitialGlobalAttributesObjc:globalAttributes];
+         [ClickstreamObjc initSDK:configuration error: &error];
+         ```
+
+2. Add global attributes after initializing the SDK.
+
+    === "Swift"
+         ```swift
+         import Clickstream
+    
+         let globalAttribute: ClickstreamAttribute = [
+             ClickstreamAnalytics.Attr.APP_INSTALL_CHANNEL: "App Store",
+             "class": 6,
+             "level": 5.1,
+             "isOpenNotification": true,
+         ]
+         ClickstreamAnalytics.addGlobalAttributes(globalAttribute)
+         
+         // for delete an global attribute
+         ClickstreamAnalytics.deleteGlobalAttributes("level")
+         ```
+    === "Objective-C"
+         ```objective-c
+         @import Clickstream;
+    
+         NSDictionary *attributes =@{
+             Attr.APP_INSTALL_CHANNEL: @"App Store",
+             @"class": @6,
+             @"level": @5.1,
+             @"isOpenNotification": @YES
+         };
+         [ClickstreamObjc addGlobalAttributes :attributes];
+         
+         // for delete an global attribute
+         [ClickstreamObjc deleteGlobalAttributes: @[@"level"]];
+         ```
+
+It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
+that occur after it is set.
 
 #### Login and logout
 
@@ -291,8 +302,8 @@ You can add the following code to log an event with an item.
     import Clickstream
     
     let attributes: ClickstreamAttribute = [
-        ClickstreamAnalytics.Item.ITEM_ID: "123",
-        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        ClickstreamAnalytics.Attr.VALUE: 99.9,
+        ClickstreamAnalytics.Attr.CURRENCY: "USD",
         "event_category": "recommended"
     ]
     
@@ -312,8 +323,8 @@ You can add the following code to log an event with an item.
     @import Clickstream;
     
     NSDictionary *attributes = @{
-        ClickstreamItemKey.ITEM_ID: @"123",
-        ClickstreamItemKey.CURRENCY: @"USD",
+        Attr.VALUE: @99.9,
+        Attr.CURRENCY: @"USD",
         "event_category": @"recommended"
     };
     NSDictionary *item_book = @{
@@ -412,6 +423,64 @@ You can disable the SDK in the scenario you need. After disabling the SDK, the S
     [ClickstreamObjc enable];
     ```
 
+#### Other configuration
+
+In addition to the required appId and endpoint, you can configure other information to get more customized usage when
+initializing the SDK:
+
+=== "Swift"
+    ```swift
+    import Clickstream
+
+    let configuration = ClickstreamConfiguration()
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withLogEvents(true)
+        .withCompressEvents(true)
+        .withSendEventInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(true)
+        .withTrackUserEngagementEvents(true)
+        .withTrackAppExceptionEvents(true)
+        .withAuthCookie("your authentication cookie")
+        .withInitialGlobalAttributes([ClickstreamAnalytics.Attr.TRAFFIC_SOURCE_SOURCE: "amazon"])
+    try ClickstreamAnalytics.initSDK(configuration)
+    ```
+
+=== "Objective-C"
+    ```objective-c
+    @import Clickstream;
+
+    ClickstreamConfiguration *configuration = [[[[[[[[[[[[[ClickstreamConfiguration alloc] init]
+        withAppId:@"your appId"]
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withSendEventInterval: 10000]
+        withSessionTimeoutDuration: 1800000]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE]
+        withAuthCookie: @"your auth cookie"]
+        withInitialGlobalAttributesObjc:@{Attr.TRAFFIC_SOURCE_SOURCE: @"amazon"}];
+    [ClickstreamObjc initSDK:configuration error: &error];
+    ```
+
+Here is an explanation of each option.
+
+| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
+|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
+| withLogEvents()                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
+| withCompressEvents()            | Bool           | false    | true          | whether to compress event content by gzip when uploading events                             |
+| withSendEventsInterval()        | Int            | false    | 10000         | event sending interval in milliseconds                                                      |
+| withSessionTimeoutDuration()    | Int64          | false    | 1800000       | the duration of the session timeout in milliseconds                                         |
+| withTrackScreenViewEvents()     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
+| withTrackUserEngagementEvents() | Bool           | false    | true          | whether to auto-record user engagement events                                               |
+| withTrackAppExceptionEvents()   | Bool           | false    | true          | whether to auto-record app exception events                                                 |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
+
 #### Configuration update
 
 After initializing the SDK, you can use the following code to customize the configuration of the SDK.
@@ -445,27 +514,13 @@ After initializing the SDK, you can use the following code to customize the conf
     // config the sdk after initialize.
     ClickstreamConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
     configuration = [[[[[[[configuration withAppId:@"your appId"]
-                        withEndpoint:@"https://example.com/collect"]
-                        withLogEvents:TRUE]
-                        withCompressEvents:TRUE]
-                        withTrackScreenViewEvents:TRUE]
-                        withTrackUserEngagementEvents:TRUE]
-                        withTrackAppExceptionEvents:TRUE];
+        withEndpoint:@"https://example.com/collect"]
+        withLogEvents:TRUE]
+        withCompressEvents:TRUE]
+        withTrackScreenViewEvents:TRUE]
+        withTrackUserEngagementEvents:TRUE]
+        withTrackAppExceptionEvents:TRUE];
     ```
-
-> Note: this configuration will override the default configuration in `amplifyconfiguration.json` file
-
-Here is an explanation of each option.
-
-| Method name                 | Parameter type | Required | Default value | Description                                                                                 |
-|-----------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| appId                       | String         | true     | --            | the app id of your application in web console                                               |
-| endpoint                    | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
-| authCookie                  | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| isTrackScreenViewEvents     | Bool           | false    | true          | whether to auto-record screen view events                                                   |
-| isTrackUserEngagementEvents | Bool           | false    | true          | whether to auto-record user engagement events                                               |
-| isLogEvents                 | Bool           | false    | false         | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| isCompressEvents            | Bool           | false    | true          | whether to compress event content by gzip when uploading events                             |
 
 #### Debug events
 
@@ -686,18 +741,23 @@ All user attributes will be included in `user` object, and all custom and global
 
 ### Event attributes
 
-| Attribute name           | Data type | Auto track | Description                                                                                                                                                |
-|--------------------------|-----------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _traffic_source_medium   | String    | false      | Reserved for traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
-| _traffic_source_name     | String    | false      | Reserved for traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion        |
-| _traffic_source_source   | String    | false      | Reserved for traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
-| _channel                 | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                      |
-| _session_id              | String    | true       | Added in all events.                                                                                                                                       |
-| _session_start_timestamp | long      | true       | Added in all events.                                                                                                                                       |
-| _session_duration        | long      | true       | Added in all events.                                                                                                                                       |
-| _session_number          | int       | true       | Added in all events.                                                                                                                                       |
-| _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
-| _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
+| Attribute name                | Data type | Auto track | Description                                                                                                                                                       |
+|-------------------------------|-----------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| _traffic_source_source        | String    | false      | Reserved for traffic source source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu        |
+| _traffic_source_medium        | String    | false      | Reserved for traffic source medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine |
+| _traffic_source_campaign      | String    | false      | Reserved for traffic source campaign. Use this attribute to store the campaign of your traffic source. Example: summer_sale, holiday_specials                     |
+| _traffic_source_campaign_id   | String    | false      | Reserved for traffic source campaign id. Use this attribute to store the campaign id of your traffic source. Example: campaign_1, campaign_2                      |
+| _traffic_source_term          | String    | false      | Reserved for traffic source term. Use this attribute to store the term of your traffic source. Example: running_shoes, fitness_tracker                            |
+| _traffic_source_content       | String    | false      | Reserved for traffic source content. Use this attribute to store the content of your traffic source. Example: banner_ad_1, text_ad_2                              |
+| _traffic_source_clid          | String    | false      | Reserved for traffic source clid. Use this attribute to store the clid of your traffic source. Example: amazon_ad_123, google_ad_456                              |
+| _traffic_source_clid_platform | String    | false      | Reserved for traffic source clid platform. Use this attribute to store the clid platform of your traffic source. Example: amazon_ads, google_ads                  |
+| _app_install_channel          | String    | false      | Reserved for install source, it is the channel for app was downloaded                                                                                             |
+| _session_id                   | String    | true       | Added in all events.                                                                                                                                              |
+| _session_start_timestamp      | long      | true       | Added in all events.                                                                                                                                              |
+| _session_duration             | long      | true       | Added in all events.                                                                                                                                              |
+| _session_number               | int       | true       | Added in all events.                                                                                                                                              |
+| _screen_name                  | String    | true       | Added in all events.                                                                                                                                              |
+| _screen_unique_id             | String    | true       | Added in all events.                                                                                                                                              |
 
 ### Item attributes
 

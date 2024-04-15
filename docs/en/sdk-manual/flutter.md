@@ -75,30 +75,38 @@ analytics.record(name: "button_click");
 
 #### Add global attribute
 
-1. Add global attributes when initializing the SDK
+1. Add global attributes when initializing the SDK.
 
-   ```dart
-   analytics.init({
-     appId: "your appId",
-     endpoint: "https://example.com/collect",
-     globalAttributes: {
-       "_traffic_source_medium": "Search engine",
-       "_traffic_source_name": "Summer promotion",
-     }
-   });
-   ```
+    The following example code shows how to add traffic source fields as global attributes when initializing the SDK.
 
-2. Add global attributes after initializing the SDK
-   ```dart
-   analytics.addGlobalAttributes({
-     "_traffic_source_medium": "Search engine",
-     "_traffic_source_name": "Summer promotion",
-     "level": 10
-   });
-   ```
+    ```dart
+    analytics.init({
+      appId: "your appId",
+      endpoint: "https://example.com/collect",
+      globalAttributes: {
+        Attr.TRAFFIC_SOURCE_SOURCE: "amazon",
+        Attr.TRAFFIC_SOURCE_MEDIUM: "cpc",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN: "summer_promotion",
+        Attr.TRAFFIC_SOURCE_CAMPAIGN_ID: "summer_promotion_01",
+        Attr.TRAFFIC_SOURCE_TERM: "running_shoes",
+        Attr.TRAFFIC_SOURCE_CONTENT: "banner_ad_1",
+        Attr.TRAFFIC_SOURCE_CLID: "amazon_ad_123",
+        Attr.TRAFFIC_SOURCE_CLID_PLATFORM: "amazon_ads",
+        Attr.APP_INSTALL_CHANNEL: "amazon_store"
+      }
+    });
+    ```
 
-It is recommended to set global attributes after each SDK initialization, global attributes will be included in all
-events that occur after it is set.
+2. Add global attributes after initializing the SDK.
+    ```dart
+    analytics.addGlobalAttributes({
+      Attr.TRAFFIC_SOURCE_MEDIUM: "Search engine",
+      "level": 10
+    });
+    ```
+
+It is recommended to set global attributes when initializing the SDK, global attributes will be included in all events
+that occur after it is set.
 
 #### Delete global attribute
 
@@ -135,7 +143,9 @@ user's attribute when it changes.
 
 #### Record event with items
 
-You can add the following code to log an event with an item, and you can add custom item attribute in the `attributes` Map. In addition to the preset attributes, an item can add up to 10 custom attributes.
+You can add the following code to log an event with an item, and you can add custom item attribute in the `attributes`
+Map. In addition to the preset attributes, an item can add up to 10 custom attributes.
+
 ```dart
 var itemBook = ClickstreamItem(
     id: "123",
@@ -150,7 +160,8 @@ var itemBook = ClickstreamItem(
 analytics.record(
     name: "view_item", 
     attributes: {
-        "currency": "USD",
+        Attr.VALUE: 99,
+        Attr.CURRENCY: "USD"
         "event_category": "recommended"
     }, 
     items: [itemBook]
@@ -355,7 +366,7 @@ Native SDK version dependencies
 
 | Flutter SDK Version | Android SDK Version | Swift SDK Version |
 |---------------------|---------------------|-------------------|
-| 0.3.0               | 0.12.0              | 0.11.0            |
+| 0.3.0 ~ 0.4.0       | 0.12.0              | 0.11.0            |
 | 0.2.0               | 0.10.0              | 0.9.1             |
 | 0.1.0               | 0.9.0               | 0.8.0             |
 
