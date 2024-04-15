@@ -2954,7 +2954,7 @@
 <h2 id="ingestion-module">Ingestion module</h2>
 <p>Ingestion module includes the following cost components:</p>
 <ul>
-<li>Application load balancer</li>
+<li>Application load balancer and public IPv4 addresses</li>
 <li>EC2 for ECS</li>
 <li>Data sink (Kinesis Data Streams | Kafka | Direct to S3)</li>
 <li>S3 storage</li>
@@ -2965,6 +2965,7 @@
 <li>MSK configurations (m5.large * 2)</li>
 <li>KDS configuration (on-demand, provision)</li>
 <li>10/100/1000RPS</li>
+<li>Three public subnets are used</li>
 </ul>
 <table>
 <thead>
@@ -2981,111 +2982,111 @@
 <tbody>
 <tr>
 <td>10RPS (49GB/month)</td>
-<td>$18</td>
+<td>$28.8</td>
 <td>$122</td>
 <td>Kinesis (On-Demand)</td>
 <td>$38</td>
 <td>$3</td>
-<td>$181</td>
+<td>$191.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$18</td>
+<td>$28.8</td>
 <td>$122</td>
 <td>Kinesis (Provisioned 2 shard)</td>
 <td>$22</td>
 <td>$3</td>
-<td>$165</td>
+<td>$175.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$18</td>
+<td>$28.8</td>
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
 <td>$417</td>
 <td>$3</td>
-<td>$560</td>
+<td>$570.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$18</td>
+<td>$28.8</td>
 <td>$122</td>
 <td>None</td>
 <td></td>
 <td>$3</td>
-<td>$143</td>
+<td>$153.8</td>
 </tr>
 <tr>
 <td>100RPS (490GB/month)</td>
-<td>$43</td>
+<td>$53.8</td>
 <td>$122</td>
 <td>Kinesis(On-demand)</td>
 <td>$115</td>
 <td>$4</td>
-<td>$284</td>
+<td>$294.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$43</td>
+<td>$53.8</td>
 <td>$122</td>
 <td>Kinesis (Provisioned 2 shard)</td>
 <td>$26</td>
 <td>$4</td>
-<td>$195</td>
+<td>$205.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$43</td>
+<td>$53.8</td>
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
 <td>$417</td>
 <td>$4</td>
-<td>$586</td>
+<td>$596.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$43</td>
+<td>$53.8</td>
 <td>$122</td>
 <td>None</td>
 <td></td>
 <td>$4</td>
-<td>$169</td>
+<td>$179.8</td>
 </tr>
 <tr>
 <td>1000RPS (4900GB/month)</td>
-<td>$252</td>
+<td>$262.8</td>
 <td>$122</td>
 <td>Kinesis(On-demand)</td>
 <td>$1051</td>
 <td>$14</td>
-<td>$1439</td>
+<td>$1449.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$252</td>
+<td>$262.8</td>
 <td>$122</td>
 <td>Kinesis (Provisioned 10 shard)</td>
 <td>$180</td>
 <td>$14</td>
-<td>$568</td>
+<td>$578.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$252</td>
+<td>$262.8</td>
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 2~3)</td>
 <td>$590</td>
 <td>$14</td>
-<td>$978</td>
+<td>$988.8</td>
 </tr>
 <tr>
 <td></td>
-<td>$252</td>
+<td>$262.8</td>
 <td>$122</td>
 <td>None</td>
 <td></td>
 <td>$14</td>
-<td>$388</td>
+<td>$398.8</td>
 </tr>
 </tbody>
 </table>
@@ -3289,7 +3290,7 @@
 </li>
 </ul>
 <h3 id="amazon-global-accelerator">Amazon Global Accelerator</h3>
-<p>It incurs a fixed hourly charge and a per-day volume data transfer cost.</p>
+<p>It incurs a fixed hourly charge, a per-day volume data transfer cost and two public IPv4 addresses cost.</p>
 <p>Key assumptions:</p>
 <ul>
 <li>Ingestion deployment in <code>us-east-1</code></li>
@@ -3299,6 +3300,7 @@
 <tr>
 <th>Request Per Second</th>
 <th>Fixed hourly cost</th>
+<th>Two public IPv4 addresses cost</th>
 <th>Data transfer cost</th>
 <th>Total cost (USD/Month)</th>
 </tr>
@@ -3307,20 +3309,23 @@
 <tr>
 <td>10RPS</td>
 <td>$18</td>
+<td>$7.2</td>
 <td>$0.6</td>
-<td>$18.6</td>
+<td>$25.8</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>$18</td>
+<td>$7.2</td>
 <td>$6</td>
-<td>$24</td>
+<td>$31.2</td>
 </tr>
 <tr>
 <td>1000RPS</td>
 <td>$18</td>
+<td>$7.2</td>
 <td>$60</td>
-<td>$78</td>
+<td>$85.2</td>
 </tr>
 </tbody>
 </table>
