@@ -506,10 +506,8 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
       'ClickstreamAnalyticsMetadataDdbArn',
-      'ClickstreamMetadataDdbArn',
       'PipelineS3Bucket',
       'PipelineS3Prefix',
-      'SegmentsS3Prefix',
       'TopFrequentPropertiesLimit',
       'ScanWorkflowMinInterval',
       'ClearExpiredEventsScheduleExpression',
@@ -797,14 +795,14 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     expect(nestedStack).toBeInstanceOf(RedshiftAnalyticsStack);
   });
 
-  test('Should has 6 StateMachines', () => {
+  test('Should has 7 StateMachines', () => {
     const templates = [
       Template.fromStack(stack.nestedStacks.redshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack),
       Template.fromStack(stack.nestedStacks.redshiftProvisionedStack),
     ];
     for (const nestedTemplate of templates) {
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 8);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 7);
     }
   });
 
@@ -1361,48 +1359,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       'session/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-                's3:DeleteObject*',
-                's3:PutObject',
-                's3:PutObjectLegalHold',
-                's3:PutObjectRetention',
-                's3:PutObjectTagging',
-                's3:PutObjectVersionTagging',
-                's3:Abort*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      '*',
                     ],
                   ],
                 },
