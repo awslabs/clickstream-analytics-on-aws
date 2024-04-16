@@ -84,11 +84,6 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
 
-    const {
-      iamRolePrefixParam,
-      iamRoleBoundaryArnParam,
-    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
-
     let vpc:IVpc|undefined = undefined;
 
     if (props.existingVpc) {
@@ -219,6 +214,11 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     const healthCheckPath = '/';
 
     const pluginPrefix = 'plugins/';
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     const isEmptyRolePrefixCondition = new CfnCondition(
       this,

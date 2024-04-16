@@ -307,8 +307,8 @@ export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
 export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
   'OpenID Connector Jwks Uri Suffix';
-export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix';
-export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN';
+export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix(Optional)';
+export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN(Optional)';
 
 export const KDS_ON_DEMAND_MODE = 'ON_DEMAND';
 export const KDS_PROVISIONED_MODE = 'PROVISIONED';
