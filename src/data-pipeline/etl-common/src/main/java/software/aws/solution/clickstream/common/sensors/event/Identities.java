@@ -28,10 +28,10 @@ public class Identities {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
     @JsonProperty("identity_android_id")
-    private String identity_android_id;
+    private String identityAndroidId;
 
     @JsonProperty("identity_login_id")
-    private String identity_login_id;
+    private String identityLoginId;
 
     @JsonAnySetter
     public void setUnknownProperty(final String name, final Object value) {

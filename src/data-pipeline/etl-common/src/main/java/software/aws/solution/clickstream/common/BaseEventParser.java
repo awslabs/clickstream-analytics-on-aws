@@ -41,7 +41,7 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER.readValue(ingestLine, ClickstreamIngestRow.class);
     }
 
-    public String getGzipData(String data) {
+    public String getGzipData(final String data) {
         return data;
     }
 
