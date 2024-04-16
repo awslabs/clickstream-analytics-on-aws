@@ -149,12 +149,11 @@ function useFetchEvents() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [eventData, attributeData, builtInMetaData] =
-        await Promise.all([
-          listMetadataEvents(projectId, appId),
-          listAllAttributes(projectId, appId),
-          getAllBuiltInMetadata(),
-        ]);
+      const [eventData, attributeData, builtInMetaData] = await Promise.all([
+        listMetadataEvents(projectId, appId),
+        listAllAttributes(projectId, appId),
+        getAllBuiltInMetadata(),
+      ]);
       setData({
         metaDataEvents: eventData?.metaDataEvents ?? [],
         categoryEvents: eventData?.categoryEvents ?? [],

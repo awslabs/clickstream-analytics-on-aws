@@ -56,7 +56,6 @@ import {
   ClickStreamBadRequestError,
   DataCollectionSDK,
   ENetworkType,
-  IngestionType,
   KinesisStreamMode,
   MetricsLegendPosition,
   PipelineServerProtocol,
@@ -370,9 +369,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.gte(60)
   @JSONObject.lte(1830)
   @JSONObject.custom( (stack:CIngestionServerStack, _key:string, _value:string) => {
-    if (stack._pipeline?.ingestionServer.ingestionType === IngestionType.Fargate) {
-      return 120;
-    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
       return stack.S3BatchTimeout ? stack.S3BatchTimeout + 30 : 330;
     }
     return undefined;

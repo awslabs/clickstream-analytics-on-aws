@@ -971,4 +971,3 @@ export const userAttributeDisplayname = (displayName: string) => {
     ConditionCategory.USER
   );
 };
-

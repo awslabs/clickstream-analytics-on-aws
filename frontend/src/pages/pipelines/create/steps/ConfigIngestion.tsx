@@ -39,7 +39,6 @@ import {
   DEFAULT_KDS_SINK_INTERVAL,
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
-  EIngestionType,
   ENetworkType,
   MAX_KDS_BATCH_SIZE,
   MAX_KDS_SINK_INTERVAL,
@@ -143,7 +142,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeNetworkType,
     changePublicSubnets,
     changePrivateSubnets,
-    changeIngestionType,
     changeServerMin,
     changeServerMax,
     changeWarmSize,
@@ -394,33 +392,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           </FormField>
 
           <FormField label={t('pipeline:create.ingestionCapacity')} stretch>
-            <Tiles
-              onChange={({ detail }) => changeIngestionType(detail.value)}
-              value={pipelineInfo.ingestionServer.ingestionType}
-              columns={2}
-              items={[
-                {
-                  label: 'ECS on Fargate',
-                  description: t('pipeline:create.ingestionTypeFargateDesc'),
-                  value: EIngestionType.Fargate,
-                  disabled: isDisabled(update, pipelineInfo),
-                },
-                {
-                  label: 'ECS on EC2',
-                  description: t('pipeline:create.ingestionTypeEC2Desc'),
-                  value: EIngestionType.EC2,
-                  disabled: isDisabled(update, pipelineInfo),
-                },
-              ]}
-            />
-
             <FormField
-              description={
-                pipelineInfo.ingestionServer.ingestionType ===
-                EIngestionType.EC2
-                  ? t('pipeline:create.ingestionCapacityDesc')
-                  : t('pipeline:create.ingestionCapacityFargateDesc')
-              }
+              description={t('pipeline:create.ingestionCapacityDesc')}
               stretch
             />
             <ColumnLayout columns={3}>
@@ -468,35 +441,28 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   }}
                 />
               </FormField>
-              {pipelineInfo.ingestionServer.ingestionType ===
-                EIngestionType.EC2 && (
-                <>
-                  <FormField
-                    stretch
-                    errorText={ternary(
-                      warmPoolError,
-                      t('pipeline:valid.warmPoolError'),
-                      undefined
-                    )}
-                  >
-                    <div>{t('pipeline:create.warmPool')}</div>
-                    <Input
-                      type="number"
-                      value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
-                      onChange={(e) => {
-                        if (
-                          !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(
-                            e.detail.value
-                          )
-                        ) {
-                          return false;
-                        }
-                        changeWarmSize(e.detail.value);
-                      }}
-                    />
-                  </FormField>
-                </>
-              )}
+              <FormField
+                stretch
+                errorText={ternary(
+                  warmPoolError,
+                  t('pipeline:valid.warmPoolError'),
+                  undefined
+                )}
+              >
+                <div>{t('pipeline:create.warmPool')}</div>
+                <Input
+                  type="number"
+                  value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
+                  onChange={(e) => {
+                    if (
+                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
+                    ) {
+                      return false;
+                    }
+                    changeWarmSize(e.detail.value);
+                  }}
+                />
+              </FormField>
             </ColumnLayout>
           </FormField>
 

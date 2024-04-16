@@ -15,7 +15,6 @@
       "Ingestion_s3": "ingestion-server-s3-stack.template.json",
       "Ingestion_kafka": "ingestion-server-kafka-stack.template.json",
       "Ingestion_kinesis": "ingestion-server-kinesis-stack.template.json",
-      "Ingestion_v2": "ingestion-server-v2-stack.template.json",
       "KafkaConnector": "kafka-s3-sink-stack.template.json",
       "DataProcessing": "data-pipeline-stack.template.json",
       "DataModelingRedshift": "data-analytics-redshift-stack.template.json",
