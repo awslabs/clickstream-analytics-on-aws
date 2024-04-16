@@ -16,9 +16,6 @@ importers:
       '@aws-cdk/aws-glue-alpha':
         specifier: ^2.81.0-alpha.0
         version: 2.81.0-alpha.0(aws-cdk-lib@2.136.0)(constructs@10.3.0)
-      '@aws-cdk/aws-kinesisanalytics-flink-alpha':
-        specifier: ^2.81.0-alpha.0
-        version: 2.81.0-alpha.0(aws-cdk-lib@2.136.0)(constructs@10.3.0)
       '@aws-cdk/aws-servicecatalogappregistry-alpha':
         specifier: ^2.81.0-alpha.0
         version: 2.81.0-alpha.0(aws-cdk-lib@2.136.0)(constructs@10.3.0)
@@ -932,17 +929,6 @@ packages:
 
   /@aws-cdk/aws-glue-alpha@2.81.0-alpha.0(aws-cdk-lib@2.136.0)(constructs@10.3.0):
     resolution: {integrity: sha512-unzXzzkojF08YrA0Hhrlxl2XQYzyy3Vx/GgwmGsJ0MZ6MrT/Gnvz9iUNwE1DQoIKKJfOq/auFnVRcdJjrJVBjw==}
-    engines: {node: '>= 14.15.0'}
-    peerDependencies:
-      aws-cdk-lib: 2.81.0
-      constructs: ^10.0.0
-    dependencies:
-      aws-cdk-lib: 2.136.0(constructs@10.3.0)
-      constructs: 10.3.0
-    dev: false
-
-  /@aws-cdk/aws-kinesisanalytics-flink-alpha@2.81.0-alpha.0(aws-cdk-lib@2.136.0)(constructs@10.3.0):
-    resolution: {integrity: sha512-72AlheexPoAoxOZu4Td+bWnhUIUDM0BmlpMy6aYXxLZbXm0W94m7uIN+0YGzrfWmY6CpnbqbahJs4ZPNEQj/6Q==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       aws-cdk-lib: 2.81.0

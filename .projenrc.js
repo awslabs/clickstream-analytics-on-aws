@@ -22,7 +22,6 @@ const pnpmVersion = '8.15.3';
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
   '@aws-cdk/aws-servicecatalogappregistry-alpha',
-  '@aws-cdk/aws-kinesisanalytics-flink-alpha',
 ].map(m => `${m}@^${cdkVersion}-alpha.0`);
 
 const commonDeps = [
