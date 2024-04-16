@@ -43,8 +43,10 @@ export const handler = async (_e: any, _c: Context) => {
       || (refreshInfo !== undefined && Date.now() - refreshInfo.lastRefreshTime >= Number(REFRESH_INTERVAL_MINUTES) * 60 * 1000)) {
       const latestJobTimestamp = await getLatestEmrJobEndTime(pipelineS3BucketName, pipelineEmrStatusS3Prefix, projectId);
 
+      const triggerDate = subtractDayFromTimestamp(latestJobTimestamp);
+
       const input = JSON.stringify({
-        latestJobTimestamp: latestJobTimestamp,
+        latestJobTimestamp: triggerDate,
       });
 
       const startExecutionCommand = new StartExecutionCommand({
@@ -96,6 +98,12 @@ async function updateMVRefreshInfoToS3(lastRefreshTime: number, pipelineS3Prefix
     logger.error('Error when write mv refresh info data to s3:', { error });
     throw error;
   }
+}
+
+function subtractDayFromTimestamp(timestamp: number) {
+  const date = new Date(timestamp);
+  date.setDate(date.getDate() - 1);
+  return date.getTime();
 }
 
 export function getMVRefreshInfoKey(bucketPrefix: string) {
