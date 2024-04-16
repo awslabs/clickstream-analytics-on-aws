@@ -1,0 +1,138 @@
+{
+  "event_timestamp" : 1690249851000,
+  "user_pseudo_id" : "9113946abd821d52",
+  "user_id" : null,
+  "user_properties" : {
+    "lastName" : {
+      "set_time_msec" : null,
+      "value" : null
+    },
+    "$os" : {
+      "set_time_msec" : null,
+      "value" : "Android"
+    },
+    "$wifi" : {
+      "set_time_msec" : null,
+      "value" : true
+    },
+    "$network_type" : {
+      "set_time_msec" : null,
+      "value" : "WIFI"
+    },
+    "$screen_height" : {
+      "set_time_msec" : null,
+      "value" : 2400
+    },
+    "$device_id" : {
+      "set_time_msec" : null,
+      "value" : "9113946abd821d52"
+    },
+    "$lib_plugin_version" : {
+      "set_time_msec" : null,
+      "value" : [ "android:3.5.3" ]
+    },
+    "$app_id" : {
+      "set_time_msec" : null,
+      "value" : "com.farmerbb.notepad"
+    },
+    "$url" : {
+      "set_time_msec" : null,
+      "value" : "com.farmerbb.notepad.android.NotepadActivity"
+    },
+    "$lib_method" : {
+      "set_time_msec" : null,
+      "value" : "autoTrack"
+    },
+    "$carrier" : {
+      "set_time_msec" : null,
+      "value" : "T-Mobile"
+    },
+    "$os_version" : {
+      "set_time_msec" : null,
+      "value" : "12"
+    },
+    "$is_first_day" : {
+      "set_time_msec" : null,
+      "value" : true
+    },
+    "$model" : {
+      "set_time_msec" : null,
+      "value" : "sdk_gphone64_arm64"
+    },
+    "$screen_width" : {
+      "set_time_msec" : null,
+      "value" : 1080
+    },
+    "$brand" : {
+      "set_time_msec" : null,
+      "value" : "GOOGLE"
+    },
+    "$app_version" : {
+      "set_time_msec" : null,
+      "value" : "3.0.3"
+    },
+    "$lib" : {
+      "set_time_msec" : null,
+      "value" : "Android"
+    },
+    "firstName" : {
+      "set_time_msec" : null,
+      "value" : null
+    },
+    "$x_test_user" : {
+      "set_time_msec" : null,
+      "value" : "Yong Liu"
+    },
+    "user_id" : {
+      "set_time_msec" : null,
+      "value" : null
+    },
+    "$app_name" : {
+      "set_time_msec" : null,
+      "value" : "Notepad"
+    },
+    "$title" : {
+      "set_time_msec" : null,
+      "value" : "Notepad"
+    },
+    "$lib_version" : {
+      "set_time_msec" : null,
+      "value" : "6.7.2"
+    },
+    "$timezone_offset" : {
+      "set_time_msec" : null,
+      "value" : -480
+    },
+    "$screen_name" : {
+      "set_time_msec" : null,
+      "value" : "com.farmerbb.notepad.android.NotepadActivity"
+    },
+    "age" : {
+      "set_time_msec" : null,
+      "value" : 0
+    },
+    "$manufacturer" : {
+      "set_time_msec" : null,
+      "value" : "GOOGLE"
+    },
+    "username" : {
+      "set_time_msec" : null,
+      "value" : null
+    }
+  },
+  "first_touch_time_msec" : 1690249850031,
+  "first_visit_date" : 1690249850031,
+  "first_referrer" : null,
+  "first_traffic_source" : null,
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : null,
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : null,
+  "first_traffic_category" : null,
+  "first_app_install_source" : null,
+  "process_info" : null
+}

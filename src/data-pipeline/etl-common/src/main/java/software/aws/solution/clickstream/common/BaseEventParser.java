@@ -48,13 +48,17 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER.readValue(ingestLine, ClickstreamIngestRow.class);
     }
 
+    public String getGzipData(String data) {
+        return data;
+    }
+
     @Override
     public ParseRowResult parseLineToDBRow(final String ingestLine, final String projectId, final String fileName) throws JsonProcessingException {
         ClickstreamIngestRow clickstreamIngestRow = ingestLineToRow(ingestLine);
         String data = clickstreamIngestRow.getData();
 
         if (!data.contains("[") && !data.contains("{")) {
-            String gzipData = data;
+            String gzipData = getGzipData(data);
             log.info("gzipData: " + true);
             data = decompress(Base64.getDecoder().decode(gzipData));
         }
