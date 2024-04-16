@@ -35,6 +35,7 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
   beforeEach(() => {
     sfnClientMock.reset();
+    s3Mock.reset();
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
@@ -47,8 +48,6 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
     s3Mock.on(PutObjectCommand).resolves({});
 
-    sfnClientMock.on(StartExecutionCommand).resolves({});
-
     process.env.ENABLE_REFRESH = 'true';
     const resp = await handler({}, context);
     expect(resp).toEqual({
@@ -58,7 +57,14 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
   test('Should trigger to refresh - interval greater then 2 hours', async () => {
 
-    const info = JSON.stringify({ lastRefreshTime: new Date().getTime() - (2.1 * 60 * 60 * 1000) });
+    const date = new Date();
+
+    const info = JSON.stringify(
+      {
+        lastRefreshTime: date.getTime() - (2.1 * 60 * 60 * 1000),
+        endTimestamp: date.getTime(),
+      },
+    );
     s3Mock.on(GetObjectCommand).resolves({
       Body: {
         transformToString: async () => {
@@ -73,6 +79,14 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
     const resp = await handler({}, context);
     expect(resp).toEqual({
       status: WorkflowStatus.SUCCEED,
+    });
+
+    date.setDate(date.getDate() - 1);
+    const triggerTimestamp = date.getTime();
+
+    expect(sfnClientMock).toHaveReceivedNthCommandWith(1, StartExecutionCommand, {
+      stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
+      input: JSON.stringify({ latestJobTimestamp: triggerTimestamp }),
     });
 
   });
