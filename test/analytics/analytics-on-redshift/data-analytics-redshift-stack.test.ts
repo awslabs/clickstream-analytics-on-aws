@@ -433,26 +433,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   const nestStackCommonTablesProps = {
     tablesOdsSource: {
-      event: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/event/',
-        fileSuffix: '.snappy',
-      },
-      event_parameter: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/event_parameter/',
-        fileSuffix: '.snappy',
-      },
-      user: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/user/',
-        fileSuffix: '.snappy',
-      },
-      item: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/item/',
-        fileSuffix: '.snappy',
-      },
       event_v2: {
         s3Bucket: sinkS3Bucket,
         prefix: 'project1/event_v2/',
@@ -1047,7 +1027,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test.only('Check RedshiftAssociatedRoleDefaultPolicy', () => {
+  test('Check RedshiftAssociatedRoleDefaultPolicy', () => {
     for (const nestedTemplate of allNestedTemplates) {
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
         PolicyDocument: {
@@ -1059,7 +1039,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 's3:List*',
               ],
               Effect: 'Allow',
-              Resource: [Match.anyValue(),
+              Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
@@ -1075,7 +1056,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       'event_v2/*',
                     ],
                   ],
-                }],
+                },
+              ],
             },
             Match.anyValue(),
             {
@@ -1085,7 +1067,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 's3:List*',
               ],
               Effect: 'Allow',
-              Resource: [Match.anyValue(),
+              Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
@@ -1101,7 +1084,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       'item_v2/*',
                     ],
                   ],
-                }],
+                },
+              ],
             },
             {
               Action: [
@@ -1110,7 +1094,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 's3:List*',
               ],
               Effect: 'Allow',
-              Resource: [Match.anyValue(),
+              Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
@@ -1126,7 +1111,8 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       'user_v2/*',
                     ],
                   ],
-                }],
+                },
+              ],
             },
             {
               Action: [
