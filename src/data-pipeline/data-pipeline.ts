@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, SolutionInfo, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -34,7 +34,6 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
-import { SolutionInfo } from '../common/solution-info';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { TrafficSourceServ } from '../control-plane/backend/lambda/api/service/traffic';

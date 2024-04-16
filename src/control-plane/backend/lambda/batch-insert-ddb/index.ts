@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, marshallOptions, unmarshallOptions } from '@aws/clickstream-base-lib';
 import {
   DynamoDBClient,
   BatchWriteItemCommand,
@@ -29,8 +30,6 @@ import {
   CloudFormationCustomResourceUpdateEvent,
   Context,
 } from 'aws-lambda';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import dictionary from '../../lambda/api/config/dictionary.json';
 
 const ddbClient = new DynamoDBClient({

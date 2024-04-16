@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { ExecutionStatus, ListExecutionsCommand, ListExecutionsCommandInput, SFNClient } from '@aws-sdk/client-sfn';
 import { SegmentJobInitOutput } from './segment-job-init';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
 
 export interface StateMachineStatusEvent {

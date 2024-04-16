@@ -11,11 +11,10 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { SSMClient, PutParameterCommand, DeleteParameterCommand, Tag, AddTagsToResourceCommand, ResourceTypeForTagging } from '@aws-sdk/client-ssm';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { getFunctionTags } from '../../../common/lambda/tags';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { InputWidgetElement, MetricsWidgetsProps } from '../../metrics-widgets-custom-resource';
 import { PARAMETERS_DESCRIPTION } from '../../settings';
 import { getParameterStoreName, listParameters } from '../../util';

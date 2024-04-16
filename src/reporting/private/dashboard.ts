@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { AnalysisSummary, DashboardSummary, DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, TimeGranularity, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
-import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
   databaseSchemaNames: string;

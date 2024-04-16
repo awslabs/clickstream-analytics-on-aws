@@ -15,8 +15,10 @@ import path from 'path';
 import {
   CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
   CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX,
+  POWERTOOLS_ENVS,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   SCAN_METADATA_WORKFLOW_PREFIX,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import {
   CfnResource,
@@ -59,8 +61,6 @@ import { StackWorkflowStateMachine } from './stack-workflow-state-machine-constr
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
-import { SolutionInfo } from '../../common/solution-info';
 
 export interface ApplicationLoadBalancerProps {
   readonly vpc: IVpc;

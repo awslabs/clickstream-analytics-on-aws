@@ -35,6 +35,7 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   SUBNETS_THREE_AZ_PATTERN,
+  SolutionVersion,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
   VPC_ID_PATTERN,
 } from '@aws/clickstream-base-lib';
@@ -44,7 +45,6 @@ import { CPipelineResources, IPipeline } from './pipeline';
 import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName } from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
-import { SolutionVersion } from '../common/solution-info-ln';
 import {
   validateDataProcessingInterval,
   validatePattern,

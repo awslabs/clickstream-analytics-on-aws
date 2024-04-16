@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { logger } from '../../../common/powertools';
+import { logger } from '@aws/clickstream-base-lib';
 
 /**
  * The lambda function to parse timezone with appId list.

@@ -12,9 +12,9 @@
  */
 
 
+import { logger } from '@aws/clickstream-base-lib';
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { GlueClientUtil } from './glue-client-util';
-import { logger } from '../../../common/powertools';
 import { SinkTableEnum } from '../../data-pipeline';
 import { InitPartitionCustomResourceProps } from '../../utils/custom-resource';
 

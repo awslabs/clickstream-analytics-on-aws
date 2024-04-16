@@ -10,14 +10,12 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
-import { logger } from '../../common/powertools';
 import { readS3ObjectAsString } from '../../common/s3';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
-import { sleep } from '../../common/utils';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
 
 export function getRedshiftClient(roleArn: string) {

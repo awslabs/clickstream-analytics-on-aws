@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { ListSubscriptionsByTopicCommand, ListSubscriptionsByTopicCommandOutput, SNSClient, SubscribeCommand } from '@aws-sdk/client-sns';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 
 
 const region = process.env.AWS_REGION!;

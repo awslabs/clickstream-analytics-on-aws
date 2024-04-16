@@ -11,14 +11,13 @@
  *  and limitations under the License.
  */
 
-import { ALARM_NAME_PREFIX, METRICS_PARAMETER_PATH_PREFIX } from '@aws/clickstream-base-lib';
+import { ALARM_NAME_PREFIX, METRICS_PARAMETER_PATH_PREFIX, logger } from '@aws/clickstream-base-lib';
 import { GetParametersByPathCommand, Parameter, SSMClient } from '@aws-sdk/client-ssm';
 import { CfnResource, Stack } from 'aws-cdk-lib';
 import { Alarm } from 'aws-cdk-lib/aws-cloudwatch';
 import { Construct } from 'constructs';
 import { WIDGETS_HEIGHT } from './settings';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { logger } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
 
 export function getParameterStoreName(projectId: string, stackId?: string, name?: string): string {

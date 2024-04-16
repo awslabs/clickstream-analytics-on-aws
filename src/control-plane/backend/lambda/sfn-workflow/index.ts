@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
 import { JSONPath } from 'jsonpath-plus';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { putStringToS3, readS3ObjectAsJson } from '../api/store/aws/s3';
 
 export interface WorkFlowStack {

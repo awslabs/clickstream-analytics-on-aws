@@ -11,13 +11,10 @@
  *  and limitations under the License.
  */
 
-import { SegmentDdbItem, SegmentJobStatus } from '@aws/clickstream-base-lib';
+import { SegmentDdbItem, SegmentJobStatus, aws_sdk_client_common_config, logger, parseDynamoDBTableARN } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { StateMachineStatusOutput } from './state-machine-status';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { parseDynamoDBTableARN } from '../../../common/utils';
 import { executeStatements, getRedshiftClient, getRedshiftProps } from '../redshift-data';
 
 export type ExecuteSegmentQueryEvent = StateMachineStatusOutput;
