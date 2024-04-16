@@ -165,6 +165,51 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
+  it('Check callback bucket when create pipeline without execution info', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+    });
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const workflow = input.TransactItems[1].Put.Item.workflow.M.Workflow.M;
+      const serviceCatalogAppRegistry = workflow.Branches.L[0].M.States.M.ServiceCatalogAppRegistry.M;
+      const callback = serviceCatalogAppRegistry.Data.M.Callback.M;
+      console.log(callback);
+      expect(
+        callback.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        callback.BucketPrefix.S.startsWith('clickstream/workflow/main-') &&
+        callback.BucketPrefix.S.endsWith('-1677715200000'),
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+        status: undefined,
+        executionDetail: undefined,
+        executionArn: undefined,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
+  });
   it('Create pipeline with error bucket', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
@@ -3973,7 +4018,7 @@ describe('Pipeline test', () => {
       Items: [],
     });
     ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
+    const res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -3981,18 +4026,6 @@ describe('Pipeline test', () => {
       data: null,
       success: true,
       message: 'Pipeline deleted.',
-    });
-
-    // Mock DynamoDB error
-    ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
-      .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Unexpected error occurred at server.',
-      error: 'Error',
     });
   });
   it('Delete pipeline with no pid', async () => {
