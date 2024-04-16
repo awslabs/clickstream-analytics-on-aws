@@ -197,8 +197,9 @@ async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValu
 async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, region: string, bucket: string, prefix: string) {
   const splitValues = paramValue.split('.');
   const stackName = splitValues[1];
+  const fileKey = `${prefix}/${stackName}/output.json`;
   // get stack from s3
-  const stackJson = await _getStackFromS3(region, bucket, prefix, stackName);
+  const stackJson = await _getStackFromS3(region, bucket, fileKey);
   let value = '';
   if (stackJson) {
     const values = JSONPath({ path: paramValue, json: stackJson });
@@ -212,13 +213,12 @@ async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: 
   };
 }
 
-async function _getStackFromS3(region: string, bucket: string, prefix: string, stackName: string) {
-  const fileKey = `${prefix}/${stackName}/output.json`;
+async function _getStackFromS3(region: string, bucket: string, fileKey: string) {
   try {
     return await readS3ObjectAsJson(region, bucket, fileKey);
   } catch (err) {
     logger.error('read empty content error.', {
-      region, bucket, key: fileKey,
+      err, region, bucket, key: fileKey,
     });
     return undefined;
   }
@@ -227,7 +227,7 @@ async function _getStackFromS3(region: string, bucket: string, prefix: string, s
 async function _getOutputsFromS3(region: string, bucket: string, prefix: string, stackName: string) {
   const fileKey = `${prefix}/${stackName}/output.json`;
   try {
-    const content = await _getStackFromS3(region, bucket, fileKey, stackName);
+    const content = await _getStackFromS3(region, bucket, fileKey);
     if (!content) {
       logger.warn('read empty outputs.', {
         region, bucket, key: fileKey,
@@ -238,7 +238,7 @@ async function _getOutputsFromS3(region: string, bucket: string, prefix: string,
     return outputs;
   } catch (err) {
     logger.error('read outputs error.', {
-      region, bucket, key: fileKey,
+      err, region, bucket, key: fileKey,
     });
     return [];
   }
