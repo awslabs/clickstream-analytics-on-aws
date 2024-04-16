@@ -45,8 +45,11 @@ import static software.aws.solution.clickstream.model.ModelV2.*;
 
 @Slf4j
 public class DataConverterV3 {
-
-    private static UDF9<String, Long, Long, String, String, String, String, String, String, List<GenericRow>> convertClickstreamData() {
+    private final Map<String, RuleConfig> appRuleConfig;
+    public DataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
+    }
+    private static UDF9<String, Long, Long, String, String, String, String, String, String, List<GenericRow>> convertClickstreamData(final Map<String, RuleConfig> appRuleConfig) {
         return (String value,
                 Long ingestTimestamp, Long uploadTimestamp,
                 String rid, String uri, String ua, String ip,
@@ -61,7 +64,7 @@ public class DataConverterV3 {
                         .uri(uri)
                         .ua(ua)
                         .ip(ip)
-                        .build());
+                        .build(), appRuleConfig);
             } catch (Exception e) {
                 log.error("cannot convert data to ClickstreamEvent"
                         + ERROR_LOG + e.getMessage() + VALUE_LOG + value);
@@ -81,25 +84,25 @@ public class DataConverterV3 {
         }));
     }
 
-    private static List<GenericRow> getGenericRowList(final String jsonString, final ExtraParams extraParams) throws JsonProcessingException {
+    private static List<GenericRow> getGenericRowList(final String jsonString, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
         List<GenericRow> rows = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonString);
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.add(getGenericRow(elementsIt.next(), index, extraParams));
+                rows.add(getGenericRow(elementsIt.next(), index, extraParams, appRuleConfig));
                 index++;
             }
         } else {
-            rows.add(getGenericRow(jsonNode, index, extraParams));
+            rows.add(getGenericRow(jsonNode, index, extraParams, appRuleConfig));
         }
         return rows;
 
     }
 
-    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams) throws JsonProcessingException {
-        ParseDataResult result = ClickstreamEventParser.getInstance().parseData(jsonNode.toString(), extraParams, index);
+    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
+        ParseDataResult result = ClickstreamEventParser.getInstance(appRuleConfig).parseData(jsonNode.toString(), extraParams, index);
 
         List<GenericRow> eventRows = new ArrayList<>();
         for (ClickstreamEvent event : result.getClickstreamEventList()) {
@@ -125,7 +128,7 @@ public class DataConverterV3 {
                 DataTypes.createStructField("items", itemListType, true),
         }));
 
-        UserDefinedFunction convertGTMServerDataUdf = udf(convertClickstreamData(), udfOutType);
+        UserDefinedFunction convertGTMServerDataUdf = udf(convertClickstreamData(this.appRuleConfig), udfOutType);
         String appId = "appId";
         Dataset<Row> convertedKeyValueDataset = dataset
                 .filter(col(appId).isNotNull().and(col(appId).notEqual("")))

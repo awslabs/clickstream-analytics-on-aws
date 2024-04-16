@@ -13,7 +13,9 @@
 
 package software.aws.solution.clickstream.common.enrich.ts;
 
+
 public interface TrafficSourceHelper {
-    CategoryTrafficSource getCategoryTrafficSource(TrafficSource trafficSource);
-    TrafficSourceParserResult parse(String inputUrl, String referrer);
+    CategoryTrafficSource parse(String pageUrl, String pageReferrer, String latestReferrer, String latestReferrerHost);
+
+    CategoryTrafficSource parse(TrafficSourceUtm trafficSourceUtm, String pageReferrer, String latestReferrer, String latestReferrerHost);
 }

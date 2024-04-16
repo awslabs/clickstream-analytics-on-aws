@@ -32,8 +32,11 @@ import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 @Slf4j
 public class GTMServerDataTransformerV2Test extends BaseSparkTest {
-    GTMServerDataTransformerV2 transformer = new GTMServerDataTransformerV2();
-
+    GTMServerDataTransformerV2 transformer;
+    @BeforeEach
+    void setUpTransformer() {
+        transformer = new GTMServerDataTransformerV2(getTestTransformConfig("testApp"));
+    }
     @Test
     void test_convert_event_v2() throws IOException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2Test.test_convert_event_v2

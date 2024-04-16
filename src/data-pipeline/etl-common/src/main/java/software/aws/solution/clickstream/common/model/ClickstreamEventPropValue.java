@@ -18,6 +18,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class ClickstreamEventPropValue {
-   private final String value;
-   private final ValueType type;
+   private final String value; // NOSONAR
+   private final ValueType type; // NOSONAR
 }

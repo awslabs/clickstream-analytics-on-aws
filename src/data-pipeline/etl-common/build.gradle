@@ -57,7 +57,7 @@ dependencies {
 
     // test related
     testImplementation("org.assertj:assertj-core:$assertJVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 
     // slf4j
     implementation "org.slf4j:slf4j-api:$slf4jVersion"

@@ -37,6 +37,7 @@ import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
+import { TrafficSourceServ } from '../control-plane/backend/lambda/api/service/traffic';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
@@ -323,4 +324,15 @@ export class DataPipelineConstruct extends Construct {
 
     });
   }
+}
+
+export function getRuleConfigDir(prefix: string, projectId: string) {
+  let ruleConfigPrefix: string;
+  if (prefix.startsWith(`clickstream/${projectId}/`)) {
+    const tsServ = new TrafficSourceServ();
+    ruleConfigPrefix = tsServ.getConfigRuleKeyPrefix(projectId);
+  } else {
+    ruleConfigPrefix = prefix + projectId + '/rules/';
+  }
+  return ruleConfigPrefix;
 }

@@ -11,15 +11,20 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common.enrich.ts;
+package software.aws.solution.clickstream.common.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import software.aws.solution.clickstream.common.model.UriInfo;
+import lombok.Setter;
 
 @Getter
-@AllArgsConstructor
-public class TrafficSourceParserResult {
-    CategoryTrafficSource trafficSource;
-    UriInfo uriInfo;
+@Setter
+public class TimeShiftInfo {
+    Long ingestTimestamp;
+    Long uploadTimestamp;
+    Long eventTimestamp;
+    Long originEventTimestamp;
+    Long timeDiff;
+    boolean isAdjusted;
+    String uri;
+    Integer adjustThreshold;
 }

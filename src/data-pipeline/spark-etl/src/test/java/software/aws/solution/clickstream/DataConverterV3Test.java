@@ -20,15 +20,18 @@ import software.aws.solution.clickstream.transformer.*;
 import java.io.*;
 
 import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.common.BaseEventParser.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 
 public class DataConverterV3Test extends BaseSparkTest {
-    DataConverterV3 converter = new DataConverterV3();
+    private DataConverterV3 converter;
+    @BeforeEach
+    void setupConverter() {
+        this.converter = new DataConverterV3(getTestTransformConfig().getAppRuleConfig());
+    }
+
     public static Dataset<Row> addFileName(Dataset<Row> dataset) {
         return dataset.withColumn(INPUT_FILE_NAME, input_file_name());
     }
-
     @Test
     public void test_convert_data_v3() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.DataConverterV3Test.test_convert_data_v3

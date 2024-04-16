@@ -351,12 +351,12 @@
       "op::or": [{
           "field": "traffic_source_source",
           "op": "contain",
-          "op::contain": "mail"
+          "value": "mail"
         },
         {
-          "field": "traffic_source_meidum",
+          "field": "traffic_source_medium",
           "op": "contain",
-          "op::contain": "mail"
+          "value": "mail"
         },
         {
           "field": "page_view_latest_referrer_host",
@@ -385,7 +385,7 @@
           "value": "sms"
         },
         {
-          "field": "traffic_source_meidum",
+          "field": "traffic_source_medium",
           "op": "eq",
           "value": "sms"
         }
@@ -431,12 +431,12 @@
         {
           "field": "traffic_source_medium",
           "op": "contain",
-          "op::contain": "mobile"
+          "value": "mobile"
         },
         {
           "field": "traffic_source_medium",
           "op": "contain",
-          "op::contain": "notification"
+          "value": "notification"
         }
       ]
     }
@@ -485,7 +485,7 @@
     },
     "condition": {
       "op::and": [{
-        "field": "latest_referrer_host",
+        "field": "page_view_latest_referrer_host",
         "op": "match",
         "value": "^.*internal.*$"
       }]

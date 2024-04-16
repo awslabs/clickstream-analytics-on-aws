@@ -22,6 +22,8 @@ import software.aws.solution.clickstream.common.ingest.*;
 import software.aws.solution.clickstream.common.model.*;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 
@@ -206,6 +208,58 @@ public class ClickstreamEventParserTest extends BaseTest {
     }
 
     @Test
+    public void test_parse_line_to_db_row_event_with_config() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_event_with_config
+        setEnableEventTimeShift(false);
+
+        String line = resourceFileContent("/original_data_page_url_web.json");
+        log.info(line);
+        Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
+        ruleConfigMap.put("uba-app", getRuleConfigV0());
+
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance(ruleConfigMap);
+        String projectId = "test_project_id";
+        String fileName = "original_data_page_url.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+
+        String expectedJson = this.resourceFileAsString("/expected/test_parse_line_to_db_row_event_web.json");
+
+        Assertions.assertEquals(expectedJson, prettyJson(eventV2.toJson()));
+
+        setEnableEventTimeShift(true);
+    }
+
+    @Test
+    public void test_parse_line_to_db_row_event_with_config2() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_event_with_config2
+        setEnableEventTimeShift(false);
+
+        String line = resourceFileContent("/original_data_page_url_web.json");
+        log.info(line);
+        Map<String, RuleConfig> ruleConfigMap = new HashMap<>();
+        ruleConfigMap.put("uba-app", getRuleConfigV0());
+
+        ClickstreamEventParser clickstreamEventParser = ClickstreamEventParser.getInstance();
+        clickstreamEventParser.setAppRuleConfig(ruleConfigMap);
+
+        String projectId = "test_project_id";
+        String fileName = "original_data_page_url.json";
+
+        ParseRowResult rowResult = clickstreamEventParser.parseLineToDBRow(line, projectId, fileName);
+
+        ClickstreamEvent eventV2 = rowResult.getClickstreamEventList().get(0);
+
+        String expectedJson = this.resourceFileAsString("/expected/test_parse_line_to_db_row_event_web.json");
+
+        Assertions.assertEquals(expectedJson, prettyJson(eventV2.toJson()));
+
+        setEnableEventTimeShift(true);
+    }
+
+    @Test
     public void test_parse_line_to_db_row_item() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.ClickstreamEventParserTest.test_parse_line_to_db_row_item
         setEnableEventTimeShift(false);
@@ -250,11 +304,9 @@ public class ClickstreamEventParserTest extends BaseTest {
     }
 
 
-
-
     @Test
     void testGetSetForTimeShiftInfo() {
-        BaseEventParser.TimeShiftInfo timeShiftInfo = new BaseEventParser.TimeShiftInfo();
+        TimeShiftInfo timeShiftInfo = new TimeShiftInfo();
 
         timeShiftInfo.setTimeDiff(1000L);
         timeShiftInfo.setUploadTimestamp(2000L);
@@ -273,5 +325,7 @@ public class ClickstreamEventParserTest extends BaseTest {
         Assertions.assertEquals(5000L, timeShiftInfo.getOriginEventTimestamp());
 
     }
+
+
 
 }

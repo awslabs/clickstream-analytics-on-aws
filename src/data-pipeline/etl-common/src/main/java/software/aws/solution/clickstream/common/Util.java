@@ -13,19 +13,32 @@
 
 package software.aws.solution.clickstream.common;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import lombok.extern.slf4j.*;
-import software.aws.solution.clickstream.common.enrich.*;
-import software.aws.solution.clickstream.common.exception.*;
-import software.aws.solution.clickstream.common.ingest.*;
-import software.aws.solution.clickstream.common.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import software.aws.solution.clickstream.common.enrich.UrlParseResult;
+import software.aws.solution.clickstream.common.exception.ExtractDataException;
+import software.aws.solution.clickstream.common.ingest.UserPropObjectValue;
+import software.aws.solution.clickstream.common.model.ClickstreamEventPropValue;
+import software.aws.solution.clickstream.common.model.ClickstreamUserPropValue;
+import software.aws.solution.clickstream.common.model.ValueType;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.*;
-import java.util.*;
-import java.util.zip.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 @Slf4j
 public final class Util {
@@ -91,15 +104,20 @@ public final class Util {
         if (url == null) {
             return null;
         }
+        String schemaUrl = url;
+        if (!url.substring(0, Math.min(url.length(), 15)).contains("://")) {
+            schemaUrl = "https://" + url;
+        }
+
         UrlParseResult result = new UrlParseResult();
         try {
-            URI uri = new URI(url);
+            URI uri = new URI(schemaUrl);
             result.setHostName(uri.getHost());
             result.setPath(uri.getPath());
             result.setQueryString(deCodeUri(uri.getQuery()));
             result.setQueryParameters(getUriParams(url));
         } catch (URISyntaxException e) {
-            log.warn("cannot parse url: " + url + ERROR_LOG + e.getMessage());
+            log.warn("cannot parse url: " + schemaUrl + ERROR_LOG + e.getMessage());
         }
         return result;
     }
@@ -233,5 +251,34 @@ public final class Util {
         return sb.toString();
     }
 
+    public static String readResourceFile(final String fileName) throws IOException {
+        InputStream inputStream = getResourceAsStream(fileName);
+        if (inputStream == null) {
+            throw new IllegalArgumentException("File not found! " + fileName);
+        }
+        ByteArrayOutputStream output = readAllInputStream(inputStream);
+        return output.toString(StandardCharsets.UTF_8);
 
+    }
+
+    public static ByteArrayOutputStream readAllInputStream(final InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
+        }
+        return output;
+    }
+
+
+    public static String readTextFile(final String fileName) throws IOException {
+        FileInputStream inputStream = new FileInputStream(fileName);
+        ByteArrayOutputStream output = readAllInputStream(inputStream);
+        return output.toString(StandardCharsets.UTF_8);
+    }
+
+    public static InputStream getResourceAsStream(final String fileName) {
+        return Util.class.getClassLoader().getResourceAsStream(fileName);
+    }
 }

@@ -19,7 +19,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class ClickstreamUserPropValue {
-    private final String value;
-    private final ValueType type;
-    private final Long setTimemsec;
+    private final String value; // NOSONAR
+    private final ValueType type; // NOSONAR
+    private final Long setTimemsec; // NOSONAR
 }
