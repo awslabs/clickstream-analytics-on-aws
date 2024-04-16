@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Duration,
   Stack,
@@ -40,7 +40,6 @@ import {
 } from './common/cfn-nag';
 import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
-import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { getExistVpc } from './common/vpc-utils';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';

@@ -13,8 +13,8 @@
 
 import fetch from 'node-fetch';
 import { logger } from './powertools';
-import { httpsAgent } from './sdk-client-config-ln';
-import { sleep } from './utils-ln';
+import { httpsAgent } from './sdk-client-config';
+import { sleep } from './utils';
 
 const retryDelay = 2000; // Delay between retries in milliseconds
 

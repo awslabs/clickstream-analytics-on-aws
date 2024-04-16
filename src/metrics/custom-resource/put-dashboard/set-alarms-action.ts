@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { CloudWatchClient, DescribeAlarmsCommand, PutMetricAlarmCommand, MetricAlarm } from '@aws-sdk/client-cloudwatch';
-import { logger } from '../../../common/powertools';
 
 export async function setAlarmsAction(cwClient: CloudWatchClient, alarmArns: string[], snsTopicArn: string) {
   logger.info('setAlarmsAction for alarmArns: ' + alarmArns);

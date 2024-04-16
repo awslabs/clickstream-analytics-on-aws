@@ -18,6 +18,8 @@ import {
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
+  SolutionVersion,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
@@ -54,7 +56,6 @@ import {
   PipelineStatusDetail,
   PipelineStatusType,
 } from '../common/model-ln';
-import { SolutionInfo, SolutionVersion } from '../common/solution-info-ln';
 import {
   validateIngestionServerNum,
   validatePattern,

@@ -51,7 +51,6 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
 import {
   clickstream_event_view_columns,
@@ -1935,7 +1934,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2003,7 +2001,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2088,7 +2085,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(2);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
 
@@ -2258,7 +2254,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2343,7 +2338,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2429,7 +2423,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2598,7 +2591,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -2699,7 +2691,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(2);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
   });
@@ -2780,7 +2771,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
   });
 
@@ -2899,7 +2889,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(2);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
   });
@@ -3007,7 +2996,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3133,7 +3121,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3207,7 +3194,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3300,7 +3286,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3395,7 +3380,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3510,7 +3494,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3678,7 +3661,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3768,7 +3750,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3799,12 +3780,6 @@ describe('QuickSight Lambda function', () => {
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
       Status: 200,
     });
-
-    // quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolvesOnce({
-    //   ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
-    // }).resolvesOnce({
-    //   ResourceStatus: ResourceStatus.DELETED,
-    // });
 
     quickSightClientMock.on(DescribeAnalysisDefinitionCommand).rejects(notExistError);
 
@@ -3860,7 +3835,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });
@@ -3983,7 +3957,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(2);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
   });
@@ -4114,7 +4087,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(2);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
   });
@@ -4630,7 +4602,6 @@ describe('QuickSight Lambda function', () => {
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
-    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
 
   });

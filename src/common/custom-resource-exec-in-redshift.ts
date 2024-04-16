@@ -11,11 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { logger } from './powertools';
 import { putStringToS3 } from './s3';
-import { aws_sdk_client_common_config } from './sdk-client-config';
-import { sleep } from './utils';
 
 const sfnClient = new SFNClient({
   ...aws_sdk_client_common_config,

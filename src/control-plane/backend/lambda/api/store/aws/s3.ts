@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   S3Client,
   ListBucketsCommand,
@@ -23,7 +24,6 @@ import {
 import pLimit from 'p-limit';
 import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
 
 const promisePool = pLimit(20);

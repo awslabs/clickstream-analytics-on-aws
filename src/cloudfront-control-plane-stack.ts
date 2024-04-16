@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from '@aws/clickstream-base-lib';
+import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL, SolutionInfo } from '@aws/clickstream-base-lib';
 import { Aspects, Aws, CfnCondition, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
@@ -42,7 +42,6 @@ import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNag
 import { createLambdaRole } from './common/lambda';
 import { Parameters } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
-import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStackWithRegion } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, CNCloudFrontS3PortalProps, DomainProps } from './control-plane/cloudfront-s3-portal';

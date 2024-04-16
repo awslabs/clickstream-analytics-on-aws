@@ -26,6 +26,8 @@ import {
   ExploreVisualName,
   QuickSightChartType,
   ExploreComputeMethod,
+  sleep,
+  SolutionVersion,
 } from '@aws/clickstream-base-lib';
 import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, DayOfWeek, InputColumn, QuickSight, ResourceStatus, ThrottlingException, Visual, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
@@ -70,10 +72,8 @@ import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
-import { sleep } from '../common/utils-ln';
 import { IPipeline } from '../model/pipeline';
 import { QuickSightUserArns, deleteExploreUser, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';

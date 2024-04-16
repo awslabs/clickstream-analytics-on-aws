@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { logger } from '../../../common/powertools';
+import { logger } from '@aws/clickstream-base-lib';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;

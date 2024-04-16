@@ -28,15 +28,11 @@ const commonDeps = [
   'uuid@^9.0.0',
   '@aws-lambda-powertools/logger@^1.17.0',
   '@aws-lambda-powertools/metrics@^1.17.0',
-  'jsonwebtoken@^9.0.0',
-  'jwks-rsa@^3.0.1',
   'mustache@^4.2.0',
-  'node-fetch@^2.6.4',
-  'node-cache@^5.1.2',
   'cron-parser@^4.8.1',
   'moment-timezone@^0.5.45',
+  'node-fetch@^2.6.4',
   'jsonpath-plus@^7.2.0',
-  'hpagent@^1.2.0',
   'csv-parser@^3.0.0',
 ];
 
@@ -48,9 +44,9 @@ const commonDevDeps = [
   '@types/mustache@^4.2.2',
   'mock-fs@^5.2.0',
   '@types/mock-fs@^4.13.1',
-  '@types/node-fetch@^2.6.4',
-  '@types/jsonpath-plus@^5.0.2',
   '@types/jsonwebtoken@^9.0.0',
+  '@types/jsonpath-plus@^5.0.2',
+  '@types/node-fetch@^2.6.4',
 ];
 
 const smithyPackagesVersion = '2.0.7';
@@ -214,6 +210,16 @@ const devDepsForFrontendProject = [
   'html-minifier@^4.0.0',
   'prettier@^2.7.1',
   'typescript@^4.8.4',
+  'crypto-browserify@^3.12.0',
+  'stream-http@^3.0.0',
+  'https-browserify@^1.0.0',
+  'browserify-url@^0.0.1',
+  'stream-browserify@^3.0.0',
+  'browserify-util@^0.12.6',
+  'process@^0.11.10',
+  'console-browserify@^1.2.0',
+  'assert-browserify@^2.0.0',
+  'vm-browserify@^1.1.2',
 ];
 
 const depsForApiProject = [
@@ -385,6 +391,20 @@ const baseProject = new typescript.TypeScriptProject({
   licensed: true,
   defaultReleaseBranch: defaultBranch,
   readme: undefined,
+  deps: [
+    '@aws-sdk/types',
+    '@smithy/node-http-handler',
+    '@aws-lambda-powertools/logger@^1.17.0',
+    'node-fetch@^2.6.4',
+    'hpagent@^1.2.0',
+    'jsonwebtoken@^9.0.0',
+    'jwks-rsa@^3.0.1',
+    'node-cache@^5.1.2',
+  ],
+  devDeps: [
+    '@types/node-fetch@^2.6.4',
+    '@types/jsonwebtoken@^9.0.0',
+  ],
   eslint: false,
   sampleCode: false,
   packageManager: project.package.packageManager,

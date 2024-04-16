@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Arn,
   ArnFormat,
@@ -70,7 +70,6 @@ import {
   ruleToSuppressRolePolicyWithWildcardResources,
 } from '../common/cfn-nag';
 import { createSGForEgressToAwsService } from '../common/sg';
-import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftOdsTables {

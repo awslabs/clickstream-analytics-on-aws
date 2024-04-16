@@ -20,8 +20,8 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
-import { Logger } from '@aws-lambda-powertools/logger';
 import { App, Fn } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
@@ -30,7 +30,6 @@ import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
 import { BuiltInTagKeys, MetricsNamespace, REDSHIFT_MODE } from '../../../src/common/model';
-import { SolutionInfo } from '../../../src/common/solution-info';
 import { getExistVpc } from '../../../src/common/vpc-utils';
 import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift-stack';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
@@ -45,8 +44,6 @@ import {
   RefAnyValue,
   RefGetAtt,
 } from '../../utils';
-
-const logger = new Logger();
 
 describe('DataAnalyticsRedshiftStack common parameter test', () => {
   const app = new App();
@@ -526,12 +523,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
     );
 
-    logger.info('templateParams:', { templateParams });
     for (const ep of exceptedParams) {
-      logger.info('input', {
-        ep: ep,
-        includesInTemplate: templateParams.includes(ep),
-      });
       expect(templateParams.includes(ep)).toBeTruthy();
     }
     expect(templateParams.length).toEqual(exceptedParams.length + 1);
@@ -640,7 +632,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   test('Should has Rules for existing RedshiftServerless', () => {
     const rule = template.toJSON().Rules.ExistingRedshiftServerlessParameters;
-    logger.info('Params', { ExistingRedshiftServerlessParameters: rule.Assertions[0].Assert[CFN_FN.AND] });
     for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
       expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessWorkgroupName' ||
         e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessIAMRole').toBeTruthy();
@@ -691,7 +682,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     try {
       new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
     } catch (e) {
-      logger.error('ERROR:' + e);
       error = true;
     }
     expect(error).toBeTruthy();
@@ -749,7 +739,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     try {
       new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
     } catch (e) {
-      logger.error('ERROR:' + e);
       error = true;
     }
     expect(error).toBeTruthy();

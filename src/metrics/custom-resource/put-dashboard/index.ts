@@ -12,13 +12,12 @@
  */
 
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { CloudWatchClient, PutDashboardCommand } from '@aws-sdk/client-cloudwatch';
 import { SSMClient, Parameter } from '@aws-sdk/client-ssm';
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 
 import { setAlarmsAction } from './set-alarms-action';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { AlarmsWidgetElement, MetricExpression, MetricWidgetElement, MetricsWidgetsProps, RenderingProperties, TextWidgetElement } from '../../metrics-widgets-custom-resource';
 import { DESCRIPTION_HEIGHT } from '../../settings';
 import { getParameterStoreName, getPosition, listParameters } from '../../util';

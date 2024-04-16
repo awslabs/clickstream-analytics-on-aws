@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
 import { logger } from '../common/powertools';
-import { SolutionInfo } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '@aws/clickstream-base-lib';
+import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX, SolutionVersion } from '@aws/clickstream-base-lib';
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient, PutRuleCommand, TagResourceCommand as EventTagResourceCommand } from '@aws-sdk/client-cloudwatch-events';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
@@ -86,7 +86,6 @@ import {
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
-import { SolutionVersion } from '../../common/solution-info-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';

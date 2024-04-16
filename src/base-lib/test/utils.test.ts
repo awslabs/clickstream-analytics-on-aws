@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { formatDate, parseDynamoDBTableARN } from '../../src/common/utils';
+import { formatDate, parseDynamoDBTableARN } from '../lib/common/utils';
 
 describe('utils functions tests', () => {
   test('parseDynamoDBTableARN function', () => {

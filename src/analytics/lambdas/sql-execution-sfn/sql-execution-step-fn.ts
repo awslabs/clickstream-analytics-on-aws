@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { logger } from '../../../common/powertools';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
 import { executeBySqlOrS3File, getRedshiftClient } from '../redshift-data';
 

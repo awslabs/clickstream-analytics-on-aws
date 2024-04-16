@@ -306,11 +306,6 @@
       "type": "runtime"
     },
     {
-      "name": "hpagent",
-      "version": "^1.2.0",
-      "type": "runtime"
-    },
-    {
       "name": "i18next-fs-backend",
       "version": "^2.2.0",
       "type": "runtime"
@@ -348,11 +343,6 @@
     {
       "name": "mustache",
       "version": "^4.2.0",
-      "type": "runtime"
-    },
-    {
-      "name": "node-cache",
-      "version": "^5.1.2",
       "type": "runtime"
     },
     {
