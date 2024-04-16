@@ -100,11 +100,6 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + '- Control Plane';
 
-    const {
-      iamRolePrefixParam,
-      iamRoleBoundaryArnParam,
-    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
-
     let domainProps: DomainProps | undefined = undefined;
     let cnCloudFrontS3PortalProps: CNCloudFrontS3PortalProps | undefined;
     const solutionBucket = new SolutionBucket(this, 'ClickstreamSolution');
@@ -250,6 +245,11 @@ export class CloudFrontControlPlaneStack extends Stack {
     const oidcInfo = this.oidcInfo(createCognitoUserPool ? controlPlane.controlPlaneUrl : undefined);
     const authorizer = this.createAuthorizer(oidcInfo);
     const pluginPrefix = 'plugins/';
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     const isEmptyRolePrefixCondition = new CfnCondition(
       this,

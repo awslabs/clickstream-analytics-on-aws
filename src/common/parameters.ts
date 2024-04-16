@@ -660,7 +660,7 @@ export class Parameters {
     const labels: any = paramLabels ?? {};
 
     const iamRolePrefixParam = new CfnParameter(scope, 'IamRolePrefix', {
-      description: 'The prefix of all IAM Roles.',
+      description: 'The prefix of the IAM Roles created in the solution.',
       type: 'String',
       allowedPattern: IAM_ROLE_PREFIX_PATTERN,
       default: '',
@@ -670,7 +670,7 @@ export class Parameters {
     };
 
     const iamRoleBoundaryArnParam = new CfnParameter(scope, 'IamRoleBoundaryArn', {
-      description: 'Set permissions boundaries for IAM Roles.',
+      description: 'Set permissions boundaries for the IAM Roles created in the solution.',
       type: 'String',
       default: '',
     });
