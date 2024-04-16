@@ -25,7 +25,7 @@ describe('Athena built-in query test', () => {
     template.hasParameter('AthenaDatabase', {});
     template.hasParameter('AthenaWorkGroup', {});
     template.hasParameter('AthenaEventTable', {});
-    template.hasParameter('AthenaEventParamTable', {});
+    template.hasParameter('AthenaSessionTable', {});
     template.hasParameter('AthenaUserTable', {});
     template.hasParameter('AppRegistryApplicationArn', {});
   });

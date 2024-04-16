@@ -19,10 +19,10 @@ import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
 import { ClickstreamSinkTables, SinkTableEnum } from '../data-pipeline';
-import { getSessionTableColumns } from '../tables/session-table';
 import { getEventTableColumns } from '../tables/event_v2-table';
 import { getIngestionEventsTableColumns } from '../tables/ingestion-events-table';
 import { getItemTableColumns } from '../tables/item_v2-table';
+import { getSessionTableColumns } from '../tables/session-table';
 import { getUserTableColumns } from '../tables/user_v2-table';
 
 interface Props {

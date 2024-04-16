@@ -18,76 +18,75 @@ import {
 
 export function getSessionTableColumns(): Column[] {
   return [{
-      name: "event_timestamp",
-      type: Schema.TIMESTAMP
-    },
-    {
-      name: "user_pseudo_id",
-      type: Schema.STRING
-    },
-    {
-      name: "session_id",
-      type: Schema.STRING
-    },
-    {
-      name: "user_id",
-      type: Schema.STRING
-    },
-    {
-      name: "session_number",
-      type: Schema.BIG_INT
-    },
-    {
-      name: "session_start_time_msec",
-      type: Schema.BIG_INT
-    },
-    {
-      name: "session_source",
-      type: Schema.STRING
-    },
-    {
-      name: "session_medium",
-      type: Schema.STRING
-    },
-    {
-      name: "session_campaign",
-      type: Schema.STRING
-    },
-    {
-      name: "session_content",
-      type: Schema.STRING
-    },
-    {
-      name: "session_term",
-      type: Schema.STRING
-    },
-    {
-      name: "session_campaign_id",
-      type: Schema.STRING
-    },
-    {
-      name: "session_clid_platform",
-      type: Schema.STRING
-    },
-    {
-      name: "session_clid",
-      type: Schema.STRING
-    },
-    {
-      name: "session_channel_group",
-      type: Schema.STRING
-    },
-    {
-      name: "session_source_category",
-      type: Schema.STRING
-    },
-    {
-      name: "process_info",
-      type: Schema.map(Schema.STRING, Schema.STRING)
-    },
-    {
-      name: "created_time",
-      type: Schema.TIMESTAMP
-    }
-  ];
+    name: 'event_timestamp',
+    type: Schema.TIMESTAMP,
+  },
+  {
+    name: 'user_pseudo_id',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_id',
+    type: Schema.STRING,
+  },
+  {
+    name: 'user_id',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_number',
+    type: Schema.BIG_INT,
+  },
+  {
+    name: 'session_start_time_msec',
+    type: Schema.BIG_INT,
+  },
+  {
+    name: 'session_source',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_medium',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_campaign',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_content',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_term',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_campaign_id',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_clid_platform',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_clid',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_channel_group',
+    type: Schema.STRING,
+  },
+  {
+    name: 'session_source_category',
+    type: Schema.STRING,
+  },
+  {
+    name: 'process_info',
+    type: Schema.map(Schema.STRING, Schema.STRING),
+  },
+  {
+    name: 'created_time',
+    type: Schema.TIMESTAMP,
+  }];
 }

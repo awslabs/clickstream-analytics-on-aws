@@ -57,8 +57,8 @@ export function getIngestionEventsTableColumns(): Column[] {
     }, {
       name: 'ingest_time',
       type: Schema.BIG_INT,
-    },{
-      name: "upload_timestamp",
+    }, {
+      name: 'upload_timestamp',
       type: Schema.STRING,
     },
   ];
