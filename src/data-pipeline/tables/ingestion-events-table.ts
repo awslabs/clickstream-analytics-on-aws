@@ -59,7 +59,7 @@ export function getIngestionEventsTableColumns(): Column[] {
       type: Schema.BIG_INT,
     }, {
       name: 'client_timestamp',
-      type: Schema.STRING,
+      type: Schema.BIG_INT,
     },
   ];
 
