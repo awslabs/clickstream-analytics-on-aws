@@ -19,7 +19,7 @@ docs/mkdocs.base.yml:35
 docs/en/pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
 docs/zh/pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
 # account id for ALB access log
-frontend/src/ts/constant-ln.ts:20
+src/common/constant.ts:20
 src/common/constant.ts:23
 src/common/constant.ts:26
 src/common/constant.ts:29
@@ -91,6 +91,7 @@ frontend/src/ts/constant-ln.ts:80
 frontend/src/ts/constant-ln.ts:83
 frontend/src/ts/constant-ln.ts:86
 frontend/src/ts/constant-ln.ts:89
+src/control-plane/backend/lambda/api/common/constants-ln.ts:20
 src/control-plane/backend/lambda/api/common/constants-ln.ts:23
 src/control-plane/backend/lambda/api/common/constants-ln.ts:26
 src/control-plane/backend/lambda/api/common/constants-ln.ts:29
