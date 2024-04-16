@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { Context } from 'aws-lambda';
 import { EMRServerlessUtil } from './emr-client-util';
-import { logger } from '../../../common/powertools';
 
 exports.handler = async (event: any, context: Context) => {
   logger.info('Triggered from schedule event', { event });

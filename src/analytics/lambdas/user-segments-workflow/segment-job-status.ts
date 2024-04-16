@@ -15,6 +15,9 @@ import {
   CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME,
   CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME,
   SegmentJobStatus,
+  aws_sdk_client_common_config,
+  logger,
+  parseDynamoDBTableARN,
 } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { StatusString } from '@aws-sdk/client-redshift-data';
@@ -23,9 +26,6 @@ import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NodeJsClient } from '@smithy/types';
 import csvParser from 'csv-parser';
 import { ExecuteSegmentQueryOutput } from './execute-segment-query';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { parseDynamoDBTableARN } from '../../../common/utils';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
 import { describeStatement, getRedshiftClient } from '../redshift-data';
 

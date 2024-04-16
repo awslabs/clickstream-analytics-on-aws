@@ -12,7 +12,7 @@
  */
 
 import crypto from 'crypto';
-import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '@aws/clickstream-base-lib';
+import { DASHBOARD_ADMIN_PERMISSION_ACTIONS, DATASET_ADMIN_PERMISSION_ACTIONS, DATASET_READER_PERMISSION_ACTIONS, DATA_SOURCE_OWNER_PERMISSION_ACTIONS, FOLDER_CONTRIBUTOR_PERMISSION_ACTIONS, FOLDER_OWNER_PERMISSION_ACTIONS, QUICKSIGHT_RESOURCE_NAME_PREFIX, aws_sdk_client_common_config, logger, sleep, timezoneJsonArrayToDict } from '@aws/clickstream-base-lib';
 import {
   QuickSight,
   DashboardSourceEntity,
@@ -43,9 +43,6 @@ import {
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep, timezoneJsonArrayToDict } from '../../../../common/utils';
 import { getQuickSightFolderId, getQuickSightFolderName } from '../../../../control-plane/backend/lambda/api/store/aws/quicksight';
 import {
   QuicksightCustomResourceLambdaProps,

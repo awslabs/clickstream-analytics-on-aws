@@ -12,6 +12,7 @@
  */
 
 import { join } from 'path';
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Stack,
   NestedStack,
@@ -22,7 +23,6 @@ import { Construct } from 'constructs';
 import { BasicRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from '../../analytics/private/model';
 import { RedshiftAssociateIAMRole } from '../../analytics/private/redshift-associate-iam-role';
 import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithWildcardResources } from '../../common/cfn-nag';
-import { SolutionInfo } from '../../common/solution-info';
 import { StreamingIngestionSchemas } from '../redshift/streaming-ingestion-schema';
 
 export interface StreamingIngestionToRedshiftStackProps extends NestedStackProps {

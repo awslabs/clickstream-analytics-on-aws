@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { parseVersion } from '@aws/clickstream-base-lib';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import fetch, { Response } from 'node-fetch';
 import request from 'supertest';
 import { dictionaryMock } from './ddb-mock';
 import { FULL_SOLUTION_VERSION } from '../../common/constants';
-import { parseVersion } from '../../common/solution-info-ln';
 import { app, server } from '../../index';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);

@@ -31,7 +31,6 @@ import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalId
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { logger } from '../../../../../src/common/powertools';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 import { loadSQLFromFS } from '../../../../fs-utils';

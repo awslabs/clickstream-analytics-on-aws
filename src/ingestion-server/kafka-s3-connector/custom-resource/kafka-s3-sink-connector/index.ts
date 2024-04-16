@@ -15,6 +15,7 @@ import fs from 'fs';
 import { IncomingMessage } from 'http';
 import https from 'https';
 import path from 'path';
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import {
   CreateConnectorCommand,
   CreateCustomPluginCommand,
@@ -38,10 +39,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { getFunctionTags } from '../../../../common/lambda/tags';
-
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep } from '../../../../common/utils';
 
 const region = process.env.AWS_REGION;
 

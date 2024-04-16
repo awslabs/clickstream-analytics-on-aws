@@ -30,6 +30,7 @@ import {
   TABLE_NAME_ITEM_V2,
   TABLE_NAME_USER_V2,
   TABLE_NAME_SESSION,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -45,7 +46,6 @@ import {
 } from './common/cfn-nag';
 import { REDSHIFT_MODE } from './common/model';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 
 export class DataAnalyticsRedshiftStack extends Stack {

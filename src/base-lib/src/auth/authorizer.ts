@@ -11,15 +11,12 @@
  *  and limitations under the License.
  */
 
-import {
-  Logger,
-} from '@aws-lambda-powertools/logger';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import NodeCache from 'node-cache';
-import fetch from 'node-fetch';
+import { fetchRemoteUrl } from '../common/fetch';
+import { logger } from '../common/powertools';
 
-const logger = new Logger();
 const nodeCache = new NodeCache();
 
 export const ERR_OPENID_CONFIGURATION = 'Get openid configuration error.';
@@ -127,9 +124,7 @@ export class JWTAuthorizer {
         if (!this.issuer?.endsWith('/')) {
           jwksUriSuffix = `/${jwksUriSuffix}`;
         }
-        const response = await fetch(`${this.issuer}${jwksUriSuffix}`, {
-          method: 'GET',
-        });
+        const response = await fetchRemoteUrl(`${this.issuer}${jwksUriSuffix}`);
         const data = await response.json();
         nodeCache.set(this.openidConfigurationKey, data, this.cacheTtl);
         return data as OpenidConfiguration;

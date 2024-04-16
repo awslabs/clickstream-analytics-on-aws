@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
+import { SolutionVersion, fetchRemoteUrl } from '@aws/clickstream-base-lib';
 import { FULL_SOLUTION_VERSION } from '../common/constants';
-import { fetchRemoteUrl } from '../common/fetch';
 import { logger } from '../common/powertools';
-import { SolutionVersion } from '../common/solution-info-ln';
 import { ApiSuccess } from '../common/types';
 import { getTemplateUrl } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';

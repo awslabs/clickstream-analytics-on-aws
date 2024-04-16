@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { logger } from '../../../common/powertools';
+import { logger } from '@aws/clickstream-base-lib';
 import { SP_CLEAR_EXPIRED_EVENTS } from '../../private/constant';
 import { ClearExpiredEventsBody } from '../../private/model';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';

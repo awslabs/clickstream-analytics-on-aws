@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import {
   Configuration,
   EMRServerlessClient,
@@ -24,9 +25,7 @@ import { CATEGORY_RULE } from './traffic_source_category_rule_v1';
 import { CHANNEL_RULE } from './traffic_source_channel_rule_v1';
 import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '../../../base-lib/src';
 import { getFunctionTags } from '../../../common/lambda/tags';
-import { logger } from '../../../common/powertools';
 import { isObjectExist, listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
 
 

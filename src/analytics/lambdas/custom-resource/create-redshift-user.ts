@@ -10,8 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { logger } from '@aws/clickstream-base-lib';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
 import { CreateMappingRoleUser } from '../../private/model';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 

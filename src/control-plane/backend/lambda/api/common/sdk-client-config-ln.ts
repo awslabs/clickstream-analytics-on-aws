@@ -1,1 +1,0 @@
-../../../../../common/sdk-client-config.ts

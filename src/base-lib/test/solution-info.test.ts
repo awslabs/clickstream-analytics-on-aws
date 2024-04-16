@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { SolutionVersion, versionDetail } from '../../src/common/solution-info';
+import { SolutionVersion, versionDetail } from '../lib/common/solution-info';
+
 
 test ('parse solution version', () => {
   expect(versionDetail('v1.1.0-dev-main-202311081606-58f342d5'))

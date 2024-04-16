@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { JWTAuthorizer } from '@aws/clickstream-base-lib';
 import { APIGatewayTokenAuthorizerEvent, CdkCustomResourceCallback } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 import { JwksClient, RsaSigningKey } from 'jwks-rsa';
 import fetch, { Response } from 'node-fetch';
-import { JWTAuthorizer } from '../../../src/control-plane/auth/authorizer';
 import { handler } from '../../../src/control-plane/auth/index';
 import 'aws-sdk-client-mock-jest';
 import { getMockContext } from '../../common/lambda-context';
@@ -82,7 +82,7 @@ describe('Auth test', () => {
 
     const authResult = await authorizer.auth(TOKEN);
     expect(mockFetch.mock.calls.length).toBe(1);
-    expect(mockFetch.mock.calls[0]).toEqual(['https://cognito-idp.us-east-2.amazonaws.com/us-east-2_xxx/.well-known/openid-configuration', { method: 'GET' }]);
+    expect(mockFetch.mock.calls[0]).toEqual(['https://cognito-idp.us-east-2.amazonaws.com/us-east-2_xxx/.well-known/openid-configuration', { agent: undefined, timeout: 7000 }]);
     expect(authResult).toEqual({
       jwtPayload: {
         aud: 'aud',

@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { Aspects, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { createAthenaStackParameters } from './analytics/parameter';
 import { AthenaSavedQuery } from './analytics/private/athena-saved-queries';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 
 export class DataModelingAthenaStack extends Stack {
