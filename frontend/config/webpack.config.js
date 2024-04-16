@@ -630,7 +630,7 @@ module.exports = function (webpackEnv) {
             resource.request = 'console-browserify';
             break;
           case 'util':
-            resource.request = 'util';
+            resource.request = 'browserify-util';
             break;
           default:
             throw new Error(`Not found ${mod}`);
