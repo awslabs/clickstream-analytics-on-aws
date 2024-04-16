@@ -211,6 +211,16 @@ const devDepsForFrontendProject = [
   'html-minifier@^4.0.0',
   'prettier@^2.7.1',
   'typescript@^4.8.4',
+  'crypto-browserify@^3.12.0',
+  'stream-http@^3.0.0',
+  'https-browserify@^1.0.0',
+  'browserify-url@^0.0.1',
+  'stream-browserify@^3.0.0',
+  'browserify-util@^0.12.6',
+  'process@^0.11.10',
+  'console-browserify@^1.2.0',
+  'assert-browserify@^2.0.0',
+  'vm-browserify@^1.1.2',
 ];
 
 const depsForApiProject = [
