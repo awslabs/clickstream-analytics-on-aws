@@ -12,7 +12,6 @@
  */
 
 import {
-  Segment,
   MetadataSource,
   ConditionCategoryFrontend,
   MetadataValueType,
@@ -94,17 +93,6 @@ export interface IEventAnalyticsItem {
   hasTab?: boolean;
   isMultiSelect?: boolean;
   enableChangeRelation?: boolean;
-}
-
-// for segment group
-export interface ExtendSegment extends Segment {
-  refreshType: 'manual' | 'auto' | 'custom';
-  autoRefreshOption: SelectProps.Option;
-  autoRefreshDayOption: SelectProps.Option | null;
-  expireDate: string;
-  // validation
-  nameError?: string;
-  cronError?: string;
 }
 
 export interface IEventSegmentationItem {

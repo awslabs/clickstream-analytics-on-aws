@@ -13,7 +13,6 @@
 import { SelectProps } from '@cloudscape-design/components';
 import {
   ERelationShip,
-  ExtendSegment,
   IEventSegmentationItem,
   IEventSegmentationObj,
 } from 'components/eventselect/AnalyticsType';
@@ -540,32 +539,6 @@ export const darkBackgroundColors = [
   '#10316B',
   '#8D0801',
 ];
-
-export const INIT_SEGMENT_OBJ: ExtendSegment = {
-  segmentId: '',
-  segmentType: 'User',
-  name: '',
-  description: '',
-  projectId: '',
-  appId: '',
-  createBy: '',
-  createAt: 0,
-  lastUpdateBy: '',
-  lastUpdateAt: 0,
-  refreshSchedule: {
-    cron: 'Manual',
-    expireAfter: 0,
-  },
-  criteria: {
-    filterGroups: [],
-    operator: 'and',
-  },
-  // extends fields
-  refreshType: 'manual',
-  autoRefreshOption: SEGMENT_AUTO_REFRESH_OPTIONS[0],
-  autoRefreshDayOption: null,
-  expireDate: '',
-};
 
 export const TABLE_FILTER_OPTIONS = [':', '!:', '=', '!='];
 export const FILTER_TIME_ZONE: string[] = [];

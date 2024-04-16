@@ -20,7 +20,6 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
-  OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
 } from '@aws/clickstream-base-lib';
 import { Logger } from '@aws-lambda-powertools/logger';
 import { App, Fn } from 'aws-cdk-lib';
@@ -3036,15 +3035,6 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     });
     stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
       Condition: 'newRedshiftServerless',
-    });
-    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-      Condition: 'redshiftProvisioned',
-    });
-    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-      Condition: 'newRedshiftServerless',
-    });
-    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-      Condition: 'existingRedshiftServerless',
     });
   });
 

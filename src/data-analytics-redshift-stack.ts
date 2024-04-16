@@ -21,7 +21,6 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
   OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
-  OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX,
   TABLE_NAME_EVENT,
   TABLE_NAME_EVENT_PARAMETER,
   TABLE_NAME_ITEM,
@@ -354,23 +353,6 @@ export function createRedshiftAnalyticsStack(
     description: 'Scan metadata workflow stepfunction arn',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
-
-  // Add user segments workflow arn in stack output
-  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-    value: redshiftProvisionedStack.userSegmentsWorkflowArn,
-    description: 'User segments workflow step function arn',
-    condition: isRedshiftProvisioned,
-  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
-  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-    value: newRedshiftServerlessStack.userSegmentsWorkflowArn,
-    description: 'User segments workflow step function arn',
-    condition: isNewRedshiftServerless,
-  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
-  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`, {
-    value: redshiftExistingServerlessStack.userSegmentsWorkflowArn,
-    description: 'User segments workflow step function arn',
-    condition: isExistingRedshiftServerless,
-  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

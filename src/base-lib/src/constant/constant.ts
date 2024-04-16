@@ -355,8 +355,6 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX =
   'RedshiftDataApiRoleArn';
 export const OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX =
   'ScanMetadataWorkflowArn';
-export const OUTPUT_USER_SEGMENTS_WORKFLOW_ARN_SUFFIX =
-  'UserSegmentsWorkflowArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN =
   'DataSourceArn';
 export const OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS =
@@ -407,8 +405,6 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
 export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWorkflowStateMachine';
 export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
-export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME = 'segment_000.csv';
-export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME = 'segment-summary_000.csv';
 export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [

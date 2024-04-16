@@ -60,7 +60,6 @@ import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role'
 import { RedshiftServerless } from './private/redshift-serverless';
 import { RefreshMaterializedViewsWorkflow } from './private/refresh-materialized-views-workflow';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { UserSegmentsWorkflow } from './private/segments/user-segments-workflow';
 import {
   addCfnNagForCustomResourceProvider,
   addCfnNagForLogRetention,
@@ -115,7 +114,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
   readonly refreshMaterializedViewsWorkflowArn: string;
-  readonly userSegmentsWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -432,25 +430,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       });
     }
 
-    // User segments workflow
-    const userSegmentsWorkflow = new UserSegmentsWorkflow(this, 'ClickstreamUserSegmentsWorkflow', {
-      projectId: props.projectId,
-      securityGroupForLambda,
-      networkConfig: {
-        vpc: props.vpc,
-        vpcSubnets: props.subnetSelection,
-      },
-      clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
-      dataAPIRole: this.redshiftDataAPIExecRole,
-      redshiftAssociatedRole,
-      serverlessRedshift: existingRedshiftServerlessProps,
-      provisionedRedshift: props.provisionedRedshiftProps,
-      databaseName: projectDatabaseName,
-      pipelineS3Bucket: props.scanMetadataWorkflowData.pipelineS3Bucket,
-      segmentsS3Prefix: props.segmentsS3Prefix,
-    });
-    this.userSegmentsWorkflowArn = userSegmentsWorkflow.userSegmentsWorkflow.stateMachineArn;
-
     addCfnNag(this);
   }
 }
@@ -552,15 +531,6 @@ function addCfnNag(stack: Stack) {
       paths_endswith: ['RedshiftAssociatedRole/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ruleToSuppressRolePolicyWithHighSPCM('RedshiftAssociatedRole'),
-      ],
-    },
-    {
-      paths_endswith: ['ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource'],
-      rules_to_suppress: [
-        ...ruleRolePolicyWithWildcardResources(
-          'ClickstreamUserSegmentsWorkflow/StateMachine/Role/DefaultPolicy/Resource',
-          'UserSegmentsStateMachine', 'logs/xray').rules_to_suppress,
-        ruleToSuppressRolePolicyWithHighSPCM('UserSegments'),
       ],
     },
   ]);

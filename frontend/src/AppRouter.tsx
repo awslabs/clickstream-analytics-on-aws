@@ -27,8 +27,6 @@ import AnalyticsDashboardFullWindow from 'pages/analytics/dashboard/full/Analyti
 import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDataManagement';
 import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
-import AddUserSegments from 'pages/analytics/segments/AddUserSegment';
-import UserSegments from 'pages/analytics/segments/UserSegments';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -449,32 +447,6 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 ]}
               >
                 <AnalyticsDashboardFullWindow />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="/analytics/:projectId/app/:appId/segments"
-            element={
-              <RoleRoute
-                sessionExpired={sessionExpired}
-                layout="analytics"
-                auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-              >
-                <UserSegments />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="/analytics/:projectId/app/:appId/segments/add"
-            element={
-              <RoleRoute
-                sessionExpired={sessionExpired}
-                layout="analytics"
-                auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-              >
-                <AddUserSegments />
               </RoleRoute>
             }
           />
