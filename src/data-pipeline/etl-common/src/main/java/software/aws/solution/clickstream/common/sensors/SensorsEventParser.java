@@ -1,15 +1,16 @@
 /**
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
- * with the License. A copy of the License is located at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
+ *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  with the License. A copy of the License is located at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
+ *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
+ *  and limitations under the License.
  */
+
 
 package software.aws.solution.clickstream.common.sensors;
 
@@ -81,7 +82,7 @@ public final class SensorsEventParser extends BaseEventParser {
 
         boolean isFirstVisit = false;
         if (sensorsEvent.getProperties() != null) {
-            isFirstVisit = sensorsEvent.getProperties().is_first_time();
+            isFirstVisit = sensorsEvent.getProperties().isFirstTime();
         }
         log.info("isFirstVisit: " + isFirstVisit);
 
@@ -104,7 +105,7 @@ public final class SensorsEventParser extends BaseEventParser {
     }
 
     @Override
-    public String getGzipData(String data) {
+    public String getGzipData(final String data) {
         if (data.contains(GZIP_RAW_DATA)) {
             return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_RAW_DATA) + GZIP_RAW_DATA.length()));
         } else if (data.contains(GZIP_WEB_SDK_DATA)) {
@@ -122,7 +123,7 @@ public final class SensorsEventParser extends BaseEventParser {
         String eventId = String.format("%s-%s-%s-%s",
                 extraParams.getRid(),
                 index,
-                sensorsEvent.getDistinct_id(),
+                sensorsEvent.getDistinctId(),
                 "x");
 
         clickstreamEvent.setEventId(eventId);
@@ -146,18 +147,18 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setProjectId(extraParams.getProjectId());
 
         clickstreamEvent.setPageViewPageReferrer(deCodeUri(sensorsEvent.getProperties().getReferrer()));
-        clickstreamEvent.setPageViewPageTitle(deCodeUri(sensorsEvent.getProperties().getReferrer_title()));
+        clickstreamEvent.setPageViewPageTitle(deCodeUri(sensorsEvent.getProperties().getReferrerTitle()));
         clickstreamEvent.setPageViewPageUrl(deCodeUri(sensorsEvent.getProperties().getUrl()));
 
-        clickstreamEvent.setUserEngagementTimeMsec(sensorsEvent.getProperties().getEvent_duration());
-        clickstreamEvent.setUserId(sensorsEvent.getAnonymous_id());
-        clickstreamEvent.setUserPseudoId(sensorsEvent.getDistinct_id());
+        clickstreamEvent.setUserEngagementTimeMsec(sensorsEvent.getProperties().getEventDuration());
+        clickstreamEvent.setUserId(sensorsEvent.getAnonymousId());
+        clickstreamEvent.setUserPseudoId(sensorsEvent.getDistinctId());
         // clickstreamEvent.setSessionId(sensorsEvent.getGaSessionId());
         clickstreamEvent.setSessionStartTimeMsec(sensorsEvent.getTime());
 
         // clickstreamEvent.setSessionNumber(sensorsEvent.getGaSessionNumber());
         clickstreamEvent.setIp(sensorsEvent.getProperties().getIp());
-        clickstreamEvent.setUa(sensorsEvent.getProperties().getUser_agent());
+        clickstreamEvent.setUa(sensorsEvent.getProperties().getUserAgent());
 
         // customParameters
         Map<String, ClickstreamEventPropValue> customParameters = getEventCustomParameters(sensorsEvent, clickstreamEvent);
@@ -177,20 +178,20 @@ public final class SensorsEventParser extends BaseEventParser {
 
     private void setDeviceInfo(final SensorsEvent sensorsEvent, final ClickstreamEvent clickstreamEvent) {
         if (sensorsEvent.getProperties() != null) {
-            clickstreamEvent.setDeviceMobileBrandName(sensorsEvent.getProperties().getProduct_name());
-            clickstreamEvent.setDeviceMobileModelName(sensorsEvent.getProperties().getProduct_classify());
+            clickstreamEvent.setDeviceMobileBrandName(sensorsEvent.getProperties().getProductName());
+            clickstreamEvent.setDeviceMobileModelName(sensorsEvent.getProperties().getProductClassify());
 
             clickstreamEvent.setDeviceOperatingSystem(sensorsEvent.getProperties().getOs());
-            clickstreamEvent.setDeviceOperatingSystemVersion(sensorsEvent.getProperties().getOs_version());
+            clickstreamEvent.setDeviceOperatingSystemVersion(sensorsEvent.getProperties().getOsVersion());
         }
 
-        clickstreamEvent.setDeviceSystemLanguage(sensorsEvent.getProperties().getBrowser_language());
+        clickstreamEvent.setDeviceSystemLanguage(sensorsEvent.getProperties().getBrowserLanguage());
 
-        if (sensorsEvent.getProperties() != null && sensorsEvent.getProperties().getUser_agent() != null) {
+        if (sensorsEvent.getProperties() != null && sensorsEvent.getProperties().getUserAgent() != null) {
             Map<String, Object> deviceUaMap = new HashMap<>();
-            deviceUaMap.put(UA_STRING, sensorsEvent.getProperties().getUser_agent());
+            deviceUaMap.put(UA_STRING, sensorsEvent.getProperties().getUserAgent());
             clickstreamEvent.setDeviceUa(deviceUaMap);
-            Matcher matcher = USER_AGENT_PATTERN.matcher(sensorsEvent.getProperties().getUser_agent());
+            Matcher matcher = USER_AGENT_PATTERN.matcher(sensorsEvent.getProperties().getUserAgent());
             if (matcher.find()) {
                 String browser = matcher.group("browser");
                 String browserVersion = matcher.group(2);
@@ -205,8 +206,8 @@ public final class SensorsEventParser extends BaseEventParser {
         }
 
         if (null != sensorsEvent.getProperties()) {
-            clickstreamEvent.setDeviceScreenWidth(sensorsEvent.getProperties().getScreen_width());
-            clickstreamEvent.setDeviceScreenHeight(sensorsEvent.getProperties().getScreen_height());
+            clickstreamEvent.setDeviceScreenWidth(sensorsEvent.getProperties().getScreenWidth());
+            clickstreamEvent.setDeviceScreenHeight(sensorsEvent.getProperties().getScreenHeight());
         }
     }
 
@@ -222,15 +223,15 @@ public final class SensorsEventParser extends BaseEventParser {
             customParameters = convertStringObjectMapToStringEventPropMap(sensorsEvent.getUnknownProperties());
             clickstreamEvent.setCustomParameters(customParameters);
         }
-        String screenResolution = sensorsEvent.getProperties().getScreen_width() + "x" + sensorsEvent.getProperties().getScreen_height();
-        customParameters.put("client_id", new ClickstreamEventPropValue(sensorsEvent.getDistinct_id(), ValueType.STRING));
+        String screenResolution = sensorsEvent.getProperties().getScreenWidth() + "x" + sensorsEvent.getProperties().getScreenHeight();
+        customParameters.put("client_id", new ClickstreamEventPropValue(sensorsEvent.getDistinctId(), ValueType.STRING));
         customParameters.put("ip_override", new ClickstreamEventPropValue(sensorsEvent.getProperties().getIp(), ValueType.STRING));
         customParameters.put("screen_resolution", new ClickstreamEventPropValue(screenResolution, ValueType.STRING));
-        customParameters.put("user_agent", new ClickstreamEventPropValue(sensorsEvent.getProperties().getUser_agent(), ValueType.STRING));
+        customParameters.put("user_agent", new ClickstreamEventPropValue(sensorsEvent.getProperties().getUserAgent(), ValueType.STRING));
 
-        if (sensorsEvent.getProperties().getUser_agent() != null) {
+        if (sensorsEvent.getProperties().getUserAgent() != null) {
             customParameters.put("x-ga-ur",
-                    new ClickstreamEventPropValue(sensorsEvent.getProperties().getUser_agent(), ValueType.STRING));
+                    new ClickstreamEventPropValue(sensorsEvent.getProperties().getUserAgent(), ValueType.STRING));
         }
         if (sensorsEvent.getProperties().getProvince() != null && sensorsEvent.getProperties().getCity() != null) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -291,10 +292,10 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamUser.setFirstAppInstallSource(clickstreamEvent.getAppInstallSource());
 
 
-        String userId = sensorsEvent.getProperties().getUser_id();
-        String userName = sensorsEvent.getProperties().getUser_name();
-        String userFirstName = sensorsEvent.getProperties().getX_test_user();
-        String userLastName = sensorsEvent.getProperties().getX_test_user();
+        String userId = sensorsEvent.getProperties().getUserId();
+        String userName = sensorsEvent.getProperties().getUserName();
+        String userFirstName = sensorsEvent.getProperties().getXTestUser();
+        String userLastName = sensorsEvent.getProperties().getXTestUser();
         int age = sensorsEvent.getProperties().getAge();
 
         Map<String, ClickstreamUserPropValue> csUserProps = new HashMap<>();

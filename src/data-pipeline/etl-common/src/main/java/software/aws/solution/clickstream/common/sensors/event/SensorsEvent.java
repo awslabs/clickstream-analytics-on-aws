@@ -1,15 +1,16 @@
 /**
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
- * with the License. A copy of the License is located at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
+ *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance
+ *  with the License. A copy of the License is located at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES
+ *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
+ *  and limitations under the License.
  */
+
 
 
 package software.aws.solution.clickstream.common.sensors.event;
@@ -30,7 +31,7 @@ public class SensorsEvent {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
     @JsonProperty("_track_id")
-    private String _track_id;
+    private String trackId;
 
     @JsonProperty("time")
     private long time;
@@ -42,13 +43,13 @@ public class SensorsEvent {
     private String crc;
 
     @JsonProperty("distinct_id")
-    private String distinct_id;
+    private String distinctId;
 
     @JsonProperty("original_id")
-    private String original_id;
+    private String originalId;
 
     @JsonProperty("anonymous_id")
-    private String anonymous_id;
+    private String anonymousId;
 
     @JsonProperty("identities")
     private Identities identities;
@@ -60,7 +61,7 @@ public class SensorsEvent {
     private String project;
 
     @JsonProperty("time_free")
-    private boolean time_free;
+    private boolean timeFree;
 
     @JsonProperty("lib")
     private Lib lib;
