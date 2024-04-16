@@ -168,7 +168,10 @@ describe('SFN workflow Lambda Function', () => {
       Name: 'DataProcessing',
       Type: 'Stack',
     });
-    expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-DataModelingRedshift-f00b00bdbabb4ea9a00e8e66f0f372fa/output.json',
+    });
   });
 
   test('Create stack with parameter get from stack output suffix', async () => {
@@ -232,7 +235,10 @@ describe('SFN workflow Lambda Function', () => {
       Name: 'DataProcessing',
       Type: 'Stack',
     });
-    expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-DataModelingRedshift-f00b00bdbabb4ea9a00e8e66f0f372fa/output.json',
+    });
   });
 
   test('Pass stack', async () => {

@@ -311,6 +311,56 @@ export class CPipeline {
     this.validateNetworkOnce = false;
   }
 
+  private _setExecutionName(executionName: string) {
+    if (this.pipeline.status?.executionDetail) {
+      this.pipeline.status = {
+        ...this.pipeline.status,
+        executionDetail: {
+          ...this.pipeline.status.executionDetail,
+          name: executionName,
+        },
+      };
+    }
+    if (this.pipeline.executionDetail) {
+      this.pipeline.executionDetail = {
+        ...this.pipeline.executionDetail,
+        name: executionName,
+      };
+    } else {
+      this.pipeline.executionDetail = {
+        name: executionName,
+        status: ExecutionStatus.RUNNING,
+        executionArn: '',
+      };
+    }
+  }
+
+  private _setExecutionRunning(executionArn: string) {
+    if (this.pipeline.status?.executionDetail) {
+      this.pipeline.executionArn = executionArn;
+      this.pipeline.status = {
+        ...this.pipeline.status,
+        executionDetail: {
+          ...this.pipeline.status.executionDetail,
+          status: ExecutionStatus.RUNNING,
+        },
+      };
+    }
+    if (this.pipeline.executionDetail) {
+      this.pipeline.executionDetail = {
+        ...this.pipeline.executionDetail,
+        executionArn: executionArn,
+        status: ExecutionStatus.RUNNING,
+      };
+    } else {
+      this.pipeline.executionDetail = {
+        name: executionArn.split(':').pop() ?? '',
+        status: ExecutionStatus.RUNNING,
+        executionArn: executionArn,
+      };
+    }
+  }
+
   public async create(): Promise<void> {
     // create rule to listen CFN stack
     await this._createRules();
@@ -318,13 +368,10 @@ export class CPipeline {
     this.pipeline.statusType = PipelineStatusType.CREATING;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     this.pipeline.workflow = await this.generateWorkflow();
     const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.stackDetails = [];
     this.pipeline.statusType = PipelineStatusType.CREATING;
     // bind plugin
@@ -380,6 +427,7 @@ export class CPipeline {
     };
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     // update parameters
     await this._mergeUpdateParameters(oldPipeline);
     // enable reporting
@@ -392,11 +440,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     this.pipeline.workflow = this.stackManager.getWorkflow();
     await store.updatePipeline(this.pipeline, oldPipeline);
@@ -492,6 +536,7 @@ export class CPipeline {
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
@@ -501,11 +546,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
@@ -585,6 +626,7 @@ export class CPipeline {
     await this._createRules();
     this.pipeline.lastAction = 'Update';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     // update appIds and timezone
     const updateList: { stackType: PipelineStackType; parameterKey: string; parameterValue: string }[] = [];
     updateList.push({
@@ -622,11 +664,7 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     this.pipeline.workflow = this.stackManager.getWorkflow();
@@ -645,16 +683,13 @@ export class CPipeline {
     await this._forceRefreshStacksByName();
     this.pipeline.lastAction = 'Delete';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     // update workflow
     this.stackManager.deleteWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.statusType = PipelineStatusType.DELETING;
     // update pipeline metadata
     this.pipeline.updateAt = Date.now();
@@ -676,15 +711,12 @@ export class CPipeline {
     // create rule to listen CFN stack
     await this._createRules();
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this._setExecutionName(executionName);
     this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
-    this.pipeline.executionDetail = {
-      executionArn: executionArn,
-      name: executionName,
-      status: ExecutionStatus.RUNNING,
-    };
+    this._setExecutionRunning(executionArn);
     this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
