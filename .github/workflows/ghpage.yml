@@ -48,10 +48,10 @@ jobs:
           mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
 
-      - name: Publish doc - 1.2.x
+      - name: Publish doc - 1.1.6
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
-          VERSION: 1.2.x
+          VERSION: 1.1.6
           LINK_EN: ${{ vars.LINK_EN }}
           LINK_ZH: ${{ vars.LINK_ZH }}
         run: |
