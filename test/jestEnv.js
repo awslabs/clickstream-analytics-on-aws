@@ -60,6 +60,7 @@ process.env.APP_IDS = 'app1,app2'
 process.env.REDSHIFT_MODE = 'Serverless';
 process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = 'workgroup-test';
 process.env.DATA_REFRESHNESS_IN_HOUR = '72';
+process.env.REFRESH_STATE_MACHINE_ARN = 'arn:aws:states:us-east-1:111122223333:workflow/abc'
 
 process.env.TIMEZONE_WITH_APPID_LIST = '[{"appId":"app1","timezone":"America/Noronha"},{"appId":"app2","timezone":"Asia/Shanghai"}]'
 
