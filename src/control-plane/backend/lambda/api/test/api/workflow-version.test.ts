@@ -657,9 +657,6 @@ describe('Workflow test with pipeline version', () => {
                         DataModelingRedshiftStack,
                         [
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
-                          },
-                          {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
@@ -745,9 +742,6 @@ describe('Workflow test with pipeline version', () => {
                       DataModelingRedshift: removeParametersFromStack(
                         DataModelingRedshiftStack,
                         [
-                          {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
-                          },
                           {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
@@ -1122,9 +1116,6 @@ describe('Workflow test with pipeline version in China region', () => {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
-                          },
-                          {
                             ParameterKey: 'TimeZoneWithAppId',
                           },
                           {
@@ -1202,9 +1193,6 @@ describe('Workflow test with pipeline version in China region', () => {
                         [
                           {
                             ParameterKey: 'SegmentsS3Prefix',
-                          },
-                          {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
                           },
                           {
                             ParameterKey: 'TimeZoneWithAppId',
