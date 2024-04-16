@@ -1249,7 +1249,7 @@ export class CDataModelingStack extends JSONObject {
     const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
     return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`;
   })
-  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     ClickstreamMetadataDdbArn?: string;
 
   @JSONObject.optional('')
