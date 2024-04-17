@@ -61,7 +61,6 @@ public class SensorsEventParserTest extends BaseTest {
         SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
         ClickstreamIngestRow row = sensorsEventParser.ingestLineToRow(firstLine);
         SensorsEvent event = sensorsEventParser.ingestDataToEvent(row.getData());
-        System.out.println(prettyJson(objectToJsonString(event)));
         String expectedJson = this.resourceFileAsString("/sensors-data/expected/test_sensors_data_ingestDataToEvent.json");
 
         Assertions.assertEquals(expectedJson, prettyJson(objectToJsonString(event)));
@@ -69,7 +68,7 @@ public class SensorsEventParserTest extends BaseTest {
 
 
     @Test
-    void test_gtm_parseLineToDBRow_event() throws IOException {
+    void test_sensors_parseLineToDBRow_event() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_event
 
         String lines = resourceFileContent("/sensors-data/gzip-raw-data.json");
@@ -81,6 +80,22 @@ public class SensorsEventParserTest extends BaseTest {
 
         ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
         String expectedJson = this.resourceFileAsString("/sensors-data/expected/test_sensors_data_parseLineToDBRow_event.json");
+        Assertions.assertEquals(expectedJson, prettyJson(csEvent.toJson()), "test_sensors_parseLineToDBRow_event");
+    }
+
+    @Test
+    void test_sensors_parseLineToDBRow_web_event() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_event
+
+        String lines = resourceFileContent("/sensors-data/web-sdk-data.json");
+
+        String firstLine = lines.split("\n")[0];
+
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
+
+        ClickstreamEvent csEvent = rowResult.getClickstreamEventList().get(0);
+        String expectedJson = this.resourceFileAsString("/sensors-data/expected/test_sensors_data_parseLineToDBRow_web_event.json");
         Assertions.assertEquals(expectedJson, prettyJson(csEvent.toJson()), "test_sensors_parseLineToDBRow_event");
     }
 
@@ -112,6 +127,21 @@ public class SensorsEventParserTest extends BaseTest {
         ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
 
         Assertions.assertEquals(0, rowResult.getClickstreamItemList().size(), "test_sensors_parseLineToDBRow_item");
+
+    }
+
+    @Test
+    void test_sensors_parseLineToDBRow_item_data() throws IOException {
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.gtm.GTMEventParserTest.test_gtm_parseLineToDBRow_item
+
+        String lines = resourceFileContent("/sensors-data/unzip-item-data.json");
+
+        String firstLine = lines.split("\n")[0];
+
+        SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
+        ParseRowResult rowResult = sensorsEventParser.parseLineToDBRow(firstLine, "test_project_id", "server-session-start.json");
+
+        Assertions.assertEquals(1, rowResult.getClickstreamItemList().size(), "test_sensors_parseLineToDBRow_item");
 
     }
 }

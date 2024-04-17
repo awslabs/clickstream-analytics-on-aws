@@ -114,7 +114,7 @@ public final class SensorsEventParser extends BaseEventParser {
         if (data.contains(GZIP_RAW_DATA)) {
             return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_RAW_DATA) + GZIP_RAW_DATA.length()));
         } else if (data.contains(GZIP_WEB_SDK_DATA)) {
-            return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_WEB_SDK_DATA) + GZIP_RAW_DATA.length(), data.indexOf("&ext=crc")));
+            return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_WEB_SDK_DATA) + GZIP_WEB_SDK_DATA.length(), data.indexOf("&ext=crc")));
         } else {
             return data;
         }
