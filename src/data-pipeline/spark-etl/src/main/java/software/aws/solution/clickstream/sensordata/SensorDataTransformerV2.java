@@ -11,32 +11,25 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.gtm;
+package software.aws.solution.clickstream.sensordata;
 
-import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.transformer.BaseThirdPartyTransformer;
 import software.aws.solution.clickstream.transformer.DatasetTransformer;
 import software.aws.solution.clickstream.transformer.TransformConfig;
 
-import static software.aws.solution.clickstream.transformer.EventParserFactory.GTM_SERVER_DATA;
-
-
-@Slf4j
-public class GTMServerDataTransformerV2 extends BaseThirdPartyTransformer {
+public class SensorDataTransformerV2 extends BaseThirdPartyTransformer {
     private TransformConfig transformConfig;
-
     @Override
     public String getName() {
-    return GTM_SERVER_DATA;
+        return "sensor_data";
     }
-
     @Override
     public DatasetTransformer getDatasetTransformer() {
         if (this.transformConfig == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new ServerDataConverterV2(this.transformConfig.getAppRuleConfig());
+        return new SensorDataConverterV2(this.transformConfig.getAppRuleConfig());
     }
 
     @Override
