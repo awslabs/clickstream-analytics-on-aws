@@ -40,7 +40,7 @@ export class DataModelingAthenaStack extends Stack {
       database: athenaParameters.database,
       workGroup: athenaParameters.workGroup,
       eventTable: athenaParameters.eventTable,
-      eventParamTable: athenaParameters.eventParamTable,
+      sessionTable: athenaParameters.sessionTable,
       userTable: athenaParameters.userTable,
     });
 

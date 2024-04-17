@@ -40,10 +40,10 @@ import { TrafficSourceServ } from '../control-plane/backend/lambda/api/service/t
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
-  EVENT='event',
-  EVENT_PARAMETER='event_parameter',
-  USER='user',
-  ITEM='item'
+  EVENT_V2='event_v2',
+  SESSION='session',
+  USER_V2='user_v2',
+  ITEM_V2='item_v2'
 }
 
 export interface DataPipelineProps {
@@ -72,10 +72,10 @@ export interface DataPipelineProps {
 }
 
 export interface ClickstreamSinkTables {
-  readonly eventTable: Table;
-  readonly eventParameterTable: Table;
-  readonly userTable: Table;
-  readonly itemTable: Table;
+  readonly eventV2Table: Table;
+  readonly sessionTable: Table;
+  readonly userV2Table: Table;
+  readonly itemV2Table: Table;
 }
 
 export class DataPipelineConstruct extends Construct {

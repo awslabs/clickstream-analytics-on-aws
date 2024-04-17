@@ -29,10 +29,6 @@ export type ODSSource = BucketInfo & {
 }
 
 export interface TablesODSSource {
-  readonly event: ODSSource;
-  readonly event_parameter: ODSSource;
-  readonly user: ODSSource;
-  readonly item: ODSSource;
   readonly event_v2: ODSSource;
   readonly item_v2: ODSSource;
   readonly user_v2: ODSSource;

@@ -166,8 +166,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       lambdaFunction: skipRunningWorkflowFn,
       payload: TaskInput.fromObject({
         'execution_id.$': '$$.Execution.Id',
-        'eventBucketName': props.tablesOdsSource.event.s3Bucket.bucketName,
-        'eventPrefix': props.tablesOdsSource.event.prefix,
+        'eventBucketName': props.tablesOdsSource.event_v2.s3Bucket.bucketName,
+        'eventPrefix': props.tablesOdsSource.event_v2.prefix,
       }),
       outputPath: '$.Payload',
     });
