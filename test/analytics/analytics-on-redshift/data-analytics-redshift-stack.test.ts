@@ -1125,8 +1125,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                   ],
                 }],
             },
-            Match.anyValue(),
-
           ],
           Version: '2012-10-17',
         },
