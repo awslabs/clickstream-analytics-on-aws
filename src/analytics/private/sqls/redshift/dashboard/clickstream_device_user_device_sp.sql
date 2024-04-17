@@ -9,7 +9,7 @@ DELETE FROM {{database_name}}.{{schema}}.{{viewName}} where event_date = day;
 
 INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
     event_date,
-    merged_user_id,
+    user_id,
     platform,
     app_version,
     "operating_system / version",
@@ -19,7 +19,7 @@ INSERT INTO {{database_name}}.{{schema}}.{{viewName}} (
   )
 select 
   day::date as event_date,
-  merged_user_id,
+  merged_user_id as user_id,
   platform,
   app_version,
   device_operating_system || device_ua_os || ' / ' || device_operating_system_version || device_ua_os_version as "operating_system / version",
