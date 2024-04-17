@@ -381,4 +381,30 @@ describe('SFN workflow Lambda Function', () => {
     });
   });
 
+  test('Check region of s3 client is different from pipeline region', async () => {
+    const event = {
+      ...baseMapInput,
+      Data: {
+        ...baseStackWorkflowEvent,
+        Type: 'Pass',
+      },
+    };
+    cloudFormationMock.on(DescribeStacksCommand).rejects(
+      new Error('Stack not found'),
+    );
+    s3Mock
+      .on(PutObjectCommand)
+      .callsFake(async (_, getClient) => {
+        const client = getClient();
+        const region = await client.config.region();
+        if (region === process.env.AWS_REGION) {
+          return { MessageId: '12345678-1111-2222-3333-111122223333' };
+        } else {
+          throw new Error('mocked rejection');
+        }
+      });
+    const resp = await handler(event) as CdkCustomResourceResponse;
+    expect(resp?.Data?.Input.Region).toEqual('ap-northeast-1');
+  });
+
 });
