@@ -52,7 +52,7 @@
     "$referrer" : null,
     "$referrer_title" : null,
     "$resume_from_background" : false,
-    "$is_first_time" : false,
+    "$is_first_time" : true,
     "$age" : 0,
     "$name" : null,
     "$user_id" : null,
