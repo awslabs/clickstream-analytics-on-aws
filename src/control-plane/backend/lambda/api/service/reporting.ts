@@ -185,6 +185,28 @@ export class ReportingService {
     }
   };
 
+  private buildDataSetParamForFunnelVisual(chartType: QuickSightChartType, groupCondition: GroupingCondition) {
+
+    const datasetColumns = [];
+    const visualProjectedColumns = []
+    const hasGrouping = (chartType === QuickSightChartType.BAR 
+      && isValidGroupingCondition(groupCondition));
+    if (hasGrouping) {
+      for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
+        datasetColumns.push({
+          Name: colName,
+          Type: getQuickSightDataType((groupCondition).conditions[index].dataType),
+        });
+        visualProjectedColumns.push(colName);
+      }
+    }
+
+    return {
+      visualProjectedColumns,
+      datasetColumns,
+    }
+  }
+
   private async _buildFunnelQuickSightDashboard(props: BuildFunnelQuickSightDashboardProps): Promise<CreateDashboardResult> {
     const datasetColumns = [...funnelVisualColumns];
     const visualProjectedColumns = [
@@ -208,18 +230,10 @@ export class ReportingService {
       countColName = 'user_pseudo_id';
     }
 
-    let groupCondition = undefined;
-    const hasGrouping = (props.query.chartType === QuickSightChartType.BAR && isValidGroupingCondition(props.query.groupCondition as GroupingCondition));
-    if (hasGrouping) {
-      groupCondition = props.query.groupCondition as GroupingCondition;
-      for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
-        datasetColumns.push({
-          Name: colName,
-          Type: getQuickSightDataType((groupCondition).conditions[index].dataType),
-        });
-        visualProjectedColumns.push(colName);
-      }
-    }
+    const groupCondition = props.query.groupCondition as GroupingCondition;
+    const params = this.buildDataSetParamForFunnelVisual(props.query.chartType, groupCondition);
+    datasetColumns.push(...params.datasetColumns);
+    visualProjectedColumns.push(...params.visualProjectedColumns);
 
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
