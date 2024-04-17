@@ -85,12 +85,12 @@ export class ReportingCheck {
         }
 
         if (condition.dataType !== MetadataValueType.STRING) {
-         this.status = {
-           success: false,
-           message: 'Grouping function only supports string data type.',
-         };
-         break;
-       }
+          this.status = {
+            success: false,
+            message: 'Grouping function only supports string data type.',
+          };
+          break;
+        }
       }
     }
 

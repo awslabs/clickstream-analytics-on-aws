@@ -332,8 +332,31 @@ function _buildFunnelChartViewResultCaseWhenSql(prefix: string, eventCount: numb
   return resultColSql;
 }
 
-function _buildFunnelChartViewResultGroupingSql(prefix: string,
-  appendGroupingCol: boolean, applyToFirst: boolean, colNameWithAlias: ColNameWithAlias | undefined, eventCount: number) : string {
+function _buildResultSqlForGrouping(colNameWithAlias: ColNameWithAlias, eventCount: number, prefix: string) : string {
+
+  let resultColSql = '';
+  for ( const colName of colNameWithAlias.colNames) {
+    resultColSql += `
+      ,case
+    `;
+    for (let index = eventCount; index > 0; index--) {
+      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, index, colName);
+    }
+    resultColSql += `
+      end as ${colName}
+    `;
+  }
+
+  return resultColSql;
+}
+
+function _buildFunnelChartViewResultGroupingSql(
+  prefix: string,
+  appendGroupingCol: boolean,
+  applyToFirst: boolean,
+  colNameWithAlias: ColNameWithAlias | undefined,
+  eventCount: number,
+) : string {
 
   let resultColSql = '';
 
@@ -350,18 +373,7 @@ function _buildFunnelChartViewResultGroupingSql(prefix: string,
         ${ appendGroupingCol ? `${colNameSql}` : ''}
       `;
     } else if (appendGroupingCol) {
-
-      for ( const colName of colNameWithAlias.colNames) {
-        resultColSql += `
-          ,case
-        `;
-        for (let index = eventCount; index > 0; index--) {
-          resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, index, colName);
-        }
-        resultColSql += `
-          end as ${colName}
-        `;
-      }
+      resultColSql = _buildResultSqlForGrouping(colNameWithAlias, eventCount, prefix);
     }
   }
 
@@ -1482,6 +1494,23 @@ function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, e
 
 }
 
+function _buildSqlForGrouping(groupCondition: GroupingCondition | undefined, index: number) {
+  let groupColSql = '';
+  let groupCol = '';
+  if (isValidGroupingCondition(groupCondition)) {
+    const colNameAndAlias = buildColNameWithPrefix(groupCondition);
+    groupCol = colNameAndAlias.colNames.join(',');
+    for (const colName of colNameAndAlias.colNames) {
+      groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
+    }
+  }
+
+  return {
+    groupCol,
+    groupColSql,
+  };
+}
+
 function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, eventNames, sqlParameters);
@@ -1498,18 +1527,9 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
         unionSql = 'union all';
       }
 
-      let groupColSql = '';
-      let groupCol = '';
-      if (isValidGroupingCondition(sqlParameters.groupCondition)) {
-        const colNameAndAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
-        groupCol = colNameAndAlias.colNames.join(',');
-        for (const colName of colNameAndAlias.colNames) {
-          groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
-        }
-      }
-
+      const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
       const idSql = _buildIDColumnSqlMixedMode(index, item);
-      const query = _buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn);
+      const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
 
       joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
@@ -1524,10 +1544,10 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
           , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
           , table_${index}.event_timestamp_${index} as event_timestamp
           ${idSql}
-          ${groupColSql}
+          ${groupingSql.groupColSql}
           from table_${index}
         ) as union_table_${index}
-        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ${query.groupby}
+        group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} ${query.groupby}
       `);
     }
   } else {

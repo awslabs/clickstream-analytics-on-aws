@@ -188,8 +188,8 @@ export class ReportingService {
   private buildDataSetParamForFunnelVisual(chartType: QuickSightChartType, groupCondition: GroupingCondition) {
 
     const datasetColumns = [];
-    const visualProjectedColumns = []
-    const hasGrouping = (chartType === QuickSightChartType.BAR 
+    const visualProjectedColumns = [];
+    const hasGrouping = (chartType === QuickSightChartType.BAR
       && isValidGroupingCondition(groupCondition));
     if (hasGrouping) {
       for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
@@ -204,7 +204,7 @@ export class ReportingService {
     return {
       visualProjectedColumns,
       datasetColumns,
-    }
+    };
   }
 
   private async _buildFunnelQuickSightDashboard(props: BuildFunnelQuickSightDashboardProps): Promise<CreateDashboardResult> {
