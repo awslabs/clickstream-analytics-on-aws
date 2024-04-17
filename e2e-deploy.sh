@@ -105,8 +105,6 @@ done
 
 context_string=""
 if [ "$deployWebConsole" != "true" ]; then
-  echo "$deployWebConsole"
-  echo "DDDDDD"
   context_string="${context_string} -c ignoreWebConsoleSynth=true"
 fi
 
