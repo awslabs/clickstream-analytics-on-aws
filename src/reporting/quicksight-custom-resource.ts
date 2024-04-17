@@ -47,6 +47,10 @@ import {
   CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
+  CLICKSTREAM_DEVICE_USER_DEVICE,
+  CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
+  CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -658,6 +662,57 @@ export function createQuicksightCustomResource(
           'exit_count',
         ],
       },
+      {
+        tableName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ENGAGEMENT_EVENT_NAME} where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_id',
+            Type: 'STRING',
+          },
+          {
+            Name: 'event_name',
+            Type: 'STRING',
+          },
+          {
+            Name: 'event_value',
+            Type: 'DECIMAL',
+          },
+          {
+            Name: 'event_count',
+            Type: 'INTEGER',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate22',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate22',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'user_id',
+          'event_name',
+          'event_value',
+          'event_count',
+        ],
+      },
 
       //Retention Sheet
       {
@@ -896,6 +951,67 @@ export function createQuicksightCustomResource(
           'app_version',
           'merged_user_id',
           'crashed_user_id',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_USER_DEVICE} where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
+            Name: 'app_version',
+            Type: 'STRING',
+          },
+          {
+            Name: 'user_id',
+            Type: 'STRING',
+          },
+          {
+            Name: 'operating_system / version',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_ua_browser',
+            Type: 'STRING',
+          },
+          {
+            Name: 'device_screen_resolution',
+            Type: 'STRING',
+          },
+          {
+            Name: 'event_count',
+            Type: 'INTEGER',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate21',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate21',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'platform',
+          'app_version',
+          'user_id',
+          'operating_system / version',
+          'device_ua_browser',
+          'device_screen_resolution',
+          'event_count',
         ],
       },
 
