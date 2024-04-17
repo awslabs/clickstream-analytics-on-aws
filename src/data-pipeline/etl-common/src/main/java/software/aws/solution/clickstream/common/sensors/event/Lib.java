@@ -27,19 +27,19 @@ import java.util.Map;
 public class Lib {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("lib_method")
+    @JsonProperty("$lib_method")
     private String libMethod;
 
-    @JsonProperty("lib")
+    @JsonProperty("$lib")
     private String lib;
 
-    @JsonProperty("lib_version")
+    @JsonProperty("$lib_version")
     private String libVersion;
 
-    @JsonProperty("app_version")
+    @JsonProperty("$app_version")
     private String appVersion;
 
-    @JsonProperty("lib_detail")
+    @JsonProperty("$lib_detail")
     private String libDetail;
 
     @JsonAnySetter

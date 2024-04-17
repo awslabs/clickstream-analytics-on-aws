@@ -30,139 +30,139 @@ public class Properties {
 
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("is_login_id")
+    @JsonProperty("$is_login_id")
     private boolean isLoginId;
 
-    @JsonProperty("ip")
+    @JsonProperty("$ip")
     private String ip;
 
-    @JsonProperty("province")
+    @JsonProperty("$province")
     private String province;
 
-    @JsonProperty("city")
+    @JsonProperty("$city")
     private String city;
 
-    @JsonProperty("user_agent")
+    @JsonProperty("$user_agent")
     private String userAgent;
 
-    @JsonProperty("url")
+    @JsonProperty("$url")
     private String url;
 
-    @JsonProperty("screen_name")
+    @JsonProperty("$screen_name")
     private String screenName;
 
-    @JsonProperty("title")
+    @JsonProperty("$title")
     private String title;
 
-    @JsonProperty("lib_method")
+    @JsonProperty("$lib_method")
     private String libMethod;
 
-    @JsonProperty("is_first_day")
+    @JsonProperty("$is_first_day")
     private boolean isFirstDay;
 
-    @JsonProperty("os")
+    @JsonProperty("$os")
     private String os;
 
-    @JsonProperty("os_version")
+    @JsonProperty("$os_version")
     private String osVersion;
 
-    @JsonProperty("lib")
+    @JsonProperty("$lib")
     private String lib;
 
-    @JsonProperty("manufacturer")
+    @JsonProperty("$manufacturer")
     private String manufacturer;
 
-    @JsonProperty("model")
+    @JsonProperty("$model")
     private String model;
 
-    @JsonProperty("brand")
+    @JsonProperty("$brand")
     private String brand;
 
-    @JsonProperty("app_version")
+    @JsonProperty("$app_version")
     private String appVersion;
 
-    @JsonProperty("screen_width")
+    @JsonProperty("$screen_width")
     private int screenWidth;
 
-    @JsonProperty("screen_height")
+    @JsonProperty("$screen_height")
     private int screenHeight;
 
-    @JsonProperty("carrier")
+    @JsonProperty("$carrier")
     private String carrier;
 
-    @JsonProperty("timezone_offset")
+    @JsonProperty("$timezone_offset")
     private int timezoneOffset;
 
-    @JsonProperty("app_id")
+    @JsonProperty("$app_id")
     private String appId;
 
-    @JsonProperty("app_name")
+    @JsonProperty("$app_name")
     private String appName;
 
-    @JsonProperty("wifi")
+    @JsonProperty("$wifi")
     private boolean wifi;
 
-    @JsonProperty("network_type")
+    @JsonProperty("$network_type")
     private String networkType;
 
-    @JsonProperty("lib_plugin_version")
+    @JsonProperty("$lib_plugin_version")
     private List<String> libPluginVersion;
 
-    @JsonProperty("device_id")
+    @JsonProperty("$device_id")
     private String deviceId;
 
-    @JsonProperty("x_test_user")
+    @JsonProperty("$x_test_user")
     private String xTestUser;
 
-    @JsonProperty("product_id")
+    @JsonProperty("$product_id")
     private int productId;
 
-    @JsonProperty("product_name")
+    @JsonProperty("$product_name")
     private String productName;
 
-    @JsonProperty("product_classify")
+    @JsonProperty("$product_classify")
     private String productClassify;
 
-    @JsonProperty("product_price")
+    @JsonProperty("$product_price")
     private double productPrice;
 
-    @JsonProperty("item_price")
+    @JsonProperty("$item_price")
     private double itemPrice;
 
-    @JsonProperty("event_duration")
+    @JsonProperty("$event_duration")
     private long eventDuration;
 
-    @JsonProperty("referrer")
+    @JsonProperty("$referrer")
     private String referrer;
 
-    @JsonProperty("referrer_title")
+    @JsonProperty("$referrer_title")
     private String referrerTitle;
 
-    @JsonProperty("resume_from_background")
+    @JsonProperty("$resume_from_background")
     private boolean resumeFromBackground;
 
-    @JsonProperty("is_first_time")
+    @JsonProperty("$is_first_time")
     private boolean isFirstTime;
 
-    @JsonProperty("age")
+    @JsonProperty("$age")
     private int age;
 
-    @JsonProperty("name")
+    @JsonProperty("$name")
     private String name;
 
-    @JsonProperty("user_id")
+    @JsonProperty("$user_id")
     private String userId;
 
-    @JsonProperty("user_name")
+    @JsonProperty("$user_name")
     private String userName;
 
-    @JsonProperty("browser")
+    @JsonProperty("$browser")
     private String browser;
 
-    @JsonProperty("browser_language")
+    @JsonProperty("$browser_language")
     private String browserLanguage;
 
-    @JsonProperty("browser_version")
+    @JsonProperty("$browser_version")
     private String browserVersion;
 
     @JsonAnySetter
