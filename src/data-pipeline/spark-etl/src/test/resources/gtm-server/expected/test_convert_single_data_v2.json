@@ -75,7 +75,7 @@
       "app_install_source" : null,
       "platform" : "Web",
       "project_id" : "test_project_id_gtm_server",
-      "app_id" : "GMTServer1",
+      "app_id" : null,
       "screen_view_screen_name" : null,
       "screen_view_screen_id" : null,
       "screen_view_screen_unique_id" : null,
@@ -211,7 +211,7 @@
       "first_traffic_category" : null,
       "first_app_install_source" : null,
       "process_info" : null,
-      "app_id" : "GMTServer1",
+      "app_id" : null,
       "event_name" : "_page_view"
     },
     "items" : [ ]
