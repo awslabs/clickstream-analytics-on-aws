@@ -51,7 +51,6 @@ fi
 
 envs_string=""
 if [ -n "$region" ]; then
-  # envs_string="${envs_string}export AWS_REGION=$region;"
   export AWS_REGION=$region
 fi
 
