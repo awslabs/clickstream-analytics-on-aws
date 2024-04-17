@@ -45,7 +45,6 @@ import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_
 public final class SensorsEventParser extends BaseEventParser {
     private static SensorsEventParser instance;
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
-    private static final SensorsEventParser INSTANCE = new SensorsEventParser();
     private final Map<String, RuleConfig> appRuleConfig;
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile(
             "(?<browser>\\w+)\\/(\\d+(\\.\\d+)?)(\\s*\\((?<os>.*?)\\s*(?<osVersion>\\d+(\\.\\d+)?)?\\s*;\\s*(?<device>.*?)\\))?",
