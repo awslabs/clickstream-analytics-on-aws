@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.BaseEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.common.gtm.GTMEventParser;
 import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.common.sensors.event.Item;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
@@ -41,19 +43,29 @@ import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_
 
 @Slf4j
 public final class SensorsEventParser extends BaseEventParser {
+    private static SensorsEventParser instance;
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private static final SensorsEventParser INSTANCE = new SensorsEventParser();
+    private final Map<String, RuleConfig> appRuleConfig;
     private static final Pattern USER_AGENT_PATTERN = Pattern.compile(
             "(?<browser>\\w+)\\/(\\d+(\\.\\d+)?)(\\s*\\((?<os>.*?)\\s*(?<osVersion>\\d+(\\.\\d+)?)?\\s*;\\s*(?<device>.*?)\\))?",
             Pattern.CASE_INSENSITIVE);
     private static final String GZIP_RAW_DATA = "data_list=";
     private static final String GZIP_WEB_SDK_DATA = "data=";
 
-    private SensorsEventParser() {
+    private SensorsEventParser(final Map<String, RuleConfig> appRuleConfig) {
+        this.appRuleConfig = appRuleConfig;
     }
 
     public static SensorsEventParser getInstance() {
-        return INSTANCE;
+        return getInstance(null);
+    }
+
+    public static SensorsEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+        if (instance == null) {
+            instance = new SensorsEventParser(appRuleConfig);
+        }
+        return instance;
     }
 
 
@@ -344,5 +356,10 @@ public final class SensorsEventParser extends BaseEventParser {
             }
         }
         return clickstreamItems;
+    }
+
+    @Override
+    protected Map<String, RuleConfig> getAppRuleConfig() {
+        return this.appRuleConfig;
     }
 }
