@@ -22,14 +22,14 @@ helpFunction()
 }
 
 # Set the options of this bash script, get the 
-while getopts ":c:n:s:p:r:" opt
+while getopts ":cn:s:p:r:" opt
 do
    case "$opt" in
       n ) stackNameKey="$OPTARG" ;;
       s ) stackName="$OPTARG" ;;
       r ) region="$OPTARG" ;;
       p ) profile="$OPTARG" ;;
-      c ) deployWebConsole="$OPTARG" ;;
+      c ) deployWebConsole="true" ;;
       ? ) helpFunction ;;
    esac
 done
@@ -44,20 +44,21 @@ if [ -z "$stackName" ]; then
   helpFunction
 fi
 
-cdk_options_string=""
+profile_options_string=""
 if [ -n "$profile" ]; then
-  cdk_options_string="${cdk_options_string} --profile $profile"
+  profile_options_string="--profile $profile"
 fi
 
 envs_string=""
 if [ -n "$region" ]; then
-  envs_string="${envs_string}export AWS_REGION=$region;"
+  # envs_string="${envs_string}export AWS_REGION=$region;"
+  export AWS_REGION=$region
 fi
 
 # AWS CLI command to describe CloudFormation stack parameters
-parameters=$(aws cloudformation describe-stacks --stack-name "$stackName" --query "Stacks[0].Parameters" --output json)
+parameters=$(aws cloudformation describe-stacks "$profile_options_string" --stack-name "$stackName" --query "Stacks[0].Parameters" --output json)
 
-tags=$(aws cloudformation describe-stacks --stack-name "$stackName" --query "Stacks[0].Tags" --output json)
+tags=$(aws cloudformation describe-stacks "$profile_options_string" --stack-name "$stackName" --query "Stacks[0].Tags" --output json)
 
 # extract the stack name 'Clickstream-DataModelingRedshift-xxx' from aws ARN like arn:aws:cloudformation:ap-northeast-1:123456789012:stack/Clickstream-DataModelingRedshift-xxx/18df3b90-a943-11ee-86a1-0ef0a7b32a81 or arn:aws-cn:cloudformation:cn-north-1:123456789012:stack/Clickstream-DataModelingRedshift-xxx/18df3b90-a943-11ee-86a1-0ef0a7b32a81
 if [[ $stackName == *"arn:aws:cloudformation"* || $stackName == *"arn:aws-cn:cloudformation"* ]]; then
@@ -113,6 +114,6 @@ echo "Concatenated parameters: $param_string"
 
 echo "Concatenated tags: $tag_string"
 
-echo "Final command: $envs_string npx cdk deploy $cdk_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+echo "Final command: $envs_string npx cdk deploy $profile_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
 
-bash -c "$envs_string npx cdk deploy $cdk_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+bash -c "npx cdk deploy $profile_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
