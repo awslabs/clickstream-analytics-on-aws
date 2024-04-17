@@ -27,6 +27,7 @@ import java.util.*;
 import static java.util.Objects.*;
 import static org.apache.spark.sql.functions.col;
 import static org.junit.jupiter.api.Assertions.*;
+import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TABLE_VERSION_SUFFIX_V3;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
@@ -153,9 +154,9 @@ class ETLRunnerForTransformerV3Test extends ETLRunnerBaseTest {
         runner.executeTransformers(sourceDataset, transformers);
 
         String dataDir = ContextUtil.getWarehouseDir();
-
-        String tableNameIncr = dataDir + "/" + ETL_USER_V2_PROPS + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
-        String tableNameFull = dataDir + "/" + ETL_USER_V2_PROPS + FULL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        // "etl_clickstream_user_props"
+        String tableNameIncr = dataDir + "/" + "etl_clickstream_user_props" + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V3;
+        String tableNameFull = dataDir + "/" + "etl_clickstream_user_props" + FULL_SUFFIX + TABLE_VERSION_SUFFIX_V3;
 
         Dataset<Row> dIncr = spark.read().parquet(tableNameIncr);
         long cIncr = dIncr.count();

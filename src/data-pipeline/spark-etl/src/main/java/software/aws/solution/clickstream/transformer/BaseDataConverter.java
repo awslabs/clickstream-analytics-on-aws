@@ -11,60 +11,68 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.gtm;
+package software.aws.solution.clickstream.transformer;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
-import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.clickstream.transformer.BaseDataConverter;
-import software.aws.solution.clickstream.transformer.EventParserFactory;
-import software.aws.solution.clickstream.transformer.UDFHelper;
-
-import java.util.Map;
+import software.aws.solution.clickstream.util.DatasetUtil;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.udf;
+import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
+import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
+public abstract class BaseDataConverter implements DatasetTransformer, AppRuleConfigurable {
 
-@Slf4j
-public class ServerDataConverterV2 extends BaseDataConverter {
-    private final Map<String, RuleConfig> appRuleConfig;
-
-    public ServerDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
-    }
+    public abstract String getName();
 
     @Override
-    public String getName() {
-        return EventParserFactory.GTM_SERVER_DATA;
+    public Dataset<Row> transform(final Dataset<Row> dataset) {
+
+        Dataset<Row> convertedDataset = convertByUDF(dataset);
+
+        boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
+        if (debugLocal) {
+            convertedDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/" + getName());
+        }
+        Dataset<Row> okDataset = convertedDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNull());
+        Dataset<Row> corruptDataset = convertedDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNotNull());
+        long corruptDatasetCount = corruptDataset.count();
+        if (corruptDatasetCount > 0) {
+            DatasetUtil.saveCorruptDataset(corruptDataset, corruptDatasetCount, "etl_corrupted_json_" + getName().toLowerCase());
+        }
+        return okDataset;
     }
 
-    @Override
     public Dataset<Row> convertByUDF(final Dataset<Row> dataset) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
-        UserDefinedFunction convertGTMServerDataUdf = udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+
+        UserDefinedFunction convertUdf = getConvertUdf();
+
         String appId = "appId";
+
         if (hasColumn(dataset, UPLOAD_TIMESTAMP)) {
             return filterEmptyAppId(dataset, appId)
-                    .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
+                    .withColumn(DATA_OUT, explode(convertUdf.apply(
                                     col(DATA),
                                     col("ingest_time"),
                                     col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
                                     col("rid"),
-                                    lit(null).cast(DataTypes.StringType), // uri
-                                    lit(null).cast(DataTypes.StringType), // ua
-                                    lit(null).cast(DataTypes.StringType), // ip
+                                    col("uri"),
+                                    col("ua"),
+                                    col("ip"),
                                     lit(projectId),
                                     col(INPUT_FILE_NAME),
                                     col(appId)
@@ -72,29 +80,29 @@ public class ServerDataConverterV2 extends BaseDataConverter {
                     ));
         } else {
             return filterEmptyAppId(dataset, appId)
-                    .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
+                    .withColumn(DATA_OUT, explode(convertUdf.apply(
                                     col(DATA),
                                     col("ingest_time"),
-                                    lit(null).cast(DataTypes.LongType), // upload_timestamp
+                                    lit(null).cast(DataTypes.LongType),
                                     col("rid"),
-                                    lit(null).cast(DataTypes.StringType), // uri
-                                    lit(null).cast(DataTypes.StringType), // ua
-                                    lit(null).cast(DataTypes.StringType), // ip
+                                    col("uri"),
+                                    col("ua"),
+                                    col("ip"),
                                     lit(projectId),
                                     col(INPUT_FILE_NAME),
                                     col(appId)
                             )
                     ));
+
         }
     }
 
-    @Override
     public UserDefinedFunction getConvertUdf() {
         return udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
     }
 
-    @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
+    public static Dataset<Row> filterEmptyAppId(final Dataset<Row> dataset, final String appId) {
+        return dataset
+                .filter(col(appId).isNotNull().and(col(appId).notEqual("")));
     }
 }

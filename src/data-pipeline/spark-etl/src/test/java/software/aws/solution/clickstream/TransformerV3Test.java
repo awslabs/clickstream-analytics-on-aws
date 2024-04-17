@@ -28,6 +28,7 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TABLE_VERSION_SUFFIX_V3;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
@@ -40,6 +41,10 @@ class TransformerV3Test extends BaseSparkTest {
     @BeforeEach
     void setupTransformer() {
         this.transformer = new TransformerV3(getTestTransformConfig("uba-app"));
+    }
+
+    public String getUserPropsTableName(String name) {
+        return ("etl_" + name + "_user_props").toLowerCase();
     }
 
     @Test
@@ -165,7 +170,7 @@ class TransformerV3Test extends BaseSparkTest {
         Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
         String dataDir = ContextUtil.getWarehouseDir();
 
-        String tableName1 = dataDir + "/" + ETL_USER_V2_PROPS + FULL_SUFFIX  + TABLE_VERSION_SUFFIX_V1;
+        String tableName1 = dataDir + "/" + getUserPropsTableName("clickstream") + FULL_SUFFIX  + TABLE_VERSION_SUFFIX_V3;
 
         transformer.postTransform(datasetEvent);
         Dataset<Row> d1 = spark.read().parquet(tableName1);

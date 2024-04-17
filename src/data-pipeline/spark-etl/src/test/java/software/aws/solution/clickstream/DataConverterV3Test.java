@@ -70,7 +70,8 @@ public class DataConverterV3Test extends BaseSparkTest {
         Assertions.assertEquals(0, result.count());
         Assertions.assertTrue(result.schema().prettyJson().contains("dataOut"));
 
-        String corruptedDir = whDir + "/etl_corrupted_json_data_v2/jobName=test-job";
+        // etl_corrupted_json_" + getName().toLowerCase()
+        String corruptedDir = whDir + "/etl_corrupted_json_clickstream/jobName=test-job";
         System.out.printf("corruptedDir: %s\n", corruptedDir);
         Assertions.assertTrue(new File(corruptedDir).exists(), corruptedDir + " should exist");
     }

@@ -13,28 +13,10 @@
 
 package software.aws.solution.clickstream.transformer;
 
-import lombok.extern.slf4j.Slf4j;
-import software.aws.solution.clickstream.common.RuleConfig;
-
-import java.util.Map;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 
-@Slf4j
-public class DataConverterV3 extends BaseDataConverter {
-    private final Map<String, RuleConfig> appRuleConfig;
-
-    public DataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
-        this.appRuleConfig = appRuleConfig;
-    }
-
-    @Override
-    public String getName() {
-        return EventParserFactory.CLICKSTREAM;
-    }
-
-    @Override
-    public Map<String, RuleConfig> getAppRuleConfig() {
-        return this.appRuleConfig;
-    }
-
+public interface DatasetTransformer {
+    Dataset<Row> transform(Dataset<Row> dataset);
 }

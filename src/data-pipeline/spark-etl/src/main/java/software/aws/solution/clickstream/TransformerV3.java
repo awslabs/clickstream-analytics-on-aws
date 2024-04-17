@@ -14,35 +14,62 @@
 package software.aws.solution.clickstream;
 
 import lombok.Getter;
-import lombok.extern.slf4j.*;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
 import software.aws.solution.clickstream.common.Constant;
-import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.enrich.RuleBasedTrafficSourceHelper;
-import software.aws.solution.clickstream.model.*;
-import software.aws.solution.clickstream.transformer.*;
-import software.aws.solution.clickstream.util.*;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
+import software.aws.solution.clickstream.model.ModelV2;
+import software.aws.solution.clickstream.transformer.BaseTransformerV3;
+import software.aws.solution.clickstream.transformer.Cleaner;
+import software.aws.solution.clickstream.transformer.DataConverterV3;
+import software.aws.solution.clickstream.transformer.DatasetTransformer;
+import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.util.ContextUtil;
+import software.aws.solution.clickstream.util.DatasetUtil;
 
-import java.sql.*;
-import java.time.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
-import static software.aws.solution.clickstream.util.ContextUtil.*;
-import static software.aws.solution.clickstream.util.DatasetUtil.*;
-import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.*;
-import static software.aws.solution.clickstream.model.ModelV2.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
+import static org.apache.spark.sql.functions.first;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.lower;
+import static org.apache.spark.sql.functions.map;
+import static org.apache.spark.sql.functions.max;
+import static org.apache.spark.sql.functions.max_by;
+import static org.apache.spark.sql.functions.min;
+import static org.apache.spark.sql.functions.min_by;
+import static org.apache.spark.sql.functions.struct;
+import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
+import static software.aws.solution.clickstream.transformer.EventParserFactory.CLICKSTREAM;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForSession;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForUserV2;
+import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_APP_END;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_OPEN;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_VISIT;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SCREEN_VIEW;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_SESSION_START;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_USER_ENGAGEMENT;
+import static software.aws.solution.clickstream.util.DatasetUtil.addSchemaToMap;
+import static software.aws.solution.clickstream.util.DatasetUtil.readDatasetFromPath;
+import static software.aws.solution.clickstream.util.DatasetUtil.saveFullDatasetToPath;
+import static software.aws.solution.clickstream.util.DatasetUtil.saveIncrementalDatasetToPath;
 
 
 @Slf4j
-public class TransformerV3 implements TransformerInterfaceV3 {
-    public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
+public class TransformerV3 extends BaseTransformerV3 {
     public static final String ETL_USER_V2_PROPS = "etl_user_v2_props";
     public static final String INPUT_FILE_NAME = "input_file_name";
-    public static final String PROCESS_JOB_ID = "process_job_id";
-    public static final String PROCESS_TIME = "process_time";
     public static final String PLATFORM_WEB = "Web";
     public static final String USER_FIRST_EVENT_NAME = "first_event_name";
     public static final String USER_LATEST_EVENT_NAME = "latest_event_name";
@@ -50,38 +77,13 @@ public class TransformerV3 implements TransformerInterfaceV3 {
     public static final String DATA_STR = "data_str";
     private final Cleaner cleaner = new Cleaner();
     @Getter
-    private Map<String, RuleConfig> appRuleConfig;
+    private TransformConfig transformConfig;
 
     public TransformerV3() {
     }
+
     public TransformerV3(final TransformConfig transformConfig) {
         config(transformConfig);
-    }
-
-    @Override
-    public void config(final TransformConfig transformConfig) {
-        this.appRuleConfig = transformConfig.getAppRuleConfig();
-        log.info("appRuleConfig is set");
-    }
-
-    public static Dataset<Row> addProcessInfo(final Dataset<Row> dataset) {
-        String jobName = ContextUtil.getJobName();
-        return dataset.withColumn(Constant.PROCESS_INFO,
-                mapConcatSafe(
-                        col(Constant.PROCESS_INFO),
-                        map(
-                                lit(PROCESS_JOB_ID), lit(jobName),
-                                lit(PROCESS_TIME), lit(Instant.now().toString())
-                        ))
-        ).withColumn(Constant.CREATED_TIME, lit(new Timestamp(System.currentTimeMillis())).cast(DataTypes.TimestampType));
-    }
-
-
-    private static Dataset<Row> extractEvent(final Dataset<Row> convertedDataset) {
-        Dataset<Row> eventDataset = convertedDataset.select(explode(expr("dataOut.events")).alias("event"))
-                .select("event.*")
-                .select(toColumnArray(ModelV2.getEventFields()));
-        return addProcessInfo(runMaxLengthTransformerForEventV2(eventDataset));
     }
 
     public static Dataset<Row> aggUserDataset(final Dataset<Row> userDataSet, final String info) {
@@ -248,73 +250,23 @@ public class TransformerV3 implements TransformerInterfaceV3 {
         );
     }
 
-    public static Column mapConcatSafe(final Column map1, final Column map2) {
-        return when(map1.isNull(), map2)
-                .when(map2.isNull(), map1)
-                .otherwise(map_concat(map1, map2));
-    }
-
-    private static void mergeIncrementalTables(final SparkSession sparkSession) {
-        log.info("start merging incremental tables");
-        int userKeepDays = ContextUtil.getUserKeepDays();
-
-        List<DatasetUtil.TableInfo> l = new ArrayList<>();
-
-        l.add(new DatasetUtil.TableInfo(
-                ETL_USER_V2_PROPS, TABLE_VERSION_SUFFIX_V1, userKeepDays
-        ));
-
-        DatasetUtil.mergeIncrementalTables(sparkSession, l);
+    @Override
+    public void config(final TransformConfig transformConfig) {
+        this.transformConfig = transformConfig;
+        log.info("TransformConfig is set");
     }
 
     @Override
-    public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {
-        Dataset<Row> cleanedDataset = cleaner.clean(dataset, DATA_SCHEMA_V2_FILE_PATH);
-        cleanedDataset = cleanedDataset.drop(DATA)
-                .withColumnRenamed(DATA_STR, DATA);
-
-        ContextUtil.cacheDataset(cleanedDataset);
-        log.info(new ETLMetric(cleanedDataset, "after clean").toString());
-
-        log.info(cleanedDataset.schema().prettyJson());
-
-        if (Arrays.asList(dataset.columns()).contains(CLIENT_TIMESTAMP)) {
-            cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, col(CLIENT_TIMESTAMP).cast(DataTypes.LongType));
-        } else if (!Arrays.asList(dataset.columns()).contains(UPLOAD_TIMESTAMP)) {
-            cleanedDataset = cleanedDataset.withColumn(UPLOAD_TIMESTAMP, lit(null).cast(DataTypes.LongType));
+    public DatasetTransformer getDatasetTransformer() {
+        if (this.getTransformConfig() == null) {
+            throw new ExecuteTransformerException("Transform config is not set");
         }
-
-        if (this.getAppRuleConfig() == null) {
-            throw new IllegalArgumentException("appRuleConfig is null");
-        }
-
-        DataConverterV3 dataConverter = new DataConverterV3(this.getAppRuleConfig());
-
-        Dataset<Row> convertedDataset = dataConverter.transform(cleanedDataset);
-        convertedDataset.cache();
-        log.info("convertedDataset count:" + convertedDataset.count());
-
-        Dataset<Row> eventDataset = extractEvent(convertedDataset);
-        Dataset<Row> itemDataset = extractItem(convertedDataset);
-        Dataset<Row> userDataset = extractUser(eventDataset, convertedDataset);
-        Dataset<Row> sessionDataset = extractSessionFromEvent(eventDataset);
-
-        log.info("eventDataset count:" + eventDataset.count());
-        log.info("itemDataset count:" + itemDataset.count());
-        log.info("userDataset count:" + userDataset.count());
-        log.info("sessionDataset count:" + sessionDataset.count());
-
-        Map<TableName, Dataset<Row>> result = new EnumMap<>(TableName.class);
-        // table name -> dataset
-        result.put(TableName.EVENT_V2, eventDataset);
-        result.put(TableName.ITEM_V2, itemDataset);
-        result.put(TableName.USER_V2, userDataset);
-        result.put(TableName.SESSION, sessionDataset);
-        return result;
-
+        return new DataConverterV3(this.transformConfig.getAppRuleConfig());
     }
 
-    private Dataset<Row> extractUser(final Dataset<Row> eventDataset, final Dataset<Row> convertedDataset) {
+
+    @Override
+    public Dataset<Row> extractUser(final Dataset<Row> eventDataset, final Dataset<Row> convertedDataset) {
         Dataset<Row> userDataset = convertedDataset.select(expr("dataOut.user.*"))
                 .select(toColumnArray(ModelV2.getUserFields()));
 
@@ -331,8 +283,8 @@ public class TransformerV3 implements TransformerInterfaceV3 {
         Dataset<Row> newUserAggDataset = aggUserDataset(userDataset, "newUserAggDataset");
         log.info("newUserAggDataset count: {}", newUserAggDataset.count());
 
-        String tableName = ETL_USER_V2_PROPS;
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserAggDataset, tableName, TABLE_VERSION_SUFFIX_V1);
+        String tableName = getUserPropsTableName();
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserAggDataset, tableName, TABLE_VERSION_SUFFIX_V3);
         log.info("tableName: {}", tableName);
         log.info("pathInfo - incremental: " + pathInfo.getIncremental() + ", full: " + pathInfo.getFull());
 
@@ -385,14 +337,23 @@ public class TransformerV3 implements TransformerInterfaceV3 {
         return addProcessInfo(runMaxLengthTransformerForUserV2(userDatasetFinal));
     }
 
-    private Dataset<Row> extractItem(final Dataset<Row> convertedDataset) {
-        Dataset<Row> itemDataset = convertedDataset.select(explode(expr("dataOut.items")).alias("item"))
-                .select("item.*")
-                .select(toColumnArray(ModelV2.getItemFields()));
-        return addProcessInfo(runMaxLengthTransformerForItemV2(itemDataset));
+    @Override
+    public  Dataset<Row> getCleanedDataset(final Dataset<Row> dataset) {
+        Dataset<Row> cleanedDataset = this.cleaner.clean(dataset, DATA_SCHEMA_V2_FILE_PATH);
+        cleanedDataset = cleanedDataset.drop(DATA)
+                .withColumnRenamed(DATA_STR, DATA);
+
+        log.info("getCleanedDataset() count: {}", dataset.count());
+        return cleanedDataset;
     }
 
-    private Dataset<Row> extractSessionFromEvent(final Dataset<Row> eventDataset) {
+    @Override
+    public String getName() {
+        return CLICKSTREAM;
+    }
+
+    @Override
+    public Dataset<Row> extractSessionFromEvent(final Dataset<Row> eventDataset) {
         Dataset<Row> sessionDataset = eventDataset.select(
                 col(Constant.APP_ID),
                 col(Constant.EVENT_TIMESTAMP),
@@ -500,5 +461,16 @@ public class TransformerV3 implements TransformerInterfaceV3 {
         return dataset.drop(Constant.UA, Constant.IP);
     }
 
+    private void mergeIncrementalTables(final SparkSession sparkSession) {
+        log.info("start merging incremental tables");
+        int userKeepDays = ContextUtil.getUserKeepDays();
 
+        List<DatasetUtil.TableInfo> l = new ArrayList<>();
+
+        l.add(new DatasetUtil.TableInfo(
+                getUserPropsTableName(), TABLE_VERSION_SUFFIX_V3, userKeepDays
+        ));
+
+        DatasetUtil.mergeIncrementalTables(sparkSession, l);
+    }
 }

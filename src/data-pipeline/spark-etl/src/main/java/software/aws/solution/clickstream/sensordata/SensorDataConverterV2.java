@@ -11,30 +11,32 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.sensordata;
 
 import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.transformer.AppRuleConfigurable;
+import software.aws.solution.clickstream.transformer.BaseDataConverter;
+import software.aws.solution.clickstream.transformer.DatasetTransformer;
+import software.aws.solution.clickstream.transformer.EventParserFactory;
 
 import java.util.Map;
 
-
 @Slf4j
-public class DataConverterV3 extends BaseDataConverter {
+public class SensorDataConverterV2 extends BaseDataConverter implements DatasetTransformer, AppRuleConfigurable {
     private final Map<String, RuleConfig> appRuleConfig;
 
-    public DataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
+    public SensorDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
         this.appRuleConfig = appRuleConfig;
     }
 
     @Override
     public String getName() {
-        return EventParserFactory.CLICKSTREAM;
+        return EventParserFactory.SENSOR_DATA;
     }
 
     @Override
     public Map<String, RuleConfig> getAppRuleConfig() {
         return this.appRuleConfig;
     }
-
 }
