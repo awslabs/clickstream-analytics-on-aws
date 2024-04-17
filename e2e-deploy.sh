@@ -22,14 +22,14 @@ helpFunction()
 }
 
 # Set the options of this bash script, get the 
-while getopts ":cn:s:p:r:" opt
+while getopts ":c:n:s:p:r:" opt
 do
    case "$opt" in
       n ) stackNameKey="$OPTARG" ;;
       s ) stackName="$OPTARG" ;;
       r ) region="$OPTARG" ;;
       p ) profile="$OPTARG" ;;
-      c ) deployWebConsole="true" ;;
+      c ) deployWebConsole="$OPTARG" ;;
       ? ) helpFunction ;;
    esac
 done
@@ -104,7 +104,9 @@ for tag in $(echo "$tags" | jq -c '.[]'); do
 done
 
 context_string=""
-if [ "$deployWebConsole" !== "true" ]; then
+if [ "$deployWebConsole" != "true" ]; then
+  echo "$deployWebConsole"
+  echo "DDDDDD"
   context_string="${context_string} -c ignoreWebConsoleSynth=true"
 fi
 
