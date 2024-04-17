@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP, CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, ExecuteStatementCommand, GetStatementResultCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckStartRefreshSpEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-start-sp-refresh';
@@ -117,6 +117,7 @@ describe('Lambda - check next refresh task', () => {
       detail: {
         nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
         refreshDate: '2024-03-10',
+        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
         appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
         timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
       },
@@ -125,13 +126,13 @@ describe('Lambda - check next refresh task', () => {
 
   test('forceRefresh is false and this is first time, but this date has been refreshed', async () => {
     checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
-    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+    redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
     const exeuteId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
 
-    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
+    redshiftDataMock.on(GetStatementResultCommand).resolves({
       Records: [
         [{ stringValue: '2024-03-10' }],
       ],
@@ -141,6 +142,36 @@ describe('Lambda - check next refresh task', () => {
     expect(resp).toEqual({
       detail: {
         nextStep: RefreshWorkflowSteps.END_STEP,
+      },
+    });
+  });
+
+  test('forceRefresh is false and this is first time, but the first sp has been refreshed', async () => {
+    checkNextRefreshViewEvent.originalInput.forceRefresh = 'false';
+    redshiftDataMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+
+    redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({
+      Records: [
+        [{ stringValue: '2024-03-10' }],
+      ],
+    }).resolves({
+      Records: [
+        [{ stringValue: '2024-03-08' }],
+      ],
+    });
+
+    const resp = await handler(checkNextRefreshViewEvent);
+    expect(resp).toEqual({
+      detail: {
+        nextStep: RefreshWorkflowSteps.REFRESH_SP_STEP,
+        refreshDate: '2024-03-10',
+        startRefreshViewNameOrSPName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP,
+        appId: checkNextRefreshViewEvent.timezoneWithAppId.appId,
+        timezone: checkNextRefreshViewEvent.timezoneWithAppId.timezone,
       },
     });
   });

@@ -14,7 +14,7 @@
 import { RefreshWorkflowSteps } from '../../private/constant';
 import { reportingViewsDef, schemaDefs } from '../../private/sql-def';
 
-interface RefreshViewOrSp {
+export interface RefreshViewOrSp {
   name: string;
   type: string;
   timezoneSensitive: string;
