@@ -51,13 +51,15 @@ import {
   SheetDefinition,
   GeoSpatialDataRole,
   SimpleNumericalAggregationFunction,
+  InputColumnDataType,
+  DimensionField,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildColNameWithPrefix, buildConditionProps } from './sql-builder';
 import { AttributionSQLParameters } from './sql-builder-attribution';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -574,12 +576,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 }
 
 export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean, countColName: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, groupCondition: GroupingCondition | undefined, countColName: string) : Visual {
 
   if (quickSightChartType === QuickSightChartType.FUNNEL) {
     return _getFunnelChartVisualDef(visualId, viewName, titleProps, countColName);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, hasGrouping, countColName);
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, groupCondition, countColName);
   } else {
     const errorMessage = `Funnel analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
@@ -604,9 +606,9 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
 }
 
 function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  groupColumn: string, hasGrouping: boolean, countColName: string) : Visual {
+  groupColumn: string, groupCondition: GroupingCondition | undefined, countColName: string) : Visual {
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(groupCondition !== undefined);
 
   const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -623,7 +625,24 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
     smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
-  return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
+  if(isValidGroupingCondition(groupCondition)) {
+    const smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples!
+    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      const fieldId = uuidv4();
+      smallMultiples.push({
+        CategoricalDimensionField: {
+          FieldId: fieldId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      });
+    }
+  }
+
+  return visual;
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
@@ -863,7 +882,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 }
 
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, groupCondition: GroupingCondition | undefined) : Visual {
 
   if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
@@ -871,7 +890,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     throw new Error(errorMessage);
   }
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(groupCondition !== undefined);
 
   const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -888,7 +907,28 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
-  return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  if(isValidGroupingCondition(groupCondition)) {
+    let smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples;
+    if(smallMultiples === undefined) {
+      smallMultiples = visual.LineChartVisual?.ChartConfiguration?.FieldWells?.LineChartAggregatedFieldWells?.SmallMultiples;
+    }
+    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      const fieldId = uuidv4();
+      smallMultiples!.push({
+        CategoricalDimensionField: {
+          FieldId: fieldId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      });
+    }
+  }
+
+  return visual;
 }
 
 export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
@@ -913,9 +953,9 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
 }
 
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, groupCondition: GroupingCondition) : Visual {
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(groupCondition !== undefined);
 
   const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -929,7 +969,25 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
     smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
-  return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
+
+  if(isValidGroupingCondition(groupCondition)) {
+    const rows = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
+    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      const fieldId = uuidv4();
+      rows.push({
+        CategoricalDimensionField: {
+          FieldId: fieldId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      });
+    }
+  }
+
+  return visual;
 }
 
 export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
@@ -952,10 +1010,19 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
   const fieldWells = visual.PivotTableVisual!.ChartConfiguration!.FieldWells!;
-
-  //todo
   if (grouppingColName !== undefined) {
-    fieldWells.PivotTableAggregatedFieldWells!.Rows![1].CategoricalDimensionField!.Column!.ColumnName = grouppingColName[0];
+    const rows  = fieldWells.PivotTableAggregatedFieldWells!.Rows!;
+    for(const colName of grouppingColName) {
+      rows.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      });
+    }
   }
 
   if (aggregationMthod !== undefined) {
@@ -1139,9 +1206,28 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
+
+export function getQuickSightDataType(metadataValueType: MetadataValueType) : InputColumnDataType {
+  
+  switch (metadataValueType) {
+    case MetadataValueType.STRING:
+      return 'STRING';
+    case MetadataValueType.BOOLEAN:
+      return 'BOOLEAN';
+    case MetadataValueType.NUMBER:
+    case MetadataValueType.DOUBLE:
+    case MetadataValueType.FLOAT:
+      return 'DECIMAL';
+    case MetadataValueType.INTEGER:
+      return 'INTEGER';
+    default:
+      return 'STRING';
+  }
+}
+
 export function getRetentionChartVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, hasGrouping: boolean) : Visual {
+  quickSightChartType: QuickSightChartType, groupCondition: GroupingCondition | undefined) : Visual {
 
   if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Retention analysis: unsupported quicksight chart type ${quickSightChartType}`;
@@ -1149,7 +1235,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     throw new Error(errorMessage);
   }
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(groupCondition !== null);
 
   const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -1165,13 +1251,34 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
-  return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+
+  if(isValidGroupingCondition(groupCondition)) {
+    let smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples;
+    if(smallMultiples === undefined) {
+      smallMultiples = visual.LineChartVisual?.ChartConfiguration?.FieldWells?.LineChartAggregatedFieldWells?.SmallMultiples;
+    }
+    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      const fieldId = uuidv4();
+      smallMultiples!.push({
+        CategoricalDimensionField: {
+          FieldId: fieldId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      });
+    }
+  }
+
+  return visual;
 }
 
 export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
+  titleProps: DashboardTitleProps, groupCondition: GroupingCondition) : Visual {
 
-  const props = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(groupCondition !== undefined);
 
   const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -1184,7 +1291,26 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
-  return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+  const visual = JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
+  const rows = visual.PivotTableVisual!.ChartConfiguration!.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
+  const existRows = [...rows];
+
+  if(isValidGroupingCondition(groupCondition)) {
+    for(const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
+      const fieldId = uuidv4();
+      rows[index] = {
+        CategoricalDimensionField: {
+          FieldId: fieldId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
+        },
+      };
+    }
+  }
+  rows.push(...existRows);
+  return visual;
 }
 
 export function buildEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[] | AttributionTouchPoint[]) {

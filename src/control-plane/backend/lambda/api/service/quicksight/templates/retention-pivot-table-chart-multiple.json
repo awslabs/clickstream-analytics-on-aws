@@ -15,15 +15,6 @@
               "PivotTableAggregatedFieldWells": {
                   "Rows": [
                       {
-                            "CategoricalDimensionField": {
-                                "FieldId": "{{smalMultiplesFieldId}}",
-                                "Column": {
-                                    "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                    "ColumnName": "group_col"
-                                }
-                            }
-                      },
-                      {
                           "CategoricalDimensionField": {
                               "FieldId": "{{catDimFieldId}}",
                               "Column": {

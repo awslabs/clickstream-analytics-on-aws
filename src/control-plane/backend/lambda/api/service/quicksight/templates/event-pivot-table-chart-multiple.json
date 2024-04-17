@@ -22,16 +22,7 @@
                                   "ColumnName": "event_name"
                               }
                           }
-                      },
-                      {
-                        "CategoricalDimensionField": {
-                            "FieldId": "{{smalMultiplesFieldId}}",
-                            "Column": {
-                                "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                "ColumnName": "group_col"
-                            }
-                        }
-                    }
+                      }
                   ],
                   "Columns": [
                       {

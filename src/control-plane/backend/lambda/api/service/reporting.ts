@@ -67,8 +67,9 @@ import {
   DashboardTitleProps,
   getTimezoneByAppId,
   isValidGroupingCondition,
+  getQuickSightDataType,
 } from './quicksight/reporting-utils';
-import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -208,14 +209,17 @@ export class ReportingService {
       countColName = 'user_pseudo_id';
     }
 
-    const hasGrouping = props.query.chartType == QuickSightChartType.BAR && props.query.groupCondition !== undefined;
+    let groupCondition = undefined;
+    const hasGrouping = props.query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(props.query.groupCondition as GroupingCondition);
     if (hasGrouping) {
-      datasetColumns.push({
-        Name: 'group_col',
-        Type: 'STRING',
-      });
-
-      visualProjectedColumns.push('group_col');
+      groupCondition = props.query.groupCondition as GroupingCondition;
+      for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
+        datasetColumns.push({
+          Name: colName,
+          Type: getQuickSightDataType((groupCondition).conditions[index].dataType),
+        });
+        visualProjectedColumns.push(colName);
+      }
     }
 
     //create quicksight dataset
@@ -283,7 +287,8 @@ export class ReportingService {
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, props.query);
     const quickSightChartType = props.query.chartType;
     const visualDef = getFunnelVisualDef(
-      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn, hasGrouping, countColName);
+      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn, 
+      groupCondition, countColName);
     const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: props.query.timeScopeType,
       sheetId: props.sheetId,
@@ -479,16 +484,20 @@ export class ReportingService {
       const sql = buildEventAnalysisView(sqlParameters);
       logger.debug(`event analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
-      if (hasGrouping) {
-        datasetColumns.push({
-          Name: 'group_col',
-          Type: 'STRING',
-        });
 
-        projectedColumns.push('group_col');
+      let groupCondition = undefined;
+      const hasGrouping = query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(query.groupCondition as GroupingCondition);
+      if (hasGrouping) {
+        groupCondition = query.groupCondition as GroupingCondition;
+        for (const [index, colName] of buildColNameWithPrefix(query.groupCondition as GroupingCondition).colNames.entries()) {
+          datasetColumns.push({
+            Name: colName,
+            Type: getQuickSightDataType((query.groupCondition as GroupingCondition).conditions[index].dataType),
+          });
+          projectedColumns.push(colName);
+        }
       }
 
       const datasetPropsArray: DataSetProps[] = [];
@@ -514,7 +523,7 @@ export class ReportingService {
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
-      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
+      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, groupCondition);
       const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -868,7 +877,6 @@ export class ReportingService {
       });
       logger.debug(`retention analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = [
         'grouping',
         'start_event_date',
@@ -876,13 +884,17 @@ export class ReportingService {
         'retention',
       ];
       const datasetColumns = [...retentionAnalysisVisualColumns];
+      const hasGrouping = query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(query.groupCondition as GroupingCondition);
+      let groupCondition = undefined;
       if (hasGrouping) {
-        datasetColumns.push({
-          Name: 'group_col',
-          Type: 'STRING',
-        });
-
-        projectedColumns.push('group_col');
+        groupCondition = query.groupCondition as GroupingCondition;
+        for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
+          datasetColumns.push({
+            Name: colName,
+            Type: getQuickSightDataType(groupCondition.conditions[index].dataType),
+          });
+          projectedColumns.push(colName);
+        }
       }
 
       const datasetPropsArray: DataSetProps[] = [];
@@ -908,7 +920,7 @@ export class ReportingService {
       const visualId = uuidv4();
       const locale = query.locale ?? ExploreLocales.EN_US;
       const quickSightChartType = query.chartType;
-      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, hasGrouping);
+      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, groupCondition);
       const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
