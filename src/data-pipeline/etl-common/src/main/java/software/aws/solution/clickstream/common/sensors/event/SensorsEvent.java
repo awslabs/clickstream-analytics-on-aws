@@ -70,7 +70,7 @@ public class SensorsEvent {
     private Properties properties;
 
     @JsonProperty("_flush_time")
-    private long _flush_time;
+    private long flushTime;
 
     @JsonProperty("items")
     private List<Item> items;

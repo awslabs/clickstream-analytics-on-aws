@@ -22,7 +22,6 @@ import software.aws.solution.clickstream.common.BaseEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.clickstream.common.gtm.GTMEventParser;
 import software.aws.solution.clickstream.common.model.*;
 import software.aws.solution.clickstream.common.sensors.event.Item;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
