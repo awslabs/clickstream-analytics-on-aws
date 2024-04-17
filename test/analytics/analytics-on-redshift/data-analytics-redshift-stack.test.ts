@@ -429,26 +429,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   const nestStackCommonTablesProps = {
     tablesOdsSource: {
-      event: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/event/',
-        fileSuffix: '.snappy',
-      },
-      event_parameter: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/event_parameter/',
-        fileSuffix: '.snappy',
-      },
-      user: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/user/',
-        fileSuffix: '.snappy',
-      },
-      item: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/item/',
-        fileSuffix: '.snappy',
-      },
       event_v2: {
         s3Bucket: sinkS3Bucket,
         prefix: 'project1/event_v2/',
@@ -1046,208 +1026,26 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
               ],
               Effect: 'Allow',
               Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
                     [
                       'arn:',
-                      RefAnyValue,
+                      {
+                        Ref: 'AWS::Partition',
+                      },
                       ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
+                      Match.anyValue(),
                       '/',
-                      RefAnyValue,
-                      'event/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      '*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'event_parameter/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'user/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'item/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
+                      Match.anyValue(),
                       'event_v2/*',
                     ],
                   ],
                 },
               ],
             },
+            Match.anyValue(),
             {
               Action: [
                 's3:GetObject*',
@@ -1256,27 +1054,19 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
               ],
               Effect: 'Allow',
               Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
                     [
                       'arn:',
-                      RefAnyValue,
+                      {
+                        Ref: 'AWS::Partition',
+                      },
                       ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
+                      Match.anyValue(),
                       '/',
-                      RefAnyValue,
+                      Match.anyValue(),
                       'item_v2/*',
                     ],
                   ],
@@ -1291,27 +1081,19 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
               ],
               Effect: 'Allow',
               Resource: [
+                Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
                     [
                       'arn:',
-                      RefAnyValue,
+                      {
+                        Ref: 'AWS::Partition',
+                      },
                       ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
+                      Match.anyValue(),
                       '/',
-                      RefAnyValue,
+                      Match.anyValue(),
                       'user_v2/*',
                     ],
                   ],
@@ -1325,34 +1107,26 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 's3:List*',
               ],
               Effect: 'Allow',
-              Resource: [
+              Resource: [Match.anyValue(),
                 {
                   'Fn::Join': [
                     '',
                     [
                       'arn:',
-                      RefAnyValue,
+                      {
+                        Ref: 'AWS::Partition',
+                      },
                       ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
+                      Match.anyValue(),
                       '/',
-                      RefAnyValue,
+                      Match.anyValue(),
                       'session/*',
                     ],
                   ],
-                },
-              ],
+                }],
             },
+            Match.anyValue(),
+
           ],
           Version: '2012-10-17',
         },

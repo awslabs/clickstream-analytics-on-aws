@@ -21,71 +21,7 @@
       {
         "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
       },
-      "event/\"}}},\"LoadData - Skip Running Workflow\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.SkipRunningWorkflow\",\"BooleanEquals\":true,\"Next\":\"LoadData - Ignore Running\"}],\"Default\":\"LoadData - Load data to tables\"},\"LoadData - Load data to tables\":{\"Type\":\"Parallel\",\"Next\":\"LoadData - Load Data To Redshift Completed\",\"Branches\":[{\"StartAt\":\"LoadData - event\",\"States\":{\"LoadData - event\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
-      {
-        "Ref": "AWS::Partition"
-      },
-      ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"odsTableName\":\"event\",\"odsSourceBucket\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackODSEventBucketC0324FBERef"
-      },
-      "\",\"odsSourcePrefix\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
-      },
-      "event/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
-      {
-        "Ref": "LoadDataSubLoadDataStateMachine65360865"
-      },
-      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'event')\"}}}},{\"StartAt\":\"LoadData - event_parameter\",\"States\":{\"LoadData - event_parameter\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
-      {
-        "Ref": "AWS::Partition"
-      },
-      ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"odsTableName\":\"event_parameter\",\"odsSourceBucket\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackODSEventBucketC0324FBERef"
-      },
-      "\",\"odsSourcePrefix\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
-      },
-      "event_parameter/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
-      {
-        "Ref": "LoadDataSubLoadDataStateMachine65360865"
-      },
-      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'event_parameter')\"}}}},{\"StartAt\":\"LoadData - user\",\"States\":{\"LoadData - user\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
-      {
-        "Ref": "AWS::Partition"
-      },
-      ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"odsTableName\":\"user\",\"odsSourceBucket\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackODSEventBucketC0324FBERef"
-      },
-      "\",\"odsSourcePrefix\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
-      },
-      "user/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
-      {
-        "Ref": "LoadDataSubLoadDataStateMachine65360865"
-      },
-      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'user')\"}}}},{\"StartAt\":\"LoadData - item\",\"States\":{\"LoadData - item\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
-      {
-        "Ref": "AWS::Partition"
-      },
-      ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"odsTableName\":\"item\",\"odsSourceBucket\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackODSEventBucketC0324FBERef"
-      },
-      "\",\"odsSourcePrefix\":\"",
-      {
-        "Ref": "referencetoredshiftserverlessstackGetSourcePrefixCustomerResource6ACF9C22prefix"
-      },
-      "item/\",\"AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$\":\"$$.Execution.Id\"},\"StateMachineArn\":\"",
-      {
-        "Ref": "LoadDataSubLoadDataStateMachine65360865"
-      },
-      "\",\"Name.$\":\"States.Format('{}-{}', States.ArrayGetItem(States.StringSplit(States.ArrayGetItem(States.StringSplit($$.Execution.Id, ':'), 7), '_'), 0), 'item')\"}}}},{\"StartAt\":\"LoadData - event_v2\",\"States\":{\"LoadData - event_v2\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
+      "event_v2/\"}}},\"LoadData - Skip Running Workflow\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.SkipRunningWorkflow\",\"BooleanEquals\":true,\"Next\":\"LoadData - Ignore Running\"}],\"Default\":\"LoadData - Load data to tables\"},\"LoadData - Load data to tables\":{\"Type\":\"Parallel\",\"Next\":\"LoadData - Load Data To Redshift Completed\",\"Branches\":[{\"StartAt\":\"LoadData - event_v2\",\"States\":{\"LoadData - event_v2\":{\"End\":true,\"Type\":\"Task\",\"ResultSelector\":{\"ExecutionArn.$\":\"$.ExecutionArn\"},\"Resource\":\"arn:",
       {
         "Ref": "AWS::Partition"
       },
