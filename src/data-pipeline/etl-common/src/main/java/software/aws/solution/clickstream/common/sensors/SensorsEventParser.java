@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static software.aws.solution.clickstream.common.ClickstreamEventParser.*;
 import static software.aws.solution.clickstream.common.Util.*;
@@ -46,9 +44,6 @@ public final class SensorsEventParser extends BaseEventParser {
     private static SensorsEventParser instance;
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
     private final Map<String, RuleConfig> appRuleConfig;
-    private static final Pattern USER_AGENT_PATTERN = Pattern.compile(
-            "(?<browser>\\w+)\\/(\\d+(\\.\\d+)?)(\\s*\\((?<os>.*?)\\s*(?<osVersion>\\d+(\\.\\d+)?)?\\s*;\\s*(?<device>.*?)\\))?",
-            Pattern.CASE_INSENSITIVE);
     private static final String GZIP_RAW_DATA = "data_list=";
     private static final String GZIP_WEB_SDK_DATA = "data=";
 
@@ -202,18 +197,6 @@ public final class SensorsEventParser extends BaseEventParser {
             Map<String, Object> deviceUaMap = new HashMap<>();
             deviceUaMap.put(UA_STRING, sensorsEvent.getProperties().getUserAgent());
             clickstreamEvent.setDeviceUa(deviceUaMap);
-            Matcher matcher = USER_AGENT_PATTERN.matcher(sensorsEvent.getProperties().getUserAgent());
-            if (matcher.find()) {
-                String browser = matcher.group("browser");
-                String browserVersion = matcher.group(2);
-                String os = matcher.group("os");
-                String osVersion = matcher.group("osVersion");
-                clickstreamEvent.setDeviceUaBrowser(browser);
-                clickstreamEvent.setDeviceUaBrowserVersion(browserVersion);
-                clickstreamEvent.setDeviceUaOs(os);
-                clickstreamEvent.setDeviceUaOsVersion(osVersion);
-            }
-
         }
 
         if (null != sensorsEvent.getProperties()) {
