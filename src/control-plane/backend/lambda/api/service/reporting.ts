@@ -66,6 +66,7 @@ import {
   getEventPropertyCountPivotTableVisualDef,
   DashboardTitleProps,
   getTimezoneByAppId,
+  isValidGroupingCondition,
 } from './quicksight/reporting-utils';
 import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
@@ -365,7 +366,7 @@ export class ReportingService {
     }
   };
 
-  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string) {
+  private _getProjectColumnsAndDatasetColumns(computeMethodProps: EventComputeMethodsProps, groupingColName?: string[]) {
     const projectedColumns = ['event_date', 'event_name'];
     const datasetColumns: InputColumn[] = [
       {
@@ -379,12 +380,13 @@ export class ReportingService {
     ];
 
     if (groupingColName != undefined) {
-      datasetColumns.push({
-        Name: groupingColName,
-        Type: 'STRING',
-      });
-
-      projectedColumns.push(groupingColName);
+      for (const col of groupingColName) {
+        datasetColumns.push({
+          Name: col,
+          Type: 'STRING',
+        });
+        projectedColumns.push(col);
+      }
     }
 
     if (!computeMethodProps.isMixedMethod) {
@@ -561,7 +563,7 @@ export class ReportingService {
   };
 
   async _getVisualDefOfEventVisualOnEventProperty(computeMethodProps: EventComputeMethodsProps,
-    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string) {
+    tableVisualId: string, viewName: string, titleProps:DashboardTitleProps, groupColumn: string, groupingColName?: string[]) {
 
     let tableVisualDef: Visual;
     if (computeMethodProps.isSameAggregationMethod) {
@@ -608,9 +610,11 @@ export class ReportingService {
 
       const computeMethodProps = getComputeMethodProps(sqlParameters);
 
-      let groupingColName;
-      if ( query.groupCondition !== undefined) {
-        groupingColName = buildColNameWithPrefix(query.groupCondition);
+      let groupingColName:string[] = [];
+      if ( isValidGroupingCondition(query.groupCondition)) {
+        for (const colName of buildColNameWithPrefix(query.groupCondition).colNames) {
+          groupingColName.push(colName);
+        }
       }
 
       const projectedColumnsAndDatasetColumns = this._getProjectColumnsAndDatasetColumns(computeMethodProps, groupingColName);
@@ -704,7 +708,7 @@ export class ReportingService {
           includingOtherEvents: query.pathAnalysis.includingOtherEvents,
           mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
         },
-        groupCondition: query.groupCondition,
+        groupConditionV2: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
       });
     }
@@ -732,7 +736,7 @@ export class ReportingService {
         includingOtherEvents: query.pathAnalysis.includingOtherEvents,
         mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
       },
-      groupCondition: query.groupCondition,
+      groupConditionV2: query.groupCondition,
       globalEventCondition: query.globalEventCondition,
     });
   }
@@ -859,7 +863,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
-        groupCondition: query.groupCondition,
+        groupConditionV2: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);

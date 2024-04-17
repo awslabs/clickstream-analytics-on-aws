@@ -57,7 +57,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './dashboard-ln';
 import { ReportingCheck } from './reporting-check';
-import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
+import { AttributionTouchPoint, ColumnAttribute, Condition, EventAndCondition, EventComputeMethodsProps, GroupingCondition, PairEventAndCondition, SQLParameters, buildConditionProps } from './sql-builder';
 import { AttributionSQLParameters } from './sql-builder-attribution';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -933,7 +933,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
 }
 
 export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string, aggregationMthod?: string) : Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, grouppingColName?: string[], aggregationMthod?: string) : Visual {
 
   const props = _getMultipleVisualProps(grouppingColName !== undefined);
 
@@ -953,8 +953,9 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 
   const fieldWells = visual.PivotTableVisual!.ChartConfiguration!.FieldWells!;
 
+  //todo
   if (grouppingColName !== undefined) {
-    fieldWells.PivotTableAggregatedFieldWells!.Rows![1].CategoricalDimensionField!.Column!.ColumnName = grouppingColName;
+    fieldWells.PivotTableAggregatedFieldWells!.Rows![1].CategoricalDimensionField!.Column!.ColumnName = grouppingColName[0];
   }
 
   if (aggregationMthod !== undefined) {
@@ -1005,7 +1006,7 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 }
 
 export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMethodsProps, visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, grouppingColName?: string) : Visual {
+  titleProps: DashboardTitleProps, grouppingColName?: string[]) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/event-table-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventTableAnalysisType = {
     visualId,
@@ -1026,7 +1027,7 @@ export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMet
         FieldId: uuidv4(),
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: grouppingColName,
+          ColumnName: grouppingColName[0], //todo
         },
       },
     });
@@ -1698,4 +1699,19 @@ export function getTimezoneByAppId(pipeline: IPipeline | undefined, appId: strin
     return DEFAULT_TIMEZONE;
   }
   return pipeline.timezone.find((tz) => tz.appId === appId)?.timezone ?? DEFAULT_TIMEZONE;
+}
+
+export function isValidGroupingCondition(groupCondition: GroupingCondition | undefined): boolean {
+
+  if (groupCondition === undefined || groupCondition.conditions === undefined || groupCondition.conditions.length === 0) {
+    return false;
+  }
+
+  for (const condition of groupCondition.conditions) {
+    if (condition.property === undefined || condition.property === '') {
+      return false;
+    }
+  }
+
+  return true;
 }
