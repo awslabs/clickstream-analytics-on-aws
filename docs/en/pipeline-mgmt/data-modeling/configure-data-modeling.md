@@ -30,13 +30,21 @@ You can set below configurations for Redshift.
 
         * **VPC**: A virtual private cloud (VPC) based on the Amazon VPC service is your private, logically isolated network in the AWS Cloud.
 
-            > **Note**: If you place the cluster within the isolated subnets, the VPC must have VPC endpoints for S3, Logs, Dynamodb, STS, States, Redshift and Redshift-data service.
+            !!! info "Note"
+
+                If you place the cluster within the isolated subnets, the VPC must have VPC endpoints for S3, Logs, Dynamodb, STS, States, Redshift and Redshift-data service.
 
         * **Security Group**: This VPC security group defines which subnets and IP ranges can access the endpoint of Redshift cluster.
 
         * **Subnets**: Select at least three existing VPC subnets.
 
-            > **Note**: We recommend using private subnets to deploy for following security best practices.
+            !!! info "Note"
+            
+                We recommend using private subnets to deploy for following security best practices.
+
+            !!! info "Note"
+            
+                Please ensure that your subnets have enough available IP addresses to create Redshift Serverless, and check [the number of free IP addresses required for each subnet][serverless-usage-considerations].
 
     * **Provisioned mode**
 
@@ -47,3 +55,5 @@ You can set below configurations for Redshift.
     * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.
 
 * **Athena**: Choose Athena to query all data on S3 using the table created in the Glue Data Catalog.
+
+[serverless-usage-considerations]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-usage-considerations.html
