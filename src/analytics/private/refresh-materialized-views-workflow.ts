@@ -299,9 +299,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'ParseTimeZoneWithAppIdListRule', true, []),
@@ -326,10 +323,7 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       ),
       handler: 'handler',
       memorySize: 128,
-      timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
+      timeout: Duration.seconds(30),
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshWorkflowStartRule', true, []),
@@ -354,9 +348,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshSpRole', true, []),
@@ -384,9 +375,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshViewRole', true, []),
@@ -412,9 +400,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshBasicViewRole', true, []),
@@ -442,9 +427,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckStartSpRefreshRole', true, []),
@@ -473,9 +455,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshMvStatusRole', true, []),
@@ -502,9 +481,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshSpStatusRole', true, []),
@@ -532,9 +508,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshSpRole', true, []),
