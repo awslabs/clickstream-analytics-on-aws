@@ -16,6 +16,10 @@ import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } f
 import { JSONPath } from 'jsonpath-plus';
 import { putStringToS3, readS3ObjectAsJson } from '../api/store/aws/s3';
 
+// Set the AWS Region for access s3 bucket.
+// Note: It is different from pipeline region.
+const REGION = process.env.AWS_REGION ?? 'us-east-1';
+
 export interface WorkFlowStack {
   Name: string;
   Type: string;
@@ -95,7 +99,7 @@ export const callback = async (event: SfnStackEvent) => {
   const stack = await describe(event.Input.Region, event.Input.StackName);
   await putStringToS3(
     JSON.stringify({ [event.Input.StackName]: stack ?? {} }),
-    event.Input.Region,
+    REGION,
     event.Callback.BucketName,
     `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
   );
@@ -127,15 +131,14 @@ async function stackParametersResolve(stack: WorkFlowStack) {
   if (stack.Data.Callback.BucketName && stack.Data.Callback.BucketPrefix) {
     const bucket = stack.Data.Callback.BucketName;
     const prefix = stack.Data.Callback.BucketPrefix;
-    const region = stack.Data.Input.Region;
     for (let param of stack.Data.Input.Parameters) {
       let key = param.ParameterKey;
       let value = param.ParameterValue;
       // Find the value in output accurately through JSONPath
       if (param.ParameterKey?.endsWith('.$') && param.ParameterValue?.startsWith('$.')) {
-        ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, region, bucket, prefix));
+        ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, bucket, prefix));
       } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) { // Find the value in output by suffix
-        ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, region, bucket, prefix));
+        ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, bucket, prefix));
       }
       param.ParameterKey = key;
       param.ParameterValue = value;
@@ -147,7 +150,6 @@ async function stackTagsResolve(stack: WorkFlowStack) {
   const tags = stack.Data.Input.Tags;
   const bucket = stack.Data.Callback.BucketName;
   const prefix = stack.Data.Callback.BucketPrefix;
-  const region = stack.Data.Input.Region;
 
   // When the tag Key or Value starts with '#.', resolve the tag using the pattern '#.{stackName}.{outputKeySuffix}'
   // e.g. origin = '#.Clickstream-ServiceCatalogAppRegistry-249f84aa8dd044c2a7294cb04cebe88b.ServiceCatalogAppRegistryApplicationTagKey'
@@ -160,7 +162,7 @@ async function stackTagsResolve(stack: WorkFlowStack) {
     const splitValues = origin.split('.');
     const stackName = splitValues[1];
     const outputKeySuffix = splitValues[2];
-    const outputs = await _getOutputsFromS3(region, bucket, prefix, stackName);
+    const outputs = await _getOutputsFromS3(bucket, prefix, stackName);
     const stackOutput = outputs.find(output => output.OutputKey?.endsWith(outputKeySuffix));
     return stackOutput?.OutputValue;
   };
@@ -181,12 +183,12 @@ async function stackTagsResolve(stack: WorkFlowStack) {
   }
 }
 
-async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, region: string, bucket: string, prefix: string) {
+async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, bucket: string, prefix: string) {
   // get stack name
   const splitValues = paramValue.split('.');
   const stackName = splitValues[1];
   // get output from s3
-  const outputs = await _getOutputsFromS3(region, bucket, prefix, stackName);
+  const outputs = await _getOutputsFromS3(bucket, prefix, stackName);
   const stackOutput = outputs.find(output => output.OutputKey?.endsWith(splitValues[2]));
   return {
     key: paramKey.substring(0, paramKey.length - 2),
@@ -194,12 +196,12 @@ async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValu
   };
 }
 
-async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, region: string, bucket: string, prefix: string) {
+async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, bucket: string, prefix: string) {
   const splitValues = paramValue.split('.');
   const stackName = splitValues[1];
   const fileKey = `${prefix}/${stackName}/output.json`;
   // get stack from s3
-  const stackJson = await _getStackFromS3(region, bucket, fileKey);
+  const stackJson = await _getStackFromS3(bucket, fileKey);
   let value = '';
   if (stackJson) {
     const values = JSONPath({ path: paramValue, json: stackJson });
@@ -213,24 +215,24 @@ async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: 
   };
 }
 
-async function _getStackFromS3(region: string, bucket: string, fileKey: string) {
+async function _getStackFromS3(bucket: string, fileKey: string) {
   try {
-    return await readS3ObjectAsJson(region, bucket, fileKey);
+    return await readS3ObjectAsJson(REGION, bucket, fileKey);
   } catch (err) {
     logger.error('read empty content error.', {
-      err, region, bucket, key: fileKey,
+      err, region: REGION, bucket, key: fileKey,
     });
     return undefined;
   }
 }
 
-async function _getOutputsFromS3(region: string, bucket: string, prefix: string, stackName: string) {
+async function _getOutputsFromS3(bucket: string, prefix: string, stackName: string) {
   const fileKey = `${prefix}/${stackName}/output.json`;
   try {
-    const content = await _getStackFromS3(region, bucket, fileKey);
+    const content = await _getStackFromS3(bucket, fileKey);
     if (!content) {
       logger.warn('read empty outputs.', {
-        region, bucket, key: fileKey,
+        region: REGION, bucket, key: fileKey,
       });
       return [];
     }
@@ -238,7 +240,7 @@ async function _getOutputsFromS3(region: string, bucket: string, prefix: string,
     return outputs;
   } catch (err) {
     logger.error('read outputs error.', {
-      err, region, bucket, key: fileKey,
+      err, region: REGION, bucket, key: fileKey,
     });
     return [];
   }
