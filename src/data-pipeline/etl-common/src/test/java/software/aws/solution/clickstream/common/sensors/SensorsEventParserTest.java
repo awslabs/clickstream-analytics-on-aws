@@ -61,6 +61,7 @@ public class SensorsEventParserTest extends BaseTest {
         SensorsEventParser sensorsEventParser = SensorsEventParser.getInstance();
         ClickstreamIngestRow row = sensorsEventParser.ingestLineToRow(firstLine);
         SensorsEvent event = sensorsEventParser.ingestDataToEvent(row.getData());
+        System.out.println(prettyJson(objectToJsonString(event)));
         String expectedJson = this.resourceFileAsString("/sensors-data/expected/test_sensors_data_ingestDataToEvent.json");
 
         Assertions.assertEquals(expectedJson, prettyJson(objectToJsonString(event)));

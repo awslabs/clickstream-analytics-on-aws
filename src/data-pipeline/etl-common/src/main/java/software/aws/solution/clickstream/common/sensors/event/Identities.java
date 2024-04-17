@@ -27,10 +27,10 @@ import java.util.Map;
 public class Identities {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("identity_android_id")
+    @JsonProperty("$identity_android_id")
     private String identityAndroidId;
 
-    @JsonProperty("identity_login_id")
+    @JsonProperty("$identity_login_id")
     private String identityLoginId;
 
     @JsonAnySetter

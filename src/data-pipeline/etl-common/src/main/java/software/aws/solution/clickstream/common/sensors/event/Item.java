@@ -28,19 +28,19 @@ import java.util.Map;
 public class Item {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
-    @JsonProperty("item_id")
+    @JsonProperty("$item_id")
     private String itemId;
 
-    @JsonProperty("region")
+    @JsonProperty("$region")
     private String region;
 
-    @JsonProperty("item_name")
+    @JsonProperty("$item_name")
     private String itemName;
 
-    @JsonProperty("price")
+    @JsonProperty("$price")
     private double price;
 
-    @JsonProperty("item_list_name")
+    @JsonProperty("$item_list_name")
     private String itemListName;
 
     @JsonAnySetter
