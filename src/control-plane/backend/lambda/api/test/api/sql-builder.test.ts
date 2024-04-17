@@ -7523,7 +7523,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -7725,7 +7725,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: 'geo_country',
@@ -7927,7 +7927,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -8191,7 +8191,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: 'geo_country',
@@ -8455,7 +8455,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: 'geo_country',
@@ -9446,7 +9446,7 @@ describe('SQL Builder test', () => {
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
         conversionIntervalInSeconds: 10*60,
-        groupConditionV2: {
+        groupCondition: {
           conditions: [
             {
               category: ConditionCategory.USER,
@@ -9636,7 +9636,7 @@ describe('SQL Builder test', () => {
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
         conversionIntervalInSeconds: 10*60,
-        groupConditionV2: {
+        groupCondition: {
           conditions: [
             {
               category: ConditionCategory.USER,
@@ -9910,7 +9910,7 @@ describe('SQL Builder test', () => {
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
         conversionIntervalInSeconds: 10*60,
-        groupConditionV2: {
+        groupCondition: {
           conditions: [
             {
               category: ConditionCategory.USER,
@@ -10073,7 +10073,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -10445,7 +10445,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -11444,7 +11444,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT,
@@ -11743,7 +11743,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT,
@@ -11933,7 +11933,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -13004,7 +13004,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -14595,7 +14595,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -14822,7 +14822,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -18354,7 +18354,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -18649,7 +18649,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -19411,7 +19411,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -19924,7 +19924,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT,
@@ -20235,7 +20235,7 @@ describe('SQL Builder test', () => {
           },
         },
       ],
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT,
@@ -20430,7 +20430,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -20679,7 +20679,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -20978,7 +20978,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -21194,7 +21194,7 @@ describe('SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             property: '_session_id',
@@ -21414,7 +21414,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -21839,7 +21839,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -22264,7 +22264,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.EVENT_OUTER,
@@ -22583,7 +22583,7 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      groupConditionV2: {
+      groupCondition: {
         conditions: [
           {
             category: ConditionCategory.USER_OUTER,

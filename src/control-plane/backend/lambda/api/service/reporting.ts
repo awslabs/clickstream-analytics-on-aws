@@ -135,7 +135,6 @@ export class ReportingService {
         return res.status(404).json(new ApiFail('Pipeline not found'));
       }
       query.timezone = getTimezoneByAppId(pipeline, query.appId);
-      console.log('query', query.timezone);
 
       encodeQueryValueForSql(query as SQLParameters);
 
@@ -210,7 +209,7 @@ export class ReportingService {
     }
 
     let groupCondition = undefined;
-    const hasGrouping = props.query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(props.query.groupCondition as GroupingCondition);
+    const hasGrouping = (props.query.chartType === QuickSightChartType.BAR && isValidGroupingCondition(props.query.groupCondition as GroupingCondition));
     if (hasGrouping) {
       groupCondition = props.query.groupCondition as GroupingCondition;
       for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
@@ -287,7 +286,7 @@ export class ReportingService {
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, props.query);
     const quickSightChartType = props.query.chartType;
     const visualDef = getFunnelVisualDef(
-      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn, 
+      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn,
       groupCondition, countColName);
     const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: props.query.timeScopeType,
@@ -488,7 +487,9 @@ export class ReportingService {
       const datasetColumns = [...eventVisualColumns];
 
       let groupCondition = undefined;
-      const hasGrouping = query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(query.groupCondition as GroupingCondition);
+      const hasGrouping = isValidGroupingCondition(query.groupCondition as GroupingCondition);
+
+      console.log('hasGrouping', hasGrouping);
       if (hasGrouping) {
         groupCondition = query.groupCondition as GroupingCondition;
         for (const [index, colName] of buildColNameWithPrefix(query.groupCondition as GroupingCondition).colNames.entries()) {
@@ -547,7 +548,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
+      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
 
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
@@ -717,7 +718,7 @@ export class ReportingService {
           includingOtherEvents: query.pathAnalysis.includingOtherEvents,
           mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
         },
-        groupConditionV2: query.groupCondition,
+        groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
       });
     }
@@ -745,7 +746,7 @@ export class ReportingService {
         includingOtherEvents: query.pathAnalysis.includingOtherEvents,
         mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
       },
-      groupConditionV2: query.groupCondition,
+      groupCondition: query.groupCondition,
       globalEventCondition: query.globalEventCondition,
     });
   }
@@ -872,7 +873,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
-        groupConditionV2: query.groupCondition,
+        groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);
@@ -884,7 +885,7 @@ export class ReportingService {
         'retention',
       ];
       const datasetColumns = [...retentionAnalysisVisualColumns];
-      const hasGrouping = query.chartType == QuickSightChartType.BAR && isValidGroupingCondition(query.groupCondition as GroupingCondition);
+      const hasGrouping = isValidGroupingCondition(query.groupCondition as GroupingCondition);
       let groupCondition = undefined;
       if (hasGrouping) {
         groupCondition = query.groupCondition as GroupingCondition;
@@ -944,7 +945,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, hasGrouping);
+      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, groupCondition);
 
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 

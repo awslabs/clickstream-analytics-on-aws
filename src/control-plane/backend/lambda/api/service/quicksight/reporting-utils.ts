@@ -52,7 +52,6 @@ import {
   GeoSpatialDataRole,
   SimpleNumericalAggregationFunction,
   InputColumnDataType,
-  DimensionField,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -626,9 +625,9 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
   };
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
-  if(isValidGroupingCondition(groupCondition)) {
-    const smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples!
-    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+  if (isValidGroupingCondition(groupCondition)) {
+    const smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples!;
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
       const fieldId = uuidv4();
       smallMultiples.push({
         CategoricalDimensionField: {
@@ -909,12 +908,12 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
-  if(isValidGroupingCondition(groupCondition)) {
+  if (isValidGroupingCondition(groupCondition)) {
     let smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples;
-    if(smallMultiples === undefined) {
+    if (smallMultiples === undefined) {
       smallMultiples = visual.LineChartVisual?.ChartConfiguration?.FieldWells?.LineChartAggregatedFieldWells?.SmallMultiples;
     }
-    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
       const fieldId = uuidv4();
       smallMultiples!.push({
         CategoricalDimensionField: {
@@ -953,7 +952,7 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
 }
 
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupColumn: string, groupCondition: GroupingCondition) : Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, groupCondition: GroupingCondition | undefined) : Visual {
 
   const props = _getMultipleVisualProps(groupCondition !== undefined);
 
@@ -971,9 +970,9 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
-  if(isValidGroupingCondition(groupCondition)) {
+  if (isValidGroupingCondition(groupCondition)) {
     const rows = visual.PivotTableVisual?.ChartConfiguration?.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
-    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
       const fieldId = uuidv4();
       rows.push({
         CategoricalDimensionField: {
@@ -1011,8 +1010,8 @@ export function getEventPropertyCountPivotTableVisualDef(visualId: string, viewN
 
   const fieldWells = visual.PivotTableVisual!.ChartConfiguration!.FieldWells!;
   if (grouppingColName !== undefined) {
-    const rows  = fieldWells.PivotTableAggregatedFieldWells!.Rows!;
-    for(const colName of grouppingColName) {
+    const rows = fieldWells.PivotTableAggregatedFieldWells!.Rows!;
+    for (const colName of grouppingColName) {
       rows.push({
         CategoricalDimensionField: {
           FieldId: uuidv4(),
@@ -1089,15 +1088,18 @@ export function getEventNormalTableVisualDef(computeMethodProps: EventComputeMet
   const fieldWellGroupBy = visual.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells!.GroupBy!;
 
   if (grouppingColName !== undefined) {
-    fieldWellGroupBy.push({
-      CategoricalDimensionField: {
-        FieldId: uuidv4(),
-        Column: {
-          DataSetIdentifier: viewName,
-          ColumnName: grouppingColName[0], //todo
+
+    for (const colName of grouppingColName) {
+      fieldWellGroupBy.push({
+        CategoricalDimensionField: {
+          FieldId: uuidv4(),
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: colName,
+          },
         },
-      },
-    });
+      });
+    }
   }
 
   if (!computeMethodProps.isMixedMethod) {
@@ -1208,7 +1210,7 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
 
 
 export function getQuickSightDataType(metadataValueType: MetadataValueType) : InputColumnDataType {
-  
+
   switch (metadataValueType) {
     case MetadataValueType.STRING:
       return 'STRING';
@@ -1253,12 +1255,12 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 
-  if(isValidGroupingCondition(groupCondition)) {
+  if (isValidGroupingCondition(groupCondition)) {
     let smallMultiples = visual.BarChartVisual?.ChartConfiguration?.FieldWells?.BarChartAggregatedFieldWells?.SmallMultiples;
-    if(smallMultiples === undefined) {
+    if (smallMultiples === undefined) {
       smallMultiples = visual.LineChartVisual?.ChartConfiguration?.FieldWells?.LineChartAggregatedFieldWells?.SmallMultiples;
     }
-    for(const colName of buildColNameWithPrefix(groupCondition).colNames) {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
       const fieldId = uuidv4();
       smallMultiples!.push({
         CategoricalDimensionField: {
@@ -1276,7 +1278,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
 }
 
 export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
-  titleProps: DashboardTitleProps, groupCondition: GroupingCondition) : Visual {
+  titleProps: DashboardTitleProps, groupCondition: GroupingCondition | undefined) : Visual {
 
   const props = _getMultipleVisualProps(groupCondition !== undefined);
 
@@ -1295,8 +1297,8 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   const rows = visual.PivotTableVisual!.ChartConfiguration!.FieldWells?.PivotTableAggregatedFieldWells?.Rows!;
   const existRows = [...rows];
 
-  if(isValidGroupingCondition(groupCondition)) {
-    for(const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
+  if (isValidGroupingCondition(groupCondition)) {
+    for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
       const fieldId = uuidv4();
       rows[index] = {
         CategoricalDimensionField: {
