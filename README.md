@@ -4,7 +4,7 @@ An end-to-end solution to collect, ingest, analyze, and visualize clickstream da
 
 ## Solution Overview
 
-This solution collects, ingests, analyzes, and visualizes clickstreams from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
+This solution collects, ingests, analyzes, and visualizes clickstream events from your websites and mobile applications. Clickstream data is critical for online business analytics use cases, such as user behavior analysis, customer data platform, and marketing analysis. This data derives insights into the patterns of user interactions on a website or application, helping businesses understand user navigation, preferences, and engagement levels to drive product innovation and optimize marketing investments.
 
 With this solution, you can quickly configure and deploy a data pipeline that fits your business and technical needs. It provides purpose-built software development kits (SDKs) that automatically collect common events and easy-to-use APIs to report custom events, enabling you to easily send your customers’ clickstream data to the data pipeline in your AWS account. The solution also offers pre-assembled dashboards that visualize key metrics about user lifecycle, including acquisition, engagement, activity, and retention, and adds visibility into user devices and geographies. You can combine user behavior data with business backend data to create a comprehensive data platform and generate insights that drive business growth.
 
@@ -29,6 +29,7 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [Swift][swift-sdk]
 - [Web][web-sdk]
 - [Flutter][flutter-sdk]
+- [React Native][react-native-sdk]
 - [WeChat Mini Program][wechat-sdk]
 - [HTTP API][http-api]
 
@@ -72,7 +73,9 @@ npx cdk deploy ingestion-server-s3-stack --parameters ...
 
 ```shell
 # update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
-bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh -n modelRedshiftStackName -s Clickstream-DataModelingRedshift-xxx
+# update the existing web console
+bash e2e-deploy.sh -n standardControlPlaneStackName -s <stack name of existing web console> -c
 ```
 
 ## Test
@@ -197,6 +200,7 @@ Upon successfully cloning the repository into your local development environment
 [android-sdk]: https://github.com/awslabs/clickstream-android
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
 [flutter-sdk]: https://github.com/awslabs/clickstream-flutter
+[react-native-sdk]: https://github.com/awslabs/clickstream-react-native
 [web-sdk]: https://github.com/awslabs/clickstream-web
 [wechat-sdk]: https://github.com/awslabs/clickstream-wechat
 [http-api]: https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/http-api/

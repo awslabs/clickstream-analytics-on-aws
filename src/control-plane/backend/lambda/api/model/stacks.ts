@@ -35,6 +35,7 @@ import {
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
   SUBNETS_THREE_AZ_PATTERN,
+  SolutionVersion,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
   VPC_ID_PATTERN,
 } from '@aws/clickstream-base-lib';
@@ -44,7 +45,6 @@ import { CPipelineResources, IPipeline } from './pipeline';
 import { analyticsMetadataTable, awsAccountId, awsRegion, clickStreamTableName } from '../common/constants';
 import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { isSupportVersion, supportVersions } from '../common/parameter-reflect';
-import { SolutionVersion } from '../common/solution-info-ln';
 import {
   validateDataProcessingInterval,
   validatePattern,
@@ -952,6 +952,7 @@ export class CDataModelingStack extends JSONObject {
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'RedshiftServerlessRPU',
+      'TimeZoneWithAppId',
     ];
     return allowedList;
   }
@@ -1251,8 +1252,27 @@ export class CDataModelingStack extends JSONObject {
     const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
     return `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${clickStreamTableName}`;
   })
-  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+  @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     ClickstreamMetadataDdbArn?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack :CDataModelingStack, _key:string, _value:any) => {
+    const tz = stack._pipeline?.timezone ?? [];
+    if (tz.length === 0) {
+      return '';
+    }
+    return JSON.stringify(tz);
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    TimeZoneWithAppId?: string;
+
+  @JSONObject.optional(72)
+  @JSONObject.gt(0)
+  @JSONObject.custom( (stack :CDataProcessingStack, _key:string, _value:any) => {
+    return stack._pipeline?.dataProcessing?.dataFreshnessInHour ?? 72;
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    DataFreshnessInHour?: number;
 
   @JSONObject.optional('')
   @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
@@ -1301,6 +1321,7 @@ export class CReportingStack extends JSONObject {
       'RedshiftParameterKeyParam',
       'QuickSightPrincipalParam',
       'QuickSightOwnerPrincipalParam',
+      'QuickSightTimezoneParam',
     ];
     return allowedList;
   }
@@ -1331,6 +1352,7 @@ export class CReportingStack extends JSONObject {
   @JSONObject.custom( (stack:CReportingStack, _key:string, _value:any) => {
     return stack._resources?.quickSightUser?.publishUserArn ?? '';
   })
+  @supportVersions([SolutionVersion.ANY, SolutionVersion.V_1_1_5])
     QuickSightPrincipalParam?: string;
 
   @JSONObject.optional('')
@@ -1418,14 +1440,25 @@ export class CReportingStack extends JSONObject {
     RedshiftParameterKeyParam?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (stack:CDataModelingStack, _key:string, _value:string) => {
+  @JSONObject.custom( (stack :CReportingStack, _key:string, _value:any) => {
+    const tz = stack._pipeline?.timezone ?? [];
+    if (tz.length === 0) {
+      return '';
+    }
+    return JSON.stringify(tz);
+  })
+  @supportVersions([SolutionVersion.V_1_1_6, SolutionVersion.ANY])
+    QuickSightTimezoneParam?: string;
+
+  @JSONObject.optional('')
+  @JSONObject.custom( (stack:CReportingStack, _key:string, _value:string) => {
     return getAppRegistryApplicationArn(stack._pipeline);
   })
   @supportVersions([SolutionVersion.V_1_1_0, SolutionVersion.ANY])
     AppRegistryApplicationArn?: string;
 
   @JSONObject.optional('')
-  @JSONObject.custom( (_stack:CDataModelingStack, _key:string, _value:string) => {
+  @JSONObject.custom( (_stack:CReportingStack, _key:string, _value:string) => {
     return getIamRoleBoundaryArn();
   })
     IamRoleBoundaryArn?: string;

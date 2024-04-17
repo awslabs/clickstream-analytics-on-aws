@@ -11,14 +11,13 @@
  *  and limitations under the License.
  */
 
+import { generateRandomStr, logger } from '@aws/clickstream-base-lib';
 import { CdkCustomResourceHandler, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { executeStatementsWithWait, getRedshiftClient } from '../../../analytics/lambdas/redshift-data';
 import { SQLDef } from '../../../analytics/private/model';
 import { getSqlContent, getSqlContents } from '../../../analytics/private/utils';
 import { createSchemasInRedshiftAsync } from '../../../common/custom-resource-exec-in-redshift';
 import { planAppChanges } from '../../../common/custom-resources';
-import { logger } from '../../../common/powertools';
-import { generateRandomStr } from '../../../common/utils';
 import { STREAMING_SCHEMA_SUFFIX } from '../../private/constant';
 import { getSinkStreamName } from '../../private/utils';
 import { StreamingIngestionSchemas, MustacheParamType } from '../../redshift/model';

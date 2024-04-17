@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX } from '@aws/clickstream-base-lib';
+import { EVENT_SOURCE_LOAD_DATA_FLOW, SCAN_METADATA_WORKFLOW_PREFIX, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Arn,
   ArnFormat,
@@ -58,6 +58,7 @@ import {
 } from './private/model';
 import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
+import { RefreshMaterializedViewsWorkflow } from './private/refresh-materialized-views-workflow';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UserSegmentsWorkflow } from './private/segments/user-segments-workflow';
 import {
@@ -70,7 +71,6 @@ import {
   ruleToSuppressRolePolicyWithWildcardResources,
 } from '../common/cfn-nag';
 import { createSGForEgressToAwsService } from '../common/sg';
-import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftOdsTables {
@@ -102,6 +102,8 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly dataProcessingCronOrRateExpression: string;
   readonly clickstreamMetadataDdbTable: ITable;
   readonly segmentsS3Prefix: string;
+  readonly dataFreshnessInHour: number;
+  readonly timezoneWithAppId: string;
 }
 
 export class RedshiftAnalyticsStack extends NestedStack {
@@ -111,6 +113,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
   readonly scanMetadataWorkflowArn: string;
+  readonly refreshMaterializedViewsWorkflowArn: string;
   readonly userSegmentsWorkflowArn: string;
 
   constructor(
@@ -269,6 +272,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       codePath,
       functionEntry,
       workflowBucketInfo: props.workflowBucketInfo,
+      timeZoneWithAppId: props.timezoneWithAppId,
     });
 
     this.sqlExecutionWorkflow = this.applicationSchema.sqlExecutionStepFunctions;
@@ -283,14 +287,14 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const redshiftRoleForCopyFromS3 = new Role(this, 'CopyDataFromS3Role', {
+    const redshiftAssociatedRole = new Role(this, 'RedshiftAssociatedRole', {
       assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
     });
-    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateS3CopyRole',
+    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateIAMRole',
       {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
-        role: redshiftRoleForCopyFromS3,
+        role: redshiftAssociatedRole,
       }).cr;
     crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForSQLExecution);
 
@@ -313,6 +317,24 @@ export class RedshiftAnalyticsStack extends NestedStack {
     });
 
     this.scanMetadataWorkflowArn = scanMetadataWorkflow.scanMetadataWorkflow.stateMachineArn;
+
+    const refreshMaterializedViewsWorkflow = new RefreshMaterializedViewsWorkflow(this, REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX, {
+      appIds: props.appIds,
+      projectId: props.projectId,
+      securityGroupForLambda,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timezoneWithAppId: props.timezoneWithAppId,
+    });
+
+    this.refreshMaterializedViewsWorkflowArn = refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine.stateMachineArn;
 
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
@@ -342,11 +364,13 @@ export class RedshiftAnalyticsStack extends NestedStack {
       emrServerlessApplicationId: props.emrServerlessApplicationId,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
-      redshiftRoleForCopyFromS3,
+      redshiftRoleForCopyFromS3: redshiftAssociatedRole,
       ddbStatusTable,
       tablesOdsSource: props.tablesOdsSource,
       workflowBucketInfo: props.workflowBucketInfo,
       loadDataConfig: props.loadDataConfig,
+      refreshViewStateMachineArn: this.refreshMaterializedViewsWorkflowArn,
+      pipelineEmrStatusS3Prefix: props.scanMetadataWorkflowData.pipelineS3Prefix,
       nextStateStateMachines: [
         {
           name: 'Scan Metadata Async',
@@ -368,6 +392,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
 
@@ -383,6 +409,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
@@ -396,6 +424,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
+        mvRefreshInterval: props.mvRefreshInterval.toString(),
+        refreshMaterializedViewsWorkflow: refreshMaterializedViewsWorkflow.refreshMaterializedViewsMachine,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
@@ -411,6 +441,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       },
       clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      redshiftAssociatedRole,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
@@ -500,9 +531,26 @@ function addCfnNag(stack: Stack) {
       ],
     },
     {
-      paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
+      paths_endswith: ['RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
-        ruleToSuppressRolePolicyWithHighSPCM('CopyDataFromS3'),
+        ...ruleRolePolicyWithWildcardResources(
+          'RefreshMaterializedViewsMachine/Role/DefaultPolicy/Resource',
+          'RefreshMaterializedViewsWorkflow', 'logs/xray').rules_to_suppress,
+        ruleToSuppressRolePolicyWithHighSPCM('RefreshMaterializedViewsWorkflow'),
+      ],
+    },
+    {
+      paths_endswith: ['RefreshSpStateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'RefreshSpStateMachine/Role/DefaultPolicy/Resource',
+          'RefreshSpStateMachine', 'logs/xray').rules_to_suppress,
+      ],
+    },
+    {
+      paths_endswith: ['RedshiftAssociatedRole/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ruleToSuppressRolePolicyWithHighSPCM('RedshiftAssociatedRole'),
       ],
     },
     {

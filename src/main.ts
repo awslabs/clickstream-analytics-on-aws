@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { Architecture } from '@aws-sdk/client-lambda';
 import { Annotations, App, Aspects, CfnCondition, Fn, IAspect, Stack } from 'aws-cdk-lib';
 import { CfnFunction, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -21,7 +22,6 @@ import { IConstruct } from 'constructs';
 import { ApplicationLoadBalancerControlPlaneStack } from './alb-control-plane-stack';
 import { CloudFrontControlPlaneStack } from './cloudfront-control-plane-stack';
 import { commonCdkNagRules } from './common/cfn-nag';
-import { SolutionInfo } from './common/solution-info';
 import { DataAnalyticsRedshiftStack } from './data-analytics-redshift-stack';
 import { DataModelingAthenaStack } from './data-modeling-athena-stack';
 import { DataPipelineStack } from './data-pipeline-stack';
@@ -108,7 +108,7 @@ if (!(/true/i).test(app.node.tryGetContext('ignoreWebConsoleSynth'))) {
   ];
 
   stackSuppressions([
-    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+    new CloudFrontControlPlaneStack(app, app.node.tryGetContext('standardControlPlaneStackName') ?? 'cloudfront-s3-control-plane-stack-global', {
       synthesizer: synthesizer(),
     }),
     new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {

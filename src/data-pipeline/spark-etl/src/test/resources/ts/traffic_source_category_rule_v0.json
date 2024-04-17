@@ -1,0 +1,410 @@
+[
+    {
+        "url": "www.gnadenmeer.de",
+        "source": "Gnadenmeer",
+        "category": "Search",
+        "params": [
+            "keyword"
+        ]
+    },
+    {
+        "url": "aax-us-east.amazon-adsystem.com",
+        "source": "aax-us-east.amazon-adsystem",
+        "category": "Shopping",
+        "params": []
+    },
+    {
+        "url": "lang-8.com",
+        "source": "lang-8",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "search.comcast.net",
+        "source": "Comcast",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "wsdsold.infospace.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": []
+    },
+    {
+        "url": "airg.ca",
+        "source": "airg",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "43things.com",
+        "source": "43things",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "search.naver.com",
+        "source": "Naver",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "hatena.com",
+        "source": "Hatena",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "360.cn",
+        "source": "360",
+        "category": "Search",
+        "params": []
+    },
+    {
+        "url": "activerain.com",
+        "source": "activerain",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "ameba.jp",
+        "source": "ameba",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "search.avast.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "isearch.babylon.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "last.fm",
+        "source": "last",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.ru",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.de",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.es",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.fr",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.it",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.jp",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.pl",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.com.br",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.se",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lastfm.com.tr",
+        "source": "Last.fm",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "linkedin.com",
+        "source": "linkedin",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "lnkd.in",
+        "source": "lnkd",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "ko.search.need2find.com",
+        "source": "Needtofind",
+        "category": "Search",
+        "params": [
+            "searchfor"
+        ]
+    },
+    {
+        "url": "www.neti.ee",
+        "source": "Neti",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "avg.com",
+        "source": "avg",
+        "category": "Search",
+        "params": []
+    },
+    {
+        "url": "b.hatena.ne.jp",
+        "source": "b.hatena",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "alibaba.com",
+        "source": "alibaba",
+        "category": "Shopping",
+        "params": []
+    },
+    {
+        "url": "ar.pinterest.com",
+        "source": "ar.pinterest",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "start.facemoods.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "s"
+        ]
+    },
+    {
+        "url": "start.funmoods.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "search.magentic.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "search.searchcompletion.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "au.search.yahoo.com",
+        "source": "au.search.yahoo",
+        "category": "Search",
+        "params": []
+    },
+    {
+        "url": "babyblog.ru",
+        "source": "babyblog",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "babylon.com",
+        "source": "babylon",
+        "category": "Search",
+        "params": []
+    },
+    {
+        "url": "bebo.com",
+        "source": "Bebo",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "www.searchmobileonline.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "artstation.com",
+        "source": "artstation",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "askubuntu.com",
+        "source": "askubuntu",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "americantowns.com",
+        "source": "americantowns",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "anobii.com",
+        "source": "anobii",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "images.search.conduit.com",
+        "source": "Conduit.com",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.crawler.com",
+        "source": "Crawler",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.cuil.com",
+        "source": "Cuil",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "daemon-search.com",
+        "source": "Daemon search",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.gomeo.com",
+        "source": "Gomeo",
+        "category": "Search",
+        "params": [
+            "keywords"
+        ]
+    },
+    {
+        "url": "search.goo.ne.jp",
+        "source": "goo",
+        "category": "Search",
+        "params": [
+            "mt"
+        ]
+    },
+    {
+        "url": "govome.inspsearch.com",
+        "source": "InfoSpace",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "www.google.interia.pl",
+        "source": "Interia",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "google.com",
+        "source": "google",
+        "category": "Search",
+        "params": [
+            "q"
+        ]
+    },
+    {
+        "url": "ixquick.com",
+        "source": "IxQuick",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "www.eu.ixquick.com",
+        "source": "IxQuick",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "us.ixquick.com",
+        "source": "IxQuick",
+        "category": "Search",
+        "params": [
+            "query"
+        ]
+    },
+    {
+        "url": "wechat.com",
+        "source": "wechat",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "za.pinterest.com",
+        "source": "za.pinterest",
+        "category": "Social",
+        "params": []
+    }
+]

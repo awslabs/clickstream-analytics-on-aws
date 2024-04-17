@@ -11,13 +11,10 @@
  *  and limitations under the License.
  */
 
-import { SegmentJobStatus } from '@aws/clickstream-base-lib';
+import { SegmentDdbItem, SegmentJobStatus, aws_sdk_client_common_config, logger, parseDynamoDBTableARN } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { StateMachineStatusOutput } from './state-machine-status';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { parseDynamoDBTableARN } from '../../../common/utils';
 import { executeStatements, getRedshiftClient, getRedshiftProps } from '../redshift-data';
 
 export type ExecuteSegmentQueryEvent = StateMachineStatusOutput;
@@ -48,12 +45,14 @@ const redshiftClient = getRedshiftClient(process.env.REDSHIFT_DATA_API_ROLE!);
 
 export const handler = async (event: ExecuteSegmentQueryEvent) => {
   try {
+    const { appId, segmentId, jobRunId } = event;
+
     // Update segment job status to 'In Progress'
     const command = new UpdateCommand({
       TableName: ddbTableName,
       Key: {
-        id: event.segmentId,
-        type: `SEGMENT_JOB#${event.jobRunId}`,
+        id: segmentId,
+        type: `SEGMENT_JOB#${jobRunId}`,
       },
       UpdateExpression: 'set jobStatus = :js',
       ExpressionAttributeValues: {
@@ -64,10 +63,20 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
     logger.info('Update segment job status to \'In Progress\'');
     await ddbDocClient.send(command);
 
-    // Construct and execute segment query
-    const sql = await constructSqlStatement(event.appId, event.segmentId);
-    const queryId = await executeStatements(redshiftClient, [sql], serverlessRedshiftProps, provisionedRedshiftProps);
-    logger.info('Execute segment query: ', { queryId });
+    // Execute segment query by calling stored procedure
+    const response = await ddbDocClient.send(new GetCommand({
+      TableName: ddbTableName,
+      Key: {
+        id: appId,
+        type: `SEGMENT_SETTING#${segmentId}`,
+      },
+    }));
+    const segment = response.Item as SegmentDdbItem;
+    const escapedSql = segment.sql!.replace(/'/g, '\'\'');
+    const s3Path = `s3://${process.env.PIPELINE_S3_BUCKET}/${process.env.SEGMENTS_S3_PREFIX}app/${appId}/segment/${segmentId}/job/${jobRunId}/`;
+    const sp = `CALL ${appId}.sp_user_segment('${segmentId}', '${escapedSql}', '${s3Path}', '${process.env.REDSHIFT_ASSOCIATED_ROLE}')`;
+    const queryId = await executeStatements(redshiftClient, [sp], serverlessRedshiftProps, provisionedRedshiftProps);
+    logger.info('Execute segment query', { queryId, query: sp });
     const output: ExecuteSegmentQueryOutput = {
       appId: event.appId,
       segmentId: event.segmentId,
@@ -80,17 +89,4 @@ export const handler = async (event: ExecuteSegmentQueryEvent) => {
     logger.error('Error when executing segment query.', err as Error);
     throw err;
   }
-};
-
-const constructSqlStatement = async (appId: string, segmentId: string) => {
-  await ddbDocClient.send(new GetCommand({
-    TableName: ddbTableName,
-    Key: {
-      id: appId,
-      type: `SEGMENT_SETTING#${segmentId}`,
-    },
-  }));
-
-  // TODO: construct sql
-  return `SELECT 1, '${appId}', '${segmentId}';`;
 };

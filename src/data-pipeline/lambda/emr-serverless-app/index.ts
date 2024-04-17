@@ -12,12 +12,10 @@
  */
 
 
-import { EMR_ARCHITECTURE_AUTO } from '@aws/clickstream-base-lib';
+import { EMR_ARCHITECTURE_AUTO, aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { EMRServerlessClient, CreateApplicationCommand, Architecture, CreateApplicationCommandInput, DeleteApplicationCommand } from '@aws-sdk/client-emr-serverless';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { EmrApplicationArchitectureType } from '../../../data-pipeline-stack';
 
 export interface ResourcePropertiesType {

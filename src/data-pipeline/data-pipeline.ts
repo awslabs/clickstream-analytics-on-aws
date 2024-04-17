@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, SolutionInfo, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -34,16 +34,16 @@ import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
 import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
-import { SolutionInfo } from '../common/solution-info';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
+import { TrafficSourceServ } from '../control-plane/backend/lambda/api/service/traffic';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
-  EVENT='event',
-  EVENT_PARAMETER='event_parameter',
-  USER='user',
-  ITEM='item'
+  EVENT_V2='event_v2',
+  SESSION='session',
+  USER_V2='user_v2',
+  ITEM_V2='item_v2'
 }
 
 export interface DataPipelineProps {
@@ -72,10 +72,10 @@ export interface DataPipelineProps {
 }
 
 export interface ClickstreamSinkTables {
-  readonly eventTable: Table;
-  readonly eventParameterTable: Table;
-  readonly userTable: Table;
-  readonly itemTable: Table;
+  readonly eventV2Table: Table;
+  readonly sessionTable: Table;
+  readonly userV2Table: Table;
+  readonly itemV2Table: Table;
 }
 
 export class DataPipelineConstruct extends Construct {
@@ -323,4 +323,15 @@ export class DataPipelineConstruct extends Construct {
 
     });
   }
+}
+
+export function getRuleConfigDir(prefix: string, projectId: string) {
+  let ruleConfigPrefix: string;
+  if (prefix.startsWith(`clickstream/${projectId}/`)) {
+    const tsServ = new TrafficSourceServ();
+    ruleConfigPrefix = tsServ.getConfigRuleKeyPrefix(projectId);
+  } else {
+    ruleConfigPrefix = prefix + projectId + '/rules/';
+  }
+  return ruleConfigPrefix;
 }

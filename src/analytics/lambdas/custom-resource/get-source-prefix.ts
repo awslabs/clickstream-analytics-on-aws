@@ -12,8 +12,8 @@
  */
 
 
+import { logger } from '@aws/clickstream-base-lib';
 import { CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
 
 export interface ServiceTokenType {
   readonly ServiceToken: string;

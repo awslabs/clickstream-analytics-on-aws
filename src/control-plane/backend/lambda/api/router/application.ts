@@ -76,6 +76,17 @@ router_app.delete(
     return appServ.delete(req, res, next);
   });
 
+router_app.put(
+  '/:id/timezone',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId')
+      .custom(isProjectExisted),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return appServ.updateTimezone(req, res, next);
+  });
 
 export {
   router_app,

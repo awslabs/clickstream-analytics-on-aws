@@ -15,8 +15,10 @@
 package software.aws.solution.clickstream;
 
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.Dataset;
@@ -27,7 +29,9 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
+import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import javax.validation.constraints.NotEmpty;
@@ -48,10 +52,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.decode;
 import static org.apache.spark.sql.functions.input_file_name;
 import static org.apache.spark.sql.functions.date_format;
 
 import static software.aws.solution.clickstream.TransformerV3.CLIENT_TIMESTAMP;
+import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
 import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.util.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
@@ -66,13 +72,93 @@ public class ETLRunner {
     public static final String DEBUG_LOCAL_PATH = System.getProperty("debug.local.path", "/tmp/etl-debug");
     public static final String TRANSFORM_METHOD_NAME = "transform";
     public static final String EVENT_DATE = "event_date";
+    public static final String CONFIG_METHOD = "config";
     private final SparkSession spark;
-    private final ETLRunnerConfig config;
+    private final ETLRunnerConfig runConfig;
     private TableName eventTableName = null;
 
-    public ETLRunner(final SparkSession spark, final ETLRunnerConfig config) {
+    @Getter
+    private TransformConfig transformConfig;
+
+    public ETLRunner(final SparkSession spark, final ETLRunnerConfig runConfig) {
         this.spark = spark;
-        this.config = config;
+        this.runConfig = runConfig;
+        initConfig(runConfig);
+    }
+
+    void initConfig(final ETLRunnerConfig runConfig) {
+        String ruleConfigDir = runConfig.getConfigRuleDir();
+        log.info("ruleConfigDir: " + ruleConfigDir);
+        Dataset<Row> configFileDataset = this.spark.read().format("binaryFile")
+                .option("pathGlobFilter", "*.json")
+                .option("recursiveFileLookup", "true")
+                .load(ruleConfigDir);
+
+        List<PathContent> configFileList = configFileDataset.select(col("path"), decode(col("content"), "utf8").alias("content"))
+                .as(Encoders.bean(PathContent.class)).collectAsList();
+
+        Map<String, RuleConfig> appRuleConfig = new HashMap<>();
+        for (PathContent pathContent : configFileList) {
+            log.info("path: " + pathContent.getPath());
+
+            String path = pathContent.getPath();
+            String content = pathContent.getContent();
+
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 2) {
+                log.warn("Invalid path: " + path);
+                continue;
+            }
+            String fileName = pathParts[pathParts.length - 1];
+            String appId = pathParts[pathParts.length - 2];
+
+            RuleConfig ruleConfig = null;
+            if (appRuleConfig.containsKey(appId)) {
+                ruleConfig = appRuleConfig.get(appId);
+            } else {
+                ruleConfig = new RuleConfig();
+                appRuleConfig.put(appId, ruleConfig);
+            }
+
+            String categoryRuleFileNameV1 = "traffic_source_category_rule_v1.json";
+            String channelRuleFileNameV1 = "traffic_source_channel_rule_v1.json";
+
+            if (categoryRuleFileNameV1.equalsIgnoreCase(fileName)) {
+                ruleConfig.setOptCategoryRuleJson(content);
+            }
+            if (channelRuleFileNameV1.equalsIgnoreCase(fileName)) {
+                ruleConfig.setOptChannelRuleJson(content);
+            }
+        }
+
+        showConfigInfo(appRuleConfig, runConfig.getValidAppIds());
+
+        TransformConfig transformRuleConfig = new TransformConfig();
+        transformRuleConfig.setAppRuleConfig(appRuleConfig);
+
+        this.transformConfig = transformRuleConfig;
+    }
+
+    private static void showConfigInfo(final Map<String, RuleConfig> appRuleConfig, final String appIds) {
+        for (Map.Entry<String, RuleConfig> entry : appRuleConfig.entrySet()) {
+            String appInfo = "appId: " + entry.getKey() + ", ";
+            if (entry.getValue().getOptCategoryRuleJson() != null) {
+                log.info(appInfo + "getOptCategoryRuleJson length: " + entry.getValue().getOptCategoryRuleJson().length());
+            } else {
+                log.warn(appInfo + "getOptCategoryRuleJson is null");
+            }
+            if (entry.getValue().getOptChannelRuleJson() != null) {
+                log.info(appInfo + "getOptChannelRuleJson length: " + entry.getValue().getOptChannelRuleJson().length());
+            } else {
+                log.warn(appInfo + "getOptChannelRuleJson is null");
+            }
+        }
+
+        for (String appId: appIds.split(",")) {
+            if (!appRuleConfig.containsKey(appId)) {
+                log.warn("appRuleConfig does not contain appId: " + appId);
+            }
+        }
     }
 
     public static Dataset<Row> execPostTransform(final Dataset<Row> dataset, final String transformerClassName) {
@@ -126,7 +212,7 @@ public class ETLRunner {
     }
 
     public void run() {
-        ContextUtil.setContextProperties(this.config);
+        ContextUtil.setContextProperties(this.runConfig);
 
         log.info(JOB_NAME_PROP + ":" + System.getProperty(JOB_NAME_PROP));
         log.info(WAREHOUSE_DIR_PROP + ":" + System.getProperty(WAREHOUSE_DIR_PROP));
@@ -135,7 +221,7 @@ public class ETLRunner {
         ContextUtil.cacheDataset(dataset);
         log.info(new ETLMetric(dataset, "source").toString());
 
-        Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
+        Dataset<Row> dataset2 = executeTransformers(dataset, runConfig.getTransformerClassNames());
 
         long resultCount = writeResultEventDataset(dataset2);
         log.info(new ETLMetric(resultCount, SINK).toString());
@@ -144,11 +230,11 @@ public class ETLRunner {
     private Dataset<Row> rePartitionInputDataset(final Dataset<Row> dataset) {
         int inputDataPartitions = dataset.rdd().getNumPartitions();
         Dataset<Row> repDataset = dataset;
-        if (config.getRePartitions() > 0
-                && (inputDataPartitions > 200 || config.getRePartitions() < inputDataPartitions)
+        if (runConfig.getRePartitions() > 0
+                && (inputDataPartitions > 200 || runConfig.getRePartitions() < inputDataPartitions)
         ) {
-            log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.getRePartitions());
-            repDataset = repDataset.repartition(config.getRePartitions(),
+            log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + runConfig.getRePartitions());
+            repDataset = repDataset.repartition(runConfig.getRePartitions(),
                     col("ingest_time"), col("rid"));
         }
         log.info("NumPartitions: " + repDataset.rdd().getNumPartitions());
@@ -156,7 +242,7 @@ public class ETLRunner {
     }
 
     public long writeResultEventDataset(final Dataset<Row> dataset2) {
-        String outPath = config.getOutputPath();
+        String outPath = runConfig.getOutputPath();
         if (this.eventTableName == null) {
             throw new IllegalStateException("eventTableName is null");
         }
@@ -165,25 +251,25 @@ public class ETLRunner {
 
     public Dataset<Row> readInputDataset(final boolean checkModifiedTime) {
 
-        List<String[]> partitions = getSourcePartition(config.getStartTimestamp(), config.getEndTimestamp());
-        List<String> sourcePaths = getSourcePaths(config.getSourcePath(), partitions);
+        List<String[]> partitions = getSourcePartition(runConfig.getStartTimestamp(), runConfig.getEndTimestamp());
+        List<String> sourcePaths = getSourcePaths(runConfig.getSourcePath(), partitions);
 
         String[] sourcePathsArray = sourcePaths.toArray(new String[]{});
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         ZoneId utc = ZoneId.of("UTC");
 
-        ZonedDateTime modifiedAfterDatetime = Instant.ofEpochMilli(config.getStartTimestamp())
+        ZonedDateTime modifiedAfterDatetime = Instant.ofEpochMilli(runConfig.getStartTimestamp())
                 .atZone(utc);
         // add one second to endTimestamp here to change range from inclusive to exclusive
         // (startTimestamp, endTimestamp] ==> (modifiedAfter, modifiedBefore)
-        ZonedDateTime modifiedBeforeDatetime = Instant.ofEpochMilli(config.getEndTimestamp() + 1000L)
+        ZonedDateTime modifiedBeforeDatetime = Instant.ofEpochMilli(runConfig.getEndTimestamp() + 1000L)
                 .atZone(utc);
 
         String modifiedAfter = dateTimeFormatter.format(modifiedAfterDatetime);
         String modifiedBefore = dateTimeFormatter.format(modifiedBeforeDatetime);
 
-        log.info("startTimestamp:" + config.getStartTimestamp() + ", endTimestamp:" + config.getEndTimestamp());
+        log.info("startTimestamp:" + runConfig.getStartTimestamp() + ", endTimestamp:" + runConfig.getEndTimestamp());
         log.info("modifiedAfter:" + modifiedAfter + ", modifiedBefore:" + modifiedBefore);
         log.info("sourcePathsArray:" + String.join(",", sourcePathsArray));
 
@@ -221,18 +307,20 @@ public class ETLRunner {
         Dataset<Row> dataset = spark.read()
                 .options(options)
                 .schema(inputDataSchema)
-                .json(sourcePathsArray[0]);
+                .json(sourcePathsArray[0])
+                .withColumn(INPUT_FILE_NAME, input_file_name());
         log.info("read source " + 0 + ", path:" + sourcePathsArray[0]);
         for (int i = 1; i < sourcePathsArray.length; i++) {
             Dataset<Row> datasetTemp = spark.read()
                     .options(options)
                     .schema(inputDataSchema)
-                    .json(sourcePathsArray[i]);
+                    .json(sourcePathsArray[i])
+                    .withColumn(INPUT_FILE_NAME, input_file_name());
             log.info("read source " + i + ", path:" + sourcePathsArray[i]);
             dataset = dataset.unionAll(datasetTemp);
         }
 
-        List<Row> inputFiles = dataset.select(input_file_name().alias("fileName")).distinct().collectAsList();
+        List<Row> inputFiles = dataset.select(col(INPUT_FILE_NAME).alias("fileName")).distinct().collectAsList();
         inputFiles.forEach(row -> log.info(row.getAs("fileName")));
         long fileNameCount = inputFiles.size();
         log.info(new ETLMetric(fileNameCount, "loaded input files").toString());
@@ -270,6 +358,9 @@ public class ETLRunner {
             } else if (Map.class.getCanonicalName().equals(transform.getReturnType().getCanonicalName())) {
                 // V3 transform for event_v2
                 this.eventTableName = TableName.EVENT_V2;
+
+                configTransformerInstance(aClass, instance);
+
                 Map<TableName, Dataset<Row>> transformedDatasets = (Map<TableName, Dataset<Row>>) transform.invoke(instance, dataset);
                 eventDataset = transformedDatasets.get(TableName.EVENT_V2);
                 saveTransformedDatasets(transformedDatasets);
@@ -292,6 +383,12 @@ public class ETLRunner {
         }
     }
 
+    private void configTransformerInstance(final Class<?> aClass, final Object instance)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+            Method configMethod = aClass.getMethod(CONFIG_METHOD, TransformConfig.class);
+            configMethod.invoke(instance, this.transformConfig);
+    }
+
     private void saveTransformedDatasets(final List<Dataset<Row>> transformedDatasets) {
         if (transformedDatasets.size() != 4) {
             return;
@@ -299,7 +396,7 @@ public class ETLRunner {
         Dataset<Row> evenParamDataset = transformedDatasets.get(1);
         Dataset<Row> itemDataset = transformedDatasets.get(2);
         Dataset<Row> userDataset = transformedDatasets.get(3);
-        String outPath = config.getOutputPath();
+        String outPath = runConfig.getOutputPath();
         long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
         log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.getTableName()).toString());
 
@@ -321,7 +418,7 @@ public class ETLRunner {
                 continue;
             }
             Dataset<Row> dataset = entry.getValue();
-            String outPath = config.getOutputPath();
+            String outPath = runConfig.getOutputPath();
             long datasetCount = writeResult(outPath, dataset, tableName);
             log.info(new ETLMetric(datasetCount, SINK + " " + tableName.getTableName()).toString());
         }
@@ -345,7 +442,7 @@ public class ETLRunner {
         log.info("saveOutputPath: " + saveOutputPath);
 
         String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
-        if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
+        if ("json".equalsIgnoreCase(runConfig.getOutPutFormat())) {
             partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
         } else {
             int numPartitions = Math.max((int) (resultCount / 100_000), 1);

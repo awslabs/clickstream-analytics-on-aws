@@ -45,6 +45,7 @@ echo "issuer: $issuer"
 export ISSUER=$issuer
 export WITH_AUTH_MIDDLEWARE=true
 export WITH_VALIDATE_ROLE=true
+export LOG_LEVEL=DEBUG
 
 # Run the server
 cd ../backend/lambda/api && pnpm dev

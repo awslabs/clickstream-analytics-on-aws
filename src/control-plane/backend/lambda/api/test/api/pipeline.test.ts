@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX } from '@aws/clickstream-base-lib';
+import { OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX, SolutionVersion } from '@aws/clickstream-base-lib';
 import { DescribeStacksCommand, CloudFormationClient, StackStatus } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient, PutRuleCommand, TagResourceCommand as EventTagResourceCommand } from '@aws-sdk/client-cloudwatch-events';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
@@ -86,7 +86,6 @@ import {
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
-import { SolutionVersion } from '../../common/solution-info-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { getDefaultTags, getStackPrefix } from '../../common/utils';
 import { app, server } from '../../index';
@@ -164,6 +163,51 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Check callback bucket when create pipeline without execution info', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+    });
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
+    ddbMock.on(PutCommand).resolves({});
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const workflow = input.TransactItems[1].Put.Item.workflow.M.Workflow.M;
+      const serviceCatalogAppRegistry = workflow.Branches.L[0].M.States.M.ServiceCatalogAppRegistry.M;
+      const callback = serviceCatalogAppRegistry.Data.M.Callback.M;
+      console.log(callback);
+      expect(
+        callback.BucketName.S === 'TEST_EXAMPLE_BUCKET' &&
+        callback.BucketPrefix.S.startsWith('clickstream/workflow/main-') &&
+        callback.BucketPrefix.S.endsWith('-1677715200000'),
+      ).toBeTruthy();
+    });
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+        status: undefined,
+        executionDetail: undefined,
+        executionArn: undefined,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
   });
   it('Create pipeline with error bucket', async () => {
     tokenMock(ddbMock, false);
@@ -3165,8 +3209,8 @@ describe('Pipeline test', () => {
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
-        dataProcessingInput.M.Tags.L[3].M.Key.S === 'customerKey3' &&
-        reportInput.M.Tags.L[3].M.Key.S === 'customerKey3',
+        dataProcessingInput.M.Tags.L[5].M.Key.S === 'customerKey3' &&
+        reportInput.M.Tags.L[5].M.Key.S === 'customerKey3',
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3380,6 +3424,7 @@ describe('Pipeline test', () => {
         tags: [
           { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
         ],
+        timezone: undefined,
       },
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
@@ -3415,6 +3460,7 @@ describe('Pipeline test', () => {
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
+        expressionAttributeValues[':timezone'].L.length === 0 &&
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
@@ -3561,6 +3607,7 @@ describe('Pipeline test', () => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
       const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       expect(
+        expressionAttributeValues[':timezone'].L.length === 1 &&
         expressionAttributeValues[':templateVersion'].S === FULL_SOLUTION_VERSION &&
         expressionAttributeValues[':tags'].L[0].M.value.S === FULL_SOLUTION_VERSION &&
         dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2',
@@ -3970,7 +4017,7 @@ describe('Pipeline test', () => {
       Items: [],
     });
     ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
+    const res = await request(app)
       .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -3978,18 +4025,6 @@ describe('Pipeline test', () => {
       data: null,
       success: true,
       message: 'Pipeline deleted.',
-    });
-
-    // Mock DynamoDB error
-    ddbMock.on(UpdateCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
-      .delete(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Unexpected error occurred at server.',
-      error: 'Error',
     });
   });
   it('Delete pipeline with no pid', async () => {

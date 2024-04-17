@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { Route53Client, paginateListHostedZones, HostedZone } from '@aws-sdk/client-route-53';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { Route53HostedZone } from '../../common/types';
 
 export const listHostedZones = async () => {

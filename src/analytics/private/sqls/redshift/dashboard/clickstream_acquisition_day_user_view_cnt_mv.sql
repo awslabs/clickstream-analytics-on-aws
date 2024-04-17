@@ -4,7 +4,7 @@ SORTKEY(event_date, platform)
 AUTO REFRESH NO
 AS 
 SELECT 
-  DATE_TRUNC('day', CONVERT_TIMEZONE('{{timezone}}', event_timestamp)) AS event_date,
+  DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) AS event_date,
   platform,
   merged_user_id as "Active users", 
   SUM(CASE WHEN event_name = '_first_open' THEN 1 ELSE 0 END) AS "New users",

@@ -1,0 +1,23 @@
+[
+    {
+        "url": "search.comcast.net",
+        "source": "Comcast",
+        "category": "Search",
+        "params": [
+            "q",
+            "query"
+        ]
+    },
+    {
+        "url": "wechat.com/search",
+        "source": "wechat search",
+        "category": "Social",
+        "params": []
+    },
+    {
+        "url": "za.pinterest.com",
+        "source": "za.pinterest",
+        "category": "Social",
+        "params": []
+    }
+]

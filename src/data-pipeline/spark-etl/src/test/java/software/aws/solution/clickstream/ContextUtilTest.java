@@ -17,7 +17,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.util.*;
 
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
@@ -39,12 +42,20 @@ public class ContextUtilTest {
         String dataFreshnessInHour = "72";
         String outputPartitions = "-1";
 
+        Path configDirPath = null;
+        try {
+            configDirPath = Paths.get(Objects.requireNonNull(getClass().getResource("/rule_config/")).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
                 new ETLRunnerConfig.TransformationConfig(
                         newArrayList(transformerClassNames.split(",")),
                         projectId, validAppIds,
                         Long.valueOf(dataFreshnessInHour),
-                        360 * 30, 360 * 30
+                        360 * 30, 360 * 30,
+                        configDirPath.toString()
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "true",

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import {
   ECSClient,
   DeleteClusterCommand,
@@ -23,9 +24,6 @@ import {
   DeleteServiceCommand,
 } from '@aws-sdk/client-ecs';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { sleep } from '../../../common/utils';
 
 const region = process.env.AWS_REGION!;
 

@@ -15,8 +15,10 @@ import path from 'path';
 import {
   CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX,
   CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX,
+  POWERTOOLS_ENVS,
   QUICKSIGHT_RESOURCE_NAME_PREFIX,
   SCAN_METADATA_WORKFLOW_PREFIX,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import {
   CfnResource,
@@ -59,8 +61,6 @@ import { StackWorkflowStateMachine } from './stack-workflow-state-machine-constr
 import { addCfnNagSuppressRules, addCfnNagToSecurityGroup, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
-import { SolutionInfo } from '../../common/solution-info';
 
 export interface ApplicationLoadBalancerProps {
   readonly vpc: IVpc;
@@ -348,6 +348,8 @@ export class ClickStreamApiConstruct extends Construct {
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
         IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
         API_FUNCTION_LAMBDA_ROLE: role.roleArn,
+        TEMPLATE_FILE: `${Stack.of(this).stackName}.template.json`,
+        STACK_ID: Stack.of(this).stackId,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
@@ -454,6 +456,7 @@ export class ClickStreamApiConstruct extends Construct {
           'redshift-data:BatchExecuteStatement',
           's3:ListBucket',
           's3:GetObject',
+          's3:PutObject',
           'ds:AuthorizeApplication',
           'ds:UnauthorizeApplication',
           'ds:CheckAlias',

@@ -11,13 +11,13 @@
  *  and limitations under the License.
  */
 
+import { POWERTOOLS_ENVS } from '@aws/clickstream-base-lib';
 import { CfnResource, RemovalPolicy } from 'aws-cdk-lib';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LogGroup, LogGroupClass, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, ruleToSuppressCloudWatchLogEncryption } from '../common/cfn-nag';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export interface SolutionNodejsFunctionProps extends Omit<NodejsFunctionProps, 'logRetention'> {
   logConf?: {

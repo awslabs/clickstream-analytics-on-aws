@@ -12,7 +12,7 @@
  */
 
 import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
-import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import {
   ExecuteSegmentQueryEvent,
@@ -30,9 +30,26 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
     jobRunId: 'job-run-id',
     stateMachineStatus: StateMachineStatus.IDLE,
   };
+  const segmentSetting = {
+    id: 'app-id',
+    type: 'SEGMENT_SETTING#segment-id',
+    appId: 'app-id',
+    segmentId: 'segment-id',
+    name: 'User segment test',
+    segmentType: 'User',
+    projectId: 'project-id',
+    refreshSchedule: {
+      expireAfter: 1709705841300,
+    },
+    eventBridgeRuleArn: 'arn:aws:events:us-east-1:account:rule/segment-111-scheduler',
+    sql: 'SELECT 1',
+  };
 
   test('Execute segment query', async () => {
     ddbDocClientMock.on(UpdateCommand).resolvesOnce({});
+    ddbDocClientMock.on(GetCommand).resolvesOnce({
+      Item: segmentSetting,
+    });
     redshiftDataClientMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'query-id-1' });
 
     const resp = await handler(event);
@@ -55,6 +72,13 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
       },
       ReturnValues: 'ALL_NEW',
     });
+    expect(ddbDocClientMock).toHaveReceivedCommandWith(GetCommand, {
+      TableName: 'ClickStreamApiClickstreamMetadata',
+      Key: {
+        id: 'app-id',
+        type: 'SEGMENT_SETTING#segment-id',
+      },
+    });
     expect(redshiftDataClientMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: 'workgroup-test',
       Sql: expect.any(String),
@@ -63,6 +87,9 @@ describe('User segments workflow execute-segment-query lambda tests', () => {
 
   test('Execute segment query failed due to execute command error', async () => {
     ddbDocClientMock.on(UpdateCommand).resolvesOnce({});
+    ddbDocClientMock.on(GetCommand).resolvesOnce({
+      Item: segmentSetting,
+    });
     redshiftDataClientMock.on(ExecuteStatementCommand).rejectsOnce();
 
     try {

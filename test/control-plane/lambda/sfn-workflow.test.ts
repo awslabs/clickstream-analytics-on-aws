@@ -64,6 +64,14 @@ describe('SFN workflow Lambda Function', () => {
     Name: 'DataProcessing',
   };
 
+  const baseMapInput = {
+    MapRun: true,
+    Token: 'TOKEN',
+    Data: {
+      ...baseStackWorkflowEvent,
+    },
+  };
+
   beforeEach(() => {
     s3Mock.reset();
     cloudFormationMock.reset();
@@ -160,7 +168,10 @@ describe('SFN workflow Lambda Function', () => {
       Name: 'DataProcessing',
       Type: 'Stack',
     });
-    expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-DataModelingRedshift-f00b00bdbabb4ea9a00e8e66f0f372fa/output.json',
+    });
   });
 
   test('Create stack with parameter get from stack output suffix', async () => {
@@ -224,7 +235,10 @@ describe('SFN workflow Lambda Function', () => {
       Name: 'DataProcessing',
       Type: 'Stack',
     });
-    expect(s3Mock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-DataModelingRedshift-f00b00bdbabb4ea9a00e8e66f0f372fa/output.json',
+    });
   });
 
   test('Pass stack', async () => {
@@ -273,6 +287,98 @@ describe('SFN workflow Lambda Function', () => {
       Type: 'Pass',
     });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+  });
+
+  test('Run pass stack in map', async () => {
+    const event = {
+      ...baseMapInput,
+      Data: {
+        ...baseStackWorkflowEvent,
+        Type: 'Pass',
+      },
+    };
+
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    const resp = await handler(event) as CdkCustomResourceResponse;
+    expect(resp).toEqual({
+      Data: {
+        Callback: {
+          BucketName: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+          BucketPrefix: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb',
+        },
+        Input: {
+          Action: 'Create',
+          Parameters: [
+            { ParameterKey: 'VpcId', ParameterValue: 'vpc-099adfb13a6ba6821' },
+            { ParameterKey: 'PrivateSubnetIds', ParameterValue: 'subnet-02b1c74d310e29d66,subnet-0f4d44b0cb5898403,subnet-02b77ab42fb6f6210' },
+            { ParameterKey: 'ProjectId', ParameterValue: 'demo_ervv' },
+            { ParameterKey: 'AppIds', ParameterValue: '' },
+          ],
+          Region: 'ap-northeast-1',
+          StackName: 'Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa',
+          TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.1.0-dev-main-202309261209-a1094814/default/data-pipeline-stack.template.json',
+        },
+      },
+      Name: 'DataProcessing',
+      Type: 'Pass',
+    });
+    expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+  });
+
+  test('Run pass stack in map and stack has been deleted', async () => {
+    const event = {
+      ...baseMapInput,
+      Data: {
+        ...baseStackWorkflowEvent,
+        Type: 'Pass',
+      },
+    };
+
+    cloudFormationMock.on(DescribeStacksCommand).rejects(
+      new Error('Stack not found'),
+    );
+    const resp = await handler(event) as CdkCustomResourceResponse;
+    expect(resp).toEqual({
+      Data: {
+        Callback: {
+          BucketName: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+          BucketPrefix: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb',
+        },
+        Input: {
+          Action: 'Create',
+          Parameters: [
+            { ParameterKey: 'VpcId', ParameterValue: 'vpc-099adfb13a6ba6821' },
+            { ParameterKey: 'PrivateSubnetIds', ParameterValue: 'subnet-02b1c74d310e29d66,subnet-0f4d44b0cb5898403,subnet-02b77ab42fb6f6210' },
+            { ParameterKey: 'ProjectId', ParameterValue: 'demo_ervv' },
+            { ParameterKey: 'AppIds', ParameterValue: '' },
+          ],
+          Region: 'ap-northeast-1',
+          StackName: 'Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa',
+          TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.1.0-dev-main-202309261209-a1094814/default/data-pipeline-stack.template.json',
+        },
+      },
+      Name: 'DataProcessing',
+      Type: 'Pass',
+    });
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
+      Body: '{"Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa":{}}',
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa/output.json',
+    });
   });
 
 });

@@ -239,8 +239,14 @@ fi
 
 # Environmental variables for use in CDK
 export DIST_OUTPUT_BUCKET=$SOLUTION_BUCKET
+# set TARGET based on pipeline type
+export PIPELINE_TYPE=${PIPELINE_TYPE:-feature}
+export TARGET=$VERSION
+if [[ $PIPELINE_TYPE == "release" ]]; then
+    TARGET='latest'
+fi
 
-update_dict $SOLUTION_NAME/$VERSION ''
+update_dict $TARGET ''
 
 #-----------------------------------------------------------------------------------
 # Get reference for all important folders

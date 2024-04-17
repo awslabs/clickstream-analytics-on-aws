@@ -307,8 +307,8 @@ export const PARAMETER_LABEL_OIDC_ISSUER = 'OpenID Connector Issuer';
 export const PARAMETER_LABEL_OIDC_CLIENT_ID = 'OpenID Connector Client Id';
 export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
   'OpenID Connector Jwks Uri Suffix';
-export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix';
-export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN';
+export const PARAMETER_LABEL_IAM_ROLE_PREFIX = 'IAM Role Prefix(Optional)';
+export const PARAMETER_LABEL_IAM_ROLE_BOUNDARY_ARN = 'IAM Role Boundary ARN(Optional)';
 
 export const KDS_ON_DEMAND_MODE = 'ON_DEMAND';
 export const KDS_PROVISIONED_MODE = 'PROVISIONED';
@@ -334,7 +334,7 @@ export const OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX =
   'EMRServerlessApplicationId';
 export const OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX = 'GlueDatabase';
 export const OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX = 'GlueEventTable';
-export const OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX='GlueEventParameterTable';
+export const OUTPUT_DATA_PROCESSING_GLUE_SESSION_TABLE_SUFFIX='GlueSessionTable';
 export const OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX = 'GlueUserTable';
 export const OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX = 'GlueItemTable';
 
@@ -380,6 +380,7 @@ export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFI
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ARN = 'FlinkAppArn';
 export const OUTPUT_STREAMING_INGESTION_SINK_KINESIS_JSON = 'SinkKinesisJson';
 export const OUTPUT_STREAMING_INGESTION_FLINK_APP_ID_STREAM_CONFIG_S3_PATH = 'FlinkAppIdStreamConfigS3Path';
+
 // Ingestion server
 export const INGESTION_SERVER_PING_PATH = '/ping';
 
@@ -406,6 +407,9 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 export const SCAN_METADATA_WORKFLOW_PREFIX = 'ScanMetadataWorkflow';
 export const CLICKSTREAM_SEGMENTS_WORKFLOW_PREFIX = 'ClickstreamUserSegmentsWorkflowStateMachine';
 export const CLICKSTREAM_SEGMENTS_CRON_JOB_RULE_PREFIX = 'Clickstream-SegmentJobRule-';
+export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_FILENAME = 'segment_000.csv';
+export const CLICKSTREAM_SEGMENTS_JOB_OUTPUT_SUMMARY_FILENAME = 'segment-summary_000.csv';
+export const REFRESH_MATERIALIZED_VIEWS_WORKFLOW_PREFIX = 'RefreshMaterializedViewsWorkflow';
 
 export const DATASET_READER_PERMISSION_ACTIONS = [
   'quicksight:DescribeDataSet',
@@ -472,3 +476,8 @@ export const DATA_SOURCE_OWNER_PERMISSION_ACTIONS = [
   'quicksight:DeleteDataSource',
   'quicksight:UpdateDataSource',
 ];
+
+export const DEFAULT_TIMEZONE = 'UTC';
+export const TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME = 'traffic_source_category_rule_v1.json';
+export const TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME = 'traffic_source_channel_rule_v1.json';
+

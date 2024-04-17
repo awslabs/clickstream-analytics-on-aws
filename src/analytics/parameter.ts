@@ -16,9 +16,9 @@ import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
   DDB_TABLE_ARN_PATTERN,
-  TABLE_NAME_EVENT,
-  TABLE_NAME_EVENT_PARAMETER,
-  TABLE_NAME_USER,
+  TABLE_NAME_EVENT_V2,
+  TABLE_NAME_SESSION,
+  TABLE_NAME_USER_V2,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
 import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -43,6 +43,8 @@ export interface RedshiftAnalyticsStackProps {
   projectId: string;
   appIds: string;
   dataProcessingCronOrRateExpression: string;
+  dataFreshnessInHour: number;
+  timezoneWithAppId: string;
   dataSourceConfiguration: {
     bucket: IBucket;
     prefix: string;
@@ -99,7 +101,7 @@ export interface AthenaAnalyticsStackProps {
   readonly database: string;
   readonly workGroup: string;
   readonly eventTable: string;
-  readonly eventParamTable: string;
+  readonly sessionTable: string;
   readonly userTable: string;
 }
 
@@ -126,19 +128,19 @@ export function createAthenaStackParameters(scope: Construct): {
   const athenaEventTableParam = new CfnParameter(scope, 'AthenaEventTable', {
     description: 'The Athena event table name.',
     type: 'String',
-    default: TABLE_NAME_EVENT,
+    default: TABLE_NAME_EVENT_V2,
   });
 
-  const athenaEventParamTableParam = new CfnParameter(scope, 'AthenaEventParamTable', {
-    description: 'The Athena event table name.',
+  const athenaSessionTableParam = new CfnParameter(scope, 'AthenaSessionTable', {
+    description: 'The Athena session table name.',
     type: 'String',
-    default: TABLE_NAME_EVENT_PARAMETER,
+    default: TABLE_NAME_SESSION,
   });
 
   const athenaUserTableParam = new CfnParameter(scope, 'AthenaUserTable', {
     description: 'The Athena event table name.',
     type: 'String',
-    default: TABLE_NAME_USER,
+    default: TABLE_NAME_USER_V2,
   });
 
   athenaParamsGroup.push({
@@ -147,7 +149,7 @@ export function createAthenaStackParameters(scope: Construct): {
       athenaWorkGroupParam.logicalId,
       athenaDatabaseParam.logicalId,
       athenaEventTableParam.logicalId,
-      athenaEventParamTableParam.logicalId,
+      athenaSessionTableParam.logicalId,
       athenaUserTableParam.logicalId,
     ],
   });
@@ -170,9 +172,9 @@ export function createAthenaStackParameters(scope: Construct): {
     },
   };
 
-  const athenaEventParamTableParamsLabels = {
-    [athenaEventParamTableParam.logicalId]: {
-      default: 'Athena Event Parameter Table Name',
+  const athenaSessionTableParamsLabels = {
+    [athenaSessionTableParam.logicalId]: {
+      default: 'Athena Session Table Name',
     },
   };
 
@@ -191,7 +193,7 @@ export function createAthenaStackParameters(scope: Construct): {
         ...athenaDatabaseParamsLabels,
         ...athenaWorkGroupParamsLabels,
         ...athenaEventTableParamsLabels,
-        ...athenaEventParamTableParamsLabels,
+        ...athenaSessionTableParamsLabels,
         ...athenaUserTableParamsLabels,
       },
     },
@@ -203,7 +205,7 @@ export function createAthenaStackParameters(scope: Construct): {
       database: athenaDatabaseParam.valueAsString,
       workGroup: athenaWorkGroupParam.valueAsString,
       eventTable: athenaEventTableParam.valueAsString,
-      eventParamTable: athenaEventParamTableParam.valueAsString,
+      sessionTable: athenaSessionTableParam.valueAsString,
       userTable: athenaUserTableParam.valueAsString,
     },
   };
@@ -615,6 +617,14 @@ export function createStackParameters(scope: Construct): {
     default: 365,
   });
 
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
+
+  const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
+    description: 'The time zone with app id as json string',
+    type: 'String',
+    default: '[]',
+  });
+
   const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {
     description: 'The schedule expression of data processing.',
     type: 'String',
@@ -761,6 +771,8 @@ export function createStackParameters(scope: Construct): {
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsNumber,
+      timezoneWithAppId: timezoneWithAppIdParam.valueAsString,
       dataSourceConfiguration: {
         bucket: Bucket.fromBucketName(
           scope,

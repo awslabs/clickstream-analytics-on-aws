@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '@aws/clickstream-base-lib';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   CfnCondition,
   CfnOutput,
@@ -36,7 +36,6 @@ import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { SINK_TYPE_MODE } from './common/model';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { getALBSubnetsCondtion, getExistVpc } from './common/vpc-utils';
 import { createKinesisNestStack } from './ingestion-server/kinesis-data-stream/kinesis-data-stream-nested-stack';

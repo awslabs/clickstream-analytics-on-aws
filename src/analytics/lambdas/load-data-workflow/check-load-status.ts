@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import {
@@ -19,8 +20,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { handleBackoffTimeInfo } from '../../../common/workflow';
 import { ManifestBody } from '../../private/model';
 import { getRedshiftClient } from '../redshift-data';

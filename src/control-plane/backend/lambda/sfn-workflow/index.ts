@@ -11,11 +11,10 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { CloudFormationClient, DescribeStacksCommand, Output, Parameter, Tag } from '@aws-sdk/client-cloudformation';
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { JSONPath } from 'jsonpath-plus';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { putStringToS3, readS3ObjectAsJson } from '../api/store/aws/s3';
 
 export interface WorkFlowStack {
   Name: string;
@@ -94,26 +93,12 @@ export const callback = async (event: SfnStackEvent) => {
   }
 
   const stack = await describe(event.Input.Region, event.Input.StackName);
-  if (!stack) {
-    throw Error('Describe Stack failed.');
-  }
-
-  try {
-    const s3Client = new S3Client({
-      ...aws_sdk_client_common_config,
-    });
-    const input = {
-      Body: JSON.stringify({ [event.Input.StackName]: stack }),
-      Bucket: event.Callback.BucketName,
-      Key: `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
-      ContentType: 'application/json',
-    };
-    const command = new PutObjectCommand(input);
-    await s3Client.send(command);
-  } catch (err) {
-    logger.error((err as Error).message, { error: err, event: event });
-    throw Error((err as Error).message);
-  }
+  await putStringToS3(
+    JSON.stringify({ [event.Input.StackName]: stack ?? {} }),
+    event.Input.Region,
+    event.Callback.BucketName,
+    `${event.Callback.BucketPrefix}/${event.Input.StackName}/output.json`,
+  );
   return event;
 };
 
@@ -142,14 +127,15 @@ async function stackParametersResolve(stack: WorkFlowStack) {
   if (stack.Data.Callback.BucketName && stack.Data.Callback.BucketPrefix) {
     const bucket = stack.Data.Callback.BucketName;
     const prefix = stack.Data.Callback.BucketPrefix;
+    const region = stack.Data.Input.Region;
     for (let param of stack.Data.Input.Parameters) {
       let key = param.ParameterKey;
       let value = param.ParameterValue;
       // Find the value in output accurately through JSONPath
       if (param.ParameterKey?.endsWith('.$') && param.ParameterValue?.startsWith('$.')) {
-        ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, bucket, prefix));
+        ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, region, bucket, prefix));
       } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) { // Find the value in output by suffix
-        ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, bucket, prefix));
+        ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, region, bucket, prefix));
       }
       param.ParameterKey = key;
       param.ParameterValue = value;
@@ -161,6 +147,7 @@ async function stackTagsResolve(stack: WorkFlowStack) {
   const tags = stack.Data.Input.Tags;
   const bucket = stack.Data.Callback.BucketName;
   const prefix = stack.Data.Callback.BucketPrefix;
+  const region = stack.Data.Input.Region;
 
   // When the tag Key or Value starts with '#.', resolve the tag using the pattern '#.{stackName}.{outputKeySuffix}'
   // e.g. origin = '#.Clickstream-ServiceCatalogAppRegistry-249f84aa8dd044c2a7294cb04cebe88b.ServiceCatalogAppRegistryApplicationTagKey'
@@ -173,21 +160,9 @@ async function stackTagsResolve(stack: WorkFlowStack) {
     const splitValues = origin.split('.');
     const stackName = splitValues[1];
     const outputKeySuffix = splitValues[2];
-    const s3ObjectKey = `${prefix}/${stackName}/output.json`;
-    let outputs;
-    try {
-      const content = await getObject(bucket, s3ObjectKey);
-      outputs = JSON.parse(content as string)[stackName].Outputs as Output[];
-    } catch (err) {
-      logger.error('Stack workflow cannot retrieve stack output upon resolving tags ', { error: err, s3ObjectKey });
-      return undefined;
-    }
-    if (outputs) {
-      const stackOutput = outputs.find(output => output.OutputKey?.endsWith(outputKeySuffix));
-      return stackOutput?.OutputValue;
-    }
-
-    return undefined;
+    const outputs = await _getOutputsFromS3(region, bucket, prefix, stackName);
+    const stackOutput = outputs.find(output => output.OutputKey?.endsWith(outputKeySuffix));
+    return stackOutput?.OutputValue;
   };
 
   if (tags && bucket && prefix) {
@@ -206,53 +181,28 @@ async function stackTagsResolve(stack: WorkFlowStack) {
   }
 }
 
-async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, bucket: string, prefix: string) {
+async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, region: string, bucket: string, prefix: string) {
   // get stack name
   const splitValues = paramValue.split('.');
   const stackName = splitValues[1];
   // get output from s3
-  let stackOutputs;
-  try {
-    const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
-    stackOutputs = JSON.parse(output as string)[stackName].Outputs;
-  } catch (err) {
-    logger.error('Stack workflow output error.', {
-      error: err,
-      output: `${prefix}/${stackName}/output.json`,
-    });
-  }
-  let value = '';
-  if (stackOutputs) {
-    for (let out of stackOutputs as Output[]) {
-      if (out.OutputKey?.endsWith(splitValues[2])) {
-        value = out.OutputValue ?? '';
-        break;
-      }
-    }
-  }
+  const outputs = await _getOutputsFromS3(region, bucket, prefix, stackName);
+  const stackOutput = outputs.find(output => output.OutputKey?.endsWith(splitValues[2]));
   return {
     key: paramKey.substring(0, paramKey.length - 2),
-    value: value ?? '',
+    value: stackOutput?.OutputValue ?? '',
   };
 }
 
-async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, bucket: string, prefix: string) {
+async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, region: string, bucket: string, prefix: string) {
   const splitValues = paramValue.split('.');
   const stackName = splitValues[1];
-  // get output from s3
-  let stackOutputs;
-  try {
-    const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
-    stackOutputs = JSON.parse(output as string);
-  } catch (err) {
-    logger.error('Stack workflow output error.', {
-      error: err,
-      output: `${prefix}/${stackName}/output.json`,
-    });
-  }
+  const fileKey = `${prefix}/${stackName}/output.json`;
+  // get stack from s3
+  const stackJson = await _getStackFromS3(region, bucket, fileKey);
   let value = '';
-  if (stackOutputs) {
-    const values = JSONPath({ path: paramValue, json: stackOutputs });
+  if (stackJson) {
+    const values = JSONPath({ path: paramValue, json: stackJson });
     if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
       value = values[0] as string;
     }
@@ -263,27 +213,33 @@ async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: 
   };
 }
 
-async function getObject(bucket: string, key: string) {
-  const streamToString = (stream: any) => new Promise((resolve, reject) => {
-    const chunks: any = [];
-    stream.on('data', (chunk: any) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  });
-
-  const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: key,
-  });
-
+async function _getStackFromS3(region: string, bucket: string, fileKey: string) {
   try {
-    const s3Client = new S3Client({
-      ...aws_sdk_client_common_config,
+    return await readS3ObjectAsJson(region, bucket, fileKey);
+  } catch (err) {
+    logger.error('read empty content error.', {
+      err, region, bucket, key: fileKey,
     });
-    const { Body } = await s3Client.send(command);
-    const bodyContents = await streamToString(Body);
-    return bodyContents;
-  } catch (error) {
     return undefined;
+  }
+}
+
+async function _getOutputsFromS3(region: string, bucket: string, prefix: string, stackName: string) {
+  const fileKey = `${prefix}/${stackName}/output.json`;
+  try {
+    const content = await _getStackFromS3(region, bucket, fileKey);
+    if (!content) {
+      logger.warn('read empty outputs.', {
+        region, bucket, key: fileKey,
+      });
+      return [];
+    }
+    const outputs = content[stackName].Outputs as Output[];
+    return outputs;
+  } catch (err) {
+    logger.error('read outputs error.', {
+      err, region, bucket, key: fileKey,
+    });
+    return [];
   }
 }

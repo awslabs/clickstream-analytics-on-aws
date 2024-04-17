@@ -97,12 +97,12 @@ import {
   REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
   REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
   mergeParameters,
+  removeParameters,
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
 // eslint-disable-next-line import/order
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '@aws/clickstream-base-lib';
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, SolutionInfo } from '@aws/clickstream-base-lib';
 import { BuiltInTagKeys, SINK_TYPE_MODE } from '../../common/model-ln';
-import { SolutionInfo } from '../../common/solution-info-ln';
 import { ENetworkType, IngestionType, WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
@@ -2348,10 +2348,16 @@ describe('Workflow test', () => {
                           Input: {
                             Action: 'Create',
                             Region: 'ap-southeast-1',
-                            Parameters: [
-                              ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
-                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                            ],
+                            Parameters: removeParameters(
+                              [
+                                ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                              [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
                             StackName: `${getStackPrefix()}-Reporting-6666-6666`,
                             Tags: Tags,
                             TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
@@ -2701,10 +2707,16 @@ describe('Workflow test', () => {
                           Input: {
                             Action: 'Create',
                             Region: 'ap-southeast-1',
-                            Parameters: [
-                              ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
-                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
-                            ],
+                            Parameters: removeParameters(
+                              [
+                                ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                              [
+                                {
+                                  ParameterKey: 'QuickSightPrincipalParam',
+                                },
+                              ]),
                             StackName: `${getStackPrefix()}-Reporting-6666-6666`,
                             Tags: Tags,
                             TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',

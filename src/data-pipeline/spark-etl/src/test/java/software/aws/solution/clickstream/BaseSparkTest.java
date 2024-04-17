@@ -18,23 +18,34 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.decode;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 @Slf4j
@@ -193,5 +204,63 @@ public class BaseSparkTest extends BaseTest {
         String testWarehouseDir = "/tmp/warehouse/" + testName + "/" + new Date().getTime();
         System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
         return testWarehouseDir;
+    }
+
+    public TransformConfig getTestTransformConfig(String... appIds) {
+        Path ruleConfigDir = null;
+        try {
+            ruleConfigDir = Paths.get(Objects.requireNonNull(getClass().getResource("/rule_config/")).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        log.info("ruleConfigDir: " + ruleConfigDir);
+        Dataset<Row> configFileDataset = this.spark.read().format("binaryFile")
+                .option("pathGlobFilter", "*.json")
+                .option("recursiveFileLookup", "true")
+                .load(ruleConfigDir.toString());
+
+        List<PathContent> configFileList = configFileDataset.select(col("path"), decode(col("content"), "utf8").alias("content"))
+                .as(Encoders.bean(PathContent.class)).collectAsList();
+
+        Map<String, RuleConfig> appRuleConfig = new HashMap<>();
+        for (PathContent pathContent : configFileList) {
+            log.info("path: " + pathContent.getPath());
+            String path = pathContent.getPath();
+            String content = pathContent.getContent();
+
+            String[] pathParts = path.split("/");
+            String fileName = pathParts[pathParts.length - 1];
+            String appId = pathParts[pathParts.length - 2];
+
+            RuleConfig ruleConfig = null;
+            if (appRuleConfig.containsKey(appId)) {
+                ruleConfig = appRuleConfig.get(appId);
+            } else {
+                ruleConfig = new RuleConfig();
+                appRuleConfig.put(appId, ruleConfig);
+            }
+
+            String categoryRuleFileNameV1 = "traffic_source_category_rule_v1.json";
+            String channelRuleFileNameV1 = "traffic_source_channel_rule_v1.json";
+
+            if (categoryRuleFileNameV1.equalsIgnoreCase(fileName)) {
+                ruleConfig.setOptCategoryRuleJson(content);
+            }
+            if (channelRuleFileNameV1.equalsIgnoreCase(fileName)) {
+                ruleConfig.setOptChannelRuleJson(content);
+            }
+        }
+
+        appRuleConfig.put("testApp", appRuleConfig.get("app1"));
+        appRuleConfig.put("uba-app", appRuleConfig.get("app1"));
+        appRuleConfig.put("gtmTest", appRuleConfig.get("app1"));
+        for (String appId : appIds) {
+            appRuleConfig.put(appId, appRuleConfig.get("app1"));
+        }
+
+        TransformConfig transformRuleConfig = new TransformConfig();
+        transformRuleConfig.setAppRuleConfig(appRuleConfig);
+        return transformRuleConfig;
     }
 }

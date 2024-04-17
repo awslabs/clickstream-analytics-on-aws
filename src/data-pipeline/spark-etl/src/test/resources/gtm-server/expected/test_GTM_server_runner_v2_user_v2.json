@@ -4,9 +4,7 @@
   "first_referrer" : "https://www.example.com/ipad-cases?DG=iPad&AG=Customizable&A_Customizable=Yes&page=2",
   "first_touch_time_msec" : 1695261244826,
   "first_traffic_campaign" : null,
-  "first_traffic_category" : null,
-  "first_traffic_content" : "https://www.example.com/ipad-cases?DG=iPad&AG=Customizable&A_Customizable=Yes&page=2",
-  "first_traffic_medium" : "referral",
+  "first_traffic_channel_group" : "Referral",
   "first_traffic_source" : "www.example.com",
   "first_visit_date" : "2023-09-21",
   "process_info" : {
