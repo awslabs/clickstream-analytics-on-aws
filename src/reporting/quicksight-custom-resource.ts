@@ -51,6 +51,8 @@ import {
   CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -377,6 +379,52 @@ export function createQuicksightCustomResource(
           'geo_country',
           'geo_city',
           'user_count',
+        ],
+      },
+      {
+        tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
+        importMode: 'DIRECT_QUERY',
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY} where event_date >= <<$startDate23>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))`,
+        columns: [
+          {
+            Name: 'event_date',
+            Type: 'DATETIME',
+          },
+          {
+            Name: 'Active User',
+            Type: 'STRING',
+          },
+          {
+            Name: 'New User',
+            Type: 'STRING',
+          },
+        ],
+        dateTimeDatasetParameter: [
+          {
+            name: 'startDate23',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: tenYearsAgo,
+          },
+          {
+            name: 'endDate23',
+            timeGranularity: TimeGranularity.DAY,
+            defaultValue: futureDate,
+          },
+        ],
+        tagColumnOperations: [
+          {
+            columnName: 'geo_country',
+            columnGeographicRoles: ['COUNTRY'],
+          },
+          {
+            columnName: 'geo_city',
+            columnGeographicRoles: ['CITY'],
+          },
+        ],
+        projectedColumns: [
+          'event_date',
+          'Active User',
+          'New User',
         ],
       },
 

@@ -1048,6 +1048,26 @@
                 ]
             },
             "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Intra_Day_User",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_date",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "Active User",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "New User",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
         }
     ],
     "Sheets": [
