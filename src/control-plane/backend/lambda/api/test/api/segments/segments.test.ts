@@ -19,6 +19,7 @@ import {
   PutTargetsCommand,
   RemoveTargetsCommand,
 } from '@aws-sdk/client-eventbridge';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -39,12 +40,14 @@ import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW, stackDetai
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const eventBridgeClientMock = mockClient(EventBridgeClient);
 const sfnClientMock = mockClient(SFNClient);
+const s3ClientMock = mockClient(S3Client);
 
 describe('Segments test', () => {
   beforeEach(() => {
     ddbMock.reset();
     eventBridgeClientMock.reset();
     sfnClientMock.reset();
+    s3ClientMock.reset();
   });
 
   test('Create segment with scheduled cron job', async () => {
@@ -464,6 +467,9 @@ describe('Segments test', () => {
     }).resolves({
       Item: MOCK_SEGMENT_JOB_STATUS_ITEM,
     });
+    s3ClientMock.on(GetObjectCommand).resolves({
+      Body: undefined,
+    } as any);
 
     const res = await request(app).get(`/api/segments/${MOCK_SEGMENT_ID}/jobs/${MOCK_SEGMENT_JOB_ID}/exportS3Url?appId=${MOCK_APP_ID}&projectId=${MOCK_PROJECT_ID}`);
 
