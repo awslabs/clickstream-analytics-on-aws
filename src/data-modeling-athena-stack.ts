@@ -42,6 +42,7 @@ export class DataModelingAthenaStack extends Stack {
       eventTable: athenaParameters.eventTable,
       sessionTable: athenaParameters.sessionTable,
       userTable: athenaParameters.userTable,
+      itemTable: athenaParameters.itemTable,
     });
 
     // Associate Service Catalog AppRegistry application with stack

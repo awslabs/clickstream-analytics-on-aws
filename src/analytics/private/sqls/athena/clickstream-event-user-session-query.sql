@@ -4,14 +4,69 @@
 -- msck repair table {{database}}.item_v2;
 -- msck repair table {{database}}.session;
 
+with user_view as (
+  select 
+    user_pseudo_id,
+    user_id,
+    event_timestamp,
+    first_touch_time_msec,
+    first_visit_date,
+    first_referrer,
+    first_traffic_source,
+    first_traffic_medium,
+    first_traffic_campaign,
+    first_traffic_content,
+    first_traffic_term,
+    first_traffic_campaign_id,
+    first_traffic_clid_platform,
+    first_traffic_clid,
+    first_traffic_channel_group,
+    first_traffic_category,
+    first_app_install_source,
+    user_properties,
+    user_properties_json_str
+  from (
+    select 
+      *
+      ,row_number() over (partition by user_pseudo_id order by event_timestamp desc) as row_num
+    from {{database}}.user_v2 
+  ) where row_num = 1
+),
+
+session_view as (
+  select 
+    event_timestamp,
+    user_pseudo_id,
+    session_id,
+    user_id,
+    session_number,
+    session_start_time_msec,
+    session_source,
+    session_medium,
+    session_campaign,
+    session_content,
+    session_term,
+    session_campaign_id,
+    session_clid_platform,
+    session_clid,
+    session_channel_group,
+    session_source_category
+  from (
+    select 
+      *
+      ,row_number() over (partition by session_id order by event_timestamp desc) as row_num
+    from {{database}}.session 
+  ) where row_num = 1
+)
+
 SELECT
-  event_timestamp,
-  event_id,
-  event_time_msec,
-  event_name,
-  user_pseudo_id,
-  user_id,
-  session_id,
+  e.event_timestamp,
+  e.event_id,
+  e.event_time_msec,
+  e.event_name,
+  u.user_pseudo_id,
+  u.user_id,
+  e.session_id,
   event_value,
   event_value_currency,
   event_bundle_sequence_id,
@@ -101,9 +156,40 @@ SELECT
   app_exception_message,
   app_exception_stack,
   custom_parameters_json_str,
-  custom_parameters
+  custom_parameters,
+  e.session_duration,
+  s.session_number,
+  s.session_start_time_msec,
+  session_source,
+  session_medium,
+  session_campaign,
+  session_content,
+  session_term,
+  session_campaign_id,
+  session_clid_platform,
+  session_clid,
+  session_channel_group,
+  session_source_category,
+  u.first_touch_time_msec,
+  u.first_visit_date,
+  u.first_referrer,
+  u.first_traffic_category,
+  u.first_traffic_source,
+  u.first_traffic_medium,
+  u.first_traffic_campaign,
+  u.first_traffic_content,
+  u.first_traffic_term,
+  u.first_traffic_campaign_id,
+  u.first_traffic_clid_platform,
+  u.first_traffic_clid,
+  u.first_traffic_channel_group,
+  u.first_app_install_source,
+  u.user_properties_json_str,
+  u.user_properties
 FROM 
-    {{database}}.event_v2
+    {{database}}.event_v2 e
+    join user_view u on e.user_pseudo_id = u.user_pseudo_id
+    join session_view s on e.session_id = s.session_id
 where partition_app = ? 
   and partition_year >= ?
   and partition_month >= ?
