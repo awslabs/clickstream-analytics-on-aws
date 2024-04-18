@@ -13,7 +13,7 @@
 
 import { logger } from '@aws/clickstream-base-lib';
 import { StatusString } from '@aws-sdk/client-redshift-data';
-import { SP_CLEAR_EXPIRED_EVENTS } from '../../private/constant';
+import { SP_CLEAR_EXPIRED_DATA } from '../../private/constant';
 import { ClearExpiredEventsEventDetail } from '../../private/model';
 import { describeStatement, executeStatementsWithWait, getRedshiftClient, getRedshiftProps, getStatementResult } from '../redshift-data';
 
@@ -86,7 +86,7 @@ export const queryClearLog = async (appId: string) => {
   const schema = appId;
 
   try {
-    const querySqlStatement = `SELECT * FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_EVENTS}' ORDER BY log_date, id`;
+    const querySqlStatement = `SELECT * FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_DATA}' ORDER BY log_date, id`;
     const queryId = await executeStatementsWithWait(
       redshiftDataApiClient, [querySqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
@@ -94,7 +94,7 @@ export const queryClearLog = async (appId: string) => {
 
     logger.info('Clear log response:', { response });
 
-    const delSqlStatement = `DELETE FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_EVENTS}'`;
+    const delSqlStatement = `DELETE FROM ${schema}.clickstream_log WHERE log_name='${SP_CLEAR_EXPIRED_DATA}'`;
     await executeStatementsWithWait(
       redshiftDataApiClient, [delSqlStatement], redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
     return {

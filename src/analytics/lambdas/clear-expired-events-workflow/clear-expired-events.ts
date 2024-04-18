@@ -12,9 +12,10 @@
  */
 
 import { logger } from '@aws/clickstream-base-lib';
-import { SP_CLEAR_EXPIRED_EVENTS } from '../../private/constant';
+import { SP_CLEAR_EXPIRED_DATA } from '../../private/constant';
 import { ClearExpiredEventsBody } from '../../private/model';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
+import { getRefreshList } from '../refresh-materialized-views-workflow/check-next-refresh-view';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
@@ -37,9 +38,14 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
   );
 
   const schema = event.detail.appId;
+
+  const spList = getRefreshList().spViews;
+  const spTables = spList.map((sp) => sp.viewName);
+  const spTablesStr = spTables.join(',');
+
   const retentionRangeDays = event.detail.retentionRangeDays;
   const sqlStatements : string[] = [];
-  sqlStatements.push(`CALL ${schema}.${SP_CLEAR_EXPIRED_EVENTS}(${retentionRangeDays})`);
+  sqlStatements.push(`CALL ${schema}.${SP_CLEAR_EXPIRED_DATA}(${retentionRangeDays}, '${spTablesStr}')`);
 
   try {
     const queryId = await executeStatements(

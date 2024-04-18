@@ -19,6 +19,7 @@ import {
   TABLE_NAME_EVENT_V2,
   TABLE_NAME_SESSION,
   TABLE_NAME_USER_V2,
+  TABLE_NAME_ITEM_V2,
 } from '@aws/clickstream-base-lib';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
 import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -103,6 +104,7 @@ export interface AthenaAnalyticsStackProps {
   readonly eventTable: string;
   readonly sessionTable: string;
   readonly userTable: string;
+  readonly itemTable: string;
 }
 
 export function createAthenaStackParameters(scope: Construct): {
@@ -138,9 +140,15 @@ export function createAthenaStackParameters(scope: Construct): {
   });
 
   const athenaUserTableParam = new CfnParameter(scope, 'AthenaUserTable', {
-    description: 'The Athena event table name.',
+    description: 'The Athena user table name.',
     type: 'String',
     default: TABLE_NAME_USER_V2,
+  });
+
+  const athenaItemTableParam = new CfnParameter(scope, 'AthenaItemTable', {
+    description: 'The Athena item table name.',
+    type: 'String',
+    default: TABLE_NAME_ITEM_V2,
   });
 
   athenaParamsGroup.push({
@@ -151,6 +159,7 @@ export function createAthenaStackParameters(scope: Construct): {
       athenaEventTableParam.logicalId,
       athenaSessionTableParam.logicalId,
       athenaUserTableParam.logicalId,
+      athenaItemTableParam.logicalId,
     ],
   });
 
@@ -184,6 +193,12 @@ export function createAthenaStackParameters(scope: Construct): {
     },
   };
 
+  const athenaItemTableParamsLabels = {
+    [athenaItemTableParam.logicalId]: {
+      default: 'Athena Item Table Name',
+    },
+  };
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -195,6 +210,7 @@ export function createAthenaStackParameters(scope: Construct): {
         ...athenaEventTableParamsLabels,
         ...athenaSessionTableParamsLabels,
         ...athenaUserTableParamsLabels,
+        ...athenaItemTableParamsLabels,
       },
     },
   };
@@ -207,6 +223,7 @@ export function createAthenaStackParameters(scope: Construct): {
       eventTable: athenaEventTableParam.valueAsString,
       sessionTable: athenaSessionTableParam.valueAsString,
       userTable: athenaUserTableParam.valueAsString,
+      itemTable: athenaItemTableParam.valueAsString,
     },
   };
 

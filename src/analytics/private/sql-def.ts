@@ -19,12 +19,18 @@ import {
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY_SP,
   CLICKSTREAM_DEVICE_CRASH_RATE,
   CLICKSTREAM_DEVICE_CRASH_RATE_SP,
+  CLICKSTREAM_DEVICE_USER_DEVICE,
+  CLICKSTREAM_DEVICE_USER_DEVICE_SP,
   CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW,
   CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP,
   CLICKSTREAM_ENGAGEMENT_ENTRANCE,
   CLICKSTREAM_ENGAGEMENT_ENTRANCE_SP,
+  CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
+  CLICKSTREAM_ENGAGEMENT_EVENT_NAME_SP,
   CLICKSTREAM_ENGAGEMENT_EXIT,
   CLICKSTREAM_ENGAGEMENT_EXIT_SP,
   CLICKSTREAM_ENGAGEMENT_KPI,
@@ -57,6 +63,9 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
   },
   {
+    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY,
+  },
+  {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   },
   {
@@ -73,6 +82,9 @@ export const reportingViewsDef: SQLViewDef[] = [
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE,
+  },
+  {
+    viewName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_EXIT,
@@ -99,6 +111,9 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
   },
   {
+    viewName: CLICKSTREAM_DEVICE_USER_DEVICE,
+  },
+  {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
     spName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP,
     type: 'sp',
@@ -115,6 +130,13 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
     spName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
+    type: 'sp',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
+  },
+  {
+    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY,
+    spName: CLICKSTREAM_ACQUISITION_INTRA_DAY_SP,
     type: 'sp',
     scheduleRefresh: 'true',
     timezoneSensitive: 'true',
@@ -162,6 +184,13 @@ export const reportingViewsDef: SQLViewDef[] = [
     timezoneSensitive: 'true',
   },
   {
+    viewName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
+    spName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME_SP,
+    type: 'sp',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
+  },
+  {
     viewName: CLICKSTREAM_RETENTION_DAU_WAU,
     spName: CLICKSTREAM_RETENTION_DAU_WAU_SP,
     type: 'sp',
@@ -185,6 +214,13 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
     spName: CLICKSTREAM_DEVICE_CRASH_RATE_SP,
+    type: 'sp',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
+  },
+  {
+    viewName: CLICKSTREAM_DEVICE_USER_DEVICE,
+    spName: CLICKSTREAM_DEVICE_USER_DEVICE_SP,
     type: 'sp',
     scheduleRefresh: 'true',
     timezoneSensitive: 'true',
@@ -234,13 +270,7 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'sp-scan-metadata.sql',
   },
   {
-    sqlFile: 'sp-clear-expired-events.sql',
-  },
-  {
-    sqlFile: 'sp-clear-item-and-user.sql',
-  },
-  {
-    sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
+    sqlFile: 'sp-clear-expired-data.sql',
   },
   {
     sqlFile: 'event-v2.sql',

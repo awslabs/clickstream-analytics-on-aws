@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP } from '@aws/clickstream-base-lib';
+import { CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_SP, CLICKSTREAM_DEVICE_USER_DEVICE_SP } from '@aws/clickstream-base-lib';
 import { RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckNextRefreshSpEvent } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-next-refresh-sp';
@@ -88,7 +88,7 @@ describe('Lambda - check next refresh task', () => {
   });
 
   test('it is the end, no sp need to be refreshed', async () => {
-    checkNextRefreshViewEvent.detail.completeRefreshSp = 'clickstream_device_crash_rate_sp';
+    checkNextRefreshViewEvent.detail.completeRefreshSp = CLICKSTREAM_DEVICE_USER_DEVICE_SP;
     const resp = await handler(checkNextRefreshViewEvent);
     expect(resp).toEqual({
       detail: {

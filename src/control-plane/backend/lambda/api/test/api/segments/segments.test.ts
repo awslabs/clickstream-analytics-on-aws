@@ -41,6 +41,11 @@ const ddbMock = mockClient(DynamoDBDocumentClient);
 const eventBridgeClientMock = mockClient(EventBridgeClient);
 const sfnClientMock = mockClient(SFNClient);
 const s3ClientMock = mockClient(S3Client);
+jest.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: jest.fn((_client, _command) => {
+    return new Promise((resolve) => resolve('https://clickstream.s3.com/s3-object-url'));
+  }),
+}));
 
 describe('Segments test', () => {
   beforeEach(() => {

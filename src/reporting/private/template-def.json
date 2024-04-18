@@ -976,6 +976,98 @@
                 ]
             },
             "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Device",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_date",
+                        "DataType": "DATETIME"
+                      },
+                      {
+                        "Name": "platform",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "app_version",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "user_id",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "operating_system / version",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "device_ua_browser",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "device_screen_resolution",
+                        "DataType": "STRING"
+                      },
+                      {
+                        "Name": "event_count",
+                        "DataType": "INTEGER"
+                      }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Event_Name",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_date",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "platform",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "user_id",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "event_name",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "event_value",
+                        "DataType": "DECIMAL"
+                    },
+                    {
+                        "Name": "event_count",
+                        "DataType": "INTEGER"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
+        },
+        {
+            "Placeholder": "Intra_Day_User",
+            "DataSetSchema": {
+                "ColumnSchemaList": [
+                    {
+                        "Name": "event_date",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "Active User",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "New User",
+                        "DataType": "STRING"
+                    }
+                ]
+            },
+            "ColumnGroupSchemaList": []
         }
     ],
     "Sheets": [
