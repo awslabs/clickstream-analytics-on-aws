@@ -52,8 +52,7 @@ public class ServerDataConverterV2 extends BaseDataConverter {
 
     @Override
     public Column[] getUDFParamsColumns(final Dataset<Row> dataset) {
-        if (hasColumn(dataset, UPLOAD_TIMESTAMP)) {
-            return new Column[] {
+        Column[] columns = new Column[] {
                 col(DATA),
                 col("ingest_time"),
                 col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
@@ -64,21 +63,11 @@ public class ServerDataConverterV2 extends BaseDataConverter {
                 lit(System.getProperty(PROJECT_ID_PROP)),
                 col(INPUT_FILE_NAME),
                 col("appId")
-            };
-        } else {
-            return new Column[] {
-                col(DATA),
-                col("ingest_time"),
-                lit(null).cast(DataTypes.LongType), // upload_timestamp
-                col("rid"),
-                lit(null).cast(DataTypes.StringType), // uri
-                lit(null).cast(DataTypes.StringType), // ua
-                lit(null).cast(DataTypes.StringType), // ip
-                lit(System.getProperty(PROJECT_ID_PROP)),
-                col(INPUT_FILE_NAME),
-                col("appId")
-            };
+        };
+        if (!hasColumn(dataset, UPLOAD_TIMESTAMP)) {
+          columns[2] = lit(null).cast(DataTypes.LongType);
         }
+        return columns;
     }
 
     @Override

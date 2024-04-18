@@ -73,33 +73,22 @@ public abstract class BaseDataConverter implements DatasetConverter, AppRuleConf
 
     public Column[] getUDFParamsColumns(final Dataset<Row> dataset) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
-        if (hasColumn(dataset, UPLOAD_TIMESTAMP)) {
-            return new Column[]{
-                    col(DATA),
-                    col("ingest_time"),
-                    col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
-                    col("rid"),
-                    col("uri"),
-                    col("ua"),
-                    col("ip"),
-                    lit(projectId),
-                    col(INPUT_FILE_NAME),
-                    col(INGEST_APPID)
-            };
-        } else {
-            return new Column[]{
-                    col(DATA),
-                    col("ingest_time"),
-                    lit(null).cast(DataTypes.LongType),
-                    col("rid"),
-                    col("uri"),
-                    col("ua"),
-                    col("ip"),
-                    lit(projectId),
-                    col(INPUT_FILE_NAME),
-                    col(INGEST_APPID)
-            };
+        Column[] columns = new Column[]{
+                col(DATA),
+                col("ingest_time"),
+                col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
+                col("rid"),
+                col("uri"),
+                col("ua"),
+                col("ip"),
+                lit(projectId),
+                col(INPUT_FILE_NAME),
+                col(INGEST_APPID)
+        };
+        if (!hasColumn(dataset, UPLOAD_TIMESTAMP)) {
+           columns[2] = lit(null).cast(DataTypes.LongType);
         }
+        return columns;
     }
 
     public UserDefinedFunction getConvertUdf() {
