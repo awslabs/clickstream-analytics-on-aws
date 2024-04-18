@@ -26,14 +26,22 @@ export class LambdaAdapterLayer extends LayerVersion {
     const defaultArch = props?.arch ?? 'x86_64';
 
     super(scope, id, {
-      code: Code.fromDockerBuild(path.join(__dirname, '.'), {
-        file: 'Dockerfile',
-        buildArgs: {
-          ARCH: defaultArch,
-          ADAPTER_VERSION: defaultVersion,
-        },
-      }),
+      code: getLambdaCode(defaultArch, defaultVersion),
       compatibleRuntimes: [Runtime.NODEJS_16_X, Runtime.NODEJS_18_X, Runtime.NODEJS_20_X, Runtime.NODEJS_LATEST],
+    });
+  }
+}
+
+function getLambdaCode(defaultArch: string, defaultVersion: string) {
+  if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+    return Code.fromAsset('./src/control-plane/backend/layer/lambda-web-adapter');
+  } else {
+    return Code.fromDockerBuild(path.join(__dirname, '.'), {
+      file: 'Dockerfile',
+      buildArgs: {
+        ARCH: defaultArch,
+        ADAPTER_VERSION: defaultVersion,
+      },
     });
   }
 }

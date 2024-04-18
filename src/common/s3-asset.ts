@@ -61,12 +61,7 @@ export function uploadBuiltInJarsAndRemoteFiles(
   };
 
   const deployment = new BucketDeployment(scope, 'JarsAndFiles', {
-    sources: [
-      Source.asset(props.sourcePath, {
-        assetHashType: AssetHashType.SOURCE,
-        bundling,
-      }),
-    ],
+    sources: getSourceAsset(props, bundling),
     destinationBucket: props.destinationBucket,
     destinationKeyPrefix: props.destinationKeyPrefix,
     memoryLimit: 1024, // Increase the memory limit to 1 gigabytes
@@ -86,6 +81,19 @@ export function uploadBuiltInJarsAndRemoteFiles(
     jars: entryPointJar,
     deployment,
   };
+}
+
+function getSourceAsset(props: BuildJarProps, bundling: BundlingOptions) {
+  if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+    return [Source.data('test', 'test')];
+  } else {
+    return [
+      Source.asset(props.sourcePath, {
+        assetHashType: AssetHashType.SOURCE,
+        bundling,
+      }),
+    ];
+  }
 }
 
 function extractFilenameFromUrl(url: string): string {

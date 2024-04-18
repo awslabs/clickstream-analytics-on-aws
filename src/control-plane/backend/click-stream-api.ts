@@ -315,12 +315,7 @@ export class ClickStreamApiConstruct extends Construct {
   private createApiFunction(props: ClickStreamApiProps, lambdaFunctionNetwork: any, role: Role): LambdaFunction {
     const fn = new LambdaFunction(this, 'ApiFunction', {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
-      code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
-        file: './src/control-plane/backend/Dockerfile',
-        buildArgs: {
-          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
-        },
-      }),
+      code: this.getLambdaCode(),
       handler: 'run.sh',
       runtime: Runtime.NODEJS_18_X,
       architecture: Architecture.ARM_64,
@@ -370,6 +365,19 @@ export class ClickStreamApiConstruct extends Construct {
     ]);
 
     return fn;
+  }
+
+  private getLambdaCode() {
+    if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+      return Code.fromAsset('./src/control-plane/backend/lambda/api/');
+    } else {
+      return Code.fromDockerBuild(path.join(__dirname, '../../../'), {
+        file: './src/control-plane/backend/Dockerfile',
+        buildArgs: {
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
+        },
+      });
+    }
   }
 
   private getLambdaNetworkConfig(props: ClickStreamApiProps) {
