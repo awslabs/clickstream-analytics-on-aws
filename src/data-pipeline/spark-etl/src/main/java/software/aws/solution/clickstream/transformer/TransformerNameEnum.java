@@ -13,10 +13,6 @@
 
 package software.aws.solution.clickstream.transformer;
 
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-
-
-public interface DatasetTransformer {
-    Dataset<Row> transform(Dataset<Row> dataset);
+public enum TransformerNameEnum {
+    CLICKSTREAM, GTM_SERVER_DATA, SENSORS_DATA;
 }

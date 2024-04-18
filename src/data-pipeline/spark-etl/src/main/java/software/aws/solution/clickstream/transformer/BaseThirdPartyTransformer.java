@@ -19,6 +19,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.DatasetUtil;
@@ -180,9 +181,7 @@ public abstract class BaseThirdPartyTransformer extends BaseTransformerV3 {
         return userFinalDataset;
     }
 
-    public abstract String getName();
-
-    public abstract DatasetTransformer getDatasetTransformer();
+    public abstract DatasetConverter getDatasetTransformer();
 
     @Override
     public Map<TableName, Dataset<Row>> transform(final Dataset<Row> dataset) {

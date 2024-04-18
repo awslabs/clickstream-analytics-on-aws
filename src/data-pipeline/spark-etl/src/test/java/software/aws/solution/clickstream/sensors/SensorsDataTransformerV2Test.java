@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.sensordata;
+package software.aws.solution.clickstream.sensors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
@@ -30,17 +30,17 @@ import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP
 import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
 @Slf4j
-public class SensorDataTransformerV2Test extends BaseSparkTest {
-    private SensorDataTransformerV2 transformer;
+public class SensorsDataTransformerV2Test extends BaseSparkTest {
+    private SensorsDataTransformerV2 transformer;
     @BeforeEach
     void setupTransformer() {
-        this.transformer = new SensorDataTransformerV2();
+        this.transformer = new SensorsDataTransformerV2();
         this.transformer.config(getTestTransformConfig("sensorTest"));
     }
 
     @Test
     void should_transform_event() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.sensordata.SensorDataTransformerV2Test.should_transform_event
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.sensors.SensorsDataTransformerV2Test.should_transform_event
         System.setProperty(APP_IDS_PROP, "sensorTest");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         String testWarehouseDir = "/tmp/warehouse/sensor_data/should_transform_event/" + new Date().getTime();

@@ -11,32 +11,31 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.udfconverter;
 
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
-import software.aws.solution.clickstream.sensordata.FakeSensorEventParser;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
+import software.aws.solution.clickstream.sensors.FakeSensorsEventParser;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
 import java.util.Map;
 
 public class EventParserFactory {
 
-    public static final String GTM_SERVER_DATA = "gtm_server_data";
-    public static final String SENSOR_DATA = "sensor_data";
-    public static final String CLICKSTREAM = "clickstream";
-
-    public static EventParser getEventParser(final String parserName, final Map<String, RuleConfig> appRuleConfig) {
+    public static EventParser getEventParser(final TransformerNameEnum parserName, final Map<String, RuleConfig> appRuleConfig) {
         switch (parserName) {
             case GTM_SERVER_DATA:
                 return GTMEventParser.getInstance(appRuleConfig);
-            case SENSOR_DATA:
-                return FakeSensorEventParser.getInstance(appRuleConfig);
+            case SENSORS_DATA:
+                return FakeSensorsEventParser.getInstance(appRuleConfig);
             case CLICKSTREAM:
                 return ClickstreamEventParser.getInstance(appRuleConfig);
             default:
-                throw new IllegalArgumentException("Unknown parser name: " + parserName);
+                throw new ExecuteTransformerException("Unknown parser name: " + parserName);
         }
+
     }
 }

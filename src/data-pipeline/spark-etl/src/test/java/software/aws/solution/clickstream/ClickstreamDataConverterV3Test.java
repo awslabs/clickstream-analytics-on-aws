@@ -15,18 +15,18 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.clickstream.transformer.*;
+import software.aws.solution.clickstream.udfconverter.ClickstreamDataConverterV3;
 
 import java.io.*;
 
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
 
-public class DataConverterV3Test extends BaseSparkTest {
-    private DataConverterV3 converter;
+public class ClickstreamDataConverterV3Test extends BaseSparkTest {
+    private ClickstreamDataConverterV3 converter;
     @BeforeEach
     void setupConverter() {
-        this.converter = new DataConverterV3(getTestTransformConfig().getAppRuleConfig());
+        this.converter = new ClickstreamDataConverterV3(getTestTransformConfig().getAppRuleConfig());
     }
 
     public static Dataset<Row> addFileName(Dataset<Row> dataset) {

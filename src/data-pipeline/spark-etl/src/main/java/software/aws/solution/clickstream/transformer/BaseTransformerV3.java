@@ -20,6 +20,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
 import software.aws.solution.clickstream.TransformerInterfaceV3;
 import software.aws.solution.clickstream.common.Constant;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.ETLMetric;
@@ -124,12 +125,12 @@ public abstract class BaseTransformerV3 implements TransformerInterfaceV3 {
 
     public abstract Dataset<Row> getCleanedDataset(Dataset<Row> dataset);
 
-    public abstract String getName();
+    public abstract TransformerNameEnum getName();
     public abstract Dataset<Row> extractSessionFromEvent(Dataset<Row> eventDataset) ;
 
     public abstract Dataset<Row> extractUser(Dataset<Row> eventDataset, Dataset<Row> convertedDataset) ;
 
-    public abstract DatasetTransformer getDatasetTransformer();
+    public abstract DatasetConverter getDatasetTransformer();
 
     public String getUserPropsTableName() {
         return ("etl_" + this.getName() + "_user_props").toLowerCase();

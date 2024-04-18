@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.udfconverter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +30,7 @@ import software.aws.solution.clickstream.common.model.ClickstreamEvent;
 import software.aws.solution.clickstream.common.model.ClickstreamItem;
 import software.aws.solution.clickstream.rowconv.ItemGenericRowConverter;
 import software.aws.solution.clickstream.rowconv.UserGenericRowConverter;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +50,7 @@ import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
 @Slf4j
 public class UDFHelper {
     public static UDF10<String, Long, Long, String, String, String, String, String, String, String, List<GenericRow>>
-    getConvertDataUdf(final String name, final Map<String, RuleConfig> appRuleConfig) {
+    getConvertDataUdf(final TransformerNameEnum name, final Map<String, RuleConfig> appRuleConfig) {
         return (String value,
                 Long ingestTimestamp, Long uploadTimestamp,
                 String rid, String uri, String ua, String ip,

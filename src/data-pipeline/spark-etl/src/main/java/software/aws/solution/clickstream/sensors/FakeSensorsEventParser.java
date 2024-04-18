@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.sensordata;
+package software.aws.solution.clickstream.sensors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import software.aws.solution.clickstream.common.EventParser;
@@ -22,7 +22,7 @@ import software.aws.solution.clickstream.common.RuleConfig;
 
 import java.util.Map;
 
-public class FakeSensorEventParser implements EventParser {
+public class FakeSensorsEventParser implements EventParser {
 
     @Override
     public ParseRowResult parseLineToDBRow(final String s, final String s1, final String s2) throws JsonProcessingException {
@@ -34,7 +34,7 @@ public class FakeSensorEventParser implements EventParser {
         return null;
     }
 
-    public static FakeSensorEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
-        return new FakeSensorEventParser();
+    public static FakeSensorsEventParser getInstance(final Map<String, RuleConfig> appRuleConfig) {
+        return new FakeSensorsEventParser();
     }
 }

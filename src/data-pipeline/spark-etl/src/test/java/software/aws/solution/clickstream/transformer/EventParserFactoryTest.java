@@ -16,11 +16,15 @@ package software.aws.solution.clickstream.transformer;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.CLICKSTREAM;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.GTM_SERVER_DATA;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.SENSORS_DATA;
 
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
-import software.aws.solution.clickstream.sensordata.FakeSensorEventParser;
+import software.aws.solution.clickstream.udfconverter.EventParserFactory;
+import software.aws.solution.clickstream.sensors.FakeSensorsEventParser;
 
 import java.util.HashMap;
 
@@ -28,26 +32,19 @@ public class EventParserFactoryTest {
 
     @Test
     public void shouldReturnGTMEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(EventParserFactory.GTM_SERVER_DATA, new HashMap<>());
+        EventParser parser = EventParserFactory.getEventParser(GTM_SERVER_DATA, new HashMap<>());
         assertTrue(parser instanceof GTMEventParser);
     }
 
     @Test
     public void shouldReturnFakeSensorEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(EventParserFactory.SENSOR_DATA, new HashMap<>());
-        assertTrue(parser instanceof FakeSensorEventParser);
+        EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, new HashMap<>());
+        assertTrue(parser instanceof FakeSensorsEventParser);
     }
 
     @Test
     public void shouldReturnClickstreamEventParser() {
-        EventParser parser = EventParserFactory.getEventParser(EventParserFactory.CLICKSTREAM, new HashMap<>());
+        EventParser parser = EventParserFactory.getEventParser(CLICKSTREAM, new HashMap<>());
         assertTrue(parser instanceof ClickstreamEventParser);
-    }
-
-    @Test
-    public void shouldThrowExceptionForUnknownParser() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            EventParserFactory.getEventParser("unknown", new HashMap<>());
-        });
     }
 }

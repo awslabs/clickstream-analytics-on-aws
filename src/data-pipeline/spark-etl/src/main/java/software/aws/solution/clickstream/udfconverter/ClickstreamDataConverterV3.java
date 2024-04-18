@@ -11,25 +11,27 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.udfconverter;
 
 import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
 import java.util.Map;
 
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.CLICKSTREAM;
 
 @Slf4j
-public class DataConverterV3 extends BaseDataConverter {
+public class ClickstreamDataConverterV3 extends BaseDataConverter {
     private final Map<String, RuleConfig> appRuleConfig;
 
-    public DataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
+    public ClickstreamDataConverterV3(final Map<String, RuleConfig> appRuleConfig) {
         this.appRuleConfig = appRuleConfig;
     }
 
     @Override
-    public String getName() {
-        return EventParserFactory.CLICKSTREAM;
+    public TransformerNameEnum getName() {
+        return CLICKSTREAM;
     }
 
     @Override

@@ -16,10 +16,11 @@ package software.aws.solution.clickstream.gtm;
 import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.transformer.BaseThirdPartyTransformer;
-import software.aws.solution.clickstream.transformer.DatasetTransformer;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
-import static software.aws.solution.clickstream.transformer.EventParserFactory.GTM_SERVER_DATA;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.GTM_SERVER_DATA;
 
 
 @Slf4j
@@ -27,12 +28,12 @@ public class GTMServerDataTransformerV2 extends BaseThirdPartyTransformer {
     private TransformConfig transformConfig;
 
     @Override
-    public String getName() {
+    public TransformerNameEnum getName() {
     return GTM_SERVER_DATA;
     }
 
     @Override
-    public DatasetTransformer getDatasetTransformer() {
+    public DatasetConverter getDatasetTransformer() {
         if (this.transformConfig == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }

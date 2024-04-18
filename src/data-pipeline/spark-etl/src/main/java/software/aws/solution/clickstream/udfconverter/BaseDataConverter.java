@@ -11,13 +11,17 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.transformer;
+package software.aws.solution.clickstream.udfconverter;
 
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
+import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
+import software.aws.solution.clickstream.transformer.AppRuleConfigurable;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.DatasetUtil;
 
 import static org.apache.spark.sql.functions.col;
@@ -34,9 +38,11 @@ import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
-public abstract class BaseDataConverter implements DatasetTransformer, AppRuleConfigurable {
+public abstract class BaseDataConverter implements DatasetConverter, AppRuleConfigurable {
 
-    public abstract String getName();
+    public static final String INGEST_APPID = "appId";
+
+    public abstract TransformerNameEnum getName();
 
     @Override
     public Dataset<Row> transform(final Dataset<Row> dataset) {
@@ -51,58 +57,57 @@ public abstract class BaseDataConverter implements DatasetTransformer, AppRuleCo
         Dataset<Row> corruptDataset = convertedDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNotNull());
         long corruptDatasetCount = corruptDataset.count();
         if (corruptDatasetCount > 0) {
-            DatasetUtil.saveCorruptDataset(corruptDataset, corruptDatasetCount, "etl_corrupted_json_" + getName().toLowerCase());
+            DatasetUtil.saveCorruptDataset(corruptDataset, corruptDatasetCount, "etl_corrupted_json_" + getName().toString().toLowerCase());
         }
         return okDataset;
     }
 
     public Dataset<Row> convertByUDF(final Dataset<Row> dataset) {
+        UserDefinedFunction convertGTMServerDataUdf = udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+        return filterEmptyAppId(dataset)
+                .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
+                                getUDFParamsColumns(dataset)
+                        )
+                ));
+    }
+
+    public Column[] getUDFParamsColumns(final Dataset<Row> dataset) {
         String projectId = System.getProperty(PROJECT_ID_PROP);
-
-        UserDefinedFunction convertUdf = getConvertUdf();
-
-        String appId = "appId";
-
         if (hasColumn(dataset, UPLOAD_TIMESTAMP)) {
-            return filterEmptyAppId(dataset, appId)
-                    .withColumn(DATA_OUT, explode(convertUdf.apply(
-                                    col(DATA),
-                                    col("ingest_time"),
-                                    col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
-                                    col("rid"),
-                                    col("uri"),
-                                    col("ua"),
-                                    col("ip"),
-                                    lit(projectId),
-                                    col(INPUT_FILE_NAME),
-                                    col(appId)
-                            )
-                    ));
+            return new Column[]{
+                    col(DATA),
+                    col("ingest_time"),
+                    col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
+                    col("rid"),
+                    col("uri"),
+                    col("ua"),
+                    col("ip"),
+                    lit(projectId),
+                    col(INPUT_FILE_NAME),
+                    col(INGEST_APPID)
+            };
         } else {
-            return filterEmptyAppId(dataset, appId)
-                    .withColumn(DATA_OUT, explode(convertUdf.apply(
-                                    col(DATA),
-                                    col("ingest_time"),
-                                    lit(null).cast(DataTypes.LongType),
-                                    col("rid"),
-                                    col("uri"),
-                                    col("ua"),
-                                    col("ip"),
-                                    lit(projectId),
-                                    col(INPUT_FILE_NAME),
-                                    col(appId)
-                            )
-                    ));
-
+            return new Column[]{
+                    col(DATA),
+                    col("ingest_time"),
+                    lit(null).cast(DataTypes.LongType),
+                    col("rid"),
+                    col("uri"),
+                    col("ua"),
+                    col("ip"),
+                    lit(projectId),
+                    col(INPUT_FILE_NAME),
+                    col(INGEST_APPID)
+            };
         }
     }
 
     public UserDefinedFunction getConvertUdf() {
-        return udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
+        return functions.udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
     }
 
-    public static Dataset<Row> filterEmptyAppId(final Dataset<Row> dataset, final String appId) {
+    public static Dataset<Row> filterEmptyAppId(final Dataset<Row> dataset) {
         return dataset
-                .filter(col(appId).isNotNull().and(col(appId).notEqual("")));
+                .filter(col(INGEST_APPID).isNotNull().and(col(INGEST_APPID).notEqual("")));
     }
 }

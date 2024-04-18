@@ -26,9 +26,10 @@ import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.model.ModelV2;
 import software.aws.solution.clickstream.transformer.BaseTransformerV3;
 import software.aws.solution.clickstream.transformer.Cleaner;
-import software.aws.solution.clickstream.transformer.DataConverterV3;
-import software.aws.solution.clickstream.transformer.DatasetTransformer;
+import software.aws.solution.clickstream.udfconverter.ClickstreamDataConverterV3;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 import software.aws.solution.clickstream.transformer.TransformConfig;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 import software.aws.solution.clickstream.util.ContextUtil;
 import software.aws.solution.clickstream.util.DatasetUtil;
 
@@ -47,9 +48,9 @@ import static org.apache.spark.sql.functions.min;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
 import static software.aws.solution.clickstream.model.ModelV2.toColumnArray;
-import static software.aws.solution.clickstream.transformer.EventParserFactory.CLICKSTREAM;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForSession;
 import static software.aws.solution.clickstream.transformer.MaxLengthTransformerV2.runMaxLengthTransformerForUserV2;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.CLICKSTREAM;
 import static software.aws.solution.clickstream.util.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
@@ -257,11 +258,11 @@ public class TransformerV3 extends BaseTransformerV3 {
     }
 
     @Override
-    public DatasetTransformer getDatasetTransformer() {
+    public DatasetConverter getDatasetTransformer() {
         if (this.getTransformConfig() == null) {
             throw new ExecuteTransformerException("Transform config is not set");
         }
-        return new DataConverterV3(this.transformConfig.getAppRuleConfig());
+        return new ClickstreamDataConverterV3(this.transformConfig.getAppRuleConfig());
     }
 
 
@@ -348,7 +349,7 @@ public class TransformerV3 extends BaseTransformerV3 {
     }
 
     @Override
-    public String getName() {
+    public TransformerNameEnum getName() {
         return CLICKSTREAM;
     }
 
