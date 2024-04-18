@@ -245,6 +245,7 @@ export class SegmentServ {
 
       return res.status(200).json(new ApiSuccess({ presignedUrl }, 'Generate presigned URL successfully.'));
     } catch (error) {
+      console.log('getExportS3Url fail: ', error);
       return next(error);
     }
   }
