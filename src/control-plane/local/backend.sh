@@ -46,7 +46,6 @@ export ISSUER=$issuer
 export WITH_AUTH_MIDDLEWARE=true
 export WITH_VALIDATE_ROLE=true
 export LOG_LEVEL=DEBUG
-export OUTBOUND_NAVIGATION="[{\"name\":\"Text2SQL\",\"icon\":\"anchor-link\",\"title\":{\"en-US\":\"Generate SQL\",\"zh-CN\":\"AI生成SQL\"},\"url\":\"https://www.json.org/json-en.html\"},{\"name\":\"GenAI\",\"icon\":\"gen-ai\",\"title\":{\"en-US\":\"Generate AI\",\"zh-CN\":\"AI\"},\"url\":\"https://en.wikipedia.org/wiki/Generative_artificial_intelligence\"}]"
 
 # Run the server
 cd ../backend/lambda/api && pnpm dev

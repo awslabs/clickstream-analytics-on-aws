@@ -50,7 +50,6 @@ const Outbound: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('outboundName', outboundName);
     if (outboundName) {
       fetchOutbound();
     }
