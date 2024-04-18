@@ -299,9 +299,9 @@ tmp_user_first_traffic_mobile AS (
     SELECT
         e.user_pseudo_id,
         MAX(page_view_latest_referrer) AS first_referrer,
-        coalesce(MAX(traffic_source_source), 'direct') AS first_traffic_source,
+        MAX(traffic_source_source) AS first_traffic_source,
         MAX(traffic_source_medium) AS first_traffic_medium,
-        coalesce(MAX(traffic_source_campaign), 'direct') AS first_traffic_campaign,
+        MAX(traffic_source_campaign) AS first_traffic_campaign,
         MAX(traffic_source_content) AS first_traffic_content,
         MAX(traffic_source_term) AS first_traffic_term,
         MAX(traffic_source_campaign_id) AS first_traffic_campaign_id,
@@ -317,7 +317,7 @@ tmp_user_first_traffic_mobile AS (
         e.platform != 'Web'
         AND e.user_pseudo_id = t.user_pseudo_id
         AND e.session_id = t.session_id
-        AND e.traffic_source_source != 'direct'
+        AND e.traffic_source_source is NOT NULL
     GROUP BY
         e.user_pseudo_id
 )

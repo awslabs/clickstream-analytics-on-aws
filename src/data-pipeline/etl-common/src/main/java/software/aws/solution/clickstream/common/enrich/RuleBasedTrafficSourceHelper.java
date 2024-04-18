@@ -29,6 +29,7 @@ import software.aws.solution.clickstream.common.enrich.ts.rule.SourceCategoryAnd
 import software.aws.solution.clickstream.common.exception.ExtractDataException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,6 +253,14 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         String source = sourceCategoryAndTerms.getSource();
         String terms = sourceCategoryAndTerms.getTerms();
         String category = sourceCategoryAndTerms.getCategory();
+
+        List<String> socialMediumList = Arrays.asList(
+                "social", "social-network", "social-media", "sm", "social network", "social media"
+        );
+        if (socialMediumList.contains(trafficSourceUtm.getMedium())
+                && (category == null || category.equals(CategoryListEvaluator.UNASSIGNED))) {
+            category = "Social";
+        }
 
         log.info("categoryListEvaluator source: {}, terms: {}, category: {}", source, terms, category);
 

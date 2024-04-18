@@ -136,67 +136,6 @@ CALL {{schema}}.sp_clickstream_log_non_atomic (
     'update ' || record_number || ' traffic_source for session(web)'
 );
 
-CREATE temp TABLE tmp_traffic_session_mobile AS (
-    SELECT
-        e.user_pseudo_id,
-        e.session_id,
-        coalesce(MAX(traffic_source_source), 'direct') AS session_source,
-        MAX(traffic_source_medium) AS session_medium,
-        coalesce(MAX(traffic_source_campaign), 'direct') AS session_campaign,
-        MAX(traffic_source_content) AS session_content,
-        MAX(traffic_source_term) AS session_term,
-        MAX(traffic_source_campaign_id) AS session_campaign_id,
-        MAX(traffic_source_clid_platform) AS session_clid_platform,
-        MAX(traffic_source_clid) AS session_clid,
-        MAX(traffic_source_channel_group) AS session_channel_group,
-        MAX(traffic_source_category) AS session_source_category
-    FROM
-        {{schema}}.event_v2 e
-    WHERE
-        e.event_name IN ('_user_enagement', '_screen_view', '_app_end')
-        AND e.platform != 'Web' 
-        AND e.platform IS NOT NULL
-        AND e.traffic_source_source != 'direct'
-    GROUP BY
-        e.user_pseudo_id,
-        e.session_id
-);
-
-UPDATE
-    {{schema}}.session
-SET
-    session_source = t.session_source,
-    session_medium = t.session_medium,
-    session_campaign = t.session_campaign,
-    session_content = t.session_content,
-    session_term = t.session_term,
-    session_campaign_id = t.session_campaign_id,
-    session_clid_platform = t.session_clid_platform,
-    session_clid = t.session_clid,
-    session_channel_group = t.session_channel_group,
-    session_source_category = t.session_source_category,
-    process_info = object_transform(
-        process_info
-        SET
-            '"backfill_traffic_source_mobile"',
-            true
-    )
-FROM
-    tmp_traffic_session_mobile t
-WHERE
-    session.user_pseudo_id = t.user_pseudo_id
-    AND session.session_id = t.session_id
-    AND session.process_info.backfill_start_time IS NOT NULL
-    AND session.process_info.backfill_end_time IS NULL;
-
-GET DIAGNOSTICS record_number := ROW_COUNT;
-
-CALL {{schema}}.sp_clickstream_log_non_atomic (
-    log_name,
-    'info',
-    'update ' || record_number || ' traffic_source for session(mobile)'
-);
-
 
 UPDATE
     {{schema}}.session

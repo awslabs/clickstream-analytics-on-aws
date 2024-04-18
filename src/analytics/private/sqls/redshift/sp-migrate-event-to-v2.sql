@@ -722,36 +722,13 @@ CREATE temp TABLE tmp_event_traffic_source AS (
         page_view_page_referrer,
         page_view_page_url,
         json_parse(
-            {{schema}}.parse_utm_from_url(page_view_page_url, page_view_page_referrer)
+            {{schema}}.parse_utm_from_url(page_view_page_url,  COALESCE(page_view_page_referrer, page_view_latest_referrer))
         ) utm
     FROM
         {{schema}}.event_v2 e
     WHERE
         platform = 'Web'
         AND page_view_page_url IS NOT NULL
-        AND event_id IN (
-            SELECT
-                event_id
-            FROM
-                tmp_cand_event_id
-        )
-    UNION
-    ALL
-    SELECT
-        event_timestamp,
-        event_id,
-        platform,
-        page_view_latest_referrer,
-        page_view_page_referrer,
-        page_view_page_url,
-        json_parse(
-            {{schema}}.parse_utm_from_url(page_view_latest_referrer, NULL)
-        ) utm
-    FROM
-        {{schema}}.event_v2 e
-    WHERE
-        platform != 'Web'
-        AND page_view_latest_referrer IS NOT NULL
         AND event_id IN (
             SELECT
                 event_id

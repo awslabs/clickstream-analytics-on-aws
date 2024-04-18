@@ -173,6 +173,9 @@ public final class ChannelRuleEvaluator {
         if (value.equals(EMPTY_VALUE_FLAG)) {
             value = "";
         }
+        actualValue = actualValue.toLowerCase();
+        value = value.toLowerCase();
+
         if (op.equals(OpEnum.EQ.getOp())) {
             return actualValue.equals(value);
         } else if (op.equals(OpEnum.NOT_EQ.getOp())) {
@@ -198,10 +201,16 @@ public final class ChannelRuleEvaluator {
     }
 
     private boolean compareIn(final String expectedValue, final String op, final List<String> values) {
+        values.replaceAll(String::toLowerCase);
+        String epValue = expectedValue;
+        if (expectedValue == null) {
+            epValue = "";
+        }
+        epValue = epValue.toLowerCase();
         if (op.equals(OpEnum.IN.getOp())) {
-            return values.contains(expectedValue);
+            return values.contains(epValue);
         } else if (op.equals(OpEnum.NOT_IN.getOp())) {
-            return !values.contains(expectedValue);
+            return !values.contains(epValue);
         }
         return false;
     }
