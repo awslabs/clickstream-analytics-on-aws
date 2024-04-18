@@ -100,7 +100,10 @@
   "app_exception_message" : null,
   "app_exception_stack" : null,
   "custom_parameters" : {
-    "x-ga-system_properties" : {
+    "distinct_id" : "9113946abd821d52",
+    "screen_resolution" : "1080x2400",
+    "user_agent" : null,
+    "properties" : {
       "$is_login_id" : false,
       "$ip" : null,
       "$province" : null,
@@ -147,11 +150,7 @@
       "$browser_language" : null,
       "$browser_version" : null,
       "$lib_version" : "6.7.2"
-    },
-    "screen_resolution" : "1080x2400",
-    "client_id" : "9113946abd821d52",
-    "user_agent" : null,
-    "ip_override" : null
+    }
   },
   "process_info" : {
     "input_file_name" : "server-session-start.json",

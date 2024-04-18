@@ -217,15 +217,10 @@ public final class SensorsEventParser extends BaseEventParser {
             clickstreamEvent.setCustomParameters(customParameters);
         }
         String screenResolution = sensorsEvent.getProperties().getScreenWidth() + "x" + sensorsEvent.getProperties().getScreenHeight();
-        customParameters.put("client_id", new ClickstreamEventPropValue(sensorsEvent.getDistinctId(), ValueType.STRING));
-        customParameters.put("ip_override", new ClickstreamEventPropValue(sensorsEvent.getProperties().getIp(), ValueType.STRING));
+        customParameters.put("distinct_id", new ClickstreamEventPropValue(sensorsEvent.getDistinctId(), ValueType.STRING));
         customParameters.put("screen_resolution", new ClickstreamEventPropValue(screenResolution, ValueType.STRING));
         customParameters.put("user_agent", new ClickstreamEventPropValue(sensorsEvent.getProperties().getUserAgent(), ValueType.STRING));
 
-        if (sensorsEvent.getProperties().getUserAgent() != null) {
-            customParameters.put("x-ga-ur",
-                    new ClickstreamEventPropValue(sensorsEvent.getProperties().getUserAgent(), ValueType.STRING));
-        }
         if (sensorsEvent.getProperties().getProvince() != null && sensorsEvent.getProperties().getCity() != null) {
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode eventObject = objectMapper.createObjectNode();
@@ -239,7 +234,7 @@ public final class SensorsEventParser extends BaseEventParser {
                     new ClickstreamEventPropValue(objectToJsonString(eventObject), ValueType.OBJECT));
         }
         if (sensorsEvent.getProperties() != null) {
-            customParameters.put("x-ga-system_properties",
+            customParameters.put("properties",
                     new ClickstreamEventPropValue(objectToJsonString(sensorsEvent.getProperties()), ValueType.OBJECT));
         }
         return customParameters;
