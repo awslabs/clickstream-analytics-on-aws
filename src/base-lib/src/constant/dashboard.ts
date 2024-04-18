@@ -30,6 +30,9 @@ export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_SP = 'clickstream_a
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION = 'clickstream_acquisition_day_user_acquisition';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP = 'clickstream_acquisition_day_user_acquisition_sp';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV = 'clickstream_acquisition_day_user_view_cnt_mv';
+export const CLICKSTREAM_ACQUISITION_INTRA_DAY = 'clickstream_acquisition_intra_day';
+export const CLICKSTREAM_ACQUISITION_INTRA_DAY_SP = 'clickstream_acquisition_intra_day_sp';
+
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW = 'clickstream_engagement_day_user_view';
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_SP = 'clickstream_engagement_day_user_view_sp';
 export const CLICKSTREAM_ENGAGEMENT_ENTRANCE = 'clickstream_engagement_entrance';
@@ -42,32 +45,40 @@ export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW = 'clickstream_engagement_p
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL = 'clickstream_engagement_page_screen_view_detail';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_SP = 'clickstream_engagement_page_screen_view_detail_sp';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_SP = 'clickstream_engagement_page_screen_view_sp';
+export const CLICKSTREAM_ENGAGEMENT_EVENT_NAME_SP = 'clickstream_engagement_event_name_sp';
+export const CLICKSTREAM_ENGAGEMENT_EVENT_NAME = 'clickstream_engagement_event_name';
 
 export const CLICKSTREAM_RETENTION_USER_NEW_RETURN = 'clickstream_retention_user_new_return';
 export const CLICKSTREAM_RETENTION_DAU_WAU = 'clickstream_retention_dau_wau';
 export const CLICKSTREAM_RETENTION_EVENT_OVERTIME = 'clickstream_retention_event_overtime';
 export const CLICKSTREAM_DEVICE_CRASH_RATE = 'clickstream_device_crash_rate';
+export const CLICKSTREAM_DEVICE_USER_DEVICE = 'clickstream_device_user_device';
 export const CLICKSTREAM_RETENTION_USER_NEW_RETURN_SP = 'clickstream_retention_user_new_return_sp';
 export const CLICKSTREAM_RETENTION_DAU_WAU_SP = 'clickstream_retention_dau_wau_sp';
 export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_SP = 'clickstream_retention_event_overtime_sp';
 export const CLICKSTREAM_DEVICE_CRASH_RATE_SP = 'clickstream_device_crash_rate_sp';
+export const CLICKSTREAM_DEVICE_USER_DEVICE_SP = 'clickstream_device_user_device_sp';
 
 export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
 export const CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER_PLACEHOLDER = 'Country_New_User';
 export const CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER_PLACEHOLDER = 'Day_Traffic_Source_User';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_PLACEHOLDER = 'Day_User_Acquisition';
 export const CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV_PLACEHOLDER = 'Day_User_View';
+
+export const CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER = 'Intra_Day_User';
 export const CLICKSTREAM_ENGAGEMENT_DAY_USER_VIEW_PLACEHOLDER = 'Day_User_View_Engagement';
 export const CLICKSTREAM_ENGAGEMENT_ENTRANCE_PLACEHOLDER = 'Entrance';
 export const CLICKSTREAM_ENGAGEMENT_EXIT_PLACEHOLDER = 'Exit';
 export const CLICKSTREAM_ENGAGEMENT_KPI_PLACEHOLDER = 'Engagement_KPI';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_PLACEHOLDER = 'Page_Screen_View';
 export const CLICKSTREAM_ENGAGEMENT_PAGE_SCREEN_VIEW_DETAIL_PLACEHOLDER = 'Page_Screen_View_Detail';
+export const CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER = 'Event_Name';
 
 export const CLICKSTREAM_RETENTION_USER_NEW_RETURN_PLACEHOLDER = 'User_New_Return';
 export const CLICKSTREAM_RETENTION_DAU_WAU_PLACEHOLDER = 'DAU_WAU';
 export const CLICKSTREAM_RETENTION_EVENT_OVERTIME_PLACEHOLDER = 'Event_Overtime';
 export const CLICKSTREAM_DEVICE_CRASH_RATE_PLACEHOLDER = 'Crash_Rate';
+export const CLICKSTREAM_DEVICE_USER_DEVICE_PLACEHOLDER = 'Device';
 
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
 export const CLICKSTREAM_RETENTION_VIEW_NAME_PLACEHOLDER = 'Retention_View';
