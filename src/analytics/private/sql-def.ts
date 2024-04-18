@@ -270,13 +270,7 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'sp-scan-metadata.sql',
   },
   {
-    sqlFile: 'sp-clear-expired-events.sql',
-  },
-  {
-    sqlFile: 'sp-clear-item-and-user.sql',
-  },
-  {
-    sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
+    sqlFile: 'sp-clear-expired-data.sql',
   },
   {
     sqlFile: 'event-v2.sql',
