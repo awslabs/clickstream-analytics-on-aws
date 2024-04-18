@@ -13,58 +13,33 @@
 
 export const AthenaBuiltInQueries = [
   {
-    id: 'DeviceQuery',
-    name: 'Clickstream - Device Query',
-    description: 'Athena SQL that queries device information',
-    sqlFile: 'clickstream-device-query.sql',
-  },
-  {
-    id: 'LifecycleDailyQuery',
-    name: 'Clickstream - User Life Cycle Query(daily view)',
-    description: 'Athena SQL that generates user life cycle information by date',
-    sqlFile: 'clickstream-lifecycle-daily-query.sql',
-  },
-  {
-    id: 'LifecycleWeeklyQuery',
-    name: 'Clickstream - User Life Cycle Query (weekly view)',
-    description: 'Athena SQL that generates user life cycle information by week',
-    sqlFile: 'clickstream-lifecycle-weekly-query.sql',
-  },
-  {
-    id: 'EventsParameterQuery',
-    name: 'Clickstream - Events Parameter Query',
-    description: 'Athena SQL that queries event parameters',
-    sqlFile: 'clickstream-event-parameter-query.sql',
+    id: 'AllDataQuery',
+    name: 'Clickstream - All Data Query',
+    description: 'Athena SQL that queries event,user and session information',
+    sqlFile: 'clickstream-event-user-session-query.sql',
   },
   {
     id: 'EventsQuery',
     name: 'Clickstream - Event Query',
-    description: 'Athena SQL that queries events information',
+    description: 'Athena SQL that queries event information',
     sqlFile: 'clickstream-event-query.sql',
   },
   {
-    id: 'RetentionQuery',
-    name: 'Clickstream - Retention Query',
-    description: 'Athena SQL that calculates user retention metrics',
-    sqlFile: 'clickstream-retention-query.sql',
+    id: 'UserQuery',
+    name: 'Clickstream - User Query',
+    description: 'Athena SQL that queries user information',
+    sqlFile: 'clickstream-user-query.sql',
   },
   {
     id: 'SessionQuery',
     name: 'Clickstream - Session Query',
-    description: 'Athena SQL that calculates session-related metrics',
+    description: 'Athena SQL that queries session-related metrics',
     sqlFile: 'clickstream-session-query.sql',
   },
   {
-    id: 'UserDimQuery',
-    name: 'Clickstream - User Dimension Query',
-    description: 'Athena SQL that generates latest user information',
-    sqlFile: 'clickstream-user-dim-query.sql',
+    id: 'ItemQuery',
+    name: 'Clickstream - Item Query',
+    description: 'Athena SQL that queries item information',
+    sqlFile: 'clickstream-item-query.sql',
   },
-  {
-    id: 'UserAttrQuery',
-    name: 'Clickstream - User Attribute Query',
-    description: 'Athena SQL that queries users\' attributes',
-    sqlFile: 'clickstream-user-attr-query.sql',
-  },
-
 ];

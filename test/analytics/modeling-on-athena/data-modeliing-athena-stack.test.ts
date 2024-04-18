@@ -27,74 +27,24 @@ describe('Athena built-in query test', () => {
     template.hasParameter('AthenaEventTable', {});
     template.hasParameter('AthenaSessionTable', {});
     template.hasParameter('AthenaUserTable', {});
+    template.hasParameter('AthenaItemTable', {});
     template.hasParameter('AppRegistryApplicationArn', {});
   });
 
-  test('Should have device query', () => {
+  test('Should have event-user-session query', () => {
     template.hasResourceProperties('AWS::Athena::NamedQuery', {
       Name: {
         'Fn::Join': [
           '',
           [
-            'Clickstream - Device Query - ',
+            'Clickstream - All Data Query - ',
             {
               Ref: Match.anyValue(),
             },
           ],
         ],
       },
-      Description: 'Athena SQL that queries device information',
-    });
-  });
-
-  test('Should have life cycle daily query', () => {
-    template.hasResourceProperties('AWS::Athena::NamedQuery', {
-      Name: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream - User Life Cycle Query(daily view) - ',
-            {
-              Ref: Match.anyValue(),
-            },
-          ],
-        ],
-      },
-      Description: 'Athena SQL that generates user life cycle information by date',
-    });
-  });
-
-  test('Should have life cycle weekly query', () => {
-    template.hasResourceProperties('AWS::Athena::NamedQuery', {
-      Name: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream - User Life Cycle Query (weekly view) - ',
-            {
-              Ref: Match.anyValue(),
-            },
-          ],
-        ],
-      },
-      Description: 'Athena SQL that generates user life cycle information by week',
-    });
-  });
-
-  test('Should have events parameter query', () => {
-    template.hasResourceProperties('AWS::Athena::NamedQuery', {
-      Name: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream - Events Parameter Query - ',
-            {
-              Ref: Match.anyValue(),
-            },
-          ],
-        ],
-      },
-      Description: 'Athena SQL that queries event parameters',
+      Description: 'Athena SQL that queries event,user and session information',
     });
   });
 
@@ -111,24 +61,7 @@ describe('Athena built-in query test', () => {
           ],
         ],
       },
-      Description: 'Athena SQL that queries events information',
-    });
-  });
-
-  test('Should have retention query', () => {
-    template.hasResourceProperties('AWS::Athena::NamedQuery', {
-      Name: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream - Retention Query - ',
-            {
-              Ref: Match.anyValue(),
-            },
-          ],
-        ],
-      },
-      Description: 'Athena SQL that calculates user retention metrics',
+      Description: 'Athena SQL that queries event information',
     });
   });
 
@@ -145,41 +78,41 @@ describe('Athena built-in query test', () => {
           ],
         ],
       },
-      Description: 'Athena SQL that calculates session-related metrics',
+      Description: 'Athena SQL that queries session-related metrics',
     });
   });
 
-  test('Should have use dim query', () => {
+  test('Should have user query', () => {
     template.hasResourceProperties('AWS::Athena::NamedQuery', {
       Name: {
         'Fn::Join': [
           '',
           [
-            'Clickstream - User Dimension Query - ',
+            'Clickstream - User Query - ',
             {
               Ref: Match.anyValue(),
             },
           ],
         ],
       },
-      Description: 'Athena SQL that generates latest user information',
+      Description: 'Athena SQL that queries user information',
     });
   });
 
-  test('Should have use attribute query', () => {
+  test('Should have item query', () => {
     template.hasResourceProperties('AWS::Athena::NamedQuery', {
       Name: {
         'Fn::Join': [
           '',
           [
-            'Clickstream - User Attribute Query - ',
+            'Clickstream - Item Query - ',
             {
               Ref: Match.anyValue(),
             },
           ],
         ],
       },
-      Description: 'Athena SQL that queries users\' attributes',
+      Description: 'Athena SQL that queries item information',
     });
   });
 
