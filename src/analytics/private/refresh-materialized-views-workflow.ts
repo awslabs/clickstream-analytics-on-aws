@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { IRole } from 'aws-cdk-lib/aws-iam';
+import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays, LogGroup } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, DefinitionBody, Wait, WaitTime, Succeed, Condition, Choice, Fail, TaskInput, Pass, Map, IntegrationPattern } from 'aws-cdk-lib/aws-stepfunctions';
@@ -71,6 +71,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
+    checkRefreshMvStatusJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
     const waitCheckMVStatus = new Wait(this, 'Wait check MV status seconds', {
       time: WaitTime.secondsPath('$.waitTimeInfo.waitTime'),
     });
@@ -93,6 +100,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
+    refreshBasicViewFnJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
     const checkNextRefreshViewFn = this.checkNextRefreshViewFn(props, lambdaLogGroup);
     const checkNextRefreshViewJob = new LambdaInvoke(this, `${this.node.id} - Check next view should be refreshed`, {
       lambdaFunction: checkNextRefreshViewFn,
@@ -102,6 +116,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
+    });
+
+    checkNextRefreshViewJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
     });
 
     const checkNextRefreshViewJobFail = new Fail(this, `${this.node.id} - check next refresh view fail`, {
@@ -118,6 +139,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         'originalInput.$': '$$.Execution.Input',
       }),
       outputPath: '$.Payload',
+    });
+
+    checkStartSpRefreshJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
     });
 
     const refreshViewJobFailed = new Fail(this, `${this.node.id} - Refresh view job fails`, {
@@ -196,21 +224,46 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     const parseTimeZoneWithAppIdListJob = new LambdaInvoke(this, `${this.node.id} - Parse timezone with appId list from props`, {
       lambdaFunction: parseTimeZoneWithAppIdListFn,
       outputPath: '$.Payload',
-    }).next(checkJobExist);
+    });
+
+    parseTimeZoneWithAppIdListJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
+    parseTimeZoneWithAppIdListJob.next(checkJobExist);
 
     const getJobListFromInput = new Pass(this, `${this.node.id} - Get app_id from input`, {
       parameters: {
-        'timezoneWithAppIdList.$': '$.timezoneWithAppIdList',
+        'timezoneWithAppIdList.$': '$$.Execution.Input.timezoneWithAppIdList',
       },
     }).next(checkJobExist);
 
     const getAppIdList = new Choice(this, `${this.node.id} - Check if app_id list exists`)
-      .when(Condition.isPresent('$.timezoneWithAppIdList'), getJobListFromInput)
+      .when(Condition.isPresent('$$.Execution.Input.timezoneWithAppIdList'), getJobListFromInput)
       .otherwise(parseTimeZoneWithAppIdListJob);
+
+    // add lambda job to check exist execution
+    const checkWorkflowStartFn = this.checkWorkflowStartFn(props, lambdaLogGroup);
+    const checkWorkflowStartJob = new LambdaInvoke(this, `${this.node.id} - Check whether refresh workflow should start`, {
+      lambdaFunction: checkWorkflowStartFn,
+      payload: TaskInput.fromObject({
+        'executionId.$': '$$.Execution.Id',
+      }),
+      outputPath: '$.Payload',
+    });
+
+    const refreshWorkflowDefinition = checkWorkflowStartJob
+      .next(
+        new Choice(this, `${this.node.id} - Check if scan metadata workflow start`)
+          .when(Condition.stringEquals('$.status', WorkflowStatus.SKIP), doRefreshJobSucceed)
+          .when(Condition.stringEquals('$.status', WorkflowStatus.CONTINUE), getAppIdList));
 
     // Create state machine
     const refreshMaterializedViewsMachine = new StateMachine(this, 'RefreshMaterializedViewsMachine', {
-      definitionBody: DefinitionBody.fromChainable(getAppIdList),
+      definitionBody: DefinitionBody.fromChainable(refreshWorkflowDefinition),
       logs: {
         destination: stepFunctionLogGroup,
         level: LogLevel.ALL,
@@ -218,6 +271,19 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       tracingEnabled: true,
       comment: 'This state machine is responsible for refreshing materialized views',
     });
+
+    checkWorkflowStartFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
+      statements: [
+        new PolicyStatement({
+          actions: [
+            'states:ListExecutions',
+          ],
+          resources: [
+            refreshMaterializedViewsMachine.stateMachineArn,
+          ],
+        }),
+      ],
+    }));
 
     return refreshMaterializedViewsMachine;
   }
@@ -233,9 +299,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'ParseTimeZoneWithAppIdListRule', true, []),
@@ -250,6 +313,30 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
     return fn;
   }
 
+  private checkWorkflowStartFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
+    const fnSG = props.securityGroupForLambda;
+
+    const fn = new SolutionNodejsFunction(this, 'CheckRefreshWorkflowStart', {
+      entry: join(
+        this.lambdaRootPath,
+        'check-refresh-workflow-start.ts',
+      ),
+      handler: 'handler',
+      memorySize: 128,
+      timeout: Duration.seconds(30),
+      logGroup,
+      reservedConcurrentExecutions: 1,
+      role: createLambdaRole(this, 'CheckRefreshWorkflowStartRule', true, []),
+      ...props.networkConfig,
+      securityGroups: [fnSG],
+      environment: {
+        TIMEZONE_WITH_APPID_LIST: props.timezoneWithAppId,
+      },
+      applicationLogLevel: 'WARN',
+    });
+    return fn;
+  }
+
   private checkNextRefreshSpFn(props: RefreshMaterializedViewsWorkflowProps, logGroup: LogGroup): IFunction {
     const fnSG = props.securityGroupForLambda;
 
@@ -261,9 +348,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshSpRole', true, []),
@@ -291,9 +375,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckNextRefreshViewRole', true, []),
@@ -319,9 +400,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshBasicViewRole', true, []),
@@ -349,9 +427,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckStartSpRefreshRole', true, []),
@@ -380,9 +455,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshMvStatusRole', true, []),
@@ -409,9 +481,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'CheckRefreshSpStatusRole', true, []),
@@ -439,9 +508,6 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(3),
-      logConf: {
-        retention: RetentionDays.ONE_WEEK,
-      },
       logGroup,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'RefreshSpRole', true, []),
@@ -482,6 +548,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
+    refreshSpFnJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
     const checkRefreshSpStatusFn = this.checkRefreshSpStatusFn(props, lambdaLogGroup);
     const checkRefreshSpStatusJob = new LambdaInvoke(this, `${this.node.id} - Check refresh SP status`, {
       lambdaFunction: checkRefreshSpStatusFn,
@@ -491,6 +564,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         'waitTimeInfo.$': '$.waitTimeInfo',
       }),
       outputPath: '$.Payload',
+    });
+
+    checkRefreshSpStatusJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
     });
 
     const waitCheckSPStatus = new Wait(this, 'Wait check SP status seconds', {
@@ -518,6 +598,13 @@ export class RefreshMaterializedViewsWorkflow extends Construct {
         'originalInput.$': '$$.Execution.Input.originalInput',
       }),
       outputPath: '$.Payload',
+    });
+
+    checkNextRefreshSpJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
     });
 
     refreshSpFnJob
