@@ -214,3 +214,39 @@ export const FLUTTER_ADD_USER_ATTR = `analytics.setUserAttributes({
   "userAge": 22
 });
 `;
+
+export const REACT_NATIVE_INSTALL_GUIDE = `// npm
+npm install @aws/clickstream-react-native
+
+// Or yarn
+yarn install @aws/clickstream-react-native`;
+
+export const REACT_NATIVE_INIT_SDK_TEXT = `import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
+
+ClickstreamAnalytics.init({
+    appId: 'your appId',
+    endpoint: 'https://example.com/collect',
+});
+`;
+
+export const REACT_NATIVE_RECORD_EVENT = `import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
+
+ClickstreamAnalytics.record({
+  name: 'button_click',
+  attributes: {
+    event_category: 'shoes',
+    currency: 'CNY',
+    value: 279.9,
+  },
+});
+
+ClickstreamAnalytics.record({name: 'button_click'});
+`;
+
+export const REACT_NATIVE_ADD_USER_ATTR = `import { ClickstreamAnalytics } from '@aws/clickstream-react-native';
+
+ClickstreamAnalytics.setUserAttributes({
+  userName: "carl",
+  userAge: 22
+});
+`;
