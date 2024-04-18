@@ -30,6 +30,7 @@ import moment from 'moment-timezone';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from 'pages/application/detail/comp/ConfigFlutterSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
+import ConfigReactNativeSDK from 'pages/application/detail/comp/ConfigReactNativeSDK';
 import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -342,6 +343,15 @@ const RegisterApp: React.FC = () => {
                 content: (
                   <div className="pd-20">
                     <ConfigFlutterSDK appInfo={application} />
+                  </div>
+                ),
+              },
+              {
+                label: t('application:detail.reactNative'),
+                id: 'reactNative',
+                content: (
+                  <div className="pd-20">
+                    <ConfigReactNativeSDK appInfo={application} />
                   </div>
                 ),
               },

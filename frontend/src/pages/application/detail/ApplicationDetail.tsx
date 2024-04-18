@@ -44,6 +44,7 @@ import { defaultStr } from 'ts/utils';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from './comp/ConfigFlutterSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
+import ConfigReactNativeSDK from './comp/ConfigReactNativeSDK';
 import ConfigWebSDK from './comp/ConfigWebSDK';
 
 const ApplicationDetail: React.FC = () => {
@@ -381,6 +382,15 @@ const ApplicationDetail: React.FC = () => {
                       content: (
                         <div className="pd-20">
                           <ConfigFlutterSDK appInfo={applicationInfo} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('application:detail.reactNative'),
+                      id: 'reactNative',
+                      content: (
+                        <div className="pd-20">
+                          <ConfigReactNativeSDK appInfo={applicationInfo} />
                         </div>
                       ),
                     },
