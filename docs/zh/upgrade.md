@@ -78,7 +78,7 @@
 6. 执行以下SQL查看存储过程执行日志； 确保那里没有错误。
 
     ```sql 
-    -- 请将 `<app-id>` 替换为您的实际应用 IDd
+    -- 请将 `<app-id>` 替换为您的实际应用 ID
     SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_ods_events' order by log_date desc;
     ```     
 
@@ -93,6 +93,60 @@
     DROP PROCEDURE  "<app-id>".sp_upsert_users();
     DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
     ```
+
+
+### 从1.1.x升级后迁移现有数据
+
+当您从 v1.1.x 升级管道时，您需要执行以下操作将数据从旧表 `event`, `event_parameter`, `user` 和 `item` 迁移到 Redshift 中的新表 `event_v2`、`user_v2`、`item_v2` 和 `session`:
+
+1. 打开 [Redshift 查询编辑器 v2][查询编辑器]。 您可以参考 AWS 文档 [使用查询编辑器 v2][working-with-query-editor] 使用 Redshift 查询编辑器 v2 登录并查询数据。
+
+    !!! info "注意"
+        您必须使用`admin`用户或具有 schema（名为`项目 ID`）所有权权限的用户。
+
+2. 选择无服务器工作组或配置的集群，`<project-id>`->`<app-id>`->Tables，并确保其中列出了 appId 的表。
+
+3. 新建一个SQL编辑器。
+
+4. 在编辑器中执行以下SQL，这个SQL将迁移过去180天的数据。
+
+     ```sql
+     -- 请将 `<app-id>` 替换为您的实际应用 ID
+    CALL "<app-id>".sp_migrate_all_to_v2(180);
+     ```
+
+5. 等待SQL 完成。 执行时间取决于表“event”中的数据量。
+
+6. 执行以下SQL查看存储过程执行日志； 确保那里没有错误。
+
+    ```sql
+    -- 请将 `<app-id>` 替换为您的实际应用 ID
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_event_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_user_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_item_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_session_to_v2' order by log_date desc;
+    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_all_to_v2' order by log_date desc;
+    ```  
+
+7. 如果您没有其他应用程序使用旧表和视图，您可以运行下面的 SQL 来清理旧视图和表，以节省 Redshift 的存储空间。
+
+    ```sql
+    -- 请将 `<app-id>` 替换为您的实际应用 ID
+    DROP TABLE "<app-id>".event CASCADE;
+    DROP TABLE "<app-id>".item CASCADE;
+    DROP TABLE "<app-id>".user CASCADE;
+    DROP TABLE "<app-id>".event_parameter CASCADE;
+
+    DROP PROCEDURE  "<app-id>".sp_migrate_event_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_migrate_item_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_clear_expired_events(retention_range_days integer)
+    DROP PROCEDURE  "<app-id>".sp_migrate_all_to_v2(nday integer);
+    DROP PROCEDURE  "<app-id>".sp_migrate_user_to_v2();
+    DROP PROCEDURE  "<app-id>".sp_migrate_session_to_v2();
+    DROP PROCEDURE  "<app-id>".sp_clear_item_and_user();
+    ```
+
+
 
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
