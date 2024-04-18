@@ -867,6 +867,9 @@ describe('DataReportingQuickSightStack resource test', () => {
       quickSightUser: {
         Ref: 'QuickSightUserParam',
       },
+      quickSightSharePrincipalArn: {
+        Ref: 'QuickSightOwnerPrincipalParam',
+      },
       quickSightOwnerPrincipalArn: {
         Ref: 'QuickSightOwnerPrincipalParam',
       },
@@ -1842,6 +1845,40 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
+            tableName: 'Intra_Day_User',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day where event_date >= <<$startDate23>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'Active User',
+                Type: 'STRING',
+              },
+              {
+                Name: 'New User',
+                Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate23',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate23',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'Active User',
+              'New User',
+            ],
+          },
+          {
             tableName: 'Day_User_View_Engagement',
             importMode: 'DIRECT_QUERY',
             customSql: "SELECT * FROM {{schema}}.clickstream_engagement_day_user_view where event_date >= <<$startDate09>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate09>>))",
@@ -2111,6 +2148,55 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
           },
           {
+            tableName: 'Event_Name',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_engagement_event_name where event_date >= <<$startDate22>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate22>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_value',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate22',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate22',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'user_id',
+              'event_name',
+              'event_value',
+              'event_count',
+            ],
+          },
+          {
             tableName: 'User_New_Return',
             importMode: 'DIRECT_QUERY',
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_user_new_return where event_date >= <<$startDate15>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate15>>))",
@@ -2334,7 +2420,69 @@ describe('DataReportingQuickSightStack resource test', () => {
               'crashed_user_id',
             ],
           },
+          {
+            tableName: 'Device',
+            importMode: 'DIRECT_QUERY',
+            customSql: "SELECT * FROM {{schema}}.clickstream_device_user_device where event_date >= <<$startDate21>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate21>>))",
+            columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'operating_system / version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_ua_browser',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_screen_resolution',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_count',
+                Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate21',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate21',
+                timeGranularity: 'DAY',
+              },
+            ],
+            projectedColumns: [
+              'event_date',
+              'platform',
+              'app_version',
+              'user_id',
+              'operating_system / version',
+              'device_ua_browser',
+              'device_screen_resolution',
+              'event_count',
+            ],
+          },
         ],
+      },
+      timezone: {
+        Ref: 'QuickSightTimezoneParam',
       },
     }, 1);
 
