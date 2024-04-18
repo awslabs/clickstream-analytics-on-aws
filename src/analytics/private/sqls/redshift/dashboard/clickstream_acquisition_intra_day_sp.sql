@@ -14,8 +14,8 @@ event_date,
 )
 select 
    day::date as event_date,
-  ,merged_user_id as "Active User"
-  ,new_user_indicator as "New User"
+   merged_user_id as "Active User",
+   new_user_indicator as "New User"
 from {{database_name}}.{{schema}}.{{baseView}}
 where DATE_TRUNC('day', CONVERT_TIMEZONE(timezone, event_timestamp)) = day 
 group by 1,2,3

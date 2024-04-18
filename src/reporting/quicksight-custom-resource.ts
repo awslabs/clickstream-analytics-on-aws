@@ -411,16 +411,6 @@ export function createQuicksightCustomResource(
             defaultValue: futureDate,
           },
         ],
-        tagColumnOperations: [
-          {
-            columnName: 'geo_country',
-            columnGeographicRoles: ['COUNTRY'],
-          },
-          {
-            columnName: 'geo_city',
-            columnGeographicRoles: ['CITY'],
-          },
-        ],
         projectedColumns: [
           'event_date',
           'Active User',

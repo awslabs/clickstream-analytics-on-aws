@@ -63,6 +63,9 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
   },
   {
+    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY,
+  },
+  {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
   },
   {
@@ -79,6 +82,9 @@ export const reportingViewsDef: SQLViewDef[] = [
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_ENTRANCE,
+  },
+  {
+    viewName: CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
   },
   {
     viewName: CLICKSTREAM_ENGAGEMENT_EXIT,
@@ -103,6 +109,9 @@ export const reportingViewsDef: SQLViewDef[] = [
   },
   {
     viewName: CLICKSTREAM_DEVICE_CRASH_RATE,
+  },
+  {
+    viewName: CLICKSTREAM_DEVICE_USER_DEVICE,
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
