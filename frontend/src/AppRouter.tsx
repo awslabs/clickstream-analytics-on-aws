@@ -26,6 +26,7 @@ import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/Analytics
 import AnalyticsDashboardFullWindow from 'pages/analytics/dashboard/full/AnalyticsDashboardFullWindow';
 import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDataManagement';
 import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
+import Outbound from 'pages/analytics/outbound/Outbound';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
@@ -447,6 +448,23 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 ]}
               >
                 <AnalyticsDashboardFullWindow />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/outbound/:outboundName"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
+              >
+                <Outbound />
               </RoleRoute>
             }
           />

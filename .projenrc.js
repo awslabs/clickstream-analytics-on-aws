@@ -168,6 +168,7 @@ const depsForFrontendProject = [
   'uuid@^9.0.0',
   'web-vitals@^3.3.2',
   'moment-timezone@^0.5.45',
+  'react-iframe@^1.8.5',
 ];
 
 const devDepsForFrontendProject = [

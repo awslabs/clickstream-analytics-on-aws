@@ -1269,6 +1269,19 @@ export class ReportingService {
     }
   };
 
+  async outbound(_req: any, res: any, _next: any) {
+    const outboundNavigationStr = process.env.OUTBOUND_NAVIGATION;
+    if (!outboundNavigationStr) {
+      return res.status(201).json(new ApiSuccess([]));
+    }
+    try {
+      const outboundNavigation = JSON.parse(outboundNavigationStr);
+      return res.status(201).json(new ApiSuccess(outboundNavigation));
+    } catch (error) {
+      logger.warn('Get outbound navigation with error.', { error, data: outboundNavigationStr });
+      return res.status(201).json(new ApiSuccess([]));
+    }
+  };
 }
 
 async function _cleanDatasets(quickSight: QuickSight) {

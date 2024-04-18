@@ -11,10 +11,12 @@
  *  and limitations under the License.
  */
 
-import { Icon } from '@cloudscape-design/components';
+import { Icon, IconProps } from '@cloudscape-design/components';
+import { getOutbound } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import { UserContext } from 'context/UserContext';
-import React, { useContext, useState } from 'react';
+import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { ANALYTICS_NAV_ITEM, ANALYTICS_NAV_STATUS } from 'ts/const';
@@ -45,12 +47,35 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   const [isExpanded, setIsExpanded] = useState<boolean>(
     localStorage.getItem(ANALYTICS_NAV_STATUS) !== 'close'
   );
+  const [allOutbound, setAllOutbound] = useState<any[]>([]);
   const toggleNavigation = () => {
     localStorage.setItem(ANALYTICS_NAV_STATUS, isExpanded ? 'close' : 'open');
     setIsExpanded(!isExpanded);
   };
   const onChangeNavItem = (item: string) => {
     localStorage.setItem(ANALYTICS_NAV_ITEM, item);
+  };
+
+  const fetchOutbound = async () => {
+    try {
+      const { success, data }: ApiResponse<any> = await getOutbound();
+      if (success && data) {
+        setAllOutbound(data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getOutboundNavItems = () => {
+    return allOutbound.map((item: any) => {
+      return {
+        text: defaultStr(item.title[getLngFromLocalStorage()]),
+        icon: <Icon name={defaultStr(item.icon, 'gen-ai') as IconProps.Name} />,
+        href: `/analytics/${projectId}/app/${appId}/outbound/${item.name}`,
+        value: 'outbound',
+      } as IAnalyticsItemType;
+    });
   };
 
   const analyticsNavItems: IAnalyticsItemType[] = [
@@ -81,11 +106,20 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   ];
 
   const getNavItems = () => {
+    const outboundNavItems = getOutboundNavItems();
     if (!isAnalystAuthorRole(currentUser?.roles)) {
-      return [...analyticsNavItems.slice(0, 2), ...analyticsNavItems.slice(3)];
+      return [
+        ...analyticsNavItems.slice(0, 2),
+        ...analyticsNavItems.slice(3),
+        ...outboundNavItems,
+      ];
     }
-    return analyticsNavItems;
+    return [...analyticsNavItems, ...outboundNavItems];
   };
+
+  useEffect(() => {
+    fetchOutbound();
+  }, []);
 
   return (
     <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>

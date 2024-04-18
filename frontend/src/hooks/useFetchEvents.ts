@@ -53,6 +53,12 @@ const getAllBuiltInMetadata = async () => {
 };
 
 const listMetadataEvents = async (projectId, appId) => {
+  if (!projectId || !appId) {
+    return {
+      metaDataEvents: [],
+      categoryEvents: [],
+    };
+  }
   try {
     const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
       await getMetadataEventsList({
@@ -70,6 +76,9 @@ const listMetadataEvents = async (projectId, appId) => {
 };
 
 const getAllParameters = async (projectId, appId) => {
+  if (!projectId || !appId) {
+    return [];
+  }
   try {
     const {
       success,
@@ -89,6 +98,9 @@ const getAllParameters = async (projectId, appId) => {
 };
 
 const getUserAttributes = async (projectId, appId) => {
+  if (!projectId || !appId) {
+    return [];
+  }
   try {
     const {
       success,

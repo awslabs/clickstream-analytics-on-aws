@@ -481,6 +481,11 @@
       "type": "runtime"
     },
     {
+      "name": "react-iframe",
+      "version": "^1.8.5",
+      "type": "runtime"
+    },
+    {
       "name": "react-oidc-context",
       "version": "^2.2.2",
       "type": "runtime"

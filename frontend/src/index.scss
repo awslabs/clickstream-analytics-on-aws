@@ -1107,6 +1107,12 @@ ul.menu-list li.checkbox-item {
 }
 
 // Analytics Layout Style
+.cs-analytics-outbound-iframe {
+  width: 100%;
+  height: 100vh;
+  border: 0;
+}
+
 .cs-analytics-traffic-table {
   [class^='awsui_body-cell'] {
     overflow: visible !important;

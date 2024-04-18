@@ -272,3 +272,8 @@ export const embedAnalyzesUrl = async (
   );
   return result;
 };
+
+export const getOutbound = async () => {
+  const result: any = await apiRequest('get', '/reporting/outbound');
+  return result;
+};

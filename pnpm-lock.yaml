@@ -431,6 +431,9 @@ importers:
       react-i18next:
         specifier: ^12.1.1
         version: 12.3.1(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
+      react-iframe:
+        specifier: ^1.8.5
+        version: 1.8.5(react@18.2.0)
       react-oidc-context:
         specifier: ^2.2.2
         version: 2.3.1(oidc-client-ts@2.4.0)(react@18.2.0)
@@ -15511,6 +15514,15 @@ packages:
       i18next: 22.5.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-iframe@1.8.5(react@18.2.0):
+    resolution: {integrity: sha512-F4cQJGs3ydaG6fJWfuz9yLwOU0Trzl6kttXuUG+vYwosH8enOOFxZWEDQCSbNVO8ayjfYZeqLxEvdvcsSy4GvA==}
+    peerDependencies:
+      react: '>=16.x.x'
+    dependencies:
+      object-assign: 4.1.1
+      react: 18.2.0
     dev: false
 
   /react-is@16.13.1:

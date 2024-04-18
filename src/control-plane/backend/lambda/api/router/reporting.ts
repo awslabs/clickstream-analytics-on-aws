@@ -103,6 +103,12 @@ router_reporting.post(
     return reportingServ.cleanQuickSightResources(req, res, next);
   });
 
+router_reporting.get(
+  '/outbound',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.outbound(req, res, next);
+  });
+
 export {
   router_reporting,
 };
