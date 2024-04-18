@@ -15,8 +15,8 @@
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_user_dim_view_v1.sql:3"
         ```
     === "Athena"
-        ```sql title="clickstream-user-dim-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-user-dim-query.sql"
+        ```sql title="clickstream-user-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-user-query.sql"
         ```
 
 ## 维度和指标
