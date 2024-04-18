@@ -63,9 +63,8 @@ import {
 } from './workflow-mock';
 import { FULL_SOLUTION_VERSION } from '../../common/constants';
 // eslint-disable-next-line import/order
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE } from '@aws/clickstream-base-lib';
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE, SolutionInfo, SolutionVersion } from '@aws/clickstream-base-lib';
 import { BuiltInTagKeys } from '../../common/model-ln';
-import { SolutionInfo, SolutionVersion } from '../../common/solution-info-ln';
 import { getStackPrefix } from '../../common/utils';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
@@ -471,7 +470,11 @@ describe('Workflow test with pipeline version', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStack, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStack, Tags),
-                      Reporting: setTagsToStack(ReportingStack, Tags),
+                      Reporting: removeParametersFromStack(setTagsToStack(ReportingStack, Tags), [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -566,6 +569,12 @@ describe('Workflow test with pipeline version', () => {
                           {
                             ParameterKey: 'AppRegistryApplicationArn.#',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                       Reporting: removeParametersFromStack(ReportingStack, [
@@ -574,6 +583,9 @@ describe('Workflow test with pipeline version', () => {
                         },
                         {
                           ParameterKey: 'AppRegistryApplicationArn.#',
+                        },
+                        {
+                          ParameterKey: 'QuickSightTimezoneParam',
                         },
                       ],
                       ),
@@ -645,20 +657,28 @@ describe('Workflow test with pipeline version', () => {
                         DataModelingRedshiftStack,
                         [
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                            ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
-                            ParameterKey: 'SegmentsS3Prefix',
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
-                      Reporting: mergeParametersFromStack(ReportingStack, [
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
-                        },
-                      ],
-                      ),
+                      Reporting: removeParametersFromStack(
+                        mergeParametersFromStack(ReportingStack, [
+                          {
+                            ParameterKey: 'QuickSightOwnerPrincipalParam',
+                            ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+                          },
+                        ],
+                        ), [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ]),
                     },
                   },
                   {
@@ -723,14 +743,24 @@ describe('Workflow test with pipeline version', () => {
                         DataModelingRedshiftStack,
                         [
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                            ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
-                            ParameterKey: 'SegmentsS3Prefix',
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
-                      Reporting: ReportingStack,
+                      Reporting: removeParametersFromStack(
+                        ReportingStack,
+                        [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ],
+                      ),
                     },
                   },
                   {
@@ -786,7 +816,11 @@ describe('Workflow test with pipeline version', () => {
                     States: {
                       DataProcessing: DataProcessingStack,
                       DataModelingRedshift: DataModelingRedshiftStack,
-                      Reporting: ReportingStack,
+                      Reporting: removeParametersFromStack(ReportingStack, [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -854,6 +888,18 @@ describe('Workflow test with pipeline version in China region', () => {
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
+    const reportingStackCn = mergeParametersFromStack(
+      setTagsToStack(ReportingStackCn, Tags),
+      [
+        {
+          ParameterKey: 'QuickSightUserParam',
+          ParameterValue: 'GCRUser',
+        },
+        {
+          ParameterKey: 'QuickSightOwnerPrincipalParam',
+          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+        },
+      ]);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -874,22 +920,11 @@ describe('Workflow test with pipeline version in China region', () => {
                     States: {
                       DataProcessing: setTagsToStack(DataProcessingStackCn, Tags),
                       DataModelingRedshift: setTagsToStack(DataModelingRedshiftStackCn, Tags),
-                      Reporting: mergeParametersFromStack(
-                        setTagsToStack(ReportingStackCn, Tags),
-                        [
-                          {
-                            ParameterKey: 'QuickSightUserParam',
-                            ParameterValue: 'GCRUser',
-                          },
-                          {
-                            ParameterKey: 'QuickSightPrincipalParam',
-                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                          },
-                          {
-                            ParameterKey: 'QuickSightOwnerPrincipalParam',
-                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                          },
-                        ]),
+                      Reporting: removeParametersFromStack(reportingStackCn, [
+                        {
+                          ParameterKey: 'QuickSightPrincipalParam',
+                        },
+                      ]),
                     },
                   },
                   {
@@ -993,6 +1028,12 @@ describe('Workflow test with pipeline version in China region', () => {
                           {
                             ParameterKey: 'AppRegistryApplicationArn',
                           },
+                          {
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
+                          },
                         ],
                       ),
                     },
@@ -1075,7 +1116,10 @@ describe('Workflow test with pipeline version in China region', () => {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
@@ -1151,24 +1195,34 @@ describe('Workflow test with pipeline version in China region', () => {
                             ParameterKey: 'SegmentsS3Prefix',
                           },
                           {
-                            ParameterKey: 'ClickstreamMetadataDdbArn',
+                            ParameterKey: 'TimeZoneWithAppId',
+                          },
+                          {
+                            ParameterKey: 'DataFreshnessInHour',
                           },
                         ],
                       ),
-                      Reporting: mergeParametersFromStack(ReportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightUserParam',
-                          ParameterValue: 'GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                      ]),
+                      Reporting: removeParametersFromStack(
+                        mergeParametersFromStack(ReportingStackCn, [
+                          {
+                            ParameterKey: 'QuickSightUserParam',
+                            ParameterValue: 'GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                          {
+                            ParameterKey: 'QuickSightOwnerPrincipalParam',
+                            ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+                          },
+                        ]),
+                        [
+                          {
+                            ParameterKey: 'QuickSightTimezoneParam',
+                          },
+                        ],
+                      ),
                     },
                   },
                   {
@@ -1209,6 +1263,18 @@ describe('Workflow test with pipeline version in China region', () => {
       region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
+    const reportingStackCn = mergeParametersFromStack(
+      ReportingStackCn,
+      [
+        {
+          ParameterKey: 'QuickSightUserParam',
+          ParameterValue: 'GCRUser',
+        },
+        {
+          ParameterKey: 'QuickSightOwnerPrincipalParam',
+          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
+        },
+      ]);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1229,18 +1295,9 @@ describe('Workflow test with pipeline version in China region', () => {
                     States: {
                       DataProcessing: DataProcessingStackCn,
                       DataModelingRedshift: DataModelingRedshiftStackCn,
-                      Reporting: mergeParametersFromStack(ReportingStackCn, [
-                        {
-                          ParameterKey: 'QuickSightUserParam',
-                          ParameterValue: 'GCRUser',
-                        },
+                      Reporting: removeParametersFromStack(reportingStackCn, [
                         {
                           ParameterKey: 'QuickSightPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
-                        },
-                        {
-                          ParameterKey: 'QuickSightOwnerPrincipalParam',
-                          ParameterValue: 'arn:aws-cn:quicksight:cn-north-1:555555555555:user/default/GCRUser',
                         },
                       ]),
                     },

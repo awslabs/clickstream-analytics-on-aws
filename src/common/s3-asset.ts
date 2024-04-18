@@ -11,21 +11,23 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { AssetHashType, BundlingOptions, DockerImage, Size } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
-import { SolutionInfo } from './solution-info';
 
 export interface BuildJarProps {
   readonly sourcePath: string;
   readonly jarName: string;
   readonly shadowJar: boolean;
+  readonly buildDirectory: string; // base on src/
   readonly destinationBucket: IBucket;
   readonly destinationKeyPrefix: string;
   readonly buildImage?: string;
   readonly additionalBuildArgument?: string;
   readonly remoteFiles?: string[];
+  readonly commonLibs?: string[];
 }
 
 export function uploadBuiltInJarsAndRemoteFiles(
@@ -40,7 +42,8 @@ export function uploadBuiltInJarsAndRemoteFiles(
   const shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
-    'cd /tmp/',
+    ...props.commonLibs ?? [],
+    `cd /tmp/${props.buildDirectory}`,
     `gradle clean build -PprojectVersion=${version} -x test -x coverageCheck ${props.additionalBuildArgument ?? ''}`,
     `cp ./build/libs/${jarFile} /asset-output/`,
     'cd /asset-output/',

@@ -8,10 +8,10 @@
     "process_time" : "_PROCESS_TIME_",
     "rid" : "55384aaeda62c5b20a462076ec59f3f5"
   },
-  "session_campaign" : "direct",
+  "session_campaign" : "Direct",
+  "session_channel_group" : "Direct",
   "session_id" : "1704867229",
   "session_number" : 9,
-  "session_source" : "direct",
   "session_start_time_msec" : 1704867230837,
   "user_pseudo_id" : "cuPHQ5qyIqHl8QiSr3aZXrAR+jGYJKhuyWzJcFI39ds=.1703490225",
   "partition_app" : "testAllAppId1",

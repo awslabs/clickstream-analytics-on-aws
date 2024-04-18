@@ -12,12 +12,11 @@
  */
 
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { SFNClient, ListExecutionsCommand, ListExecutionsCommandOutput } from '@aws-sdk/client-sfn';
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;

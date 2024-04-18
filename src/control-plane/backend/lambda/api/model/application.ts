@@ -23,6 +23,7 @@ export interface IApplication {
   readonly androidPackage?: string;
   readonly iosBundleId?: string;
   readonly iosAppStoreId?: string;
+  readonly timezone?: string;
 
   readonly createAt: number;
   readonly updateAt: number;

@@ -15,6 +15,7 @@ package software.aws.solution.clickstream;
 
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.model.*;
 
 import java.io.*;
@@ -39,14 +40,14 @@ class IPEnrichmentV2Test extends BaseSparkTest {
         Dataset<Row> outDataset = ipEnrichment.transform(dataset);
 
         outDataset = outDataset.select(
-                ModelV2.IP,
-                ModelV2.GEO_CITY,
-                ModelV2.GEO_CONTINENT,
-                ModelV2.GEO_COUNTRY,
-                ModelV2.GEO_METRO,
-                ModelV2.GEO_REGION,
-                ModelV2.GEO_SUB_CONTINENT,
-                ModelV2.GEO_LOCALE
+                Constant.IP,
+                Constant.GEO_CITY,
+                Constant.GEO_CONTINENT,
+                Constant.GEO_COUNTRY,
+                Constant.GEO_METRO,
+                Constant.GEO_REGION,
+                Constant.GEO_SUB_CONTINENT,
+                Constant.GEO_LOCALE
         );
 
         String expectedJson = this.resourceFileAsString("/event_v2/expected/test_enrich_ip_v2.json");

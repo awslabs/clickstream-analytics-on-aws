@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { SolutionVersion } from '@aws/clickstream-base-lib';
 import { JSONObject } from 'ts-json-object';
-import { SolutionVersion } from './solution-info-ln';
 
 export const __supportVersionsKey: Symbol = Symbol('supportVersions');
 

@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
+import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, SolutionInfo, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
@@ -36,13 +36,14 @@ import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
+import { TrafficSourceServ } from '../control-plane/backend/lambda/api/service/traffic';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
-  EVENT='event',
-  EVENT_PARAMETER='event_parameter',
-  USER='user',
-  ITEM='item'
+  EVENT_V2='event_v2',
+  SESSION='session',
+  USER_V2='user_v2',
+  ITEM_V2='item_v2'
 }
 
 export interface DataPipelineProps {
@@ -71,10 +72,10 @@ export interface DataPipelineProps {
 }
 
 export interface ClickstreamSinkTables {
-  readonly eventTable: Table;
-  readonly eventParameterTable: Table;
-  readonly userTable: Table;
-  readonly itemTable: Table;
+  readonly eventV2Table: Table;
+  readonly sessionTable: Table;
+  readonly userV2Table: Table;
+  readonly itemV2Table: Table;
 }
 
 export class DataPipelineConstruct extends Construct {
@@ -105,6 +106,13 @@ export class DataPipelineConstruct extends Construct {
       'built-in',
     ])]);
 
+    const version = SolutionInfo.SOLUTION_VERSION_SHORT;
+
+    let commonLibCommands = [
+      'cd /tmp/data-pipeline/etl-common/',
+      `gradle clean build install -PprojectVersion=${version} -x test -x coverageCheck`,
+    ];
+
     const {
       entryPointJar,
       jars: builtInJars,
@@ -112,11 +120,13 @@ export class DataPipelineConstruct extends Construct {
     } = uploadBuiltInJarsAndRemoteFiles(
       scope,
       {
-        sourcePath: path.resolve(__dirname, 'spark-etl'),
+        sourcePath: path.resolve(__dirname, '..'), // src/ directory
+        buildDirectory: path.join( 'data-pipeline', 'spark-etl'),
         jarName: 'spark-etl',
         shadowJar: false,
         destinationBucket: this.props.pipelineS3Bucket,
         destinationKeyPrefix: pluginPrefix,
+        commonLibs: commonLibCommands,
       },
     );
 
@@ -313,4 +323,15 @@ export class DataPipelineConstruct extends Construct {
 
     });
   }
+}
+
+export function getRuleConfigDir(prefix: string, projectId: string) {
+  let ruleConfigPrefix: string;
+  if (prefix.startsWith(`clickstream/${projectId}/`)) {
+    const tsServ = new TrafficSourceServ();
+    ruleConfigPrefix = tsServ.getConfigRuleKeyPrefix(projectId);
+  } else {
+    ruleConfigPrefix = prefix + projectId + '/rules/';
+  }
+  return ruleConfigPrefix;
 }

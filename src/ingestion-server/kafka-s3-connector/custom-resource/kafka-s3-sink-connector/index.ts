@@ -15,6 +15,7 @@ import fs from 'fs';
 import { IncomingMessage } from 'http';
 import https from 'https';
 import path from 'path';
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import {
   CreateConnectorCommand,
   CreateCustomPluginCommand,
@@ -27,17 +28,17 @@ import {
   ListCustomPluginsCommand,
   NotFoundException,
   UpdateConnectorCommand,
+  TagResourceCommand,
+  ListTagsForResourceCommand,
+  UntagResourceCommand,
 } from '@aws-sdk/client-kafkaconnect';
 import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
-
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { sleep } from '../../../../common/utils';
+import { getFunctionTags } from '../../../../common/lambda/tags';
 
 const region = process.env.AWS_REGION;
 
@@ -106,11 +107,11 @@ async function _handler(event: ResourceEvent, _context: Context) {
   logger.injectLambdaContext();
   let requestType = event.RequestType;
   if (requestType == 'Create') {
-    await onCreate(event);
+    await onCreate(event, _context);
   }
 
   if (requestType == 'Update') {
-    await onUpdate(event);
+    await onUpdate(event, _context);
   }
 
   if (requestType == 'Delete') {
@@ -142,7 +143,7 @@ function getResourceName(event: ResourceEvent) {
   };
 }
 
-async function onCreate(event: ResourceEvent) {
+async function onCreate(event: ResourceEvent, context: Context) {
   logger.info('onCreate()');
   const { bucket: pluginBucket, key: pluginKey } =
     await downloadPluginZipFileToS3(event);
@@ -156,7 +157,7 @@ async function onCreate(event: ResourceEvent) {
 
   // createConnector
   if (customPluginArn) {
-    await createConnector(event, customPluginArn);
+    await createConnector(event, customPluginArn, context);
   }
 }
 
@@ -228,7 +229,7 @@ async function createCustomPlugin(
   return customPluginArn;
 }
 
-async function createConnector(event: ResourceEvent, customPluginArn: string) {
+async function createConnector(event: ResourceEvent, customPluginArn: string, context: Context) {
   logger.info('createConnector()');
   const props = event.ResourceProperties as ResourcePropertiesType;
   const { connectorName } = getResourceName(event);
@@ -236,7 +237,8 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
     getConnectorConfiguration(
       event.ResourceProperties as ResourcePropertiesType,
     );
-
+  const tags = await getFunctionTags(context);
+  logger.info('funcTags', { tags });
   const command = new CreateConnectorCommand({
     connectorName: connectorName,
     connectorDescription: `Created by stackId: ${event.StackId}, logicalResourceId: ${event.LogicalResourceId}`,
@@ -288,6 +290,7 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
       },
     },
     serviceExecutionRoleArn: props.s3SinkConnectorRole,
+    tags: tags,
   });
   logger.info('command', { command });
   let resConnectorArn;
@@ -386,12 +389,12 @@ function getConnectorConfiguration(
   return configuration;
 }
 
-async function onUpdate(event: CloudFormationCustomResourceEvent) {
+async function onUpdate(event: CloudFormationCustomResourceEvent, context: Context) {
   logger.info('onUpdate()');
   const properties = event.ResourceProperties;
   logger.info('properties', { properties });
   try {
-    await updateConnector(event);
+    await updateConnector(event, context);
   } catch (e: any) {
     if (
       (e.message as string)
@@ -408,7 +411,7 @@ async function onUpdate(event: CloudFormationCustomResourceEvent) {
   }
 }
 
-async function updateConnector(event: ResourceEvent) {
+async function updateConnector(event: ResourceEvent, context: Context) {
   logger.info('updateConnector()');
   const { connectorName } = getResourceName(event);
   logger.info('connectorName: ' + connectorName);
@@ -422,6 +425,17 @@ async function updateConnector(event: ResourceEvent) {
   );
   if (listRes.connectors?.length == 1) {
     const connectorArn = listRes.connectors[0].connectorArn;
+    const describeResp = await kafkaConnectClient.send(
+      new DescribeConnectorCommand({
+        connectorArn,
+      }),
+    );
+    if (describeResp.connectorState === 'UPDATING') {
+      logger.info('connector is already updating');
+      await waitUpdateComplete(connectorArn);
+      return;
+    }
+    await updateConnectorTags(context, connectorArn);
     logger.info('connectorArn: ' + connectorArn);
     const currentVersion = listRes.connectors[0].currentVersion;
     const command = new UpdateConnectorCommand({
@@ -441,23 +455,8 @@ async function updateConnector(event: ResourceEvent) {
       connectorArn,
       currentVersion,
     });
-
     await kafkaConnectClient.send(command);
-
-    let n = 0;
-    while (n < MAX_N) {
-      n++;
-      await sleep(SLEEP_SEC * 1000);
-      const res = await kafkaConnectClient.send(
-        new DescribeConnectorCommand({
-          connectorArn,
-        }),
-      );
-      logger.info(`${n} connectorState: ${res.connectorState}`);
-      if (res.connectorState !== 'UPDATING') {
-        break;
-      }
-    }
+    await waitUpdateComplete(connectorArn);
   }
 }
 
@@ -606,4 +605,55 @@ async function download(url: string, outPath: string) {
       });
     });
   });
+}
+
+async function updateConnectorTags(context: Context, connectorArn?: string) {
+  const lambdaTags = await getFunctionTags(context);
+  logger.info('funcTags', { lambdaTags });
+
+  const existingTagsResponse = await kafkaConnectClient.send(new ListTagsForResourceCommand({
+    resourceArn: connectorArn,
+  }));
+  const existingTags = existingTagsResponse.tags || {};
+  const newTags = lambdaTags || {};
+
+  if (Object.keys(newTags).length === Object.keys(existingTags).length &&
+    Object.keys(newTags).every(key => newTags[key] === existingTags[key])) {
+    logger.info('No changes to tags required.');
+    return;
+  }
+
+  const existingTagKeys = Object.keys(existingTags);
+  if (existingTagKeys.length > 0) {
+    logger.info('Untagging existing tags', { existingTagKeys });
+    await kafkaConnectClient.send(new UntagResourceCommand({
+      resourceArn: connectorArn,
+      tagKeys: existingTagKeys,
+    }));
+  }
+
+  if (Object.keys(newTags).length > 0) {
+    logger.info('Tagging with new tags', { newTags });
+    await kafkaConnectClient.send(new TagResourceCommand({
+      resourceArn: connectorArn,
+      tags: newTags,
+    }));
+  }
+}
+
+async function waitUpdateComplete(connectorArn?: string) {
+  let n = 0;
+  while (n < MAX_N) {
+    n++;
+    await sleep(SLEEP_SEC * 1000);
+    const res = await kafkaConnectClient.send(
+      new DescribeConnectorCommand({
+        connectorArn,
+      }),
+    );
+    logger.info(`${n} connectorState: ${res.connectorState}`);
+    if (res.connectorState !== 'UPDATING') {
+      break;
+    }
+  }
 }

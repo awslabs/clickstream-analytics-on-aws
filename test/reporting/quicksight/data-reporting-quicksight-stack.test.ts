@@ -53,15 +53,16 @@ describe('DataReportingQuickSightStack parameter test', () => {
     template.hasParameter('QuickSightVpcConnectionSubnetParam', {});
   });
 
-  test('Should has Parameter QuickSightPrincipalParam', () => {
-    template.hasParameter('QuickSightPrincipalParam', {
+  test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
+    template.hasParameter('QuickSightOwnerPrincipalParam', {
       Type: 'String',
     });
   });
 
-  test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
-    template.hasParameter('QuickSightOwnerPrincipalParam', {
+  test('Should has Parameter QuickSightTimezoneParam', () => {
+    template.hasParameter('QuickSightTimezoneParam', {
       Type: 'String',
+      Default: '[]',
     });
   });
 
@@ -132,10 +133,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
 
-    const param2 = template.toJSON().Parameters.QuickSightPrincipalParam;
-    const pattern2 = param2.AllowedPattern;
-    const regex2 = new RegExp(`${pattern2}`);
-
     const validValues = [
       'arn:aws:quicksight:us-east-1:111111111111:user/default/clickstream',
       'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser',
@@ -145,7 +142,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
 
     for (const v of validValues) {
       expect(v).toMatch(regex);
-      expect(v).toMatch(regex2);
     }
 
     const invalidValues = [
@@ -156,7 +152,6 @@ describe('DataReportingQuickSightStack parameter test', () => {
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
-      expect(v).not.toMatch(regex2);
     }
   });
 
@@ -872,9 +867,6 @@ describe('DataReportingQuickSightStack resource test', () => {
       quickSightUser: {
         Ref: 'QuickSightUserParam',
       },
-      quickSightSharePrincipalArn: {
-        Ref: 'QuickSightPrincipalParam',
-      },
       quickSightOwnerPrincipalArn: {
         Ref: 'QuickSightOwnerPrincipalParam',
       },
@@ -938,30 +930,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: {
-              'Fn::Join': [
-                '',
-                [
-                  "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('",
-                  {
-                    Ref: 'QuickSightTimezoneParam',
-                  },
-                  "', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
-                ],
-              ],
-            },
+            customSql: "\n          select \n            \n    *, \n    DATE_TRUNC('second', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_timestamp_local,\n    DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) ::timestamp AS event_date\n   \n          from {{schema}}.clickstream_event_view_v3\n          where DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) >= <<$startDate01>>\n          and DATE_TRUNC('day', CONVERT_TIMEZONE('{{{timezone}}}', event_timestamp)) < DATEADD(DAY, 1, date_trunc('day', <<$endDate01>>))\n        ",
             columns: [
               {
                 Name: 'event_timestamp',

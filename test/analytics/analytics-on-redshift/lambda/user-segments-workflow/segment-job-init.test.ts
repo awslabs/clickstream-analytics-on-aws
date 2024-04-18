@@ -11,14 +11,12 @@
  *  and limitations under the License.
  */
 
-import { SegmentJobStatus, SegmentJobTriggerType } from '@aws/clickstream-base-lib';
+import { SegmentJobStatus, SegmentJobTriggerType, formatDate } from '@aws/clickstream-base-lib';
 import { DisableRuleCommand, EventBridgeClient } from '@aws-sdk/client-eventbridge';
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../../src/analytics/lambdas/user-segments-workflow/segment-job-init';
 import 'aws-sdk-client-mock-jest';
-
-import { formatDate } from '../../../../../src/common/utils';
 
 describe('User segments workflow segment-job-init lambda tests', () => {
   const ddbDocClientMock = mockClient(DynamoDBDocumentClient);

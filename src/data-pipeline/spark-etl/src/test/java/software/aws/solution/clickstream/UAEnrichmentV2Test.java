@@ -14,7 +14,7 @@
 package software.aws.solution.clickstream;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 
 import java.io.*;
 
@@ -32,13 +32,13 @@ public class UAEnrichmentV2Test extends BaseSparkTest {
         String expectedJson = this.resourceFileAsString("/event_v2/expected/test_enrich_UA_v2.json");
 
         Assertions.assertEquals(expectedJson, outDataset.select(
-                ModelV2.DEVICE_UA_BROWSER,
-                ModelV2.DEVICE_UA_BROWSER_VERSION,
-                ModelV2.DEVICE_UA_OS,
-                ModelV2.DEVICE_UA_OS_VERSION,
-                ModelV2.DEVICE_UA_DEVICE,
-                ModelV2.DEVICE_UA_DEVICE_CATEGORY,
-                ModelV2.DEVICE_UA
+                Constant.DEVICE_UA_BROWSER,
+                Constant.DEVICE_UA_BROWSER_VERSION,
+                Constant.DEVICE_UA_OS,
+                Constant.DEVICE_UA_OS_VERSION,
+                Constant.DEVICE_UA_DEVICE,
+                Constant.DEVICE_UA_DEVICE_CATEGORY,
+                Constant.DEVICE_UA
         ).first().prettyJson());
     }
 

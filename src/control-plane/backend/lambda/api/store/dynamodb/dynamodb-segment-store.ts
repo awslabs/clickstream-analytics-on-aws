@@ -16,7 +16,7 @@ import { GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/li
 import { clickStreamTableName } from '../../common/constants';
 import { docClient } from '../../common/dynamodb-client';
 import { logger } from '../../common/powertools';
-import { SEGMENT_JOBS_LIST_LIMIT } from '../../service/segment';
+import { SEGMENT_JOBS_LIST_LIMIT } from '../../service/segments/segment';
 import { SegmentStore } from '../segment-store';
 
 export class DynamoDBSegmentStore implements SegmentStore {

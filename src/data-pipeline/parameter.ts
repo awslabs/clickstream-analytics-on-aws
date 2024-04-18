@@ -53,12 +53,7 @@ export function createStackParameters(scope: Construct) {
     default: 'pipeline-temp/',
   });
 
-  const dataFreshnessInHourParam = new CfnParameter(scope, 'DataFreshnessInHour', {
-    description: 'Data Freshness in hour, default is 72 hours (3 days)',
-    default: 72,
-    type: 'Number',
-  });
-
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
 
   const userKeepDaysParam = new CfnParameter(scope, 'UserKeepMaxDays', {
     description: 'Max of user data keep days',

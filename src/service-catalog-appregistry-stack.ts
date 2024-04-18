@@ -16,13 +16,13 @@ import {
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY,
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE,
   SERVICE_CATALOG_SUPPORTED_REGIONS,
+  SolutionInfo,
 } from '@aws/clickstream-base-lib';
 import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
 import { Aws, CfnCondition, CfnOutput, CfnResource, Fn, Stack, Tags } from 'aws-cdk-lib';
 import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 
 export interface ServiceCatalogAppRegistryProps extends StackProps {
 }

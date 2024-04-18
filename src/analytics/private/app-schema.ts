@@ -164,6 +164,7 @@ export abstract class RedshiftSQLExecution extends Construct {
 export interface ApplicationSchemasAndReportingProps extends RedshiftSQLExecutionProps {
   readonly projectId: string;
   readonly appIds: string;
+  readonly timeZoneWithAppId: string;
   readonly databaseName: string;
   readonly odsTableNames: RedshiftOdsTables;
 }
@@ -220,6 +221,7 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
+      timezoneWithAppId: properties.timeZoneWithAppId,
     };
   }
 }

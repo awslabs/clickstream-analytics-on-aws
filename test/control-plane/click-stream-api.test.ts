@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Match } from 'aws-cdk-lib/assertions';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
@@ -198,6 +199,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           LOG_LEVEL: 'WARN',
           WITH_VALIDATE_ROLE: 'true',
+          TEMPLATE_FILE: Match.not(Match.absent()),
+          STACK_ID: Match.not(Match.absent()),
         },
       },
       MemorySize: 512,
@@ -939,6 +942,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
               's3:GetObject',
+              's3:PutObject',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',
@@ -2612,6 +2616,7 @@ describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
               'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
               's3:GetObject',
+              's3:PutObject',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',

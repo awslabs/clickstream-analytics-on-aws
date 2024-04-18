@@ -43,9 +43,22 @@ const deleteApplication = async (params: { id: string; pid: string }) => {
   return result;
 };
 
+const updateApplicationTimezone = async (params: {
+  id: string;
+  pid: string;
+  timezone: string;
+}) => {
+  const result: any = await apiRequest('put', `/app/${params.id}/timezone`, {
+    projectId: params.pid,
+    timezone: params.timezone,
+  });
+  return result;
+};
+
 export {
   getApplicationListByPipeline,
   createApplication,
   getApplicationDetail,
   deleteApplication,
+  updateApplicationTimezone,
 };

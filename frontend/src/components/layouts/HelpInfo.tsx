@@ -50,6 +50,7 @@ const HelpInfo: React.FC = () => {
     [HelpPanelType.METADATA_EVENT_INFO]: 'metadataEventInfo',
     [HelpPanelType.METADATA_EVENT_PARAM_INFO]: 'metadataEventParamInfo',
     [HelpPanelType.METADATA_USER_PARAM_INFO]: 'metadataUserParamInfo',
+    [HelpPanelType.CHANNEL_GROUP_CONDITION_INFO]: 'channelGroupConditionInfo',
   };
 
   const getDescription = (currentHelpPanelKey: string) => {

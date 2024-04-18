@@ -18,7 +18,7 @@ import lombok.extern.slf4j.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.expressions.*;
 import org.apache.spark.sql.types.*;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
 import static org.apache.spark.sql.functions.*;
@@ -43,15 +43,15 @@ public class IPEnrichmentV2 {
         ));
         Dataset<Row> ipEnrichDataset = dataset.withColumn(IP_ENRICH_OUT,
                 udfEnrichIP.apply(
-                        split(col(ModelV2.IP), ",").getItem(0),
-                        col(ModelV2.GEO_LOCALE)
+                        split(col(Constant.IP), ",").getItem(0),
+                        col(Constant.GEO_LOCALE)
                 ))
-                .withColumn(ModelV2.GEO_CITY, coalesce(col(IP_ENRICH_OUT).getField("city"), col(ModelV2.GEO_CITY)))
-                .withColumn(ModelV2.GEO_CONTINENT, coalesce(col(IP_ENRICH_OUT).getField("continent"), col(ModelV2.GEO_CONTINENT)))
-                .withColumn(ModelV2.GEO_COUNTRY, coalesce(col(IP_ENRICH_OUT).getField("country"), col(ModelV2.GEO_COUNTRY)))
-                .withColumn(ModelV2.GEO_METRO, coalesce(col(IP_ENRICH_OUT).getField("metro"), col(ModelV2.GEO_METRO)))
-                .withColumn(ModelV2.GEO_REGION, coalesce(col(IP_ENRICH_OUT).getField("region"), col(ModelV2.GEO_REGION)))
-                .withColumn(ModelV2.GEO_SUB_CONTINENT, coalesce(col(IP_ENRICH_OUT).getField("sub_continent"), col(ModelV2.GEO_SUB_CONTINENT)))
+                .withColumn(Constant.GEO_CITY, coalesce(col(IP_ENRICH_OUT).getField("city"), col(Constant.GEO_CITY)))
+                .withColumn(Constant.GEO_CONTINENT, coalesce(col(IP_ENRICH_OUT).getField("continent"), col(Constant.GEO_CONTINENT)))
+                .withColumn(Constant.GEO_COUNTRY, coalesce(col(IP_ENRICH_OUT).getField("country"), col(Constant.GEO_COUNTRY)))
+                .withColumn(Constant.GEO_METRO, coalesce(col(IP_ENRICH_OUT).getField("metro"), col(Constant.GEO_METRO)))
+                .withColumn(Constant.GEO_REGION, coalesce(col(IP_ENRICH_OUT).getField("region"), col(Constant.GEO_REGION)))
+                .withColumn(Constant.GEO_SUB_CONTINENT, coalesce(col(IP_ENRICH_OUT).getField("sub_continent"), col(Constant.GEO_SUB_CONTINENT)))
                 .drop(IP_ENRICH_OUT);
 
         if (ContextUtil.isDebugLocal()) {

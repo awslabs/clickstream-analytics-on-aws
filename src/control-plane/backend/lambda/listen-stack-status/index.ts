@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { CloudFormationStackStatusChangeNotificationEventDetail, describeStack, getNewStackDetails, getPipeline, getPipelineIdFromStackName, getWorkflowStacks, stackPrefix, updatePipelineStackStatus } from './listen-tools';
-import { logger } from '../../../../common/powertools';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
   const eventBody = event.Records[0].body;

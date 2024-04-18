@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '@aws/clickstream-base-lib';
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT_V2, TABLE_NAME_INGESTION, TABLE_NAME_ITEM_V2, TABLE_NAME_SESSION, TABLE_NAME_USER_V2, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
@@ -526,30 +526,29 @@ test('Security group count is 1', () => {
 describe('Glue tables have fixed logic id', () => {
 
   for (const template of nestedTemplates) {
-
     test('Glue table `ingestion_events` logic id is SourceTable617AB4E1', ()=> {
       const tableResource = getResourceById(template, 'SourceTable617AB4E1');
-      expect( tableResource.Properties.TableInput.Name).toEqual('ingestion_events');
+      expect( tableResource.Properties.TableInput.Name).toEqual(TABLE_NAME_INGESTION);
     });
 
-    test('Glue table `event` logic id is eventSinkTableA33E3CC9', ()=> {
-      const tableResource = getResourceById(template, 'eventSinkTableA33E3CC9');
-      expect( tableResource.Properties.TableInput.Name).toEqual('event');
+    test('Glue table `event_v2` logic id is eventV2SinkTableA33E3CC9', ()=> {
+      const tableResource = getResourceById(template, 'eventV2SinkTableA33E3CC9');
+      expect( tableResource.Properties.TableInput.Name).toEqual(TABLE_NAME_EVENT_V2);
     });
 
-    test('Glue table `event_parameter` logic id is eventparameterSinkTable03A457D7', ()=> {
-      const tableResource = getResourceById(template, 'eventparameterSinkTable03A457D7');
-      expect( tableResource.Properties.TableInput.Name).toEqual('event_parameter');
+    test('Glue table `session` logic id is sessionSinkTable03A457D7', ()=> {
+      const tableResource = getResourceById(template, 'sessionSinkTable03A457D7');
+      expect( tableResource.Properties.TableInput.Name).toEqual(TABLE_NAME_SESSION);
     });
 
-    test('Glue table `item` logic id is itemSinkTable7F9A1F7C', ()=> {
-      const tableResource = getResourceById(template, 'itemSinkTable7F9A1F7C');
-      expect( tableResource.Properties.TableInput.Name).toEqual('item');
+    test('Glue table `item_v2` logic id is itemV2SinkTable7F9A1F7C', ()=> {
+      const tableResource = getResourceById(template, 'itemV2SinkTable7F9A1F7C');
+      expect( tableResource.Properties.TableInput.Name).toEqual(TABLE_NAME_ITEM_V2);
     });
 
-    test('Glue table `user` logic id is userSinkTable993D48C3', ()=> {
-      const tableResource = getResourceById(template, 'userSinkTable993D48C3');
-      expect( tableResource.Properties.TableInput.Name).toEqual('user');
+    test('Glue table `user_v2` logic id is userV2SinkTable993D48C3', ()=> {
+      const tableResource = getResourceById(template, 'userV2SinkTable993D48C3');
+      expect( tableResource.Properties.TableInput.Name).toEqual(TABLE_NAME_USER_V2);
     });
   }
 });
@@ -581,7 +580,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: TABLE_NAME_EVENT,
+        Name: TABLE_NAME_EVENT_V2,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -591,7 +590,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: TABLE_NAME_EVENT_PARAMETER,
+        Name: TABLE_NAME_SESSION,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -602,7 +601,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: TABLE_NAME_ITEM,
+        Name: TABLE_NAME_ITEM_V2,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -612,7 +611,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
         Ref: Match.anyValue(),
       },
       TableInput: {
-        Name: TABLE_NAME_USER,
+        Name: TABLE_NAME_USER_V2,
         TableType: 'EXTERNAL_TABLE',
       },
     });
@@ -1184,7 +1183,62 @@ describe('Data Processing job submitter', () => {
           Match.anyValue(),
           Match.anyValue(),
           Match.anyValue(),
-          Match.anyValue(),
+          {
+            Action: [
+              's3:GetObject*',
+              's3:GetBucket*',
+              's3:List*',
+              's3:DeleteObject*',
+              's3:PutObject',
+              's3:PutObjectLegalHold',
+              's3:PutObjectRetention',
+              's3:PutObjectTagging',
+              's3:PutObjectVersionTagging',
+              's3:Abort*',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    Match.anyValue(),
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':s3:::',
+                    Match.anyValue(),
+                    '/',
+                    Match.anyValue(),
+                    Match.anyValue(),
+                    '/rules/*',
+                  ],
+                ],
+              },
+            ],
+          },
+
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
         ],
       },
     });

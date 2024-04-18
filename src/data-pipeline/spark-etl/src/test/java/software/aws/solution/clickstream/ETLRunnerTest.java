@@ -17,6 +17,7 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
+import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
@@ -508,6 +509,21 @@ class ETLRunnerTest extends ETLRunnerBaseTest {
         Dataset<Row> params = eventParamDataset.filter(expr("event_param_int_value = 0 and event_param_key = '_session_start_timestamp'"));
         assertEquals(0, params.count(), "should not have _session_start_timestamp = 0");
 
+    }
+
+    @Test
+    void test_initConfig() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.test_initConfig
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "test_initConfig");
+        ETLRunner runner = new ETLRunner(spark, config);
+        TransformConfig transformConfig = runner.getTransformConfig();
+        Assertions.assertTrue(transformConfig.getAppRuleConfig().get("app1").getOptCategoryRuleJson().contains("google.com"));
+        Assertions.assertTrue(transformConfig.getAppRuleConfig().get("app1").getOptChannelRuleJson().contains("__empty__"));
     }
 
 }

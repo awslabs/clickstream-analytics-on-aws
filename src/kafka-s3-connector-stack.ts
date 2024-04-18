@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DOMAIN_NAME_PATTERN } from '@aws/clickstream-base-lib';
+import { DOMAIN_NAME_PATTERN, SolutionInfo } from '@aws/clickstream-base-lib';
 import { Aspects, CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { ISecurityGroup, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -20,7 +20,6 @@ import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceProvider, ruleToSuppressRolePolicyWithWildcardResources, ruleToSuppressRolePolicyWithHighSPCM } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import {
   KafkaS3SinkConnector,

@@ -59,32 +59,39 @@ jest.mock('@aws-sdk/client-emr-serverless', () => {
   return emrMock;
 });
 
+
 const putStringToS3Mock = jest.fn(() => { });
+const isObjectExistMock = jest.fn(() => true);
+
+const mockS3Functions = {
+  readS3ObjectAsJson: jest.fn(() => undefined),
+  putStringToS3: putStringToS3Mock,
+  isObjectExist: isObjectExistMock,
+  listObjectsByPrefix: jest.fn((_b, _k, f) => {
+    [
+      {
+        Key: 'test/file2.json',
+        Size: 1024,
+        LastModified: new Date(startTimestamp),
+      },
+      {
+        Key: 'test/file3.gz',
+        Size: 1024,
+        LastModified: new Date(startTimestamp),
+      },
+      {
+        Key: 'test/_.json',
+        Size: 0,
+        LastModified: new Date(startTimestamp),
+      },
+    ].forEach(o => f(o));
+  }),
+};
+
 jest.mock('../../src/common/s3', () => {
-  return {
-    readS3ObjectAsJson: jest.fn(() => undefined),
-    putStringToS3: putStringToS3Mock,
-    listObjectsByPrefix: jest.fn((b, k, f) => {
-      [
-        {
-          Key: 'test/file2.json',
-          Size: 1024,
-          LastModified: new Date(startTimestamp),
-        },
-        {
-          Key: 'test/file3.gz',
-          Size: 1024,
-          LastModified: new Date(startTimestamp),
-        },
-        {
-          Key: 'test/_.json',
-          Size: 0,
-          LastModified: new Date(startTimestamp),
-        },
-      ].forEach(o => f(o));
-    }),
-  };
+  return mockS3Functions;
 });
+
 
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -118,6 +125,9 @@ process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
 process.env.USER_KEEP_DAYS = '10';
 process.env.ITEM_KEEP_DAYS = '12';
+// RULE_CONFIG_DIR
+process.env.RULE_CONFIG_DIR = 's3://test_config_bucket/test_proj_001/rules/';
+
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -147,6 +157,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
         sizeTotal: 43008,
       },
     });
+    expect(isObjectExistMock.mock.calls.length).toEqual(4);
   });
 
   test('ignore starting data processing job when no files found', async () => {
@@ -198,6 +209,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '10',
             '10',
             '12',
+            's3://test_config_bucket/test_proj_001/rules/',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -240,7 +252,6 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start data processing job with event input jobName, sparkConfig and partitions', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
-
     await EMRServerlessUtil.start({
       jobName: 'test-sparkConfig-job',
       startTimestamp,
@@ -280,6 +291,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             '90',
             '10',
             '12',
+            's3://test_config_bucket/test_proj_001/rules/',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -323,7 +335,6 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start data processing job with timestamp - number', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
-
     await EMRServerlessUtil.start({
       startTimestamp: new Date(startTimestamp).getTime(),
     }, context);
@@ -362,7 +373,6 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start ETL job get function tags error', async () => {
     lambdaMock.on(ListTagsCommand).rejects(new Error('ListTagsCommand error'));
-
     let errMsg = '';
     try {
       await EMRServerlessUtil.start({
@@ -439,3 +449,43 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   });
 
 });
+
+
+describe('Data Process -- EMR Serverless job submitter function rule files do not exist', () => {
+
+  const context = getMockContext();
+  const lambdaMock = mockClient(LambdaClient);
+  const isObjectExistFalseMock = jest.fn(() => false);
+  beforeEach(() => {
+    lambdaMock.reset();
+    mockS3Functions.isObjectExist = isObjectExistFalseMock;
+  });
+
+  test('start data processing job1', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+    const jobInfo = await EMRServerlessUtil.start({
+      startTimestamp,
+      endTimestamp,
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+    expect(jobInfo).toEqual({
+      jobRunId: 'jobId007',
+      objectsInfo: {
+        objectCount: 4,
+        sizeTotal: 43008,
+      },
+    });
+    expect(isObjectExistFalseMock.mock.calls.length).toEqual(4);
+    expect(putStringToS3Mock.mock.calls[0][0]).toContain('b.hatena.ne.jp');
+    expect(putStringToS3Mock.mock.calls[0][1]).toEqual('test_config_bucket');
+    expect(putStringToS3Mock.mock.calls[0][2]).toEqual('test_proj_001/rules/app1/traffic_source_category_rule_v1.json');
+
+    expect(putStringToS3Mock.mock.calls[1][0]).toContain('__empty__');
+    expect(putStringToS3Mock.mock.calls[1][2]).toEqual('test_proj_001/rules/app1/traffic_source_channel_rule_v1.json');
+
+    expect(putStringToS3Mock.mock.calls[2][2]).toEqual('test_proj_001/rules/app2/traffic_source_category_rule_v1.json');
+    expect(putStringToS3Mock.mock.calls[3][2]).toEqual('test_proj_001/rules/app2/traffic_source_channel_rule_v1.json');
+
+  });
+});
+

@@ -13,7 +13,7 @@
   "session_campaign_id" : "utm-id-1",
   "session_clid_platform" : "utm-source-platform-1",
   "session_clid" : "{\"type\":\"gclid\",\"value\":\"gclid-1\"}",
-  "session_channel_group" : null,
+  "session_channel_group" : "Unassigned",
   "session_source_category" : null,
   "process_info" : {
     "event_name" : "_user_engagement",

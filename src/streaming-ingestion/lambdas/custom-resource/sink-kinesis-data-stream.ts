@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import {
   KinesisClient, AddTagsToStreamCommand, CreateStreamCommand, DescribeStreamSummaryCommand,
   UpdateStreamModeCommand, UpdateShardCountCommand, ScalingType,
@@ -23,8 +24,6 @@ import {
 import { CdkCustomResourceHandler, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { planAppChanges } from '../../../common/custom-resources';
 import { getFunctionTags } from '../../../common/lambda/tags';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { KINESIS_SINK_CR_OUTPUT_ATTR } from '../../private/constant';
 import { KinesisCustomResourceProps, KinesisProperties } from '../../private/model';
 import { getSinkStreamName } from '../../private/utils';

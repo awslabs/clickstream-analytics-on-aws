@@ -25,6 +25,7 @@ declare global {
     androidPackage: string;
     iosBundleId: string;
     iosAppStoreId: string;
+    timezone: string;
     pipeline?: {
       id: string;
       name: string;

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   RedshiftClient,
   paginateDescribeClusters,
@@ -25,7 +26,6 @@ import {
   GetNamespaceCommand,
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { RedshiftCluster, RedshiftInfo, RedshiftWorkgroup } from '../../common/types';
 
 export const describeRedshiftClusters = async (region: string, vpcId?: string, clusterIdentifier?: string) => {

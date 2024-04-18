@@ -29,10 +29,6 @@ export type ODSSource = BucketInfo & {
 }
 
 export interface TablesODSSource {
-  readonly event: ODSSource;
-  readonly event_parameter: ODSSource;
-  readonly user: ODSSource;
-  readonly item: ODSSource;
   readonly event_v2: ODSSource;
   readonly item_v2: ODSSource;
   readonly user_v2: ODSSource;
@@ -117,6 +113,7 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly reportingViewsDef: SQLViewDef[];
   readonly schemaDefs: SQLDef[];
   readonly schemaHash: string;
+  readonly timezoneWithAppId: string;
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;
@@ -212,6 +209,7 @@ export type MustacheParamType = {
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
+  table_refresh_mv_sp_status: string;
   table_ods_events: string;
   user_bi?: string;
   baseView?: string;

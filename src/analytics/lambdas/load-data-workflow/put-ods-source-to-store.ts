@@ -11,12 +11,10 @@
  *  and limitations under the License.
  */
 
-import { PARTITION_APP } from '@aws/clickstream-base-lib';
+import { PARTITION_APP, aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent, S3ObjectCreatedNotificationEventDetail } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { JobStatus } from '../../private/constant';
 
 // Set the AWS Region.

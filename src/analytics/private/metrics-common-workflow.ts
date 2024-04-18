@@ -27,6 +27,8 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   loadDataWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   scanWorkflowMinInterval: string;
+  mvRefreshInterval: string;
+  refreshMaterializedViewsWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
   sqlExecutionWorkflow: IStateMachine;
 }) {
@@ -34,6 +36,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   const processingJobInterval = new GetInterval(scope, 'dataProcess', {
     expression: props.dataProcessingCronOrRateExpression,
     scanWorkflowMinInterval: props.scanWorkflowMinInterval,
+    mvRefreshInterval: props.mvRefreshInterval,
   });
 
   const statesNamespace = 'AWS/States';
@@ -71,6 +74,17 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
   (loadDataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
+  const refreshMaterializedViewsWorkflowAlarm = new Alarm(scope, id + 'RefreshMaterializedViewsWorkflowAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1,
+    evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
+    metric: props.refreshMaterializedViewsWorkflow.metricFailed({ period: Duration.hours(24) }),
+    alarmDescription: `Refresh materialized views workflow failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Refresh Materialized Views Workflow'),
+  });
+  (refreshMaterializedViewsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getMvRefreshIntervalSeconds());
+
   const scanMetadataWorkflowAlarm = new Alarm(scope, id + 'ScanMetadataWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
@@ -103,7 +117,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
-  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, scanMetadataWorkflowAlarm]);
+  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, scanMetadataWorkflowAlarm, refreshMaterializedViewsWorkflowAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {

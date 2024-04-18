@@ -28,6 +28,12 @@ export enum WorkflowStatus {
   NO_JOBS = 'NO_JOBS',
 }
 
+export enum RefreshWorkflowSteps {
+  REFRESH_SP_STEP = 'REFRESH_SP',
+  REFRESH_MV_STEP = 'REFRESH_MV',
+  END_STEP = 'END',
+}
+
 export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
 export const REDSHIFT_EVENT_TABLE_NAME = 'event';
@@ -60,6 +66,7 @@ export const SQL_TEMPLATE_PARAMETER = {
   sp_clickstream_log: 'sp_clickstream_log',
   sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
   table_clickstream_log: 'clickstream_log',
+  table_refresh_mv_sp_status: 'refresh_mv_sp_status',
   table_ods_events: 'ods_events',
 };
 

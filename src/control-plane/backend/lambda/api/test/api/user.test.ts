@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DEFAULT_SOLUTION_OPERATOR } from '@aws/clickstream-base-lib';
+import { DEFAULT_SOLUTION_OPERATOR, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -23,7 +23,6 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
-import { SolutionInfo } from '../../common/solution-info-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
 import { app, server } from '../../index';

@@ -12,7 +12,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { logger } from '../../../common/powertools';
+import { logger } from '@aws/clickstream-base-lib';
 import { SP_SCAN_METADATA, PROPERTY_ARRAY_TEMP_TABLE } from '../../private/constant';
 import { describeStatement, getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 

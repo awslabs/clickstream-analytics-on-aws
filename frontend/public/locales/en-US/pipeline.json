@@ -410,6 +410,8 @@
   },
   "upgrade": {
     "title": "Upgrade Pipeline",
-    "tip": "Are you sure you want to upgrade the pipeline to this version?"
+    "tip": "Are you sure you want to upgrade the pipeline to this version?",
+    "needTimezone": "To upgrade the pipeline, please specify a reporting time zone for the app(s) registered in this pipeline.",
+    "needTimezoneWarning": "Once the reporting time zone for the app is configured, it cannot be modified."
   }
 }

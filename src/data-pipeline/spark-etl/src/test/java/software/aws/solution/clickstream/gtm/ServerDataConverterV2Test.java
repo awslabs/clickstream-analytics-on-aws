@@ -26,8 +26,11 @@ import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
 public class ServerDataConverterV2Test extends BaseSparkTest {
-    ServerDataConverterV2 converter = new ServerDataConverterV2();
-
+    ServerDataConverterV2 converter;
+    @BeforeEach
+    void setupConverter() {
+        this.converter = new ServerDataConverterV2(getTestTransformConfig().getAppRuleConfig());
+    }
     public static Dataset<Row> addFileName(Dataset<Row> dataset) {
         return dataset.withColumn(INPUT_FILE_NAME, input_file_name());
     }

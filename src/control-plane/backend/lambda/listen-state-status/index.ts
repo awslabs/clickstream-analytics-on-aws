@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { logger } from '@aws/clickstream-base-lib';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { EventBridgeEvent } from 'aws-lambda';
-import { logger } from '../../../../common/powertools';
 import { CFN_RULE_PREFIX } from '../api/common/constants';
 import { StepFunctionsExecutionStatusChangeNotificationEventDetail, deleteProject, deleteRuleAndTopic, getPipeline, getTopicArn, updatePipelineStateStatus } from '../listen-stack-status/listen-tools';
 

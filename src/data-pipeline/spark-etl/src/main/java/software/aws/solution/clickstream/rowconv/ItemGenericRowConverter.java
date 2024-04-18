@@ -16,7 +16,9 @@ package software.aws.solution.clickstream.rowconv;
 import org.apache.spark.sql.catalyst.expressions.*;
 import software.aws.solution.clickstream.common.model.*;
 
-public class ItemGenericRowConverter {
+public final class ItemGenericRowConverter {
+    private ItemGenericRowConverter() {
+    }
     public static GenericRow toGenericRow(final ClickstreamItem item) {
         return new GenericRow(new Object[]{
                 item.getEventTimestamp(),

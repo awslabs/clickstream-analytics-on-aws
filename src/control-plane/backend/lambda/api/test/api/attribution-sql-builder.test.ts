@@ -22,6 +22,7 @@ describe('Attribution SQL Builder test', () => {
   test('last touch model - event count', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -209,18 +210,30 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -365,7 +378,13 @@ describe('Attribution SQL Builder test', () => {
           and target_data.rank = touch_point_data_3.group_id
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
-          and TO_CHAR(target_data.event_timestamp, 'YYYY-MM-DD') = TO_CHAR(touch_point_data_3.event_timestamp, 'YYYY-MM-DD')
+          and TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          ) = TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          )
         where
           touch_point_data_3.event_name <> 'purchase'
           and target_data.event_timestamp >= date '2023-10-01'
@@ -455,6 +474,7 @@ describe('Attribution SQL Builder test', () => {
   test('first touch model - sum value', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.SESSION,
@@ -648,18 +668,30 @@ describe('Attribution SQL Builder test', () => {
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date_trunc('month', current_date - interval '23 months')
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('month', current_date - interval '23 months')
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -899,6 +931,7 @@ describe('Attribution SQL Builder test', () => {
   test('last touch model - no condition', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -929,18 +962,30 @@ describe('Attribution SQL Builder test', () => {
           event.event_timestamp,
           event.user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -1043,7 +1088,13 @@ describe('Attribution SQL Builder test', () => {
           and target_data.rank = touch_point_data_3.group_id
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
-          and TO_CHAR(target_data.event_timestamp, 'YYYY-MM-DD') = TO_CHAR(touch_point_data_3.event_timestamp, 'YYYY-MM-DD')
+          and TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          ) = TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          )
         where
           touch_point_data_3.event_name <> 'purchase'
           and target_data.event_timestamp >= date '2023-10-01'
@@ -1133,6 +1184,7 @@ describe('Attribution SQL Builder test', () => {
   test('linear model - event count', () => {
     const sql = buildSQLForLinearModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -1321,18 +1373,30 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-09-30'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-09-30'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -1569,6 +1633,7 @@ describe('Attribution SQL Builder test', () => {
   test('linear model - sum value', () => {
     const sql = buildSQLForLinearModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.SESSION,
@@ -1755,18 +1820,30 @@ describe('Attribution SQL Builder test', () => {
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -2005,6 +2082,7 @@ describe('Attribution SQL Builder test', () => {
   test('position model - sum value', () => {
     const sql = buildSQLForPositionModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.SUM_VALUE,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -2166,18 +2244,30 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date_trunc('month', current_date - interval '19 months')
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('month', current_date - interval '19 months')
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -2314,7 +2404,13 @@ describe('Attribution SQL Builder test', () => {
           and target_data.rank = touch_point_data_3.group_id
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
-          and TO_CHAR(target_data.event_timestamp, 'YYYY-MM-DD') = TO_CHAR(touch_point_data_3.event_timestamp, 'YYYY-MM-DD')
+          and TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          ) = TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          )
         where
           touch_point_data_3.event_name <> 'purchase'
           and target_data.event_timestamp >= date_trunc('month', current_date - interval '19 months')
@@ -2414,6 +2510,7 @@ describe('Attribution SQL Builder test', () => {
   test('position model - event value', () => {
     const sql = buildSQLForPositionModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -2576,22 +2673,34 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= DATEADD (
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
             DAY,
             -1,
             date_trunc('month', current_date - interval '19 months')
           )
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       target_data as (
@@ -2829,6 +2938,7 @@ describe('Attribution SQL Builder test', () => {
   test('position model - more events', () => {
     const sql = buildSQLForPositionModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -2997,22 +3107,34 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= DATEADD (
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
             DAY,
             -1,
             date_trunc('month', current_date - interval '19 months')
           )
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in (
             'view_item',
             'add_to_cart',
@@ -3284,6 +3406,7 @@ describe('Attribution SQL Builder test', () => {
   test('last touch model - event count - relative data range', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
@@ -3472,22 +3595,34 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= DATEADD (
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
             DAY,
             -7,
             date_trunc('week', current_date - interval '3 weeks')
           )
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -3724,6 +3859,7 @@ describe('Attribution SQL Builder test', () => {
   test('last touch model - event count - custom touch point name', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       touchPointNames: ['1_test_name', ''],
       computeMethod: ExploreComputeMethod.EVENT_CNT,
@@ -3913,22 +4049,34 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= DATEADD (
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
             DAY,
             -7,
             date_trunc('week', current_date - interval '3 weeks')
           )
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4165,6 +4313,7 @@ describe('Attribution SQL Builder test', () => {
   test('position model - more events - partial touch point names', () => {
     const sql = buildSQLForPositionModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       touchPointNames: ['1_test_name', '2_test_name'],
       computeMethod: ExploreComputeMethod.EVENT_CNT,
@@ -4334,22 +4483,34 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= DATEADD (
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= DATEADD (
             DAY,
             -1,
             date_trunc('month', current_date - interval '19 months')
           )
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in (
             'view_item',
             'add_to_cart',
@@ -4621,6 +4782,7 @@ describe('Attribution SQL Builder test', () => {
   test('special char \'', () => {
     const sql = buildSQLForSinglePointModel({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
@@ -4808,18 +4970,30 @@ describe('Attribution SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+         CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'''
@@ -4961,7 +5135,13 @@ describe('Attribution SQL Builder test', () => {
           and target_data.rank = touch_point_data_3.group_id
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
           and target_data.event_timestamp >= touch_point_data_3.event_timestamp
-          and TO_CHAR(target_data.event_timestamp, 'YYYY-MM-DD') = TO_CHAR(touch_point_data_3.event_timestamp, 'YYYY-MM-DD')
+          and TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          ) = TO_CHAR(
+          CONVERT_TIMEZONE('Asia/Shanghai', target_data.event_timestamp),
+          'YYYY-MM-DD'
+          )
         where
           touch_point_data_3.event_name <> 'purchase'
           and target_data.event_timestamp >= date '2023-10-01'

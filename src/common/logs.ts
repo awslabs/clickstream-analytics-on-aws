@@ -23,11 +23,14 @@ export function createLogGroup(
     prefix?: string;
     retention?: RetentionDays;
   },
+  logGroupId?: string,
 ) {
   const shortId = getShortIdOfStack(Stack.of(scope));
   const logGroupName = `${props.prefix ?? 'clickstream-loggroup'}-${shortId}`;
 
-  const logGroup = new LogGroup(scope, 'LogGroup', {
+  const id = logGroupId ?? 'LogGroup';
+
+  const logGroup = new LogGroup(scope, id, {
     logGroupName,
     retention: props.retention ?? RetentionDays.SIX_MONTHS,
   });

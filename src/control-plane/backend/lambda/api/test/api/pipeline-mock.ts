@@ -13,7 +13,7 @@
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import {
@@ -34,6 +34,12 @@ export const BASE_PIPELINE_ATTRIBUTES = {
   region: 'ap-southeast-1',
   versionTag: 'latest',
   dataCollectionSDK: DataCollectionSDK.CLICKSTREAM,
+  timezone: [
+    {
+      timezone: 'Asia/Singapore',
+      appId: MOCK_APP_ID,
+    },
+  ],
   status: {
     status: PipelineStatusType.ACTIVE,
     stackDetails: [],

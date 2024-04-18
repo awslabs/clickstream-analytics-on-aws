@@ -46,6 +46,7 @@ const PipelineDetail: React.FC = () => {
   const [projectPipelineExtend, setProjectPipelineExtend] =
     useState<IPipelineExtend>();
   const [loadingPipeline, setLoadingPipeline] = useState(false);
+  const [loadingPipelineExtend, setLoadingPipelineExtend] = useState(false);
 
   const { activeTab } = location.state || {};
   const [detailActiveTab, setDetailActiveTab] = useState(
@@ -64,9 +65,6 @@ const PipelineDetail: React.FC = () => {
         setProjectPipeline(data);
         setLoadingData(false);
         setLoadingPipeline(false);
-        if (data.dataModeling.redshift) {
-          getProjectPipelineExtend();
-        }
       }
     } catch (error) {
       setLoadingPipeline(false);
@@ -75,6 +73,7 @@ const PipelineDetail: React.FC = () => {
 
   const getProjectPipelineExtend = async () => {
     try {
+      setLoadingPipelineExtend(true);
       const { success, data }: ApiResponse<IPipelineExtend> =
         await getPipelineExtend({
           projectId: defaultStr(pid),
@@ -82,8 +81,9 @@ const PipelineDetail: React.FC = () => {
       if (success) {
         setProjectPipelineExtend(data);
       }
+      setLoadingPipelineExtend(false);
     } catch (error) {
-      console.error(error);
+      setLoadingPipelineExtend(false);
     }
   };
 
@@ -95,7 +95,6 @@ const PipelineDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        getProjectPipelineDetail('false');
       }
     } catch (error) {
       setLoadingData(false);
@@ -120,6 +119,7 @@ const PipelineDetail: React.FC = () => {
   useEffect(() => {
     getProjectPipelineDetail('false');
     getProjectDetailById();
+    getProjectPipelineExtend();
   }, []);
 
   return (
@@ -139,7 +139,9 @@ const PipelineDetail: React.FC = () => {
             <SpaceBetween direction="vertical" size="l">
               <BasicInfo
                 pipelineInfo={projectPipeline}
+                projectPipelineExtend={projectPipelineExtend}
                 loadingRefresh={loadingPipeline}
+                loadingPipelineExtend={loadingPipelineExtend}
                 reloadPipeline={(refresh: string) => {
                   getProjectPipelineDetail(refresh);
                 }}

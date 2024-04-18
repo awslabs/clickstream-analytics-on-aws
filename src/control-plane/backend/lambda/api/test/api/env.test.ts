@@ -1748,6 +1748,7 @@ describe('Fetch test', () => {
   });
 
   it('Fetch Pipeline', async () => {
+    const defaultFetchOptions = { agent: undefined, timeout: 7000 };
     ddbMock.on(GetCommand).resolves({
       Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
     });
@@ -1761,7 +1762,7 @@ describe('Fetch test', () => {
         type: 'PipelineEndpoint',
       });
     expect(mockFetch.mock.calls.length).toBe(1);
-    expect(mockFetch.mock.calls[0]).toEqual(['http://xxx/xxx', { method: 'GET' }]);
+    expect(mockFetch.mock.calls[0]).toEqual(['http://xxx/xxx', defaultFetchOptions]);
     expect(resPipelineEndpoint.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(resPipelineEndpoint.statusCode).toBe(200);
     expect(resPipelineEndpoint.body).toEqual({
@@ -1780,7 +1781,7 @@ describe('Fetch test', () => {
         type: 'PipelineDNS',
       });
     expect(mockFetch.mock.calls.length).toBe(2);
-    expect(mockFetch.mock.calls[1]).toEqual(['http://yyy/yyy', { method: 'GET' }]);
+    expect(mockFetch.mock.calls[1]).toEqual(['http://yyy/yyy', defaultFetchOptions]);
     expect(resPipelineDNS.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(resPipelineDNS.statusCode).toBe(200);
     expect(resPipelineDNS.body).toEqual({
@@ -1799,7 +1800,7 @@ describe('Fetch test', () => {
         type: 'PipelineDomain',
       });
     expect(mockFetch.mock.calls.length).toBe(3);
-    expect(mockFetch.mock.calls[2]).toEqual(['https://fake.example.com', { method: 'GET' }]);
+    expect(mockFetch.mock.calls[2]).toEqual(['https://fake.example.com', defaultFetchOptions]);
     expect(resPipelineDomain.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(resPipelineDomain.statusCode).toBe(200);
     expect(resPipelineDomain.body).toEqual({

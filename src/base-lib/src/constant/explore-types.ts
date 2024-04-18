@@ -174,9 +174,8 @@ export enum ExploreAnalyticsOperators {
   NOT_IN = 'not_in',
   CONTAINS = 'contains',
   NOT_CONTAINS = 'not_contains',
-  YES = 'yes',
-  NO = 'no',
-  BETWEEN = 'between',
+  TRUE = 'true',
+  FALSE = 'false',
 }
 
 export enum ExploreAnalyticsNumericOperators {

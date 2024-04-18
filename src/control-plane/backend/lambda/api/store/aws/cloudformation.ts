@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { CloudFormationClient, DescribeStacksCommand, DescribeTypeCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/model-ln';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { getStackPrefix, getVersionFromTags } from '../../common/utils';
 
 export const describeStack = async (region: string, stackName: string) => {

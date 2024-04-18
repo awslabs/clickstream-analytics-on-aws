@@ -22,7 +22,7 @@ import LabelTag from 'pages/common/LabelTag';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { EVENT_PARAMETER_DISPLAY_PREFIX, TABLE_FILTER_OPTIONS } from 'ts/const';
 import {
   defaultStr,
   getUserInfoFromLocalStorage,
@@ -190,7 +190,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       propertyLabel: t('analytics:metadata.eventParameter.tableColumnName'),
       key: 'name',
       groupValuesLabel: t('analytics:metadata.eventParameter.tableColumnName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -200,7 +200,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnDisplayName'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -210,7 +210,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnMetadataSource'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t(
@@ -220,7 +220,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnParameterType'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.eventParameter.tableColumnHasData'),
@@ -228,7 +228,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnHasData'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.eventParameter.tableColumnDataType'),
@@ -236,7 +236,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnDataType'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.eventParameter.tableColumnPlatform'),
@@ -244,7 +244,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.eventParameter.tableColumnPlatform'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

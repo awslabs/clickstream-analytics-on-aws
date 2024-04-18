@@ -12,7 +12,7 @@
  */
 
 import path from 'path';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Duration,
   Stack,
@@ -40,7 +40,6 @@ import {
 } from './common/cfn-nag';
 import { Parameters, SubnetParameterType } from './common/parameters';
 import { SolutionBucket } from './common/solution-bucket';
-import { SolutionInfo } from './common/solution-info';
 import { SolutionVpc } from './common/solution-vpc';
 import { getExistVpc } from './common/vpc-utils';
 import { ApplicationLoadBalancerLambdaPortal } from './control-plane/alb-lambda-portal';
@@ -84,11 +83,6 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
-
-    const {
-      iamRolePrefixParam,
-      iamRoleBoundaryArnParam,
-    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     let vpc:IVpc|undefined = undefined;
 
@@ -167,6 +161,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
           CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '819200',
           CHUNK_MAX_SIZE: process.env.CHUNK_MAX_SIZE ?? '1024000',
+          REACT_APP_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         },
       },
     });
@@ -219,6 +214,11 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     const healthCheckPath = '/';
 
     const pluginPrefix = 'plugins/';
+
+    const {
+      iamRolePrefixParam,
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this, this.paramGroups, this.paramLabels);
 
     const isEmptyRolePrefixCondition = new CfnCondition(
       this,

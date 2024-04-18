@@ -60,6 +60,7 @@ import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.util.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.common.Util.decompress;
+import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
 
 @Slf4j
@@ -110,7 +111,10 @@ public class Cleaner {
 
     public Dataset<Row> clean(final Dataset<Row> datasetInput, final String schemaFile) {
         log.info(new ETLMetric(datasetInput, "clean enter").toString());
-        Dataset<Row> dataset = datasetInput.withColumn(INPUT_FILE_NAME, input_file_name());
+        Dataset<Row> dataset = datasetInput;
+        if (!hasColumn(datasetInput, INPUT_FILE_NAME)) {
+            dataset = datasetInput.withColumn(INPUT_FILE_NAME, input_file_name());
+        }
         Dataset<Row> decodedDataset = decodeDataColumn(dataset);
         ContextUtil.cacheDataset(decodedDataset);
 
@@ -128,7 +132,6 @@ public class Cleaner {
         }
         return filteredDataSet;
     }
-
     private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset, final String schemaFile) {
         String schemaString;
         try {

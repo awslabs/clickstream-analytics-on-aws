@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from '@aws/clickstream-base-lib';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, SolutionInfo } from '@aws/clickstream-base-lib';
 import {
   Aspects,
   Aws,
@@ -36,7 +36,6 @@ import {
   ruleRolePolicyWithWildcardResources,
 } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
 import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
 import { createStackParametersQuickSight } from './reporting/parameter';
@@ -164,7 +163,7 @@ export class DataReportingQuickSightStack extends Stack {
       quickSightProps: {
         userName: stackParams.quickSightUserParam.valueAsString,
         namespace: stackParams.quickSightNamespaceParam.valueAsString,
-        sharePrincipalArn: stackParams.quickSightPrincipalParam.valueAsString,
+        sharePrincipalArn: stackParams.quickSightOwnerPrincipalParam.valueAsString,
         ownerPrincipalArn: stackParams.quickSightOwnerPrincipalParam.valueAsString,
       },
       redshiftProps: {

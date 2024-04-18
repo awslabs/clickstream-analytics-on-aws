@@ -13,11 +13,10 @@
 
 import { promisify } from 'util';
 import { gzip } from 'zlib';
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { KinesisStreamEvent, KinesisStreamRecord } from 'aws-lambda';
 import { v4 as uuid_v4 } from 'uuid';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 
 const region = process.env.AWS_REGION;
 const s3Bucket = process.env.S3_BUCKET;

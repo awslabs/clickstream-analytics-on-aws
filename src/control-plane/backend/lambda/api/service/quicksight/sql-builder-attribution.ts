@@ -522,10 +522,10 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       timeWindowSql = `
         and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         and TO_CHAR(
-          target_data.event_timestamp,
+          CONVERT_TIMEZONE('${params.timezone}', target_data.event_timestamp),
           'YYYY-MM-DD'
         ) = TO_CHAR(
-          touch_point_data_3.event_timestamp,
+          CONVERT_TIMEZONE('${params.timezone}', target_data.event_timestamp),
           'YYYY-MM-DD'
         )
       `;
@@ -753,7 +753,7 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: Attribution
         event.user_id,
         ${eventColumnSql}
         ${userColumnSql}
-        ${buildDateUnitsSql()}
+        ${buildDateUnitsSql(sqlParameters.timezone)}
       from
         ${sqlParameters.dbName}.${sqlParameters.schemaName}.${EVENT_USER_VIEW} as event
       where

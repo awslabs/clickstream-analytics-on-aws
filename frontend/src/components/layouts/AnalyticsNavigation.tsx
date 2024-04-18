@@ -73,6 +73,12 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       value: 'analyzes',
     },
     {
+      text: t('nav.analytics.segments'),
+      icon: <ExtendIcon icon="UnchecksGrid" />,
+      href: `/analytics/segments`,
+      value: 'segments',
+    },
+    {
       text: t('nav.analytics.data-management'),
       icon: <ExtendIcon icon="BsTagsFill" />,
       href: `/analytics/${projectId}/app/${appId}/data-management`,

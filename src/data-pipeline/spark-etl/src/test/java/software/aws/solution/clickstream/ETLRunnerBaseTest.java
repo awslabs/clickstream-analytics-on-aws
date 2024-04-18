@@ -13,14 +13,17 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import software.aws.solution.clickstream.util.*;
 
+import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+@Slf4j
 public class ETLRunnerBaseTest extends BaseSparkTest {
 
 
@@ -55,13 +58,20 @@ public class ETLRunnerBaseTest extends BaseSparkTest {
         if (name.contains("parquet")) {
             outPutFormat = "parquet";
         }
+        Path configDirPath = null;
+        try {
+            configDirPath = Paths.get(Objects.requireNonNull(getClass().getResource("/rule_config/")).toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        log.info("configDirPath: {}", configDirPath);
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
                 new ETLRunnerConfig.TransformationConfig(
                         newArrayList(transformerClassNames.split(",")),
                         projectId, validAppIds,
                         Long.valueOf(dataFreshnessInHour),
-                        nDaysUser, nDaysItem
+                        nDaysUser, nDaysItem, configDirPath.toString()
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "false",

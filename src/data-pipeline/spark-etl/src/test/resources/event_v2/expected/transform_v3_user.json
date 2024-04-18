@@ -15,7 +15,7 @@
   "first_traffic_campaign_id" : null,
   "first_traffic_clid_platform" : null,
   "first_traffic_clid" : null,
-  "first_traffic_channel_group" : null,
+  "first_traffic_channel_group" : "Unassigned",
   "first_traffic_category" : null,
   "first_app_install_source" : "C001",
   "process_info" : {

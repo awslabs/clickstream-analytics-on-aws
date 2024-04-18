@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, PROJECT_ID_PATTERN } from '@aws/clickstream-base-lib';
+import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, PROJECT_ID_PATTERN, SolutionInfo } from '@aws/clickstream-base-lib';
 import { Aspects, CfnOutput, CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
@@ -20,7 +20,6 @@ import { Construct } from 'constructs';
 import { RolePermissionBoundaryAspect } from './common/aspects';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention } from './common/cfn-nag';
 import { Parameters } from './common/parameters';
-import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
 import { addSubscriptionCustomResource } from './metrics/add-sns-subscription';
 import { MetricAndAlarm } from './metrics/metrics';

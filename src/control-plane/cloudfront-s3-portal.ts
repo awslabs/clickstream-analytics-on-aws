@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { isEmpty } from '@aws/clickstream-base-lib';
 import {
   RemovalPolicy,
   Fn,
@@ -69,7 +70,6 @@ import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { getShortIdOfStackWithRegion } from '../common/stack';
-import { isEmpty } from '../common/utils';
 
 export interface DistributionProps {
   readonly enableIpv6?: boolean;

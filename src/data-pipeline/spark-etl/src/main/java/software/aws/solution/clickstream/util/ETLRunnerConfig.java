@@ -60,6 +60,8 @@ public class ETLRunnerConfig {
     @NotNull
     private final int itemKeepDays;
 
+    private final String configRuleDir;
+
     public ETLRunnerConfig(
             @NotNull final TransformationConfig transformationConfig,
             @NotNull final InputOutputConfig inputOutputConfig,
@@ -83,6 +85,7 @@ public class ETLRunnerConfig {
         this.sourcePath = inputOutputConfig.getSourcePath();
         this.userKeepDays = transformationConfig.getUserKeepDays();
         this.itemKeepDays = transformationConfig.getItemKeepDays();
+        this.configRuleDir = transformationConfig.getConfigRuleDir();
     }
 
     public boolean isSaveInfoToWarehouse() {
@@ -153,6 +156,10 @@ public class ETLRunnerConfig {
         return itemKeepDays;
     }
 
+    public String getConfigRuleDir() {
+        return configRuleDir;
+    }
+
     @AllArgsConstructor
     @Getter
     public static class PartitionConfig {
@@ -205,6 +212,8 @@ public class ETLRunnerConfig {
         final Integer userKeepDays;
         @NotNull
         final Integer itemKeepDays;
+        @NotNull
+        final String configRuleDir;
     }
 }
 

@@ -19,17 +19,20 @@ import com.fasterxml.jackson.databind.module.*;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.catalyst.expressions.*;
 import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import java.util.*;
 
-import static software.aws.solution.clickstream.util.Utils.*;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 
 @Slf4j
-public class UserGenericRowConverter {
+public final class UserGenericRowConverter {
+    private UserGenericRowConverter() {
+    }
 
     public static Map<String, GenericRow> userPropertiesToGenericRowMap(final Map<String, ClickstreamUserPropValue> userProperties) {
         if (userProperties == null || userProperties.isEmpty()) {
-            return null;
+            return null; //NOSONAR
         }
         Map<String, GenericRow> rowsMap = new HashMap<>();
         for (Map.Entry<String, ClickstreamUserPropValue> entry : userProperties.entrySet()) {
@@ -50,7 +53,7 @@ public class UserGenericRowConverter {
             return objectMapper.writeValueAsString(userProperties);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize userProperties to JSON string {}", getStackTrace(e));
-            throw new RuntimeException("Failed to serialize userProperties to JSON string", e);
+            throw new ExecuteTransformerException(e);
         }
     }
 

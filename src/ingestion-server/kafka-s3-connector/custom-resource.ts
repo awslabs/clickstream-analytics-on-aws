@@ -21,6 +21,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { createRoleForS3SinkConnectorCustomResourceLambda } from './iam';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
+import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -109,7 +110,8 @@ function createS3SinkConnectorLambda(
     connectorRole: props.connectorRole,
   });
 
-  const fn = new SolutionNodejsFunction(scope, 's3SinkConnectorCustomResourceLambda', {
+  const fnId = 's3SinkConnectorCustomResourceLambda';
+  const fn = new SolutionNodejsFunction(scope, fnId, {
     entry: join(
       __dirname,
       'custom-resource',
@@ -124,6 +126,7 @@ function createS3SinkConnectorLambda(
     },
     role,
   });
+  attachListTagsPolicyForFunction(scope, fnId, fn);
   fn.node.addDependency(role);
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
     rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('KafkaS3ConnectorCR'),

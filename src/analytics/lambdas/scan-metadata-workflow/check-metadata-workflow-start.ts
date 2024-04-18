@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { SFNClient, ListExecutionsCommand, ListExecutionsCommandOutput } from '@aws-sdk/client-sfn';
-import { logger } from '../../../common/powertools';
 import { readS3ObjectAsJson } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getLatestEmrJobEndTime } from '../../../data-pipeline/utils/utils-common';
 import { WorkflowStatus } from '../../private/constant';
 

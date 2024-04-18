@@ -12,10 +12,10 @@
  */
 
 
+import { logger } from '@aws/clickstream-base-lib';
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
-import { logger } from '../../../common/powertools';
 import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;

@@ -49,7 +49,9 @@ codescan-*-default.sh
 src/data-pipeline/spark-etl/.gradle
 src/data-pipeline/spark-etl/build
 src/data-pipeline/spark-etl/bin
-src/data-pipeline/spark-etl/?/
+src/data-pipeline/etl-common/.gradle
+src/data-pipeline/etl-common/build
+src/data-pipeline/etl-common/bin
 code-coverage-results.md
 metastore_db
 nohup.out

@@ -12,9 +12,9 @@
  */
 
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
 import { STSUploadRole } from '../../common/constants';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 export const AssumeUploadRole = async (sessionName: string) => {
   const client = new STSClient({

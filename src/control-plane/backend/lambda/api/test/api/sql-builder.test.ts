@@ -12,7 +12,7 @@
  */
 
 import { afterEach } from 'node:test';
-import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from '../../service/quicksight/reporting-utils';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, _buildCommonPartSql, daysBetweenDates, buildEventPropertyAnalysisView, ExploreAnalyticsType } from '../../service/quicksight/sql-builder';
 
@@ -29,6 +29,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -64,18 +65,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp), 
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -183,6 +196,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -219,18 +233,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -339,6 +365,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -374,18 +401,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -447,14 +486,14 @@ describe('SQL Builder test', () => {
             FROM
               table_1.event_timestamp_1 - table_0.event_timestamp_0
           ) > 0
-          and TO_CHAR(table_0.event_timestamp_0, 'YYYY-MM-DD') = TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_0.event_timestamp_0)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and EXTRACT(
             epoch
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          and TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD') = TO_CHAR(table_2.event_timestamp_2, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       )
     select
       DAY,
@@ -486,6 +525,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
@@ -520,18 +560,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -593,14 +645,14 @@ describe('SQL Builder test', () => {
             FROM
               table_1.event_timestamp_1 - table_0.event_timestamp_0
           ) > 0
-          and TO_CHAR(table_0.event_timestamp_0, 'YYYY-MM-DD') = TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_0.event_timestamp_0)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and EXTRACT(
             epoch
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          and TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD') = TO_CHAR(table_2.event_timestamp_2, 'YYYY-MM-DD')
+          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       )
     select
       DAY,
@@ -632,6 +684,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -701,18 +754,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.device_screen_height,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -835,6 +900,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -907,18 +973,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.device_screen_height,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in (
             '_first_open',
             '_scroll',
@@ -1148,6 +1226,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -1179,18 +1258,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -1296,6 +1387,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -1372,18 +1464,30 @@ describe('SQL Builder test', () => {
         event.platform,
         event.device_screen_height,
         event.session_id,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name not in (
           '_session_start',
           '_session_stop',
@@ -1512,6 +1616,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -1586,18 +1691,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.device_screen_height,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       mid_table as (
@@ -1768,6 +1885,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -1779,7 +1897,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -1799,20 +1916,31 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.session_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -1951,6 +2079,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -1962,7 +2091,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -1983,20 +2111,31 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.session_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2157,6 +2296,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -2168,7 +2308,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2188,20 +2327,31 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.session_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
             'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2347,6 +2497,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -2355,7 +2506,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2374,20 +2524,31 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2584,6 +2745,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -2592,7 +2754,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2612,20 +2773,31 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -2842,6 +3014,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -2850,7 +3023,6 @@ describe('SQL Builder test', () => {
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
@@ -2869,20 +3041,31 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.screen_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
       ),
       mid_table_1 as (
         select
@@ -3086,6 +3269,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -3189,18 +3373,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.device_screen_height,
           event.device_screen_width,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2024-02-15'
-          and DATE (event.event_timestamp) <= date '2024-03-01'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2024-02-15'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2024-03-01'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -3367,6 +3563,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -3472,18 +3669,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.device_screen_height,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2024-02-15'
-          and DATE (event.event_timestamp) <= date '2024-03-01'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2024-02-15'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2024-03-01'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -3650,6 +3859,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -3756,18 +3966,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.device_screen_height,
           event.user_properties._user_id.value::varchar as u__user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2024-02-15'
-          and DATE (event.event_timestamp) <= date '2024-03-01'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2024-02-15'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2024-03-01'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -3934,6 +4156,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -4040,18 +4263,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.device_screen_height,
           event.custom_parameters._user_id.value::varchar as e__user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-06-19'
-          and DATE (event.event_timestamp) <= date '2023-06-22'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-06-19'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-06-22'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4182,6 +4417,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -4296,18 +4532,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._device_screen_height.value::bigint as e__device_screen_height,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.user_properties._user_country.value::varcharasu__user_country,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4433,6 +4681,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -4570,18 +4819,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -4755,6 +5016,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -4892,18 +5154,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5030,6 +5304,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -5167,18 +5442,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -5302,6 +5589,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -5445,18 +5733,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -5591,6 +5891,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -5734,18 +6035,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -5941,6 +6254,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -6140,18 +6454,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -6366,6 +6692,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -6532,18 +6859,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-20'
-          and DATE (event.event_timestamp) <= date '2023-11-04'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-20'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-11-04'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -6806,6 +7145,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -6925,7 +7265,6 @@ describe('SQL Builder test', () => {
         },
       ],
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         lagSeconds: 3600,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
@@ -6952,20 +7291,31 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.screen_name,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -7169,6 +7519,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -7225,18 +7576,30 @@ describe('SQL Builder test', () => {
         event.user_id,
         event.custom_parameters._session_id.value::varchar as e__session_id,
         event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     table_0 as (
@@ -7354,6 +7717,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -7410,18 +7774,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.geo_country,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -7539,6 +7915,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
@@ -7595,18 +7972,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.custom_parameters._session_id.value::varchar as e__session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -7678,7 +8067,7 @@ describe('SQL Builder test', () => {
             FROM
               table_1.event_timestamp_1 - table_0.event_timestamp_0
           ) > 0
-          and TO_CHAR(table_0.event_timestamp_0, 'YYYY-MM-DD') = TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_0.event_timestamp_0)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.e__session_id_1 = table_2.e__session_id_2
           and EXTRACT(
@@ -7686,7 +8075,7 @@ describe('SQL Builder test', () => {
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          and TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD') = TO_CHAR(table_2.event_timestamp_2, 'YYYY-MM-DD')
+          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       ),
       seq_table as (
         select
@@ -7786,6 +8175,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -7842,18 +8232,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.geo_country,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -7925,7 +8327,7 @@ describe('SQL Builder test', () => {
             FROM
               table_1.event_timestamp_1 - table_0.event_timestamp_0
           ) > 0
-          and TO_CHAR(table_0.event_timestamp_0, 'YYYY-MM-DD') = TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_0.event_timestamp_0)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.geo_country_1 = table_2.geo_country_2
           and EXTRACT(
@@ -7933,7 +8335,7 @@ describe('SQL Builder test', () => {
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          and TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD') = TO_CHAR(table_2.event_timestamp_2, 'YYYY-MM-DD')
+          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       ),
       seq_table as (
         select
@@ -8033,6 +8435,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -8089,18 +8492,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.geo_country,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -8167,14 +8582,14 @@ describe('SQL Builder test', () => {
             FROM
               table_1.event_timestamp_1 - table_0.event_timestamp_0
           ) > 0
-          and TO_CHAR(table_0.event_timestamp_0, 'YYYY-MM-DD') = TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD')
+          and CONVERT_TIMEZONE('Asia/Shanghai', table_0.event_timestamp_0)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and EXTRACT(
             epoch
             FROM
               table_2.event_timestamp_2 - table_1.event_timestamp_1
           ) > 0
-          and TO_CHAR(table_1.event_timestamp_1, 'YYYY-MM-DD') = TO_CHAR(table_2.event_timestamp_2, 'YYYY-MM-DD')
+          andCONVERT_TIMEZONE('Asia/Shanghai', table_1.event_timestamp_1)::DATE = CONVERT_TIMEZONE('Asia/Shanghai', table_2.event_timestamp_2)::DATE
       ),
       seq_table as (
         select
@@ -8256,6 +8671,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8288,18 +8704,30 @@ describe('SQL Builder test', () => {
         event.event_timestamp,
         event.merged_user_id as user_pseudo_id,
         event.user_id,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -8311,6 +8739,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8362,18 +8791,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             u__user_first_touch_timestamp > 1686532526770
@@ -8390,6 +8831,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8458,18 +8900,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `.trim().replace(/ /g, ''),
@@ -8482,6 +8936,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8535,18 +8990,30 @@ describe('SQL Builder test', () => {
         event.user_id,
         event.platform,
         event.geo_country,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -8559,6 +9026,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8620,18 +9088,30 @@ describe('SQL Builder test', () => {
         event.platform,
         event.geo_country,
         event.custom_parameters._session_duration.value::bigint as e__session_duration,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
       `;
@@ -8644,6 +9124,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8705,18 +9186,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.geo_country,
           event.user_properties._user_name.value::varchar as u__user_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `;
@@ -8729,6 +9222,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8806,18 +9300,30 @@ describe('SQL Builder test', () => {
         event.custom_parameters._session_duration.value::bigint as e__session_duration,
         event.user_properties._first_visit_date.value::bigint as u__first_visit_date,
         event.user_first_touch_timestamp,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -8831,6 +9337,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8876,18 +9383,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
     `;
@@ -8900,6 +9419,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -8938,18 +9458,30 @@ describe('SQL Builder test', () => {
         event.merged_user_id as user_pseudo_id,
         event.user_id,
         event.user_properties._user_name.value::varchar as u__user_name,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
     ),
     `;
@@ -8962,6 +9494,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -9030,18 +9563,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -9060,6 +9605,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -9134,18 +9680,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
           event.user_properties._user_name.value::varchar as u__user_name,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -9164,6 +9722,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -9274,18 +9833,30 @@ describe('SQL Builder test', () => {
           event.user_properties._first_visit_time_msec.value::bigint as u__first_visit_time_msec,
           event.user_first_touch_time_msec,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -9304,6 +9875,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, ['view_item', 'add_to_cart', 'purchase'],
       {
         dbName: 'shop',
+        timezone: 'Asia/Shanghai',
         schemaName: 'shop',
         computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
@@ -9420,18 +9992,30 @@ describe('SQL Builder test', () => {
         event.user_first_touch_time_msec,
         event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
         event.user_properties._user_name.value::varchar as u__user_name,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
         TO_CHAR(
-          date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
           'YYYY-MM-DD'
         ) as week,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-        TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+        TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
       from
         shop.shop.clickstream_event_view_v3 as event
       where
-        DATE (event.event_timestamp) >= date '2023-10-01'
-        and DATE (event.event_timestamp) <= date '2025-10-10'
+        CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+        and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
         and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         and (
           platform = 'Android'
@@ -9450,6 +10034,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -9592,18 +10177,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -9805,6 +10402,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -9966,18 +10564,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
           and (
             platform = 'Android'
@@ -10183,6 +10793,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -10313,18 +10924,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -10451,6 +11074,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -10530,18 +11154,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
           and (
             u__user_first_touch_timestamp > 1686532526770
@@ -10656,6 +11292,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -10793,18 +11430,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.custom_parameters.category.value::varchar as e_category,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -10937,6 +11586,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -11074,18 +11724,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.custom_parameters.category.value::varchar as e_category,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -11214,6 +11876,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -11356,18 +12019,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -11499,6 +12174,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -11641,18 +12317,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -11768,6 +12456,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -11805,18 +12494,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.session_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       mid_table as (
@@ -11926,6 +12627,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -12045,7 +12747,6 @@ describe('SQL Builder test', () => {
         },
       ],
       pathAnalysis: {
-        platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         nodes: ['LoginActivity', 'MainActivity', 'ProductDetailActivity', 'ShoppingCartActivity'],
@@ -12072,20 +12773,31 @@ describe('SQL Builder test', () => {
           event.session_id,
           event.screen_name,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
-          and event.event_name = '_screen_view'
-          and platform = 'Android'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
+          and event.event_name in ('_screen_view', '_page_view')
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -12231,6 +12943,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -12445,18 +13158,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-24'
-          and DATE (event.event_timestamp) <= date '2023-10-30'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-24'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-10-30'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'
@@ -12622,6 +13347,7 @@ describe('SQL Builder test', () => {
   test('use specified schema name in generated SQL', () => {
 
     const sql = buildFunnelView({
+      timezone: 'UTC',
       dbName: 'shopping',
       schemaName: 'shopping',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
@@ -12695,18 +13421,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.device_screen_height,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('UTC',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('UTC',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('UTC',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('UTC',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shopping.shopping.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('UTC',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('UTC',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -12873,6 +13611,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -13017,18 +13756,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.session_id,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -13183,6 +13934,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -13225,18 +13977,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -13343,6 +14107,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'blog',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -13375,18 +14140,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.blog.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -13542,6 +14319,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'blog',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -13574,18 +14352,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.blog.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -13741,6 +14531,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'blog',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -13780,18 +14571,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.geo_country,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.blog.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -13950,6 +14753,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'blog',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -13989,18 +14793,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.geo_country,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.blog.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_first_open', '_scroll', '_user_engagement')
       ),
       table_0 as (
@@ -14208,6 +15024,7 @@ describe('SQL Builder test', () => {
   test('relative time range  1 week', () => {
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
@@ -14239,18 +15056,30 @@ describe('SQL Builder test', () => {
           event.event_timestamp,
           event.merged_user_id as user_pseudo_id,
           event.user_id,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date_trunc('week', current_date - interval '0 weeks')
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('week', current_date - interval '0 weeks')
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -14358,6 +15187,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -14460,18 +15290,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.platform,
           event.device_screen_height,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date_trunc('week', current_date - interval '-1 weeks')
-          and DATE (event.event_timestamp) <= CURRENT_DATE
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date_trunc('week', current_date - interval '-1 weeks')
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= CURRENT_DATE
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform = 'Android'
@@ -14602,6 +15444,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -14725,18 +15568,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             (
@@ -14870,6 +15725,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -14984,18 +15840,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
           and (
             (
@@ -15119,6 +15987,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -15210,18 +16079,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
           and (geo_country = 'China''')
       ),
@@ -15308,6 +16189,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -15399,18 +16281,30 @@ describe('SQL Builder test', () => {
           event.platform,
           event.device_screen_height,
           event.first_traffic_source,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-06-19'
-          and DATE (event.event_timestamp) <= date '2023-06-22'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-06-19'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-06-22'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (platform = 'Android''')
       ),
@@ -15532,6 +16426,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -15671,18 +16566,30 @@ describe('SQL Builder test', () => {
           event.app_info_install_source,
           event.custom_parameters.project_category.value::varchar as e_project_category,
           event.user_properties.status.value::varchar as u_status,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-06-19'
-          and DATE (event.event_timestamp) <= date '2023-06-22'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-06-19'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-06-22'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           and (
             platform like '%\\\\%%'
@@ -15831,6 +16738,7 @@ describe('SQL Builder test', () => {
   test('count on property', () => {
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -15888,18 +16796,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.geo_country,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -16010,6 +16930,7 @@ describe('SQL Builder test', () => {
   test('sum on property', () => {
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -16070,18 +16991,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -16190,6 +17123,7 @@ describe('SQL Builder test', () => {
   test('aggregate on property with different compute method', () => {
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -16250,18 +17184,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -16401,6 +17347,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -16460,18 +17407,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -16613,6 +17572,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -16656,18 +17616,30 @@ describe('SQL Builder test', () => {
           event.merged_user_id as user_pseudo_id,
           event.user_id,
           event.geo_country,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'purchase')
       ),
       table_0 as (
@@ -16779,6 +17751,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -16835,18 +17808,30 @@ describe('SQL Builder test', () => {
           event.user_id,
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event 
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       table_0 as (
@@ -17027,6 +18012,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -17091,18 +18077,30 @@ describe('SQL Builder test', () => {
             event.user_id,
             event.geo_country,
             event.custom_parameters._session_duration.value::bigint as e__session_duration,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
-              date_trunc('week', event.event_timestamp),
-              'YYYY-MM-DD'
-            ) as week,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+            TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
           from
             shop.shop.clickstream_event_view_v3 as event   
           where
-            DATE (event.event_timestamp) >= date '2023-10-01'
-            and DATE (event.event_timestamp) <= date '2025-10-10'
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+            and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
             and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         ),
         table_0 as (
@@ -17282,6 +18280,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -17352,18 +18351,30 @@ describe('SQL Builder test', () => {
             event.geo_country,
             event.platform,
             event.custom_parameters._session_duration.value::bigint as e__session_duration,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
-              date_trunc('week', event.event_timestamp),
-              'YYYY-MM-DD'
-            ) as week,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+            TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
           from
             shop.shop.clickstream_event_view_v3 as event   
           where
-            DATE (event.event_timestamp) >= date '2023-10-01'
-            and DATE (event.event_timestamp) <= date '2025-10-10'
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+            and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
             and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         ),
         table_0 as (
@@ -17560,6 +18571,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPropertyAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.COUNT_PROPERTY,
       specifyJoinColumn: true,
@@ -17656,18 +18668,30 @@ describe('SQL Builder test', () => {
             event.platform,
             event.custom_parameters._session_duration.value::bigint as e__session_duration,
             event.user_properties.status.value::varchar as u_status,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
             TO_CHAR(
-              date_trunc('week', event.event_timestamp),
-              'YYYY-MM-DD'
-            ) as week,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-            TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+            TO_CHAR(
+          date_trunc(
+            'week', 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+            TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
           from
             shop.shop.clickstream_event_view_v3 as event 
           where
-            DATE (event.event_timestamp) >= date '2023-10-01'
-            and DATE (event.event_timestamp) <= date '2025-10-10'
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+            and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
             and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         ),
         table_0 as (
@@ -17876,6 +18900,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -17894,7 +18919,7 @@ describe('SQL Builder test', () => {
           {
             category: ConditionCategory.EVENT_OUTER,
             property: 'screen_view_entrances',
-            operator: ExploreAnalyticsOperators.YES,
+            operator: ExploreAnalyticsOperators.TRUE,
             value: [],
             dataType: MetadataValueType.BOOLEAN,
           },
@@ -17910,7 +18935,7 @@ describe('SQL Builder test', () => {
               {
                 category: ConditionCategory.EVENT_OUTER,
                 property: 'screen_view_entrances',
-                operator: ExploreAnalyticsOperators.YES,
+                operator: ExploreAnalyticsOperators.TRUE,
                 value: [],
                 dataType: MetadataValueType.BOOLEAN,
               },
@@ -17975,18 +19000,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_screen_view', 'purchase')
           and (
             geo_country = 'China'''
@@ -18076,6 +19113,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -18094,7 +19132,7 @@ describe('SQL Builder test', () => {
           {
             category: ConditionCategory.EVENT,
             property: 'is_high_value_user',
-            operator: ExploreAnalyticsOperators.NO,
+            operator: ExploreAnalyticsOperators.FALSE,
             value: [],
             dataType: MetadataValueType.BOOLEAN,
           },
@@ -18110,7 +19148,7 @@ describe('SQL Builder test', () => {
               {
                 category: ConditionCategory.EVENT,
                 property: 'is_high_value_user',
-                operator: ExploreAnalyticsOperators.YES,
+                operator: ExploreAnalyticsOperators.TRUE,
                 value: [],
                 dataType: MetadataValueType.BOOLEAN,
               },
@@ -18175,18 +19213,30 @@ describe('SQL Builder test', () => {
           event.custom_parameters.is_high_value_user.value::boolean as e_is_high_value_user,
           event.custom_parameters._session_duration.value::bigint as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::bigint as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-01'
-          and DATE (event.event_timestamp) <= date '2025-10-10'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-01'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2025-10-10'
           and event.event_name in ('_screen_view', 'purchase')
           and (
             geo_country = 'China'''
@@ -18279,6 +19329,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       dbName: 'shop',
+      timezone: 'Asia/Shanghai',
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
@@ -18493,18 +19544,30 @@ describe('SQL Builder test', () => {
           event.geo_country,
           event.custom_parameters._session_duration.value::double precision as e__session_duration,
           event.user_properties._user_first_touch_timestamp.value::double precision as u__user_first_touch_timestamp,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM') as month,
           TO_CHAR(
-            date_trunc('week', event.event_timestamp),
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+               'week', 
+               CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)
+            ),
             'YYYY-MM-DD'
           ) as week,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD') as day,
-          TO_CHAR(event.event_timestamp, 'YYYY-MM-DD HH24') || '00:00' as hour
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR( 
+            CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp),
+            'YYYY-MM-DDHH24'
+          ) || '00:00' as hour
         from
           shop.shop.clickstream_event_view_v3 as event
         where
-          DATE (event.event_timestamp) >= date '2023-10-24'
-          and DATE (event.event_timestamp) <= date '2023-10-30'
+          CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE >= date '2023-10-24'
+          and CONVERT_TIMEZONE('Asia/Shanghai',event.event_timestamp)::DATE <= date '2023-10-30'
           and event.event_name in ('view_item', 'purchase', 'add_to_cart')
           and (
             platform = 'Android'

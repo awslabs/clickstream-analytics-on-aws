@@ -19,23 +19,34 @@ import com.fasterxml.jackson.databind.module.*;
 import lombok.extern.slf4j.*;
 import org.apache.spark.sql.catalyst.expressions.*;
 import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import java.util.*;
 
-import static software.aws.solution.clickstream.util.Utils.*;
+import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringStringMap;
+import static software.aws.solution.clickstream.common.Util.getStackTrace;
 
 @Slf4j
-public class EventGenericRowConverter {
+public final class EventGenericRowConverter {
+    private EventGenericRowConverter() {
+    }
 
     public static Map<String, GenericRow> eventParametersToGenericRowMap(final Map<String, ClickstreamEventPropValue> customParameters) {
         if (customParameters == null || customParameters.isEmpty()) {
-            return null;
+            return null; //NOSONAR
         }
         Map<String, GenericRow> rowsMap = new HashMap<>();
         for (Map.Entry<String, ClickstreamEventPropValue> entry : customParameters.entrySet()) {
-            rowsMap.put(entry.getKey(), entry.getValue().toGenericRow());
+            rowsMap.put(entry.getKey(), toGenericRow(entry.getValue()));
         }
         return rowsMap;
+    }
+
+    private static GenericRow toGenericRow(final ClickstreamEventPropValue value) {
+        return new GenericRow(new String[]{
+                value.getValue(),
+                value.getType().getTypeName()
+        });
     }
 
     public static String eventParametersToJsonString(final Map<String, ClickstreamEventPropValue> customParameters) {
@@ -50,7 +61,7 @@ public class EventGenericRowConverter {
             return objectMapper.writeValueAsString(customParameters);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize customParameters to JSON string {}", getStackTrace(e));
-            throw new RuntimeException("Failed to serialize customParameters to JSON string", e);
+            throw new ExecuteTransformerException(e);
         }
     }
 

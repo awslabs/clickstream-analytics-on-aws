@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { SNSClient, CreateTopicCommand, SubscribeCommand, SetTopicAttributesCommand, TagResourceCommand } from '@aws-sdk/client-sns';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { getDefaultTags } from '../../common/utils';
 
 export const createTopicAndSubscribeSQSQueue = async (region: string, projectId: string, name: string, queueArn: string) => {

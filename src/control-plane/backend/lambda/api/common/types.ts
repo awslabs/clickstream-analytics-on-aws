@@ -374,6 +374,7 @@ export enum BucketPrefix {
   LOAD_WORKFLOW = 'load-workflow',
   KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
   SEGMENTS = 'segments',
+  TRAFFIC_SOURCE = 'traffic-source',
 }
 
 export enum MetricsLegendPosition {

@@ -11,13 +11,11 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, parseDynamoDBTableARN } from '@aws/clickstream-base-lib';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, PutCommandInput } from '@aws-sdk/lib-dynamodb';
 import { getWorkflowInfoKey } from './check-metadata-workflow-start';
-import { logger } from '../../../common/powertools';
 import { putStringToS3 } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { parseDynamoDBTableARN } from '../../../common/utils';
 
 const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;

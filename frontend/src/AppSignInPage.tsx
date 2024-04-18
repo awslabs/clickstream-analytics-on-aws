@@ -12,8 +12,10 @@
  */
 import { Button } from '@cloudscape-design/components';
 import AppRouter from 'AppRouter';
+import { getSystemInfo } from 'apis/system';
 import { getUserDetails } from 'apis/user';
 import Loading from 'components/common/Loading';
+import { SystemInfoContext } from 'context/SystemInfoContext';
 import { UserContext } from 'context/UserContext';
 import ReSignIn from 'pages/error-page/ReSignIn';
 import React, { useEffect, useState } from 'react';
@@ -25,6 +27,7 @@ const SignedInPage: React.FC = () => {
   const auth = useAuth();
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<IUser>();
+  const [systemInfo, setSystemInfo] = useState<SystemInfo>();
 
   const getCurrentUser = async () => {
     if (!auth.user?.profile.email) {
@@ -46,9 +49,21 @@ const SignedInPage: React.FC = () => {
     }
   };
 
+  const fetchSystemInfo = async () => {
+    try {
+      const { success, data }: ApiResponse<SystemInfo> = await getSystemInfo();
+      if (success) {
+        setSystemInfo(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (auth.isAuthenticated) {
       getCurrentUser();
+      fetchSystemInfo();
     }
   }, [auth]);
 
@@ -68,7 +83,9 @@ const SignedInPage: React.FC = () => {
   if (auth.isAuthenticated) {
     return (
       <UserContext.Provider value={currentUser}>
-        <AppRouter auth={auth} sessionExpired={false} />
+        <SystemInfoContext.Provider value={systemInfo}>
+          <AppRouter auth={auth} sessionExpired={false} />
+        </SystemInfoContext.Provider>
       </UserContext.Provider>
     );
   }

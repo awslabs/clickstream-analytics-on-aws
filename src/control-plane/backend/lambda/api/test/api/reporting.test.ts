@@ -46,7 +46,7 @@ import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './p
 import { clickStreamTableName } from '../../common/constants';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { EventAndCondition, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
+import { EVENT_USER_VIEW, EventAndCondition, PairEventAndCondition, SQLCondition, buildRetentionAnalysisView } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
@@ -115,6 +115,18 @@ describe('reporting test', () => {
     redshiftClientMock.reset();
     tokenMock(ddbMock, false);
     quickSightUserMock(ddbMock, false);
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        timezone: [
+          {
+            timezone: 'Asia/Singapore',
+            appId: 'app1',
+          },
+        ],
+      }],
+    });
   });
 
   it('funnel bar visual - preview', async () => {
@@ -225,6 +237,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -315,6 +328,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -379,6 +393,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.ZH_CN,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -437,6 +452,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
@@ -506,6 +522,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
@@ -555,7 +572,7 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
 
-  it('event visual - preview - twice request with group condition', async () => {
+  it('event visual - preview - twice request with string group condition', async () => {
     quickSightMock.on(CreateDataSetCommand).callsFake(input => {
       expect(
         input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
@@ -595,6 +612,7 @@ describe('reporting test', () => {
 
     const requestBody = {
       action: 'PREVIEW',
+
       locale: ExploreLocales.ZH_CN,
       chartType: QuickSightChartType.LINE,
       viewName: 'testview0002',
@@ -652,6 +670,104 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
   });
 
+  it('event visual - preview - twice request with boolean group condition', async () => {
+    quickSightMock.on(CreateDataSetCommand).callsFake(input => {
+      expect(
+        input.PhysicalTableMap.PhyTable1.CustomSql.Columns.length === 4,
+      ).toBeTruthy();
+    });
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
+
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_TOKEN,
+        type: 'REQUESTID',
+      },
+    }, true).resolves({});
+
+    const requestBody = {
+      action: 'PREVIEW',
+
+      locale: ExploreLocales.ZH_CN,
+      chartType: QuickSightChartType.LINE,
+      viewName: 'testview0002',
+      projectId: 'project01_wvzh',
+      pipelineId: 'pipeline-1111111',
+      appId: 'app1',
+      sheetName: 'sheet99',
+      computeMethod: 'USER_ID_CNT',
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalInSeconds: 7200,
+      eventAndConditions: [{
+        eventName: 'add_button_click',
+      },
+      {
+        eventName: 'note_share',
+      },
+      {
+        eventName: 'note_export',
+      }],
+      timeScopeType: 'RELATIVE',
+      lastN: 4,
+      timeUnit: 'WK',
+      groupColumn: 'week',
+      groupCondition: {
+        category: ConditionCategory.EVENT_OUTER,
+        property: 'screen_view_entrances',
+        dataType: MetadataValueType.BOOLEAN,
+      },
+      dashboardCreateParameters: {
+        region: 'us-east-1',
+        allowedDomain: 'https://example.com',
+        quickSight: {
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+        },
+      },
+    };
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send(requestBody);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+
+    const res2 = await request(app)
+      .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send(requestBody);
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(201);
+    expect(res2.body.success).toEqual(true);
+    expect(quickSightMock).toHaveReceivedNthSpecificCommandWith(2, CreateDataSetCommand, {});
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
+  });
+
   it('event visual - publish', async () => {
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
@@ -675,6 +791,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -757,6 +874,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -839,6 +957,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartType: QuickSightChartType.SANKEY,
@@ -926,6 +1045,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -1026,6 +1146,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -1273,6 +1394,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'attribution analysis',
         chartSubTitle: 'detail information',
@@ -1516,6 +1638,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -1769,6 +1892,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: 'zh-CN',
         projectId: 'shop_11111',
         pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
@@ -2005,10 +2129,6 @@ describe('reporting test', () => {
       Status: StatusString.FINISHED,
     });
 
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
@@ -2021,7 +2141,6 @@ describe('reporting test', () => {
       .send({
         projectId: 'project01_wvzh',
         appId: 'app1',
-        region: 'us-east-1',
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -2032,7 +2151,7 @@ describe('reporting test', () => {
     expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
     expect(redshiftClientMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
-      Sqls: expect.arrayContaining(['select * from app1.event limit 1']),
+      Sqls: expect.arrayContaining([`select * from app1.${EVENT_USER_VIEW} limit 1`]),
     });
   });
 
@@ -2043,7 +2162,6 @@ describe('reporting test', () => {
       .send({
         projectId: '\\x98',
         appId: 'app1',
-        region: 'us-east-1',
       });
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -2310,6 +2428,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.BAR,
         viewName: 'testview0002',
         appId: 'app1',
@@ -2352,6 +2471,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2396,6 +2516,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2436,6 +2557,7 @@ describe('reporting test', () => {
   it('common parameter check - limit conditions', async () => {
     const funnelBody = {
       action: 'PREVIEW',
+
       chartType: QuickSightChartType.BAR,
       viewName: 'testview0002',
       projectId: 'project01_wvzh',
@@ -2553,6 +2675,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2596,6 +2719,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         chartType: QuickSightChartType.BAR,
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
@@ -2642,6 +2766,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2686,6 +2811,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2729,6 +2855,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2810,6 +2937,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -2855,6 +2983,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -2898,6 +3027,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -2945,6 +3075,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
@@ -2994,6 +3125,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.LINE,
         projectId: 'project01_wvzh',
@@ -3041,6 +3173,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         viewName: 'testview0002',
         chartType: QuickSightChartType.LINE,
         projectId: 'project01_wvzh',
@@ -3089,6 +3222,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3140,6 +3274,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3231,6 +3366,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
@@ -3329,7 +3465,6 @@ describe('reporting test', () => {
         Name: 'test-analysis',
       },
     });
-
 
     const res = await request(app)
       .post('/api/reporting/retention')
@@ -3440,6 +3575,7 @@ describe('reporting test', () => {
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
+        timezone: 'Asia/Singapore',
         groupColumn: 'week',
         timeStart: undefined,
         timeEnd: undefined,
@@ -3530,6 +3666,7 @@ describe('reporting test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
+
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
@@ -3634,6 +3771,7 @@ describe('reporting test', () => {
         timeScopeType: 'RELATIVE',
         lastN: 4,
         timeUnit: 'WK',
+        timezone: 'Asia/Singapore',
         groupColumn: 'week',
         timeStart: undefined,
         timeEnd: undefined,
@@ -3741,6 +3879,7 @@ describe('reporting test in China region', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
+
         chartType: QuickSightChartType.BAR,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',

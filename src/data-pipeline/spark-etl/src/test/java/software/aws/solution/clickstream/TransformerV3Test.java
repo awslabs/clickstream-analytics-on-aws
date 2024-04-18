@@ -18,8 +18,9 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.transformer.BaseTransformerV3.TABLE_VERSION_SUFFIX_V3;
 import static software.aws.solution.clickstream.util.ContextUtil.*;
 import static software.aws.solution.clickstream.util.DatasetUtil.*;
 import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
@@ -35,7 +37,15 @@ import static software.aws.solution.clickstream.TransformerV3.ETL_USER_V2_PROPS;
 @Slf4j
 class TransformerV3Test extends BaseSparkTest {
 
-    private final TransformerV3 transformer = new TransformerV3();
+    private TransformerV3 transformer;
+    @BeforeEach
+    void setupTransformer() {
+        this.transformer = new TransformerV3(getTestTransformConfig("uba-app"));
+    }
+
+    public String getUserPropsTableName(String name) {
+        return ("etl_" + name + "_user_props").toLowerCase();
+    }
 
     @Test
     public void should_transform_event_v2() throws IOException {
@@ -160,7 +170,7 @@ class TransformerV3Test extends BaseSparkTest {
         Dataset<Row> datasetEvent = transformedDatasets.get(TableName.EVENT_V2);
         String dataDir = ContextUtil.getWarehouseDir();
 
-        String tableName1 = dataDir + "/" + ETL_USER_V2_PROPS + FULL_SUFFIX  + TABLE_VERSION_SUFFIX_V1;
+        String tableName1 = dataDir + "/" + getUserPropsTableName("clickstream") + FULL_SUFFIX  + TABLE_VERSION_SUFFIX_V3;
 
         transformer.postTransform(datasetEvent);
         Dataset<Row> d1 = spark.read().parquet(tableName1);
@@ -245,8 +255,8 @@ class TransformerV3Test extends BaseSparkTest {
 
         datasetSession.write().mode(SaveMode.Overwrite).json("/tmp/session/");
 
-        datasetSession = datasetSession.filter(col(ModelV2.USER_PSEUDO_ID).equalTo("unique_id_iOS_1").and(
-                col(ModelV2.SESSION_ID).equalTo("see000201912dk-23u92-1df0020")
+        datasetSession = datasetSession.filter(col(Constant.USER_PSEUDO_ID).equalTo("unique_id_iOS_1").and(
+                col(Constant.SESSION_ID).equalTo("see000201912dk-23u92-1df0020")
         ));
         String expectedJsonSession = this.resourceFileAsString("/event_v2/expected/transform_v3_traffic_source_session.json");
 

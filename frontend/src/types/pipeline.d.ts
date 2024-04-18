@@ -36,6 +36,11 @@ declare global {
     dashboardId: string;
   }
 
+  interface IAppTimezone {
+    readonly appId: string;
+    readonly timezone: string;
+  }
+
   interface IPipeline {
     id: string;
     type: string;
@@ -159,6 +164,7 @@ declare global {
         user?: string;
       };
     };
+    timezone?: IAppTimezone[];
     statusType?: PipelineStatusType;
     stackDetails?: PipelineStatusDetail[];
     executionDetail?: ExecutionDetail;

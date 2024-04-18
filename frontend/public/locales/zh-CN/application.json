@@ -1,15 +1,21 @@
 {
   "valid": {
     "nameEmpty": "请输入应用程序名称",
-    "appIdInvalid": "应用程序 ID 必须以字母开头，只能支持字母、数字和 _，最多 127 个字符"
+    "appIdInvalid": "应用程序 ID 必须以字母开头，只能支持字母、数字和 _，最多 127 个字符",
+    "timezoneInvalid": "请选择报表时区"
   },
   "appName": "应用程序名称",
   "appID": "应用程序 ID",
+  "appTimezone": "应用程序报表时区",
   "appDesc": "应用程序描述",
   "appPackageName": "应用程序包名称",
   "androidPackageName": "Android 软件包名称",
   "iosAppBundleId": "应用程序包 ID (iOS)",
   "createdTime": "已创建",
+  "labels": {
+    "timezonePlaceholder": "选择报表时区",
+    "empty": "未找到匹配项"
+  },
   "sdkGuide": {
     "registerApp": "注册应用程序",
     "configSDK": "配置 SDK",

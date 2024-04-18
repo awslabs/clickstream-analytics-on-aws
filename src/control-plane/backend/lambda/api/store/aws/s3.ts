@@ -11,17 +11,19 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   S3Client,
   ListBucketsCommand,
   GetBucketLocationCommand,
   GetObjectCommand,
   GetBucketPolicyCommand,
+  PutObjectCommand,
+  NoSuchKey,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
 import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
 
 const promisePool = pLimit(20);
@@ -63,33 +65,6 @@ export const listBuckets = async (region: string) => {
   return buckets;
 };
 
-export async function getS3Object(region: string, bucket: string, key: string): Promise<any> {
-  const streamToString = (stream: any) => new Promise((resolve, reject) => {
-    const chunks: any = [];
-    stream.on('data', (chunk: any) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-  });
-
-  const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: key,
-  });
-
-  try {
-    const s3Client = new S3Client({
-      ...aws_sdk_client_common_config,
-      region,
-    });
-    const { Body } = await s3Client.send(command);
-    const bodyContents = await streamToString(Body);
-    return bodyContents;
-  } catch (error) {
-    logger.error('get S3 bucket object error ', { error });
-    return undefined;
-  }
-}
-
 export const getS3BucketPolicy = async (region: string, bucket: string) => {
   try {
     const s3Client = new S3Client({
@@ -125,3 +100,64 @@ export const isBucketExist = async (region: string, bucket: string) => {
     return false;
   }
 };
+
+export async function putStringToS3(
+  content: string,
+  region: string,
+  bucketName: string,
+  key: string,
+) {
+  const s3Client = new S3Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      Body: content,
+    }),
+  );
+}
+
+export async function readS3ObjectAsString(region: string, bucketName: string, key: string): Promise<string | undefined> {
+  try {
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const res = await s3Client.send(
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      }),
+    );
+    if (res.Body) {
+      const jsonStr = await res.Body.transformToString('utf-8');
+      return jsonStr;
+    } else {
+      return;
+    }
+  } catch (e) {
+    if (e instanceof NoSuchKey) {
+      logger.warn('file does not exist');
+      return;
+    }
+    logger.error('readS3ObjectAsString error', { error: e, bucketName, key });
+    throw e;
+  }
+}
+
+export async function readS3ObjectAsJson(region: string, bucketName: string, key: string) {
+  const content = await readS3ObjectAsString(region, bucketName, key);
+  if (content) {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      logger.error('readS3ObjectAsJson error', { error: e, key });
+      throw e;
+    }
+  } else {
+    return;
+  }
+}

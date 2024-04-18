@@ -65,6 +65,9 @@
     "analyticsDocumentation": "Analytics Documentation",
     "feedback": "Feedback",
     "signOut": "Sign out",
+    "updateAvailable1": "A new version {{version}} is now available. Please click here to upgrade.",
+    "updateAvailable2": "A new version {{version}} is now available. Please contact your administrator to upgrade.",    
+    "noNotification": "There are no new notifications",
     "search": "Search",
     "closeSearch": "Close search",
     "more": "More",
@@ -205,7 +208,11 @@
     "actions": "Actions",
     "createSegment": "Create Segment",
     "filterGroup": "Filter group",
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "addSourceCategory": "Add new category",
+    "addChannelGroup": "Add new group",
+    "reorder": "Reorder",
+    "apply": "Apply"
   },
   "item": "item",
   "items": "items",

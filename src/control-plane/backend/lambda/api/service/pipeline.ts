@@ -121,7 +121,9 @@ export class PipelineServ {
       }
       const latestPipeline = latestPipelines[0];
       const pipeline = new CPipeline(latestPipeline);
-      const createApplicationSchemasStatus = await pipeline.getCreateApplicationSchemasStatus();
+      const apps = await store.listApplication(latestPipeline.projectId, 'asc');
+      const appIds = apps.map(a => a.appId);
+      const createApplicationSchemasStatus = await pipeline.getCreateApplicationSchemasStatus(appIds);
       return res.json(new ApiSuccess({
         createApplicationSchemasStatus,
       }));

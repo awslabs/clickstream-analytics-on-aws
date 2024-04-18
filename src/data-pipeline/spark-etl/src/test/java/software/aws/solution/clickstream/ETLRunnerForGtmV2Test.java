@@ -16,7 +16,7 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.*;
 import org.apache.spark.sql.*;
 import org.junit.jupiter.api.*;
-import software.aws.solution.clickstream.model.*;
+import software.aws.solution.clickstream.common.Constant;
 import software.aws.solution.clickstream.util.*;
 
 import java.io.*;
@@ -115,9 +115,9 @@ public class ETLRunnerForGtmV2Test extends ETLRunnerBaseTest {
         String eventV2Schema = this.resourceFileAsString("/event_v2/expected/event_v2_parquet_schema.json");
 
         Assertions.assertEquals(eventV2Schema, eventDataset.schema().prettyJson());
-        Assertions.assertTrue(eventDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
-        Assertions.assertTrue(sessionDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
-        Assertions.assertTrue(itemDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
-        Assertions.assertTrue(userDataset.filter(col(ModelV2.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(eventDataset.filter(col(Constant.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(sessionDataset.filter(col(Constant.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(itemDataset.filter(col(Constant.CREATED_TIME).isNotNull()).count() > 0);
+        Assertions.assertTrue(userDataset.filter(col(Constant.CREATED_TIME).isNotNull()).count() > 0);
     }
 }

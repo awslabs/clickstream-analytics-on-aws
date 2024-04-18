@@ -980,7 +980,7 @@
     ],
     "Sheets": [
         {
-            "SheetId": "939954df-1b0b-4c92-ad5f-5ae2cdcac464",
+            "SheetId": "3b362d75-c85e-44b5-87e2-bf1f29542634",
             "Name": "Overview",
             "ParameterControls": [
                 {
@@ -1055,7 +1055,7 @@
             "Visuals": [
                 {
                     "BarChartVisual": {
-                        "VisualId": "dd0e2141-a5bd-4cdb-bb98-4183db12b943",
+                        "VisualId": "2291c967-0313-4a81-a0ef-c639c3763771",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -1076,7 +1076,7 @@
                                                     "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "time_period"
                                                 },
-                                                "HierarchyId": "a6435896-e342-40eb-b2de-0bebd534c49d"
+                                                "HierarchyId": "3c594830-938a-4f76-9e92-e68a0ef909a4"
                                             }
                                         }
                                     ],
@@ -1165,7 +1165,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "a6435896-e342-40eb-b2de-0bebd534c49d",
+                                    "HierarchyId": "3c594830-938a-4f76-9e92-e68a0ef909a4",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -1174,7 +1174,7 @@
                 },
                 {
                     "PieChartVisual": {
-                        "VisualId": "5d649a6a-674e-4043-9fbe-028cd6ae9a6d",
+                        "VisualId": "eb4f8aa9-c097-4387-837c-266542426d2a",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -1266,7 +1266,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "8594630a-6f03-4d07-8dfd-a608377655cb",
+                        "VisualId": "484787b0-1b2f-40cc-9d3e-14dd55f4f165",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -1287,7 +1287,7 @@
                                                     "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "85674c14-89f8-493d-8d26-3407e4ed9ae1"
+                                                "HierarchyId": "162eb539-8400-4877-92cf-788aee707729"
                                             }
                                         }
                                     ],
@@ -1425,7 +1425,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "85674c14-89f8-493d-8d26-3407e4ed9ae1",
+                                    "HierarchyId": "162eb539-8400-4877-92cf-788aee707729",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -1434,7 +1434,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "a79f984e-b21e-4d4f-b36b-a5ece9960db3",
+                        "VisualId": "beafd593-a6f9-4e5e-adc8-d67a7a6b7879",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -1459,7 +1459,7 @@
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
-                                                "HierarchyId": "b52226e6-d34c-41b9-aff8-8df358974fcd",
+                                                "HierarchyId": "222ecbdf-2cbe-4d86-86ff-1b4c33f54b86",
                                                 "FormatConfiguration": {
                                                     "DateTimeFormat": "MMM-DD",
                                                     "NullValueFormatConfiguration": {
@@ -1652,7 +1652,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "b52226e6-d34c-41b9-aff8-8df358974fcd",
+                                    "HierarchyId": "222ecbdf-2cbe-4d86-86ff-1b4c33f54b86",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -1666,7 +1666,7 @@
                         "GridLayout": {
                             "Elements": [
                                 {
-                                    "ElementId": "a79f984e-b21e-4d4f-b36b-a5ece9960db3",
+                                    "ElementId": "beafd593-a6f9-4e5e-adc8-d67a7a6b7879",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 36,
@@ -1674,7 +1674,7 @@
                                     "RowSpan": 13
                                 },
                                 {
-                                    "ElementId": "8594630a-6f03-4d07-8dfd-a608377655cb",
+                                    "ElementId": "484787b0-1b2f-40cc-9d3e-14dd55f4f165",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 18,
@@ -1682,7 +1682,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "5d649a6a-674e-4043-9fbe-028cd6ae9a6d",
+                                    "ElementId": "eb4f8aa9-c097-4387-837c-266542426d2a",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 18,
                                     "ColumnSpan": 18,
@@ -1690,7 +1690,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "dd0e2141-a5bd-4cdb-bb98-4183db12b943",
+                                    "ElementId": "2291c967-0313-4a81-a0ef-c639c3763771",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 36,
@@ -1739,7 +1739,7 @@
             "ContentType": "INTERACTIVE"
         },
         {
-            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
             "Name": "Acquisition",
             "ParameterControls": [
                 {
@@ -1917,7 +1917,7 @@
             "Visuals": [
                 {
                     "InsightVisual": {
-                        "VisualId": "3f49941d-e768-4a69-9956-2d79eb9b439e",
+                        "VisualId": "42892d6a-6d25-4ea9-86fc-11dccb6ad33b",
                         "Title": {
                             "Visibility": "VISIBLE"
                         },
@@ -1936,7 +1936,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "dd7ad16e-b358-4a8b-a4de-69f856f756b1",
+                        "VisualId": "4448542d-3451-4d2b-85e1-f708c6bf42cd",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2277,7 +2277,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "bc6f09e9-6ccf-436c-a2e6-7626f3778288",
+                        "VisualId": "c16f6d79-b369-468a-92ce-66203a0f6bac",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2390,7 +2390,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "ee95ea38-eaf7-45c6-84e5-f5e6cb27e6e9",
+                        "VisualId": "62174ba0-e4bb-4302-8bc2-892ef754cf65",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2412,7 +2412,7 @@
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
-                                                "HierarchyId": "eea50c77-1bcc-4a31-adb6-19c02aac1d52"
+                                                "HierarchyId": "0e92c671-75b2-4332-8e72-28f936149002"
                                             }
                                         }
                                     ],
@@ -2515,7 +2515,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "eea50c77-1bcc-4a31-adb6-19c02aac1d52",
+                                    "HierarchyId": "0e92c671-75b2-4332-8e72-28f936149002",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -2524,7 +2524,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "e78478e3-909a-4b01-a0bc-4e4115070cf5",
+                        "VisualId": "8b3aad03-aa64-4ad2-8f06-feae38e1dc9a",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2637,7 +2637,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "13d6ef8c-6726-4c35-ad09-227102df06e0",
+                        "VisualId": "63b0bff0-0aa2-4ba0-9be1-8ffc5196dfd0",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2662,7 +2662,7 @@
                                                     "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
-                                                "HierarchyId": "0f91b7fa-b7df-4129-9e31-318b568712fd"
+                                                "HierarchyId": "d8da1ead-54d1-43c0-a3ba-193e0a72393b"
                                             }
                                         }
                                     ],
@@ -2787,7 +2787,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "0f91b7fa-b7df-4129-9e31-318b568712fd",
+                                    "HierarchyId": "d8da1ead-54d1-43c0-a3ba-193e0a72393b",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -2796,7 +2796,7 @@
                 },
                 {
                     "KPIVisual": {
-                        "VisualId": "5d32402c-1f4f-4385-ac86-13e5ab409298",
+                        "VisualId": "15c39165-4600-4beb-89ec-ab2e8a81b158",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2867,7 +2867,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "b2b94eb9-081d-4166-a75e-1f137a825a57",
+                        "VisualId": "f466711d-b0ed-463a-a0c5-213dd24aea84",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -2892,7 +2892,7 @@
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
-                                                "HierarchyId": "9cf1ed46-9824-4d49-b5c2-86864904f1ae",
+                                                "HierarchyId": "a87f3f11-ae53-42a0-a8ad-76317532d8d1",
                                                 "FormatConfiguration": {
                                                     "DateTimeFormat": "MMM-DD",
                                                     "NullValueFormatConfiguration": {
@@ -3085,7 +3085,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "9cf1ed46-9824-4d49-b5c2-86864904f1ae",
+                                    "HierarchyId": "a87f3f11-ae53-42a0-a8ad-76317532d8d1",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -3094,7 +3094,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "aa9b95bd-7822-4563-bdec-693ffc8c0c03",
+                        "VisualId": "e0e5be0e-6264-45d7-b07c-de7629a41f6c",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -3116,7 +3116,7 @@
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
-                                                "HierarchyId": "db6c6355-9947-45c4-849a-e0858f494134"
+                                                "HierarchyId": "c3f49de7-6326-4611-addb-d87cf055577a"
                                             }
                                         }
                                     ],
@@ -3219,7 +3219,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "db6c6355-9947-45c4-849a-e0858f494134",
+                                    "HierarchyId": "c3f49de7-6326-4611-addb-d87cf055577a",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -3228,7 +3228,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "820e2137-2446-49d6-9c9e-0ef6f8906fc8",
+                        "VisualId": "2f8a80f5-bef8-4c84-b2c2-3c5636fa85e4",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -3549,7 +3549,7 @@
                 },
                 {
                     "FilledMapVisual": {
-                        "VisualId": "49b061ba-6fe7-4608-b50a-42e6c2b0e77b",
+                        "VisualId": "ff761fb9-715e-40f2-9162-e21d870be4b0",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -3628,7 +3628,7 @@
                 },
                 {
                     "KPIVisual": {
-                        "VisualId": "d04ad066-196b-427f-bc90-ddb1b81aca2a",
+                        "VisualId": "29ebf7af-0632-414d-9fcf-0ff44e3b6046",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -3700,7 +3700,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "970a51d3-21ba-43b1-baf1-14b114192084",
+                        "VisualId": "f9f56a89-f647-460b-b7ec-cd085e54c938",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -3725,7 +3725,7 @@
                                                     "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
-                                                "HierarchyId": "c2dd3276-91bc-48fb-8e22-79fdaf151cd5"
+                                                "HierarchyId": "acf175cb-7dae-4e43-808b-653407fc4bf8"
                                             }
                                         }
                                     ],
@@ -3856,7 +3856,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "c2dd3276-91bc-48fb-8e22-79fdaf151cd5",
+                                    "HierarchyId": "acf175cb-7dae-4e43-808b-653407fc4bf8",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -3865,7 +3865,7 @@
                 },
                 {
                     "InsightVisual": {
-                        "VisualId": "c686a993-d479-453c-bf47-3e9204ac3aeb",
+                        "VisualId": "df665cfa-d5f2-47bc-95e6-a582cf90cf5a",
                         "Title": {
                             "Visibility": "VISIBLE"
                         },
@@ -3884,7 +3884,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "1c4477f0-33ef-4a1d-9ad4-df7a7afadc14",
+                        "VisualId": "80c73d05-8d14-4c25-a07f-763d00a2f200",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -4004,6 +4004,20 @@
                                                 "Relative": "EXTRA_LARGE"
                                             }
                                         }
+                                    },
+                                    "ValueCellStyle": {
+                                        "FontConfiguration": {
+                                            "FontSize": {
+                                                "Relative": "LARGE"
+                                            }
+                                        }
+                                    },
+                                    "MetricHeaderCellStyle": {
+                                        "FontConfiguration": {
+                                            "FontSize": {
+                                                "Relative": "LARGE"
+                                            }
+                                        }
                                     }
                                 },
                                 "ColumnTotalOptions": {
@@ -4086,7 +4100,7 @@
                         "FreeFormLayout": {
                             "Elements": [
                                 {
-                                    "ElementId": "b2b94eb9-081d-4166-a75e-1f137a825a57",
+                                    "ElementId": "f466711d-b0ed-463a-a0c5-213dd24aea84",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "64px",
@@ -4098,7 +4112,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "aa9b95bd-7822-4563-bdec-693ffc8c0c03",
+                                    "ElementId": "e0e5be0e-6264-45d7-b07c-de7629a41f6c",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "1168px",
@@ -4107,7 +4121,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "820e2137-2446-49d6-9c9e-0ef6f8906fc8",
+                                    "ElementId": "2f8a80f5-bef8-4c84-b2c2-3c5636fa85e4",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "1680px",
@@ -4116,7 +4130,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "49b061ba-6fe7-4608-b50a-42e6c2b0e77b",
+                                    "ElementId": "ff761fb9-715e-40f2-9162-e21d870be4b0",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "3520px",
@@ -4137,7 +4151,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "d04ad066-196b-427f-bc90-ddb1b81aca2a",
+                                    "ElementId": "29ebf7af-0632-414d-9fcf-0ff44e3b6046",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1152px",
                                     "YAxisLocation": "64px",
@@ -4149,7 +4163,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "5d32402c-1f4f-4385-ac86-13e5ab409298",
+                                    "ElementId": "15c39165-4600-4beb-89ec-ab2e8a81b158",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1346px",
                                     "YAxisLocation": "63px",
@@ -4161,7 +4175,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "970a51d3-21ba-43b1-baf1-14b114192084",
+                                    "ElementId": "f9f56a89-f647-460b-b7ec-cd085e54c938",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "640px",
@@ -4170,7 +4184,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "13d6ef8c-6726-4c35-ad09-227102df06e0",
+                                    "ElementId": "63b0bff0-0aa2-4ba0-9be1-8ffc5196dfd0",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "798px",
                                     "YAxisLocation": "640px",
@@ -4206,7 +4220,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "e78478e3-909a-4b01-a0bc-4e4115070cf5",
+                                    "ElementId": "8b3aad03-aa64-4ad2-8f06-feae38e1dc9a",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1024px",
                                     "YAxisLocation": "1168px",
@@ -4230,7 +4244,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "c686a993-d479-453c-bf47-3e9204ac3aeb",
+                                    "ElementId": "df665cfa-d5f2-47bc-95e6-a582cf90cf5a",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "544px",
                                     "YAxisLocation": "1072px",
@@ -4284,7 +4298,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "ee95ea38-eaf7-45c6-84e5-f5e6cb27e6e9",
+                                    "ElementId": "62174ba0-e4bb-4302-8bc2-892ef754cf65",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "2400px",
@@ -4293,7 +4307,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "bc6f09e9-6ccf-436c-a2e6-7626f3778288",
+                                    "ElementId": "c16f6d79-b369-468a-92ce-66203a0f6bac",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1024px",
                                     "YAxisLocation": "2400px",
@@ -4302,7 +4316,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "dd7ad16e-b358-4a8b-a4de-69f856f756b1",
+                                    "ElementId": "4448542d-3451-4d2b-85e1-f708c6bf42cd",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "2912px",
@@ -4323,7 +4337,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "1c4477f0-33ef-4a1d-9ad4-df7a7afadc14",
+                                    "ElementId": "80c73d05-8d14-4c25-a07f-763d00a2f200",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1008px",
                                     "YAxisLocation": "3520px",
@@ -4332,7 +4346,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "3f49941d-e768-4a69-9956-2d79eb9b439e",
+                                    "ElementId": "42892d6a-6d25-4ea9-86fc-11dccb6ad33b",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "512px",
                                     "YAxisLocation": "2272px",
@@ -4390,7 +4404,7 @@
             "ContentType": "INTERACTIVE"
         },
         {
-            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
             "Name": "Engagement",
             "ParameterControls": [
                 {
@@ -4597,7 +4611,7 @@
             "Visuals": [
                 {
                     "InsightVisual": {
-                        "VisualId": "022032b7-2843-4e2f-9823-b89dc7428733",
+                        "VisualId": "cf295bc9-a877-45c2-9db2-1bb95d941297",
                         "Title": {
                             "Visibility": "VISIBLE"
                         },
@@ -4616,7 +4630,7 @@
                 },
                 {
                     "InsightVisual": {
-                        "VisualId": "25380913-c80c-4f9f-a59b-de5cf3db05a2",
+                        "VisualId": "7f0d1f51-365c-496a-a3be-4cad1b2499e5",
                         "Title": {
                             "Visibility": "VISIBLE"
                         },
@@ -4635,7 +4649,7 @@
                 },
                 {
                     "InsightVisual": {
-                        "VisualId": "12248a2d-a078-4471-878c-61c428a9776f",
+                        "VisualId": "f596793c-33ce-4c56-a90d-fae06eb87cec",
                         "Title": {
                             "Visibility": "VISIBLE"
                         },
@@ -4654,7 +4668,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "97b65a28-7c5d-4217-aa8f-e78de0ba47f5",
+                        "VisualId": "cf9f7a18-5318-441a-86f2-8748ee6b798a",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -4675,7 +4689,7 @@
                                                     "DataSetIdentifier": "Day_User_View_Engagement",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "bf894bcd-b36d-4d58-807c-d86260eb95d4"
+                                                "HierarchyId": "154f7b92-c576-4d15-b452-feb77485b068"
                                             }
                                         }
                                     ],
@@ -4800,7 +4814,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "bf894bcd-b36d-4d58-807c-d86260eb95d4",
+                                    "HierarchyId": "154f7b92-c576-4d15-b452-feb77485b068",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -4809,7 +4823,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "8ae66fb8-a936-4500-941e-475ace066faf",
+                        "VisualId": "19a37861-dac0-4699-8e1c-fddf0ff2ab55",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -4830,7 +4844,7 @@
                                                     "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "610035f4-950c-4c62-a59c-3018c5bfbb0d"
+                                                "HierarchyId": "229e63a5-f9b8-4826-8000-aede0975a8b8"
                                             }
                                         }
                                     ],
@@ -4968,7 +4982,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "610035f4-950c-4c62-a59c-3018c5bfbb0d",
+                                    "HierarchyId": "229e63a5-f9b8-4826-8000-aede0975a8b8",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -4977,7 +4991,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "0a340982-dc50-4729-8172-8a1d770ac812",
+                        "VisualId": "167f0533-a6fe-4378-8187-4659e125b284",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -4998,7 +5012,7 @@
                                                     "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp"
                                                 },
-                                                "HierarchyId": "fcb0da61-0d71-47b7-ba4b-d382c45686a6"
+                                                "HierarchyId": "0c6e5bb6-e853-4c92-855a-89992641e7b2"
                                             }
                                         }
                                     ],
@@ -5089,7 +5103,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "fcb0da61-0d71-47b7-ba4b-d382c45686a6",
+                                    "HierarchyId": "0c6e5bb6-e853-4c92-855a-89992641e7b2",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -5098,7 +5112,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "5471cc5c-38a6-4a0b-9ff0-119bc2680daf",
+                        "VisualId": "b3a31177-1132-4782-9e31-e8185eb607d3",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5213,7 +5227,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "e437f86a-cde4-4b1d-a1a5-88b45519a628",
+                        "VisualId": "d97939b6-3d26-415c-b3a5-57a554126a8c",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5415,7 +5429,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "d006e817-9ff0-4aee-b90d-b4091304aca0",
+                        "VisualId": "ade7944a-cb8e-4a3e-ac30-6df8881fa04b",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5436,7 +5450,7 @@
                                                     "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "848f5999-49ce-4d1c-a3ec-7c57d6d948eb"
+                                                "HierarchyId": "dbe55f9f-9293-4e78-9c64-668ac16aa8a2"
                                             }
                                         }
                                     ],
@@ -5529,7 +5543,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "848f5999-49ce-4d1c-a3ec-7c57d6d948eb",
+                                    "HierarchyId": "dbe55f9f-9293-4e78-9c64-668ac16aa8a2",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -5538,7 +5552,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "0776e3bd-ebca-4772-87a6-b78e2971708e",
+                        "VisualId": "cfc2766d-234b-4abe-b513-34a42fbe7732",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5643,7 +5657,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "31be7a36-3b1f-402c-8ea5-044d211b9a8c",
+                        "VisualId": "085ef3e8-fa6b-45b5-beb6-1e02434d623f",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5856,7 +5870,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "c756bd06-4cc6-4205-bf6d-66edfc9b6a06",
+                        "VisualId": "ec87aea5-7f43-4624-a873-67388e65395b",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -5954,7 +5968,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "f2516da6-5cbe-4345-9605-95e3d844709a",
+                        "VisualId": "d82c0464-db24-4f80-a7a8-c9cacd76633f",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -6079,7 +6093,7 @@
                         "FreeFormLayout": {
                             "Elements": [
                                 {
-                                    "ElementId": "97b65a28-7c5d-4217-aa8f-e78de0ba47f5",
+                                    "ElementId": "cf9f7a18-5318-441a-86f2-8748ee6b798a",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1024px",
                                     "YAxisLocation": "64px",
@@ -6088,7 +6102,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "8ae66fb8-a936-4500-941e-475ace066faf",
+                                    "ElementId": "19a37861-dac0-4699-8e1c-fddf0ff2ab55",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "64px",
@@ -6097,7 +6111,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "0a340982-dc50-4729-8172-8a1d770ac812",
+                                    "ElementId": "167f0533-a6fe-4378-8187-4659e125b284",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "816px",
@@ -6106,7 +6120,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "5471cc5c-38a6-4a0b-9ff0-119bc2680daf",
+                                    "ElementId": "b3a31177-1132-4782-9e31-e8185eb607d3",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "1024px",
                                     "YAxisLocation": "816px",
@@ -6115,7 +6129,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "e437f86a-cde4-4b1d-a1a5-88b45519a628",
+                                    "ElementId": "d97939b6-3d26-415c-b3a5-57a554126a8c",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "1344px",
@@ -6124,7 +6138,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "d006e817-9ff0-4aee-b90d-b4091304aca0",
+                                    "ElementId": "ade7944a-cb8e-4a3e-ac30-6df8881fa04b",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "2080px",
@@ -6133,7 +6147,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "0776e3bd-ebca-4772-87a6-b78e2971708e",
+                                    "ElementId": "cfc2766d-234b-4abe-b513-34a42fbe7732",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "784px",
                                     "YAxisLocation": "2080px",
@@ -6142,7 +6156,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "31be7a36-3b1f-402c-8ea5-044d211b9a8c",
+                                    "ElementId": "085ef3e8-fa6b-45b5-beb6-1e02434d623f",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "2688px",
@@ -6151,7 +6165,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "c756bd06-4cc6-4205-bf6d-66edfc9b6a06",
+                                    "ElementId": "ec87aea5-7f43-4624-a873-67388e65395b",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "3456px",
@@ -6160,7 +6174,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "f2516da6-5cbe-4345-9605-95e3d844709a",
+                                    "ElementId": "d82c0464-db24-4f80-a7a8-c9cacd76633f",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "4048px",
@@ -6319,7 +6333,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "12248a2d-a078-4471-878c-61c428a9776f",
+                                    "ElementId": "f596793c-33ce-4c56-a90d-fae06eb87cec",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "576px",
                                     "YAxisLocation": "1984px",
@@ -6331,7 +6345,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "25380913-c80c-4f9f-a59b-de5cf3db05a2",
+                                    "ElementId": "7f0d1f51-365c-496a-a3be-4cad1b2499e5",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "592px",
                                     "YAxisLocation": "3376px",
@@ -6343,7 +6357,7 @@
                                     }
                                 },
                                 {
-                                    "ElementId": "022032b7-2843-4e2f-9823-b89dc7428733",
+                                    "ElementId": "cf295bc9-a877-45c2-9db2-1bb95d941297",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "512px",
                                     "YAxisLocation": "720px",
@@ -6401,7 +6415,7 @@
             "ContentType": "INTERACTIVE"
         },
         {
-            "SheetId": "552a2887-7bfd-424d-bba0-9accae525c47",
+            "SheetId": "9b0f219d-d57e-47d5-a795-d58653561f41",
             "Name": "Retention",
             "ParameterControls": [
                 {
@@ -6470,7 +6484,7 @@
             "Visuals": [
                 {
                     "LineChartVisual": {
-                        "VisualId": "0105c721-ae95-418a-bae8-3802fb697d88",
+                        "VisualId": "9e509794-e5af-44dc-96fb-d34e1b83a8b1",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -6491,7 +6505,7 @@
                                                     "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "first_date"
                                                 },
-                                                "HierarchyId": "dbe191bc-0c24-4a27-a11e-9183f44686f8"
+                                                "HierarchyId": "8ad15bbf-ef9d-4eaa-8189-573dceaecbe0"
                                             }
                                         }
                                     ],
@@ -6588,7 +6602,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "dbe191bc-0c24-4a27-a11e-9183f44686f8",
+                                    "HierarchyId": "8ad15bbf-ef9d-4eaa-8189-573dceaecbe0",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -6597,7 +6611,7 @@
                 },
                 {
                     "ComboChartVisual": {
-                        "VisualId": "443f0afd-c640-4290-b8f9-41d279dd6d2a",
+                        "VisualId": "ca7538ae-08df-41b1-a353-bb13a7c48e05",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -6618,7 +6632,7 @@
                                                     "DataSetIdentifier": "User_New_Return",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "7683206d-2615-40a6-bebe-64efeddef261"
+                                                "HierarchyId": "8180e771-31c9-45c5-bef3-8fdd5658b665"
                                             }
                                         }
                                     ],
@@ -6718,7 +6732,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "7683206d-2615-40a6-bebe-64efeddef261",
+                                    "HierarchyId": "8180e771-31c9-45c5-bef3-8fdd5658b665",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -6727,7 +6741,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "20ea27d7-af95-4395-94a4-9bbe060f6415",
+                        "VisualId": "234f0ae3-34da-4550-a865-c6275397c687",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -6748,7 +6762,7 @@
                                                     "DataSetIdentifier": "Event_Overtime",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "1739103f-e99f-4d40-b71b-d1ed69d5c70e"
+                                                "HierarchyId": "656f9e16-c0b5-4206-a88e-f2c31af7b72f"
                                             }
                                         }
                                     ],
@@ -6861,7 +6875,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "1739103f-e99f-4d40-b71b-d1ed69d5c70e",
+                                    "HierarchyId": "656f9e16-c0b5-4206-a88e-f2c31af7b72f",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -6870,7 +6884,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "01211d55-a791-49f8-86c6-766645e26616",
+                        "VisualId": "a7fa0ed1-9531-4448-842a-ceb3bf7109c5",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -6891,7 +6905,7 @@
                                                     "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "373a20ea-ed19-4d20-a99b-2191399f10b8"
+                                                "HierarchyId": "300c0ef1-ef2c-4ba0-bdfd-4269c6590e1f"
                                             }
                                         }
                                     ],
@@ -7055,7 +7069,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "373a20ea-ed19-4d20-a99b-2191399f10b8",
+                                    "HierarchyId": "300c0ef1-ef2c-4ba0-bdfd-4269c6590e1f",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -7064,7 +7078,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "d40dc94e-3ddd-4d6d-bd4f-82e6770abc8b",
+                        "VisualId": "3c63c502-e3af-4da8-b400-493fea2fe440",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7080,10 +7094,10 @@
                                     "Rows": [
                                         {
                                             "DateDimensionField": {
-                                                "FieldId": "b789f515-68ee-461e-b65e-61ead1c77cff.2.1711698508376",
+                                                "FieldId": "f674c811-6d20-4dc8-994d-d57ce0b3792e.2.1712814433901",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "First Visit Date (retention)"
+                                                    "ColumnName": "First Action Date"
                                                 }
                                             }
                                         }
@@ -7152,7 +7166,7 @@
                                             "Relative": "LARGE"
                                         }
                                     },
-                                    "Height": 30
+                                    "Height": 33
                                 },
                                 "RowHeaderStyle": {
                                     "FontConfiguration": {
@@ -7170,7 +7184,7 @@
                                             "Relative": "LARGE"
                                         }
                                     },
-                                    "Height": 30
+                                    "Height": 33
                                 },
                                 "RowAlternateColorOptions": {
                                     "Status": "ENABLED",
@@ -7201,8 +7215,7 @@
                             "FieldOptions": {
                                 "SelectedFieldOptions": [
                                     {
-                                        "FieldId": "b789f515-68ee-461e-b65e-61ead1c77cff.2.1711698508376",
-                                        "CustomLabel": "First Visit Date",
+                                        "FieldId": "f674c811-6d20-4dc8-994d-d57ce0b3792e.2.1712814433901",
                                         "Visibility": "VISIBLE"
                                     },
                                     {
@@ -7213,6 +7226,120 @@
                                     {
                                         "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
                                         "Visibility": "VISIBLE"
+                                    }
+                                ],
+                                "DataPathOptions": [
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-30 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "139px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-27 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "137px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-31 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "131px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-25 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "127px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-26 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "126px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-29 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "123px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-03-28 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "119px"
+                                    },
+                                    {
+                                        "DataPathList": [
+                                            {
+                                                "FieldId": "LogicalTable1.event_date.0.1711015080343",
+                                                "FieldValue": "2024-04-01 00:00:00.000",
+                                                "DataPathType": {}
+                                            },
+                                            {
+                                                "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
+                                                "FieldValue": "Retention Rate"
+                                            }
+                                        ],
+                                        "Width": "118px"
                                     }
                                 ]
                             }
@@ -7255,7 +7382,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "5886c98c-7e3d-4e98-9d60-d03b1fc9ee3b",
+                        "VisualId": "4edd4dcb-c978-4f62-ba43-42eacb3c5f71",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7388,7 +7515,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "aca3a372-1118-4ceb-806d-b8517d1347e0",
+                        "VisualId": "1d1994c6-f28e-4ce8-bf47-54d31c9cfe61",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7409,7 +7536,7 @@
                                                     "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "time_period"
                                                 },
-                                                "HierarchyId": "5b1d856e-2b0d-4ee7-b951-84bc78354006"
+                                                "HierarchyId": "b3942c1c-cc20-4e1a-98b0-f42cc32705cb"
                                             }
                                         }
                                     ],
@@ -7498,7 +7625,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "5b1d856e-2b0d-4ee7-b951-84bc78354006",
+                                    "HierarchyId": "b3942c1c-cc20-4e1a-98b0-f42cc32705cb",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -7512,7 +7639,7 @@
                         "FreeFormLayout": {
                             "Elements": [
                                 {
-                                    "ElementId": "443f0afd-c640-4290-b8f9-41d279dd6d2a",
+                                    "ElementId": "ca7538ae-08df-41b1-a353-bb13a7c48e05",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "0px",
@@ -7521,7 +7648,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "20ea27d7-af95-4395-94a4-9bbe060f6415",
+                                    "ElementId": "234f0ae3-34da-4550-a865-c6275397c687",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "1104px",
@@ -7530,7 +7657,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "01211d55-a791-49f8-86c6-766645e26616",
+                                    "ElementId": "a7fa0ed1-9531-4448-842a-ceb3bf7109c5",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "800px",
                                     "YAxisLocation": "1104px",
@@ -7539,7 +7666,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "d40dc94e-3ddd-4d6d-bd4f-82e6770abc8b",
+                                    "ElementId": "3c63c502-e3af-4da8-b400-493fea2fe440",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "1632px",
@@ -7548,7 +7675,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "5886c98c-7e3d-4e98-9d60-d03b1fc9ee3b",
+                                    "ElementId": "4edd4dcb-c978-4f62-ba43-42eacb3c5f71",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "560px",
@@ -7557,7 +7684,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "0105c721-ae95-418a-bae8-3802fb697d88",
+                                    "ElementId": "9e509794-e5af-44dc-96fb-d34e1b83a8b1",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "800px",
                                     "YAxisLocation": "560px",
@@ -7566,7 +7693,7 @@
                                     "Visibility": "VISIBLE"
                                 },
                                 {
-                                    "ElementId": "aca3a372-1118-4ceb-806d-b8517d1347e0",
+                                    "ElementId": "1d1994c6-f28e-4ce8-bf47-54d31c9cfe61",
                                     "ElementType": "VISUAL",
                                     "XAxisLocation": "0px",
                                     "YAxisLocation": "2240px",
@@ -7621,7 +7748,7 @@
             "ContentType": "INTERACTIVE"
         },
         {
-            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
             "Name": "Device",
             "ParameterControls": [
                 {
@@ -7690,7 +7817,7 @@
             "Visuals": [
                 {
                     "LineChartVisual": {
-                        "VisualId": "8080f043-8506-4420-9166-408751d93abe",
+                        "VisualId": "086e7ee4-4d70-4045-b179-f67d1c9c4262",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7714,7 +7841,7 @@
                                                     "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "998dbfe5-f072-42a2-bfa8-f201c2c6a6df"
+                                                "HierarchyId": "8ddb3be5-fce2-4e43-83db-4c5dc1dc96cc"
                                             }
                                         }
                                     ],
@@ -7805,7 +7932,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "998dbfe5-f072-42a2-bfa8-f201c2c6a6df",
+                                    "HierarchyId": "8ddb3be5-fce2-4e43-83db-4c5dc1dc96cc",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -7814,7 +7941,7 @@
                 },
                 {
                     "PieChartVisual": {
-                        "VisualId": "36a5c79b-a96a-4be5-a18e-5f11ecb0ad42",
+                        "VisualId": "d1c92a67-8f01-42a2-b468-754b6b292d25",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7906,7 +8033,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "31989e24-a2bc-4643-aa88-26d3835db691",
+                        "VisualId": "286b0dcc-143b-4aec-9e0a-e50e87370937",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -7927,7 +8054,7 @@
                                                     "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "f7964423-4dd8-4dfc-9560-485211b36240"
+                                                "HierarchyId": "91179014-9ab6-4ebc-8aab-62c6a05df4d9"
                                             }
                                         }
                                     ],
@@ -7946,10 +8073,10 @@
                                     "Colors": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "LogicalTable1.device_operating_system.0.1711011863662",
+                                                "FieldId": "LogicalTable1.platform.2.1712813109003",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_View",
-                                                    "ColumnName": "device_operating_system"
+                                                    "ColumnName": "platform"
                                                 }
                                             }
                                         }
@@ -7995,12 +8122,6 @@
                                     "TooltipFields": [
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.device_operating_system.0.1711011863662",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        },
-                                        {
-                                            "FieldTooltipItem": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711011876922",
                                                 "Visibility": "VISIBLE"
                                             }
@@ -8008,6 +8129,12 @@
                                         {
                                             "FieldTooltipItem": {
                                                 "FieldId": "LogicalTable1.event_date.2.1711700330552",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        {
+                                            "FieldTooltipItem": {
+                                                "FieldId": "LogicalTable1.platform.2.1712813109003",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -8019,7 +8146,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "f7964423-4dd8-4dfc-9560-485211b36240",
+                                    "HierarchyId": "91179014-9ab6-4ebc-8aab-62c6a05df4d9",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -8028,7 +8155,7 @@
                 },
                 {
                     "LineChartVisual": {
-                        "VisualId": "dcaa950f-06c9-453b-a6a4-18934f60314a",
+                        "VisualId": "79bf185d-a0ab-465a-ac2e-519a1e55d857",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -8052,7 +8179,7 @@
                                                     "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
-                                                "HierarchyId": "297e7a8a-0835-4289-bea6-ab1f7e87a467"
+                                                "HierarchyId": "a1061285-dfc3-4eaf-b40e-19ecbc8450f1"
                                             }
                                         }
                                     ],
@@ -8143,7 +8270,7 @@
                         "ColumnHierarchies": [
                             {
                                 "DateTimeHierarchy": {
-                                    "HierarchyId": "297e7a8a-0835-4289-bea6-ab1f7e87a467",
+                                    "HierarchyId": "a1061285-dfc3-4eaf-b40e-19ecbc8450f1",
                                     "DrillDownFilters": []
                                 }
                             }
@@ -8152,11 +8279,11 @@
                 },
                 {
                     "TreeMapVisual": {
-                        "VisualId": "c78faac6-f181-4251-ad3b-8b5f024c19a7",
+                        "VisualId": "b748b021-c41e-4d14-95a8-ddba27eacfc0",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">Users by device model</inline>\n</visual-title>"
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">\n    <b>Users by device model</b>\n  </inline>\n</visual-title>"
                             }
                         },
                         "Subtitle": {
@@ -8287,7 +8414,7 @@
                 },
                 {
                     "PivotTableVisual": {
-                        "VisualId": "5e951085-7513-4fe1-9934-b1e17ffa9672",
+                        "VisualId": "947c58a6-1a54-4a8c-be47-3ed5732695f1",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -8506,7 +8633,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "ad16b9fe-0159-4838-b3c1-0e95b031b361",
+                        "VisualId": "887b5606-1176-4d41-9301-5d833ec61cc3",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -8570,8 +8697,8 @@
                                 "ScrollbarOptions": {
                                     "VisibleRange": {
                                         "PercentRange": {
-                                            "From": 33.33333333333323,
-                                            "To": 100.0
+                                            "From": 0.0,
+                                            "To": 66.66666666666673
                                         }
                                     }
                                 }
@@ -8609,7 +8736,7 @@
                 },
                 {
                     "BarChartVisual": {
-                        "VisualId": "24ec0945-ead0-4143-844b-be3b63b230be",
+                        "VisualId": "f13fbd84-d99f-4525-abbd-6ea44b25cd86",
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
@@ -8717,7 +8844,7 @@
                         "GridLayout": {
                             "Elements": [
                                 {
-                                    "ElementId": "36a5c79b-a96a-4be5-a18e-5f11ecb0ad42",
+                                    "ElementId": "d1c92a67-8f01-42a2-b468-754b6b292d25",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 18,
@@ -8725,7 +8852,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "ad16b9fe-0159-4838-b3c1-0e95b031b361",
+                                    "ElementId": "887b5606-1176-4d41-9301-5d833ec61cc3",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 18,
                                     "ColumnSpan": 18,
@@ -8733,7 +8860,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "31989e24-a2bc-4643-aa88-26d3835db691",
+                                    "ElementId": "286b0dcc-143b-4aec-9e0a-e50e87370937",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 36,
@@ -8741,7 +8868,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "c78faac6-f181-4251-ad3b-8b5f024c19a7",
+                                    "ElementId": "b748b021-c41e-4d14-95a8-ddba27eacfc0",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 36,
@@ -8749,7 +8876,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "24ec0945-ead0-4143-844b-be3b63b230be",
+                                    "ElementId": "f13fbd84-d99f-4525-abbd-6ea44b25cd86",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 18,
@@ -8757,7 +8884,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "8080f043-8506-4420-9166-408751d93abe",
+                                    "ElementId": "086e7ee4-4d70-4045-b179-f67d1c9c4262",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 18,
                                     "ColumnSpan": 18,
@@ -8765,7 +8892,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "dcaa950f-06c9-453b-a6a4-18934f60314a",
+                                    "ElementId": "79bf185d-a0ab-465a-ac2e-519a1e55d857",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 0,
                                     "ColumnSpan": 18,
@@ -8773,7 +8900,7 @@
                                     "RowSpan": 12
                                 },
                                 {
-                                    "ElementId": "5e951085-7513-4fe1-9934-b1e17ffa9672",
+                                    "ElementId": "947c58a6-1a54-4a8c-be47-3ed5732695f1",
                                     "ElementType": "VISUAL",
                                     "ColumnIndex": 18,
                                     "ColumnSpan": 18,
@@ -8818,6 +8945,992 @@
                                     "ColumnIndex": 4,
                                     "ColumnSpan": 2,
                                     "RowIndex": 0,
+                                    "RowSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "ContentType": "INTERACTIVE"
+        },
+        {
+            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+            "Name": "Details",
+            "FilterControls": [
+                {
+                    "DateTimePicker": {
+                        "FilterControlId": "8cb92cbd-9728-4ce0-b3ef-f49402814c85",
+                        "Title": "Event timestamp",
+                        "SourceFilterId": "01c72a81-39e3-43fd-8e2b-41650c01b77d",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD HH:mm:ss",
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "DATE_RANGE"
+                    }
+                },
+                {
+                    "DateTimePicker": {
+                        "FilterControlId": "083d7bfc-422d-4252-924c-f14eeb5f2efc",
+                        "Title": "Event timestamp (local)",
+                        "SourceFilterId": "4f6ce805-0ee6-44a5-bc1c-bde75a9b6032",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD HH:mm:ss",
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "DATE_RANGE"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "6489c503-14fc-4e88-a337-891f4103934e",
+                        "Title": "User ID",
+                        "SourceFilterId": "d552921c-f03c-48ef-a49c-2c477e15c27f",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "2db89f9a-1e4e-43a2-9641-c7896d611401",
+                        "Title": "Platform",
+                        "SourceFilterId": "2f927341-70d6-4e98-b9ec-d15769f3411f",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "f800f37d-ef73-4672-8bea-c8cda0c9e620",
+                        "Title": "Event name",
+                        "SourceFilterId": "832dd07a-94a4-4d3c-951a-8f5684efb388",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "f5f078a1-0538-4f9e-99b9-f2ff39f8498c",
+                        "Title": "App version",
+                        "SourceFilterId": "cf5c4bea-f76c-419a-89ab-39bd64eaccd8",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "14b5c0e9-d298-4d95-a991-5118fac9b1e5",
+                        "Title": "Device id",
+                        "SourceFilterId": "8736ecba-b921-4c55-bf83-573e31d1ef36",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "31aab892-8a9d-4a22-bdce-5a4a9a76f0ba",
+                        "Title": "Device advertising ID (IDFA)",
+                        "SourceFilterId": "a1fe4c54-d816-48d2-8f24-da8379844e64",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "fe45784f-2fdc-4753-9076-97fa8a6ec1bc",
+                        "Title": "Operating System / Version",
+                        "SourceFilterId": "fddc8d5d-8efe-41c9-960f-8debc31d4dda",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "d91d9503-af03-43a9-8863-4dcc37774963",
+                        "Title": "SDK version",
+                        "SourceFilterId": "4b0610f0-1815-4bba-928e-4bc2d2667463",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "9c6dce3d-3657-4739-a1bf-b65a6612b77b",
+                        "Title": "User pseudo id",
+                        "SourceFilterId": "e2934357-6efa-4771-9637-2053c852fa46",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                },
+                {
+                    "Dropdown": {
+                        "FilterControlId": "f9e29e4b-d3e6-4ce9-abfa-08b18cee14a9",
+                        "Title": "Event id",
+                        "SourceFilterId": "5c4b3787-2d2b-4a35-8fac-815ecc4246b8",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            },
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                }
+            ],
+            "Visuals": [
+                {
+                    "TableVisual": {
+                        "VisualId": "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">\n    <b>User attributes</b>\n  </inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-subtitle>Display user attributes for each user. </visual-subtitle>"
+                            }
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "TableAggregatedFieldWells": {
+                                    "GroupBy": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_pseudo_id.2.1712806226840",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_pseudo_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_id.2.1712806247149",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_properties_json_str.2.1712806240485",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_properties_json_str"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_app_install_source.4.1712807637157",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_app_install_source"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "DateDimensionField": {
+                                                "FieldId": "LogicalTable1.first_visit_date.17.1712807644663",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_visit_date"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "NumericalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_touch_time_msec.6.1712807638374",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_touch_time_msec"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_referrer.16.1712807667343",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_referrer"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_campaign.7.1712807639483",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_campaign"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_campaign_id.8.1712807640297",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_campaign_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_category.9.1712807640751",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_category"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_channel_group.10.1712807641144",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_channel_group"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_clid.11.1712807641544",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_clid"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_clid_platform.12.1712807642103",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_clid_platform"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_content.13.1712807642502",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_content"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_medium.14.1712807642978",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_medium"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_source.15.1712807643562",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_source"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.first_traffic_term.16.1712807643962",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "first_traffic_term"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": []
+                                }
+                            },
+                            "SortConfiguration": {},
+                            "TableOptions": {
+                                "HeaderStyle": {
+                                    "FontConfiguration": {
+                                        "FontSize": {
+                                            "Relative": "LARGE"
+                                        },
+                                        "FontColor": "#EEEEEE"
+                                    },
+                                    "BackgroundColor": "#2A5D78",
+                                    "Height": 40
+                                },
+                                "CellStyle": {
+                                    "Height": 25
+                                }
+                            }
+                        },
+                        "Actions": []
+                    }
+                },
+                {
+                    "TableVisual": {
+                        "VisualId": "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">\n    <b>Event details</b>\n  </inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-subtitle>Display the key dimensions of each individual event record. Click on the row of the event, below two tables will display the associated custom event parameters and user attributes.</visual-subtitle>"
+                            }
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "TableAggregatedFieldWells": {
+                                    "GroupBy": [
+                                        {
+                                            "DateDimensionField": {
+                                                "FieldId": "LogicalTable1.event_timestamp.1.1712805646237",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_timestamp"
+                                                },
+                                                "DateGranularity": "SECOND",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY h:mm a",
+                                                    "NullValueFormatConfiguration": {
+                                                        "NullString": "null"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "DateDimensionField": {
+                                                "FieldId": "LogicalTable1.event_timestamp_local.2.1712805649636",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_timestamp_local"
+                                                },
+                                                "DateGranularity": "SECOND",
+                                                "FormatConfiguration": {
+                                                    "DateTimeFormat": "MM-DD-YYYY h:mm a",
+                                                    "NullValueFormatConfiguration": {
+                                                        "NullString": "null"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.event_id.3.1712805660395",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.event_name.2.1712805655383",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_name"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "NumericalDimensionField": {
+                                                "FieldId": "LogicalTable1.event_bundle_sequence_id.4.1712805667491",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_bundle_sequence_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_id.16.1712805953100",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_pseudo_id.15.1712805949063",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_pseudo_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.platform.12.1712805758161",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "platform"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.app_id.5.1712805709908",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "app_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.app_package_id.6.1712805713017",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "app_package_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.app_version.7.1712805716621",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "app_version"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "3ed35862-5bd9-4e82-9cde-140ca1ffe3b3.14.1712805894003",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "Operating System / Version"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.device_carrier.8.1712805722705",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "device_carrier"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.device_ua_browser.13.1712805849285",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "device_ua_browser"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.device_manufacturer.9.1712805724030",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "device_manufacturer"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.geo_country.13.1712805932263",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "geo_country"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.geo_city.14.1712805934187",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "geo_city"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": []
+                                }
+                            },
+                            "SortConfiguration": {
+                                "RowSort": [
+                                    {
+                                        "FieldSort": {
+                                            "FieldId": "LogicalTable1.event_timestamp.1.1712805646237",
+                                            "Direction": "DESC"
+                                        }
+                                    }
+                                ]
+                            },
+                            "TableOptions": {
+                                "HeaderStyle": {
+                                    "Visibility": "VISIBLE",
+                                    "FontConfiguration": {
+                                        "FontSize": {
+                                            "Relative": "LARGE"
+                                        },
+                                        "FontColor": "#EEEEEE"
+                                    },
+                                    "TextWrap": "WRAP",
+                                    "HorizontalTextAlignment": "LEFT",
+                                    "BackgroundColor": "#2A5D78",
+                                    "Height": 40
+                                },
+                                "CellStyle": {
+                                    "Height": 25
+                                },
+                                "RowAlternateColorOptions": {
+                                    "Status": "ENABLED",
+                                    "UsePrimaryBackgroundColor": "ENABLED"
+                                }
+                            },
+                            "FieldOptions": {
+                                "SelectedFieldOptions": [
+                                    {
+                                        "FieldId": "LogicalTable1.event_timestamp.1.1712805646237",
+                                        "Width": "157px"
+                                    },
+                                    {
+                                        "FieldId": "LogicalTable1.event_bundle_sequence_id.4.1712805667491",
+                                        "Width": "142px"
+                                    }
+                                ],
+                                "Order": []
+                            }
+                        },
+                        "Actions": [
+                            {
+                                "CustomActionId": "4fb8ee9e-f531-467a-81c4-abef5429aa85",
+                                "Name": "Filter event and user",
+                                "Status": "ENABLED",
+                                "Trigger": "DATA_POINT_CLICK",
+                                "ActionOperations": [
+                                    {
+                                        "FilterOperation": {
+                                            "SelectedFieldsConfiguration": {
+                                                "SelectedFields": [
+                                                    "LogicalTable1.event_timestamp.1.1712805646237",
+                                                    "LogicalTable1.event_timestamp_local.2.1712805649636",
+                                                    "LogicalTable1.event_id.3.1712805660395",
+                                                    "LogicalTable1.user_pseudo_id.15.1712805949063",
+                                                    "LogicalTable1.user_id.16.1712805953100",
+                                                    "LogicalTable1.event_name.2.1712805655383"
+                                                ]
+                                            },
+                                            "TargetVisualsConfiguration": {
+                                                "SameSheetTargetVisualConfiguration": {
+                                                    "TargetVisualOptions": "ALL_VISUALS"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "TableVisual": {
+                        "VisualId": "1e640c17-d5bf-4e52-a926-0bf40f496282",
+                        "Title": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-title>\n  <inline font-size=\"20px\">\n    <b>Event custom parameters</b>\n  </inline>\n</visual-title>"
+                            }
+                        },
+                        "Subtitle": {
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-subtitle>Display the custom parameters for each individual event. </visual-subtitle>"
+                            }
+                        },
+                        "ChartConfiguration": {
+                            "FieldWells": {
+                                "TableAggregatedFieldWells": {
+                                    "GroupBy": [
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.custom_parameters_json_str.0.1712806211513",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "custom_parameters_json_str"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.event_id.1.1712806215965",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "event_id"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "CategoricalDimensionField": {
+                                                "FieldId": "LogicalTable1.user_pseudo_id.2.1712806226840",
+                                                "Column": {
+                                                    "DataSetIdentifier": "Event_View",
+                                                    "ColumnName": "user_pseudo_id"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "Values": []
+                                }
+                            },
+                            "SortConfiguration": {},
+                            "TableOptions": {
+                                "HeaderStyle": {
+                                    "FontConfiguration": {
+                                        "FontSize": {
+                                            "Relative": "LARGE"
+                                        },
+                                        "FontColor": "#EEEEEE"
+                                    },
+                                    "TextWrap": "WRAP",
+                                    "BackgroundColor": "#2A5D78",
+                                    "Height": 40
+                                },
+                                "CellStyle": {
+                                    "Height": 25
+                                }
+                            },
+                            "FieldOptions": {
+                                "SelectedFieldOptions": [
+                                    {
+                                        "FieldId": "LogicalTable1.custom_parameters_json_str.0.1712806211513",
+                                        "Width": "1457px"
+                                    },
+                                    {
+                                        "FieldId": "LogicalTable1.user_pseudo_id.2.1712806226840",
+                                        "Visibility": "HIDDEN"
+                                    }
+                                ],
+                                "Order": []
+                            }
+                        },
+                        "Actions": []
+                    }
+                }
+            ],
+            "Layouts": [
+                {
+                    "Configuration": {
+                        "GridLayout": {
+                            "Elements": [
+                                {
+                                    "ElementId": "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                    "ElementType": "VISUAL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 36,
+                                    "RowIndex": 0,
+                                    "RowSpan": 13
+                                },
+                                {
+                                    "ElementId": "1e640c17-d5bf-4e52-a926-0bf40f496282",
+                                    "ElementType": "VISUAL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 36,
+                                    "RowIndex": 13,
+                                    "RowSpan": 12
+                                },
+                                {
+                                    "ElementId": "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                    "ElementType": "VISUAL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 36,
+                                    "RowIndex": 25,
+                                    "RowSpan": 12
+                                }
+                            ],
+                            "CanvasSizeOptions": {
+                                "ScreenCanvasSizeOptions": {
+                                    "ResizeOption": "FIXED",
+                                    "OptimizedViewPortWidth": "1600px"
+                                }
+                            }
+                        }
+                    }
+                }
+            ],
+            "SheetControlLayouts": [
+                {
+                    "Configuration": {
+                        "GridLayout": {
+                            "Elements": [
+                                {
+                                    "ElementId": "2db89f9a-1e4e-43a2-9641-c7896d611401",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 2,
+                                    "RowIndex": 0,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "8cb92cbd-9728-4ce0-b3ef-f49402814c85",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 2,
+                                    "ColumnSpan": 5,
+                                    "RowIndex": 0,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "083d7bfc-422d-4252-924c-f14eeb5f2efc",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 7,
+                                    "ColumnSpan": 5,
+                                    "RowIndex": 0,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "6489c503-14fc-4e88-a337-891f4103934e",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 1,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "9c6dce3d-3657-4739-a1bf-b65a6612b77b",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 4,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 1,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "14b5c0e9-d298-4d95-a991-5118fac9b1e5",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 8,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 1,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "f800f37d-ef73-4672-8bea-c8cda0c9e620",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 2,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "f9e29e4b-d3e6-4ce9-abfa-08b18cee14a9",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 4,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 2,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "fe45784f-2fdc-4753-9076-97fa8a6ec1bc",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 8,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 2,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "d91d9503-af03-43a9-8863-4dcc37774963",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 0,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 3,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "f5f078a1-0538-4f9e-99b9-f2ff39f8498c",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 4,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 3,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "31aab892-8a9d-4a22-bdce-5a4a9a76f0ba",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnIndex": 8,
+                                    "ColumnSpan": 4,
+                                    "RowIndex": 3,
                                     "RowSpan": 1
                                 }
                             ]
@@ -8901,11 +10014,6 @@
         },
         {
             "DataSetIdentifier": "Event_View",
-            "Name": "First Visit Date (retention)",
-            "Expression": "ifelse({first_visit_date} > {First Action Date}, {First Action Date}, {first_visit_date})"
-        },
-        {
-            "DataSetIdentifier": "Event_View",
             "Name": "New user",
             "Expression": "distinct_countIf({merged_user_id},{event_name}='_first_open')"
         },
@@ -8927,7 +10035,7 @@
         {
             "DataSetIdentifier": "Event_View",
             "Name": "Retention Rate",
-            "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{first_visit_date}]))"
+            "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{First Action Date}]))"
         },
         {
             "DataSetIdentifier": "Page_Screen_View_Detail",
@@ -9234,12 +10342,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "e78478e3-909a-4b01-a0bc-4e4115070cf5",
-                                "aa9b95bd-7822-4563-bdec-693ffc8c0c03",
-                                "820e2137-2446-49d6-9c9e-0ef6f8906fc8"
+                                "8b3aad03-aa64-4ad2-8f06-feae38e1dc9a",
+                                "e0e5be0e-6264-45d7-b07c-de7629a41f6c",
+                                "2f8a80f5-bef8-4c84-b2c2-3c5636fa85e4"
                             ]
                         }
                     ]
@@ -9272,10 +10380,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "49b061ba-6fe7-4608-b50a-42e6c2b0e77b"
+                                "ff761fb9-715e-40f2-9162-e21d870be4b0"
                             ]
                         }
                     ]
@@ -9308,7 +10416,7 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "ALL_VISUALS"
                         }
                     ]
@@ -9341,7 +10449,7 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "552a2887-7bfd-424d-bba0-9accae525c47",
+                            "SheetId": "9b0f219d-d57e-47d5-a795-d58653561f41",
                             "Scope": "ALL_VISUALS"
                         }
                     ]
@@ -9374,7 +10482,7 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+                            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
                             "Scope": "ALL_VISUALS"
                         }
                     ]
@@ -9407,12 +10515,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "d006e817-9ff0-4aee-b90d-b4091304aca0",
-                                "0776e3bd-ebca-4772-87a6-b78e2971708e",
-                                "31be7a36-3b1f-402c-8ea5-044d211b9a8c"
+                                "ade7944a-cb8e-4a3e-ac30-6df8881fa04b",
+                                "cfc2766d-234b-4abe-b513-34a42fbe7732",
+                                "085ef3e8-fa6b-45b5-beb6-1e02434d623f"
                             ]
                         }
                     ]
@@ -9445,7 +10553,7 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "ALL_VISUALS"
                         }
                     ]
@@ -9479,10 +10587,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "970a51d3-21ba-43b1-baf1-14b114192084"
+                                "f9f56a89-f647-460b-b7ec-cd085e54c938"
                             ]
                         }
                     ]
@@ -9516,10 +10624,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "13d6ef8c-6726-4c35-ad09-227102df06e0"
+                                "63b0bff0-0aa2-4ba0-9be1-8ffc5196dfd0"
                             ]
                         }
                     ]
@@ -9560,10 +10668,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "820e2137-2446-49d6-9c9e-0ef6f8906fc8"
+                                "2f8a80f5-bef8-4c84-b2c2-3c5636fa85e4"
                             ]
                         }
                     ]
@@ -9596,12 +10704,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "ee95ea38-eaf7-45c6-84e5-f5e6cb27e6e9",
-                                "bc6f09e9-6ccf-436c-a2e6-7626f3778288",
-                                "dd7ad16e-b358-4a8b-a4de-69f856f756b1"
+                                "62174ba0-e4bb-4302-8bc2-892ef754cf65",
+                                "c16f6d79-b369-468a-92ce-66203a0f6bac",
+                                "4448542d-3451-4d2b-85e1-f708c6bf42cd"
                             ]
                         }
                     ]
@@ -9634,12 +10742,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "0a340982-dc50-4729-8172-8a1d770ac812",
-                                "5471cc5c-38a6-4a0b-9ff0-119bc2680daf",
-                                "e437f86a-cde4-4b1d-a1a5-88b45519a628"
+                                "167f0533-a6fe-4378-8187-4659e125b284",
+                                "b3a31177-1132-4782-9e31-e8185eb607d3",
+                                "d97939b6-3d26-415c-b3a5-57a554126a8c"
                             ]
                         }
                     ]
@@ -9678,12 +10786,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "0a340982-dc50-4729-8172-8a1d770ac812",
-                                "5471cc5c-38a6-4a0b-9ff0-119bc2680daf",
-                                "e437f86a-cde4-4b1d-a1a5-88b45519a628"
+                                "167f0533-a6fe-4378-8187-4659e125b284",
+                                "b3a31177-1132-4782-9e31-e8185eb607d3",
+                                "d97939b6-3d26-415c-b3a5-57a554126a8c"
                             ]
                         }
                     ]
@@ -9724,11 +10832,11 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "d006e817-9ff0-4aee-b90d-b4091304aca0",
-                                "0776e3bd-ebca-4772-87a6-b78e2971708e"
+                                "ade7944a-cb8e-4a3e-ac30-6df8881fa04b",
+                                "cfc2766d-234b-4abe-b513-34a42fbe7732"
                             ]
                         }
                     ]
@@ -9761,11 +10869,11 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "c756bd06-4cc6-4205-bf6d-66edfc9b6a06",
-                                "f2516da6-5cbe-4345-9605-95e3d844709a"
+                                "ec87aea5-7f43-4624-a873-67388e65395b",
+                                "d82c0464-db24-4f80-a7a8-c9cacd76633f"
                             ]
                         }
                     ]
@@ -9806,10 +10914,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "f2516da6-5cbe-4345-9605-95e3d844709a"
+                                "d82c0464-db24-4f80-a7a8-c9cacd76633f"
                             ]
                         }
                     ]
@@ -9850,10 +10958,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "c756bd06-4cc6-4205-bf6d-66edfc9b6a06"
+                                "ec87aea5-7f43-4624-a873-67388e65395b"
                             ]
                         }
                     ]
@@ -9889,10 +10997,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "552a2887-7bfd-424d-bba0-9accae525c47",
+                            "SheetId": "9b0f219d-d57e-47d5-a795-d58653561f41",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "d40dc94e-3ddd-4d6d-bd4f-82e6770abc8b"
+                                "3c63c502-e3af-4da8-b400-493fea2fe440"
                             ]
                         }
                     ]
@@ -9927,10 +11035,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+                            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "c78faac6-f181-4251-ad3b-8b5f024c19a7"
+                                "b748b021-c41e-4d14-95a8-ddba27eacfc0"
                             ]
                         }
                     ]
@@ -9965,10 +11073,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+                            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "dcaa950f-06c9-453b-a6a4-18934f60314a"
+                                "79bf185d-a0ab-465a-ac2e-519a1e55d857"
                             ]
                         }
                     ]
@@ -10003,10 +11111,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+                            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "8080f043-8506-4420-9166-408751d93abe"
+                                "086e7ee4-4d70-4045-b179-f67d1c9c4262"
                             ]
                         }
                     ]
@@ -10041,10 +11149,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "2db6d878-fe1e-44b5-8e76-7f4f219bd411",
+                            "SheetId": "91007bca-55a4-4e75-b560-f1c8d308bb92",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "5e951085-7513-4fe1-9934-b1e17ffa9672"
+                                "947c58a6-1a54-4a8c-be47-3ed5732695f1"
                             ]
                         }
                     ]
@@ -10077,12 +11185,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "939954df-1b0b-4c92-ad5f-5ae2cdcac464",
+                            "SheetId": "3b362d75-c85e-44b5-87e2-bf1f29542634",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "5d649a6a-674e-4043-9fbe-028cd6ae9a6d",
-                                "8594630a-6f03-4d07-8dfd-a608377655cb",
-                                "a79f984e-b21e-4d4f-b36b-a5ece9960db3"
+                                "eb4f8aa9-c097-4387-837c-266542426d2a",
+                                "484787b0-1b2f-40cc-9d3e-14dd55f4f165",
+                                "beafd593-a6f9-4e5e-adc8-d67a7a6b7879"
                             ]
                         }
                     ]
@@ -10115,10 +11223,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "939954df-1b0b-4c92-ad5f-5ae2cdcac464",
+                            "SheetId": "3b362d75-c85e-44b5-87e2-bf1f29542634",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "8594630a-6f03-4d07-8dfd-a608377655cb"
+                                "484787b0-1b2f-40cc-9d3e-14dd55f4f165"
                             ]
                         }
                     ]
@@ -10151,10 +11259,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "939954df-1b0b-4c92-ad5f-5ae2cdcac464",
+                            "SheetId": "3b362d75-c85e-44b5-87e2-bf1f29542634",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "5d649a6a-674e-4043-9fbe-028cd6ae9a6d"
+                                "eb4f8aa9-c097-4387-837c-266542426d2a"
                             ]
                         }
                     ]
@@ -10187,10 +11295,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "12248a2d-a078-4471-878c-61c428a9776f"
+                                "f596793c-33ce-4c56-a90d-fae06eb87cec"
                             ]
                         }
                     ]
@@ -10223,10 +11331,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "25380913-c80c-4f9f-a59b-de5cf3db05a2"
+                                "7f0d1f51-365c-496a-a3be-4cad1b2499e5"
                             ]
                         }
                     ]
@@ -10259,10 +11367,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "022032b7-2843-4e2f-9823-b89dc7428733"
+                                "cf295bc9-a877-45c2-9db2-1bb95d941297"
                             ]
                         }
                     ]
@@ -10298,12 +11406,12 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "939954df-1b0b-4c92-ad5f-5ae2cdcac464",
+                            "SheetId": "3b362d75-c85e-44b5-87e2-bf1f29542634",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "5d649a6a-674e-4043-9fbe-028cd6ae9a6d",
-                                "8594630a-6f03-4d07-8dfd-a608377655cb",
-                                "a79f984e-b21e-4d4f-b36b-a5ece9960db3"
+                                "eb4f8aa9-c097-4387-837c-266542426d2a",
+                                "484787b0-1b2f-40cc-9d3e-14dd55f4f165",
+                                "beafd593-a6f9-4e5e-adc8-d67a7a6b7879"
                             ]
                         }
                     ]
@@ -10342,11 +11450,11 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "e78478e3-909a-4b01-a0bc-4e4115070cf5",
-                                "aa9b95bd-7822-4563-bdec-693ffc8c0c03"
+                                "8b3aad03-aa64-4ad2-8f06-feae38e1dc9a",
+                                "e0e5be0e-6264-45d7-b07c-de7629a41f6c"
                             ]
                         }
                     ]
@@ -10385,11 +11493,11 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "bc6f09e9-6ccf-436c-a2e6-7626f3778288",
-                                "ee95ea38-eaf7-45c6-84e5-f5e6cb27e6e9"
+                                "c16f6d79-b369-468a-92ce-66203a0f6bac",
+                                "62174ba0-e4bb-4302-8bc2-892ef754cf65"
                             ]
                         }
                     ]
@@ -10425,10 +11533,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "dd7ad16e-b358-4a8b-a4de-69f856f756b1"
+                                "4448542d-3451-4d2b-85e1-f708c6bf42cd"
                             ]
                         }
                     ]
@@ -10461,10 +11569,10 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "e3445719-6687-4f35-9913-e388a0b0bad5",
+                            "SheetId": "820a7edf-1416-4edd-bf59-3cdef23cfdbd",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "ee95ea38-eaf7-45c6-84e5-f5e6cb27e6e9"
+                                "62174ba0-e4bb-4302-8bc2-892ef754cf65"
                             ]
                         }
                     ]
@@ -10500,10 +11608,456 @@
                 "SelectedSheets": {
                     "SheetVisualScopingConfigurations": [
                         {
-                            "SheetId": "65d056a2-1105-4afa-b65a-138dcfc8e566",
+                            "SheetId": "c63d32b9-da56-4564-8f29-aa370fe78bbc",
                             "Scope": "SELECTED_VISUALS",
                             "VisualIds": [
-                                "31be7a36-3b1f-402c-8ea5-044d211b9a8c"
+                                "085ef3e8-fa6b-45b5-beb6-1e02434d623f"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "698aae08-fe70-4274-b531-9a8e56936fae",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "d552921c-f03c-48ef-a49c-2c477e15c27f",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "user_id"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "9f386546-485f-4369-b9a3-066497b358b7",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "e2934357-6efa-4771-9637-2053c852fa46",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "user_pseudo_id"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "5701a40f-054f-4e45-8357-1d2d95e333fc",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "832dd07a-94a4-4d3c-951a-8f5684efb388",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "event_name"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "859aeaa8-599d-4499-b5b9-9312ebb99376",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "2f927341-70d6-4e98-b9ec-d15769f3411f",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "platform"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "CategoryValues": [
+                                    "Android"
+                                ],
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "263310bd-fb5f-4e55-a131-165bfafcce08",
+            "Filters": [
+                {
+                    "TimeRangeFilter": {
+                        "FilterId": "01c72a81-39e3-43fd-8e2b-41650c01b77d",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "event_timestamp"
+                        },
+                        "NullOption": "NON_NULLS_ONLY",
+                        "TimeGranularity": "MINUTE"
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "ab272ead-8609-4c93-bc66-00ee78412c19",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "cf5c4bea-f76c-419a-89ab-39bd64eaccd8",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "app_version"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "0746289e-f374-4a97-9322-bde38b8013a3",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "8736ecba-b921-4c55-bf83-573e31d1ef36",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "device_vendor_id"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "16ffb1be-56ec-44bd-ae89-65bdfbb9a4b8",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "a1fe4c54-d816-48d2-8f24-da8379844e64",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "device_advertising_id"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "80a327a4-9ddb-47ce-b1d7-ce84103df2cf",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "fddc8d5d-8efe-41c9-960f-8debc31d4dda",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "Operating System / Version"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "f919b1a5-89a9-4785-9db9-b94c158c56fb",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "4b0610f0-1815-4bba-928e-4bc2d2667463",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "sdk_version"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "66463fe4-2a07-489f-8477-6f2f0d6243e9",
+            "Filters": [
+                {
+                    "TimeRangeFilter": {
+                        "FilterId": "4f6ce805-0ee6-44a5-bc1c-bde75a9b6032",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "event_timestamp_local"
+                        },
+                        "NullOption": "NON_NULLS_ONLY",
+                        "TimeGranularity": "MINUTE"
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "e7e6c762-9d9f-4ae9-975b-0f6ab24ec7d8",
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e",
+                                "1e640c17-d5bf-4e52-a926-0bf40f496282"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "0e94b62e-c62b-484b-82c0-17527147a7d4",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "5c4b3787-2d2b-4a35-8fac-815ecc4246b8",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "event_id"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES",
+                                "NullOption": "NON_NULLS_ONLY"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "8afad4ba-eee0-40b6-a7e6-3d573ba5bf3e",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "85d756fa-2fd2-4bae-a6c4-8093196ada7e"
                             ]
                         }
                     ]

@@ -73,7 +73,7 @@ describe('Glue catalog add partition test', () => {
     const s3Bucket = 'bucket1';
     const s3Prefix = 'prefix1/';
     const databaseName = 'db1';
-    const tableName = SinkTableEnum.EVENT;
+    const tableName = SinkTableEnum.EVENT_V2;
 
     const projectId = 'projectId1';
     const appIds = 'appId1,appId2';

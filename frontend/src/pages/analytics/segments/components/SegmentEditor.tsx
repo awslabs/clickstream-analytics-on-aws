@@ -40,7 +40,7 @@ import {
 } from 'pages/analytics/analytics-utils';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentItem from './group/SegmentItem';
@@ -55,6 +55,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
 ) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { projectId, appId } = useParams();
   const { segmentObject, updateSegmentObject } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
 
@@ -122,7 +123,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
         )
       );
       setLoadingCreate(false);
-      navigate(`/analytics/test_magic_project_gpvz/app/shopping/segments`);
+      navigate(`/analytics/${projectId}/app/${appId}/segments`);
     } catch (error) {
       console.info(error);
       setLoadingCreate(false);
