@@ -22,6 +22,9 @@ import { SOLUTION_CONFIG_PATH } from '../../src/control-plane/private/solution-c
 import { TestApp, removeFolder } from '../common/jest';
 import { validateSubnetsRule } from '../rules';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+
 function getParameter(template: Template, param: string) {
   return template.toJSON().Parameters[param];
 }

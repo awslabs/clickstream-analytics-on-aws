@@ -19,6 +19,9 @@ import { TestStack } from './TestTask';
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { findConditionByName, findFirstResource, findResources } from '../../utils';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../../cdk-lambda-nodejs-mock'));
+
 test('Has one autoscaling group', () => {
   const app = new App();
   const stack = new TestStack(app, 'test', {

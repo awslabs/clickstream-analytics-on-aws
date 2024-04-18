@@ -31,6 +31,9 @@ import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal
 import { Constant } from '../../src/control-plane/private/constant';
 import { TestApp, removeFolder } from '../common/jest';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+
 const cdkOut = '/tmp/cloudfront-s3-portal-test';
 const commonApp = new TestApp(cdkOut);
 const frontendProps = {
