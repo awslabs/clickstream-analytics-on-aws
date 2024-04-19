@@ -134,7 +134,8 @@ SELECT
   COALESCE(u.user_id, e.user_pseudo_id) as merged_user_id,
   CASE WHEN event_name = '_first_open' THEN COALESCE(u.user_id, e.user_pseudo_id) ELSE NULL END as new_user_indicator,
   CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.session_id ELSE NULL END as view_session_indicator,
-  CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator
+  CASE WHEN event_name IN ('_page_view', '_screen_view') THEN e.event_id ELSE NULL END as view_event_indicator,
+  CASE WHEN e.event_timestamp::date = u.first_visit_date THEN 'true' else 'false' END as is_first_day_event
 FROM 
     {{database_name}}.{{schema}}.event_v2 as e
 JOIN 
