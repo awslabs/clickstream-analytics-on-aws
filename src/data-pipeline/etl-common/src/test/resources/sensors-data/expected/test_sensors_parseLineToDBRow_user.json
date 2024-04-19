@@ -1,0 +1,46 @@
+{
+  "event_timestamp" : 1690249851000,
+  "user_pseudo_id" : "9113946abd821d52",
+  "user_id" : null,
+  "user_properties" : {
+    "firstName" : {
+      "set_time_msec" : null,
+      "value" : "Yong Liu"
+    },
+    "lastName" : {
+      "set_time_msec" : null,
+      "value" : "Yong Liu"
+    },
+    "user_id" : {
+      "set_time_msec" : null,
+      "value" : null
+    },
+    "$lib_version" : {
+      "set_time_msec" : null,
+      "value" : "6.7.2"
+    },
+    "age" : {
+      "set_time_msec" : null,
+      "value" : 0
+    },
+    "username" : {
+      "set_time_msec" : null,
+      "value" : null
+    }
+  },
+  "first_touch_time_msec" : 1690249850031,
+  "first_visit_date" : 1690249850031,
+  "first_referrer" : null,
+  "first_traffic_source" : null,
+  "first_traffic_medium" : null,
+  "first_traffic_campaign" : "Direct",
+  "first_traffic_content" : null,
+  "first_traffic_term" : null,
+  "first_traffic_campaign_id" : null,
+  "first_traffic_clid_platform" : null,
+  "first_traffic_clid" : null,
+  "first_traffic_channel_group" : "Direct",
+  "first_traffic_category" : null,
+  "first_app_install_source" : null,
+  "process_info" : null
+}
