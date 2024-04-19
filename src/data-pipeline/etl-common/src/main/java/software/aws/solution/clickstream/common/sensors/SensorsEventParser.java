@@ -260,7 +260,7 @@ public final class SensorsEventParser extends BaseEventParser {
             clickstreamUser.setFirstTouchTimeMsec(clickstreamEvent.getEventTimestamp().getTime());
         }
 
-        clickstreamUser.setFirstVisitDate(new java.sql.Date(clickstreamUser.getFirstTouchTimeMsec()));
+        clickstreamUser.setFirstVisitDate(new java.sql.Date(clickstreamUser.getFirstTouchTimeMsec())); // NOSONAR
 
         String pageReferrer = clickstreamEvent.getPageViewPageReferrer();
         String lateReferrer = clickstreamEvent.getPageViewLatestReferrer();
