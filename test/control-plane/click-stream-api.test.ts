@@ -16,8 +16,10 @@ import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+}
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
   afterAll(() => {

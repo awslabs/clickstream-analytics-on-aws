@@ -19,8 +19,10 @@ import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
 import { genString, getResourceById } from '../utils';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+}
 
 const c63Str = genString(63);
 const c64Str = genString(64);

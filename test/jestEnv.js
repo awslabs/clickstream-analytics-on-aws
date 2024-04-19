@@ -35,9 +35,6 @@ process.env.IAM_ROLE_BOUNDARY_ARN = ''
 process.env.TEMPLATE_FILE = 'cloudfront-s3-control-plane-stack-global.template.json'
 process.env.SOLUTION_VERSION = 'v1.1.5-202403071513'
 
-// web console bundling
-process.env.CI = 'true'
-
 // env variables for analytics stack
 process.env.PROJECT_ID='project1'
 process.env.DYNAMODB_TABLE_NAME='project1_ods_events_trigger'

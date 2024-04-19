@@ -16,8 +16,10 @@ import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DataReportingQuickSightStack } from '../../../src/data-reporting-quicksight-stack';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../../cdk-lambda-nodejs-mock'));
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../../cdk-lambda-nodejs-mock'));
+}
 
 describe('DataReportingQuickSightStack parameter test', () => {
   const app = new App();

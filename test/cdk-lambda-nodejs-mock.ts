@@ -35,7 +35,6 @@ export class NodejsFunction extends Function {
       `arn:aws:s3:::${MOCK_LAMBDA_CODE_S3_BUCKET}`,
     );
 
-    // https://github.com/aws/aws-cdk/blob/main/packages/aws-cdk-lib/aws-lambda-nodejs/lib/function.ts#L116C16-L116C79
     const handler = props.handler ?? 'handler';
     // Create a Lambda Function without the real code generated using Parcel/Docker
     super(scope, id, {
@@ -43,6 +42,7 @@ export class NodejsFunction extends Function {
       ...props,
       // Required values if not set for LambdaFunction
       runtime: props.runtime ?? Runtime.NODEJS_18_X,
+      // https://github.com/aws/aws-cdk/blob/main/packages/aws-cdk-lib/aws-lambda-nodejs/lib/function.ts#L116C16-L116C79
       handler: handler.indexOf('.') !== -1 ? `${handler}` : `index.${handler}`,
       // Set code with mock s3 location
       code: Code.fromBucket(bucket, MOCK_LAMBDA_CODE_S3_KEY),

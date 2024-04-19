@@ -26,8 +26,10 @@ import { TestEnv, TestStack, findResourcesName, findResources } from './test-uti
 import { Constant } from '../../src/control-plane/private/constant';
 import { TestApp, removeFolder } from '../common/jest';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+}
 
 describe('ApplicationLoadBalancerLambdaPortal', () => {
 
