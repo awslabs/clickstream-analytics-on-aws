@@ -20,9 +20,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseSparkTest;
+import software.aws.solution.clickstream.util.TableName;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static software.aws.solution.clickstream.util.ContextUtil.APP_IDS_PROP;
@@ -53,19 +55,21 @@ public class SensorsDataTransformerV2Test extends BaseSparkTest {
 
         Assertions.assertEquals(3, dataset.count());
 
-//        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(dataset);
-//
-//        long eventCount = transformedDatasets.get(TableName.EVENT_V2).count();
-//        long userCount = transformedDatasets.get(TableName.USER_V2).count();
-//        long itemCount = transformedDatasets.get(TableName.ITEM_V2).count();
-//        long sessionCount = transformedDatasets.get(TableName.SESSION).count();
-//
-//        log.info("eventCount: " + eventCount + " userCount: " + userCount + " itemCount: " + itemCount + " sessionCount: " + sessionCount);
-//
-//        Assertions.assertEquals(1, eventCount);
-//        Assertions.assertEquals(1, userCount);
-//        Assertions.assertEquals(1, itemCount);
-//        Assertions.assertEquals(1, sessionCount);
+        Map<TableName, Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+
+        long eventCount = transformedDatasets.get(TableName.EVENT_V2).count();
+        long userCount = transformedDatasets.get(TableName.USER_V2).count();
+        long itemCount = transformedDatasets.get(TableName.ITEM_V2).count();
+        long sessionCount = transformedDatasets.get(TableName.SESSION).count();
+
+        log.info("eventCount: " + eventCount + " userCount: " + userCount + " itemCount: " + itemCount + " sessionCount: " + sessionCount);
+
+        Assertions.assertEquals(19, eventCount);
+        Assertions.assertEquals(2, userCount);
+        Assertions.assertEquals(0, itemCount);
+        Assertions.assertEquals(0, sessionCount);
+
+        log.info( transformedDatasets.get(TableName.EVENT_V2).first().prettyJson());
 
 
     }

@@ -15,18 +15,20 @@ package software.aws.solution.clickstream.sensors;
 
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import software.aws.solution.clickstream.transformer.BaseThirdPartyTransformer;
-import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 import software.aws.solution.clickstream.transformer.TransformConfig;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
+import software.aws.solution.clickstream.udfconverter.DatasetConverter;
 
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.SENSORS_DATA;
 
 public class SensorsDataTransformerV2 extends BaseThirdPartyTransformer {
     private TransformConfig transformConfig;
+
     @Override
     public TransformerNameEnum getName() {
         return SENSORS_DATA;
     }
+
     @Override
     public DatasetConverter getDatasetTransformer() {
         if (this.transformConfig == null) {

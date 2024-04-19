@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-
 package software.aws.solution.clickstream.common.sensors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,7 +21,13 @@ import software.aws.solution.clickstream.common.BaseEventParser;
 import software.aws.solution.clickstream.common.ExtraParams;
 import software.aws.solution.clickstream.common.ParseDataResult;
 import software.aws.solution.clickstream.common.RuleConfig;
-import software.aws.solution.clickstream.common.model.*;
+import software.aws.solution.clickstream.common.Util;
+import software.aws.solution.clickstream.common.model.ClickstreamEvent;
+import software.aws.solution.clickstream.common.model.ClickstreamEventPropValue;
+import software.aws.solution.clickstream.common.model.ClickstreamItem;
+import software.aws.solution.clickstream.common.model.ClickstreamUser;
+import software.aws.solution.clickstream.common.model.ClickstreamUserPropValue;
+import software.aws.solution.clickstream.common.model.ValueType;
 import software.aws.solution.clickstream.common.sensors.event.Item;
 import software.aws.solution.clickstream.common.sensors.event.SensorsEvent;
 
@@ -32,22 +37,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.nio.charset.StandardCharsets;
-import java.io.UnsupportedEncodingException;
 
-
-import static software.aws.solution.clickstream.common.ClickstreamEventParser.*;
-import static software.aws.solution.clickstream.common.Util.*;
+import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_PAGE_VIEW;
+import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.common.ClickstreamEventParser.EVENT_USER_ENGAGEMENT;
+import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringEventPropMap;
+import static software.aws.solution.clickstream.common.Util.convertStringObjectMapToStringUserPropMap;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
+import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 import static software.aws.solution.clickstream.common.enrich.UAEnrichHelper.UA_STRING;
 
 
 @Slf4j
 public final class SensorsEventParser extends BaseEventParser {
-    private static SensorsEventParser instance;
     private static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
+    private static final String GZIP_DATA_LIST = "data_list=";
+    private static final String GZIP_DATA = "data=";
+    private static SensorsEventParser instance;
     private final Map<String, RuleConfig> appRuleConfig;
-    private static final String GZIP_RAW_DATA = "data_list=";
-    private static final String GZIP_WEB_SDK_DATA = "data=";
 
     private SensorsEventParser(final Map<String, RuleConfig> appRuleConfig) {
         this.appRuleConfig = appRuleConfig;
@@ -74,12 +81,17 @@ public final class SensorsEventParser extends BaseEventParser {
         return eventNameMap;
     }
 
+    private static String mapEventName(final SensorsEvent sensorsEvent) {
+        return EVENT_NAME_MAP.getOrDefault(sensorsEvent.getEvent(), sensorsEvent.getEvent());
+    }
+
     public SensorsEvent ingestDataToEvent(final String inputJson) throws JsonProcessingException {
         return getObjectMapper().readValue(inputJson, SensorsEvent.class);
     }
 
     @Override
     public ParseDataResult parseData(final String dataString, final ExtraParams extraParams, final int index) throws JsonProcessingException {
+        log.debug("Parsing data: " + dataString);
         SensorsEvent sensorsEvent = ingestDataToEvent(dataString);
 
         ClickstreamEvent clickstreamEvent = getClickstreamEvent(sensorsEvent, index, extraParams);
@@ -114,16 +126,23 @@ public final class SensorsEventParser extends BaseEventParser {
 
     @Override
     public String getGzipData(final String data) {
-        try {
-            if (data.contains(GZIP_RAW_DATA)) {
-                return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_RAW_DATA) + GZIP_RAW_DATA.length()), StandardCharsets.UTF_8.name());
-            } else if (data.contains(GZIP_WEB_SDK_DATA)) {
-                return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_WEB_SDK_DATA) + GZIP_WEB_SDK_DATA.length(), data.indexOf("&ext=crc")), StandardCharsets.UTF_8.name());
+        String gzData = null;
+
+        for (String dataItem : data.split("&")) {
+            if (dataItem.startsWith(GZIP_DATA_LIST)) {
+                gzData = Util.deCodeUri(dataItem.substring(GZIP_DATA_LIST.length()));
+                break;
             }
-        } catch (UnsupportedEncodingException e) {
-            return data;
+            if (dataItem.startsWith(GZIP_DATA)) {
+                gzData = Util.deCodeUri(dataItem.substring(GZIP_DATA.length()));
+                break;
+            }
         }
-        return data;
+
+        if (gzData == null) {
+            log.warn("No gzip data " + GZIP_DATA_LIST + " or " +GZIP_DATA_LIST + " found in the input data: " + data);
+        }
+        return gzData;
     }
 
     private ClickstreamEvent getClickstreamEvent(final SensorsEvent sensorsEvent, final int index, final ExtraParams extraParams) throws JsonProcessingException {
@@ -242,10 +261,6 @@ public final class SensorsEventParser extends BaseEventParser {
                     new ClickstreamEventPropValue(objectToJsonString(sensorsEvent.getProperties()), ValueType.OBJECT));
         }
         return customParameters;
-    }
-
-    private static String mapEventName(final SensorsEvent sensorsEvent) {
-        return EVENT_NAME_MAP.getOrDefault(sensorsEvent.getEvent(), sensorsEvent.getEvent());
     }
 
     private ClickstreamUser getClickstreamUser(final SensorsEvent sensorsEvent, final ClickstreamEvent clickstreamEvent) throws JsonProcessingException {

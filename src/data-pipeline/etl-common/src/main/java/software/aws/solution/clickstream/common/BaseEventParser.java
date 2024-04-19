@@ -48,6 +48,16 @@ public abstract class BaseEventParser implements EventParser {
         return OBJECT_MAPPER.readValue(ingestLine, ClickstreamIngestRow.class);
     }
 
+    @Override
+    public JsonNode getData(final String ingestDataField) throws JsonProcessingException {
+        String rawStringData = ingestDataField;
+        if (!rawStringData.startsWith("[") && !rawStringData.startsWith("{")) {
+            log.debug("gzipData: " + true);
+            String gzipData = getGzipData(rawStringData);
+            rawStringData = decompress(Base64.getDecoder().decode(gzipData));
+        }
+        return OBJECT_MAPPER.readTree(rawStringData);
+    }
     public String getGzipData(final String data) {
         return data;
     }
@@ -55,16 +65,10 @@ public abstract class BaseEventParser implements EventParser {
     @Override
     public ParseRowResult parseLineToDBRow(final String ingestLine, final String projectId, final String fileName) throws JsonProcessingException {
         ClickstreamIngestRow clickstreamIngestRow = ingestLineToRow(ingestLine);
-        String data = clickstreamIngestRow.getData();
-
-        if (!data.contains("[") && !data.contains("{")) {
-            String gzipData = getGzipData(data);
-            log.info("gzipData: " + true);
-            data = decompress(Base64.getDecoder().decode(gzipData));
-        }
+        String dataField = clickstreamIngestRow.getData();
+        JsonNode dataNode = getData(dataField);
 
         ParseRowResult rowResult = new ParseRowResult();
-
         ExtraParams extraParams = ExtraParams.builder()
                 .ua(clickstreamIngestRow.getUa())
                 .ip(clickstreamIngestRow.getIp())
@@ -77,7 +81,6 @@ public abstract class BaseEventParser implements EventParser {
                 .appId(clickstreamIngestRow.getAppId())
                 .build();
 
-        JsonNode dataNode = OBJECT_MAPPER.readTree(data);
         int index = 0;
         if (dataNode.isArray()) {
             Iterator<JsonNode> iterator = dataNode.elements();
@@ -87,7 +90,7 @@ public abstract class BaseEventParser implements EventParser {
                 addDataResult(rowResult, result);
             }
         } else {
-            ParseDataResult result = parseData(data, extraParams, 0);
+            ParseDataResult result = parseData(dataNode.toString(), extraParams, 0);
             addDataResult(rowResult, result);
         }
         return rowResult;

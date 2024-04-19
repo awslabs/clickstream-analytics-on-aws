@@ -15,7 +15,6 @@ package software.aws.solution.clickstream.transformer;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.CLICKSTREAM;
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.GTM_SERVER_DATA;
 import static software.aws.solution.clickstream.transformer.TransformerNameEnum.SENSORS_DATA;
@@ -23,8 +22,8 @@ import static software.aws.solution.clickstream.transformer.TransformerNameEnum.
 import software.aws.solution.clickstream.common.ClickstreamEventParser;
 import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
+import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 import software.aws.solution.clickstream.udfconverter.EventParserFactory;
-import software.aws.solution.clickstream.sensors.FakeSensorsEventParser;
 
 import java.util.HashMap;
 
@@ -39,7 +38,7 @@ public class EventParserFactoryTest {
     @Test
     public void shouldReturnFakeSensorEventParser() {
         EventParser parser = EventParserFactory.getEventParser(SENSORS_DATA, new HashMap<>());
-        assertTrue(parser instanceof FakeSensorsEventParser);
+        assertTrue(parser instanceof SensorsEventParser);
     }
 
     @Test

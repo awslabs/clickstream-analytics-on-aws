@@ -15,7 +15,6 @@ package software.aws.solution.clickstream.udfconverter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.api.java.UDF10;
 import org.apache.spark.sql.catalyst.expressions.GenericRow;
@@ -88,25 +87,24 @@ public class UDFHelper {
         }));
     }
 
-    public static List<GenericRow> getGenericRowList(final String jsonString, final ExtraParams extraParams, final EventParser eventParser) throws JsonProcessingException {
+    public static List<GenericRow> getGenericRowList(final String rawDataString, final ExtraParams extraParams, final EventParser eventParser) throws JsonProcessingException {
+        JsonNode jsonNode = eventParser.getData(rawDataString);
         List<GenericRow> rows = new ArrayList<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(jsonString);
         int index = 0;
         if (jsonNode.isArray()) {
             for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.add(getGenericRow(elementsIt.next(), index, extraParams, eventParser));
+                rows.add(getGenericRow(elementsIt.next().toString(), index, extraParams, eventParser));
                 index++;
             }
         } else {
-            rows.add(getGenericRow(jsonNode, index, extraParams, eventParser));
+            rows.add(getGenericRow(jsonNode.toString(), index, extraParams, eventParser));
         }
         return rows;
 
     }
 
-    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams, final EventParser eventParser) throws JsonProcessingException {
-        ParseDataResult result = eventParser.parseData(jsonNode.toString(), extraParams, index);
+    private static GenericRow getGenericRow(final String rawDataString, final int index, final ExtraParams extraParams, final EventParser eventParser) throws JsonProcessingException {
+        ParseDataResult result = eventParser.parseData(rawDataString, extraParams, index);
 
         List<GenericRow> eventRows = new ArrayList<>();
         for (ClickstreamEvent event : result.getClickstreamEventList()) {

@@ -127,7 +127,7 @@ public final class Util {
             return null;
         }
         try {
-            return URLDecoder.decode(uri, StandardCharsets.UTF_8);
+            return URLDecoder.decode(uri, StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             log.warn(e.getMessage() + ", uri:" + uri);
             return uri;
@@ -135,7 +135,11 @@ public final class Util {
     }
 
     public static Map<String, String> convertUriParamsToStrMap(final Map<String, List<String>> uriParams) {
+        if (uriParams == null) {
+            return null;
+        }
         Map<String, String> result = new HashMap<>();
+
         for (Map.Entry<String, List<String>> entry : uriParams.entrySet()) {
             result.put(entry.getKey(), String.join(",", entry.getValue()));
         }
@@ -144,6 +148,9 @@ public final class Util {
 
 
     public static Map<String, String> convertStringObjectMapToStringStringMap(final Map<String, Object> inputMap) {
+        if (inputMap == null) {
+            return null;
+        }
         Map<String, String> result = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
@@ -165,6 +172,9 @@ public final class Util {
 
     public static Map<String, ClickstreamEventPropValue> convertStringObjectMapToStringEventPropMap(final Map<String, Object> inputMap)
             throws JsonProcessingException {
+        if (inputMap == null) {
+            return null;
+        }
         Map<String, ClickstreamEventPropValue> result = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
@@ -192,8 +202,10 @@ public final class Util {
 
     public static Map<String, ClickstreamUserPropValue> convertStringObjectMapToStringUserPropMap(final Map<String, Object> inputMap)
             throws JsonProcessingException {
+        if (inputMap == null) {
+            return null;
+        }
         Map<String, ClickstreamUserPropValue> result = new HashMap<>();
-
         for (Map.Entry<String, Object> entry : inputMap.entrySet()) {
             String k = entry.getKey();
             Object v = entry.getValue();
@@ -218,7 +230,9 @@ public final class Util {
     public static Map<String, ClickstreamUserPropValue> convertCustomerUserPropMapToStringUserPropMap(final Map<String, UserPropObjectValue> customProperties)
             throws JsonProcessingException {
         Map<String, ClickstreamUserPropValue> result = new HashMap<>();
-
+        if (customProperties == null) {
+            return result;
+        }
         for (Map.Entry<String, UserPropObjectValue> entry : customProperties.entrySet()) {
             String k = entry.getKey();
             UserPropObjectValue v = entry.getValue();
@@ -257,7 +271,7 @@ public final class Util {
             throw new IllegalArgumentException("File not found! " + fileName);
         }
         ByteArrayOutputStream output = readAllInputStream(inputStream);
-        return output.toString(StandardCharsets.UTF_8);
+        return output.toString(StandardCharsets.UTF_8.toString());
 
     }
 
@@ -275,7 +289,7 @@ public final class Util {
     public static String readTextFile(final String fileName) throws IOException {
         FileInputStream inputStream = new FileInputStream(fileName);
         ByteArrayOutputStream output = readAllInputStream(inputStream);
-        return output.toString(StandardCharsets.UTF_8);
+        return output.toString(StandardCharsets.UTF_8.toString());
     }
 
     public static InputStream getResourceAsStream(final String fileName) {

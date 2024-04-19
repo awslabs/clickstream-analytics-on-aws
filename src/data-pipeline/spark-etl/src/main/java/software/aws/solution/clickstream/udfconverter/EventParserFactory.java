@@ -18,7 +18,7 @@ import software.aws.solution.clickstream.common.EventParser;
 import software.aws.solution.clickstream.common.RuleConfig;
 import software.aws.solution.clickstream.common.gtm.GTMEventParser;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
-import software.aws.solution.clickstream.sensors.FakeSensorsEventParser;
+import software.aws.solution.clickstream.common.sensors.SensorsEventParser;
 import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ public class EventParserFactory {
             case GTM_SERVER_DATA:
                 return GTMEventParser.getInstance(appRuleConfig);
             case SENSORS_DATA:
-                return FakeSensorsEventParser.getInstance(appRuleConfig);
+                return SensorsEventParser.getInstance(appRuleConfig);
             case CLICKSTREAM:
                 return ClickstreamEventParser.getInstance(appRuleConfig);
             default:
