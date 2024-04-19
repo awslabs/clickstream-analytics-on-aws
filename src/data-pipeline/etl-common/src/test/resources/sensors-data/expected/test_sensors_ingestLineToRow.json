@@ -1,0 +1,17 @@
+{
+  "date" : 1689819498000,
+  "data" : "crc=1221385162&gzip=1&data_list=H4sIAAAAAAAAAO2YW2%2FbNhSA%2F4ucx1ggRV0ov%2BUhKwpk64AW20NREJR4FHORRIGkHHhF%2FvsoWU7jSB7mwsWcQoYBQ4eH1Ll9h6Q%2Ff%2FWY1Tx%2FYFJ4qyUOCA5iQmN67VlZgbfCMU0pTsOAJlHshNvGCb1%2BinftCWmsrHPbz%2FZSjEkaxjwTNMAiCpwCr1W9rVRrjmpIAbWVVoLxVl%2B9q%2BFxy3gttJLiyLynaw82TtONXd00zR8SHj%2FmGqB2K5Yy65dyv6wCu1bdCry16tNg9VWv4d3s3jAI2Aa0kap2A7Gf%2BJ1pV7xpXoiJj3yy1xZguSydNFeVX3Bdgc4yv1YWGi78wXj%2Ft93zTW7lxjm16D%2Bd8Y1WDehnr1t96lKdHab3mNW8S9TJs12Uy27eMLR3bDpi0rBCamOZ4FtvZXULTqjMYRSVeREtHJwS6YrXbcFz22rQTv7uw4d3d7f9gBLQxcaIB3bfrFUNccicl3HYjWbaOXigfyRlQ6gepbBrV9SIom%2FCNcj7taukIESdNOday96KT8tfVSZdkPpoVfC3eztTRWHAaS%2FDfo3ufX2JToV%2Fb9CQoReRfpSFfI5jDfZR6Qc2wPXn%2B1%2Fe70PVlO29rL959NkbMroifuRc%2B%2BL0BGxkDsdBYUXZmjU75DklUYqerg%2Fwx5gGlCIUkxH9KYqDmf4T6b9TLnfnYP9goRPJH82dub9w7s%2FG8xInEQlSkiTBa6BJ930G2lVk4fxlnYP%2FL9aT9OauFn4EuAZqo7QR3HKHCy%2B3VubmGRxXeX6uNPh9q%2FFl1fg9Frfd440xUGUlLBbuZVCLO5n9vsPagT5W8%2F%2FiG75YYJqMGwBrDehdRBBKcIyydFkACpahyPIlFyRZxkAoimgIRcBPrAAauYMbpuFUBSR4roDLqYChWXBRiNNynCBMYpKko12bpBHCF7lr9w6X3c50bMf%2BuTM%2B7eu82b7lzTZAKUGEhOHo7uw4JNFFcnjJp%2Bf%2FenfWUIDeVfRpB%2BH50j33g1E%2F2FcTm8jUd%2FcKPO4VJE3dtToa9YowSvDl9orbWrzNJnFuavugMNFqbnvbo5j6KEr%2F3aWJAEwifjyu3wP%2F2SifcT6CM0ZxEic0jOPXNDttRC6W5o%2BWa%2Fs2edZg2gpYoVXFMmfkvVZtV64FLw285GqXj7143rx%2F6s37h%2F9j%2Fpp8d%2FXGFNNogvsovFju3%2FqJfz64z%2Byf7yKPn778A%2BiV0RYGHwAA",
+  "ip" : "54.222.45.3",
+  "source_type" : "http_server",
+  "rid" : "d612c941112ddb8a0f186bb0725be01a",
+  "ua" : "Dalvik/2.1.0 (Linux; U; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001)",
+  "m" : null,
+  "uri" : "/collect?platform=Android&appId=sensorTest",
+  "platform" : "Android",
+  "path" : "/collect",
+  "compression" : null,
+  "ingest_time" : 1689819527411,
+  "timestamp" : 1689819498127,
+  "upload_timestamp" : null,
+  "appId" : "sensorTest"
+}

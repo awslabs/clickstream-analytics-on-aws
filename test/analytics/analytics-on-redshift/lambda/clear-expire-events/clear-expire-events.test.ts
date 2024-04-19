@@ -14,6 +14,8 @@
 import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { ClearExpiredEventsEvent, handler } from '../../../../../src/analytics/lambdas/clear-expired-events-workflow/clear-expired-events';
+import { getRefreshList } from '../../../../../src/analytics/lambdas/refresh-materialized-views-workflow/check-next-refresh-view';
+import { SP_CLEAR_EXPIRED_DATA } from '../../../../../src/analytics/private/constant';
 import { ClearExpiredEventsBody } from '../../../../../src/analytics/private/model';
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
@@ -50,8 +52,12 @@ describe('Lambda - do clear expired events in Redshift Serverless', () => {
         id: executeId,
       }),
     });
+    const spList = getRefreshList().spViews;
+    const spTables = spList.map((sp) => sp.viewName);
+    const spTablesStr = spTables.join(',');
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
+      Sql: `CALL app1.${SP_CLEAR_EXPIRED_DATA}(365, '${spTablesStr}')`,
     });
   });
 

@@ -14,10 +14,11 @@
 import { RefreshWorkflowSteps } from '../../private/constant';
 import { reportingViewsDef, schemaDefs } from '../../private/sql-def';
 
-interface RefreshViewOrSp {
+export interface RefreshViewOrSp {
   name: string;
   type: string;
   timezoneSensitive: string;
+  viewName?: string;
 }
 
 export interface CheckNextRefreshViewEvent {
@@ -111,6 +112,7 @@ export function getRefreshList() {
       } else if (def.type === 'sp') {
         spViews.push({
           name: def.spName!,
+          viewName: def.viewName,
           type: def.type,
           timezoneSensitive: def.timezoneSensitive || 'false',
         });

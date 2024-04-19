@@ -26,7 +26,15 @@ export function getSqlContent(
   mustacheParam: MustacheParamBaseType,
   path: string = '/opt',
 ): string {
-  const sqlTemplate = readFileSync(join(path, ('sqlFile' in sqlDef) ? sqlDef.sqlFile : `${sqlDef.spName ? sqlDef.spName : sqlDef.viewName}.sql`), 'utf8');
+  let fileName: string;
+  if ('sqlFile' in sqlDef) {
+    fileName = sqlDef.sqlFile;
+  } else {
+    fileName = sqlDef.spName ? `${sqlDef.spName}.sql` : `${sqlDef.viewName}.sql`;
+  }
+  const sqlTemplatePath = join(path, fileName);
+  const sqlTemplate = readFileSync(sqlTemplatePath, 'utf8');
+
   return Mustache.render(sqlTemplate, {
     ...mustacheParam,
     viewName: 'viewName' in sqlDef ? sqlDef.viewName : undefined,

@@ -201,16 +201,15 @@ export type MustacheParamBaseType = {
 export type MustacheParamType = {
   database_name: string;
   schema: string;
-  table_event: string;
-  table_event_parameter: string;
-  table_user: string;
-  table_item: string;
   sp_scan_metadata: string;
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
   table_refresh_mv_sp_status: string;
-  table_ods_events: string;
+  table_event_v2: string;
+  table_item_v2: string;
+  table_user_v2: string;
+  table_session: string;
   user_bi?: string;
   baseView?: string;
   timezone?: string;

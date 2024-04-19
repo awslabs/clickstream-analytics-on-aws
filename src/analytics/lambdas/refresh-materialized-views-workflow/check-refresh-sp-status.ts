@@ -88,7 +88,7 @@ export const _handler = async (event: CheckRefreshSpStatusEvent, context: Contex
       detail: {
         queryId: queryId,
         status: response.Status,
-        taskName: spName,
+        spName: spName,
         message: `Error: ${response.Error}`,
       },
     };
@@ -97,7 +97,7 @@ export const _handler = async (event: CheckRefreshSpStatusEvent, context: Contex
     return {
       detail: {
         queryId: queryId,
-        taskName: spName,
+        spName: spName,
         refreshDate: refreshDate,
         status: response.Status,
       },
