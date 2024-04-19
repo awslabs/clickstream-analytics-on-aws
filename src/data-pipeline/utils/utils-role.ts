@@ -124,6 +124,8 @@ export class RoleUtil {
           'glue:CreatePartition',
           'glue:BatchCreatePartition',
           'glue:GetUserDefinedFunctions',
+          'glue:TagResource',
+          'glue:UntagResource',
         ],
       }),
 
