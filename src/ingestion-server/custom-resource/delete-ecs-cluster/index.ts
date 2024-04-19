@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import {
   ECSClient,
   DeleteClusterCommand,
@@ -23,8 +24,6 @@ import {
   DeleteServiceCommand,
 } from '@aws-sdk/client-ecs';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 
 const region = process.env.AWS_REGION!;
 
@@ -130,7 +129,7 @@ async function updateEcsService(ecsServiceName: string, ecsClusterName: string) 
       if (runningCount === 0) {
         break;
       } else {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Sleep for 10 seconds
+        await sleep(5000); // Sleep for 5 seconds
       }
     } else {
       break;

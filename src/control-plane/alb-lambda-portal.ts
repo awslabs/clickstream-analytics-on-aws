@@ -42,10 +42,6 @@ import {
 } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { LambdaTarget } from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
 import {
-  ServicePrincipal,
-  Role,
-} from 'aws-cdk-lib/aws-iam';
-import {
   DockerImageFunction,
   DockerImageCode,
   Architecture,
@@ -57,8 +53,7 @@ import { Construct } from 'constructs';
 import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { cloudWatchSendLogs, createENI } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
+import { createLambdaRole } from '../common/lambda';
 
 export interface RouteProps {
   readonly routePath: string;
@@ -366,9 +361,6 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
 
   private createFrontendFunction(props: ApplicationLoadBalancerLambdaPortalProps) {
     const dockerFile = props.frontendProps.dockerfile ?? 'Dockerfile';
-    const fnRole = new Role(this, 'portal_fn_role', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-    });
 
     const frontendLambdaSG = new SecurityGroup(this, 'frontend_function_sg', {
       vpc: props.networkProps.vpc,
@@ -392,23 +384,17 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
         buildArgs: props.frontendProps.buildArgs,
         platform: props.frontendProps.platform,
       }),
-      role: fnRole,
+      role: createLambdaRole(this, 'portal_fn_role', true, []),
       vpc: props.networkProps.vpc,
       timeout: Duration.seconds(10),
       allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
       architecture: Architecture.X86_64,
-      environment: {
-        ...POWERTOOLS_ENVS,
-      },
     });
 
-
-    createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));
-
     addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [
-      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('portal_fn'),
     ]);
 
     return lambdaFn;

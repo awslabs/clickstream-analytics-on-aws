@@ -16,6 +16,7 @@ package software.aws.solution.clickstream;
 import com.clearspring.analytics.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.util.*;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -45,6 +46,8 @@ public class DataProcessorTest extends BaseSparkTest{
         String rePartitions = "-1";
         String nUserKeepDays = "10";
         String nItemKeepDays = "20";
+        String configDirPath = Paths.get(getClass().getResource("/rule_config/").getPath()).toString();
+
         DataProcessor.runWithSpark(
                 new String[] {
                         "false", // String debug = args[0];
@@ -63,7 +66,8 @@ public class DataProcessorTest extends BaseSparkTest{
                         outputPartitions, //String outputPartitions = args[13];
                         rePartitions,//String rePartitions = args[14];
                         nUserKeepDays, //String nUserKeepDays = args[15];
-                        nItemKeepDays //String nItemKeepDays = args[16];
+                        nItemKeepDays, //String nItemKeepDays = args[16];
+                        configDirPath
                 },
                 spark
         );

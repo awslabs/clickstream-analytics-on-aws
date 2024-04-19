@@ -16,7 +16,7 @@ const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
 const analyticsMetadataTable = process.env.ANALYTICS_METADATA_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_STATE_MACHINE;
-const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_STATE_MACHINE;
+const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_STATE_MACHINE!;
 const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
 const prefixMonthGSIName = process.env.PREFIX_MONTH_GSI_NAME;
@@ -80,6 +80,10 @@ const SOLUTION_VPC_ENDPOINTS = [
   ...SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
 ];
 
+const CFN_RULE_PREFIX = 'ClickstreamRuleForCFN';
+const CFN_TOPIC_PREFIX = 'ClickstreamTopicForCFN';
+const listenStackQueueArn = process.env.LISTEN_STACK_QUEUE_ARN;
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -114,4 +118,7 @@ export {
   SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
   FULL_SOLUTION_VERSION,
+  CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
+  listenStackQueueArn,
 };

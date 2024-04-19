@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { ERR_OPENID_CONFIGURATION, JWTAuthorizer, JWTAuthorizerResponse } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { ERR_OPENID_CONFIGURATION, JWTAuthorizer, JWTAuthorizerResponse } from './authorizer';
 import { amznRequestContextHeader } from '../common/constants';
 import { logger } from '../common/powertools';
 import { getEmailFromRequestContext, isEmpty } from '../common/utils';

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { EventsParameterProvider } from 'context/AnalyticsEventsContext';
 import React, { ReactElement } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
 import { PROJECT_CONFIG_JSON } from 'ts/const';
@@ -27,16 +28,18 @@ const AnalyticsLayout: React.FC<AnalyticsLayoutProps> = (
   const { auth, children } = props;
   return (
     <>
-      <div id="b" className="gs-analytics">
-        <AnalyticsHeader
-          user={auth.user}
-          signOut={() => {
-            auth.removeUser();
-            localStorage.removeItem(PROJECT_CONFIG_JSON);
-          }}
-        />
-        <div id="app">{children}</div>
-      </div>
+      <EventsParameterProvider>
+        <div id="b" className="gs-analytics">
+          <AnalyticsHeader
+            user={auth.user}
+            signOut={() => {
+              auth.removeUser();
+              localStorage.removeItem(PROJECT_CONFIG_JSON);
+            }}
+          />
+          <div id="app">{children}</div>
+        </div>
+      </EventsParameterProvider>
       <Footer />
     </>
   );

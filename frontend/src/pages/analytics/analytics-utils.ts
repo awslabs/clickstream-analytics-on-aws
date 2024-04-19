@@ -12,6 +12,20 @@
  */
 
 import {
+  ConditionCategory,
+  ConditionCategoryFrontend,
+  ExploreAggregationMethod,
+  ExploreAnalyticsOperators,
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExplorePathSessionDef,
+  ExploreRelativeTimeUnit,
+  ExploreTimeScopeType,
+  MetadataSource,
+  MetadataValueType,
+  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
+} from '@aws/clickstream-base-lib';
+import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
@@ -26,19 +40,6 @@ import {
 import i18n from 'i18n';
 import moment from 'moment';
 import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
-import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from 'ts/constant-ln';
-import {
-  ConditionCategory,
-  ExploreAggregationMethod,
-  ExploreAnalyticsOperators,
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExplorePathSessionDef,
-  ExploreRelativeTimeUnit,
-  ExploreTimeScopeType,
-  MetadataSource,
-  MetadataValueType,
-} from 'ts/explore-types';
 import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
 
 export const metadataEventsConvertToCategoryItemType = (
@@ -157,11 +158,40 @@ export const parametersConvertToCategoryItemType = (
   });
   categoryItems.push(categoryUserItems);
   const otherIndex = categoryItems.findIndex(
-    (item) => item.categoryId === ConditionCategory.OTHER
+    (item) => item.categoryId === ConditionCategory.EVENT_OUTER
   );
   if (otherIndex !== -1) {
     categoryItems.push(categoryItems.splice(otherIndex, 1)[0]);
   }
+  return categoryItems;
+};
+
+export const parametersConvertToUserCategoryItemType = (
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) => {
+  patchSameName(userAttributeItems, parameterItems);
+  const categoryItems: CategoryItemType[] = [];
+  const categoryUserItems: CategoryItemType = {
+    categoryId: 'user',
+    categoryName: i18n.t('analytics:category.user'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  userAttributeItems.forEach((item) => {
+    categoryUserItems.itemList.push({
+      label: userAttributeDisplayname(item.displayName),
+      name: item.name,
+      value: item.id,
+      description: item.description,
+      metadataSource: item.metadataSource,
+      valueType: item.valueType,
+      category: item.category,
+      values: item.values,
+      modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
+    });
+  });
+  categoryItems.push(categoryUserItems);
   return categoryItems;
 };
 
@@ -223,6 +253,7 @@ const _getSubList = (
       valueType: parameter.valueType,
       category: parameter.category,
       groupName: groupName,
+      metadataSource: parameter.metadataSource,
       itemType: 'children',
     } as IAnalyticsItem);
   }
@@ -243,7 +274,11 @@ export const getEventMethodOptions = (
       label: i18n.t('analytics:options.eventNumber') ?? 'Event number',
     },
     {
-      label: defaultStr(i18n.t('analytics:countGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.COUNT_PROPERTY', {
+          label: '...',
+        })
+      ),
       value: ExploreComputeMethod.COUNT_PROPERTY,
       subList: _getSubList(
         userAttributeItems,
@@ -253,7 +288,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:minGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.min', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MIN,
       subList: _getSubList(
         userAttributeItems,
@@ -263,7 +302,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:maxGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.max', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MAX,
       subList: _getSubList(
         userAttributeItems,
@@ -273,7 +316,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:sumGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.sum', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.SUM,
       subList: _getSubList(
         userAttributeItems,
@@ -283,7 +330,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:avgGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.avg', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.AVG,
       subList: _getSubList(
         userAttributeItems,
@@ -293,7 +344,11 @@ export const getEventMethodOptions = (
       ),
     },
     {
-      label: defaultStr(i18n.t('analytics:medianGroup')),
+      label: defaultStr(
+        i18n.t('analytics:groupLabel.median', {
+          label: '...',
+        })
+      ),
       value: ExploreAggregationMethod.MEDIAN,
       subList: _getSubList(
         userAttributeItems,
@@ -391,6 +446,8 @@ export const validateFilterConditions = (conditions: IConditionItemType[]) => {
       [
         ExploreAnalyticsOperators.NULL,
         ExploreAnalyticsOperators.NOT_NULL,
+        ExploreAnalyticsOperators.TRUE,
+        ExploreAnalyticsOperators.FALSE,
       ].includes(item.conditionOperator.value as ExploreAnalyticsOperators)
     ) {
       return true;
@@ -461,6 +518,8 @@ export const validConditionItemType = (condition: IConditionItemType) => {
     ![
       ExploreAnalyticsOperators.NULL,
       ExploreAnalyticsOperators.NOT_NULL,
+      ExploreAnalyticsOperators.TRUE,
+      ExploreAnalyticsOperators.FALSE,
     ].includes(condition.conditionOperator.value as ExploreAnalyticsOperators);
   return (
     isValidConditionOption &&
@@ -468,6 +527,86 @@ export const validConditionItemType = (condition: IConditionItemType) => {
       (Array.isArray(condition.conditionValue) &&
         condition.conditionValue.length > 0))
   );
+};
+
+export const getTouchPointsAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  const touchPoints: AttributionTouchPoint[] = [];
+  eventOptionData.forEach((item) => {
+    if (validEventAnalyticsItem(item)) {
+      const conditions: ICondition[] = [];
+      item.conditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: categoryMapping(condition.conditionOption?.category),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
+            value: condition.conditionValue,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
+          };
+          conditions.push(conditionObj);
+        }
+      });
+
+      const touchPoint: AttributionTouchPoint = {
+        eventName: defaultStr(item.selectedEventOption?.name),
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
+      };
+      touchPoints.push(touchPoint);
+    }
+  });
+  return touchPoints;
+};
+
+export const getGoalAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  const conditions: ICondition[] = [];
+  goalData.conditionList.forEach((condition) => {
+    if (validConditionItemType(condition)) {
+      const conditionObj: ICondition = {
+        category: categoryMapping(condition.conditionOption?.category),
+        property: defaultStr(condition.conditionOption?.name),
+        operator: defaultStr(condition.conditionOperator?.value),
+        value: condition.conditionValue,
+        dataType: defaultStr(
+          condition.conditionOption?.valueType,
+          MetadataValueType.STRING
+        ),
+      };
+      conditions.push(conditionObj);
+    }
+  });
+  let groupColumn: IColumnAttribute | undefined;
+  if (goalData.calculateMethodOption?.name) {
+    groupColumn = {
+      category: categoryMapping(goalData.calculateMethodOption?.category),
+      property: defaultStr(goalData.calculateMethodOption?.name),
+      dataType: defaultStr(
+        goalData.calculateMethodOption?.valueType,
+        MetadataValueType.STRING
+      ),
+    };
+  }
+  return {
+    eventName: defaultStr(goalData.selectedEventOption?.name),
+    sqlCondition: {
+      conditions: conditions,
+      conditionOperator: goalData.conditionRelationShip,
+    },
+    groupColumn,
+  } as AttributionTouchPoint;
 };
 
 export const getTargetComputeMethod = (
@@ -510,10 +649,7 @@ const _gatEventExtParameter = (
   ) {
     return {
       targetProperty: {
-        category: defaultStr(
-          computeMethodOption?.category,
-          ConditionCategory.OTHER
-        ),
+        category: categoryMapping(computeMethodOption?.category),
         property: defaultStr(computeMethodOption?.value),
         dataType: defaultStr(
           computeMethodOption?.valueType,
@@ -526,6 +662,30 @@ const _gatEventExtParameter = (
   return undefined;
 };
 
+const categoryMapping = (category: ConditionCategoryFrontend | undefined) => {
+  switch (category) {
+    case ConditionCategoryFrontend.USER:
+      return ConditionCategory.USER;
+    case ConditionCategoryFrontend.USER_OUTER:
+      return ConditionCategory.USER_OUTER;
+    case ConditionCategoryFrontend.APP_INFO:
+    case ConditionCategoryFrontend.DEVICE:
+    case ConditionCategoryFrontend.TRAFFIC_SOURCE:
+    case ConditionCategoryFrontend.SCREEN_VIEW:
+    case ConditionCategoryFrontend.PAGE_VIEW:
+    case ConditionCategoryFrontend.UPGRADE:
+    case ConditionCategoryFrontend.SEARCH:
+    case ConditionCategoryFrontend.OUTBOUND:
+    case ConditionCategoryFrontend.SESSION:
+    case ConditionCategoryFrontend.GEO:
+    case ConditionCategoryFrontend.SDK:
+    case ConditionCategoryFrontend.OTHER:
+      return ConditionCategory.EVENT_OUTER;
+    default:
+      return ConditionCategory.EVENT;
+  }
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {
@@ -536,10 +696,7 @@ export const getEventAndConditions = (
       item.conditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.OTHER
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
@@ -586,10 +743,7 @@ export const getPairEventAndConditions = (
       item.startConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.OTHER
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
@@ -604,10 +758,7 @@ export const getPairEventAndConditions = (
       item.revisitConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: defaultStr(
-              condition.conditionOption?.category,
-              ConditionCategory.OTHER
-            ),
+            category: categoryMapping(condition.conditionOption?.category),
             property: defaultStr(condition.conditionOption?.name, ''),
             operator: defaultStr(condition.conditionOperator?.value, ''),
             value: condition.conditionValue,
@@ -642,9 +793,8 @@ export const getPairEventAndConditions = (
           startEvent: {
             ...pairEventAndCondition.startEvent,
             retentionJoinColumn: {
-              category: defaultStr(
-                item.startEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+              category: categoryMapping(
+                item.startEventRelationAttribute?.category
               ),
               property: defaultStr(item.startEventRelationAttribute?.name, ''),
               dataType: defaultStr(
@@ -661,9 +811,8 @@ export const getPairEventAndConditions = (
           backEvent: {
             ...pairEventAndCondition.backEvent,
             retentionJoinColumn: {
-              category: defaultStr(
-                item.revisitEventRelationAttribute?.category,
-                ConditionCategory.OTHER
+              category: categoryMapping(
+                item.revisitEventRelationAttribute?.category
               ),
               property: defaultStr(
                 item.revisitEventRelationAttribute?.name,
@@ -688,7 +837,7 @@ export const getGroupCondition = (
   groupApplyToFirst: boolean | null
 ) => {
   let groupingCondition: GroupingCondition = {
-    category: defaultStr(option?.category, ConditionCategory.OTHER),
+    category: categoryMapping(option?.category),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
@@ -711,10 +860,7 @@ export const getGlobalEventCondition = (
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
       const conditionObj: ICondition = {
-        category: defaultStr(
-          condition.conditionOption?.category,
-          ConditionCategory.OTHER
-        ),
+        category: categoryMapping(condition.conditionOption?.category),
         property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,
@@ -817,6 +963,9 @@ export const getLngFromLocalStorage = () => {
 };
 
 export const userAttributeDisplayname = (displayName: string) => {
+  if (typeof displayName !== 'string') {
+    return '';
+  }
   return displayName.replace(
     ConditionCategory.USER_OUTER,
     ConditionCategory.USER

@@ -1,0 +1,61 @@
+{
+  "event_timestamp" : "2023-04-24 07:08:39",
+  "user_pseudo_id" : "unique_id_web_1",
+  "user_id" : "user_id_web_1",
+  "user_properties" : {
+    "_user_age" : {
+      "value" : "22",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_currency" : {
+      "value" : "USD",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_first_touch_timestamp" : {
+      "value" : "1667877267895",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_id" : {
+      "value" : "p3121211_ts1",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_name" : {
+      "value" : "example",
+      "type" : "string",
+      "set_time_msec" : 1667877566697
+    },
+    "_user_revenue" : {
+      "value" : "123.45",
+      "type" : "number",
+      "set_time_msec" : 1667877566697
+    }
+  },
+  "user_properties_json_str" : "{\"_user_first_touch_timestamp\":{\"set_time_msec\":1667877566697,\"value\":1667877267895},\"_user_id\":{\"set_time_msec\":1667877566697,\"value\":\"p3121211_ts1\"},\"_user_name\":{\"set_time_msec\":1667877566697,\"value\":\"example\"},\"_user_revenue\":{\"set_time_msec\":1667877566697,\"value\":123.45},\"_user_currency\":{\"set_time_msec\":1667877566697,\"value\":\"USD\"},\"_user_age\":{\"set_time_msec\":1667877566697,\"value\":22}}",
+  "first_touch_time_msec" : null,
+  "first_visit_date" : null,
+  "first_referrer" : "http://google.com/_page_referrer_001",
+  "first_traffic_source" : "google",
+  "first_traffic_medium" : "cpc",
+  "first_traffic_campaign" : "campaign-1",
+  "first_traffic_content" : "content-1",
+  "first_traffic_term" : "term-1",
+  "first_traffic_campaign_id" : "campaign-id1",
+  "first_traffic_clid_platform" : "clid-platform-1",
+  "first_traffic_clid" : "{\"type\":\"gclid\",\"value\":\"gclid-1\"}",
+  "first_traffic_channel_group" : "channel-group-1",
+  "first_traffic_category" : "clid-category-1",
+  "first_app_install_source" : "C001",
+  "process_info" : {
+    "first_event_name" : "_session_start",
+    "latest_event_name" : "_profile_set",
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "uba-app",
+  "event_name" : null,
+  "created_time" : "_CREATED_TIME_"
+}

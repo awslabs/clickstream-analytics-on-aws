@@ -12,16 +12,21 @@
  */
 
 import {
+  ButtonDropdownProps,
   Flashbar,
   FlashbarProps,
   Select,
   SelectProps,
   TopNavigation,
+  TopNavigationProps,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
+import { AppContext } from 'context/AppContext';
+import { SystemInfoContext } from 'context/SystemInfoContext';
+import { UserContext } from 'context/UserContext';
 import { useLocalStorage } from 'pages/common/use-local-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
@@ -34,8 +39,13 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
-import { getDocumentLink } from 'ts/url';
-import { defaultStr, getProjectAppFromOptions } from 'ts/utils';
+import { buildUpdateCloudFormationStackLink, getDocumentLink } from 'ts/url';
+import {
+  defaultStr,
+  getProjectAppFromOptions,
+  getUserInfoFromLocalStorage,
+  isAdminRole,
+} from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -62,6 +72,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   );
   const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const appConfig = useContext(AppContext);
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
+  const systemInfo = useContext(SystemInfoContext);
 
   const getRedirectUrl = (projectId: string, appId: string) => {
     const navItem = localStorage.getItem(ANALYTICS_NAV_ITEM) ?? 'dashboards';
@@ -212,6 +225,98 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   }, []);
 
+  const getNotifyItem = () => {
+    let updateNotifyItem: ButtonDropdownProps.ItemOrGroup = {
+      id: 'no-update',
+      disabled: true,
+      text: defaultStr(t('header.noNotification')),
+    };
+
+    if (systemInfo?.hasUpdate) {
+      if (isAdminRole(currentUser?.roles))
+        updateNotifyItem = {
+          id: 'update-available',
+          href: appConfig?.solution_region
+            ? buildUpdateCloudFormationStackLink(
+                appConfig.solution_region,
+                systemInfo?.stackId,
+                systemInfo?.templateUrl
+              )
+            : '',
+          text: defaultStr(
+            t('header.updateAvailable1', {
+              version: systemInfo?.remoteVersion,
+            })
+          ),
+          external: true,
+          externalIconAriaLabel: '(opens in AWS console)',
+        };
+      else {
+        updateNotifyItem = {
+          id: 'update-available',
+          disabled: true,
+          text: defaultStr(
+            t('header.updateAvailable2', {
+              version: systemInfo?.remoteVersion,
+            })
+          ),
+        };
+      }
+    }
+
+    return updateNotifyItem;
+  };
+  const getNavItems = () => {
+    const updateNotifyItem = getNotifyItem();
+
+    return [
+      {
+        type: 'button',
+        text: defaultStr(t('header.analyticsDocumentation')),
+        href: getDocumentLink(i18n.language),
+        external: true,
+      },
+      {
+        type: 'menu-dropdown',
+        text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
+        title: 'Language',
+        ariaLabel: 'settings',
+        onItemClick: (item) => {
+          changeLanguage(item.detail.id);
+          window.location.reload();
+        },
+        items:
+          i18n.language === DEFAULT_ZH_LANG
+            ? [...LANGUAGE_ITEMS].reverse()
+            : LANGUAGE_ITEMS,
+      },
+      {
+        type: 'menu-dropdown',
+        iconName: 'notification',
+        title: '',
+        ariaLabel: 'Notifications (unread)',
+        badge: systemInfo?.hasUpdate,
+        items: [updateNotifyItem],
+      },
+      {
+        type: 'menu-dropdown',
+        text: displayName,
+        description: displayName,
+        iconName: 'user-profile',
+        onItemClick: (item) => {
+          if (item.detail.id === 'signout') {
+            if (fullLogoutUrl) {
+              signOut?.();
+              window.location.href = fullLogoutUrl;
+            }
+            signOut?.();
+          }
+        },
+        items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
+      },
+    ] as ReadonlyArray<TopNavigationProps.Utility>;
+  };
+
   return (
     <header id="h">
       <TopNavigation
@@ -242,44 +347,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             options={allProjectOptions}
           />
         }
-        utilities={[
-          {
-            type: 'button',
-            text: defaultStr(t('header.analyticsDocumentation')),
-            href: getDocumentLink(i18n.language),
-            external: true,
-          },
-          {
-            type: 'menu-dropdown',
-            text: ZH_LANGUAGE_LIST.includes(i18n.language) ? ZH_TEXT : EN_TEXT,
-            title: 'Language',
-            ariaLabel: 'settings',
-            onItemClick: (item) => {
-              changeLanguage(item.detail.id);
-              window.location.reload();
-            },
-            items:
-              i18n.language === DEFAULT_ZH_LANG
-                ? [...LANGUAGE_ITEMS].reverse()
-                : LANGUAGE_ITEMS,
-          },
-          {
-            type: 'menu-dropdown',
-            text: displayName,
-            description: displayName,
-            iconName: 'user-profile',
-            onItemClick: (item) => {
-              if (item.detail.id === 'signout') {
-                if (fullLogoutUrl) {
-                  signOut?.();
-                  window.location.href = fullLogoutUrl;
-                }
-                signOut?.();
-              }
-            },
-            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
-          },
-        ]}
+        utilities={getNavItems()}
         i18nStrings={{
           searchIconAriaLabel: defaultStr(t('header.search')),
           searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),

@@ -48,8 +48,8 @@ Please modify the `configure.py` to define the data size and scenario.
 
 ```python
 
-# Application Type, default is NotePad, you can switch to `enums.Application.Shopping` to send shopping events.
-APP_TYPE = enums.Application.NotePad
+# Application Type, default is Shopping, you can switch to `enums.Application.NotePad` to send NotePad events.
+APP_TYPE = enums.Application.Shopping
 
 # For History Events consts
 # total day in recent for data
@@ -63,9 +63,9 @@ MAX_BATCH_REQUEST_NUMBER = 20
 # for mac m1 is 8, for c5.metal is 50 to meet the best performance
 PROCESS_NUMBER = 50
 # max thread for upload event
-MAX_UPLOAD_THREAD_NUMBER = 1
+MAX_UPLOAD_THREAD_NUMBER = 10
 # the sleep time for each request
-REQUEST_SLEEP_TIME = 0.2
+REQUEST_SLEEP_TIME = 0.1
 # the gzip times for per day, added for test huge events in one day and reduce memory usage
 GZIP_TIMES_PER_DAY = 1
 
@@ -86,7 +86,7 @@ IS_LOG_FULL_REQUEST_MESSAGE = True
 
 # Common Settings
 # session times for one user in a day
-SESSION_TIMES = range(1, 5)
+SESSION_TIMES = range(1, 4)
 # whether to use gzip compression events when sending requests
 IS_GZIP = True
 
@@ -99,9 +99,12 @@ ACTION_TIMES = range(0, 30)
 PER_ACTION_DURATION_REALTIME = range(0, 5)
 
 # For Shopping App
-ALL_USER_SHOPPING = 30000
-RANDOM_DAU_SHOPPING = range(3000, 6000)
+ALL_USER_SHOPPING = 5000
+RANDOM_DAU_SHOPPING = range(300, 400)
 PLATFORM = enums.Platform.All
+# the number of products on one page of the shopping application, the minimum value is 2
+MAIN_PAGE_PRODUCT_COUNT = 4
+DEFAULT_PRODUCT_COUNT = 2
 
 
 ```

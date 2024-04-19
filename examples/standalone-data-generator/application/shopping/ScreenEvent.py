@@ -12,6 +12,7 @@ and limitations under the License.
 """
 import random
 
+import configure
 import enums
 from application.shopping.ShoppingEventType import EventType
 from application.shopping.ShoppingScreen import Page
@@ -131,21 +132,22 @@ def get_main_page_events(event, user):
     scroll_times = enums.main_page_scroll_times.get_random_item()
     # popular product exposure
     global clicked_product, current_feature
-    popular_products = Products.get_random_product(8)
+    popular_products = Products.get_random_product(configure.MAIN_PAGE_PRODUCT_COUNT)
     featured_products = []
     events.extend(Products.get_exposure_events(user, popular_products, event, enums.Feature.popular))
     user.current_timestamp += random.randint(3, 10) * 1000
     # scroll for more
     if scroll_times > 0:
-        popular_products = Products.get_random_product(4)
+        popular_products = Products.get_random_product(configure.DEFAULT_PRODUCT_COUNT)
         events.extend(Products.get_exposure_events(user, popular_products, event, enums.Feature.popular))
         user.current_timestamp += random.randint(3, 5) * 1000
     # scroll for Featured products exposure and record scroll event
     if scroll_times > 1:
         if user.prefer_category != '':
-            featured_products = Products.get_random_category_product(user.prefer_category, 4)
+            featured_products = Products.get_random_category_product(user.prefer_category,
+                                                                     configure.DEFAULT_PRODUCT_COUNT)
         else:
-            featured_products = Products.get_random_product(4)
+            featured_products = Products.get_random_product(configure.DEFAULT_PRODUCT_COUNT)
         events.append(ShoppingApp.get_final_event(user, EventType.SCROLL, ShoppingApp.clean_event(event)))
         events.extend(Products.get_exposure_events(user, featured_products, event, enums.Feature.featured))
         user.current_timestamp += random.randint(3, 5) * 1000
@@ -166,13 +168,13 @@ def get_category_page_events(event, user):
     current_category = enums.product_category.get_random_item()
     if user.prefer_category == '':
         user.prefer_category = current_category
-    category_products = Products.get_random_category_product(user.prefer_category, 4)
+    category_products = Products.get_random_category_product(user.prefer_category, configure.DEFAULT_PRODUCT_COUNT)
     events.extend(Products.get_exposure_events(user, category_products, event, enums.Feature.category))
     user.current_timestamp += random.randint(3, 60) * 1000
     scroll_times = enums.category_page_scroll_times.get_random_item()
     if scroll_times > 0:
         events.append(ShoppingApp.get_final_event(user, EventType.SCROLL, ShoppingApp.clean_event(event)))
-        category_products = Products.get_random_category_product(user.prefer_category, 4)
+        category_products = Products.get_random_category_product(user.prefer_category, configure.DEFAULT_PRODUCT_COUNT)
         events.extend(Products.get_exposure_events(user, category_products, event, enums.Feature.category))
     user.current_timestamp += random.randint(3, 60) * 1000
     if next_page == Page.DETAIL:
@@ -193,7 +195,7 @@ def get_search_page_events(event, user):
         search_event['attributes']['_search_key'] = 's'
         search_event['attributes']['_search_term'] = search_category
         events.append(ShoppingApp.get_final_event(user, EventType.SEARCH, search_event))
-        search_products = Products.get_random_category_product(search_category, 4)
+        search_products = Products.get_random_category_product(search_category, configure.DEFAULT_PRODUCT_COUNT)
         events.extend(Products.get_exposure_events(user, search_products, event, enums.Feature.search))
         user.current_timestamp += random.randint(15, 60) * 1000
     user.current_timestamp += random.randint(10, 30) * 1000
@@ -222,7 +224,8 @@ def get_detail_page_events(event, user):
     similar_products = []
     if scroll_times > 0:
         events.append(ShoppingApp.get_final_event(user, EventType.SCROLL, ShoppingApp.clean_event(event)))
-        similar_products = Products.get_random_category_product(clicked_product['category'], 4)
+        similar_products = Products.get_random_category_product(clicked_product['category'],
+                                                                configure.DEFAULT_PRODUCT_COUNT)
         events.extend(Products.get_exposure_events(user, similar_products, event, enums.Feature.similar))
         next_page = ShoppingScreen.get_next_page(Page.DETAIL)
     else:

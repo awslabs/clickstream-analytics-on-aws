@@ -22,8 +22,8 @@
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_device_view_v1.sql:6"
         ```
     === "Athena"
-        ```sql title="clickstream-device-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-device-query.sql"
+        ```sql title="clickstream-event-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-event-query.sql"
         ```
 
 ## 维度和指标

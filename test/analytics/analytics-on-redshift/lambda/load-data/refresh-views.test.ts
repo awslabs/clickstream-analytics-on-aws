@@ -15,25 +15,27 @@
 process.env.SLEEP_SEC = '1';
 process.env.APP_IDS = 'app1,app2,app3';
 
-import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/refresh-views';
+import { WorkflowStatus } from '../../../../../src/analytics/private/constant';
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import { getMockContext } from '../../../../common/lambda-context';
+
 import 'aws-sdk-client-mock-jest';
 
 const context = getMockContext();
 
 describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
-
-  const redshiftDataMock = mockClient(RedshiftDataClient);
   const s3Mock = mockClient(S3Client);
+  const sfnClientMock = mockClient(SFNClient);
 
   const workGroupName = 'demo';
 
   beforeEach(() => {
-    redshiftDataMock.reset();
+    sfnClientMock.reset();
+    s3Mock.reset();
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
@@ -46,22 +48,23 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
     s3Mock.on(PutObjectCommand).resolves({});
 
-    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
-      Id: 'id1',
-    });
-
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: 'STARTED',
-    });
-
     process.env.ENABLE_REFRESH = 'true';
     const resp = await handler({}, context);
-    expect(resp.execInfo).toHaveLength(3);
+    expect(resp).toEqual({
+      status: WorkflowStatus.SUCCEED,
+    });
   });
 
-  test('Should refresh SQL by app - interval greater then 2 hours', async () => {
+  test('Should trigger to refresh - interval greater then 2 hours', async () => {
 
-    const info = JSON.stringify({ lastRefreshTime: new Date().getTime() - (2.1 * 60 * 60 * 1000) });
+    const date = new Date();
+
+    const info = JSON.stringify(
+      {
+        lastRefreshTime: date.getTime() - (2.1 * 60 * 60 * 1000),
+        endTimestamp: date.getTime(),
+      },
+    );
     s3Mock.on(GetObjectCommand).resolves({
       Body: {
         transformToString: async () => {
@@ -72,20 +75,23 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
     s3Mock.on(PutObjectCommand).resolves({});
 
-    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
-      Id: 'id1',
-    });
-
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: 'STARTED',
-    });
-
     process.env.ENABLE_REFRESH = 'true';
     const resp = await handler({}, context);
-    expect(resp.execInfo).toHaveLength(3);
+    expect(resp).toEqual({
+      status: WorkflowStatus.SUCCEED,
+    });
+
+    date.setDate(date.getDate() - 1);
+    const triggerTimestamp = date.getTime();
+
+    expect(sfnClientMock).toHaveReceivedNthCommandWith(1, StartExecutionCommand, {
+      stateMachineArn: 'arn:aws:states:us-east-1:111122223333:workflow/abc',
+      input: JSON.stringify({ latestJobTimestamp: triggerTimestamp }),
+    });
+
   });
 
-  test('Should not refresh SQL by app - interval less then 2 hours', async () => {
+  test('Should not be triggerred - interval less then 2 hours', async () => {
 
     const info = JSON.stringify({ lastRefreshTime: new Date().getTime() - 10 * 60 * 1000 });
     s3Mock.on(GetObjectCommand).resolves({
@@ -98,44 +104,18 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
 
     s3Mock.on(PutObjectCommand).resolves({});
 
-    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
-      Id: 'id1',
-    });
-
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: 'STARTED',
-    });
-
     process.env.ENABLE_REFRESH = 'true';
     const resp = await handler({}, context);
-    expect(resp.execInfo).toHaveLength(0);
+    expect(resp).toEqual({
+      status: WorkflowStatus.SKIP,
+    });
   });
 
-  test('Should not refresh SQL by app', async () => {
-    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
-      Id: 'id1',
-    });
-
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: 'STARTED',
-    });
+  test('Should not be triggerred', async () => {
     process.env.ENABLE_REFRESH = 'false';
     const resp = await handler({}, context);
-    expect(resp.execInfo).toHaveLength(0);
-  });
-
-
-  test('Not fail the whole workflow if the refresh failed', async () => {
-    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
-      Id: 'id1',
+    expect(resp).toEqual({
+      status: WorkflowStatus.SKIP,
     });
-
-    redshiftDataMock.on(DescribeStatementCommand).resolves({
-      Status: 'FAILED',
-    });
-
-    await handler({}, context);
-
   });
-
 });

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Input,
@@ -23,8 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole, TIME_FORMAT } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
+import { IUserRole, TABLE_FILTER_OPTIONS, TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import UserTable from './UserTable';
 
@@ -51,14 +51,14 @@ const UserList: React.FC = () => {
     },
   ];
   const getRolesLabel = (roles: IUserRole[]) => {
-    const roleLabels = [];
+    const roleLabels: string[] = [];
     for (const role of roles) {
       roleLabels.push(getRoleName(role));
     }
     return roleLabels.join(',');
   };
 
-  const getRoleName = (role: IUserRole) => {
+  const getRoleName = (role: IUserRole): string => {
     switch (role) {
       case IUserRole.ADMIN:
         return t('user:options.admin');
@@ -190,19 +190,19 @@ const UserList: React.FC = () => {
       propertyLabel: t('user:labels.tableColumnUserId'),
       key: 'id',
       groupValuesLabel: t('user:labels.tableColumnUserId'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('user:labels.tableColumnName'),
       key: 'name',
       groupValuesLabel: t('user:labels.tableColumnName'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('user:labels.tableColumnRole'),
       key: 'roles',
       groupValuesLabel: t('user:labels.tableColumnRole'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

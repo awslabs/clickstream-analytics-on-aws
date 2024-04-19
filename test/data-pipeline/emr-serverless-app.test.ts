@@ -41,7 +41,78 @@ beforeEach(() => {
   emrClientMock.reset();
 });
 
-test('should create EMR-serverless application when RequestType is Create', async () => {
+test('should create EMR-serverless application with java 17 when create emr-6.15.0', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    ...basicCloudFormationEvent,
+    RequestType: 'Create',
+    ResourceProperties: {
+      ServiceToken: 'ServiceToken1',
+      projectId: 'test-stack-id',
+      name: 'spark-test-app-name',
+      version: 'emr-6.15.0',
+      securityGroupId: 'sg-102392x23df',
+      subnetIds: 'subnet-0001,subnet-0002',
+      idleTimeoutMinutes: '3',
+      architecture: 'Auto',
+
+    },
+  };
+  const context = getMockContext();
+
+  emrClientMock.on(CreateApplicationCommand).resolvesOnce({
+    applicationId: 'applicationId-001',
+  });
+
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: undefined,
+  } as any);
+
+  const res = await handler(event, context);
+  expect(res).toEqual({
+    Data: {
+      ApplicationId: 'applicationId-001',
+    },
+  });
+  expect(emrClientMock).toHaveReceivedCommandTimes(CreateApplicationCommand, 1);
+  expect(emrClientMock).toHaveReceivedCommandTimes(DeleteApplicationCommand, 0);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(GetObjectCommand, 1);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
+
+  expect(emrClientMock).toHaveReceivedNthCommandWith(1, CreateApplicationCommand, {
+    architecture: 'ARM64',
+    autoStartConfiguration: {
+      enabled: true,
+    },
+    autoStopConfiguration: {
+      enabled: true,
+      idleTimeoutMinutes: 3,
+    },
+    name: 'spark-test-app-name',
+    networkConfiguration: {
+      securityGroupIds: [
+        'sg-102392x23df',
+      ],
+      subnetIds: [
+        'subnet-0001',
+        'subnet-0002',
+      ],
+    },
+    releaseLabel: 'emr-6.15.0',
+    type: 'SPARK',
+    runtimeConfiguration: [
+      {
+        classification: 'spark-defaults',
+        properties: {
+          'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+          'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+        },
+      },
+    ],
+  });
+});
+
+
+test('should create EMR-serverless application with java 8 when emr-6.10.0', async () => {
   const event: CloudFormationCustomResourceEvent = {
     ...basicCloudFormationEvent,
     RequestType: 'Create',
@@ -99,6 +170,15 @@ test('should create EMR-serverless application when RequestType is Create', asyn
     },
     releaseLabel: 'emr-6.10.0',
     type: 'SPARK',
+    runtimeConfiguration: [
+      {
+        classification: 'spark-defaults',
+        properties: {
+          'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-8-amazon-corretto.aarch64/',
+          'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-8-amazon-corretto.aarch64/',
+        },
+      },
+    ],
   });
 
   expect(s3ClientMock).toHaveReceivedNthCommandWith(2, PutObjectCommand,

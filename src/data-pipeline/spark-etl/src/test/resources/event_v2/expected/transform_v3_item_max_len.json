@@ -1,0 +1,30 @@
+{
+  "event_timestamp" : "2023-04-24 06:51:49",
+  "event_id" : "event_idevent_idevent_idevent_idevent_idevent_idevent_idevent_idevent_id1fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39db7b8981fcd7f5b-9529-4977-a303-e8c7e39",
+  "event_name" : "_profile_set",
+  "platform" : "ANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROID-ANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDANDROIDAND",
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-9844-fe457807715198-83e45133-ddaf-4ac6-98",
+  "user_id" : "_user_id_user_id_user_id312121-312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121312121-3121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213121213",
+  "item_id" : "d3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b237aekdme3ld3b",
+  "name" : "French Press",
+  "brand" : null,
+  "currency" : null,
+  "price" : 52.99,
+  "quantity" : null,
+  "creative_name" : null,
+  "creative_slot" : null,
+  "location_id" : null,
+  "category" : "housewares",
+  "category2" : null,
+  "category3" : null,
+  "category4" : null,
+  "category5" : null,
+  "custom_parameters_json_str" : null,
+  "custom_parameters" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "maxLenTestItemUser",
+  "created_time" : "_CREATED_TIME_"
+}

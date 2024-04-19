@@ -15,13 +15,19 @@ v18.17.0
 
 ## Available Scripts
 
-In the project directory, you can run:
+In the root project directory, you can run:
 
-### `yarn install`
+### `pnpm install -g pnpm@8.15.3`
+
+### `pnpm install && pnpm projen`
 
 Install dependencies for this project.
 
-### `yarn start`
+### `pnpm nx run-many --target=build `
+
+In the frontend directory
+
+### `pnpm install && pnpm start`
 
 Runs the app in the development mode.
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
@@ -29,11 +35,11 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.
 You will also see any lint errors in the console.
 
-### `yarn test`
+### `pnpm run test`
 
 Launches the test runner in the interactive watch mode.
 
-### `yarn run build`
+### `pnpm run build`
 
 Builds the app for production to the `build` folder.
 

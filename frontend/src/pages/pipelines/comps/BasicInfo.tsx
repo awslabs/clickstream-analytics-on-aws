@@ -12,6 +12,7 @@
  */
 
 import {
+  Alert,
   Box,
   Button,
   ColumnLayout,
@@ -32,21 +33,30 @@ import { alertMsg, defaultStr } from 'ts/utils';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
+  projectPipelineExtend?: IPipelineExtend;
   loadingRefresh: boolean;
-  reloadPipeline: () => void;
+  loadingPipelineExtend: boolean;
+  reloadPipeline: (refresh: string) => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const { t } = useTranslation();
-  const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
+  const {
+    pipelineInfo,
+    projectPipelineExtend,
+    loadingPipelineExtend,
+    loadingRefresh,
+    reloadPipeline,
+  } = props;
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [disableRetry, setDisableRetry] = useState(false);
   const [loadingUpgrade, setLoadingUpgrade] = useState(false);
   const [disableUpgrade, setDisableUpgrade] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [needUpgradeAppIds, setNeedUpgradeAppIds] = useState<string[]>([]);
 
   const checkStackRollbackFailed = () => {
-    const stackDetails = pipelineInfo?.status?.stackDetails ?? [];
+    const stackDetails = pipelineInfo?.stackDetails ?? [];
     for (const detail of stackDetails) {
       if (detail.stackStatus?.endsWith('_ROLLBACK_FAILED')) {
         return false;
@@ -69,7 +79,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingRetry(false);
       if (resData.success) {
         setDisableRetry(true);
-        reloadPipeline();
+        reloadPipeline('false');
       }
     } catch (error) {
       setLoadingRetry(false);
@@ -86,12 +96,36 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingUpgrade(false);
       if (resData.success) {
         setDisableUpgrade(true);
-        reloadPipeline();
+        reloadPipeline('false');
         setShowUpgradeModal(false);
       }
     } catch (error) {
       setLoadingUpgrade(false);
     }
+  };
+
+  const upgradeClick = () => {
+    const appIds = projectPipelineExtend?.createApplicationSchemasStatus?.map(
+      (item) => item.appId
+    );
+    if (appIds?.length === 0) {
+      setNeedUpgradeAppIds([]);
+      setShowUpgradeModal(true);
+      return;
+    }
+    const hadTimezoneAppIds: string[] = [];
+    for (const tz of pipelineInfo?.timezone ?? []) {
+      if (tz.timezone.trim()) {
+        hadTimezoneAppIds.push(tz.appId);
+      }
+    }
+    // find ip in appIds but not in hadTimezoneAppIds
+    const needUpgradeAppIds = appIds?.filter(
+      (id) => !hadTimezoneAppIds.includes(id)
+    );
+
+    setNeedUpgradeAppIds(needUpgradeAppIds ?? []);
+    setShowUpgradeModal(true);
   };
 
   return (
@@ -111,6 +145,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 {t('button.cancel')}
               </Button>
               <Button
+                disabled={needUpgradeAppIds.length > 0}
                 variant="primary"
                 onClick={() => {
                   startUpgradePipeline();
@@ -124,8 +159,31 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
         }
         header={t('pipeline:upgrade.title')}
       >
-        {t('pipeline:upgrade.tip')} <br />
-        <b>{pipelineInfo?.templateInfo?.solutionVersion}</b>
+        {needUpgradeAppIds.length > 0 ? (
+          <>
+            {t('pipeline:upgrade.needTimezone')} <br />
+            <br />
+            {needUpgradeAppIds.map((id) => (
+              <Link
+                key={id}
+                external
+                href={`/project/${pipelineInfo?.projectId}/application/detail/${id}`}
+              >
+                {id}
+              </Link>
+            ))}
+            <br />
+            <br />
+            <Alert statusIconAriaLabel="Warning" type="warning">
+              {t('pipeline:upgrade.needTimezoneWarning')}
+            </Alert>
+          </>
+        ) : (
+          <>
+            {t('pipeline:upgrade.tip')} <br />
+            <b>{pipelineInfo?.templateInfo?.solutionVersion}</b>
+          </>
+        )}
       </Modal>
       <Container
         header={
@@ -135,12 +193,21 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <Button
                   iconName="refresh"
                   loading={loadingRefresh}
-                  onClick={() => {
-                    reloadPipeline();
+                  onClick={(e) => {
+                    let refresh = 'false';
+                    if (
+                      e.detail.altKey ||
+                      e.detail.ctrlKey ||
+                      e.detail.metaKey ||
+                      e.detail.shiftKey
+                    ) {
+                      refresh = 'force';
+                    }
+                    reloadPipeline(refresh);
                   }}
                 />
-                {(pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
+                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}
@@ -152,9 +219,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.retry')}
                   </Button>
                 )}
-                {(pipelineInfo?.status?.status === EPipelineStatus.Active ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Active ||
+                  pipelineInfo?.statusType === EPipelineStatus.Failed ||
+                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
                   <Button
                     href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
                     iconName="edit"
@@ -163,15 +230,14 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.edit')}
                   </Button>
                 )}
-                {pipelineInfo?.status?.status === EPipelineStatus.Active && (
+                {pipelineInfo?.statusType === EPipelineStatus.Active && (
                   <Button
                     iconName="upload-download"
                     disabled={
                       disableUpgrade || pipelineInfo?.templateInfo?.isLatest
                     }
-                    onClick={() => {
-                      setShowUpgradeModal(true);
-                    }}
+                    loading={loadingRefresh && loadingPipelineExtend}
+                    onClick={upgradeClick}
                   >
                     {t('button.upgrade')}
                   </Button>
@@ -257,9 +323,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <PipelineStatus
                   pipelineId={pipelineInfo?.pipelineId}
                   projectId={pipelineInfo?.projectId}
-                  status={pipelineInfo?.status?.status}
+                  status={pipelineInfo?.statusType}
                   updatePipelineStatus={(status) => {
-                    reloadPipeline();
+                    reloadPipeline('false');
                   }}
                 />
               </div>

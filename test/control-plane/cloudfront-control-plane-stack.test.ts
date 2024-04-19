@@ -11,12 +11,13 @@
  *  and limitations under the License.
  */
 
+import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '@aws/clickstream-base-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
-import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
 import { TestApp, removeFolder } from '../common/jest';
 import { CFN_FN } from '../constants';
+import { findFirstResourceByKeyPrefix } from '../utils';
 
 describe('CloudFrontS3PortalStack - Default stack props for common features', () => {
 
@@ -266,7 +267,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },
@@ -422,6 +423,8 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
+        'ClickStreamApiBackendEventBusListenStackFunction2C052556',
+        'ClickStreamApiBackendEventBusListenStateFunctionE05DD00F',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
@@ -538,7 +541,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },
@@ -564,37 +567,17 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
+      LoggingConfig: {
+        ApplicationLogLevel: 'WARN',
+        LogFormat: 'JSON',
+      },
     },
     );
   });
 
   test('Authorizer function should keep logs for at least 10 years', () => {
-
-    const capture = new Capture();
-    commonTemplate.hasResourceProperties('Custom::LogRetention', {
-      ServiceToken: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('LogRetention[a-fA-F0-9]+'),
-          'Arn',
-        ],
-      },
-      LogGroupName: {
-        'Fn::Join': [
-          '',
-          [
-            '/aws/lambda/',
-            {
-              Ref: Match.stringLikeRegexp('AuthorizerFunction[A-F0-9]+'),
-            },
-          ],
-        ],
-      },
-      RetentionInDays: capture,
-    },
-    );
-
-    expect(capture.asNumber()).toBeGreaterThanOrEqual(3653);
-
+    const logGroup = findFirstResourceByKeyPrefix(commonTemplate, 'AWS::Logs::LogGroup', 'AuthorizerFunctionlog');
+    expect(logGroup.resource.Properties.RetentionInDays).toBeGreaterThanOrEqual(3653);
   });
 
   test('Test security response headers ', () => {
@@ -788,6 +771,8 @@ describe('CloudFrontS3PortalStack - custom domain', () => {
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
+        'ClickStreamApiBackendEventBusListenStackFunction2C052556',
+        'ClickStreamApiBackendEventBusListenStateFunctionE05DD00F',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
@@ -868,6 +853,8 @@ describe('CloudFrontS3PortalStack - China region', () => {
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
         'AuthorizerFunctionB4DBAA43',
         'ClickStreamApiApiFunction684A4D61',
+        'ClickStreamApiBackendEventBusListenStackFunction2C052556',
+        'ClickStreamApiBackendEventBusListenStateFunctionE05DD00F',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
         'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
         'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
@@ -913,13 +900,16 @@ describe('CloudFrontS3PortalStack - China region', () => {
       },
       Role: {
         'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          Match.stringLikeRegexp('AuthorizerFunctionRole[a-zA-Z0-9]+'),
           'Arn',
         ],
       },
-      Architectures: Match.absent(),
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
+      LoggingConfig: {
+        ApplicationLogLevel: 'WARN',
+        LogFormat: 'JSON',
+      },
     },
     );
 
@@ -1021,5 +1011,88 @@ describe('CloudFrontS3PortalStack - existing OIDC provider', () => {
       },
       Handler: 'index.handler',
     });
+  });
+});
+
+describe('CloudFrontS3PortalStack - IAM role prefix', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack-prefix';
+  const app = new TestApp(cdkOut);
+  const commonPortalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack');
+  const commonTemplate = Template.fromStack(commonPortalStack);
+
+  test('exist parameters', () => {
+    commonTemplate.hasParameter('IamRolePrefix', {});
+    commonTemplate.hasParameter('IamRoleBoundaryArn', {});
+  });
+  test('exist condition', () => {
+    commonTemplate.hasCondition('IsEmptyRolePrefixCondition', {});
+  });
+  test('check policy', () => {
+    const policy = findFirstResourceByKeyPrefix(commonTemplate, 'AWS::IAM::Policy', 'ClickStreamApiStackActionStateMachineActionFunctionRoleDefaultPolicy');
+    expect(policy.resource.Properties.PolicyDocument.Statement[1].Resource).toEqual({
+      'Fn::Join': [
+        '',
+        [
+          'arn:',
+          {
+            Ref: 'AWS::Partition',
+          },
+          ':cloudformation:*:',
+          {
+            Ref: 'AWS::AccountId',
+          },
+          ':stack/',
+          {
+            'Fn::If': [
+              'IsEmptyRolePrefixCondition',
+              'Clickstream',
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      Ref: 'IamRolePrefix',
+                    },
+                    '-Clickstream',
+                  ],
+                ],
+              },
+            ],
+          },
+          '*',
+        ],
+      ],
+    });
+    expect(policy.resource.Properties.PolicyDocument.Statement[2].Resource[0]).toEqual(
+      {
+        'Fn::Join': [
+          '',
+          [
+            'arn:',
+            {
+              Ref: 'AWS::Partition',
+            },
+            ':iam::',
+            {
+              Ref: 'AWS::AccountId',
+            },
+            ':role/',
+            {
+              'Fn::If': [
+                'IsEmptyRolePrefixCondition',
+                'Clickstream',
+                {
+                  Ref: 'IamRolePrefix',
+                },
+              ],
+            },
+            '*',
+          ],
+        ],
+      });
   });
 });

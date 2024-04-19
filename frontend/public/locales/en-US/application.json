@@ -1,15 +1,21 @@
 {
   "valid": {
     "nameEmpty": "Please input application name",
-    "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters"
+    "appIdInvalid": "App ID must start with a letter and can only support letters, numbers and _, maximum of 127 characters",
+    "timezoneInvalid": "Please specify a reporting time zone for this app"
   },
   "appName": "App Name",
   "appID": "App ID",
-  "appDesc": "App Description",
+  "appTimezone": "App reporting time zone",
+  "appDesc": "App description",
   "appPackageName": "App package name",
   "androidPackageName": "Android package name",
   "iosAppBundleId": "App Bundle ID (iOS)",
   "createdTime": "Created",
+  "labels": {
+    "timezonePlaceholder": "Select a reporting time zone",
+    "empty": "No matches found"
+  },
   "sdkGuide": {
     "registerApp": "Register App",
     "configSDK": "Configure SDK",
@@ -48,7 +54,8 @@
     "webInstallSDK": "1. Install Clickstream SDK",
     "webInstallSDKDesc": "Please use npm or a module bundler to install the Clickstream SDK.",
     "webSDKSetupDesc": "Add the initialize code to your app's root entry point, for example index.js/app.tsx in React or main.ts in Vue/Angular.",
-    "flutterSDKSetupDesc": "Copy your configuration code from your clickstream solution web console, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console."
+    "flutterSDKSetupDesc": "Copy your configuration code from your clickstream solution web console, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.",
+    "reactNativeSDKSetupDesc": "Copy your configuration code from your clickstream solution web console, we recommended you add the code to your app's entry point like index.js, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution web console."
   },
   "detail": {
     "basicInfo": "Basic Information",
@@ -57,6 +64,7 @@
     "ios": "iOS",
     "web": "Web",
     "flutter": "Flutter",
+    "reactNative": "React Native",
     "pipelineInfo": "Pipeline Information",
     "serverEdp": "Server Endpoint",
     "serverDomain": "Server Domain"

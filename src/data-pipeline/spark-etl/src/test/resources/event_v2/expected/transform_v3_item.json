@@ -1,0 +1,30 @@
+{
+  "event_timestamp" : "2023-04-24 06:51:49",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
+  "platform" : "ANDROID",
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198",
+  "user_id" : "312121",
+  "item_id" : "item_id034394ldmf3",
+  "name" : "French Press3",
+  "brand" : "Brand-3",
+  "currency" : null,
+  "price" : 42.33,
+  "quantity" : 19.0,
+  "creative_name" : "Creative Name 3",
+  "creative_slot" : "Creative Slot 3",
+  "location_id" : "Location#003",
+  "category" : "housewares3",
+  "category2" : "Category-2 3",
+  "category3" : "Category-3 3",
+  "category4" : "Category-4 3",
+  "category5" : "Category-5 3",
+  "custom_parameters_json_str" : null,
+  "custom_parameters" : null,
+  "process_info" : {
+    "process_job_id" : "test-job",
+    "process_time" : "_PROCESS_TIME_"
+  },
+  "app_id" : "uba-app",
+  "created_time" : "_CREATED_TIME_"
+}

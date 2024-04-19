@@ -11,14 +11,12 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { CreateNamespaceCommand, DeleteNamespaceCommand, Namespace, NamespaceStatus, RedshiftServerlessClient, ResourceNotFoundException, Tag } from '@aws-sdk/client-redshift-serverless';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { CdkCustomResourceEvent, CdkCustomResourceHandler, CdkCustomResourceResponse, Context } from 'aws-lambda';
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { getFunctionTags } from '../../../common/lambda/tags';
-import { logger } from '../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { sleep } from '../../../common/utils';
 import { NewNamespaceCustomProperties } from '../../private/model';
 
 type ResourcePropertiesType = NewNamespaceCustomProperties & {

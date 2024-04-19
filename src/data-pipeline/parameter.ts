@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { EMR_ARCHITECTURE_AUTO, EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '@aws/clickstream-base-lib';
 import { Architecture } from '@aws-sdk/client-emr-serverless';
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { EMR_ARCHITECTURE_AUTO, EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -53,12 +53,7 @@ export function createStackParameters(scope: Construct) {
     default: 'pipeline-temp/',
   });
 
-  const dataFreshnessInHourParam = new CfnParameter(scope, 'DataFreshnessInHour', {
-    description: 'Data Freshness in hour, default is 72 hours (3 days)',
-    default: 72,
-    type: 'Number',
-  });
-
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
 
   const userKeepDaysParam = new CfnParameter(scope, 'UserKeepMaxDays', {
     description: 'Max of user data keep days',
@@ -124,7 +119,7 @@ export function createStackParameters(scope: Construct) {
   const emrVersionParam = new CfnParameter(scope, 'EmrVersion', {
     description: 'EMR Version',
     allowedPattern: EMR_VERSION_PATTERN,
-    default: 'emr-6.11.0',
+    default: 'emr-6.15.0',
     type: 'String',
   });
 

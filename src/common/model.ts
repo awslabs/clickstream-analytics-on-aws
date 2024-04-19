@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+import { Output, StackStatus } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
+
 export interface AuthenticationProps {
   readonly issuer: string;
   readonly userEndpoint: string;
@@ -25,16 +28,64 @@ export interface BIUserCredential {
   readonly password: string;
 }
 
+export interface PipelineStatusDetail {
+  stackId: string;
+  readonly stackName: string;
+  readonly stackType: PipelineStackType;
+  stackTemplateVersion: string;
+  stackStatus: StackStatus | undefined;
+  stackStatusReason: string;
+  outputs: Output[];
+}
+
+export interface ExecutionDetail {
+  executionArn: string;
+  name: string;
+  status?: ExecutionStatus;
+}
+
+export enum PipelineStackType {
+  INGESTION = 'Ingestion',
+  KAFKA_CONNECTOR = 'KafkaConnector',
+  DATA_PROCESSING = 'DataProcessing',
+  DATA_MODELING_REDSHIFT = 'DataModelingRedshift',
+  REPORTING = 'Reporting',
+  METRICS = 'Metrics',
+  ATHENA = 'DataModelingAthena',
+  APP_REGISTRY = 'ServiceCatalogAppRegistry',
+}
+
+export enum PipelineStatusType {
+  ACTIVE = 'Active',
+  FAILED = 'Failed',
+  WARNING = 'Warning',
+  CREATING = 'Creating',
+  UPDATING = 'Updating',
+  DELETING = 'Deleting',
+  DELETED = 'Deleted',
+}
+
 export enum BuiltInTagKeys {
   AWS_SOLUTION = 'aws-solution/name',
   AWS_SOLUTION_VERSION = 'aws-solution/version',
   CLICKSTREAM_PROJECT = 'aws-solution/clickstream/project',
 }
 
+export enum SINK_TYPE_MODE {
+  SINK_TYPE_KDS='KDS',
+  SINK_TYPE_S3='S3',
+  SINK_TYPE_MSK='MSK',
+}
+
 export enum REDSHIFT_MODE {
   PROVISIONED='Provisioned',
   SERVERLESS='Serverless',
   NEW_SERVERLESS='New_Serverless',
+}
+
+export enum KINESIS_MODE {
+  ON_DEMAND = 'ON_DEMAND',
+  PROVISIONED = 'PROVISIONED',
 }
 
 export enum MetricsNamespace {
@@ -68,4 +119,5 @@ export enum MetadataVersionType {
   UNSUPPORTED = 'Unsupported',
   V1 = 'V1',
   V2 = 'V2',
+  V3 = 'V3',
 }

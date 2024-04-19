@@ -21,6 +21,8 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
+import software.aws.solution.clickstream.util.*;
+import software.aws.solution.clickstream.transformer.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,86 +50,86 @@ import static org.apache.spark.sql.functions.regexp_extract;
 import static org.apache.spark.sql.functions.struct;
 import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.to_date;
-import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
-import static software.aws.solution.clickstream.DatasetUtil.APP_ID;
-import static software.aws.solution.clickstream.DatasetUtil.APP_INFO;
-import static software.aws.solution.clickstream.DatasetUtil.ATTRIBUTES;
-import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
-import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
-import static software.aws.solution.clickstream.DatasetUtil.DATA;
-import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
-import static software.aws.solution.clickstream.DatasetUtil.DEVICE;
-import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
-import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_DOUBLE_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_FLOAT_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_INT_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_KEY;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_STRING_VALUE;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
-import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
-import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_MEDIUM;
-import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE;
-import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE_TYPE;
-import static software.aws.solution.clickstream.DatasetUtil.FIRST_VISIT_DATE;
-import static software.aws.solution.clickstream.DatasetUtil.GEO;
-import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
-import static software.aws.solution.clickstream.DatasetUtil.ID;
-import static software.aws.solution.clickstream.DatasetUtil.INGEST_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
-import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
-import static software.aws.solution.clickstream.DatasetUtil.NEW_USER_COUNT;
-import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.REFERER;
-import static software.aws.solution.clickstream.DatasetUtil.REFERRER;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_CHANNEL;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_DEVICE_ID;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_REFERER;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
-import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
-import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE;
-import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
-import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_NAME;
-import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
-import static software.aws.solution.clickstream.DatasetUtil.UA;
-import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
-import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
-import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE_CATEGORY;
-import static software.aws.solution.clickstream.DatasetUtil.UA_OS;
-import static software.aws.solution.clickstream.DatasetUtil.UA_OS_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.USER_FIRST_TOUCH_TIMESTAMP;
-import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
-import static software.aws.solution.clickstream.DatasetUtil.USER_LTV;
-import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.USER_PSEUDO_ID;
-import static software.aws.solution.clickstream.DatasetUtil.addSchemaToMap;
-import static software.aws.solution.clickstream.DatasetUtil.getAggItemDataset;
-import static software.aws.solution.clickstream.DatasetUtil.loadFullItemDataset;
-import static software.aws.solution.clickstream.DatasetUtil.loadFullUserDataset;
-import static software.aws.solution.clickstream.DatasetUtil.loadFullUserRefererDataset;
-import static software.aws.solution.clickstream.DatasetUtil.readDatasetFromPath;
-import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPath;
-import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
-import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEvent;
-import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForEventParameter;
-import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForItem;
-import static software.aws.solution.clickstream.MaxLengthTransformer.runMaxLengthTransformerForUser;
+import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.util.DatasetUtil.APP_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.APP_INFO;
+import static software.aws.solution.clickstream.util.DatasetUtil.ATTRIBUTES;
+import static software.aws.solution.clickstream.util.DatasetUtil.CHANNEL;
+import static software.aws.solution.clickstream.util.DatasetUtil.COL_PAGE_REFERER;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
+import static software.aws.solution.clickstream.util.DatasetUtil.DEVICE;
+import static software.aws.solution.clickstream.util.DatasetUtil.DEVICE_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.DEVICE_ID_LIST;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_APP_END;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_APP_START;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_DATE;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_OPEN;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_FIRST_VISIT;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_NAME;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAM_DOUBLE_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAM_FLOAT_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAM_INT_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAM_KEY;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PARAM_STRING_VALUE;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.EVENT_VALUE_IN_USD;
+import static software.aws.solution.clickstream.util.DatasetUtil.FIRST_REFERER;
+import static software.aws.solution.clickstream.util.DatasetUtil.FIRST_TRAFFIC_MEDIUM;
+import static software.aws.solution.clickstream.util.DatasetUtil.FIRST_TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.util.DatasetUtil.FIRST_TRAFFIC_SOURCE_TYPE;
+import static software.aws.solution.clickstream.util.DatasetUtil.FIRST_VISIT_DATE;
+import static software.aws.solution.clickstream.util.DatasetUtil.GEO;
+import static software.aws.solution.clickstream.util.DatasetUtil.GEO_FOR_ENRICH;
+import static software.aws.solution.clickstream.util.DatasetUtil.ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.INGEST_TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.ITEMS;
+import static software.aws.solution.clickstream.util.DatasetUtil.LOCALE;
+import static software.aws.solution.clickstream.util.DatasetUtil.NEW_USER_COUNT;
+import static software.aws.solution.clickstream.util.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.util.DatasetUtil.PROJECT_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.PROPERTIES;
+import static software.aws.solution.clickstream.util.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.util.DatasetUtil.REFERER;
+import static software.aws.solution.clickstream.util.DatasetUtil.REFERRER;
+import static software.aws.solution.clickstream.util.DatasetUtil.TABLE_ETL_USER_CHANNEL;
+import static software.aws.solution.clickstream.util.DatasetUtil.TABLE_ETL_USER_DEVICE_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.TABLE_ETL_USER_PAGE_REFERER;
+import static software.aws.solution.clickstream.util.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.util.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
+import static software.aws.solution.clickstream.util.DatasetUtil.TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRAFFIC_SOURCE_NAME;
+import static software.aws.solution.clickstream.util.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_BROWSER;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_BROWSER_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_DEVICE;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_DEVICE_CATEGORY;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_OS;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_OS_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_FIRST_TOUCH_TIMESTAMP;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_LTV;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_PROPERTIES;
+import static software.aws.solution.clickstream.util.DatasetUtil.USER_PSEUDO_ID;
+import static software.aws.solution.clickstream.util.DatasetUtil.addSchemaToMap;
+import static software.aws.solution.clickstream.util.DatasetUtil.getAggItemDataset;
+import static software.aws.solution.clickstream.util.DatasetUtil.loadFullItemDataset;
+import static software.aws.solution.clickstream.util.DatasetUtil.loadFullUserDataset;
+import static software.aws.solution.clickstream.util.DatasetUtil.loadFullUserRefererDataset;
+import static software.aws.solution.clickstream.util.DatasetUtil.readDatasetFromPath;
+import static software.aws.solution.clickstream.util.DatasetUtil.saveFullDatasetToPath;
+import static software.aws.solution.clickstream.util.DatasetUtil.saveIncrementalDatasetToPath;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformer.runMaxLengthTransformerForEvent;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformer.runMaxLengthTransformerForEventParameter;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformer.runMaxLengthTransformerForItem;
+import static software.aws.solution.clickstream.transformer.MaxLengthTransformer.runMaxLengthTransformerForUser;
 
 
 @Slf4j
@@ -136,7 +138,6 @@ public final class TransformerV2 {
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
     private final KvConverter kvConverter = new KvConverter();
-    private final MaxLengthTransformer maxLengthTransformer = new MaxLengthTransformer();
 
     private static Dataset<Row> getUserTrafficSourceDataset(final Dataset<Row> userDataset, final long newUserCount) {
         Column dataCol = col("data");
@@ -344,10 +345,10 @@ public final class TransformerV2 {
                 TABLE_ETL_USER_CHANNEL, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX_V1, userKeepDays
+                TableName.USER.getTableName(), TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX_V1, itemKeepDays
+                TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX_V1, itemKeepDays
         ));
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
@@ -495,7 +496,7 @@ public final class TransformerV2 {
                         selectedColumns
                 ).distinct();
 
-        String tableName = ETLRunner.TableName.ITEM.getTableName();
+        String tableName = TableName.ITEM.getTableName();
         DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset1, tableName, TABLE_VERSION_SUFFIX_V1);
 
         log.info("newItemsDataset count:" + newItemsDataset1.count());
@@ -585,7 +586,7 @@ public final class TransformerV2 {
                         USER_LTV
                 ).distinct();
 
-        String tableName = ETLRunner.TableName.USER.getTableName();
+        String tableName = TableName.USER.getTableName();
         DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserProfileMainDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newUserCount == 0) {

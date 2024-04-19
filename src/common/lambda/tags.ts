@@ -10,12 +10,12 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { Context } from 'aws-lambda';
 import { Construct } from 'constructs';
-import { aws_sdk_client_common_config } from '../sdk-client-config';
 
 const client = new LambdaClient({
   ...aws_sdk_client_common_config,

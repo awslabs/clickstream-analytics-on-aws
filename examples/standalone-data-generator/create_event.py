@@ -48,8 +48,8 @@ if __name__ == '__main__':
         start_time = utils.current_timestamp()
         # init all user
         all_user_count = app_provider.get_all_user_count()
-        users = get_users(int(all_user_count / 2))
-        new_users_of_day = int(all_user_count / 60)
+        users = get_users(int(all_user_count / 4))
+        new_users_of_day = int(all_user_count / 40)
         # get days arr
         days = utils.get_days_arr()
         total_events_count = 0

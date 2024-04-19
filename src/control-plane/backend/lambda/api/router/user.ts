@@ -16,7 +16,7 @@ import { body, header, param } from 'express-validator';
 import { isEmail, isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { UserService } from '../service/user';
 
-const router_user = express.Router();
+const router_user: express.Router = express.Router();
 const userServ: UserService = new UserService();
 
 router_user.get(

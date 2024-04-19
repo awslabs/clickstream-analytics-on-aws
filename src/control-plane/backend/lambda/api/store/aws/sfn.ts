@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
@@ -19,7 +20,6 @@ import {
   SFNClient, StartExecutionCommand, StartExecutionCommandOutput, paginateListExecutions,
 } from '@aws-sdk/client-sfn';
 import { logger } from '../../common/powertools';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
 
 export const startExecution = async (region: string, stateMachineArn: string, executionName: string, input: string) => {

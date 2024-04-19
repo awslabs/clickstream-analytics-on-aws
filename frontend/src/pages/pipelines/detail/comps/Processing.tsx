@@ -401,7 +401,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                           href={buildVPCLink(
                             pipelineInfo?.region ?? '',
                             pipelineInfo?.dataModeling?.redshift?.newServerless
-                              ?.network?.vpcId
+                              ?.network?.vpcId ?? ''
                           )}
                         >
                           {

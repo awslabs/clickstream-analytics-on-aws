@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DEFAULT_DASHBOARD_NAME_PREFIX } from '@aws/clickstream-base-lib';
 import {
   AppLayout,
   Box,
@@ -20,6 +21,7 @@ import {
 import {
   getAnalyticsDashboardList,
   getPipelineDetailByProjectId,
+  warmup,
 } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -31,7 +33,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
-import { DEFAULT_DASHBOARD_NAME_PREFIX } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
@@ -146,6 +147,10 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   useEffect(() => {
     if (projectId && appId) {
       loadPipeline();
+      warmup({
+        projectId: projectId,
+        appId: appId,
+      });
     }
   }, [currentPage]);
 

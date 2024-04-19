@@ -105,6 +105,9 @@ export interface MskS3SinkConnectorSetting {
 export interface IngestionServerProps {
   readonly vpc: IVpc;
   readonly vpcSubnets: SubnetSelection;
+  readonly privateSubnets: string;
+  readonly publicSubnets: string;
+  readonly isPrivateSubnetsCondition: CfnCondition;
   readonly fleetProps: FleetProps;
   readonly serverEndpointPath: string;
   readonly serverCorsOrigin: string;
@@ -183,6 +186,9 @@ export class IngestionServer extends Construct {
 
     const { alb, targetGroup, listener }= createApplicationLoadBalancer(this, {
       vpc: props.vpc,
+      publicSubnets: props.publicSubnets,
+      privateSubnets: props.privateSubnets,
+      isPrivateSubnetsCondition: props.isPrivateSubnetsCondition,
       service: ecsService,
       sg: albSg,
       ports,

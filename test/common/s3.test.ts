@@ -17,7 +17,7 @@ import zlib from 'zlib';
 import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client, _Object } from '@aws-sdk/client-s3';
 import { sdkStreamMixin } from '@smithy/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
-import { copyS3Object, deleteObjectsByPrefix, listObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
+import { copyS3Object, deleteObjectsByPrefix, isObjectExist, listObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
 import 'aws-sdk-client-mock-jest';
 
 const gzip = util.promisify(zlib.gzip);
@@ -30,6 +30,14 @@ const testPrefix = 'test-prefix';
 beforeEach(() => {
   s3ClientMock.reset();
 });
+
+
+function getTestBody(body: string) {
+  const stream = new Readable();
+  stream.push(body);
+  stream.push(null);
+  return sdkStreamMixin(stream);
+}
 
 test('putStringToS3()', async ()=> {
   await putStringToS3('test string', testBucketName, testPrefix);
@@ -210,5 +218,53 @@ test('listObjectsByPrefix()', async ()=> {
 
   expect(objectCount).toEqual(4);
   expect(totalSize).toEqual(3072);
+});
+
+
+test('isObjectExist - ture', async ()=> {
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: getTestBody('test'),
+  } as any);
+
+  const exist = await isObjectExist(testBucketName, `${testPrefix}/test.json`);
+  expect(exist).toBeTruthy();
+});
+
+test('isObjectExist - false', async ()=> {
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: undefined,
+  } as any);
+
+  const exist = await isObjectExist(testBucketName, `${testPrefix}/test.json`);
+  expect(exist).toBeFalsy();
+});
+
+test('isObjectExist - err', async ()=> {
+  const error = new Error('error');
+  let hasErr = false;
+  s3ClientMock.on(GetObjectCommand).rejects(error);
+  try {
+    await isObjectExist(testBucketName, `${testPrefix}/test.json`);
+  } catch (e) {
+    hasErr = true;
+  }
+  expect(hasErr).toBeTruthy();
+
+});
+
+
+test('isObjectExist false - NoSuchKey', async ()=> {
+  // @ts-ignore
+  const error = new NoSuchKey();
+  let hasErr = false;
+  s3ClientMock.on(GetObjectCommand).rejects(error);
+  try {
+    const exist = await isObjectExist(testBucketName, `${testPrefix}/test.json`);
+    expect(exist).toBeFalsy();
+  } catch (e) {
+    hasErr = true;
+  }
+  expect(hasErr).toBeFalsy();
+
 });
 

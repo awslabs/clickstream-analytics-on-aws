@@ -29,10 +29,10 @@ export type ODSSource = BucketInfo & {
 }
 
 export interface TablesODSSource {
-  readonly event: ODSSource;
-  readonly event_parameter: ODSSource;
-  readonly user: ODSSource;
-  readonly item: ODSSource;
+  readonly event_v2: ODSSource;
+  readonly item_v2: ODSSource;
+  readonly user_v2: ODSSource;
+  readonly session: ODSSource;
 }
 
 export type WorkflowBucketInfo = BucketInfo;
@@ -64,11 +64,15 @@ export interface NewRedshiftServerlessProps extends RedshiftServerlessProps {
   readonly securityGroupIds: string;
   readonly baseCapacity: number;
 }
-export interface ExistingRedshiftServerlessProps extends RedshiftServerlessProps {
+
+export interface BasicRedshiftServerlessProps extends RedshiftServerlessProps {
   readonly workgroupId?: string;
   readonly namespaceId?: string;
-  readonly dataAPIRoleArn: string;
   readonly createdInStack: boolean;
+}
+
+export interface ExistingRedshiftServerlessProps extends BasicRedshiftServerlessProps {
+  readonly dataAPIRoleArn: string;
 }
 
 export interface ProvisionedRedshiftProps extends RedshiftProps {
@@ -77,13 +81,16 @@ export interface ProvisionedRedshiftProps extends RedshiftProps {
 }
 
 export type ExistingRedshiftServerlessCustomProps = Omit<ExistingRedshiftServerlessProps, 'createdInStack'>;
-interface CustomProperties {
+export interface CustomProperties {
   readonly serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
 }
 
 type SQLBasic = {
   readonly multipleLine?: 'true' | 'false';
+  readonly type?: 'mv' | 'sp' | 'table' | 'view';
+  readonly scheduleRefresh?: 'true' | 'false';
+  readonly timezoneSensitive?: 'true' | 'false';
 }
 
 export type SQLDef = SQLBasic & {
@@ -92,6 +99,7 @@ export type SQLDef = SQLBasic & {
 
 export type SQLViewDef = SQLBasic & {
   readonly viewName: string;
+  readonly spName?: string;
 }
 
 export type CreateDatabaseAndSchemas = CustomProperties & {
@@ -104,14 +112,17 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly redshiftBIUsernamePrefix: string;
   readonly reportingViewsDef: SQLViewDef[];
   readonly schemaDefs: SQLDef[];
-  readonly lastModifiedTime: number;
+  readonly schemaHash: string;
+  readonly timezoneWithAppId: string;
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;
+  readonly lambdaCodeHash: string;
 }
 
 export type AssociateIAMRoleToRedshift = CustomProperties & {
   readonly roleArn: string;
+  readonly timeoutInSeconds: number;
 }
 
 export interface NewWorkgroupProperties {
@@ -190,15 +201,16 @@ export type MustacheParamBaseType = {
 export type MustacheParamType = {
   database_name: string;
   schema: string;
-  table_event: string;
-  table_event_parameter: string;
-  table_user: string;
-  table_item: string;
   sp_scan_metadata: string;
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
-  table_ods_events: string;
+  table_refresh_mv_sp_status: string;
+  table_event_v2: string;
+  table_item_v2: string;
+  table_user_v2: string;
+  table_session: string;
   user_bi?: string;
-
+  baseView?: string;
+  timezone?: string;
 }

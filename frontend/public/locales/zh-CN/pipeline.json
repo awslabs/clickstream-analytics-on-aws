@@ -149,6 +149,11 @@
     "enableEdpDesc": "该解决方案提供自动生成的 URL 作为采集端点，但您也可以使用自定义终端节点。请注意，主机名必须在亚马逊 Route53 服务中注册",
     "edpSettings": "摄取端点设置",
     "edpSettingsDesc": "该解决方案将启动网络服务作为采集端点，以收集从 SDK 发送的数据。",
+    "networkType": "网络类型",
+    "networkTypeGeneral": "标准",
+    "networkTypeGeneralDesc": "子网包含公有子网和私有子网",
+    "networkTypePrivate": "私有",
+    "networkTypePrivateDesc": "子网仅包含私有子网",
     "enableHttps": "启用HTTPS",
     "domainName": "域名",
     "domainNameDesc": "为您的采集终端节点指定域名，该解决方案将自动在 Route53 中为您创建条目。",
@@ -165,6 +170,9 @@
     "minSize": "最小容量",
     "maxSize": "最大容量",
     "warmPool": "暖池",
+    "ingestionCapacityFargateDesc": "将创建ECS任务来处理请求和获取数据，每个任务使用大约 512 MiB的内存和 0.25 个 vCPU，一个任务通常每秒可以支持大约100个请求。",
+    "ingestionTypeFargateDesc": "用于少量、批量、突发流量或者维护预算为零的工作负载。",
+    "ingestionTypeEC2Desc": "用于具有稳定流量需求的大型工作负载。",
     "subnet": "子网",
     "subnetDesc": "指定您希望采集端点在哪些子网中运行",
     "subnetPlaceholder": "选择子网",
@@ -402,6 +410,8 @@
   },
   "upgrade": {
     "title": "升级数据管道",
-    "tip": "你确定要将数据管道升级到这个版本吗？"
+    "tip": "你确定要将数据管道升级到这个版本吗？",
+    "needTimezone": "请先配置以下应用的报表时区，再进行管道升级。",
+    "needTimezoneWarning": "请注意：应用程序的报表时区一旦确定，将无法更改。"
   }
 }

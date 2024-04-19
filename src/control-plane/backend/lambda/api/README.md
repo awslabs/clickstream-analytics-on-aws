@@ -71,12 +71,12 @@ $ curl localhost:8080/
 ## Local Deployment
 Installation dependency
 ```shell
-yarn install
+pnpm install
 ```
 
 Local running
 ```shell
-yarn dev
+pnpm dev
 ```
 
 Use curl to verify the server works.
@@ -87,6 +87,6 @@ curl http://localhost:8080/
 
 Build server
 ```shell
-yarn build
+pnpm build
 ```
 

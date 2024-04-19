@@ -18,6 +18,7 @@ import {
   Stack,
   StackProps,
   Fn,
+  CfnCondition,
 } from 'aws-cdk-lib';
 import {
   FlowLogDestination,
@@ -155,6 +156,8 @@ export interface TestStackProps extends StackProps {
   certificateArn?: string;
   authenticationSecretArn?: string;
   protocol?: ApplicationProtocol;
+  privateSubnets?: string;
+  publicSubnets?: string;
 }
 
 export class TestStack extends Stack {
@@ -277,6 +280,11 @@ export class TestStack extends Stack {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      publicSubnets: 'publicSubnet1,publicSubnet2',
+      privateSubnets: 'privateSubnet1,privateSubnet2',
+      isPrivateSubnetsCondition: new CfnCondition(this, 'IsPrivateSubnets', {
+        expression: Fn.conditionEquals('publicSubnet1,publicSubnet2', 'privateSubnet1,privateSubnet2'),
+      }),
       fleetProps,
       serverEndpointPath: props.serverEndpointPath
         ? props.serverEndpointPath

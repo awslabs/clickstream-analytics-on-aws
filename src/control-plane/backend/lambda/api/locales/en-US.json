@@ -5,6 +5,7 @@
       "eventAnalysis": "Event analysis",
       "pathAnalysis": "Path analysis",
       "retentionAnalysis": "Retention analysis",
+      "attributionAnalysis": "Attribution analysis",
       "tableChart": "Detail information"
     },
     "filter": {

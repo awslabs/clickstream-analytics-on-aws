@@ -22,9 +22,9 @@ apply from: "${rootProject.projectDir}/gradle/config/scripts/coverage.gradle"
 
 group = "$group"
 version = "$projectVersion"
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -56,8 +56,13 @@ dependencies {
     // test related
     testImplementation("org.assertj:assertj-core:$assertJVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+
+    // common etl
+    implementation files("/tmp/etl-common/lib/etl-common-${projectVersion}.jar")
 }
-var sparkJavaCompatibleJvmArgs = [
+
+// https://stackoverflow.com/questions/73465937/apache-spark-3-3-0-breaks-on-java-17-with-cannot-access-class-sun-nio-ch-direct
+var sparkJava17CompatibleJvmArgs = [
         "--add-opens=java.base/java.lang=ALL-UNNAMED",
         "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
         "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -75,6 +80,7 @@ var sparkJavaCompatibleJvmArgs = [
 ]
 
 tasks.named('test') {
+    jvmArgs += sparkJava17CompatibleJvmArgs
     useJUnitPlatform()
 }
 
@@ -88,16 +94,16 @@ jacocoTestReport {
             xml.enabled true
             csv.enabled true
             html.enabled true
-            // html.destination "${buildDir}/reports/jacoco/test/"
     }
 }
 
 jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from {
         configurations
                 .runtimeClasspath
                 .collect {
-                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java")) {
+                    if (it.name.contains("maxmind-db") || it.name.contains("uap-java") || it.name.contains("etl-common")) {
                         zipTree(it)
                     }
                 }

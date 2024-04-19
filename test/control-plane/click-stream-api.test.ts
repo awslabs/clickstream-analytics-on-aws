@@ -11,6 +11,8 @@
  *  and limitations under the License.
  */
 
+import { Match } from 'aws-cdk-lib/assertions';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
 
@@ -172,6 +174,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E',
         'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE',
+        'testClickStreamALBApiBackendEventBusListenStateFunction8870ECA1',
+        'testClickStreamALBApiBackendEventBusListenStackFunction5D951AF9',
         'testClickStreamALBApiApiFunction9890103B',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
@@ -179,7 +183,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       Environment: {
@@ -195,6 +199,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           LOG_LEVEL: 'WARN',
           WITH_VALIDATE_ROLE: 'true',
+          TEMPLATE_FILE: Match.not(Match.absent()),
+          STACK_ID: Match.not(Match.absent()),
         },
       },
       MemorySize: 512,
@@ -216,9 +222,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+        'testClickStreamALBApiApiFunctionRole3C2198E5',
       ],
     });
 
@@ -233,14 +238,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Environment: {
@@ -261,7 +266,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine workflow of solution Clickstream Analytics on AWS',
       Environment: {
@@ -282,7 +287,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
@@ -292,21 +297,21 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
   test('Api lambda Function in GCR', () => {
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
@@ -320,10 +325,12 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
       'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1',
       'testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5',
-      'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
       'testClickStreamALBApiUploadRoleD732B7C0',
+      'testClickStreamALBApiBackendEventBusListenStackFuncRole122CABAC',
+      'testClickStreamALBApiBackendEventBusListenStateFuncRole498CB106',
       'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB',
       'AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2',
+      'testClickStreamALBApiApiFunctionRole3C2198E5',
     ];
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Role').sort())
       .toEqual([
@@ -451,23 +458,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
         'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
         'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
-        'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
         'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
         'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
-        'testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336',
         'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
-        'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-        'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-        'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
+        'testClickStreamALBApiBackendEventBusListenStateFuncRoleDefaultPolicy4F429680',
+        'testClickStreamALBApiBackendEventBusListenStackFuncRoleDefaultPolicy2D9358B1',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
         'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
-        'customresourcefunclogs9B71FED3',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
-        'actionfunclogs394D90DA',
-        'actionfunceniA16F9174',
-        'workflowfunclogs7A318BBF',
-        'workflowfunceniF26BB9B3',
-        'apifunclogs9F7B9244',
-        'apifunceni59253B5A',
       ]);
     // StateMachineActionFunctionRoleDefaultPolicy
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -475,527 +473,24 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Statement: [
           {
             Action: [
-              'xray:PutTraceSegments',
-              'xray:PutTelemetryRecords',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
-        },
-      ],
-    });
-
-    // StateMachineRoleDefaultPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'lambda:InvokeFunction',
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
-                        'Arn',
-                      ],
-                    },
-                    ':*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'logs:CreateLogDelivery',
-              'logs:GetLogDelivery',
-              'logs:UpdateLogDelivery',
-              'logs:DeleteLogDelivery',
-              'logs:ListLogDeliveries',
-              'logs:PutResourcePolicy',
-              'logs:DescribeResourcePolicies',
-              'logs:DescribeLogGroups',
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
             ],
             Effect: 'Allow',
             Resource: '*',
           },
           {
             Action: [
-              'xray:PutTraceSegments',
-              'xray:PutTelemetryRecords',
-              'xray:GetSamplingRules',
-              'xray:GetSamplingTargets',
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
             ],
             Effect: 'Allow',
             Resource: '*',
           },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
-      Roles: [
-        {
-          Ref: 'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
-        },
-      ],
-    });
-
-    // ApiFunctionRoleDefaultPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamMetadataA721B303',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamMetadataA721B303',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
-                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                  'Arn',
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    {
-                      'Fn::GetAtt': [
-                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
-                        'Arn',
-                      ],
-                    },
-                    '/index/*',
-                  ],
-                ],
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D',
-    });
-
-    // ApiStepFunctionPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: 'states:StartExecution',
-            Effect: 'Allow',
-            Resource: [
-              {
-                Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
-              },
-              {
-                Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':states:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':stateMachine:ScanMetadataWorkflow*',
-                  ],
-                ],
-              },
-            ],
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626',
-    });
-    // ApiAWSSdkPolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
-          {
-            Action: [
-              'ec2:DescribeRegions',
-              'ec2:DescribeVpcs',
-              'ec2:DescribeSecurityGroups',
-              'ec2:DescribeSubnets',
-              'ec2:DescribeRouteTables',
-              'ec2:DescribeVpcEndpoints',
-              'ec2:DescribeSecurityGroupRules',
-              'ec2:DescribeAvailabilityZones',
-              'ec2:DescribeNatGateways',
-              'kafka:ListClustersV2',
-              'kafka:ListClusters',
-              'kafka:ListNodes',
-              's3:ListAllMyBuckets',
-              'redshift:DescribeClusters',
-              'redshift:DescribeClusterSubnetGroups',
-              'redshift-serverless:ListWorkgroups',
-              'redshift-serverless:GetWorkgroup',
-              'redshift-serverless:GetNamespace',
-              'redshift-data:BatchExecuteStatement',
-              's3:ListBucket',
-              'ds:AuthorizeApplication',
-              'ds:UnauthorizeApplication',
-              'ds:CheckAlias',
-              'ds:CreateAlias',
-              'ds:DescribeDirectories',
-              'ds:DescribeTrusts',
-              'ds:DeleteDirectory',
-              'ds:CreateIdentityPoolDirectory',
-              's3:GetBucketLocation',
-              's3:GetBucketPolicy',
-              'route53:ListHostedZones',
-              'iam:ListRoles',
-              'iam:ListServerCertificates',
-              'iam:GetContextKeysForCustomPolicy',
-              'iam:SimulateCustomPolicy',
-              'states:DescribeExecution',
-              'acm:ListCertificates',
-              'cloudformation:DescribeStacks',
-              'cloudformation:DescribeType',
-              'secretsmanager:ListSecrets',
-              'secretsmanager:GetSecretValue',
-              'cloudwatch:DescribeAlarms',
-              'cloudwatch:EnableAlarmActions',
-              'cloudwatch:DisableAlarmActions',
-            ],
-            Effect: 'Allow',
-            Resource: '*',
-          },
-          {
-            Action: [
-              'quicksight:UpdateDashboardPermissions',
-              'quicksight:CreateDataSet',
-              'quicksight:DeleteDataSet',
-              'quicksight:PassDataSet',
-              'quicksight:PassDataSource',
-              'quicksight:CreateDashboard',
-              'quicksight:DeleteDashboard',
-              'quicksight:UpdateDashboard',
-              'quicksight:DescribeDashboard',
-              'quicksight:UpdateDashboardPublishedVersion',
-              'quicksight:CreateAnalysis',
-              'quicksight:UpdateAnalysis',
-              'quicksight:DeleteAnalysis',
-              'quicksight:CreateFolderMembership',
-              'quicksight:ListFolderMembers',
-              'quicksight:DescribeFolder',
-              'quicksight:CreateFolder',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':analysis/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dashboard/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dataset/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':datasource/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':folder/clickstream*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: [
-              'quicksight:GenerateEmbedUrlForRegisteredUser',
-              'quicksight:RegisterUser',
-              'quicksight:DeleteUser',
-              'quicksight:ListUsers',
-              'quicksight:ListDataSets',
-              'quicksight:ListDashboards',
-              'quicksight:ListAnalyses',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':analysis/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dashboard/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':dataset/*',
-                  ],
-                ],
-              },
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':user/*',
-                  ],
-                ],
-              },
-            ],
-          },
-          {
-            Action: 'quicksight:DescribeAccountSubscription',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':quicksight:*:',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':*',
-                ],
-              ],
-            },
-          },
-          {
-            Action: 'sts:AssumeRole',
-            Effect: 'Allow',
-            Resource: {
-              'Fn::Join': [
-                '',
-                [
-                  'arn:',
-                  {
-                    Ref: 'AWS::Partition',
-                  },
-                  ':iam::',
-                  {
-                    Ref: 'AWS::AccountId',
-                  },
-                  ':role/Clickstream-DataModeling*',
-                ],
-              ],
-            },
-          },
-        ],
-        Version: '2012-10-17',
-      },
-      PolicyName: 'testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187',
-    });
-
-    // ActionFunctionRolePolicy
-    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
-      PolicyDocument: {
-        Statement: [
           {
             Action: [
               'cloudformation:CreateStack',
@@ -1019,7 +514,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':stack/Clickstream-*',
+                  ':stack/Clickstream*',
                 ],
               ],
             },
@@ -1272,10 +767,18 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Effect: 'Allow',
             Resource: '*',
           },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
         ],
         Version: '2012-10-17',
       },
-      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C',
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
       Roles: [
         {
           Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
@@ -1283,13 +786,585 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       ],
     });
 
+    // StateMachineRoleDefaultPolicy
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: 'lambda:InvokeFunction',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiStackActionStateMachineActionFunction9CC75763',
+                        'Arn',
+                      ],
+                    },
+                    ':*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'logs:CreateLogDelivery',
+              'logs:GetLogDelivery',
+              'logs:UpdateLogDelivery',
+              'logs:DeleteLogDelivery',
+              'logs:ListLogDeliveries',
+              'logs:PutResourcePolicy',
+              'logs:DescribeResourcePolicies',
+              'logs:DescribeLogGroups',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+              'xray:GetSamplingRules',
+              'xray:GetSamplingTargets',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
+        },
+      ],
+    });
+
+    // ApiFunctionRoleDefaultPolicy
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: 'states:StartExecution',
+            Effect: 'Allow',
+            Resource: [
+              {
+                Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+              },
+              {
+                Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ScanMetadataWorkflow*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'ec2:DescribeRegions',
+              'ec2:DescribeVpcs',
+              'ec2:DescribeSecurityGroups',
+              'ec2:DescribeSubnets',
+              'ec2:DescribeRouteTables',
+              'ec2:DescribeVpcEndpoints',
+              'ec2:DescribeSecurityGroupRules',
+              'ec2:DescribeAvailabilityZones',
+              'ec2:DescribeNatGateways',
+              'kafka:ListClustersV2',
+              'kafka:ListClusters',
+              'kafka:ListNodes',
+              's3:ListAllMyBuckets',
+              'redshift:DescribeClusters',
+              'redshift:DescribeClusterSubnetGroups',
+              'redshift-serverless:ListWorkgroups',
+              'redshift-serverless:GetWorkgroup',
+              'redshift-serverless:GetNamespace',
+              'redshift-data:BatchExecuteStatement',
+              's3:ListBucket',
+              's3:GetObject',
+              's3:PutObject',
+              'ds:AuthorizeApplication',
+              'ds:UnauthorizeApplication',
+              'ds:CheckAlias',
+              'ds:CreateAlias',
+              'ds:DescribeDirectories',
+              'ds:DescribeTrusts',
+              'ds:DeleteDirectory',
+              'ds:CreateIdentityPoolDirectory',
+              's3:GetBucketLocation',
+              's3:GetBucketPolicy',
+              'route53:ListHostedZones',
+              'iam:ListRoles',
+              'iam:ListServerCertificates',
+              'iam:GetContextKeysForCustomPolicy',
+              'iam:SimulateCustomPolicy',
+              'states:DescribeExecution',
+              'states:ListExecutions',
+              'acm:ListCertificates',
+              'cloudformation:DescribeStacks',
+              'cloudformation:DescribeType',
+              'secretsmanager:ListSecrets',
+              'secretsmanager:GetSecretValue',
+              'cloudwatch:DescribeAlarms',
+              'cloudwatch:EnableAlarmActions',
+              'cloudwatch:DisableAlarmActions',
+              'events:PutRule',
+              'events:ListTargetsByRule',
+              'events:PutTargets',
+              'events:TagResource',
+              'events:UntagResource',
+              'sns:CreateTopic',
+              'sns:Subscribe',
+              'sns:SetTopicAttributes',
+              'sns:TagResource',
+              'sns:UntagResource',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'quicksight:UpdateDashboardPermissions',
+              'quicksight:CreateDataSet',
+              'quicksight:DeleteDataSet',
+              'quicksight:PassDataSet',
+              'quicksight:PassDataSource',
+              'quicksight:CreateDashboard',
+              'quicksight:DeleteDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:DescribeDashboard',
+              'quicksight:UpdateDashboardPublishedVersion',
+              'quicksight:CreateAnalysis',
+              'quicksight:UpdateAnalysis',
+              'quicksight:DeleteAnalysis',
+              'quicksight:CreateFolderMembership',
+              'quicksight:ListFolderMembers',
+              'quicksight:DescribeFolder',
+              'quicksight:CreateFolder',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':datasource/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':folder/clickstream*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'quicksight:GenerateEmbedUrlForRegisteredUser',
+              'quicksight:RegisterUser',
+              'quicksight:DeleteUser',
+              'quicksight:ListUsers',
+              'quicksight:ListDataSets',
+              'quicksight:ListDashboards',
+              'quicksight:ListAnalyses',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':user/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: 'quicksight:DescribeAccountSubscription',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':iam::',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':role/Clickstream*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'events:RemoveTargets',
+              'events:DeleteRule',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':events:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':rule/Clickstream-SegmentJobRule-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
+              ],
+            },
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiApiFunctionRole3C2198E5',
+        },
+      ],
+    });
   });
 
   test('LogGroup', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::Logs::LogGroup'))
       .toEqual([
+        'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunctionlog17E9C861',
+        'testClickStreamALBApiStackActionStateMachineActionFunctionlog17DC1D55',
         'testClickStreamALBApiStackActionStateMachineLogGroupDE72356F',
+        'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionlog8C09C32C',
         'testClickStreamALBApiStackWorkflowStateMachineLogGroupD7FD1922',
+        'testClickStreamALBApiBackendEventBusListenStateFunctionlog97BF5A13',
+        'testClickStreamALBApiBackendEventBusListenStackFunctionlog7B8AAC43',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Logs::LogGroup', {
@@ -1348,7 +1423,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 
     newALBApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Environment: {
@@ -1438,7 +1513,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":1,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1478,7 +1553,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}}},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":40,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}},"MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1518,7 +1593,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}}}},"TimeoutSeconds":259200}',
+            '"}}}},"MaxConcurrency":40}},"TimeoutSeconds":259200}',
           ],
         ],
       },
@@ -1623,17 +1698,19 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   test('Api lambda Function', () => {
     expect(findResourcesName(newCloudfrontApiStackTemplate, 'AWS::Lambda::LayerVersion'))
       .toEqual([
-        'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
+        'testClickStreamCloudfrontApiLambdaAdapterLayerF0F222D4',
       ]);
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::LayerVersion', {
       CompatibleRuntimes: [
-        'nodejs16.x',
-        'nodejs18.x',
+        Runtime.NODEJS_16_X.toString(),
+        Runtime.NODEJS_18_X.toString(),
+        Runtime.NODEJS_20_X.toString(),
+        Runtime.NODEJS_LATEST.toString(),
       ],
     });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       Environment: {
@@ -1680,7 +1757,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
       Handler: 'run.sh',
       Layers: [
         {
-          Ref: 'testClickStreamCloudfrontApiLambdaAdapterLayerX868468A9C4',
+          Ref: 'testClickStreamCloudfrontApiLambdaAdapterLayerF0F222D4',
         },
       ],
       MemorySize: 512,
@@ -1689,29 +1766,28 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
     });
     newCloudfrontApiStackTemplate.hasResource('AWS::Lambda::Function', {
       DependsOn: [
-        'apifunceni59253B5A',
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleDefaultPolicy64431738',
-        'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
+        'testClickStreamCloudfrontApiApiFunctionRoleDefaultPolicyE0B97DC3',
+        'testClickStreamCloudfrontApiApiFunctionRole1C15F66B',
       ],
     });
 
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for api of solution Clickstream Analytics on AWS',
     });
@@ -1721,21 +1797,21 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
   test('Api lambda Function in GCR', () => {
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for dictionary init of solution Click Stream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       Runtime: 'nodejs18.x',
     });
     newALBApiStackCNTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Architectures: [
-        'x86_64',
+        Architecture.ARM_64.toString(),
       ],
       Environment: {
         Variables: {
@@ -2015,7 +2091,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":1,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2055,7 +2131,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}}},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","MaxConcurrency":40,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}},"MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2095,11 +2171,861 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}}}},"TimeoutSeconds":259200}',
+            '"}}}},"MaxConcurrency":40}},"TimeoutSeconds":259200}',
           ],
         ],
       },
     });
   });
 
-}); //end test suite
+});
+
+describe('Click Stream Api ALB deploy Construct With IAM Role Prefix', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/alb-portal-clickstream-api-with-prefix-test';
+
+  const newALBApiStackTemplate = TestEnv.newALBWithRolePrefixApiStack(cdkOut).template;
+
+  test('Policy', () => {
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Policy'))
+      .toEqual([
+        'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D',
+        'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61',
+        'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
+        'testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742',
+        'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F',
+        'testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4',
+        'testClickStreamALBApiBackendEventBusListenStateFuncRoleDefaultPolicy4F429680',
+        'testClickStreamALBApiBackendEventBusListenStackFuncRoleDefaultPolicy2D9358B1',
+        'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+        'testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB',
+      ]);
+
+    // ActionFunctionRoleDefaultPolicy
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'cloudformation:CreateStack',
+              'cloudformation:UpdateStack',
+              'cloudformation:DeleteStack',
+              'cloudformation:DescribeStacks',
+              'cloudformation:UpdateTerminationProtection',
+              'cloudformation:ContinueUpdateRollback',
+              'cloudformation:RollbackStack',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':cloudformation:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':stack/testRolePrefix-Clickstream*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'iam:GetRole',
+              'iam:PassRole',
+              'iam:DetachRolePolicy',
+              'iam:GetPolicy',
+              'iam:DeleteRolePolicy',
+              'iam:CreateRole',
+              'iam:DeleteRole',
+              'iam:AttachRolePolicy',
+              'iam:PutRolePolicy',
+              'iam:ListRolePolicies',
+              'iam:GetRolePolicy',
+              'iam:CreateInstanceProfile',
+              'iam:DeleteInstanceProfile',
+              'iam:RemoveRoleFromInstanceProfile',
+              'iam:AddRoleToInstanceProfile',
+              'iam:ListPolicies',
+              'iam:ListRoles',
+              'iam:UpdateRoleDescription',
+              'iam:TagRole',
+              'iam:UntagRole',
+              'iam:ListRoleTags',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/testRolePrefix*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':policy/testRolePrefix*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':instance-profile/testRolePrefix*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'iam:PassRole',
+              'iam:CreateServiceLinkedRole',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'resource-groups:GetGroup',
+              'resource-groups:DisassociateResource',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':resource-groups:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':group/AWS_AppRegistry_Application-clickstream-analytics-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'sns:*',
+              'sqs:*',
+              'redshift-serverless:*',
+              's3:*',
+              'apigateway:*',
+              'logs:*',
+              'redshift:*',
+              'dynamodb:*',
+              'autoscaling:*',
+              'application-autoscaling:*',
+              'glue:*',
+              'cloudwatch:*',
+              'emr-serverless:*',
+              'ssm:*',
+              'ecs:*',
+              'lambda:*',
+              'quicksight:*',
+              'ec2:*',
+              'events:*',
+              'elasticloadbalancing:*',
+              'kinesis:*',
+              'kafka:*',
+              'states:*',
+              'secretsmanager:*',
+              'globalaccelerator:*',
+              'kms:*',
+              'athena:*',
+              'servicecatalog:CreateApplication',
+              'servicecatalog:UpdateApplication',
+              'servicecatalog:DeleteApplication',
+              'servicecatalog:GetApplication',
+              'servicecatalog:GetAssociatedResource',
+              'servicecatalog:AssociateResource',
+              'servicecatalog:DisassociateResource',
+              'servicecatalog:TagResource',
+              'servicecatalog:UntagResource',
+              'tag:GetResources',
+              'tag:UntagResources',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'xray:PutTraceSegments',
+              'xray:PutTelemetryRecords',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+        },
+      ],
+    });
+
+    // ApiFunctionRoleDefaultPolicy
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'ec2:CreateNetworkInterface',
+              'ec2:DescribeNetworkInterfaces',
+              'ec2:DeleteNetworkInterface',
+              'ec2:AssignPrivateIpAddresses',
+              'ec2:UnassignPrivateIpAddresses',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: 'states:StartExecution',
+            Effect: 'Allow',
+            Resource: [
+              {
+                Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
+              },
+              {
+                Ref: 'testClickStreamALBApiStackWorkflowStateMachineAE34E0DF',
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ScanMetadataWorkflow*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':states:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':stateMachine:ClickstreamUserSegmentsWorkflowStateMachine*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'ec2:DescribeRegions',
+              'ec2:DescribeVpcs',
+              'ec2:DescribeSecurityGroups',
+              'ec2:DescribeSubnets',
+              'ec2:DescribeRouteTables',
+              'ec2:DescribeVpcEndpoints',
+              'ec2:DescribeSecurityGroupRules',
+              'ec2:DescribeAvailabilityZones',
+              'ec2:DescribeNatGateways',
+              'kafka:ListClustersV2',
+              'kafka:ListClusters',
+              'kafka:ListNodes',
+              's3:ListAllMyBuckets',
+              'redshift:DescribeClusters',
+              'redshift:DescribeClusterSubnetGroups',
+              'redshift-serverless:ListWorkgroups',
+              'redshift-serverless:GetWorkgroup',
+              'redshift-serverless:GetNamespace',
+              'redshift-data:BatchExecuteStatement',
+              's3:ListBucket',
+              's3:GetObject',
+              's3:PutObject',
+              'ds:AuthorizeApplication',
+              'ds:UnauthorizeApplication',
+              'ds:CheckAlias',
+              'ds:CreateAlias',
+              'ds:DescribeDirectories',
+              'ds:DescribeTrusts',
+              'ds:DeleteDirectory',
+              'ds:CreateIdentityPoolDirectory',
+              's3:GetBucketLocation',
+              's3:GetBucketPolicy',
+              'route53:ListHostedZones',
+              'iam:ListRoles',
+              'iam:ListServerCertificates',
+              'iam:GetContextKeysForCustomPolicy',
+              'iam:SimulateCustomPolicy',
+              'states:DescribeExecution',
+              'states:ListExecutions',
+              'acm:ListCertificates',
+              'cloudformation:DescribeStacks',
+              'cloudformation:DescribeType',
+              'secretsmanager:ListSecrets',
+              'secretsmanager:GetSecretValue',
+              'cloudwatch:DescribeAlarms',
+              'cloudwatch:EnableAlarmActions',
+              'cloudwatch:DisableAlarmActions',
+              'events:PutRule',
+              'events:ListTargetsByRule',
+              'events:PutTargets',
+              'events:TagResource',
+              'events:UntagResource',
+              'sns:CreateTopic',
+              'sns:Subscribe',
+              'sns:SetTopicAttributes',
+              'sns:TagResource',
+              'sns:UntagResource',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: [
+              'quicksight:UpdateDashboardPermissions',
+              'quicksight:CreateDataSet',
+              'quicksight:DeleteDataSet',
+              'quicksight:PassDataSet',
+              'quicksight:PassDataSource',
+              'quicksight:CreateDashboard',
+              'quicksight:DeleteDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:DescribeDashboard',
+              'quicksight:UpdateDashboardPublishedVersion',
+              'quicksight:CreateAnalysis',
+              'quicksight:UpdateAnalysis',
+              'quicksight:DeleteAnalysis',
+              'quicksight:CreateFolderMembership',
+              'quicksight:ListFolderMembers',
+              'quicksight:DescribeFolder',
+              'quicksight:CreateFolder',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':datasource/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':folder/clickstream*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'quicksight:GenerateEmbedUrlForRegisteredUser',
+              'quicksight:RegisterUser',
+              'quicksight:DeleteUser',
+              'quicksight:ListUsers',
+              'quicksight:ListDataSets',
+              'quicksight:ListDashboards',
+              'quicksight:ListAnalyses',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':user/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: 'quicksight:DescribeAccountSubscription',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':iam::',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':role/testRolePrefix*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: [
+              'events:RemoveTargets',
+              'events:DeleteRule',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':events:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':rule/Clickstream-SegmentJobRule-*',
+                ],
+              ],
+            },
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::GetAtt': [
+                'testClickStreamALBApiApiFunctionRole3C2198E5',
+                'Arn',
+              ],
+            },
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamDictionary0A1156B6',
+                  'Arn',
+                ],
+              },
+              {
+                Ref: 'AWS::NoValue',
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiClickstreamMetadataA721B303',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiClickstreamMetadataA721B303',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'dynamodb:BatchGetItem',
+              'dynamodb:GetRecords',
+              'dynamodb:GetShardIterator',
+              'dynamodb:Query',
+              'dynamodb:GetItem',
+              'dynamodb:Scan',
+              'dynamodb:ConditionCheckItem',
+              'dynamodb:BatchWriteItem',
+              'dynamodb:PutItem',
+              'dynamodb:UpdateItem',
+              'dynamodb:DeleteItem',
+              'dynamodb:DescribeTable',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::GetAtt': [
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                  'Arn',
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    {
+                      'Fn::GetAtt': [
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
+                        'Arn',
+                      ],
+                    },
+                    '/index/*',
+                  ],
+                ],
+              },
+            ],
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'testClickStreamALBApiApiFunctionRoleDefaultPolicyC2CB9B91',
+      Roles: [
+        {
+          Ref: 'testClickStreamALBApiApiFunctionRole3C2198E5',
+        },
+      ],
+    });
+  });
+});

@@ -25,7 +25,8 @@ import java.io.IOException;
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
-import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
+import static software.aws.solution.clickstream.common.Util.deCodeUri;
 
 public class ServerDataConverterTest extends BaseSparkTest {
     ServerDataConverter converter = new ServerDataConverter();
@@ -171,7 +172,7 @@ public class ServerDataConverterTest extends BaseSparkTest {
     void test_decode_uri() {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_decode_uri
         String uri = "https://www.bing.com/search?q=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&qs=n&form=QBRE&=%25eManage%20Your%20Search%20History%25E&sp=-1&lq=0&pq=%E4%B8%AD%E5%9B%BD%E4%BD%A0%E5%A5%BD&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=";
-        String decodeUri = ServerDataConverter.deCodeUri(uri);
+        String decodeUri = deCodeUri(uri);
         System.out.println(decodeUri);
         Assertions.assertEquals(
                 "https://www.bing.com/search?q=中国你好&qs=n&form=QBRE&=%eManage Your Search History%E&sp=-1&lq=0&pq=中国你好&sc=4-4&sk=&cvid=8AAED8D2E8F14915AAF3426E1B6EFB9E&ghsh=0&ghacc=0&ghpl=",

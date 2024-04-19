@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { SolutionInfo } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { SolutionInfo } from '../../src/common/solution-info';
 import { ServiceCatalogAppregistryStack } from '../../src/service-catalog-appregistry-stack';
 
 const app = new App();
@@ -55,6 +55,14 @@ test('Should has Service Catalog AppRegistry application', () => {
 
 test('Should has output', () => {
   template.hasOutput('ServiceCatalogAppRegistryApplicationArn', {
+    Condition: 'ServiceCatalogAvailableRegion',
+  });
+
+  template.hasOutput('ServiceCatalogAppRegistryApplicationTagKey', {
+    Condition: 'ServiceCatalogAvailableRegion',
+  });
+
+  template.hasOutput('ServiceCatalogAppRegistryApplicationTagValue', {
     Condition: 'ServiceCatalogAvailableRegion',
   });
 });

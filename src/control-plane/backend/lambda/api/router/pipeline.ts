@@ -16,7 +16,7 @@ import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isPipelineExisted, isProjectExisted, isRequestIdExisted, isValidEmpty, isXSSRequest, validMatchParamId, validate } from '../common/request-valid';
 import { PipelineServ } from '../service/pipeline';
 
-const router_pipeline = express.Router();
+const router_pipeline: express.Router = express.Router();
 const pipelineServ: PipelineServ = new PipelineServ();
 
 

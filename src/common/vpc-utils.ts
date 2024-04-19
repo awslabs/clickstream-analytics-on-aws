@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CfnCondition, Fn } from 'aws-cdk-lib';
 import { IVpc, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
@@ -39,4 +40,16 @@ export function getExistVpc(scope: Construct, id: string, props: VpcProps): IVpc
   );
 
   return vpc;
+}
+
+export function getALBSubnetsCondtion(scope: Construct, publicSubnetIds: string, privateSubnetIds: string) {
+  const isPrivateSubnetsCondition = new CfnCondition(
+    scope,
+    'IsPrivateSubnets',
+    {
+      expression:
+        Fn.conditionEquals(publicSubnetIds, privateSubnetIds),
+    },
+  );
+  return isPrivateSubnetsCondition;
 }

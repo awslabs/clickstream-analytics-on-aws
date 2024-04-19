@@ -19,20 +19,16 @@ import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseSparkTest;
-import software.aws.solution.clickstream.DatasetUtil;
+import software.aws.solution.clickstream.util.DatasetUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
-import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_CHECK_PREVIOUS_SESSION;
-import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
+import static software.aws.solution.clickstream.util.ContextUtil.*;
 
 public class GTMServerDataTransformerTest extends BaseSparkTest {
     GTMServerDataTransformer transformer = new GTMServerDataTransformer();
@@ -136,7 +132,7 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "true");
+
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 
@@ -167,7 +163,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty("force.merge", "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -190,7 +185,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty("force.merge", "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-brand.json")).getPath());
@@ -207,7 +201,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -228,7 +221,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_item/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -249,7 +241,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -270,7 +261,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login.json")).getPath());
@@ -290,7 +280,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login2/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login2.json")).getPath());
@@ -310,7 +299,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_with_session_start/");
-        System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "false");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-session-start.json")).getPath());

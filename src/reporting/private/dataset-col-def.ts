@@ -13,36 +13,39 @@
 
 import { InputColumn } from '@aws-sdk/client-quicksight';
 
-export const clickstream_retention_view_columns: InputColumn[] = [
-  {
-    Name: 'first_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'day_diff',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'returned_user_count',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'total_users',
-    Type: 'INTEGER',
-  },
-];
 
 export const clickstream_event_view_columns: InputColumn[] = [
   {
-    Name: 'event_date',
+    Name: 'event_timestamp',
     Type: 'DATETIME',
+  },
+  {
+    Name: 'event_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_time_msec',
+    Type: 'INTEGER',
   },
   {
     Name: 'event_name',
     Type: 'STRING',
   },
   {
-    Name: 'event_id',
+    Name: 'user_pseudo_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_id',
+    Type: 'STRING',
+  },
+
+  {
+    Name: 'event_value',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_value_currency',
     Type: 'STRING',
   },
   {
@@ -50,44 +53,8 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'INTEGER',
   },
   {
-    Name: 'event_previous_timestamp',
+    Name: 'ingest_time_msec',
     Type: 'INTEGER',
-  },
-  {
-    Name: 'event_timestamp',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'event_value_in_usd',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'app_info_app_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'app_info_package_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'app_info_install_source',
-    Type: 'STRING',
-  },
-  {
-    Name: 'app_info_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'app_info_sdk_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'app_info_sdk_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'device_id',
-    Type: 'STRING',
   },
   {
     Name: 'device_mobile_brand_name',
@@ -100,14 +67,6 @@ export const clickstream_event_view_columns: InputColumn[] = [
   {
     Name: 'device_manufacturer',
     Type: 'STRING',
-  },
-  {
-    Name: 'device_screen_width',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'device_screen_height',
-    Type: 'INTEGER',
   },
   {
     Name: 'device_carrier',
@@ -126,31 +85,11 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'host_name',
+    Name: 'device_vendor_id',
     Type: 'STRING',
   },
   {
-    Name: 'ua_browser',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_browser_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_os',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_os_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_device',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_device_category',
+    Name: 'device_advertising_id',
     Type: 'STRING',
   },
   {
@@ -162,23 +101,47 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'INTEGER',
   },
   {
+    Name: 'device_ua_os',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_ua_os_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_ua_browser',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_ua_browser_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_ua_device',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_ua_device_category',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_screen_width',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'device_screen_height',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'device_viewport_width',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'device_viewport_height',
+    Type: 'INTEGER',
+  },
+  {
     Name: 'geo_continent',
-    Type: 'STRING',
-  },
-  {
-    Name: 'geo_country',
-    Type: 'STRING',
-  },
-  {
-    Name: 'geo_city',
-    Type: 'STRING',
-  },
-  {
-    Name: 'geo_metro',
-    Type: 'STRING',
-  },
-  {
-    Name: 'geo_region',
     Type: 'STRING',
   },
   {
@@ -186,23 +149,23 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'geo_country',
+    Type: 'STRING',
+  },
+  {
+    Name: 'geo_region',
+    Type: 'STRING',
+  },
+  {
+    Name: 'geo_metro',
+    Type: 'STRING',
+  },
+  {
+    Name: 'geo_city',
+    Type: 'STRING',
+  },
+  {
     Name: 'geo_locale',
-    Type: 'STRING',
-  },
-  {
-    Name: 'platform',
-    Type: 'STRING',
-  },
-  {
-    Name: 'project_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'traffic_source_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'traffic_source_medium',
     Type: 'STRING',
   },
   {
@@ -210,54 +173,63 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'user_first_touch_timestamp',
+    Name: 'traffic_source_medium',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_campaign',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_content',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_term',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_campaign_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_clid_platform',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_clid',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_channel_group',
+    Type: 'STRING',
+  },
+  {
+    Name: 'traffic_source_category',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_first_touch_time_msec',
     Type: 'INTEGER',
   },
   {
-    Name: 'user_id',
+    Name: 'app_package_id',
     Type: 'STRING',
   },
   {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
-  },
-];
-
-export const clickstream_event_parameter_view_columns: InputColumn[] = [
-  {
-    Name: 'event_id',
+    Name: 'app_version',
     Type: 'STRING',
   },
   {
-    Name: 'event_name',
+    Name: 'app_title',
     Type: 'STRING',
   },
   {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'event_param_key',
+    Name: 'app_install_source',
     Type: 'STRING',
   },
   {
-    Name: 'event_param_double_value',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'event_param_float_value',
-    Type: 'DECIMAL',
-  },
-  {
-    Name: 'event_param_int_value',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'event_param_string_value',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_param_value',
+    Name: 'project_id',
     Type: 'STRING',
   },
   {
@@ -265,159 +237,163 @@ export const clickstream_event_parameter_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'user_id',
+    Name: 'app_id',
     Type: 'STRING',
   },
   {
-    Name: 'user_pseudo_id',
+    Name: 'screen_view_screen_name',
     Type: 'STRING',
   },
   {
-    Name: 'event_timestamp',
-    Type: 'INTEGER',
-  },
-];
-
-export const clickstream_lifecycle_daily_view_columns: InputColumn[] = [
-  {
-    Name: 'time_period',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'this_day_value',
+    Name: 'screen_view_screen_id',
     Type: 'STRING',
   },
   {
-    Name: 'sum',
-    Type: 'INTEGER',
-  },
-];
-
-export const clickstream_lifecycle_weekly_view_columns: InputColumn[] = [
-  {
-    Name: 'time_period',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'this_week_value',
+    Name: 'screen_view_screen_unique_id',
     Type: 'STRING',
   },
   {
-    Name: 'sum',
-    Type: 'INTEGER',
-  },
-];
-
-export const clickstream_device_view_columns: InputColumn[] = [
-  {
-    Name: 'device_id',
+    Name: 'screen_view_previous_screen_name',
     Type: 'STRING',
   },
   {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'mobile_brand_name',
+    Name: 'screen_view_previous_screen_id',
     Type: 'STRING',
   },
   {
-    Name: 'mobile_model_name',
+    Name: 'screen_view_previous_screen_unique_id',
     Type: 'STRING',
   },
   {
-    Name: 'manufacturer',
-    Type: 'STRING',
-  },
-  {
-    Name: 'screen_width',
+    Name: 'screen_view_previous_time_msec',
     Type: 'INTEGER',
   },
   {
-    Name: 'screen_height',
+    Name: 'screen_view_engagement_time_msec',
     Type: 'INTEGER',
   },
   {
-    Name: 'carrier',
+    Name: 'screen_view_entrances',
     Type: 'STRING',
   },
   {
-    Name: 'network_type',
+    Name: 'page_view_page_referrer',
     Type: 'STRING',
   },
   {
-    Name: 'operating_system',
+    Name: 'page_view_page_referrer_title',
     Type: 'STRING',
   },
   {
-    Name: 'operating_system_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'host_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_browser',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_browser_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_os',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_os_version',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_device',
-    Type: 'STRING',
-  },
-  {
-    Name: 'ua_device_category',
-    Type: 'STRING',
-  },
-  {
-    Name: 'system_language',
-    Type: 'STRING',
-  },
-  {
-    Name: 'time_zone_offset_seconds',
+    Name: 'page_view_previous_time_msec',
     Type: 'INTEGER',
   },
   {
-    Name: 'advertising_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'user_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'usage_num',
+    Name: 'page_view_engagement_time_msec',
     Type: 'INTEGER',
   },
-];
-
-export const clickstream_session_view_columns: InputColumn[] = [
   {
-    Name: 'session_id',
+    Name: 'page_view_page_title',
     Type: 'STRING',
   },
   {
-    Name: 'user_pseudo_id',
+    Name: 'page_view_page_url',
     Type: 'STRING',
   },
   {
-    Name: 'platform',
+    Name: 'page_view_page_url_path',
+    Type: 'STRING',
+  },
+  {
+    Name: 'page_view_hostname',
+    Type: 'STRING',
+  },
+  {
+    Name: 'page_view_latest_referrer',
+    Type: 'STRING',
+  },
+  {
+    Name: 'page_view_latest_referrer_host',
+    Type: 'STRING',
+  },
+  {
+    Name: 'page_view_entrances',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_start_is_first_time',
+    Type: 'STRING',
+  },
+  {
+    Name: 'upgrade_previous_app_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'upgrade_previous_os_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'search_key',
+    Type: 'STRING',
+  },
+  {
+    Name: 'search_term',
+    Type: 'STRING',
+  },
+  {
+    Name: 'outbound_link_classes',
+    Type: 'STRING',
+  },
+  {
+    Name: 'outbound_link_domain',
+    Type: 'STRING',
+  },
+  {
+    Name: 'outbound_link_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'outbound_link_url',
+    Type: 'STRING',
+  },
+  {
+    Name: 'outbound_link',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_engagement_time_msec',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'scroll_engagement_time_msec',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'sdk_error_code',
+    Type: 'STRING',
+  },
+  {
+    Name: 'sdk_error_message',
+    Type: 'STRING',
+  },
+  {
+    Name: 'sdk_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'sdk_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_exception_message',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_exception_stack',
+    Type: 'STRING',
+  },
+  {
+    Name: 'custom_parameters_json_str',
     Type: 'STRING',
   },
   {
@@ -425,46 +401,51 @@ export const clickstream_session_view_columns: InputColumn[] = [
     Type: 'INTEGER',
   },
   {
-    Name: 'session_views',
+    Name: 'session_number',
     Type: 'INTEGER',
   },
   {
-    Name: 'engaged_session',
+    Name: 'session_start_time_msec',
     Type: 'INTEGER',
   },
   {
-    Name: 'bounced_session',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_start_timestamp',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_engagement_time',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'session_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'session_date_hour',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'entry_view',
+    Name: 'session_source',
     Type: 'STRING',
   },
   {
-    Name: 'exit_view',
+    Name: 'session_medium',
     Type: 'STRING',
   },
-];
-
-export const clickstream_user_attr_view_columns: InputColumn[] = [
   {
-    Name: 'user_pseudo_id',
+    Name: 'session_campaign',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_content',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_term',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_campaign_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_clid_platform',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_clid',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_channel_group',
+    Type: 'STRING',
+  },
+  {
+    Name: 'session_source_category',
     Type: 'STRING',
   },
   {
@@ -472,98 +453,83 @@ export const clickstream_user_attr_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'custom_attr_key',
-    Type: 'STRING',
-  },
-  {
-    Name: 'custom_attr_value',
-    Type: 'STRING',
-  },
-  {
-    Name: 'user_first_touch_timestamp',
+    Name: 'first_touch_time_msec',
     Type: 'INTEGER',
-  },
-  {
-    Name: '_first_visit_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: '_first_referer',
-    Type: 'STRING',
-  },
-  {
-    Name: '_first_traffic_source_type',
-    Type: 'STRING',
-  },
-  {
-    Name: '_first_traffic_medium',
-    Type: 'STRING',
-  },
-  {
-    Name: '_first_traffic_source',
-    Type: 'STRING',
-  },
-  {
-    Name: '_channel',
-    Type: 'STRING',
-  },
-];
-
-export const clickstream_user_dim_view_columns: InputColumn[] = [
-  {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'user_id',
-    Type: 'STRING',
   },
   {
     Name: 'first_visit_date',
     Type: 'DATETIME',
   },
   {
-    Name: 'first_visit_install_source',
+    Name: 'first_referrer',
     Type: 'STRING',
   },
   {
-    Name: 'first_visit_device_language',
+    Name: 'first_traffic_category',
     Type: 'STRING',
   },
   {
-    Name: 'first_platform',
+    Name: 'first_traffic_source',
     Type: 'STRING',
   },
   {
-    Name: 'first_visit_country',
+    Name: 'first_traffic_medium',
     Type: 'STRING',
   },
   {
-    Name: 'first_visit_city',
+    Name: 'first_traffic_campaign',
     Type: 'STRING',
   },
   {
-    Name: 'first_traffic_source_source',
+    Name: 'first_traffic_content',
     Type: 'STRING',
   },
   {
-    Name: 'first_traffic_source_medium',
+    Name: 'first_traffic_term',
     Type: 'STRING',
   },
   {
-    Name: 'first_traffic_source_name',
+    Name: 'first_traffic_campaign_id',
     Type: 'STRING',
   },
   {
-    Name: 'first_referer',
+    Name: 'first_traffic_clid_platform',
     Type: 'STRING',
   },
   {
-    Name: 'device_id',
+    Name: 'first_traffic_clid',
     Type: 'STRING',
   },
   {
-    Name: 'registration_status',
+    Name: 'first_traffic_channel_group',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_app_install_source',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_properties_json_str',
+    Type: 'STRING',
+  },
+  {
+    Name: 'merged_user_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'latest_user_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'new_user_indicator',
+    Type: 'STRING',
+  },
+  {
+    Name: 'view_session_indicator',
+    Type: 'STRING',
+  },
+  {
+    Name: 'view_event_indicator',
     Type: 'STRING',
   },
 ];

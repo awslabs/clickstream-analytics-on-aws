@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   IAMClient,
   paginateListRoles,
@@ -19,7 +20,6 @@ import {
   SimulateCustomPolicyCommand,
 } from '@aws-sdk/client-iam';
 import { awsRegion } from '../../common/constants';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { AssumeRoleType, IamRole } from '../../common/types';
 
 export const listRoles = async (type: AssumeRoleType, key?: string) => {

@@ -331,6 +331,17 @@ module.exports = function (webpackEnv) {
       },
     },
     resolve: {
+      fallback: {
+        crypto: require.resolve('crypto-browserify'),
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        url: require.resolve('browserify-url'),
+        http2: false,
+        stream: require.resolve('stream-browserify'),
+        util: require.resolve('browserify-util'),
+        assert: require.resolve('assert-browserify'),
+        vm: require.resolve('vm-browserify'),
+      },
       // This allows you to set a fallback for where webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
@@ -348,6 +359,10 @@ module.exports = function (webpackEnv) {
         .map((ext) => `.${ext}`)
         .filter((ext) => useTypeScript || !ext.includes('ts')),
       alias: {
+        '@aws-lambda-powertools/logger': path.join(
+          paths.appPath,
+          'config/BrowserLogger.js'
+        ),
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
@@ -383,6 +398,7 @@ module.exports = function (webpackEnv) {
           exclude: /@babel(?:\/|\\{1,2})runtime/,
           test: /\.(js|mjs|jsx|ts|tsx|css)$/,
           loader: require.resolve('source-map-loader'),
+          exclude: /node_modules\/lru-memoizer/,
         },
         {
           // "oneOf" will traverse all following loaders until one will
@@ -601,6 +617,25 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+      }),
+      new webpack.NormalModuleReplacementPlugin(/node:/, (resource) => {
+        const mod = resource.request.replace(/^node:/, '');
+        switch (mod) {
+          case 'crypto':
+            resource.request = 'crypto-browserify';
+            break;
+          case 'console':
+            resource.request = 'console-browserify';
+            break;
+          case 'util':
+            resource.request = 'browserify-util';
+            break;
+          default:
+            throw new Error(`Not found ${mod}`);
+        }
+      }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(

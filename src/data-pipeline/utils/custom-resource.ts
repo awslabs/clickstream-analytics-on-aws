@@ -22,8 +22,7 @@ import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
-import { LAMBDA_NODEJS_RUNTIME, createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { createLambdaRole } from '../../common/lambda';
 import { getShortIdOfStack } from '../../common/stack';
 import { EmrApplicationArchitectureType } from '../../data-pipeline-stack';
 import { SolutionNodejsFunction } from '../../private/function';
@@ -102,7 +101,6 @@ function createCopyAssetsLambda(
   props.pipelineS3Bucket.grantReadWrite(role);
 
   const fn = new SolutionNodejsFunction(scope, 'CopyAssetsCustomResourceLambda', {
-    runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,
       '..',
@@ -114,13 +112,14 @@ function createCopyAssetsLambda(
     memorySize: 256,
     role,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     environment: {
       STACK_ID: getShortIdOfStack(Stack.of(scope)),
       PROJECT_ID: props.projectId,
       PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
       PIPELINE_S3_PREFIX: props.pipelineS3Prefix,
-      ... POWERTOOLS_ENVS,
     },
   });
 
@@ -222,7 +221,6 @@ function createEMRServerlessApplicationLambda(
   props.pipelineS3Bucket.grantReadWrite(role);
 
   const fn = new SolutionNodejsFunction(scope, 'CreateEMRServerlessApplicationLambda', {
-    runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,
       '..',
@@ -234,7 +232,9 @@ function createEMRServerlessApplicationLambda(
     memorySize: 256,
     role,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     environment: {
       STACK_ID: getShortIdOfStack(Stack.of(scope)),
       PROJECT_ID: props.projectId,
@@ -245,7 +245,6 @@ function createEMRServerlessApplicationLambda(
       SUBNETIDS: props.subnetIds,
       PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
       PIPELINE_S3_PREFIX: props.pipelineS3Prefix,
-      ... POWERTOOLS_ENVS,
     },
   });
 

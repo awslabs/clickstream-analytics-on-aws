@@ -28,15 +28,6 @@ Below is the SQL command that generates the view.
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_retention_view_v2.sql:6"
         ```
     === "Athena"
-        ```sql title="clickstream-lifecycle-weekly-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-weekly-query.sql"
-        ```
-        ```sql title="clickstream-lifecycle-daily-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-lifecycle-daily-query.sql"
-        ```
-        ```sql title="clickstream-lifecycle-daily-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-retention-query.sql"
-        ```
 
 ## Dimensions and metrics
 The report includes the following dimensions and metrics. You can add more dimensions or metrics by creating `calculated field` in QuickSight dateset. [Learn more](https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html). 

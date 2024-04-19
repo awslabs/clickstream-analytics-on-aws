@@ -40,12 +40,19 @@ test('SQL execution is created as expected', () => {
 test('SQLExecutionStepFn is created as expected', () => {
 
   newServerlessTemplate.hasResourceProperties('AWS::Lambda::Function', {
+    Architectures: [
+      'arm64',
+    ],
     Code: Match.anyValue(),
     Environment: {
       Variables: {
+        POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+        POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+        POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+        LOG_LEVEL: 'WARN',
         REDSHIFT_DATA_API_ROLE: {
           'Fn::GetAtt': [
-            Match.anyValue(),
+            'RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRole303D0537',
             'Arn',
           ],
         },
@@ -60,9 +67,14 @@ test('SQLExecutionStepFn is created as expected', () => {
             'Workgroup.WorkgroupName',
           ],
         },
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       },
     },
     Handler: 'index.handler',
+    LoggingConfig: {
+      ApplicationLogLevel: 'INFO',
+      LogFormat: 'JSON',
+    },
     MemorySize: 256,
     Role: {
       'Fn::GetAtt': [
@@ -73,6 +85,7 @@ test('SQLExecutionStepFn is created as expected', () => {
     Runtime: 'nodejs18.x',
     Timeout: 900,
   });
+
 
 });
 

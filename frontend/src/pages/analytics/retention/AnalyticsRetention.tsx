@@ -12,6 +12,16 @@
  */
 
 import {
+  ExploreComputeMethod,
+  ExploreGroupColumn,
+  ExploreRequestAction,
+  ExploreTimeScopeType,
+  IMetadataBuiltInList,
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+  QuickSightChartType,
+} from '@aws/clickstream-base-lib';
+import {
   Button,
   ColumnLayout,
   Container,
@@ -44,18 +54,6 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  QUICKSIGHT_ANALYSIS_INFIX,
-  QUICKSIGHT_DASHBOARD_INFIX,
-} from 'ts/constant-ln';
-import {
-  ExploreComputeMethod,
-  ExploreGroupColumn,
-  ExploreRequestAction,
-  ExploreTimeScopeType,
-  IMetadataBuiltInList,
-  QuickSightChartType,
-} from 'ts/explore-types';
 import {
   generateStr,
   alertMsg,

@@ -2,8 +2,9 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: 44px;
@@ -13,7 +14,8 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 [data-amplify-authenticator] [data-amplify-container] {
@@ -28,8 +30,17 @@ code {
   display: flex;
 }
 
+.flex-v {
+  display: flex;
+  flex-direction: column;
+}
+
 .flex-1 {
   flex: 1;
+}
+
+.space-between {
+  justify-content: space-between;
 }
 
 .gap-3 {
@@ -48,8 +59,20 @@ code {
   width: 75%;
 }
 
+.w-200 {
+  width: 200px;
+}
+
+.bottom-100p {
+  bottom: 100%;
+}
+
 .align-center {
   align-items: center;
+}
+
+.align-start {
+  align-items: flex-start;
 }
 
 .center {
@@ -67,8 +90,9 @@ code {
 }
 
 .custom-description {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #8d99a8;
   font-size: 14px;
@@ -189,6 +213,10 @@ code {
   width: 45%;
 }
 
+.m-w-300 {
+  max-width: 300px;
+}
+
 .wrap-line {
   word-break: break-all !important;
   white-space: break-spaces;
@@ -227,7 +255,7 @@ code {
   bottom: 20px;
   .unspecified {
     background-color: #d1d5db;
-    font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+    font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
     font-size: 12px;
     letter-spacing: 0.005em;
     line-height: 22px;
@@ -275,8 +303,15 @@ code {
   z-index: 1000;
   margin: 0;
   background-color: #0f1b2a;
-  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
-  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
+  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
+  font-family: var(
+    --font-family-base-qnistn,
+    'Open Sans',
+    'Helvetica Neue',
+    Roboto,
+    Arial,
+    sans-serif
+  );
 }
 #b {
   padding-top: 56px;
@@ -369,8 +404,15 @@ ul.menu-list li.checkbox-item {
   background-color: #0f1b2a;
   bottom: 0;
   display: flex;
-  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
-  font-family: var(--font-family-base-qnistn, "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif);
+  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
+  font-family: var(
+    --font-family-base-qnistn,
+    'Open Sans',
+    'Helvetica Neue',
+    Roboto,
+    Arial,
+    sans-serif
+  );
   font-size: 14px;
   gap: 10px;
   justify-content: space-between;
@@ -528,7 +570,7 @@ ul.menu-list li.checkbox-item {
   width: 100%;
   height: 100%;
   border: 0px;
-  overflow: "hidden";
+  overflow: 'hidden';
 }
 
 .iframe-explore {
@@ -543,7 +585,7 @@ ul.menu-list li.checkbox-item {
 
 .cs-analytics-config {
   display: flex;
-  gap: 50px;
+  gap: 5px;
 }
 
 .cs-analytics-data-range {
@@ -570,6 +612,10 @@ ul.menu-list li.checkbox-item {
   .cs-analytics-window-unit {
     flex: 1;
   }
+}
+
+.cs-analytics-attribution-model {
+  width: 180px;
 }
 
 .cs-analytics-session-window {
@@ -638,13 +684,26 @@ ul.menu-list li.checkbox-item {
       margin-right: -6px;
       color: #0972d3;
     }
+    .cs-suffix-name {
+      position: relative;
+      z-index: 10;
+      background-color: #efefef;
+      height: 28px;
+      line-height: 28px;
+      border: 2px solid #7d8998;
+      padding: 0 8px;
+      border-radius: 0 8px 8px 0;
+      margin-left: -6px;
+      color: #0972d3;
+    }
   }
   .cs-dropdown-input {
+    position: relative;
     .cs-dropdown-event-input {
-      [class^="awsui_dropdown-"] {
+      [class^='awsui_dropdown-'] {
         opacity: 0 !important;
       }
-      [class^="awsui_dropdown-content-wrapper"] {
+      [class^='awsui_dropdown-content-wrapper'] {
         opacity: 0 !important;
       }
       .custom-popover {
@@ -656,12 +715,15 @@ ul.menu-list li.checkbox-item {
         border-radius: 8px;
         z-index: 99;
         opacity: 0;
+        visibility: hidden;
         transition: opacity 0.5s ease-in-out;
         transition-delay: 0.5s;
       }
       &:hover {
         .custom-popover {
           opacity: 1;
+          visibility: visible;
+          transition-delay: 0s;
         }
       }
     }
@@ -670,10 +732,10 @@ ul.menu-list li.checkbox-item {
       .second-select-option {
         width: 300px;
         flex-shrink: 0;
-        [class^="awsui_dropdown-"] {
+        [class^='awsui_dropdown-'] {
           opacity: 0 !important;
         }
-        [class^="awsui_dropdown-content-wrapper"] {
+        [class^='awsui_dropdown-content-wrapper'] {
           opacity: 0 !important;
         }
       }
@@ -726,6 +788,9 @@ ul.menu-list li.checkbox-item {
       line-height: 10px;
       transform: translate(2px, -1px);
       transition: 0.3s;
+      &.rotate-180 {
+        transform: translate(2px, 1px) rotateX(180deg);
+      }
     }
     &.enable-change.and {
       cursor: pointer;
@@ -755,8 +820,6 @@ ul.menu-list li.checkbox-item {
     .cs-analytics-condition-item {
       margin-top: 10px;
       padding: 0 5px;
-      display: flex;
-      gap: 5px;
       .condition-event {
         width: 120px;
         flex-shrink: 0;
@@ -970,7 +1033,8 @@ ul.menu-list li.checkbox-item {
       &.group-select {
         min-width: 240px;
         .item-container {
-          width: 240px !important;
+          width: 260px !important;
+          height: 330px !important;
         }
         .group-select-sub-list {
           width: 200px;
@@ -997,21 +1061,76 @@ ul.menu-list li.checkbox-item {
   }
 }
 
+.cs-analytics-second-condition {
+  position: relative;
+}
+
+.cs-analytics-group-index {
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  color: #fff;
+  padding: 0 10px;
+  line-height: 28px;
+}
+
+.cs-analytics-group-header-bg {
+  background-color: #79bcfa;
+  padding: 4px 5px;
+}
+
+.cs-analytics-group-content-bg {
+  background-color: #f7f9fc;
+  padding: 15px;
+}
+
+.analytics-segment-group-item {
+  .segment-remove-icon {
+    display: none;
+  }
+  &:hover {
+    .segment-remove-icon {
+      display: block;
+    }
+  }
+}
+
+.analytics-segment-sequence-event {
+  .remove-icon {
+    display: none;
+  }
+  &:hover {
+    .remove-icon {
+      display: block;
+    }
+  }
+}
+
 // Analytics Layout Style
+.cs-analytics-traffic-table {
+  [class^='awsui_body-cell'] {
+    overflow: visible !important;
+  }
+}
+
+.cs-analytics-traffic-overflow {
+  overflow: hidden;
+}
+
 .gs-analytics {
   header {
     background-color: #015292 !important;
   }
-  [class^="awsui_scrolling-background"] {
+  [class^='awsui_scrolling-background'] {
     background-color: #014a87 !important;
   }
-  [class^="awsui_dark-header"] {
+  [class^='awsui_dark-header'] {
     background-color: #014a87 !important;
   }
-  [class^="awsui_background_"] {
+  [class^='awsui_background_'] {
     background-color: #014a87 !important;
   }
-  [class^="awsui_breadcrumb"] {
+  [class^='awsui_breadcrumb'] {
     background-color: #014a87 !important;
   }
 
@@ -1032,8 +1151,9 @@ ul.menu-list li.checkbox-item {
       color: #fff;
     }
     .analytics-custom-description {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-        "Droid Sans", "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+        'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+        'Helvetica Neue', sans-serif;
       -webkit-font-smoothing: antialiased;
       margin-top: 10px;
       color: #8d99a8;
@@ -1152,7 +1272,7 @@ ul.menu-list li.checkbox-item {
 }
 
 .click-stream-custom-tag {
-  font-family: "Open Sans", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: 'Open Sans', 'Helvetica Neue', Roboto, Arial, sans-serif;
   line-height: 20px;
   padding: 0 8px;
   border-radius: 4px;
@@ -1181,5 +1301,19 @@ ul.menu-list li.checkbox-item {
     &:hover {
       color: #12305d;
     }
+  }
+}
+
+.re-sign-in {
+  .alert-container {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+}
+.re-sign-in-modal {
+  [class^='awsui_dismiss-control'] {
+    display: none !important;
   }
 }

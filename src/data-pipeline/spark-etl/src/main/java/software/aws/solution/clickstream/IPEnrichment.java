@@ -29,6 +29,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
+import software.aws.solution.clickstream.util.*;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -38,7 +39,7 @@ import java.util.Optional;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.split;
 import static org.apache.spark.sql.functions.udf;
-import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
+import static software.aws.solution.clickstream.util.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 @Slf4j
@@ -68,7 +69,7 @@ public class IPEnrichment {
         return ipEnrichDataset;
     }
 
-    private UDF2<String, String, Row> enrich() {
+    static UDF2<String, String, Row> enrich() {
         return (ipValue, localeValue) -> {
             GenericRow defaultRow = new GenericRow(
                     new Object[]{null, null, null, null, null, null, localeValue}

@@ -11,12 +11,10 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config } from '@aws/clickstream-base-lib';
 import {
   SFNClient,
 } from '@aws-sdk/client-sfn';
-
-import { aws_sdk_client_common_config } from './sdk-client-config-ln';
-
 
 // Create SFN Client
 const sfnClient = new SFNClient({

@@ -1,66 +1,110 @@
 -- run following command to load latest partition
--- msck repair table {{database}}.{{eventTable}};
--- msck repair table {{database}}.{{userTable}};
+-- msck repair table {{database}}.event_v2;
+-- msck repair table {{database}}.user_v2;
+-- msck repair table {{database}}.item_v2;
+-- msck repair table {{database}}.session;
 
-select 
-   event_date
-  ,event_name
-  ,event_id
-  ,event_bundle_sequence_id as event_bundle_sequence_id
-  ,event_previous_timestamp as event_previous_timestamp
-  ,event_timestamp
-  ,event_value_in_usd
-  ,app_info.app_id as app_info_app_id
-  ,app_info.id as app_info_package_id
-  ,app_info.install_source as app_info_install_source
-  ,app_info.version as app_info_version
-  ,device.vendor_id as device_id
-  ,device.mobile_brand_name as device_mobile_brand_name
-  ,device.mobile_model_name as device_mobile_model_name
-  ,device.manufacturer as device_manufacturer
-  ,device.screen_width as device_screen_width
-  ,device.screen_height as device_screen_height
-  ,device.carrier as device_carrier
-  ,device.network_type as device_network_type
-  ,device.operating_system as device_operating_system
-  ,device.operating_system_version as device_operating_system_version
-  ,device.ua_browser 
-  ,device.ua_browser_version
-  ,device.ua_os
-  ,device.ua_os_version
-  ,device.ua_device
-  ,device.ua_device_category
-  ,device.system_language as device_system_language
-  ,device.time_zone_offset_seconds as device_time_zone_offset_seconds
-  ,geo.continent as geo_continent
-  ,geo.country as geo_country
-  ,geo.city as geo_city
-  ,geo.metro as geo_metro
-  ,geo.region as geo_region
-  ,geo.sub_continent as geo_sub_continent
-  ,geo.locale as geo_locale
-  ,platform
-  ,project_id
-  ,traffic_source.name as traffic_source_name
-  ,traffic_source.medium as traffic_source_medium
-  ,traffic_source.source as traffic_source_source
-  ,event.user_id
-  ,event.user_pseudo_id
-  ,u.user_first_touch_timestamp
-from {{database}}.{{eventTable}} as event
-left join (
-	select
-	  *
-	from (
-    select  
-      user_pseudo_id,
-		  user_first_touch_timestamp
-	    ,ROW_NUMBER() over (partition by user_pseudo_id ORDER BY event_timestamp desc) AS et_rank
-	  from {{database}}.{{userTable}}
-  )
-	where et_rank = 1
-) as u on event.user_pseudo_id = u.user_pseudo_id
-where event.partition_app = ? 
-  and event.partition_year >= ?
-  and event.partition_month >= ?
-  and event.partition_day >= ?
+SELECT
+  event_timestamp,
+  event_id,
+  event_time_msec,
+  event_name,
+  user_pseudo_id,
+  user_id,
+  session_id,
+  event_value,
+  event_value_currency,
+  event_bundle_sequence_id,
+  ingest_time_msec,
+  device_mobile_brand_name,
+  device_mobile_model_name,
+  device_manufacturer,
+  device_carrier,
+  device_network_type,
+  device_operating_system,
+  device_operating_system_version,
+  device_vendor_id,
+  device_advertising_id,
+  device_system_language,
+  device_time_zone_offset_seconds,
+  device_ua_browser,
+  device_ua_browser_version,
+  device_ua_os,
+  device_ua_os_version,
+  device_ua_device,
+  device_ua_device_category,
+  device_screen_width,
+  device_screen_height,
+  device_viewport_width,
+  device_viewport_height,
+  geo_continent,
+  geo_sub_continent,
+  geo_country,
+  geo_region,
+  geo_metro,
+  geo_city,
+  geo_locale,
+  traffic_source_source,
+  traffic_source_medium,
+  traffic_source_campaign,
+  traffic_source_content,
+  traffic_source_term,
+  traffic_source_campaign_id,
+  traffic_source_clid_platform,
+  traffic_source_clid,
+  traffic_source_channel_group,
+  traffic_source_category,
+  user_first_touch_time_msec,
+  app_package_id,
+  app_version,
+  app_title,
+  app_install_source,
+  platform,
+  project_id,
+  app_id,
+  screen_view_screen_name,
+  screen_view_screen_id,
+  screen_view_screen_unique_id,
+  screen_view_previous_screen_name,
+  screen_view_previous_screen_id,
+  screen_view_previous_screen_unique_id,
+  screen_view_previous_time_msec,
+  screen_view_engagement_time_msec,
+  screen_view_entrances,
+  page_view_page_referrer,
+  page_view_page_referrer_title,
+  page_view_previous_time_msec,
+  page_view_engagement_time_msec,
+  page_view_page_title,
+  page_view_page_url,
+  page_view_page_url_path,
+  page_view_hostname,
+  page_view_latest_referrer,
+  page_view_latest_referrer_host,
+  page_view_entrances,
+  app_start_is_first_time,
+  upgrade_previous_app_version,
+  upgrade_previous_os_version,
+  search_key,
+  search_term,
+  outbound_link_classes,
+  outbound_link_domain,
+  outbound_link_id,
+  outbound_link_url,
+  outbound_link,
+  user_engagement_time_msec,
+  scroll_engagement_time_msec,
+  sdk_error_code,
+  sdk_error_message,
+  sdk_version,
+  sdk_name,
+  app_exception_message,
+  app_exception_stack,
+  custom_parameters_json_str,
+  custom_parameters
+FROM 
+    {{database}}.event_v2
+where partition_app = ? 
+  and partition_year >= ?
+  and partition_month >= ?
+  and partition_day >= ?

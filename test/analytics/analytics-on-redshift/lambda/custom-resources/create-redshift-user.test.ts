@@ -77,6 +77,8 @@ describe('Custom resource - Create redshift serverless namespace', () => {
       Sqls: expect.arrayContaining([
         `CREATE USER "IAMR:${dataRoleName}" PASSWORD DISABLE CREATEDB`,
         'CREATE ROLE clickstream',
+        'GRANT CREATE OR REPLACE FUNCTION TO ROLE clickstream',
+        'GRANT DROP FUNCTION TO ROLE clickstream',
         'GRANT create user to role clickstream',
         `GRANT ROLE clickstream TO "IAMR:${dataRoleName}"`,
       ]),
@@ -95,7 +97,8 @@ describe('Custom resource - Create redshift serverless namespace', () => {
     expect(resp.Status).toEqual('SUCCESS');
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
-        `CREATE USER "IAMR:${newRoleName}" PASSWORD DISABLE CREATEDB`,
+        'GRANT CREATE OR REPLACE FUNCTION TO ROLE clickstream',
+        'GRANT DROP FUNCTION TO ROLE clickstream',
         'GRANT create user to role clickstream',
         `GRANT ROLE clickstream TO "IAMR:${newRoleName}"`,
       ]),

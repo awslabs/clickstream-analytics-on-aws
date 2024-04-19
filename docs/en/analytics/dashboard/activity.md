@@ -21,7 +21,7 @@ Below is the SQL command that generates the related views.
         --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v2.sql:3"
         ```
     === "Athena"
-        ```sql title="clickstream-ods-events-query.sql"
+        ```sql title="clickstream-event-query.sql"
         --8<-- "src/analytics/private/sqls/athena/clickstream-event-query.sql"
         ```
 

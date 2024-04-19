@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN, SPECIAL_CHARACTERS_PATTERN } from '@aws/clickstream-base-lib';
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
-import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
@@ -311,6 +311,18 @@ export const isAllowFilesSuffix = (data: any) => {
     if (!ALLOW_UPLOADED_FILE_TYPES.split(',').includes(suffix)) {
       return Promise.reject('Bad request. The file type not allow upload.');
     }
+  }
+  return true;
+};
+
+export const validSpecialCharacters = (value: string | undefined) => {
+  if (!value) {
+    return true;
+  }
+  const regexp = new RegExp(SPECIAL_CHARACTERS_PATTERN);
+  const match = value.match(regexp);
+  if (match) {
+    return false;
   }
   return true;
 };

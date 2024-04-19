@@ -11,32 +11,30 @@
  *  and limitations under the License.
  */
 
-import { readdirSync, statSync } from 'fs';
-import { join, resolve } from 'path';
-import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
+import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '@aws/clickstream-base-lib';
+import { Duration, CustomResource, Arn, ArnFormat, Stack, RemovalPolicy } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
-import { Function, LayerVersion, Code, IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
+import { BasicRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
-import { createSQLExecutionStepFunctions } from './sql-exectution-stepfuncs';
-import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
+import { createSQLExecutionStepFunctions } from './sql-execution-workflow';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
 
 export interface RedshiftSQLExecutionProps {
-  readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
+  readonly serverlessRedshift?: BasicRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly dataAPIRole: IRole;
   readonly codePath: string;
   readonly functionEntry: string;
   readonly workflowBucketInfo: WorkflowBucketInfo;
-  readonly projectId: string;
 }
 
 export abstract class RedshiftSQLExecution extends Construct {
@@ -74,9 +72,8 @@ export abstract class RedshiftSQLExecution extends Construct {
     this.crFunction = resource.fn;
     this.crProvider = resource.provider;
 
-    this.sqlExecutionStepFunctions.grantStartExecution(this.crFunction);
+    this.sqlExecutionStepFunctions?.grantStartExecution(this.crFunction);
     resource.cr.node.addDependency(this.sqlExecutionStepFunctions);
-
   }
 
   protected abstract getCustomResourceProperties(props: RedshiftSQLExecutionProps): { [key: string]: any };
@@ -106,6 +103,7 @@ export abstract class RedshiftSQLExecution extends Construct {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
+      schemaHash: this.getCodeHashByDirectory(props.codePath),
       ...crProps,
     };
 
@@ -129,20 +127,20 @@ export abstract class RedshiftSQLExecution extends Construct {
 
     const fnId = 'RedshiftSQLExecutionFn';
     const fn = new SolutionNodejsFunction(this, fnId, {
-      runtime: Runtime.NODEJS_18_X,
       entry: props.functionEntry,
       handler: 'handler',
       memorySize: 256,
-      reservedConcurrentExecutions: 1,
       timeout: Duration.minutes(15),
-      logRetention: RetentionDays.ONE_WEEK,
+      logConf: {
+        retention: RetentionDays.ONE_WEEK,
+        removalPolicy: RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE,
+      },
       environment: {
         SUPPRESS_ALL_ERROR: 'false',
         APPLY_ALL_APP_SQL: 'false',
         STATE_MACHINE_ARN: this.sqlExecutionStepFunctions.stateMachineArn,
         S3_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
         S3_PREFIX: props.workflowBucketInfo.prefix,
-        PROJECT_ID: props.projectId,
       },
       role: createLambdaRole(this, 'RedshiftSQLExecutionRole', false,
         this.additionalPolicies()),
@@ -150,15 +148,23 @@ export abstract class RedshiftSQLExecution extends Construct {
     });
 
     attachListTagsPolicyForFunction(this, fnId, fn);
-    props.workflowBucketInfo.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
+    props.workflowBucketInfo?.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
+  }
+
+  private getCodeHashByDirectory(directory: string): string {
+    const codesAsset = new Asset(this, 'app-schema-asset', {
+      path: directory,
+    });
+    return codesAsset.assetHash;
   }
 }
 
 export interface ApplicationSchemasAndReportingProps extends RedshiftSQLExecutionProps {
   readonly projectId: string;
   readonly appIds: string;
+  readonly timeZoneWithAppId: string;
   readonly databaseName: string;
   readonly odsTableNames: RedshiftOdsTables;
 }
@@ -215,36 +221,7 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
-      lastModifiedTime: this.getLatestModifyTimestamp(),
+      timezoneWithAppId: properties.timeZoneWithAppId,
     };
-  }
-
-  private getLatestModifyTimestamp(): number {
-    const schemaPath = resolve(__dirname, 'sqls/redshift');
-    const reportingViewsPath = resolve(__dirname, 'sqls/redshift/dashboard');
-
-    // Get latest timestamp from both directories
-    const latestSchemaTimestamp = this.getLatestTimestampForDirectory(schemaPath);
-    const latestReportingViewTimestamp = this.getLatestTimestampForDirectory(reportingViewsPath);
-
-    // Return the max of both timestamps
-    const latestTimestamp = Math.max(latestSchemaTimestamp, latestReportingViewTimestamp);
-
-    return latestTimestamp;
-  }
-
-  private getLatestTimestampForDirectory(directory: string): number {
-    let latestTimestamp = 0;
-
-    const files = readdirSync(directory);
-    files.forEach(file => {
-      const filePath = join(directory, file);
-      const stats = statSync(filePath);
-      if (stats.isFile()) {
-        latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
-      }
-    });
-
-    return latestTimestamp;
   }
 }

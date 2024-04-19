@@ -1,0 +1,65 @@
+{
+  "client_hints" : {
+    "architecture" : null,
+    "bitness" : null,
+    "full_version_list" : null,
+    "mobile" : false,
+    "model" : null,
+    "platform" : "\"macOS\"",
+    "platform_version" : null,
+    "wow64" : false,
+    "brands" : [ {
+      "brand" : "Not/A)Brand",
+      "version" : "99"
+    }, {
+      "brand" : "Microsoft Edge",
+      "version" : "115"
+    }, {
+      "brand" : "Chromium",
+      "version" : "115"
+    } ]
+  },
+  "client_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "currency" : null,
+  "engagement_time_msec" : null,
+  "event_location" : null,
+  "event_name" : "page_view",
+  "ga_session_id" : "1691480516",
+  "ga_session_number" : 2,
+  "ip_override" : "52.94.133.137",
+  "item_id" : null,
+  "items" : null,
+  "language" : "en-us",
+  "page_location" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745",
+  "page_referrer" : "https://tagassistant.google.com/",
+  "page_title" : "Retail Demo Store",
+  "screen_resolution" : "3440x1440",
+  "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.200",
+  "user_id" : null,
+  "x-ga-ur" : null,
+  "value" : 0.0,
+  "x-ga-mp2-user_properties" : null,
+  "x-ga-system_properties" : {
+    "dbg" : "1",
+    "fid" : null,
+    "ee" : false,
+    "fv" : null,
+    "ss" : null
+  },
+  "x-sst-system_properties" : {
+    "uc" : "US",
+    "ngs" : "1",
+    "gse" : null,
+    "gcd" : null,
+    "tft" : 0,
+    "consent" : null,
+    "request_start_time_ms" : null
+  },
+  "x-ga-protocol_version" : "2",
+  "x-ga-gtm_version" : "45je3820",
+  "x-ga-mp2-seg" : "1",
+  "x-ga-js_client_id" : "807802863.1690769179",
+  "x-ga-page_id" : 616150298,
+  "x-ga-measurement_id" : "G-000000001",
+  "x-ga-request_count" : 1
+}

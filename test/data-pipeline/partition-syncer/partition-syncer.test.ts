@@ -230,22 +230,22 @@ describe('Glue catalog add partition test', () => {
     expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(26, PutObjectCommand, {
       Body: '',
       Bucket: 'sink-test-cf',
-      Key: `sink-test-prefix-cf/test_proj_id_cf/event/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
+      Key: `sink-test-prefix-cf/test_proj_id_cf/event_v2/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
     });
     expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(28, PutObjectCommand, {
       Body: '',
       Bucket: 'sink-test-cf',
-      Key: `sink-test-prefix-cf/test_proj_id_cf/event_parameter/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
+      Key: `sink-test-prefix-cf/test_proj_id_cf/session/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
     });
     expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(30, PutObjectCommand, {
       Body: '',
       Bucket: 'sink-test-cf',
-      Key: `sink-test-prefix-cf/test_proj_id_cf/user/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
+      Key: `sink-test-prefix-cf/test_proj_id_cf/user_v2/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
     });
     expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(32, PutObjectCommand, {
       Body: '',
       Bucket: 'sink-test-cf',
-      Key: `sink-test-prefix-cf/test_proj_id_cf/item/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
+      Key: `sink-test-prefix-cf/test_proj_id_cf/item_v2/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
     });
   });
 });

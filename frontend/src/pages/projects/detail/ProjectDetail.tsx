@@ -17,7 +17,7 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { getPipelineByProject } from 'apis/pipeline';
+import { getPipelineDetail } from 'apis/pipeline';
 import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -39,17 +39,15 @@ const ProjectDetail: React.FC = () => {
   const [projectPipeline, setProjectPipeline] = useState<IPipeline>();
   const [projectInfo, setProjectInfo] = useState<IProject>();
 
-  const getPipelineByProjectId = async (projectId: string) => {
+  const getPipelineByProjectId = async (projectId: string, refresh: string) => {
     setLoadingPipeline(true);
-    const { success, data }: ApiResponse<ResponseTableData<IPipeline>> =
-      await getPipelineByProject({
-        pid: projectId,
-        version: 'latest',
+    const { success, data }: ApiResponse<IExtPipeline> =
+      await getPipelineDetail({
+        projectId: defaultStr(projectId),
+        refresh,
       });
     if (success) {
-      if (data.items.length > 0) {
-        setProjectPipeline(data.items[0]);
-      }
+      setProjectPipeline(data);
       setLoadingPipeline(false);
       setLoadingData(false);
     }
@@ -63,7 +61,12 @@ const ProjectDetail: React.FC = () => {
       });
       if (success) {
         setProjectInfo(data);
-        getPipelineByProjectId(projectId);
+        if (data?.pipelineId && data?.pipelineId !== '') {
+          getPipelineByProjectId(projectId, 'false');
+        } else {
+          setLoadingPipeline(false);
+          setLoadingData(false);
+        }
       }
     } catch (error) {
       setLoadingData(false);
@@ -98,8 +101,8 @@ const ProjectDetail: React.FC = () => {
       return (
         <ProjectPipeline
           loadingRefresh={loadingPipeline}
-          reloadPipeline={() => {
-            getPipelineByProjectId(defaultStr(id));
+          reloadPipeline={(refresh: string) => {
+            getPipelineByProjectId(defaultStr(id), refresh);
           }}
           pipelineInfo={projectPipeline}
         />

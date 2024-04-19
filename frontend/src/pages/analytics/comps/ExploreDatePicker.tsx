@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { ExploreGroupColumn } from '@aws/clickstream-base-lib';
 import { DatePicker, Select, SelectProps } from '@cloudscape-design/components';
 import InfoTitle from 'components/common/title/InfoTitle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExploreGroupColumn } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 
 interface IExploreDatePickerProps {

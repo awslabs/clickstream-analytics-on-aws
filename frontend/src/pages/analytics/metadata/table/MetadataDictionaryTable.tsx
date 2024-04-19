@@ -29,7 +29,7 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DICTIONARY_DISPLAY_PREFIX } from 'ts/const';
+import { DICTIONARY_DISPLAY_PREFIX, TABLE_FILTER_OPTIONS } from 'ts/const';
 import {
   alertMsg,
   defaultStr,
@@ -125,7 +125,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       propertyLabel: t('analytics:metadata.dictionary.tableColumnValue'),
       key: 'value',
       groupValuesLabel: t('analytics:metadata.dictionary.tableColumnValue'),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
     {
       propertyLabel: t('analytics:metadata.dictionary.tableColumnDisplayValue'),
@@ -133,7 +133,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       groupValuesLabel: t(
         'analytics:metadata.dictionary.tableColumnDisplayValue'
       ),
-      operators: [':', '!:', '=', '!='],
+      operators: TABLE_FILTER_OPTIONS,
     },
   ];
 

@@ -10,14 +10,12 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { aws_sdk_client_common_config, logger, sleep } from '@aws/clickstream-base-lib';
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
-import { logger } from '../../common/powertools';
 import { readS3ObjectAsString } from '../../common/s3';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
-import { sleep } from '../../common/utils';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
 
 export function getRedshiftClient(roleArn: string) {
@@ -187,17 +185,17 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
 };
 
 
-export async function exeucteBySqlorS3File(sqlOrS3File: string,
+export async function executeBySqlOrS3File(sqlOrS3File: string,
   redShiftClient: RedshiftDataClient, serverlessRedshiftProps?: RedshiftServerlessProps,
   provisionedRedshiftProps?: ProvisionedRedshiftProps,
   databaseName?: string,
 ): Promise<{ queryId: string}> {
-  logger.info('exeucteBySqlorS3File() sqlOrS3File: ' + sqlOrS3File);
+  logger.info('executeBySqlOrS3File() sqlOrS3File: ' + sqlOrS3File);
 
   const sqlStatements = await getSqlStatement(sqlOrS3File);
 
   const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
-  logger.info('exeucteBySqlorS3File() get queryId: ' + queryId);
+  logger.info('executeBySqlOrS3File() get queryId: ' + queryId);
 
   return {
     queryId: queryId!,

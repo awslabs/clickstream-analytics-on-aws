@@ -12,14 +12,13 @@
  */
 
 import path from 'path';
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { MetricUnits, Metrics } from '@aws-lambda-powertools/metrics';
 import { GetJobRunCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { EventBridgeEvent } from 'aws-lambda';
 import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
-import { logger } from '../../../common/powertools';
 import { copyS3Object, deleteObjectsByPrefix, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey } from '../../utils/utils-common';
 
 const emrApplicationId = process.env.EMR_SERVERLESS_APPLICATION_ID!;

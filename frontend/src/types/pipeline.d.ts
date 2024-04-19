@@ -12,6 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
+import { ENetworkType } from 'ts/const';
 
 export {};
 declare global {
@@ -35,6 +36,11 @@ declare global {
     dashboardId: string;
   }
 
+  interface IAppTimezone {
+    readonly appId: string;
+    readonly timezone: string;
+  }
+
   interface IPipeline {
     id: string;
     type: string;
@@ -46,17 +52,19 @@ declare global {
     projectId: string;
     region: string;
     dataCollectionSDK: string;
-    tags: ITag[];
+    tags: readonly ITag[];
     network: {
       vpcId: string;
       publicSubnetIds: string[];
       privateSubnetIds: string[];
+      type?: ENetworkType;
     };
     bucket: {
       name: string;
       prefix: string;
     };
     ingestionServer: {
+      ingestionType: EIngestionType;
       size: {
         serverMin: number;
         serverMax: number;
@@ -142,7 +150,7 @@ declare global {
         };
         newServerless: {
           network: {
-            vpcId: sring;
+            vpcId: string;
             subnetIds: string[];
             securityGroups: string[];
           };
@@ -156,14 +164,12 @@ declare global {
         user?: string;
       };
     };
-    status?: {
-      status: string;
-      stackDetails: IStackStatus[];
-    };
+    timezone?: IAppTimezone[];
+    statusType?: PipelineStatusType;
+    stackDetails?: PipelineStatusDetail[];
+    executionDetail?: ExecutionDetail;
     templateVersion?: string;
     workflow?: WorkflowTemplate;
-    executionName?: string;
-    executionArn?: string;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
     templateInfo?: {
@@ -186,9 +192,9 @@ declare global {
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
     selectedS3Bucket: SelectProps.Option | null;
-    selectedPublicSubnet: SelectProps.Option[];
+    selectedPublicSubnet: readonly SelectProps.Option[];
 
-    selectedPrivateSubnet: SelectProps.Option[];
+    selectedPrivateSubnet: readonly SelectProps.Option[];
     selectedCertificate: SelectProps.Option | null;
     selectedSecret: SelectProps.Option | null;
     mskCreateMethod: string;
@@ -226,8 +232,8 @@ declare global {
     redshiftType: string; // 'provisioned' | 'serverless';
     redshiftServerlessVPC: SelectProps.Option | null;
     redshiftBaseCapacity: SelectProps.Option | null;
-    redshiftServerlessSG: SelectProps.Option[];
-    redshiftServerlessSubnets: SelectProps.Option[];
+    redshiftServerlessSG: readonly SelectProps.Option[];
+    redshiftServerlessSubnets: readonly SelectProps.Option[];
     redshiftDataLoadValue: string;
     redshiftDataLoadUnit: SelectProps.Option | null;
 

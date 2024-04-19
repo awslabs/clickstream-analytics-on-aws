@@ -15,8 +15,8 @@ package software.aws.solution.clickstream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import software.aws.solution.clickstream.common.exception.*;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
-import software.aws.solution.clickstream.exception.ExtractDataException;
 
 import java.io.IOException;
 

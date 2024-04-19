@@ -64,7 +64,7 @@ declare global {
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataEvent[];
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -87,7 +87,7 @@ declare global {
     readonly valueType: MetadataValueType;
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -99,7 +99,7 @@ declare global {
   }
 
   interface IColumnAttribute {
-    readonly category: ConditionCategory;
+    readonly category: ConditionCategoryFrontend;
     readonly property: string;
     readonly dataType: MetadataValueType;
   }
@@ -145,6 +145,21 @@ declare global {
     readonly groupCondition?: GroupingCondition;
   }
 
+  interface AttributionTouchPoint {
+    readonly eventName: string;
+    readonly sqlCondition?: ISQLCondition;
+    readonly groupColumn?: IColumnAttribute;
+  }
+
+  interface IExploreAttributionRequest extends IExploreRequest {
+    targetEventAndCondition: AttributionTouchPoint;
+    eventAndConditions: AttributionTouchPoint[];
+    modelType: AttributionModelType;
+    modelWeights?: number[];
+    timeWindowType: ExploreAttributionTimeWindowType;
+    timeWindowInSeconds?: number;
+  }
+
   interface ICondition {
     readonly category: string;
     readonly property: string;
@@ -153,7 +168,7 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  type IRetentionJoinColumn = ColumnAttribute;
+  type IRetentionJoinColumn = IColumnAttribute;
 
   interface IEventExtParameter {
     readonly targetProperty: IColumnAttribute;

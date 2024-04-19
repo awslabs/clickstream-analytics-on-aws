@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
+import { MetadataSource } from '@aws/clickstream-base-lib';
 import { Badge } from '@cloudscape-design/components';
-import { MetadataSource } from 'ts/explore-types';
 
 interface MetadataSourceFCProps {
   source: MetadataSource;

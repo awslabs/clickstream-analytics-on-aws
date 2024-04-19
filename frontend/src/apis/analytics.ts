@@ -221,6 +221,11 @@ export const previewRetention = async (data: IExploreRequest) => {
   return result;
 };
 
+export const previewAttribution = async (data: IExploreAttributionRequest) => {
+  const result: any = await apiRequest('post', `/reporting/attribution`, data);
+  return result;
+};
+
 export const getPipelineDetailByProjectId = async (projectId: string) => {
   const result: any = await apiRequest(
     'get',
@@ -245,11 +250,7 @@ export const triggerScan = async (projectId: string, appId: string) => {
   return result;
 };
 
-export const warmup = async (data: {
-  projectId: string;
-  appId: string;
-  region: string;
-}) => {
+export const warmup = async (data: { projectId: string; appId: string }) => {
   const result: any = await apiRequest('post', '/reporting/warmup', data);
   return result;
 };

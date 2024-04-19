@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { JWTAuthorizer, isEmpty, logger } from '@aws/clickstream-base-lib';
 import {
   APIGatewayAuthorizerResult,
   APIGatewayTokenAuthorizerEvent,
@@ -19,9 +20,6 @@ import {
 } from 'aws-lambda';
 
 import { JwtPayload } from 'jsonwebtoken';
-import { JWTAuthorizer } from './authorizer';
-import { logger } from '../../common/powertools';
-import { isEmpty } from '../../common/utils';
 
 const issuerInput = process.env.ISSUER ?? '';
 

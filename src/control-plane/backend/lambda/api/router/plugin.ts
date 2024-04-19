@@ -16,7 +16,7 @@ import { body, header, query, param } from 'express-validator';
 import { defaultOrderValueValid, defaultPageValueValid, isAllowFilesSuffix, isPluginIdValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { PluginServ } from '../service/plugin';
 
-const router_plugin = express.Router();
+const router_plugin: express.Router = express.Router();
 const pluginServ: PluginServ = new PluginServ();
 
 router_plugin.get(

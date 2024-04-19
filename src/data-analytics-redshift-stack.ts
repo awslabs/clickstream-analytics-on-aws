@@ -12,38 +12,36 @@
  */
 
 import {
-  CfnCondition,
-  CfnOutput,
-  CfnStack,
-  Fn,
-  Stack,
-  StackProps,
-} from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
-import {
-  createStackParameters, RedshiftAnalyticsStackProps,
-} from './analytics/parameter';
-import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
-import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
-import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-  OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
-  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-  TABLE_NAME_EVENT,
-  TABLE_NAME_EVENT_PARAMETER,
-  TABLE_NAME_USER,
-  TABLE_NAME_ITEM,
   OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
-} from './common/constant';
-import { SolutionInfo } from './common/solution-info';
+  OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
+  TABLE_NAME_EVENT_V2,
+  TABLE_NAME_ITEM_V2,
+  TABLE_NAME_USER_V2,
+  TABLE_NAME_SESSION,
+  SolutionInfo,
+} from '@aws/clickstream-base-lib';
+import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, Stack, StackProps } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
+import { createStackParameters, RedshiftAnalyticsStackProps } from './analytics/parameter';
+import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
+import { RolePermissionBoundaryAspect } from './common/aspects';
+import {
+  addCfnNagForCfnResource,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention,
+  ruleRolePolicyWithWildcardResources,
+} from './common/cfn-nag';
+import { REDSHIFT_MODE } from './common/model';
+import { Parameters } from './common/parameters';
 import { associateApplicationWithStack } from './common/stack';
-import { REDSHIFT_MODE } from '../src/common/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -78,6 +76,12 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -87,24 +91,24 @@ export function createRedshiftAnalyticsStack(
 ) {
 
   const tablesOdsSource: TablesODSSource = {
-    event: {
+    event_v2: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT + '/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_V2 + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    event_parameter: {
+    item_v2: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_PARAMETER + '/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM_V2 + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    user: {
+    user_v2: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER + '/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER_V2 + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
-    item: {
+    session: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_SESSION + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
   };
@@ -128,7 +132,8 @@ export function createRedshiftAnalyticsStack(
     loadDataConfig,
     workflowBucketInfo,
     mvRefreshInterval: props.redshift.mvRefreshInterval,
-
+    clickstreamMetadataDdbTable: props.clickstreamMetadataDdbTable,
+    segmentsS3Prefix: props.segmentsS3Prefix,
     scanMetadataWorkflowData: {
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
       topFrequentPropertiesLimit: props.scanMetadataConfiguration.topFrequentPropertiesLimit,
@@ -182,6 +187,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timezoneWithAppId: props.timezoneWithAppId,
     },
   );
   (newRedshiftServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isNewRedshiftServerless;
@@ -199,6 +206,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timezoneWithAppId: props.timezoneWithAppId,
     },
   );
   (redshiftExistingServerlessStack.nestedStackResource as CfnStack).cfnOptions.condition = isExistingRedshiftServerless;
@@ -214,6 +223,8 @@ export function createRedshiftAnalyticsStack(
       },
       emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
+      dataFreshnessInHour: props.dataFreshnessInHour,
+      timezoneWithAppId: props.timezoneWithAppId,
     },
   );
   (redshiftProvisionedStack.nestedStackResource as CfnStack).cfnOptions.condition = isRedshiftProvisioned;

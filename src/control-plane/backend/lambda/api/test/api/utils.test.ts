@@ -11,9 +11,6 @@
  *  and limitations under the License.
  */
 
-import { SecurityGroupRule } from '@aws-sdk/client-ec2';
-import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
-import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import {
   MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
@@ -30,10 +27,19 @@ import {
   CORS_PATTERN,
   STACK_CORS_PATTERN,
   EMAIL_PATTERN,
-} from '../../common/constants-ln';
-import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
+} from '@aws/clickstream-base-lib';
+import { SecurityGroupRule } from '@aws-sdk/client-ec2';
+import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { S3_INGESTION_PIPELINE } from './pipeline-mock';
+import { validSpecialCharacters } from '../../common/request-valid';
+import {
+  validateDataProcessingInterval,
+  validatePattern,
+  validateSinkBatch,
+  validateXSS,
+} from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, getAppRegistryApplicationArn, isEmpty } from '../../common/utils';
+import { containRule, corsStackInput, filterDynamicPipelineTags, getAppRegistryApplicationArn, getStackPrefix, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -760,6 +766,41 @@ describe('Network test', () => {
     invalidValues.forEach(v => expect(() => validateDataProcessingInterval(v)).toThrow(ClickStreamBadRequestError));
   });
 
+  it('Validate special characters', async () => {
+    expect(validSpecialCharacters('')).toEqual(true);
+    expect(validSpecialCharacters('abc def ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc-def-ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc_def_ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc(def)ghi')).toEqual(true);
+
+    expect(validSpecialCharacters('abc[def]ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc{def}ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc}def{ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc<def>ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc,def,ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc/def/ghi')).toEqual(true);
+    expect(validSpecialCharacters('abc.def.ghi')).toEqual(true);
+
+    expect(validSpecialCharacters('abc|def|ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc!def!ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc@def@ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc#def#ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc$def$ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc%def%ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc^def^ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc&def&ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc*def*ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc+def+ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc=def=ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc:def:ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc;def;ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc\'def\'ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc"def"ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc?def?ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc~def~ghi')).toEqual(false);
+    expect(validSpecialCharacters('abc`def`ghi')).toEqual(false);
+  });
+
   it('Validate XSS', async () => {
     const validValues = [
       '><svg onload=alert(1)>',
@@ -782,7 +823,7 @@ describe('Network test', () => {
 
   it('Get valid Service Catalog AppRegistry application arn', () => {
     expect(getAppRegistryApplicationArn(S3_INGESTION_PIPELINE))
-      .toEqual('#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn');
+      .toEqual(`#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`);
   });
 
   it('Return empty string as Service Catalog AppRegistry application arn', () => {
@@ -791,5 +832,28 @@ describe('Network test', () => {
       region: 'cn-north-1',
     };
     expect(getAppRegistryApplicationArn(pipeline)).toEqual('');
+  });
+
+  it('filters out dynamic pipeline tags', () => {
+    const pipeline = {
+      ...S3_INGESTION_PIPELINE,
+      tags: [
+        ...S3_INGESTION_PIPELINE.tags,
+        {
+          key: 'DynamicTagKey',
+          value: '#.dynamicTag.value',
+        },
+        {
+          key: '#.DynamicTag.key',
+          value: 'DynamicTagValue',
+        },
+        {
+          key: '#.DynamicTag.key',
+          value: '#.dynamicTag.value',
+        },
+      ],
+    };
+
+    expect(filterDynamicPipelineTags(pipeline).tags).toEqual(S3_INGESTION_PIPELINE.tags);
   });
 });

@@ -12,6 +12,17 @@
  */
 
 import {
+  ExploreComputeMethod,
+  ExploreConversionIntervalType,
+  ExploreGroupColumn,
+  ExploreRequestAction,
+  IMetadataBuiltInList,
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+  SPECIAL_CHARACTERS_PATTERN,
+  QuickSightChartType,
+} from '@aws/clickstream-base-lib';
+import {
   Button,
   ColumnLayout,
   Container,
@@ -45,18 +56,6 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import {
-  QUICKSIGHT_ANALYSIS_INFIX,
-  QUICKSIGHT_DASHBOARD_INFIX,
-} from 'ts/constant-ln';
-import {
-  ExploreComputeMethod,
-  ExploreConversionIntervalType,
-  ExploreRequestAction,
-  ExploreGroupColumn,
-  QuickSightChartType,
-  IMetadataBuiltInList,
-} from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,
@@ -214,6 +213,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       );
       if (!body) {
         alertMsg(t('analytics:valid.funnelPipelineVersionError'));
+        return;
+      }
+      if (
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(chartTitle) ||
+        new RegExp(SPECIAL_CHARACTERS_PATTERN).test(chartSubTitle)
+      ) {
+        alertMsg(t('analytics:valid.inputSpecialCharactersError'));
         return;
       }
       setLoadingData(true);

@@ -11,11 +11,13 @@
  *  and limitations under the License.
  */
 
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { SolutionInfo } from '@aws/clickstream-base-lib';
+import { Aspects, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { createAthenaStackParameters } from './analytics/parameter';
 import { AthenaSavedQuery } from './analytics/private/athena-saved-queries';
-import { SolutionInfo } from './common/solution-info';
+import { RolePermissionBoundaryAspect } from './common/aspects';
+import { Parameters } from './common/parameters';
 import { associateApplicationWithStack } from './common/stack';
 
 export class DataModelingAthenaStack extends Stack {
@@ -38,11 +40,18 @@ export class DataModelingAthenaStack extends Stack {
       database: athenaParameters.database,
       workGroup: athenaParameters.workGroup,
       eventTable: athenaParameters.eventTable,
-      eventParamTable: athenaParameters.eventParamTable,
+      sessionTable: athenaParameters.sessionTable,
       userTable: athenaParameters.userTable,
+      itemTable: athenaParameters.itemTable,
     });
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }

@@ -14,14 +14,13 @@
 import { join } from 'path';
 import { CfnResource, Duration } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Runtime, Function } from 'aws-cdk-lib/aws-lambda';
+import { Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { createKinesisToS3LambdaRole } from './iam';
 import { createKinesisToS3LambdaSecurityGroup } from './sg';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
-import { POWERTOOLS_ENVS } from '../../../common/powertools';
 import { SolutionNodejsFunction } from '../../../private/function';
 
 export interface KinesisToS3Lambda {
@@ -40,12 +39,13 @@ export function createKinesisToS3Lambda(
   const role = createKinesisToS3LambdaRole(scope);
 
   const fn = new SolutionNodejsFunction(scope, 'kinesisToS3Lambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(__dirname, '..', 'kinesis-to-s3-lambda', 'index.ts'),
     handler: 'handler',
     memorySize: 2048,
     timeout: Duration.minutes(15),
-    logRetention: RetentionDays.ONE_WEEK,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
     role,
     vpc,
     vpcSubnets: props.subnetSelection,
@@ -54,8 +54,8 @@ export function createKinesisToS3Lambda(
     environment: {
       S3_BUCKET: props.s3DataBucket.bucketName,
       S3_PREFIX: props.s3DataPrefix,
-      ... POWERTOOLS_ENVS,
     },
+    applicationLogLevel: 'WARN',
   });
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [

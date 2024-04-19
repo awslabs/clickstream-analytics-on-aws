@@ -19,7 +19,7 @@ import { alertMsg, defaultStr } from 'ts/utils';
 
 interface TagsProps {
   tags: TagEditorProps.Tag[];
-  changeTags: (tags: TagEditorProps.Tag[]) => void;
+  changeTags: (tags: readonly TagEditorProps.Tag[]) => void;
 }
 
 const Tags: React.FC<TagsProps> = (props: TagsProps) => {
@@ -105,10 +105,10 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
             alertMsg(t('tag.deleteTips'), 'error');
             return;
           } else {
-            changeTags(event.detail.tags as any);
+            changeTags(event.detail.tags);
           }
         } else {
-          changeTags(event.detail.tags as any);
+          changeTags(event.detail.tags);
         }
       }}
     />

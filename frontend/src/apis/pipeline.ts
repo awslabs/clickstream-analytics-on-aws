@@ -30,17 +30,16 @@ const getPipelineByProject = async (params: {
 };
 
 const getPipelineDetail = async (params: {
-  id: string;
-  pid: string;
-  cache?: boolean;
+  projectId: string;
+  refresh?: string;
 }) => {
-  let cacheParam = 'false';
-  if (params.cache) {
-    cacheParam = 'true';
+  let refreshParam = 'false';
+  if (params.refresh) {
+    refreshParam = params.refresh;
   }
   const result: any = await apiRequest(
     'get',
-    `/pipeline/${params.id}?pid=${params.pid}&cache=${cacheParam}`
+    `/pipeline/${params.projectId}?pid=${params.projectId}&refresh=${refreshParam}`
   );
   return result;
 };

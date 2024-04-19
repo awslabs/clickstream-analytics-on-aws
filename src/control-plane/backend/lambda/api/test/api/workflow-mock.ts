@@ -12,11 +12,13 @@
  */
 
 import { Parameter } from '@aws-sdk/client-cloudformation';
+import { cloneDeep } from 'lodash';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { getStackPrefix } from '../../common/utils';
 
 export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
-  const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
+  const parameters = cloneDeep(base);
   const keys = parameters.map(p => p.ParameterKey);
   for (let att of attach) {
     if (keys.indexOf(att.ParameterKey) > -1) {
@@ -25,6 +27,32 @@ export function mergeParameters(base: Parameter[], attach: Parameter[]) {
     } else {
       parameters.push(att);
     }
+  }
+  return parameters;
+}
+
+export function removeParameters(base: Parameter[], attach: Parameter[]) {
+  // Deep Copy
+  const parameters = cloneDeep(base);
+  const keys = parameters.map(p => p.ParameterKey);
+  for (let att of attach) {
+    if (keys.indexOf(att.ParameterKey) > -1) {
+      const index = keys.indexOf(att.ParameterKey);
+      parameters.splice(index, 1);
+      keys.splice(index, 1);
+    }
+  }
+  return parameters;
+}
+
+export function replaceParameters(base: Parameter[], search: Parameter, replace: Parameter) {
+  // Deep Copy
+  const parameters = cloneDeep(base);
+  const indexOfObject = parameters.findIndex((object) => {
+    return object.ParameterKey === search.ParameterKey;
+  });
+  if (indexOfObject > -1) {
+    parameters[indexOfObject] = replace;
   }
   return parameters;
 }
@@ -168,6 +196,30 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
       ParameterValue: '90',
     },
   ],
+);
+
+export const INGESTION_S3_PRIVATE_PARAMETERS = replaceParameters(
+  INGESTION_S3_PARAMETERS,
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000021,subnet-00000000000000022,subnet-00000000000000023',
+  },
+  {
+    ParameterKey: 'PublicSubnetIds',
+    ParameterValue: 'subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+  },
+);
+
+export const INGESTION_S3_FARGATE_PARAMETERS = replaceParameters(
+  INGESTION_S3_PARAMETERS,
+  {
+    ParameterKey: 'WorkerStopTimeout',
+    ParameterValue: '90',
+  },
+  {
+    ParameterKey: 'WorkerStopTimeout',
+    ParameterValue: '120',
+  },
 );
 
 export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
@@ -531,7 +583,7 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -549,7 +601,7 @@ export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParam
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -583,7 +635,7 @@ export const DATA_PROCESSING_PLUGIN2_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -601,7 +653,7 @@ export const DATA_PROCESSING_PLUGIN3_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -619,7 +671,7 @@ export const DATA_PROCESSING_THIRDPARTY_SDK_PLUGIN3_PARAMETERS = mergeParameters
   [
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -641,7 +693,7 @@ export const DATA_PROCESSING_PLUGIN4_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
-      ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+      ParameterValue: 'software.aws.solution.clickstream.TransformerV3,software.aws.solution.clickstream.UAEnrichmentV2,software.aws.solution.clickstream.IPEnrichmentV2,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',
@@ -694,6 +746,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   {
     ParameterKey: 'PipelineS3Prefix',
     ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
+  },
+  {
+    ParameterKey: 'SegmentsS3Prefix',
+    ParameterValue: 'clickstream/project_8888_8888/data/segments-output/',
   },
   {
     ParameterKey: 'LoadWorkflowBucket',
@@ -769,11 +825,23 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'EMRServerlessApplicationId.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.EMRServerlessApplicationId',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.EMRServerlessApplicationId`,
   },
   {
     ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
     ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/analytics-metadata-table-name',
+  },
+  {
+    ParameterKey: 'ClickstreamMetadataDdbArn',
+    ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/click-stream-table-name',
+  },
+  {
+    ParameterKey: 'TimeZoneWithAppId',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
+  },
+  {
+    ParameterKey: 'DataFreshnessInHour',
+    ParameterValue: '7',
   },
 ];
 
@@ -864,6 +932,10 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS = merge
       ParameterKey: 'RedshiftServerlessRPU',
       ParameterValue: '8',
     },
+    {
+      ParameterKey: 'SegmentsS3Prefix',
+      ParameterValue: 'example/',
+    },
   ],
 );
 export const MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS = mergeParameters(
@@ -880,6 +952,10 @@ export const MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS =
     {
       ParameterKey: 'RedshiftDbUser',
       ParameterValue: 'clickstream',
+    },
+    {
+      ParameterKey: 'SegmentsS3Prefix',
+      ParameterValue: 'example/',
     },
   ],
 );
@@ -923,7 +999,11 @@ const BASE_REPORTING_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
+  },
+  {
+    ParameterKey: 'QuickSightTimezoneParam',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
 ];
 
@@ -971,11 +1051,11 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftEndpointParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointAddress`,
   },
   {
     ParameterKey: 'RedshiftPortParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.StackCreatedRedshiftServerlessWorkgroupEndpointPort`,
   },
   {
     ParameterKey: 'QuickSightVpcConnectionSubnetParam',
@@ -987,7 +1067,11 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   },
   {
     ParameterKey: 'RedshiftParameterKeyParam.#',
-    ParameterValue: '#.Clickstream-DataModelingRedshift-6666-6666.BIUserCredentialParameterName',
+    ParameterValue: `#.${getStackPrefix()}-DataModelingRedshift-6666-6666.BIUserCredentialParameterName`,
+  },
+  {
+    ParameterKey: 'QuickSightTimezoneParam',
+    ParameterValue: '[{\"timezone\":\"Asia/Singapore\",\"appId\":\"app_7777_7777\"}]',
   },
 ];
 
@@ -1025,20 +1109,25 @@ export const BASE_METRICS_EMAILS_PARAMETERS = mergeParameters(
 export const BASE_ATHENA_PARAMETERS = [
   {
     ParameterKey: 'AthenaDatabase.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueDatabase',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.GlueDatabase`,
   },
   {
     ParameterKey: 'AthenaEventTable.#',
-    ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueEventTable',
+    ParameterValue: `#.${getStackPrefix()}-DataProcessing-6666-6666.GlueEventTable`,
   },
 ];
 
 export const APPREGISTRY_APPLICATION_ARN_PARAMETER = {
   ParameterKey: 'AppRegistryApplicationArn.#',
-  ParameterValue: '#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn',
+  ParameterValue: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn`,
 };
 
 export const APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER = {
   ParameterKey: 'AppRegistryApplicationArn',
   ParameterValue: '',
+};
+
+export const BOUNDARY_ARN_PARAMETER = {
+  ParameterKey: 'IamRoleBoundaryArn',
+  ParameterValue: 'arn:aws:iam::555555555555:policy/test-boundary-policy',
 };

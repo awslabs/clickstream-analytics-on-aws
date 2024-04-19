@@ -11,19 +11,26 @@
  *  and limitations under the License.
  */
 
+
+import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_SESSION_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX, SolutionInfo } from '@aws/clickstream-base-lib';
+
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Architecture } from '@aws-sdk/client-emr-serverless';
-import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
+import { Aspects, CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { NagSuppressions } from 'cdk-nag';
 import { Construct } from 'constructs';
+import { RolePermissionBoundaryAspect } from './common/aspects';
 import {
   addCfnNagForBucketDeployment,
-  addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, commonCdkNagRules, ruleRolePolicyWithWildcardResources,
+  addCfnNagForCustomResourceProvider,
+  addCfnNagForLogRetention, addCfnNagToStack,
+  commonCdkNagRules,
+  ruleRolePolicyWithWildcardResources,
+  ruleRolePolicyWithWildcardResourcesAndHighSPCM,
 } from './common/cfn-nag';
-import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
-import { SolutionInfo } from './common/solution-info';
+import { Parameters } from './common/parameters';
 import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
 import { ClickstreamSinkTables, DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
@@ -161,22 +168,22 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables.eventTable.tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.eventV2Table.tableName,
     }).condition = withCustomPluginsCondition;
 
-    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
-      description: 'Glue Event Parameter Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables.eventParameterTable.tableName,
+    new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_SESSION_TABLE_SUFFIX}`, {
+      description: 'Glue Session Table',
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.sessionTable.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
       description: 'Glue User Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables.userTable.tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.userV2Table.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
       description: 'Glue Item Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables.itemTable.tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.itemV2Table.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
@@ -217,22 +224,22 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.eventTable.tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.eventV2Table.tableName,
     }).condition = withoutCustomPluginsCondition;
 
-    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
-      description: 'Glue Event Parameter Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.eventParameterTable.tableName,
+    new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_SESSION_TABLE_SUFFIX}`, {
+      description: 'Glue Session Table',
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.sessionTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
       description: 'Glue User Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.userTable.tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.userV2Table.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
       description: 'Glue Item Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.itemTable.tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.itemV2Table.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
@@ -242,6 +249,12 @@ export class DataPipelineStack extends Stack {
 
     // Associate Service Catalog AppRegistry application with stack
     associateApplicationWithStack(this);
+
+    // Add IAM role permission boundary aspect
+    const {
+      iamRoleBoundaryArnParam,
+    } = Parameters.createIAMRolePrefixAndBoundaryParameters(this);
+    Aspects.of(this).add(new RolePermissionBoundaryAspect(iamRoleBoundaryArnParam.valueAsString));
   }
 }
 
@@ -280,26 +293,13 @@ function addCfnNag(stack: Stack) {
     'partitionSyncerLambdaRole/DefaultPolicy/Resource',
     'CopyAssetsCustomResourceLambdaRole/DefaultPolicy/Resource',
     'InitPartitionLambdaRole/DefaultPolicy/Resource',
-    'EmrJobStateListenerLambdaRole/DefaultPolicy/Resource',
     'CreateEMRServelsssApplicationLambdaRole/DefaultPolicy/Resource',
   ].forEach(
     p => addCfnNagToStack(stack, [ruleRolePolicyWithWildcardResources(p, 'CDK', 'Lambda')]),
   );
 
   addCfnNagToStack(stack, [
-    {
-      paths_endswith: ['EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource'],
-      rules_to_suppress: [
-        {
-          id: 'W12',
-          reason: 'Some permissions are not resource based, need set * in resource',
-        },
-        {
-          id: 'W76',
-          reason: 'ACK: SPCM for IAM policy document is higher than 25',
-        },
-      ],
-    },
+    ruleRolePolicyWithWildcardResourcesAndHighSPCM('EmrSparkJobSubmitterLambdaRole/DefaultPolicy/Resource', 'EmrSparkJobSubmitterLambda', 'eni'),
   ]);
 
   NagSuppressions.addStackSuppressions(stack, [... commonCdkNagRules,

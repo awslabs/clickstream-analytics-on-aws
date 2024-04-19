@@ -12,15 +12,14 @@
  */
 
 import { join } from 'path';
-import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { INGESTION_SERVER_PING_PATH } from '@aws/clickstream-base-lib';
+import { CustomResource, Duration, CfnResource, CfnCondition, Fn } from 'aws-cdk-lib';
+import { PolicyStatement, Policy, CfnPolicy } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { addCfnNagSuppressRules } from '../../common/cfn-nag';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface UpdateAlbRulesCustomResourceProps {
@@ -63,7 +62,7 @@ export function updateAlbRulesCustomResource(
   return { customResource: cr, fn };
 }
 
-function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authenticationSecretArn?: string): SolutionNodejsFunction {
+function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, inputAuthenticationSecretArn?: string): SolutionNodejsFunction {
   const policyStatements = [
     new PolicyStatement({
       actions: [
@@ -82,20 +81,32 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
       resources: ['*'],
     }),
   ];
-  if (authenticationSecretArn) {
-    policyStatements.push(
+
+  const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
+  const authenticationSecretArn = inputAuthenticationSecretArn || '';
+
+  const authPolicy = new Policy(scope, 'updateAlbRulesLambdaAuthPolicy', {
+    statements: [
       new PolicyStatement({
         actions: [
           'secretsmanager:GetSecretValue',
         ],
         resources: [authenticationSecretArn],
       }),
-    );
-  }
-  const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
+    ],
+  });
+  authPolicy.attachToRole(role);
+
+  const authEnableCondition = new CfnCondition(
+    scope,
+    'authEnableCondition',
+    {
+      expression: Fn.conditionNot(Fn.conditionEquals(authenticationSecretArn, '')),
+    },
+  );
+  (authPolicy.node.defaultChild as CfnPolicy).cfnOptions.condition = authEnableCondition;
 
   const fn = new SolutionNodejsFunction(scope, 'updateAlbRulesLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'update-alb-rules',
@@ -104,26 +115,18 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
     handler: 'handler',
     memorySize: 256,
     timeout: Duration.minutes(5),
-    logRetention: RetentionDays.ONE_WEEK,
-    role,
     environment: {
-      ...POWERTOOLS_ENVS,
+      PING_PATH: INGESTION_SERVER_PING_PATH,
     },
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
+    },
+    role,
   });
   fn.node.addDependency(role);
-  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
-    {
-      id: 'W89',
-      reason:
-        'Lambda is used as custom resource, ignore VPC settings',
-    },
-
-    {
-      id: 'W92',
-      reason:
-        'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
-    },
-  ]);
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('UpdateALBRule'),
+  );
 
   return fn;
 }

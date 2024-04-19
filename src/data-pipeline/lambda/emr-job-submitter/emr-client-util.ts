@@ -11,18 +11,23 @@
  *  and limitations under the License.
  */
 
+import { aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import {
+  Configuration,
   EMRServerlessClient,
+  GetApplicationCommand,
   StartJobRunCommand,
   StartJobRunCommandInput,
 } from '@aws-sdk/client-emr-serverless';
 import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
+import { CATEGORY_RULE } from './traffic_source_category_rule_v1';
+import { CHANNEL_RULE } from './traffic_source_channel_rule_v1';
+import { TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME, TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME } from '../../../base-lib/src';
 import { getFunctionTags } from '../../../common/lambda/tags';
-import { logger } from '../../../common/powertools';
-import { listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
-import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { isObjectExist, listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
+
 
 const emrClient = new EMRServerlessClient({
   ...aws_sdk_client_common_config,
@@ -54,6 +59,8 @@ export class EMRServerlessUtil {
         logger.warn('appIds is empty, please check env: APP_IDS');
         return;
       }
+      await putInitRuleConfig(config.ruleConfigDir, config.appIds);
+
       const runJobInfo = await EMRServerlessUtil.startJobRun(
         event,
         config,
@@ -122,15 +129,17 @@ export class EMRServerlessUtil {
       startRunTime: new Date().toISOString(),
     });
 
-    await this.recordJobInfo({
-      event,
-      config,
-      jobRunId: 'latest',
-      startTimestamp,
-      endTimestamp,
-      state: 'LAMBDA-SUBMITTED',
-      startRunTime: new Date().toISOString(),
-    });
+    if (!event.reRunJob) {
+      await this.recordJobInfo({
+        event,
+        config,
+        jobRunId: 'latest',
+        startTimestamp,
+        endTimestamp,
+        state: 'LAMBDA-SUBMITTED',
+        startRunTime: new Date().toISOString(),
+      });
+    }
 
     logger.info('jobInfo', { jobInfo });
 
@@ -166,7 +175,10 @@ export class EMRServerlessUtil {
     const outputPartitions = (event.outputPartitions || s3OutputPartitions || estimatedSparkConfig.outputPartitions || config.outputPartitions) + '';
     const rePartitions = (event.inputRePartitions || s3InputRePartitions || estimatedSparkConfig.inputRePartitions || config.rePartitions) + '';
 
-    const jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
+    let jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
+    if (event.reRunJob) {
+      jobName = `${jobName}-rerun`;
+    }
 
     const sinkPrefix = getSinkLocationPrefix(config.sinkS3Prefix, config.projectId);
 
@@ -193,6 +205,7 @@ export class EMRServerlessUtil {
       rePartitions, // [14] rePartitions.
       userKeepDays, // [15] userKeepDays
       itemKeepDays, // [16] itemKeepDays
+      config.ruleConfigDir, // [17] ruleConfigDir
     ];
 
     const jars = Array.from(
@@ -240,6 +253,7 @@ export class EMRServerlessUtil {
       sparkSubmitParameters.push('--conf', `${confKey}=${confVal}`);
     }
 
+    const appConfigs: Configuration[] = await this.getEmrApplicationConfig(config.emrServerlessApplicationId!);
     const startJobRunCommandInput: StartJobRunCommandInput = {
       applicationId: config.emrServerlessApplicationId,
       executionRoleArn: config.roleArn,
@@ -257,12 +271,26 @@ export class EMRServerlessUtil {
             logUri: `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}pipeline-logs/${config.projectId}/`,
           },
         },
+        applicationConfiguration: [
+          ...appConfigs,
+        ],
       },
       tags: funcTags, // propagate the tags of function itself to EMR job runs
     };
 
     logger.info('getJobRunCommandInput return', { startJobRunCommandInput, startTimestamp, endTimestamp });
     return { startJobRunCommandInput, startTimestamp, endTimestamp };
+  }
+
+  private static async getEmrApplicationConfig(emrServerlessApplicationId: string): Promise<Configuration[]> {
+    const res = await emrClient.send(new GetApplicationCommand({
+      applicationId: emrServerlessApplicationId,
+    }));
+    if (res.application?.runtimeConfiguration) {
+      return res.application.runtimeConfiguration;
+    } else {
+      return [];
+    }
   }
 
   private static async recordJobInfo(jobInfoObj: {
@@ -309,6 +337,7 @@ export class EMRServerlessUtil {
       rePartitions: process.env.RE_PARTITIONS ?? '200',
       userKeepDays: process.env.USER_KEEP_DAYS ?? '180',
       itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '360',
+      ruleConfigDir: process.env.RULE_CONFIG_DIR!,
     };
   }
 
@@ -433,7 +462,7 @@ export function getDatePrefixList(prefix: string, startTimestamp: number, endTim
   logger.info(`dataPrefixList for ${new Date(startTimestamp).toISOString()} to ${new Date(endTimestamp).toISOString()}`,
     {
       start: dataPrefixList[0],
-      end: dataPrefixList[dataPrefixList.length -1],
+      end: dataPrefixList[dataPrefixList.length - 1],
       length: dataPrefixList.length,
     });
   return dataPrefixList;
@@ -546,3 +575,40 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
   };
 
 }
+async function putInitRuleConfig(ruleConfigDir: string, appIds: string) {
+  logger.info('putInitRuleConfig', { ruleConfigDir, appIds });
+
+  const categoryRuleFile = `${TRAFFIC_SOURCE_CATEGORY_RULE_FILE_NAME}`;
+  const channelRuleFile = `${TRAFFIC_SOURCE_CHANNEL_RULE_FILE_NAME}`;
+
+  const categoryRuleContent = JSON.stringify(CATEGORY_RULE);
+  const channelRuleContent = JSON.stringify(CHANNEL_RULE);
+
+  const d = new RegExp(/s3:\/\/([^/]+)\/(.*)/).exec(ruleConfigDir);
+
+  if (!d) {
+    logger.error('putInitRuleConfig invalid s3 uri ' + ruleConfigDir);
+    return;
+  }
+
+  const bucket = d[1];
+  let keyPefix = d[2];
+  if (keyPefix && !keyPefix.endsWith('/')) {
+    keyPefix += '/';
+  }
+
+  for (const appId of appIds.split(',')) {
+    const categoryRuleKey = `${keyPefix}${appId}/${categoryRuleFile}`;
+    const channelRuleKey = `${keyPefix}${appId}/${channelRuleFile}`;
+
+    if (! await isObjectExist(bucket, categoryRuleKey)) {
+      await putStringToS3(categoryRuleContent, bucket, categoryRuleKey);
+      logger.info(`put category rule config to s3://${bucket}/${categoryRuleKey}`);
+    }
+    if (! await isObjectExist(bucket, channelRuleKey)) {
+      await putStringToS3(channelRuleContent, bucket, channelRuleKey);
+      logger.info(`put channel rule config to s3://${bucket}/${channelRuleKey}`);
+    }
+  }
+}
+

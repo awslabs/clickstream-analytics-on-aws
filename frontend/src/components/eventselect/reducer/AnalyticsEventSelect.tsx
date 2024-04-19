@@ -11,11 +11,11 @@
  *  and limitations under the License.
  */
 
+import { IMetadataBuiltInList } from '@aws/clickstream-base-lib';
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
-import { IMetadataBuiltInList } from 'ts/explore-types';
 import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
   CategoryItemType,
@@ -34,6 +34,7 @@ interface EventsSelectProps {
   eventDataDispatch: AnalyticsDispatchFunction;
   maxSelectNum?: number;
   disableAddCondition?: boolean;
+  disableAddEvent?: boolean;
   addEventButtonLabel: string;
   loading: boolean;
   eventOptionList: CategoryItemType[];
@@ -55,6 +56,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     eventDataDispatch,
     maxSelectNum,
     disableAddCondition,
+    disableAddEvent,
     addEventButtonLabel,
     eventOptionList,
     defaultComputeMethodOption,
@@ -67,19 +69,20 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     metadataUserAttributes,
     loading,
   } = props;
-
   return (
     <div className="cs-analytics-dropdown">
       {eventDataState.map((element, index) => {
         return (
           <div key={identity(index)}>
             <div className="cs-analytics-parameter">
-              <div className="cs-para-name">
-                {element.customOrderName ??
-                  (element?.listOrderType === 'alphabet'
-                    ? ALPHABETS[index]
-                    : index + 1)}
-              </div>
+              {!disableAddEvent && (
+                <div className="cs-para-name">
+                  {element.customOrderName ??
+                    (element?.listOrderType === 'alphabet'
+                      ? ALPHABETS[index]
+                      : index + 1)}
+                </div>
+              )}
               <div className="flex-1">
                 <EventItem
                   type="event"
@@ -220,22 +223,24 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
           </div>
         );
       })}
-      <div className="mt-10">
-        <Button
-          iconName="add-plus"
-          onClick={() => {
-            eventDataDispatch({
-              type: 'addNewEventAnalyticsItem',
-              defaultComputeMethodOption,
-              isMultiSelect,
-              enableChangeRelation,
-            });
-          }}
-          disabled={eventDataState.length >= (maxSelectNum ?? 10)}
-        >
-          {addEventButtonLabel}
-        </Button>
-      </div>
+      {!disableAddEvent && (
+        <div className="mt-10">
+          <Button
+            iconName="add-plus"
+            onClick={() => {
+              eventDataDispatch({
+                type: 'addNewEventAnalyticsItem',
+                defaultComputeMethodOption,
+                isMultiSelect,
+                enableChangeRelation,
+              });
+            }}
+            disabled={eventDataState.length >= (maxSelectNum ?? 10)}
+          >
+            {addEventButtonLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

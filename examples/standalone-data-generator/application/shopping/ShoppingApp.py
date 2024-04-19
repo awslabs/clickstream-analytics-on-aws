@@ -21,11 +21,12 @@ from application.shopping.ShoppingEventType import EventType
 from model.User import User
 from model.device.MobileDevice import MobileDevice
 from model.device.WebDevice import WebDevice
+import copy
 
 
 def get_event_for_user(user):
     if user.platform == enums.Platform.Web:
-        event = EventSample.sampleWebEvent
+        event = copy.deepcopy(EventSample.sampleWebEvent)
         event["device_id"] = user.web_device.device_id
         event["make"] = user.web_device.make
         event["locale"] = user.web_device.locale
@@ -37,7 +38,7 @@ def get_event_for_user(user):
         event["system_language"] = user.web_device.system_language
         event["country_code"] = user.web_device.country_code
     else:
-        event = EventSample.sampleAppEvent
+        event = copy.deepcopy(EventSample.sampleAppEvent)
         event["device_id"] = user.mobile_device.device_id
         event["platform"] = user.platform
         event["os_version"] = user.mobile_device.os_version
@@ -118,17 +119,18 @@ def get_launch_events(user, event):
     event["attributes"]["_session_number"] = user.session_number
     # generate latest referrer for web
     if user.platform == enums.Platform.Web:
-        referrer = enums.latest_referrer.get_random_item()
+        referrer = enums.get_latest_referrer()
         event["attributes"]["_latest_referrer"] = referrer[0]
         event["attributes"]["_latest_referrer_host"] = referrer[1]
     # handle first open
     if user.is_first_open:
-        event["attributes"]["_session_start_timestamp"] = user.current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["value"] = user.current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = user.current_timestamp
+        current_timestamp = user.current_timestamp
+        event["attributes"]["_session_start_timestamp"] = current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["value"] = current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = current_timestamp
         events.append(get_final_event(user, EventType.FIRST_OPEN, clean_event(event)))
         user.is_first_open = False
-        user.first_touch_timestamp = user.current_timestamp
+        user.first_touch_timestamp = current_timestamp
     # add user attribute if user is login
     if user.is_login:
         user_id = {

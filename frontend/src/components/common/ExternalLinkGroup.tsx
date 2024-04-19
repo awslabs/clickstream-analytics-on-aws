@@ -16,7 +16,6 @@ import Header from '@cloudscape-design/components/header';
 import Icon from '@cloudscape-design/components/icon';
 import Link from '@cloudscape-design/components/link';
 import { identity } from 'lodash';
-import React from 'react';
 import { SeparatedList } from './separated-list';
 
 interface ExternalLinkItemProps {

@@ -10,9 +10,9 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { logger } from '@aws/clickstream-base-lib';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent } from 'aws-lambda';
 import parser from 'cron-parser';
-import { logger } from '../../../common/powertools';
 
 export const handler: CdkCustomResourceHandler = async (event) => {
   try {
@@ -59,10 +59,19 @@ async function _handler(event: CdkCustomResourceEvent) {
     }
   }
 
+  let mvRefreshIntervalSeconds = 7200;
+  if (event.ResourceProperties.mvRefreshInterval) {
+    const parsedValue = parseInt(event.ResourceProperties.mvRefreshInterval, 10);
+    if (!isNaN(parsedValue)) {
+      mvRefreshIntervalSeconds = Math.min(7200, parsedValue * 60);
+    }
+  }
+
   return {
     Data: {
       intervalSeconds,
       scanWorkflowMinIntervalSeconds: scanWorkflowMinIntervalSeconds,
+      mvRefreshIntervalSeconds: mvRefreshIntervalSeconds,
     },
   };
 }

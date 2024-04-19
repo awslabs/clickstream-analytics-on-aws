@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { XhrHttpHandler } from '@aws-sdk/xhr-http-handler';
@@ -41,7 +42,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH, PLUGIN_TYPE_LIST } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import {
   alertMsg,
   validatePluginMainFunction,

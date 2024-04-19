@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataSource } from '@aws/clickstream-base-lib';
 import {
   Box,
   Button,
@@ -29,7 +30,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_DISPLAY_PREFIX } from 'ts/const';
-import { MetadataSource } from 'ts/explore-types';
 import {
   alertMsg,
   defaultStr,

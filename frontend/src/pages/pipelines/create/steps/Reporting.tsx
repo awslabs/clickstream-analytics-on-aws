@@ -39,7 +39,7 @@ import {
   PIPELINE_QUICKSIGHT_GUIDE_LINK_EN,
   PIPELINE_QUICKSIGHT_GUIDE_LINK_CN,
 } from 'ts/url';
-import { isReportingDisabled } from 'ts/utils';
+import { defaultStr, isReportingDisabled, ternary } from 'ts/utils';
 
 interface ReportingProps {
   update?: boolean;
@@ -247,23 +247,23 @@ const Reporting: React.FC<ReportingProps> = (props: ReportingProps) => {
                               description={t(
                                 'pipeline:create.quickSightUserDesc'
                               )}
-                              errorText={
-                                quickSightUserEmptyError
-                                  ? t('pipeline:valid.quickSightUserEmptyError')
-                                  : ''
-                              }
+                              errorText={ternary(
+                                quickSightUserEmptyError,
+                                t('pipeline:valid.quickSightUserEmptyError'),
+                                ''
+                              )}
                             >
                               <div className="flex">
                                 <div className="flex-1">
                                   <Select
-                                    statusType={
-                                      loadingUsers ? 'loading' : 'finished'
-                                    }
-                                    placeholder={
-                                      t(
-                                        'pipeline:create.quickSIghtPlaceholder'
-                                      ) || ''
-                                    }
+                                    statusType={ternary(
+                                      loadingUsers,
+                                      'loading',
+                                      'finished'
+                                    )}
+                                    placeholder={defaultStr(
+                                      t('pipeline:create.quickSIghtPlaceholder')
+                                    )}
                                     selectedOption={
                                       pipelineInfo.selectedQuickSightUser
                                     }

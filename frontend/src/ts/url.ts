@@ -192,6 +192,19 @@ export const buildCloudFormationStackLink = (
   return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
 };
 
+export const buildUpdateCloudFormationStackLink = (
+  region: string,
+  stackId: string,
+  newUrl: string
+) => {
+  let domainSuffix = CONSOLE_GLOBAL_DOMAIN;
+  if (region.startsWith('cn')) domainSuffix = CONSOLE_CHINA_DOMAIN;
+
+  return `https://${region}.${domainSuffix}/cloudformation/home?region=${region}#/stacks/update?stackId=${encodeURIComponent(
+    stackId
+  )}&templateURL=${encodeURIComponent(newUrl)}`;
+};
+
 export const buildMSKLink = (region: string, arn: string) => {
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;

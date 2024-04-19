@@ -11,9 +11,9 @@
  *  and limitations under the License.
  */
 
+import { EMAIL_PATTERN } from '@aws/clickstream-base-lib';
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { EMAIL_PATTERN } from '../../src/common/constant';
 import { PARAMETERS_DESCRIPTION } from '../../src/metrics/settings';
 import { MetricsStack } from '../../src/metrics-stack';
 
@@ -101,7 +101,7 @@ test('has Dashboard', () => {
 });
 
 
-test('has lambda Function to put dashbaord', () => {
+test('has lambda Function to put dashboard', () => {
   template.hasResourceProperties('AWS::Lambda::Function', {
     Environment: {
       Variables: {
@@ -118,6 +118,10 @@ test('has lambda Function to put dashbaord', () => {
           Ref: 'ColumnNumber',
         },
       },
+    },
+    LoggingConfig: {
+      ApplicationLogLevel: 'INFO',
+      LogFormat: 'JSON',
     },
   });
 });

@@ -28,6 +28,9 @@
     - [ ] provisioned Redshift
     - [ ] Athena
   - [ ] deploy with reporting
+  - [ ] streaming ingestion
+    - [ ] with Redshift Serverless
+    - [ ] with provisioned Redshift
 
 ## Is it a breaking change
 

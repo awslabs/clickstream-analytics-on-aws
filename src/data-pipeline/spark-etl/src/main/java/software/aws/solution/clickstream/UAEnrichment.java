@@ -21,6 +21,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericRow;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
+import software.aws.solution.clickstream.util.*;
 import ua_parser.Client;
 import ua_parser.Parser;
 
@@ -28,20 +29,20 @@ import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
-import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
-import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
-import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
-import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE_CATEGORY;
-import static software.aws.solution.clickstream.DatasetUtil.UA_ENRICH;
-import static software.aws.solution.clickstream.DatasetUtil.UA_OS;
-import static software.aws.solution.clickstream.DatasetUtil.UA_OS_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_BROWSER;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_BROWSER_VERSION;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_DEVICE;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_DEVICE_CATEGORY;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_ENRICH;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_OS;
+import static software.aws.solution.clickstream.util.DatasetUtil.UA_OS_VERSION;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 
 public class UAEnrichment {
 
     private static final Parser UA_PARSER = new Parser();
 
-    private static UDF1<String, Row> enrich() {
+    static UDF1<String, Row> enrich() {
         return value -> {
             Client client = UA_PARSER.parse(value);
             String uaBrowser = Optional.ofNullable(client.userAgent).map(a -> a.family).orElse(null);

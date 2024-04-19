@@ -33,10 +33,12 @@ jobs:
           chmod +x ./deployment/test-build-dist-1.sh
           ./deployment/test-build-dist-1.sh
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: |
+            src/**/*
+            frontend/**/*
             deployment/global-s3-assets
             !deployment/global-s3-assets/**/asset.*
   cfn-lint-scan:
@@ -45,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
@@ -55,11 +57,11 @@ jobs:
         id: cfn-lint
         run: |
           cfn-lint --version
-          TEMPLATE_ROOT=templates/default
-          cfn-lint -i W3005 W2001 W3045 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
-          cfn-lint -i W3005 W2001 W3045 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
-          TEMPLATE_ROOT=templates/cn
-          cfn-lint -i W3005 W2001 W3045 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
+          TEMPLATE_ROOT=templates/deployment/global-s3-assets/default
+          cfn-lint -i W3005 W2001 W3045 W8003 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
+          cfn-lint -i W3005 W2001 W3045 W8003 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
+          TEMPLATE_ROOT=templates/deployment/global-s3-assets/cn
+          cfn-lint -i W3005 W2001 W3045 W8003 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
   cfn-nag-scan:
     name: cfn-nag scan
     needs: build-dist
@@ -68,14 +70,14 @@ jobs:
       image: stelligent/cfn_nag
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
       - name: Run cfn-nag scan
         run: |
           set -xeuo pipefail
-          cfn_nag -f -b .cfnnag_global_suppress_list templates/**/*.template.json
+          cfn_nag -f -b .cfnnag_global_suppress_list templates/deployment/global-s3-assets/**/*.template.json
   post-build-scan:
     name: post-build scan
     needs: build-dist
@@ -85,14 +87,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: deployment/global-s3-assets
@@ -102,9 +104,10 @@ jobs:
           ./build-open-source-dist.sh $SOLUTION_NAME
       - name: install dependencies
         run: |
-          yarn install --check-files --frozen-lockfile
-          npx projen
-          yarn install --check-files --frozen-lockfile --cwd frontend 
+          npm install -g pnpm@8.15.3
+          pnpm install --frozen-lockfile
+          pnpm projen
+          pnpm install --frozen-lockfile --dir frontend
       - name: Post-build scan
         env:
           VIPERLIGHT_SCAN_STRATEGY: Enforce

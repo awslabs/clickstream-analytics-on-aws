@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
+  Autosuggest,
   Button,
   Container,
   Form,
@@ -24,15 +26,16 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { createApplication, getApplicationDetail } from 'apis/application';
+import moment from 'moment-timezone';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
 import ConfigFlutterSDK from 'pages/application/detail/comp/ConfigFlutterSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
+import ConfigReactNativeSDK from 'pages/application/detail/comp/ConfigReactNativeSDK';
 import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
+import { FILTER_TIME_ZONE, MAX_USER_INPUT_LENGTH } from 'ts/const';
 import { defaultStr, validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
@@ -49,10 +52,12 @@ const RegisterApp: React.FC = () => {
     androidPackage: '',
     iosBundleId: '',
     iosAppStoreId: '',
+    timezone: '',
   });
 
   const [nameEmptyError, setNameEmptyError] = useState(false);
   const [appIdInvalidError, setAppIdInvalidError] = useState(false);
+  const [timezoneInvalidError, setTimezoneInvalidError] = useState(false);
 
   const getApplicationDetailByAppId = async (appId: string) => {
     try {
@@ -74,6 +79,10 @@ const RegisterApp: React.FC = () => {
   const confirmCreateApplication = async () => {
     if (!application.name.trim()) {
       setNameEmptyError(true);
+      return;
+    }
+    if (!application.timezone.trim()) {
+      setTimezoneInvalidError(true);
       return;
     }
     if (!validateAppId(application.appId)) {
@@ -181,6 +190,41 @@ const RegisterApp: React.FC = () => {
                       };
                     });
                   }}
+                />
+              </FormField>
+
+              <FormField
+                label={t('application:appTimezone')}
+                errorText={
+                  timezoneInvalidError
+                    ? t('application:valid.timezoneInvalid')
+                    : ''
+                }
+              >
+                <Autosuggest
+                  value={application.timezone}
+                  onChange={({ detail }) => {
+                    setTimezoneInvalidError(false);
+                    setApplication((prev) => {
+                      return {
+                        ...prev,
+                        timezone: detail.value,
+                      };
+                    });
+                  }}
+                  options={moment.tz
+                    .names()
+                    .filter((tz) => !FILTER_TIME_ZONE.includes(tz))
+                    .flatMap((tz) => {
+                      return {
+                        label: tz,
+                        value: tz,
+                      };
+                    })}
+                  placeholder={defaultStr(
+                    t('application:labels.timezonePlaceholder')
+                  )}
+                  empty={t('application:labels.empty')}
                 />
               </FormField>
 
@@ -299,6 +343,15 @@ const RegisterApp: React.FC = () => {
                 content: (
                   <div className="pd-20">
                     <ConfigFlutterSDK appInfo={application} />
+                  </div>
+                ),
+              },
+              {
+                label: t('application:detail.reactNative'),
+                id: 'reactNative',
+                content: (
+                  <div className="pd-20">
+                    <ConfigReactNativeSDK appInfo={application} />
                   </div>
                 ),
               },

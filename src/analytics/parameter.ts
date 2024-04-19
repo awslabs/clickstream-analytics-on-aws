@@ -12,29 +12,27 @@
  */
 
 import { join } from 'path';
+import {
+  PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
+  S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
+  DDB_TABLE_ARN_PATTERN,
+  TABLE_NAME_EVENT_V2,
+  TABLE_NAME_SESSION,
+  TABLE_NAME_USER_V2,
+  TABLE_NAME_ITEM_V2,
+} from '@aws/clickstream-base-lib';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
+import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { GetResourcePrefixPropertiesType } from './lambdas/custom-resource/get-source-prefix';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import {
-  PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
-  REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
-  REDSHIFT_DB_USER_NAME_PATTERN,
-  S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
-  DDB_TABLE_ARN_PATTERN,
-  TABLE_NAME_EVENT,
-  TABLE_NAME_EVENT_PARAMETER,
-  TABLE_NAME_USER,
-} from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getExistVpc } from '../common/vpc-utils';
 import { SolutionNodejsFunction } from '../private/function';
 
@@ -46,6 +44,8 @@ export interface RedshiftAnalyticsStackProps {
   projectId: string;
   appIds: string;
   dataProcessingCronOrRateExpression: string;
+  dataFreshnessInHour: number;
+  timezoneWithAppId: string;
   dataSourceConfiguration: {
     bucket: IBucket;
     prefix: string;
@@ -94,14 +94,17 @@ export interface RedshiftAnalyticsStackProps {
       dbUser: string;
     };
   };
+  clickstreamMetadataDdbTable: ITable;
+  segmentsS3Prefix: string;
 }
 
 export interface AthenaAnalyticsStackProps {
   readonly database: string;
   readonly workGroup: string;
   readonly eventTable: string;
-  readonly eventParamTable: string;
+  readonly sessionTable: string;
   readonly userTable: string;
+  readonly itemTable: string;
 }
 
 export function createAthenaStackParameters(scope: Construct): {
@@ -127,19 +130,25 @@ export function createAthenaStackParameters(scope: Construct): {
   const athenaEventTableParam = new CfnParameter(scope, 'AthenaEventTable', {
     description: 'The Athena event table name.',
     type: 'String',
-    default: TABLE_NAME_EVENT,
+    default: TABLE_NAME_EVENT_V2,
   });
 
-  const athenaEventParamTableParam = new CfnParameter(scope, 'AthenaEventParamTable', {
-    description: 'The Athena event table name.',
+  const athenaSessionTableParam = new CfnParameter(scope, 'AthenaSessionTable', {
+    description: 'The Athena session table name.',
     type: 'String',
-    default: TABLE_NAME_EVENT_PARAMETER,
+    default: TABLE_NAME_SESSION,
   });
 
   const athenaUserTableParam = new CfnParameter(scope, 'AthenaUserTable', {
-    description: 'The Athena event table name.',
+    description: 'The Athena user table name.',
     type: 'String',
-    default: TABLE_NAME_USER,
+    default: TABLE_NAME_USER_V2,
+  });
+
+  const athenaItemTableParam = new CfnParameter(scope, 'AthenaItemTable', {
+    description: 'The Athena item table name.',
+    type: 'String',
+    default: TABLE_NAME_ITEM_V2,
   });
 
   athenaParamsGroup.push({
@@ -148,8 +157,9 @@ export function createAthenaStackParameters(scope: Construct): {
       athenaWorkGroupParam.logicalId,
       athenaDatabaseParam.logicalId,
       athenaEventTableParam.logicalId,
-      athenaEventParamTableParam.logicalId,
+      athenaSessionTableParam.logicalId,
       athenaUserTableParam.logicalId,
+      athenaItemTableParam.logicalId,
     ],
   });
 
@@ -171,15 +181,21 @@ export function createAthenaStackParameters(scope: Construct): {
     },
   };
 
-  const athenaEventParamTableParamsLabels = {
-    [athenaEventParamTableParam.logicalId]: {
-      default: 'Athena Event Parameter Table Name',
+  const athenaSessionTableParamsLabels = {
+    [athenaSessionTableParam.logicalId]: {
+      default: 'Athena Session Table Name',
     },
   };
 
   const athenaUserTableParamsLabels = {
     [athenaUserTableParam.logicalId]: {
       default: 'Athena User Table Name',
+    },
+  };
+
+  const athenaItemTableParamsLabels = {
+    [athenaItemTableParam.logicalId]: {
+      default: 'Athena Item Table Name',
     },
   };
 
@@ -192,8 +208,9 @@ export function createAthenaStackParameters(scope: Construct): {
         ...athenaDatabaseParamsLabels,
         ...athenaWorkGroupParamsLabels,
         ...athenaEventTableParamsLabels,
-        ...athenaEventParamTableParamsLabels,
+        ...athenaSessionTableParamsLabels,
         ...athenaUserTableParamsLabels,
+        ...athenaItemTableParamsLabels,
       },
     },
   };
@@ -204,8 +221,9 @@ export function createAthenaStackParameters(scope: Construct): {
       database: athenaDatabaseParam.valueAsString,
       workGroup: athenaWorkGroupParam.valueAsString,
       eventTable: athenaEventTableParam.valueAsString,
-      eventParamTable: athenaEventParamTableParam.valueAsString,
+      sessionTable: athenaSessionTableParam.valueAsString,
       userTable: athenaUserTableParam.valueAsString,
+      itemTable: athenaItemTableParam.valueAsString,
     },
   };
 
@@ -217,12 +235,7 @@ export function createStackParameters(scope: Construct): {
   };
   params: RedshiftAnalyticsStackProps;
 } {
-  const redshiftModeParam = new CfnParameter(scope, 'RedshiftMode', {
-    description: 'Select Redshift cluster mode',
-    type: 'String',
-    default: REDSHIFT_MODE.NEW_SERVERLESS,
-    allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
-  });
+  const redshiftModeParam = Parameters.createRedshiftModeParameter(scope, 'RedshiftMode');
 
   const networkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
 
@@ -270,6 +283,11 @@ export function createStackParameters(scope: Construct): {
     default: 'pipeline-temp/',
   });
 
+  const segmentsS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'SegmentsS3Prefix', {
+    description: 'Segments S3 prefix',
+    default: 'segments/',
+  });
+
   new CfnRule(scope, 'S3BucketReadinessRule', {
     assertions: [
       {
@@ -293,20 +311,18 @@ export function createStackParameters(scope: Construct): {
             Fn.conditionNot(
               Fn.conditionEquals(pipelineS3PrefixParam.valueAsString, ''),
             ),
+            Fn.conditionNot(
+              Fn.conditionEquals(segmentsS3PrefixParam.valueAsString, ''),
+            ),
           ),
         assertDescription:
-          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
+          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket, LoadWorkflowBucketPrefix, pipelineS3Bucket, pipelineS3Prefix and segmentsS3Prefix cannot be empty.',
       },
     ],
   }).overrideLogicalId('S3BucketReadinessRule');
 
   // Set Redshift common parameters
-  const redshiftDefaultDatabaseParam = new CfnParameter(scope, 'RedshiftDefaultDatabase', {
-    description: 'The name of the default database in Redshift',
-    type: 'String',
-    default: 'dev',
-    allowedPattern: '^[a-zA-Z_]{1,127}[^\s"]+$',
-  });
+  const { redshiftDefaultDatabaseParam } = Parameters.createRedshiftCommonParameters(scope);
 
   const mvRefreshIntervalParam = new CfnParameter(scope, 'MVRefreshInterval', {
     description: 'The interval of refresh redshift materialized views in minutes',
@@ -318,7 +334,7 @@ export function createStackParameters(scope: Construct): {
 
   const redshiftCommonParamsGroup = [];
   redshiftCommonParamsGroup.push({
-    Label: { default: 'Redshift Database' },
+    Label: { default: 'Redshift Default Database Name' },
     Parameters: [
       redshiftDefaultDatabaseParam.logicalId,
       mvRefreshIntervalParam.logicalId,
@@ -335,7 +351,7 @@ export function createStackParameters(scope: Construct): {
   };
 
   // Set new Redshift serverless parameters
-  const redshiftServerlessWorkgroupName = createWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
+  const redshiftServerlessWorkgroupName = Parameters.createRedshiftWorkgroupParameter(scope, 'NewRedshiftServerlessWorkgroupName');
   const redshiftServerlessRPU = new CfnParameter(scope, 'RedshiftServerlessRPU', {
     description: 'Redshift processing units (RPUs) used to process your workload.',
     constraintDescription: 'Range must be 8-512 in increments of 8.',
@@ -421,28 +437,12 @@ export function createStackParameters(scope: Construct): {
   // Set existing Redshift serverless parameters
   const existingRedshiftServerlessParamsGroup = [];
 
-  const redshiftServerlessWorkgroupNameParam = createWorkgroupParameter(scope, 'RedshiftServerlessWorkgroupName');
+  const redshiftServerlessWorkgroupNameParam = Parameters.createRedshiftWorkgroupParameter(scope, 'RedshiftServerlessWorkgroupName');
 
-  const redshiftServerlessWorkgroupIdParam = new CfnParameter(scope, 'RedshiftServerlessWorkgroupId', {
-    description: '[Optional] The id of the workgroup in Redshift serverless. Please input it for least permission.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^([a-z0-9-]{24,})?$',
-  });
+  const { redshiftServerlessWorkgroupIdParam, redshiftServerlessNamespaceIdParam } =
+    Parameters.createRedshiftServerlessWorkgroupAndNamespaceParameters(scope);
 
-  const redshiftServerlessNamespaceIdParam = new CfnParameter(scope, 'RedshiftServerlessNamespaceId', {
-    description: 'The id of the namespace in Redshift serverless.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^([a-z0-9-]{24,})?$',
-  });
-
-  const redshiftServerlessIAMRoleParam = new CfnParameter(scope, 'RedshiftServerlessIAMRole', {
-    description: 'The ARN of IAM role of Redshift serverless user with superuser privilege.',
-    type: 'String',
-    default: '',
-    allowedPattern: '^(arn:(aws|aws-cn):iam::[0-9]{12}:role/.*)?$',
-  });
+  const redshiftServerlessIAMRoleParam = Parameters.createRedshiftServerlessDataRoleParameter(scope);
 
   existingRedshiftServerlessParamsGroup.push({
     Label: { default: 'Specify existing Redshift Serverless' },
@@ -469,40 +469,16 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
-  new CfnRule(scope, 'ExistingRedshiftServerlessParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.SERVERLESS),
-    assertions: [
-      {
-        assert: Fn.conditionAnd(
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftServerlessWorkgroupNameParam.valueAsString, ''),
-          ),
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftServerlessIAMRoleParam.valueAsString, ''),
-          ),
-        ),
-        assertDescription:
-            'Namespace, Workgroup and Role Arn are required for using existing Redshift Serverless.',
-      },
-    ],
-  }).overrideLogicalId('ExistingRedshiftServerlessParameters');
+  Parameters.createRedshiftServerlessParametersRule(scope, {
+    redshiftModeParam,
+    redshiftServerlessWorkgroupNameParam,
+    redshiftDataAPIRoleParam: redshiftServerlessIAMRoleParam,
+  });
 
   // Set Redshift cluster parameters
   const redshiftClusterParamsGroup = [];
 
-  const redshiftClusterIdentifierParam = new CfnParameter(scope, 'RedshiftClusterIdentifier', {
-    description: 'The cluster identifier of Redshift.',
-    type: 'String',
-    allowedPattern: REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
-    default: '',
-  });
-
-  const redshiftDbUserParam = new CfnParameter(scope, 'RedshiftDbUser', {
-    description: 'The name of Redshift database user.',
-    type: 'String',
-    allowedPattern: REDSHIFT_DB_USER_NAME_PATTERN,
-    default: '',
-  });
+  const { redshiftClusterIdentifierParam, redshiftDbUserParam } = Parameters.createProvisionedRedshiftParameters(scope);
 
   redshiftClusterParamsGroup.push({
     Label: { default: 'Provisioned Redshift Cluster' },
@@ -520,24 +496,6 @@ export function createStackParameters(scope: Construct): {
       default: 'DB user',
     },
   };
-
-  new CfnRule(scope, 'RedshiftProvisionedParameters', {
-    ruleCondition: Fn.conditionEquals(redshiftModeParam.valueAsString, REDSHIFT_MODE.PROVISIONED),
-    assertions: [
-      {
-        assert: Fn.conditionAnd(
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftClusterIdentifierParam.valueAsString, ''),
-          ),
-          Fn.conditionNot(
-            Fn.conditionEquals(redshiftDbUserParam.valueAsString, ''),
-          ),
-        ),
-        assertDescription:
-            'ClusterIdentifier and DbUser are required when using Redshift Provisioned cluster.',
-      },
-    ],
-  }).overrideLogicalId('RedshiftProvisionedParameters');
 
   // Set load job parameters
   const loadJobParamsGroup = [];
@@ -615,6 +573,8 @@ export function createStackParameters(scope: Construct): {
     allowedPattern: DDB_TABLE_ARN_PATTERN,
   });
 
+  const clickstreamMetadataDdbArnParam = Parameters.createClickstreamMetadataDdbArnParameter(scope);
+
   const topFrequentPropertiesLimitParam = new CfnParameter(scope, 'TopFrequentPropertiesLimit', {
     description: 'The number of top property values that get from ods event table.',
     type: 'Number',
@@ -672,6 +632,14 @@ export function createStackParameters(scope: Construct): {
     description: 'The period of time which records saved in Redshift. in days.',
     type: 'Number',
     default: 365,
+  });
+
+  const dataFreshnessInHourParam = Parameters.createDataFreshnessInHourParameter(scope);
+
+  const timezoneWithAppIdParam = new CfnParameter(scope, 'TimeZoneWithAppId', {
+    description: 'The time zone with app id as json string',
+    type: 'String',
+    default: '[]',
   });
 
   const dataProcessingCronOrRateExpressionParam = new CfnParameter(scope, 'DataProcessingCronOrRateExpression', {
@@ -781,6 +749,9 @@ export function createStackParameters(scope: Construct): {
         [loadWorkflowBucketPrefixParam.logicalId]: {
           default: 'S3 prefix for load workflow data',
         },
+        [segmentsS3PrefixParam.logicalId]: {
+          default: 'S3 prefix for segments output',
+        },
         ...redshiftCommonParamsLabels,
         ...redshiftServerlessParamsLabels,
         ...existingRedshiftServerlessParamsLabels,
@@ -792,6 +763,9 @@ export function createStackParameters(scope: Construct): {
 
         [dataProcessingCronOrRateExpressionParam.logicalId]: {
           default: 'The schedule expression of data processing',
+        },
+        [clickstreamMetadataDdbArnParam.logicalId]: {
+          default: 'Clickstream Metadata DDB table arn',
         },
       },
     },
@@ -814,6 +788,8 @@ export function createStackParameters(scope: Construct): {
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
+      dataFreshnessInHour: dataFreshnessInHourParam.valueAsNumber,
+      timezoneWithAppId: timezoneWithAppIdParam.valueAsString,
       dataSourceConfiguration: {
         bucket: Bucket.fromBucketName(
           scope,
@@ -870,17 +846,10 @@ export function createStackParameters(scope: Construct): {
           clusterIdentifier: redshiftClusterIdentifierParam.valueAsString,
         },
       },
+      clickstreamMetadataDdbTable: Table.fromTableArn(scope, 'ClickstreamMetadataDdbTable', clickstreamMetadataDdbArnParam.valueAsString),
+      segmentsS3Prefix: segmentsS3PrefixParam.valueAsString,
     },
   };
-}
-
-function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
-  return new CfnParameter(scope, id, {
-    description: 'The name of the Redshift serverless workgroup.',
-    type: 'String',
-    default: 'default',
-    allowedPattern: '^([a-z0-9-]{3,64})?$',
-  });
 }
 
 function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: string): string {
@@ -889,7 +858,6 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: st
 
   const lambdaRootPath = __dirname + '/lambdas/custom-resource';
   const fn = new SolutionNodejsFunction(scope, 'GetSourcePrefixCustomerResourceFn', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       lambdaRootPath,
       'get-source-prefix.ts',
@@ -897,11 +865,10 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: st
     handler: 'handler',
     memorySize: 128,
     timeout: Duration.minutes(1),
-    logRetention: RetentionDays.ONE_WEEK,
-    role,
-    environment: {
-      ... POWERTOOLS_ENVS,
+    logConf: {
+      retention: RetentionDays.ONE_WEEK,
     },
+    role,
   });
   const provider = new Provider(
     scope,

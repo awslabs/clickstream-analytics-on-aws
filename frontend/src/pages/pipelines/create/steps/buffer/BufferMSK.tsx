@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { XSS_PATTERN } from '@aws/clickstream-base-lib';
 import {
   AutosuggestProps,
   Button,
@@ -31,7 +32,6 @@ import {
   ResourceCreateMethod,
   SUPPORT_SELF_HOSTED_KAFKA,
 } from 'ts/const';
-import { XSS_PATTERN } from 'ts/constant-ln';
 import { checkDisable, defaultStr, isDisabled, ternary } from 'ts/utils';
 import MSKRequirements from './MSKRequirements';
 

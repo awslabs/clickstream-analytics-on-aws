@@ -16,8 +16,7 @@ import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Duration, Stack, CfnResource } from 'aws-cdk-lib';
 
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Runtime, Tracing, Function } from 'aws-cdk-lib/aws-lambda';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { Tracing, Function } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -26,10 +25,9 @@ import { RoleUtil } from './utils-role';
 
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
-import { ClickstreamSinkTables } from '../data-pipeline';
+import { ClickstreamSinkTables, getRuleConfigDir } from '../data-pipeline';
 
 interface Props {
   readonly vpc: IVpc;
@@ -56,9 +54,7 @@ interface Props {
 
 const functionSettings = {
   handler: 'handler',
-  runtime: Runtime.NODEJS_18_X,
   timeout: Duration.minutes(15),
-  logRetention: RetentionDays.ONE_WEEK,
   tracing: Tracing.ACTIVE,
 };
 
@@ -115,10 +111,10 @@ export class LambdaUtil {
           SOURCE_TABLE_NAME: sourceTableName,
           PROJECT_ID: this.props.projectId,
           APP_IDS: this.props.appIds,
-          ...POWERTOOLS_ENVS,
         },
         ...functionSettings,
         memorySize: 256,
+        applicationLogLevel: 'WARN',
       },
     );
     addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
@@ -141,6 +137,9 @@ export class LambdaUtil {
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
+
+    const ruleConfigDir = getRuleConfigDir(this.props.pipelineS3Prefix, this.props.projectId);
+    this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${ruleConfigDir}*`);
 
     const fn = new SolutionNodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
       role: lambdaRole,
@@ -175,10 +174,11 @@ export class LambdaUtil {
         OUTPUT_FORMAT: this.props.outputFormat,
         USER_KEEP_DAYS: this.props.userKeepDays + '',
         ITEM_KEEP_DAYS: this.props.itemKeepDays + '',
-        ...POWERTOOLS_ENVS,
+        RULE_CONFIG_DIR: `s3://${this.props.pipelineS3Bucket.bucketName}/${ruleConfigDir}`,
       },
       ...functionSettings,
       memorySize: 1024,
+      applicationLogLevel: 'WARN',
     });
     attachListTagsPolicyForFunction(this.scope, 'EmrSparkJobSubmitterFunction', fn);
     return fn;
@@ -204,10 +204,10 @@ export class LambdaUtil {
         PIPELINE_S3_BUCKET_NAME: this.props.pipelineS3Bucket.bucketName,
         PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
         DL_QUEUE_URL: dlSqs.queueUrl,
-        ...POWERTOOLS_ENVS,
       },
       ...functionSettings,
       memorySize: 1024,
+      applicationLogLevel: 'WARN',
     });
     return fn;
   }

@@ -55,6 +55,59 @@
       "docLink": "/analytics/explore/retention/"
     }
   },
+  "attributionInfo": {
+    "title": "归因分析",
+    "description": "归因是指为用户完成转化目标过程中的不同广告、点击和因素分配贡献度的行为。归因模型可以是一组规则或一种数据驱动的算法，用于确定如何将转化分配给转化路径上的接触点。",
+    "links": {
+      "docLinkName": "归因分析",
+      "docLink": "/analytics/explore/attribution"
+    }
+  },
+  "attributionModelInfo": {
+    "title": "归因模型",
+    "description": "归因模型是一组规则或一种数据驱动的算法，用于确定如何将转化分配给转化路径上的接触点。",
+    "links": {
+      "docLinkName": "归因模型",
+      "docLink": "/analytics/explore/attribution"
+    },
+    "firstTouch": {
+      "title": "首次归因：",
+      "description": "完成某个目标事件的所有归因位中，第一个归因位获得100%贡献。"
+    },
+    "lastTouch": {
+      "title": "末次归因：",
+      "description": "完成某个目标事件的所有归因位中，最后一个归因位获得100%贡献。"
+    },
+    "linearTouch": {
+      "title": "线性归因：",
+      "description": "完成某个目标事件的所有归因位中，所有归因位平分贡献。"
+    },
+    "positionBasedTouch": {
+      "title": "位置归因：",
+      "description": "完成某个目标事件的所有归因位中，用户可自定义每个位置的贡献分配比例，比如首末归因位获得40%贡献，其余位置平分剩余20%的贡献。"
+    },
+    "columnTitlesDescription": "归因结果表中每列的标题如下。",
+    "touchpointName": {
+      "title": "Touchpoint Name: ",
+      "description": "归因触点事件名称。"
+    },
+    "totalTriggerCount": {
+      "title": "Total Trigger Count: ",
+      "description": "表示在计算周期内，归因触点事件一共触发了多少次。"
+    },
+    "numberTriggersConversion": {
+      "title": "Number of Triggers with Conversion: ",
+      "description": "在转化窗口内，有多少个触点事件与转化目标同时发生。"
+    },
+    "contribution": {
+      "title": "Contribution(number/sum...value): ",
+      "description": "按照所选模型，该触点可以归因到转化目标的贡献度。"
+    },
+    "contributionRate": {
+      "title": "Contribution Rate: ",
+      "description": "通过归因模型计算后，归属于该触点事件的贡献占整体的占比，计算逻辑为：当前触点事件下的转化目标指标 / 整体转化目标之和。"
+    }
+  },
   "analyzesInfo": {
     "title": "分析",
     "description": "分析模块的底层是QuickSight的分析作者界面，在这里您可以使用QuickSight所有的功能进行定制化分析。方案预置多个点击流数据集（比如事件、事件属性、用户属性等），您也可以增加新的数据集与点击流联合分析。",

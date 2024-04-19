@@ -11,42 +11,53 @@
  *  and limitations under the License.
  */
 
-import { Container, Alert, Button } from '@cloudscape-design/components';
-import CommonLayout from 'components/layouts/CommonLayout';
+import {
+  Alert,
+  Box,
+  Button,
+  Modal,
+  SpaceBetween,
+} from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
+import { LAST_VISIT_URL } from 'ts/const';
 
 interface ReSignInProps {
   auth: AuthContextProps;
 }
 
 const ReSignIn: React.FC<ReSignInProps> = (props: ReSignInProps) => {
-  const { auth } = props;
   const { t } = useTranslation();
   return (
-    <CommonLayout auth={auth}>
-      <Container>
-        <div className="mt-10">
-          <Alert
-            action={
+    <div className="re-sign-in">
+      <Modal
+        className="re-sign-in-modal"
+        visible={true}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
               <Button
                 onClick={() => {
-                  window.location.href = '/';
+                  localStorage.setItem(LAST_VISIT_URL, window.location.href);
+                  window.location.reload();
                 }}
+                variant="primary"
               >
                 {t('button.reload')}
               </Button>
-            }
-            statusIconAriaLabel="Error"
-            type="warning"
-            header={t('header.reSignIn')}
-          >
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('header.reSignIn')}
+      >
+        <div className="mt-10">
+          <Alert statusIconAriaLabel="Error" type="warning">
             {t('header.reSignInDesc')}
           </Alert>
         </div>
-      </Container>
-    </CommonLayout>
+      </Modal>
+    </div>
   );
 };
 
