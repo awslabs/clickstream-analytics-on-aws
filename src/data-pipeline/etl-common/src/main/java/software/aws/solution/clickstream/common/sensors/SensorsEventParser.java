@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
+
 
 import static software.aws.solution.clickstream.common.ClickstreamEventParser.*;
 import static software.aws.solution.clickstream.common.Util.*;
@@ -111,13 +114,16 @@ public final class SensorsEventParser extends BaseEventParser {
 
     @Override
     public String getGzipData(final String data) {
-        if (data.contains(GZIP_RAW_DATA)) {
-            return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_RAW_DATA) + GZIP_RAW_DATA.length()));
-        } else if (data.contains(GZIP_WEB_SDK_DATA)) {
-            return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_WEB_SDK_DATA) + GZIP_WEB_SDK_DATA.length(), data.indexOf("&ext=crc")));
-        } else {
+        try {
+            if (data.contains(GZIP_RAW_DATA)) {
+                return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_RAW_DATA) + GZIP_RAW_DATA.length()), StandardCharsets.UTF_8.name());
+            } else if (data.contains(GZIP_WEB_SDK_DATA)) {
+                return java.net.URLDecoder.decode(data.substring(data.indexOf(GZIP_WEB_SDK_DATA) + GZIP_WEB_SDK_DATA.length(), data.indexOf("&ext=crc")), StandardCharsets.UTF_8.name());
+            }
+        } catch (UnsupportedEncodingException e) {
             return data;
         }
+        return data;
     }
 
     private ClickstreamEvent getClickstreamEvent(final SensorsEvent sensorsEvent, final int index, final ExtraParams extraParams) throws JsonProcessingException {
@@ -158,10 +164,8 @@ public final class SensorsEventParser extends BaseEventParser {
         clickstreamEvent.setUserEngagementTimeMsec(sensorsEvent.getProperties().getEventDuration());
         clickstreamEvent.setUserId(sensorsEvent.getAnonymousId());
         clickstreamEvent.setUserPseudoId(sensorsEvent.getDistinctId());
-        // clickstreamEvent.setSessionId(sensorsEvent.getGaSessionId());
         clickstreamEvent.setSessionStartTimeMsec(sensorsEvent.getTime());
 
-        // clickstreamEvent.setSessionNumber(sensorsEvent.getGaSessionNumber());
         clickstreamEvent.setIp(sensorsEvent.getProperties().getIp());
         clickstreamEvent.setUa(sensorsEvent.getProperties().getUserAgent());
 
@@ -248,7 +252,6 @@ public final class SensorsEventParser extends BaseEventParser {
         ClickstreamUser clickstreamUser = new ClickstreamUser();
         clickstreamUser.setAppId(clickstreamEvent.getAppId());
         clickstreamUser.setEventTimestamp(clickstreamEvent.getEventTimestamp());
-        // clickstreamUser.setUserId(sensorsEvent.getUserId());
         clickstreamUser.setUserPseudoId(clickstreamEvent.getUserPseudoId());
 
         clickstreamUser.setFirstTouchTimeMsec(sensorsEvent.getTime());

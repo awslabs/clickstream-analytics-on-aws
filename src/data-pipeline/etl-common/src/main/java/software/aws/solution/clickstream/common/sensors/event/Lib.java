@@ -28,19 +28,19 @@ public class Lib {
     private final Map<String, Object> unknownProperties = new HashMap<>();
 
     @JsonProperty("$lib_method")
-    private String libMethod;
+    private String sdkLibMethod;
 
     @JsonProperty("$lib")
-    private String lib;
+    private String sdkLib;
 
     @JsonProperty("$lib_version")
-    private String libVersion;
+    private String sdkLibVersion;
 
     @JsonProperty("$app_version")
-    private String appVersion;
+    private String sdkAppVersion;
 
     @JsonProperty("$lib_detail")
-    private String libDetail;
+    private String sdkLibDetail;
 
     @JsonAnySetter
     public void setUnknownProperty(final String name, final Object value) {
