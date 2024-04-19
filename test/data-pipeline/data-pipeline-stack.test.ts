@@ -1066,6 +1066,8 @@ describe('Data Processing job submitter', () => {
               'glue:CreatePartition',
               'glue:BatchCreatePartition',
               'glue:GetUserDefinedFunctions',
+              'glue:TagResource',
+              'glue:UntagResource',
             ],
             Effect: 'Allow',
             Resource: [
