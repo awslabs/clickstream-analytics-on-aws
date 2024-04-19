@@ -1452,6 +1452,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'is_first_day_event',
+                Type: 'STRING',
+              },
+              {
                 Name: 'event_timestamp_local',
                 Type: 'DATETIME',
               },
@@ -1620,6 +1624,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'new_user_indicator',
               'view_session_indicator',
               'view_event_indicator',
+              'is_first_day_event',
               'event_timestamp_local',
               'event_date',
             ],

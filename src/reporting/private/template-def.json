@@ -714,6 +714,10 @@
                 "DataType": "STRING"
                 },
                 {
+                "Name": "is_first_day_event",
+                "DataType": "STRING"
+                },
+                {
                 "Name": "event_timestamp_local",
                 "DataType": "DATETIME"
                 }
