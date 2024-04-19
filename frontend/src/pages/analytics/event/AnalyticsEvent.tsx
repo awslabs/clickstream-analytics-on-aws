@@ -156,9 +156,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     }
   );
 
-  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
-    null
-  );
+  const [groupOptions, setGroupOptions] = useState<SelectProps.Option[]>([]);
 
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
@@ -285,7 +283,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
-      groupCondition: getGroupCondition(groupOption, null),
+      groupCondition: getGroupCondition(groupOptions, null),
       ...dateRangeParams,
       ...saveParams,
     };
@@ -476,8 +474,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               />
               <AttributeGroup
                 groupParameters={groupParameters}
-                groupOption={groupOption}
-                setGroupOption={setGroupOption}
+                groupOptions={groupOptions}
+                setGroupOptions={setGroupOptions}
               />
             </SpaceBetween>
           </ColumnLayout>
