@@ -36,7 +36,7 @@ process.env.TEMPLATE_FILE = 'cloudfront-s3-control-plane-stack-global.template.j
 process.env.SOLUTION_VERSION = 'v1.1.5-202403071513'
 
 // web console bundling
-process.env.IS_SKIP_ASSET_BUNDLE = 'true'
+process.env.CI = 'true'
 
 // env variables for analytics stack
 process.env.PROJECT_ID='project1'

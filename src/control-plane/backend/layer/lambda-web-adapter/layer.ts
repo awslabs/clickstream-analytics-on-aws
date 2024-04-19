@@ -33,7 +33,7 @@ export class LambdaAdapterLayer extends LayerVersion {
 }
 
 function getLambdaCode(defaultArch: string, defaultVersion: string) {
-  if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+  if (process.env.CI === 'true') {
     return Code.fromAsset('./src/control-plane/backend/layer/lambda-web-adapter');
   } else {
     return Code.fromDockerBuild(path.join(__dirname, '.'), {
