@@ -23,8 +23,8 @@ global_current_time = utils.current_timestamp()
 global_total_events_for_duration = 0
 global_total_users_for_duration = 0
 app_provider = AppProvider()
-left_users = []
-left_events = []
+# left_users = []
+# left_events = []
 
 
 def init_all_user():
@@ -66,19 +66,13 @@ def get_user_event_of_duration(users, start_timestamp):
     return all_events
 
 
-def send_user_event_of_duration(users, all_events, end_timestamp):
-    stop_time_stamp = end_timestamp + configure.FLUSH_DURATION_PERFORMANCE * 1000
-    while utils.current_timestamp() <= stop_time_stamp:
-        for i in range(len(all_events)):
-            for j in range(0, len(all_events[i]), 10):
-                chunk = all_events[i][j:j + 10]
-                if len(chunk) < 10:
-                    break
-                send_event_real_time.send_events_of_day(users[i], chunk)
+def send_user_event_of_duration(users, all_events):
     for i in range(len(all_events)):
-        if len(all_events[i]) > 0:
-            left_events.append(all_events[i])
-            left_users.append(users[i])
+        for j in range(0, len(all_events[i]), 10):
+            chunk = all_events[i][j:j + 10]
+            if len(chunk) < 10:
+                break
+            send_event_real_time.send_events_of_day(users[i], chunk)
 
 
 def create_duration_event(day_users):
@@ -102,18 +96,9 @@ def create_duration_event(day_users):
         if handled_thread_count == configure.THREAD_NUMBER_FOR_USER_PERFORMANCE:
             print("\nall events count in " + str(configure.BATCH_EVENT_DURATION_IN_MINUTES_PERFORMANCE) + " minutes: " + str(
                 global_total_events_for_duration) + ", user count: " + str(global_total_users_for_duration) + "\n")
-        executor.submit(send_user_event_of_duration, users, all_events, end_timestamp)
-    global left_users, left_events
-
-    if len(left_users) > 0:
-        for i in range(len(left_users)):
-            left_users[i].total_day_events += len(left_events[i])
-        executor.submit(send_user_event_of_duration, left_users.copy(), left_events.copy(), end_timestamp)
-        left_events = []
-        left_users = []
+        executor.submit(send_user_event_of_duration, users, all_events)
     executor.shutdown(wait=True)
 
-    print("there are " + str(len(left_users)) + " users events left to send\n")
     print("end duration events sending\n\n")
 
 
