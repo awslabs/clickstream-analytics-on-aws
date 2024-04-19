@@ -41,7 +41,7 @@ import UserList from 'pages/user/UserList';
 import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { IUserRole, LAST_VISIT_URL } from 'ts/const';
 import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
 import Home from './pages/home/Home';
@@ -474,7 +474,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
-                <AddUserSegments />
+                <AddUserSegments actionType="new" />
               </RoleRoute>
             }
           />
@@ -487,7 +487,20 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
                 auth={auth}
                 roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
               >
-                <AddUserSegments isDuplicate={true} />
+                <AddUserSegments actionType="duplicate" />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/analytics/:projectId/app/:appId/segments/:segmentId/edit"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <AddUserSegments actionType="edit" />
               </RoleRoute>
             }
           />

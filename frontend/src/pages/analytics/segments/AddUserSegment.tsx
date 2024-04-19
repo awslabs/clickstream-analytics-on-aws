@@ -33,10 +33,10 @@ import SegmentEditor from './components/SegmentEditor';
 import { getSegmentById } from '../../../apis/segments';
 
 type AddUserSegmentsProps = {
-  isDuplicate?: boolean;
+  actionType: string;
 };
 const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
-  isDuplicate,
+  actionType,
 }: AddUserSegmentsProps) => {
   const { t } = useTranslation();
   const { projectId, appId, segmentId } = useParams();
@@ -58,7 +58,10 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
       href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text: t('breadCrumb.createSegment'),
+      text:
+        actionType === 'edit'
+          ? t('breadCrumb.editSegment')
+          : t('breadCrumb.createSegment'),
       href: '',
     },
   ];
@@ -70,14 +73,20 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
         segmentId: segmentId as string,
       });
       if (segmentApiResponse.success) {
+        const { id, type, segmentId } = segmentApiResponse.data;
         const { segmentObject, segmentDataState } =
           segmentApiResponse.data.uiRenderingObject;
-        setSegmentObject(segmentObject);
+        setSegmentObject({
+          ...segmentObject,
+          id,
+          type,
+          segmentId,
+        });
         setSegmentGroupData(segmentDataState);
       }
     };
 
-    if (isDuplicate) {
+    if (actionType === 'duplicate' || actionType === 'edit') {
       getSegmentObject();
     }
   }, []);
@@ -111,6 +120,7 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
                     });
                   }}
                   segmentGroupData={segmentGroupData}
+                  actionType={actionType}
                 />
               </SegmentProvider>
             </ContentLayout>

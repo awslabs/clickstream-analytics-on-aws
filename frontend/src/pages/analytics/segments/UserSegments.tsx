@@ -167,6 +167,8 @@ const UserSegments: React.FC = () => {
                               confirmDeleteSegments();
                             } else if (e.detail.id === 'duplicate') {
                               window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/duplicate`;
+                            } else if (e.detail.id === 'edit') {
+                              window.location.href = `/analytics/${projectId}/app/${appId}/segments/${selectedSegment[0].segmentId}/edit`;
                             }
                           }}
                           loading={loadingDelete}

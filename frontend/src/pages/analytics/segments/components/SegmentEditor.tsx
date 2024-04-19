@@ -23,7 +23,7 @@ import {
   Select,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { createSegment } from 'apis/segments';
+import { createSegment, updateSegment } from 'apis/segments';
 import {
   ExtendSegment,
   IEventSegmentationObj,
@@ -49,9 +49,10 @@ import { defaultStr } from 'ts/utils';
 import SegmentItem from './group/SegmentItem';
 
 interface SegmentEditorProps {
+  actionType: string;
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
-  segmentGroupData: IEventSegmentationObj;
+  segmentGroupData?: IEventSegmentationObj;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
@@ -65,10 +66,13 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
   const [loadingCreate, setLoadingCreate] = useState(false);
 
   useEffect(() => {
-    segmentDataDispatch({
-      type: AnalyticsSegmentActionType.SetSegmentData,
-      segmentData: props.segmentGroupData,
-    });
+    // Load segmentDataState for duplicate and edit segment
+    if (props.segmentGroupData) {
+      segmentDataDispatch({
+        type: AnalyticsSegmentActionType.SetSegmentData,
+        segmentData: props.segmentGroupData,
+      });
+    }
   }, []);
 
   const validateSegmentName = () => {
@@ -96,7 +100,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
     return true;
   };
 
-  const addUserSegments = async () => {
+  const saveUserSegment = async () => {
     // validate segment input
     if (!validateSegmentName()) {
       return;
@@ -116,26 +120,29 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
 
     try {
       setLoadingCreate(true);
-      await createSegment(
-        omit(
-          {
-            ...segmentObject,
-            criteria: convertUISegmentObjectToAPIObject(segmentDataState),
-            uiRenderingObject: {
-              segmentObject,
-              segmentDataState,
-            },
+      const requestBody = omit(
+        {
+          ...segmentObject,
+          criteria: convertUISegmentObjectToAPIObject(segmentDataState),
+          uiRenderingObject: {
+            segmentObject,
+            segmentDataState,
           },
-          [
-            'refreshType',
-            'autoRefreshOption',
-            'autoRefreshDayOption',
-            'expireDate',
-            'nameError',
-            'cronError',
-          ]
-        )
+        },
+        [
+          'refreshType',
+          'autoRefreshOption',
+          'autoRefreshDayOption',
+          'expireDate',
+          'nameError',
+          'cronError',
+        ]
       );
+      if (props.actionType === 'new' || props.actionType === 'duplicate') {
+        await createSegment(requestBody);
+      } else {
+        await updateSegment(requestBody);
+      }
       setLoadingCreate(false);
       navigate(`/analytics/${projectId}/app/${appId}/segments`);
     } catch (error) {
@@ -158,7 +165,7 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
           <Button
             loading={loadingCreate}
             onClick={() => {
-              addUserSegments();
+              saveUserSegment();
             }}
             variant="primary"
           >

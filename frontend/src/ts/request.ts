@@ -148,6 +148,29 @@ export function putRequest<T>(
     });
 }
 
+// PATCH Request
+export function patchRequest<T>(
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  return axios
+    .patch<ApiResponse<T>>(`${url}`, data, config)
+    .then((response: AxiosResponse) => {
+      const apiRes: ApiResponse<T> = response.data;
+      if (apiRes.success) {
+        return response.data;
+      } else {
+        alertMsg(apiRes.message);
+        throw new Error(response.data.message || 'Error');
+      }
+    })
+    .catch((err) => {
+      errMsg(err);
+      reject(err);
+    });
+}
+
 // DELETE Request
 export function deleteRequest<T>(url: string, data?: any): Promise<T> {
   return axios
@@ -169,12 +192,12 @@ export function deleteRequest<T>(url: string, data?: any): Promise<T> {
 
 // Handler api request and return data
 export const apiRequest = (
-  fecth: 'get' | 'post' | 'put' | 'delete',
+  fetch: 'get' | 'post' | 'put' | 'patch' | 'delete',
   url: string,
   param?: string | Record<string, any> | undefined
 ) => {
   return new Promise((resolve, reject) => {
-    switch (fecth) {
+    switch (fetch) {
       case 'get':
         getRequest(url, param)
           .then((response) => {
@@ -195,6 +218,15 @@ export const apiRequest = (
         break;
       case 'put':
         putRequest(url, param)
+          .then((response) => {
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+        break;
+      case 'patch':
+        patchRequest(url, param)
           .then((response) => {
             resolve(response);
           })
