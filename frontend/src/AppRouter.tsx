@@ -478,6 +478,19 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               </RoleRoute>
             }
           />
+          <Route
+            path="/analytics/:projectId/app/:appId/segments/:segmentId/duplicate"
+            element={
+              <RoleRoute
+                sessionExpired={sessionExpired}
+                layout="analytics"
+                auth={auth}
+                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+              >
+                <AddUserSegments isDuplicate={true} />
+              </RoleRoute>
+            }
+          />
         </Routes>
       </Suspense>
       <CommonAlert />

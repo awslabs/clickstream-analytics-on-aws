@@ -24,7 +24,10 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { createSegment } from 'apis/segments';
-import { ExtendSegment } from 'components/eventselect/AnalyticsType';
+import {
+  ExtendSegment,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 import RelationAnd from 'components/eventselect/comps/RelationAnd';
 import {
   AnalyticsSegmentActionType,
@@ -38,7 +41,7 @@ import {
   convertUISegmentObjectToAPIObject,
   getAutoRefreshDayOptionsByType,
 } from 'pages/analytics/analytics-utils';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SEGMENT_AUTO_REFRESH_OPTIONS } from 'ts/const';
@@ -48,6 +51,7 @@ import SegmentItem from './group/SegmentItem';
 interface SegmentEditorProps {
   segmentObject: ExtendSegment;
   updateSegmentObject: (key: string, value: any) => void;
+  segmentGroupData: IEventSegmentationObj;
 }
 
 const SegmentEditor: React.FC<SegmentEditorProps> = (
@@ -58,8 +62,14 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
   const { projectId, appId } = useParams();
   const { segmentObject, updateSegmentObject } = props;
   const { segmentDataState, segmentDataDispatch } = useSegmentContext();
-
   const [loadingCreate, setLoadingCreate] = useState(false);
+
+  useEffect(() => {
+    segmentDataDispatch({
+      type: AnalyticsSegmentActionType.SetSegmentData,
+      segmentData: props.segmentGroupData,
+    });
+  }, []);
 
   const validateSegmentName = () => {
     if (!segmentObject.name.trim()) {
@@ -111,6 +121,10 @@ const SegmentEditor: React.FC<SegmentEditorProps> = (
           {
             ...segmentObject,
             criteria: convertUISegmentObjectToAPIObject(segmentDataState),
+            uiRenderingObject: {
+              segmentObject,
+              segmentDataState,
+            },
           },
           [
             'refreshType',

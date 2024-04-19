@@ -23,6 +23,16 @@ export const getSegmentsList = async (params: {
   >;
 };
 
+export const getSegmentById = async (params: {
+  appId: string;
+  segmentId: string;
+}) => {
+  return (await apiRequest(
+    'get',
+    `/segments/${params.segmentId}?appId=${params.appId}`
+  )) as ApiResponse<Segment>;
+};
+
 export const createSegment = async (segmentObj: Segment) => {
   return await apiRequest('post', `/segments`, segmentObj);
 };

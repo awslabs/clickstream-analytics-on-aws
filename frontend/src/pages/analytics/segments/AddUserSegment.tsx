@@ -16,26 +16,37 @@ import {
   ContentLayout,
   Header,
 } from '@cloudscape-design/components';
-import { ExtendSegment } from 'components/eventselect/AnalyticsType';
+import {
+  ExtendSegment,
+  IEventSegmentationObj,
+} from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { SegmentProvider } from 'context/SegmentContext';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { INIT_SEGMENT_OBJ } from 'ts/const';
+import { DEFAULT_SEGMENT_GROUP_DATA, INIT_SEGMENT_OBJ } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
+import { getSegmentById } from '../../../apis/segments';
 
-const AddUserSegments: React.FC = () => {
+type AddUserSegmentsProps = {
+  isDuplicate?: boolean;
+};
+const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
+  isDuplicate,
+}: AddUserSegmentsProps) => {
   const { t } = useTranslation();
-  const { projectId, appId } = useParams();
+  const { projectId, appId, segmentId } = useParams();
   const [segmentObject, setSegmentObject] = useState<ExtendSegment>({
     ...INIT_SEGMENT_OBJ,
     projectId: defaultStr(projectId),
     appId: defaultStr(appId),
   });
+  const [segmentGroupData, setSegmentGroupData] =
+    useState<IEventSegmentationObj>({ ...DEFAULT_SEGMENT_GROUP_DATA });
 
   const breadcrumbItems = [
     {
@@ -52,9 +63,30 @@ const AddUserSegments: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    const getSegmentObject = async () => {
+      const segmentApiResponse = await getSegmentById({
+        appId: appId as string,
+        segmentId: segmentId as string,
+      });
+      if (segmentApiResponse.success) {
+        const { segmentObject, segmentDataState } =
+          segmentApiResponse.data.uiRenderingObject;
+        setSegmentObject(segmentObject);
+        setSegmentGroupData(segmentDataState);
+      }
+    };
+
+    if (isDuplicate) {
+      getSegmentObject();
+    }
+  }, []);
+
   return (
     <div className="flex">
-      <AnalyticsNavigation activeHref={`/analytics/segments`} />
+      <AnalyticsNavigation
+        activeHref={`/analytics/${projectId}/app/${appId}/segments`}
+      />
       <div className="flex-1">
         <AppLayout
           tools={<HelpInfo />}
@@ -78,6 +110,7 @@ const AddUserSegments: React.FC = () => {
                       };
                     });
                   }}
+                  segmentGroupData={segmentGroupData}
                 />
               </SegmentProvider>
             </ContentLayout>

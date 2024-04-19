@@ -33,7 +33,7 @@ export interface Segment {
   criteria: SegmentCriteria;
   eventBridgeRuleArn?: string;
   sql?: string;
-  uiRenderingJson?: string;
+  uiRenderingObject?: any;
 }
 
 export interface RefreshSchedule {

@@ -268,7 +268,7 @@ export class SegmentServ {
       refreshSchedule: input.refreshSchedule,
       criteria: input.criteria,
       eventBridgeRuleArn: '',
-      uiRenderingJson: input.uiRenderingJson ?? '',
+      uiRenderingObject: input.uiRenderingObject ?? {},
     };
   }
 
