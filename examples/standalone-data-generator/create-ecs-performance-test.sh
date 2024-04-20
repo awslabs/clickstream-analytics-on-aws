@@ -31,7 +31,7 @@ else
 fi
 
 # Get the default VPC ID
-DEFAULT_VPC_ID=$(aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --query "Vpcs[0].VpcId" --output text)
+DEFAULT_VPC_ID=$(aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --region ${AWS_REGION}  --query "Vpcs[0].VpcId" --output text)
 
 if [ -z "$DEFAULT_VPC_ID" ]; then
     echo "No default VPC found."
@@ -40,7 +40,7 @@ fi
 
 # Fetch Subnet IDs if SUBNET_IDS is empty
 if [ -z "$SUBNET_IDS" ]; then
-    SUBNET_IDS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$DEFAULT_VPC_ID" --query "Subnets[*].SubnetId" --output text)
+    SUBNET_IDS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$DEFAULT_VPC_ID" --region ${AWS_REGION} --query "Subnets[*].SubnetId" --output text)
     SUBNET_IDS=$(echo $SUBNET_IDS | sed 's/ /,/g')  # Convert space-separated list to comma-separated
     if [ -z "$SUBNET_IDS" ]; then
         echo "No subnets found in the default VPC."
@@ -51,7 +51,7 @@ fi
 
 # Fetch Security Group ID if SECURITY_GROUP_ID is empty
 if [ -z "$SECURITY_GROUP_ID" ]; then
-    SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$DEFAULT_VPC_ID" --query "SecurityGroups[?GroupName=='default'].GroupId" --output text)
+    SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$DEFAULT_VPC_ID" --region ${AWS_REGION} --query "SecurityGroups[?GroupName=='default'].GroupId" --output text)
     if [ -z "$SECURITY_GROUP_ID" ]; then
         echo "No default security group found in the default VPC."
         exit 1
