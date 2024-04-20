@@ -42,7 +42,8 @@ const frontendProps = {
   assetPath: 'frontend',
   dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
   buildCommands: [
-    'echo test > /asset-output/test',
+    'echo index > /asset-output/index.html',
+    'echo test > /asset-output/test.json',
   ],
   autoInvalidFilePaths: ['/index.html'],
 };
