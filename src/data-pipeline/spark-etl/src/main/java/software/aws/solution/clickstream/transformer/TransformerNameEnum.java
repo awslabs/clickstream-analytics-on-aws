@@ -11,13 +11,8 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common;
+package software.aws.solution.clickstream.transformer;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
-
-public interface EventParser {
-    ParseRowResult parseLineToDBRow(String ingestLine, String projectId, String fileName)  throws JsonProcessingException;
-    JsonNode getData(String ingestDataField) throws JsonProcessingException;
-    ParseDataResult parseData(String dataString, ExtraParams extraParams, int index)  throws JsonProcessingException;
+public enum TransformerNameEnum {
+    CLICKSTREAM, GTM_SERVER_DATA, SENSORS_DATA;
 }

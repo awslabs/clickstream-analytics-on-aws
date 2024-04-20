@@ -11,13 +11,12 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common;
+package software.aws.solution.clickstream.udfconverter;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
-public interface EventParser {
-    ParseRowResult parseLineToDBRow(String ingestLine, String projectId, String fileName)  throws JsonProcessingException;
-    JsonNode getData(String ingestDataField) throws JsonProcessingException;
-    ParseDataResult parseData(String dataString, ExtraParams extraParams, int index)  throws JsonProcessingException;
+
+public interface DatasetConverter {
+    Dataset<Row> transform(Dataset<Row> dataset);
 }
