@@ -69,7 +69,7 @@ import {
   isValidGroupingCondition,
   getQuickSightDataType,
 } from './quicksight/reporting-utils';
-import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
+import { EVENT_USER_VIEW, EventAndCondition, EventComputeMethodsProps, ExploreAnalyticsType, GroupingCondition, SQLParameters, buildColNameWithPrefix, buildEventAnalysisView, buildEventPathAnalysisView, buildEventPropertyAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView, getComputeMethodProps } from './quicksight/sql-builder';
 import { FULL_SOLUTION_VERSION, awsAccountId } from '../common/constants';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
@@ -185,12 +185,20 @@ export class ReportingService {
     }
   };
 
-  private buildDataSetParamForFunnelVisual(chartType: QuickSightChartType, groupCondition: GroupingCondition) {
+  private buildDataSetParamForVisual(analysisType: ExploreAnalyticsType,  chartType: QuickSightChartType, groupCondition: GroupingCondition) {
 
     const datasetColumns = [];
     const visualProjectedColumns = [];
-    const hasGrouping = (chartType === QuickSightChartType.BAR
-      && isValidGroupingCondition(groupCondition));
+
+    const validGroupingCondition = isValidGroupingCondition(groupCondition);
+    let hasGrouping = false;
+    if(
+       (analysisType === ExploreAnalyticsType.FUNNEL && chartType === QuickSightChartType.BAR)
+       || analysisType !== ExploreAnalyticsType.FUNNEL
+      ) {
+      hasGrouping = validGroupingCondition;
+    }
+
     if (hasGrouping) {
       for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
         datasetColumns.push({
@@ -205,6 +213,31 @@ export class ReportingService {
       visualProjectedColumns,
       datasetColumns,
     };
+  }
+
+  private getEventNameAndGroupNames(eventAndConditions: EventAndCondition[], groupCondition: GroupingCondition, ) {
+
+    const eventNames = [];
+    const percentageCols = ['rate'];
+    for (const [index, e] of eventAndConditions.entries()) {
+      eventNames.push(e.eventName);
+      if (index > 0) {
+        percentageCols.push(e.eventName + '_rate');
+      }
+    }
+    let groupingColNames:string[] = [];
+    if ( isValidGroupingCondition(groupCondition)) {
+      for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
+        groupingColNames.push(colName);
+      }
+    }
+  
+    return {
+      eventNames,
+      percentageCols,
+      groupingColNames
+    }
+
   }
 
   private async _buildFunnelQuickSightDashboard(props: BuildFunnelQuickSightDashboardProps): Promise<CreateDashboardResult> {
@@ -231,9 +264,11 @@ export class ReportingService {
     }
 
     const groupCondition = props.query.groupCondition as GroupingCondition;
-    const params = this.buildDataSetParamForFunnelVisual(props.query.chartType, groupCondition);
+    const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.FUNNEL, props.query.chartType, groupCondition);
     datasetColumns.push(...params.datasetColumns);
     visualProjectedColumns.push(...params.visualProjectedColumns);
+
+    logger.info('params', params)
 
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
@@ -251,16 +286,8 @@ export class ReportingService {
       Type: 'STRING',
     }];
 
-    let groupingConditionCol = '';
-    if (props.query.groupCondition !== undefined) {
-      groupingConditionCol = props.query.groupCondition.property;
-      tableViewCols.push({
-        Name: groupingConditionCol,
-        Type: 'STRING',
-      });
-
-      projectedColumns.push(groupingConditionCol);
-    }
+    tableViewCols.push(...params.datasetColumns);
+    projectedColumns.push(...params.visualProjectedColumns);
 
     const maxIndex = props.query.eventAndConditions.length - 1;
     for (const [index, item] of props.query.eventAndConditions.entries()) {
@@ -295,17 +322,15 @@ export class ReportingService {
       projectedColumns: ['event_date'].concat(projectedColumns),
     });
 
-    const visualId = uuidv4();
+    const tableVisualId = uuidv4();
     const locale = props.query.locale ?? ExploreLocales.EN_US;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, props.query);
     const quickSightChartType = props.query.chartType;
-    const visualDef = getFunnelVisualDef(
-      visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn,
-      groupCondition, countColName);
+
     const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: props.query.timeScopeType,
       sheetId: props.sheetId,
-      visualId,
+      visualId: '',
       viewName: props.viewName,
       lastN: props.query.lastN,
       timeUnit: props.query.timeUnit,
@@ -313,46 +338,77 @@ export class ReportingService {
       timeEnd: props.query.timeEnd,
     }, locale);
 
-    const visualProps = {
-      sheetId: props.sheetId,
-      name: ExploreVisualName.CHART,
-      visualId: visualId,
-      visual: visualDef,
-      dataSetIdentifierDeclaration: [],
-      filterControl: visualRelatedParams.filterControl,
-      parameterDeclarations: visualRelatedParams.parameterDeclarations,
-      filterGroup: visualRelatedParams.filterGroup,
-      eventCount: props.query.eventAndConditions.length,
-      colSpan: quickSightChartType === QuickSightChartType.FUNNEL ? 20: undefined,
-    };
+    
+    const visualArray: VisualProps[] = [];
+    const data = this.getEventNameAndGroupNames(props.query.eventAndConditions, groupCondition);
 
-    const tableVisualId = uuidv4();
-    const eventNames = [];
-    const percentageCols = ['rate'];
-    for (const [index, e] of props.query.eventAndConditions.entries()) {
-      eventNames.push(e.eventName);
-      if (index > 0) {
-        percentageCols.push(e.eventName + '_rate');
-      }
+    //QuickSight does not support multi colums as SmallMultiples
+    if(!groupCondition || groupCondition.conditions.length <= 1){
+      const visualId = uuidv4();
+      const visualDef = getFunnelVisualDef(
+        visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn,
+        groupCondition, countColName);
+      
+      const visualProps = {
+        sheetId: props.sheetId,
+        name: ExploreVisualName.CHART,
+        visualId: visualId,
+        visual: visualDef,
+        dataSetIdentifierDeclaration: [],
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+        eventCount: props.query.eventAndConditions.length,
+        colSpan: quickSightChartType === QuickSightChartType.FUNNEL ? 20: undefined,
+      };
+
+      visualArray.push(visualProps);
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
+
+      const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, data.eventNames, titleProps,
+        props.query.groupColumn, data.groupingColNames);
+      const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, data.percentageCols);
+  
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+  
+      const tableVisualProps = {
+        sheetId: props.sheetId,
+        name: ExploreVisualName.TABLE,
+        visualId: tableVisualId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: [],
+        ColumnConfigurations: columnConfigurations,
+      };
+
+      visualArray.push(tableVisualProps);
+    
+    } else {
+
+      const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, data.eventNames, titleProps,
+        props.query.groupColumn, data.groupingColNames);
+      const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, data.percentageCols);
+  
+      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+  
+      const tableVisualProps = {
+        sheetId: props.sheetId,
+        name: ExploreVisualName.TABLE,
+        visualId: tableVisualId,
+        visual: tableVisualDef,
+        dataSetIdentifierDeclaration: [],
+        ColumnConfigurations: columnConfigurations,
+        filterControl: visualRelatedParams.filterControl,
+        parameterDeclarations: visualRelatedParams.parameterDeclarations,
+        filterGroup: visualRelatedParams.filterGroup,
+      };
+
+      visualArray.push(tableVisualProps);
+
     }
-    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, eventNames, titleProps,
-      props.query.groupColumn, groupingConditionCol);
-    const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, percentageCols);
-
-    visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-
-    const tableVisualProps = {
-      sheetId: props.sheetId,
-      name: ExploreVisualName.TABLE,
-      visualId: tableVisualId,
-      visual: tableVisualDef,
-      dataSetIdentifierDeclaration: [],
-      ColumnConfigurations: columnConfigurations,
-    };
 
     return this.createDashboardVisuals(
       props.sheetId, props.viewName, props.query, props.pipeline,
-      datasetPropsArray, [visualProps, tableVisualProps]);
+      datasetPropsArray, visualArray);
   }
 
   async createEventVisual(req: any, res: any, next: any) {
@@ -486,7 +542,7 @@ export class ReportingService {
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
-      const sqlParameters = {
+      const sqlParameters : SQLParameters = {
         ...query,
         schemaName: query.appId,
         dbName: query.projectId,
@@ -500,20 +556,10 @@ export class ReportingService {
       const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
 
-      let groupCondition = undefined;
-      const hasGrouping = isValidGroupingCondition(query.groupCondition as GroupingCondition);
-
-      console.log('hasGrouping', hasGrouping);
-      if (hasGrouping) {
-        groupCondition = query.groupCondition as GroupingCondition;
-        for (const [index, colName] of buildColNameWithPrefix(query.groupCondition as GroupingCondition).colNames.entries()) {
-          datasetColumns.push({
-            Name: colName,
-            Type: getQuickSightDataType((query.groupCondition as GroupingCondition).conditions[index].dataType),
-          });
-          projectedColumns.push(colName);
-        }
-      }
+      const groupCondition = query.query.groupCondition as GroupingCondition;
+      const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.EVENT, query.query.chartType, groupCondition);
+      datasetColumns.push(...params.datasetColumns);
+      projectedColumns.push(...params.visualProjectedColumns);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -535,14 +581,13 @@ export class ReportingService {
       }
 
       const locale = query.locale ?? ExploreLocales.EN_US;
-      const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
-      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, groupCondition);
+      
       const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
-        visualId,
+        visualId: '',
         viewName,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
@@ -550,32 +595,62 @@ export class ReportingService {
         timeEnd: query.timeEnd,
       }, locale);
 
-      const visualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.CHART,
-        visualId: visualId,
-        visual: visualDef,
-        dataSetIdentifierDeclaration: [],
-        filterControl: visualRelatedParams.filterControl,
-        parameterDeclarations: visualRelatedParams.parameterDeclarations,
-        filterGroup: visualRelatedParams.filterGroup,
-      };
 
-      const tableVisualId = uuidv4();
-      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
+      let  visualArray: VisualProps[] = [];
+      let tableVisualId = uuidv4();
 
-      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+      //QuickSight does not support multi colums as SmallMultiples
+      if(!sqlParameters.groupCondition || sqlParameters.groupCondition?.conditions.length <= 1){
 
-      const tableVisualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.TABLE,
-        visualId: tableVisualId,
-        visual: tableVisualDef,
-        dataSetIdentifierDeclaration: [],
-      };
+        const visualId = uuidv4();
+        const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, groupCondition);
+        const visualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.CHART,
+          visualId: visualId,
+          visual: visualDef,
+          dataSetIdentifierDeclaration: [],
+          filterControl: visualRelatedParams.filterControl,
+          parameterDeclarations: visualRelatedParams.parameterDeclarations,
+          filterGroup: visualRelatedParams.filterGroup,
+        };
+
+        visualArray.push(visualProps);
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
+
+        const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
+        const tableVisualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.TABLE,
+          visualId: tableVisualId,
+          visual: tableVisualDef,
+          dataSetIdentifierDeclaration: [],
+        };
+
+        visualArray.push(tableVisualProps);
+
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+      } else {
+
+        const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, groupCondition);
+        const tableVisualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.TABLE,
+          visualId: tableVisualId,
+          visual: tableVisualDef,
+          dataSetIdentifierDeclaration: [],
+          filterControl: visualRelatedParams.filterControl,
+          parameterDeclarations: visualRelatedParams.parameterDeclarations,
+          filterGroup: visualRelatedParams.filterGroup,
+        };
+
+        visualArray.push(tableVisualProps);
+
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+      }
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps, tableVisualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, visualArray);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
@@ -899,18 +974,11 @@ export class ReportingService {
         'retention',
       ];
       const datasetColumns = [...retentionAnalysisVisualColumns];
-      const hasGrouping = isValidGroupingCondition(query.groupCondition as GroupingCondition);
-      let groupCondition = undefined;
-      if (hasGrouping) {
-        groupCondition = query.groupCondition as GroupingCondition;
-        for (const [index, colName] of buildColNameWithPrefix(groupCondition).colNames.entries()) {
-          datasetColumns.push({
-            Name: colName,
-            Type: getQuickSightDataType(groupCondition.conditions[index].dataType),
-          });
-          projectedColumns.push(colName);
-        }
-      }
+
+      const groupCondition = query.groupCondition as GroupingCondition;
+      const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.RETENTION, query.chartType, groupCondition);
+      datasetColumns.push(...params.datasetColumns);
+      projectedColumns.push(...params.visualProjectedColumns);
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -932,14 +1000,12 @@ export class ReportingService {
       }
 
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
-      const visualId = uuidv4();
       const locale = query.locale ?? ExploreLocales.EN_US;
       const quickSightChartType = query.chartType;
-      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, groupCondition);
       const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
-        visualId,
+        visualId: '',
         viewName,
         lastN: query.lastN,
         timeUnit: query.timeUnit,
@@ -947,32 +1013,63 @@ export class ReportingService {
         timeEnd: query.timeEnd,
       }, locale);
 
-      const visualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.CHART,
-        visualId: visualId,
-        visual: visualDef,
-        dataSetIdentifierDeclaration: [],
-        filterControl: visualRelatedParams.filterControl,
-        parameterDeclarations: visualRelatedParams.parameterDeclarations,
-        filterGroup: visualRelatedParams.filterGroup,
-      };
 
+      const visualPropsArray: VisualProps[] = [];
       const tableVisualId = uuidv4();
-      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, groupCondition);
 
-      visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+      if(!groupCondition || groupCondition.conditions.length <= 1){
 
-      const tableVisualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.TABLE,
-        visualId: tableVisualId,
-        visual: tableVisualDef,
-        dataSetIdentifierDeclaration: [],
-      };
+        logger.info('groupCondition', { groupCondition })
+        const visualId = uuidv4();
+        const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, groupCondition);
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
+
+        const visualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.CHART,
+          visualId: visualId,
+          visual: visualDef,
+          dataSetIdentifierDeclaration: [],
+          filterControl: visualRelatedParams.filterControl,
+          parameterDeclarations: visualRelatedParams.parameterDeclarations,
+          filterGroup: visualRelatedParams.filterGroup,
+        };
+        visualPropsArray.push(visualProps);
+
+        
+        const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, groupCondition);
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+
+        const tableVisualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.TABLE,
+          visualId: tableVisualId,
+          visual: tableVisualDef,
+          dataSetIdentifierDeclaration: [],
+        };
+
+        visualPropsArray.push(tableVisualProps);
+
+      } else {
+
+        const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, groupCondition);
+        visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
+        const tableVisualProps = {
+          sheetId: sheetId,
+          name: ExploreVisualName.TABLE,
+          visualId: tableVisualId,
+          visual: tableVisualDef,
+          dataSetIdentifierDeclaration: [],
+          filterControl: visualRelatedParams.filterControl,
+          parameterDeclarations: visualRelatedParams.parameterDeclarations,
+          filterGroup: visualRelatedParams.filterGroup,
+        };
+
+        visualPropsArray.push(tableVisualProps);
+      }
 
       const result: CreateDashboardResult = await this.createDashboardVisuals(
-        sheetId, viewName, query, pipeline, datasetPropsArray, [visualProps, tableVisualProps]);
+        sheetId, viewName, query, pipeline, datasetPropsArray, visualPropsArray);
 
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));

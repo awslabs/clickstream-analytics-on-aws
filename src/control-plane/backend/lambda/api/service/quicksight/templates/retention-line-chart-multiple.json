@@ -123,12 +123,6 @@
                               "FieldId": "{{catDimFieldId}}",
                               "Visibility": "VISIBLE"
                           }
-                      },
-                      {
-                          "FieldTooltipItem":{
-                              "FieldId":"{{smalMultiplesFieldId}}",
-                              "Visibility":"VISIBLE"
-                          }
                       }
                   ]
               }

@@ -607,7 +607,7 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
 function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   groupColumn: string, groupCondition: GroupingCondition | undefined, countColName: string) : Visual {
 
-  const props = _getMultipleVisualProps(groupCondition !== undefined);
+  const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -645,7 +645,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
-  titleProps: DashboardTitleProps, groupColumn: string, groupingConditionCol: string): Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, groupingColNames: string[]): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
@@ -673,14 +673,15 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     Width: '120px',
   });
 
-  if (groupingConditionCol !== '') {
+  console.log(groupingColNames)
+  for(const colName of groupingColNames){
     const groupColFieldId = uuidv4();
     groupBy.push({
       CategoricalDimensionField: {
         FieldId: groupColFieldId,
         Column: {
           DataSetIdentifier: viewName,
-          ColumnName: groupingConditionCol,
+          ColumnName: colName,
         },
       },
     });
@@ -889,7 +890,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     throw new Error(errorMessage);
   }
 
-  const props = _getMultipleVisualProps(groupCondition !== undefined);
+  const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -954,7 +955,7 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, groupCondition: GroupingCondition | undefined) : Visual {
 
-  const props = _getMultipleVisualProps(groupCondition !== undefined);
+  const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -965,7 +966,6 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
     title: titleProps.tableTitle,
-    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   const visual = JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
@@ -1237,7 +1237,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     throw new Error(errorMessage);
   }
 
-  const props = _getMultipleVisualProps(groupCondition !== null);
+  const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -1280,7 +1280,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
 export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupCondition: GroupingCondition | undefined) : Visual {
 
-  const props = _getMultipleVisualProps(groupCondition !== undefined);
+  const props = _getMultipleVisualProps(isValidGroupingCondition(groupCondition));
 
   const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -1310,8 +1310,9 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
         },
       };
     }
+    rows.push(...existRows);
   }
-  rows.push(...existRows);
+
   return visual;
 }
 

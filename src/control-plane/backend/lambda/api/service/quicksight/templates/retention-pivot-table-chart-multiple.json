@@ -93,10 +93,6 @@
           "FieldOptions": {
               "SelectedFieldOptions": [
                   {
-                    "FieldId": "{{smalMultiplesFieldId}}",
-                    "Visibility": "VISIBLE"
-                  },
-                  {
                       "FieldId": "{{catDimFieldId}}",
                       "Visibility": "VISIBLE"
                   },
