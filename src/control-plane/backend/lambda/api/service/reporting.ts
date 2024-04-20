@@ -185,17 +185,17 @@ export class ReportingService {
     }
   };
 
-  private buildDataSetParamForVisual(analysisType: ExploreAnalyticsType,  chartType: QuickSightChartType, groupCondition: GroupingCondition) {
+  private buildDataSetParamForVisual(analysisType: ExploreAnalyticsType, chartType: QuickSightChartType, groupCondition: GroupingCondition) {
 
     const datasetColumns = [];
     const visualProjectedColumns = [];
 
     const validGroupingCondition = isValidGroupingCondition(groupCondition);
     let hasGrouping = false;
-    if(
-       (analysisType === ExploreAnalyticsType.FUNNEL && chartType === QuickSightChartType.BAR)
+    if (
+      (analysisType === ExploreAnalyticsType.FUNNEL && chartType === QuickSightChartType.BAR)
        || analysisType !== ExploreAnalyticsType.FUNNEL
-      ) {
+    ) {
       hasGrouping = validGroupingCondition;
     }
 
@@ -215,7 +215,7 @@ export class ReportingService {
     };
   }
 
-  private getEventNameAndGroupNames(eventAndConditions: EventAndCondition[], groupCondition: GroupingCondition, ) {
+  private getEventNameAndGroupNames(eventAndConditions: EventAndCondition[], groupCondition: GroupingCondition ) {
 
     const eventNames = [];
     const percentageCols = ['rate'];
@@ -231,12 +231,12 @@ export class ReportingService {
         groupingColNames.push(colName);
       }
     }
-  
+
     return {
       eventNames,
       percentageCols,
-      groupingColNames
-    }
+      groupingColNames,
+    };
 
   }
 
@@ -268,7 +268,7 @@ export class ReportingService {
     datasetColumns.push(...params.datasetColumns);
     visualProjectedColumns.push(...params.visualProjectedColumns);
 
-    logger.info('params', params)
+    logger.info('params', params);
 
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
@@ -338,17 +338,17 @@ export class ReportingService {
       timeEnd: props.query.timeEnd,
     }, locale);
 
-    
+
     const visualArray: VisualProps[] = [];
     const data = this.getEventNameAndGroupNames(props.query.eventAndConditions, groupCondition);
 
     //QuickSight does not support multi colums as SmallMultiples
-    if(!groupCondition || groupCondition.conditions.length <= 1){
+    if (!groupCondition || groupCondition.conditions.length <= 1) {
       const visualId = uuidv4();
       const visualDef = getFunnelVisualDef(
         visualId, props.viewName, titleProps, quickSightChartType, props.query.groupColumn,
         groupCondition, countColName);
-      
+
       const visualProps = {
         sheetId: props.sheetId,
         name: ExploreVisualName.CHART,
@@ -368,9 +368,9 @@ export class ReportingService {
       const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, data.eventNames, titleProps,
         props.query.groupColumn, data.groupingColNames);
       const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, data.percentageCols);
-  
+
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-  
+
       const tableVisualProps = {
         sheetId: props.sheetId,
         name: ExploreVisualName.TABLE,
@@ -381,15 +381,15 @@ export class ReportingService {
       };
 
       visualArray.push(tableVisualProps);
-    
+
     } else {
 
       const tableVisualDef = getFunnelTableVisualDef(tableVisualId, props.tableVisualViewName, data.eventNames, titleProps,
         props.query.groupColumn, data.groupingColNames);
       const columnConfigurations = getFunnelTableVisualRelatedDefs(props.tableVisualViewName, data.percentageCols);
-  
+
       visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
-  
+
       const tableVisualProps = {
         sheetId: props.sheetId,
         name: ExploreVisualName.TABLE,
@@ -556,8 +556,8 @@ export class ReportingService {
       const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
 
-      const groupCondition = query.query.groupCondition as GroupingCondition;
-      const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.EVENT, query.query.chartType, groupCondition);
+      const groupCondition = query.groupCondition as GroupingCondition;
+      const params = this.buildDataSetParamForVisual(ExploreAnalyticsType.EVENT, query.chartType, groupCondition);
       datasetColumns.push(...params.datasetColumns);
       projectedColumns.push(...params.visualProjectedColumns);
 
@@ -583,7 +583,7 @@ export class ReportingService {
       const locale = query.locale ?? ExploreLocales.EN_US;
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
-      
+
       const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -596,11 +596,11 @@ export class ReportingService {
       }, locale);
 
 
-      let  visualArray: VisualProps[] = [];
+      let visualArray: VisualProps[] = [];
       let tableVisualId = uuidv4();
 
       //QuickSight does not support multi colums as SmallMultiples
-      if(!sqlParameters.groupCondition || sqlParameters.groupCondition?.conditions.length <= 1){
+      if (!sqlParameters.groupCondition || sqlParameters.groupCondition?.conditions.length <= 1) {
 
         const visualId = uuidv4();
         const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, groupCondition);
@@ -1017,9 +1017,9 @@ export class ReportingService {
       const visualPropsArray: VisualProps[] = [];
       const tableVisualId = uuidv4();
 
-      if(!groupCondition || groupCondition.conditions.length <= 1){
+      if (!groupCondition || groupCondition.conditions.length <= 1) {
 
-        logger.info('groupCondition', { groupCondition })
+        logger.info('groupCondition', { groupCondition });
         const visualId = uuidv4();
         const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, groupCondition);
         visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(visualId);
@@ -1036,7 +1036,7 @@ export class ReportingService {
         };
         visualPropsArray.push(visualProps);
 
-        
+
         const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, groupCondition);
         visualRelatedParams.filterGroup?.ScopeConfiguration?.SelectedSheets?.SheetVisualScopingConfigurations?.[0].VisualIds?.push(tableVisualId);
 
