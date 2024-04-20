@@ -13,164 +13,70 @@
 
 package software.aws.solution.clickstream.gtm;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.*;
-import lombok.extern.slf4j.*;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.api.java.*;
-import org.apache.spark.sql.catalyst.expressions.*;
-import org.apache.spark.sql.expressions.*;
-import org.apache.spark.sql.types.*;
-import software.aws.solution.clickstream.common.*;
-import software.aws.solution.clickstream.common.gtm.*;
-import software.aws.solution.clickstream.common.model.*;
-import software.aws.solution.clickstream.rowconv.*;
-import software.aws.solution.clickstream.util.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Column;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.expressions.UserDefinedFunction;
+import org.apache.spark.sql.types.DataTypes;
+import software.aws.solution.clickstream.common.RuleConfig;
+import software.aws.solution.clickstream.udfconverter.BaseDataConverter;
+import software.aws.solution.clickstream.transformer.TransformerNameEnum;
+import software.aws.solution.clickstream.udfconverter.UDFHelper;
 
-import java.util.*;
+import java.util.Map;
 
-import static org.apache.spark.sql.functions.*;
-import static software.aws.solution.clickstream.common.Util.getStackTrace;
-import static software.aws.solution.clickstream.util.ContextUtil.*;
-import static software.aws.solution.clickstream.util.DatasetUtil.*;
-import static software.aws.solution.clickstream.ETLRunner.*;
-import static software.aws.solution.clickstream.TransformerV3.*;
-import static software.aws.solution.clickstream.model.ModelV2.*;
-import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter.*;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.udf;
+import static software.aws.solution.clickstream.TransformerV3.INPUT_FILE_NAME;
+import static software.aws.solution.clickstream.common.BaseEventParser.UPLOAD_TIMESTAMP;
+import static software.aws.solution.clickstream.transformer.TransformerNameEnum.GTM_SERVER_DATA;
+import static software.aws.solution.clickstream.util.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.util.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.util.DatasetUtil.hasColumn;
 
 
 @Slf4j
-public class ServerDataConverterV2 {
+public class ServerDataConverterV2 extends BaseDataConverter {
     private final Map<String, RuleConfig> appRuleConfig;
+
     public ServerDataConverterV2(final Map<String, RuleConfig> appRuleConfig) {
         this.appRuleConfig = appRuleConfig;
     }
-    private static UDF6<String, Long, String, String, String, String, List<GenericRow>> convertGTMServerData(final Map<String, RuleConfig> appRuleConfig) {
-        return (String value, Long ingestTimestamp,
-                String rid, String appId,
-                String projectId, String inputFileName) -> {
-            try {
-                return getGenericRow(value, ExtraParams.builder()
-                        .ingestTimestamp(ingestTimestamp)
-                        .rid(rid)
-                        .projectId(projectId)
-                        .inputFileName(inputFileName)
-                        .uri(null)
-                        .ua(null)
-                        .ip(null)
-                        .appId(appId)
-                        .build(), appRuleConfig);
-            } catch (Exception e) {
-                log.error("cannot convert data: " + value + ", error: " + e.getMessage());
-                log.error(getStackTrace(e));
-                return getCorruptGenericRows(value, e);
-            }
+
+    @Override
+    public TransformerNameEnum getName() {
+        return GTM_SERVER_DATA;
+    }
+
+    @Override
+    public Column[] getUDFParamsColumns(final Dataset<Row> dataset) {
+        Column[] columns = new Column[] {
+                col(DATA),
+                col("ingest_time"),
+                col(UPLOAD_TIMESTAMP).cast(DataTypes.LongType),
+                col("rid"),
+                lit(null).cast(DataTypes.StringType), // uri
+                lit(null).cast(DataTypes.StringType), // ua
+                lit(null).cast(DataTypes.StringType), // ip
+                lit(System.getProperty(PROJECT_ID_PROP)),
+                col(INPUT_FILE_NAME),
+                col("appId")
         };
-    }
-
-    private static List<GenericRow> getCorruptGenericRows(final String value, final Exception e) {
-
-        return Collections.singletonList(new GenericRow(new Object[]{
-                "data:" + value + ", error:" + e.getMessage() + ", stackTrace:" + getStackTrace(e),
-                null,
-                null,
-                null,
-        }));
-    }
-
-    private static List<GenericRow> getGenericRow(final String jsonString, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
-        List<GenericRow> rows = new ArrayList<>();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(jsonString);
-        int index = 0;
-        if (jsonNode.isArray()) {
-            for (Iterator<JsonNode> elementsIt = jsonNode.elements(); elementsIt.hasNext(); ) {
-                rows.add(getGenericRow(elementsIt.next(), index, extraParams, appRuleConfig));
-                index++;
-            }
-        } else {
-            rows.add(getGenericRow(jsonNode, index, extraParams, appRuleConfig));
+        if (!hasColumn(dataset, UPLOAD_TIMESTAMP)) {
+          columns[2] = lit(null).cast(DataTypes.LongType);
         }
-        return rows;
-
+        return columns;
     }
 
-    private static GenericRow getGenericRow(final JsonNode jsonNode, final int index, final ExtraParams extraParams, final Map<String, RuleConfig> appRuleConfig) throws JsonProcessingException {
-
-        ParseDataResult dataResult = GTMEventParser.getInstance(appRuleConfig)
-                .parseData(jsonNode.toString(),
-                            extraParams,
-                            index);
-
-        // Events
-        List<ClickstreamEvent> clickstreamEventList = dataResult.getClickstreamEventList();
-        // User
-        ClickstreamUser clickstreamUser = dataResult.getClickstreamUser();
-        // Items
-        List<ClickstreamItem> clickstreamItemList = dataResult.getClickstreamItemList();
-
-        List<GenericRow> eventRows = new ArrayList<>();
-        for (ClickstreamEvent event : clickstreamEventList) {
-            eventRows.add(toGenericRow(event));
-        }
-
-          List<GenericRow> itemRows = new ArrayList<>();
-        for (ClickstreamItem item : clickstreamItemList) {
-            itemRows.add(ItemGenericRowConverter.toGenericRow(item));
-        }
-
-        return new GenericRow(new Object[]{null, eventRows, UserGenericRowConverter.toGenericRow(clickstreamUser), itemRows});
+    @Override
+    public UserDefinedFunction getConvertUdf() {
+        return udf(UDFHelper.getConvertDataUdf(this.getName(), this.getAppRuleConfig()), UDFHelper.getUdfOutput());
     }
 
-
-
-    private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
-        log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverterV2 corruptDataset").toString());
-        String jobName = System.getProperty(JOB_NAME_PROP);
-        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_gtm_corrupted_json_data_v2";
-        log.info("save corruptedDataset to " + s3FilePath);
-        corruptDataset.withColumn(JOB_NAME_COL, lit(jobName)).write().partitionBy(JOB_NAME_COL).option("compression", "gzip").mode(SaveMode.Append).json(s3FilePath);
+    @Override
+    public Map<String, RuleConfig> getAppRuleConfig() {
+        return this.appRuleConfig;
     }
-
-
-    public Dataset<Row> transform(final Dataset<Row> dataset) {
-        String projectId = System.getProperty(PROJECT_ID_PROP);
-        ArrayType eventListType = DataTypes.createArrayType(EVENT_TYPE, true);
-        ArrayType itemListType = DataTypes.createArrayType(ITEM_TYPE, true);
-
-        ArrayType udfOutType = DataTypes.createArrayType(DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField(CORRUPT_RECORD, DataTypes.StringType, true),
-                DataTypes.createStructField("events", eventListType, true),
-                DataTypes.createStructField("user", USER_TYPE, true),
-                DataTypes.createStructField("items", itemListType, true),
-        }));
-
-        UserDefinedFunction convertGTMServerDataUdf = udf(convertGTMServerData(this.appRuleConfig), udfOutType);
-        String appId = "appId";
-        Dataset<Row> convertedKeyValueDataset = dataset
-                .filter(col(appId).isNotNull().and(col(appId).notEqual("")))
-                .withColumn(DATA_OUT, explode(convertGTMServerDataUdf.apply(
-                                col(DATA),
-                                col("ingest_time"),
-                                col("rid"),
-                                col(appId),
-                                lit(projectId),
-                                col(INPUT_FILE_NAME)
-                        )
-                ));
-
-        boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
-        if (debugLocal) {
-            convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/ServerDataConverterV2/");
-        }
-        Dataset<Row> okDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNull());
-        Dataset<Row> corruptDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNotNull());
-        long corruptDatasetCount = corruptDataset.count();
-        if (corruptDatasetCount > 0) {
-            saveCorruptDataset(corruptDataset, corruptDatasetCount);
-        }
-        return okDataset;
-    }
-
 }

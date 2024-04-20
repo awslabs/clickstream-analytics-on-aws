@@ -33,6 +33,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static software.aws.solution.clickstream.common.Util.objectToJsonString;
 
@@ -56,6 +57,8 @@ public class UtilTest extends BaseTest {
         Map<String, String> result = Util.convertStringObjectMapToStringStringMap(map);
 
         assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\",\"key5\":\"12\",\"key4\":\"{\\\"key3\\\":\\\"value3\\\"}\"}", objectToJsonString(result));
+
+        assertNull(Util.convertStringObjectMapToStringStringMap(null));
 
     }
 
@@ -136,13 +139,15 @@ public class UtilTest extends BaseTest {
                         "\"name\":{\"value\":\"value1\",\"type\":\"string\",\"setTimemsec\":null},\"age\":{\"value\":\"23\",\"type\":\"number\",\"setTimemsec\":null}," +
                         "\"first\":{\"value\":\"true\",\"type\":\"boolean\",\"setTimemsec\":null}}",
                 objectToJsonString(result));
+
+        assertNull(Util.convertStringObjectMapToStringUserPropMap(null));
     }
 
     @Test
     void test_readResourceFile() throws IOException {
         // ./gradlew clean test --info --tests software.aws.solution.clickstream.common.util.UtilTest.test_readResourceFile
         String result = Util.readResourceFile("original_data.json");
-        assertNotNull( result);
+        assertNotNull(result);
     }
 
     @Test
@@ -168,6 +173,7 @@ public class UtilTest extends BaseTest {
         assertEquals("www.example.com", result.getHostName());
         assertEquals("param1=value1&param2=value2", result.getQueryString());
         assertEquals("/abc/test", result.getPath());
+        assertNull(Util.parseUrl(null));
     }
 
 }

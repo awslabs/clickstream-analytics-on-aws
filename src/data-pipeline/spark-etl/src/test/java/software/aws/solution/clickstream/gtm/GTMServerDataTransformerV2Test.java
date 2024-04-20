@@ -35,7 +35,8 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
     GTMServerDataTransformerV2 transformer;
     @BeforeEach
     void setUpTransformer() {
-        transformer = new GTMServerDataTransformerV2(getTestTransformConfig("testApp"));
+        transformer = new GTMServerDataTransformerV2();
+        transformer.config(getTestTransformConfig("testApp"));
     }
     @Test
     void test_convert_event_v2() throws IOException {
@@ -148,9 +149,9 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
 
         Map<TableName, Dataset<Row>> datasetMap = transformer.transform(dataset);
         Map<String, StructType> schemaMap = DatasetUtil.getSchemaMap();
-
-        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/etl_gtm_user_v2_props_full_v2"));
-        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/etl_gtm_user_v2_props_incremental_v2"));
+        // "etl_" + this.getName() + "_user_props"
+        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/" + getUserPropTableName() + "_full_v3"));
+        Assertions.assertNotNull(schemaMap.get(testWarehouseDir + "/" + getUserPropTableName() + "_incremental_v3"));
 
         Dataset<Row> eventDataset = transformer.postTransform(datasetMap.get(TableName.EVENT_V2));
         Assertions.assertTrue(eventDataset.count() > 1);
@@ -320,12 +321,12 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
 
 
     @Test
-    void test_transform_data_user_incremental_v2() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2Test.test_transform_data_user_incremental_v2
+    void test_transform_data_user_incremental_v3() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2Test.test_transform_data_user_incremental_v3
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
-        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_incremental_v2/" + new Date().getTime();
+        String testWarehouseDir = "/tmp/warehouse/gtm/test_transform_data_user_incremental_v3/" + new Date().getTime();
         System.setProperty(WAREHOUSE_DIR_PROP, testWarehouseDir);
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login2.json")).getPath());
@@ -336,7 +337,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
         DatasetUtil.getSchemaMap().forEach((k, v) -> {
             log.info("{} -> {}", k, v.prettyJson());
         });
-        Dataset<Row> incrementalUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/etl_gtm_user_v2_props_incremental_v2", year100);
+        Dataset<Row> incrementalUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/" + getUserPropTableName() + "_incremental_v3", year100);
         String expectedDataInc = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_incremental_v2.json");
 
         Assertions.assertEquals(expectedDataInc,
@@ -345,7 +346,7 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
                         .replaceAll("\"update_date\" : \"\\d+\",", "\"update_date\" : \"_YYYYMMDD_\","),
                 "test_transform_data_user_incremental_v2.json");
 
-        Dataset<Row> fullUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/etl_gtm_user_v2_props_full_v2", year100);
+        Dataset<Row> fullUserDataset = DatasetUtil.readDatasetFromPath(spark, testWarehouseDir + "/" + getUserPropTableName() + "_full_v3", year100);
         Assertions.assertTrue(fullUserDataset.count() > 0);
 
     }
@@ -389,6 +390,10 @@ public class GTMServerDataTransformerV2Test extends BaseSparkTest {
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_with_session_v2.json");
         Assertions.assertEquals(expectedData, replaceProcessInfo(sessionDataset.first().prettyJson()), "session is correct");
+    }
+
+    String getUserPropTableName() {
+        return "etl_gtm_server_data_user_props";
     }
 
 }
