@@ -44,6 +44,8 @@ import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
 import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.MAX_SN;
+import static software.aws.solution.clickstream.util.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.util.ContextUtil.WAREHOUSE_DIR_PROP;
 
 @Slf4j
 public final class DatasetUtil {
@@ -308,7 +310,7 @@ public final class DatasetUtil {
 
     private static String getPathForTable(final String tableName) {
         if (!tableName.matches(TABLE_REGEX)) {
-            throw new ExecuteTransformerException("getPathForTable invalid tableName: " + tableName);
+            throw new ExecuteTransformerException("getPathForTable invalid tableName: " + tableName + ", name must match: " + TABLE_REGEX);
         }
         return Paths.get(ContextUtil.getWarehouseDir(), tableName).toString().replace("s3:/", "s3://");
     }
@@ -528,6 +530,16 @@ public final class DatasetUtil {
         }
         return false;
     }
+    public static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount, final String name) {
+        log.info(new ETLMetric(corruptDatasetCount, name + " corruptDataset").toString());
+        String pathName = name.replaceAll("[\\s-]", "_").toLowerCase();
+
+        String jobName = System.getProperty(JOB_NAME_PROP);
+        String s3FilePath = Paths.get(System.getProperty(WAREHOUSE_DIR_PROP), pathName).toString().replace("s3:/", "s3://");
+        log.info("save corruptedDataset to " + s3FilePath);
+        corruptDataset.withColumn(JOB_NAME_COL, lit(jobName)).write().partitionBy(JOB_NAME_COL).option(COMPRESSION, "gzip").mode(SaveMode.Append).json(s3FilePath);
+    }
+
 }
 
 

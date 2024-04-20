@@ -107,6 +107,26 @@
         "deleted": false,
         "createAt": 1667355960000,
         "updateAt": 1667355960000
+      },
+      {
+        "id": "BUILT-IN-5",
+        "type": "PLUGIN#BUILT-IN-5",
+        "prefix": "PLUGIN",
+        "name": "SensorDataTransformer",
+        "description": {
+          "en-US": "Convert the SensorsData format into the data format in the data warehouse",
+          "zh-CN": "把 SensorsData 的数据格式，转换成数据仓库中的数据格式"
+        },
+        "builtIn": true,
+        "mainFunction": "software.aws.solution.clickstream.sensors.SensorsDataTransformerV2",
+        "jarFile": "",
+        "bindCount": 0,
+        "pluginType": "Transform",
+        "dependencyFiles": [],
+        "operator": "",
+        "deleted": false,
+        "createAt": 1667355960000,
+        "updateAt": 1667355960000
       }
     ]
   },

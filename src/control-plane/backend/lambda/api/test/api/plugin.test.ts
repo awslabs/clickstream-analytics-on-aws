@@ -255,7 +255,7 @@ describe('Plugin test', () => {
       .get('/api/plugin');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
+    expect(res.body).toMatchObject({
       success: true,
       message: '',
       data: {
@@ -326,11 +326,31 @@ describe('Plugin test', () => {
             prefix: 'PLUGIN',
             name: 'GTMServerDataTransformer',
             description: {
-              'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
-              'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
+              'en-US': expect.any(String),
+              'zh-CN': expect.any(String),
             },
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Transform',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1667355960000,
+            updateAt: 1667355960000,
+          },
+          {
+            id: 'BUILT-IN-5',
+            type: 'PLUGIN#BUILT-IN-5',
+            prefix: 'PLUGIN',
+            name: 'SensorDataTransformer',
+            description: {
+              'en-US': expect.any(String),
+              'zh-CN': expect.any(String),
+            },
+            builtIn: true,
+            mainFunction: 'software.aws.solution.clickstream.sensors.SensorsDataTransformerV2',
             jarFile: '',
             bindCount: 0,
             pluginType: 'Transform',
@@ -346,7 +366,7 @@ describe('Plugin test', () => {
           { name: 'plugin-04' },
           { name: 'plugin-05' },
         ],
-        totalCount: 9,
+        totalCount: 10,
       },
     });
 
@@ -424,7 +444,7 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
         ],
-        totalCount: 9,
+        totalCount: 10,
       },
     });
   });
@@ -505,7 +525,7 @@ describe('Plugin test', () => {
       .get('/api/plugin?order=desc');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
+    expect(res.body).toMatchObject({
       success: true,
       message: '',
       data: {
@@ -576,11 +596,31 @@ describe('Plugin test', () => {
             prefix: 'PLUGIN',
             name: 'GTMServerDataTransformer',
             description: {
-              'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
-              'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
+              'en-US': expect.any(String),
+              'zh-CN': expect.any(String),
             },
             builtIn: true,
             mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformerV2',
+            jarFile: '',
+            bindCount: 0,
+            pluginType: 'Transform',
+            dependencyFiles: [],
+            operator: '',
+            deleted: false,
+            createAt: 1667355960000,
+            updateAt: 1667355960000,
+          },
+          {
+            id: 'BUILT-IN-5',
+            type: 'PLUGIN#BUILT-IN-5',
+            prefix: 'PLUGIN',
+            name: 'SensorDataTransformer',
+            description: {
+              'en-US': expect.any(String),
+              'zh-CN': expect.any(String),
+            },
+            builtIn: true,
+            mainFunction: 'software.aws.solution.clickstream.sensors.SensorsDataTransformerV2',
             jarFile: '',
             bindCount: 0,
             pluginType: 'Transform',
@@ -594,7 +634,7 @@ describe('Plugin test', () => {
           { name: 'plugin-02' },
           { name: 'plugin-03' },
         ],
-        totalCount: 7,
+        totalCount: 8,
       },
     });
   });

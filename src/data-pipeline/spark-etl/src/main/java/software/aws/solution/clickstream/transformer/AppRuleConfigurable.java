@@ -11,13 +11,12 @@
  *  and limitations under the License.
  */
 
-package software.aws.solution.clickstream.common;
+package software.aws.solution.clickstream.transformer;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
+import software.aws.solution.clickstream.common.RuleConfig;
 
-public interface EventParser {
-    ParseRowResult parseLineToDBRow(String ingestLine, String projectId, String fileName)  throws JsonProcessingException;
-    JsonNode getData(String ingestDataField) throws JsonProcessingException;
-    ParseDataResult parseData(String dataString, ExtraParams extraParams, int index)  throws JsonProcessingException;
+import java.util.Map;
+
+public interface AppRuleConfigurable {
+    Map<String, RuleConfig> getAppRuleConfig();
 }

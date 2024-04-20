@@ -149,11 +149,11 @@ public class ServerDataConverterV2Test extends BaseSparkTest {
 
         Assertions.assertEquals(0, outDataset.count());
         Dataset<Row> corrupDataset =
-                spark.read().json("/tmp/warehouse/etl_gtm_corrupted_json_data_v2").filter(col("rid").equalTo("ssssss9dc4d91c00000v2"));
+                spark.read().json("/tmp/warehouse/etl_corrupted_json_gtm_server_data").filter(col("rid").equalTo("ssssss9dc4d91c00000v2"));
         Assertions.assertTrue(corrupDataset.count() > 0);
 
        Assertions.assertTrue(corrupDataset.select(expr("dataOut._corrupt_record"))
-               .first().getString(0).startsWith("data:[\"x-ga-protocol_version\":\"2\",\"x-ga-measurement_id\":\"G-7W7D6ZHG1T\"")
+               .first().getString(0).startsWith("Cannot convert data to ClickstreamEvent")
        );
     }
 
