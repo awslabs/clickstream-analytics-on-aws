@@ -1,9 +1,9 @@
 # Upgrade the solution
 
-## Planning and Preparation
+!!! warning "Important"
 
-1. **Backup of Modified QuickSight Analysis and Dashboard**: The solution upgrade may involve modifying the out-of-the-box analysis and dashboard. In this case, you can back them up following [this documentation][quicksight-assets-export].
-2. **Data Processing Interval** (only applied to upgrade from v1.0.x): The pipeline upgrade will take about 20 minutes. Make sure no data processing job is running while upgrading the existing pipeline. You can update the existing pipeline to increase the interval and view whether there are running jobs of the EMR Serverless application in the console.
+    1. Please be advised that upgrading to this version directly from version 1.0.x is not supported. It is necessary to upgrade to [version 1.1.5][v115] first. 
+    2. Upgrading from version 1.1.5 or any earlier 1.1 version will rebuild the default analysis dashboard and you will not be able to analyze previous data. If you need to migrate the existing data, it is imperative that you contact the AWS Clickstream team for support through your sales representative.
 
 ## Upgrade Process
 
@@ -51,49 +51,6 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
-## Post-Upgrade Actions
-
-### Migrate the existing data after upgrading from 1.0.x
-
-When you upgraded the pipeline from v1.0.x, you need to perform the below actions to migrate data from old table `ods_events` to new tables `event`, `event_parameter`, `user`, and `item` in the Redshift:
-
-1. Open [Redshift query editor v2][query-editor]. You can refer to AWS doc [Working with query editor v2][working-with-query-editor] to log in and query data using Redshift query editor v2.
-
-    !!! info "Note"
-        You must use the `admin` user or the user with schema (known as the app ID) ownership permission.
-
-2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and make sure tables for the appId are listed there.
-
-3. Create a new SQL Editor.
-
-4. Execute below SQL in editor.
-
-    ```sql
-    -- please replace `<app-id>` with your actual app id
-    CALL "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
-    ```
-
-5. Wait for the SQL to complete. The execution time depends on the volume of data in table `ods_events`.
-
-6. Execute the below SQL to check the stored procedure execution log; make sure there are no errors there.
-
-    ```sql 
-    -- please replace `<app-id>` with your actual app id
-    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_ods_events' order by log_date desc;
-    ```
-
-7. If you don't have other applications using the legacy tables and views, you could run the SQLs below to clean the legacy views and tables to save the storage of Redshift.
-
-    ```sql 
-    -- please replace `<app-id>` with your actual app id
-    DROP TABLE "<app-id>".dim_users CASCADE;
-    DROP TABLE "<app-id>".ods_events CASCADE;
-
-    DROP PROCEDURE  "<app-id>".sp_clear_expired_events(retention_range_days integer);
-    DROP PROCEDURE  "<app-id>".sp_upsert_users();
-    DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
-    ```
-
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
@@ -107,3 +64,4 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
 [intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
 [intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
+[v115]: https://awslabs.github.io/clickstream-analytics-on-aws/en/1.1.5/upgrade/
