@@ -334,10 +334,4 @@ export const schemaDefs: SQLDef[] = [
   {
     sqlFile: 'sp-migrate-data-to-v2.sql',
   },
-  {
-    sqlFile: 'segment-user.sql',
-  },
-  {
-    sqlFile: 'sp-user-segment.sql',
-  },
 ];
