@@ -73,6 +73,8 @@ def send_user_event_of_duration(users, all_events):
             if len(chunk) < 10:
                 break
             send_event_real_time.send_events_of_day(users[i], chunk)
+            if configure.NEED_SLEEP:
+                time.sleep(configure.PERFORMANCE_SLEEP_TIME)
 
 
 def create_duration_event(day_users):
