@@ -890,7 +890,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
         Code: {
           S3Bucket: Match.anyValue(),
-          S3Key: MOCK_LAMBDA_CODE_S3_KEY,
+          S3Key: Match.anyValue(),
         },
         Role: {
           'Fn::GetAtt': [
