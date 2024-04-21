@@ -1,9 +1,9 @@
 # 升级解决方案
 
-## 规划和准备
+!!! warning " 升级须知"
 
-1. **备份修改后的 QuickSight 分析和仪表板**：解决方案升级可能会更新方案提供的分析和仪表板。 如果您更改了它，请按照[本文档][quicksight-assets-export]进行备份。
-2. **数据处理间隔**（仅适用于从 1.0.x 版本升级的情况）：管道升级大约需要20分钟； 确保升级现有管道时没有数据处理作业正在运行。 您可以更新现有管道，增加间隔时间，并在控制台查看EMR Serverless应用是否有无正在运行的作业。
+    1. 请注意,从版本 1.0.x 直接升级到此版本是不被支持的。必须先升级到[版本1.1.5][v115]。
+    2. 从版本 1.1.5 或任何更早的 1.1 版本升级都会重建默认的仪表板分析，无法分析先前的数据。如果您需要迁移现有数据，请通过您的销售代表与 AWS Clickstream 团队联系以获取支持。
 
 ## 升级过程
 
@@ -51,49 +51,6 @@
 
 您可以在解决方案控制台的 **状态** 列中查看管道的状态。 几分钟后您应该会收到`活跃`状态。
 
-## 升级后操作
-
-### 从1.0.x升级后迁移现有数据
-
-当您从 v1.0.x 升级管道时，您需要执行以下操作将数据从旧表`ods_events`迁移到 Redshift 中的新表`event`、`event_parameter`、`user`和`item`:
-
-1. 打开 [Redshift 查询编辑器 v2][查询编辑器]。 您可以参考 AWS 文档 [使用查询编辑器 v2][working-with-query-editor] 使用 Redshift 查询编辑器 v2 登录并查询数据。
-
-    !!! info "注意"
-        您必须使用`admin`用户或具有 schema（名为`项目 ID`）所有权权限的用户。
-
-2. 选择无服务器工作组或配置的集群，`<project-id>`->`<app-id>`->Tables，并确保其中列出了 appId 的表。
-
-3. 新建一个SQL编辑器。
-
-4. 在编辑器中执行以下SQL。
-
-     ```sql
-     -- 请将 `<app-id>` 替换为您的实际应用 ID
-     CALL "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
-     ```
-
-5. 等待SQL 完成。 执行时间取决于表“ods_events”中的数据量。
-
-6. 执行以下SQL查看存储过程执行日志； 确保那里没有错误。
-
-    ```sql 
-    -- 请将 `<app-id>` 替换为您的实际应用 IDd
-    SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_ods_events' order by log_date desc;
-    ```     
-
-7. 如果您没有其他应用程序使用旧表和视图，您可以运行下面的 SQL 来清理旧视图和表，以节省 Redshift 的存储空间。
-
-    ```sql
-    -- 请将 `<app-id>` 替换为您的实际应用 ID
-    DROP TABLE "<app-id>".dim_users CASCADE;
-    DROP TABLE "<app-id>".ods_events CASCADE;
-
-    DROP PROCEDURE  "<app-id>".sp_clear_expired_events(retention_range_days integer);
-    DROP PROCEDURE  "<app-id>".sp_upsert_users();
-    DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
-    ```
-
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
@@ -107,3 +64,4 @@
 [intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
 [intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
 [troubleshooting]: ./troubleshooting.md
+[v115]: https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.5/upgrade/
