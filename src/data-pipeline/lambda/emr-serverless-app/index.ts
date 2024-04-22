@@ -15,6 +15,7 @@
 import { EMR_ARCHITECTURE_AUTO, aws_sdk_client_common_config, logger } from '@aws/clickstream-base-lib';
 import { EMRServerlessClient, CreateApplicationCommand, Architecture, CreateApplicationCommandInput, DeleteApplicationCommand } from '@aws-sdk/client-emr-serverless';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { getFunctionTags } from '../../../common/lambda/tags';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { EmrApplicationArchitectureType } from '../../../data-pipeline-stack';
 
@@ -58,6 +59,24 @@ export const handler = async (event: CloudFormationCustomResourceEvent, context:
 
 async function _handler(event: CloudFormationCustomResourceEvent, context: Context) {
   logger.info(`functionName: ${context.functionName}`);
+
+  let funcTags: Record<string, string> | undefined = undefined;
+
+  try {
+    funcTags = await getFunctionTags(context);
+  } catch (e) {
+    //@ts-ignore
+    if (e.name === 'TimeoutError') {
+      logger.warn('getFunctionTags TimeoutError');
+    } else {
+      logger.error('error:' + e);
+      throw e;
+    }
+  }
+
+  logger.info('funcTags', { funcTags });
+
+
   const props = event.ResourceProperties as ResourcePropertiesType;
   if (event.RequestType == 'Delete') {
     await deleteEMRServerlessApp();
@@ -65,7 +84,7 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
       Data: {},
     };
   } else {
-    const applicationId = await createEMRServerlessApp(props);
+    const applicationId = await createEMRServerlessApp(props, funcTags);
     return {
       Data: {
         ApplicationId: applicationId,
@@ -74,14 +93,11 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
   }
 }
 
-async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<string> {
+async function createEMRServerlessApp(props: ResourcePropertiesType, funcTags: Record<string, string> | undefined): Promise<string> {
   let architecture = props.architecture;
   let javaPathSuffix = 'x86_64';
   if (props.architecture === EMR_ARCHITECTURE_AUTO) {
     architecture = Architecture.ARM64;
-    if (region.startsWith('cn-')) {
-      architecture = Architecture.X86_64;
-    }
   }
   if (architecture == Architecture.ARM64) {
     javaPathSuffix = 'aarch64';
@@ -120,6 +136,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
         },
       },
     ],
+    tags: funcTags,
   };
 
   logger.info('CreateApplicationCommand input', { input });
