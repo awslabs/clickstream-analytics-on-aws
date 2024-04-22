@@ -237,6 +237,12 @@ async function _getOutputsFromS3(bucket: string, prefix: string, stackName: stri
       return [];
     }
     const outputs = content[stackName].Outputs as Output[];
+    if (!outputs) {
+      logger.warn('read empty outputs.', {
+        region: REGION, bucket, key: fileKey,
+      });
+      return [];
+    }
     return outputs;
   } catch (err) {
     logger.error('read outputs error.', {
