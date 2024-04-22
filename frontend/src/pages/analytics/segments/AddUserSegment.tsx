@@ -16,6 +16,7 @@ import {
   ContentLayout,
   Header,
 } from '@cloudscape-design/components';
+import { getSegmentById } from 'apis/segments';
 import {
   ExtendSegment,
   IEventSegmentationObj,
@@ -28,9 +29,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_SEGMENT_GROUP_DATA, INIT_SEGMENT_OBJ } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, ternary } from 'ts/utils';
 import SegmentEditor from './components/SegmentEditor';
-import { getSegmentById } from '../../../apis/segments';
 
 type AddUserSegmentsProps = {
   actionType: string;
@@ -58,10 +58,7 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
       href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text:
-        actionType === 'edit'
-          ? t('breadCrumb.editSegment')
-          : t('breadCrumb.createSegment'),
+      text: ternary(actionType === 'edit', t('breadCrumb.editSegment'), t('breadCrumb.createSegment')),
       href: '',
     },
   ];
