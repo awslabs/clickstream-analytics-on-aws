@@ -1177,7 +1177,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.time_period.0.1711698952421",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "time_period"
                                                 },
                                                 "HierarchyId": "48a2175d-bd98-4c00-918c-eb97a59247ce"
@@ -1189,7 +1189,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.sum.1.1711698955185",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "sum"
                                                 },
                                                 "AggregationFunction": {
@@ -1203,7 +1203,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.this_week_value.2.1711698957569",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "this_week_value"
                                                 }
                                             }
@@ -1296,7 +1296,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1713676394133",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -1307,7 +1307,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676396816",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -1391,7 +1391,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1711011505280",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -1402,7 +1402,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711011516067",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -1483,7 +1483,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711008857519",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "b080c072-1421-499e-aa3a-bfda0f11a703"
@@ -1495,7 +1495,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_session_per_user"
                                                 },
                                                 "AggregationFunction": {
@@ -1507,7 +1507,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_engagement_time_per_user.2.1711008934769",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_engagement_time_per_user_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -1519,7 +1519,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_engagement_time_per_session.3.1711008937937",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_engagement_time_per_session_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -1654,7 +1654,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "8cc8c157-f439-41e8-9d9f-d3817b6f978f.event_timestamp.0.1710216250723",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
@@ -1673,7 +1673,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "Active users"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -1683,7 +1683,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "New users"
                                                 },
                                                 "AggregationFunction": {
@@ -1744,7 +1744,7 @@
                                         "ApplyTo": {
                                             "FieldId": "8cc8c157-f439-41e8-9d9f-d3817b6f978f.event_timestamp.0.1710216250723",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "event_date"
                                             }
                                         }
@@ -1758,7 +1758,7 @@
                                         "ApplyTo": {
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "Active users"
                                             }
                                         }
@@ -2145,7 +2145,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1713677344090",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Intra_Day_User",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "HOUR",
@@ -2156,10 +2156,10 @@
                                     "Values": [
                                         {
                                             "CategoricalMeasureField": {
-                                                "FieldId": "LogicalTable1.new user.2.1713699354556",
+                                                "FieldId": "LogicalTable1.new_user.2.1713699354556",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
-                                                    "ColumnName": "new user"
+                                                    "DataSetIdentifier": "Intra_Day_User",
+                                                    "ColumnName": "New User"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -2168,7 +2168,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "23234208-6046-4ac5-8d8d-ff4c031fd15f.3.1713699345900",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Intra_Day_User",
                                                     "ColumnName": "Previous Day New User"
                                                 }
                                             }
@@ -2223,7 +2223,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.new user.2.1713699354556",
+                                                "FieldId": "LogicalTable1.new_user.2.1713699354556",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -2257,7 +2257,7 @@
                             }
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw"
+                        "DataSetIdentifier": "Day_Traffic_Source_User"
                     }
                 },
                 {
@@ -2280,7 +2280,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_type.8.1711465894618",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "aggregation_type"
                                                 }
                                             }
@@ -2289,7 +2289,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.0.1711007526130",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -2301,7 +2301,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "b945e825-c64b-4ae2-be3d-5e5646b409bd.7.1712026978749",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "Active User"
                                                 }
                                             }
@@ -2310,7 +2310,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "session_count"
                                                 },
                                                 "AggregationFunction": {
@@ -2322,7 +2322,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "engagement_session_count"
                                                 },
                                                 "AggregationFunction": {
@@ -2334,7 +2334,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.engagement_rate.4.1711007596698",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "Engagement Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -2363,7 +2363,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_user_engagement_time_msec.8.1711007664420",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "avg_user_engagement_time_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -2375,7 +2375,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -2621,7 +2621,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -2632,7 +2632,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.2.1711005440081",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -2670,7 +2670,7 @@
                                         "ApplyTo": {
                                             "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_Traffic_Source_User",
                                                 "ColumnName": "aggregation_dim"
                                             }
                                         }
@@ -2734,7 +2734,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711005413933",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
@@ -2747,7 +2747,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.2.1711005440081",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -2759,7 +2759,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -2868,7 +2868,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -2879,7 +2879,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.2.1711005440081",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -2917,7 +2917,7 @@
                                         "ApplyTo": {
                                             "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_Traffic_Source_User",
                                                 "ColumnName": "aggregation_dim"
                                             }
                                         }
@@ -2984,7 +2984,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_timestamp.2.1711523597437",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
@@ -2997,7 +2997,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "d9c974d1-5443-4c10-ac5d-6891cda78bbf.2.1711524191719",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "New user"
                                                 }
                                             }
@@ -3006,7 +3006,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "7082ff24-14b9-4918-99da-6f996f15df45.2.1711524285583",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Previous Day New Users"
                                                 }
                                             }
@@ -3139,7 +3139,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "d9c974d1-5443-4c10-ac5d-6891cda78bbf.0.1711518173962",
                                             "Column": {
-                                                "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Event_View",
                                                 "ColumnName": "New user"
                                             },
                                             "FormatConfiguration": {
@@ -3214,7 +3214,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "8cc8c157-f439-41e8-9d9f-d3817b6f978f.event_timestamp.0.1710216250723",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
@@ -3233,7 +3233,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "Active users"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -3243,7 +3243,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "075548fc-1d4a-4f81-87bd-44ba03e344f4.2.1710423237563",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View",
                                                     "ColumnName": "New users"
                                                 },
                                                 "AggregationFunction": {
@@ -3304,7 +3304,7 @@
                                         "ApplyTo": {
                                             "FieldId": "8cc8c157-f439-41e8-9d9f-d3817b6f978f.event_timestamp.0.1710216250723",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "event_date"
                                             }
                                         }
@@ -3318,7 +3318,7 @@
                                         "ApplyTo": {
                                             "FieldId": "e1d81927-fdbf-435c-99b0-b7fe009df20e.1.1710399885004",
                                             "Column": {
-                                                "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Day_User_View",
                                                 "ColumnName": "Active users"
                                             }
                                         }
@@ -3438,7 +3438,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711005413933",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "DAY",
@@ -3451,7 +3451,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.2.1711005440081",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -3463,7 +3463,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_source.1.1711005437083",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -3572,7 +3572,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_type.8.1711465894618",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "aggregation_type"
                                                 }
                                             }
@@ -3581,7 +3581,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.0.1711007526130",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -3593,7 +3593,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.new_user_count.1.1711007569880",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "new_user_count"
                                                 },
                                                 "AggregationFunction": {
@@ -3605,7 +3605,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.session_count.2.1711007577714",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "session_count"
                                                 },
                                                 "AggregationFunction": {
@@ -3617,7 +3617,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.engagement_session_count.3.1711007585763",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "engagement_session_count"
                                                 },
                                                 "AggregationFunction": {
@@ -3629,7 +3629,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.engagement_rate.4.1711007596698",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "Engagement Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -3658,7 +3658,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.5.1711007636650",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_Acquisition",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -3893,7 +3893,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.geo_country.1.1711546539005",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Country_New_User",
                                                     "ColumnName": "geo_country"
                                                 }
                                             }
@@ -3904,7 +3904,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.1.1711593410102",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Country_New_User",
                                                     "ColumnName": "user_count"
                                                 },
                                                 "AggregationFunction": {
@@ -3971,7 +3971,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "LogicalTable1.merged_user_id.0.1711517551372",
                                             "Column": {
-                                                "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Event_View",
                                                 "ColumnName": "merged_user_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT",
@@ -4047,7 +4047,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_timestamp.2.1711523597437",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "HOUR",
@@ -4060,7 +4060,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "41d5bacd-b3c4-40de-b52d-4983b7560586.2.1711524059841",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Active users"
                                                 }
                                             }
@@ -4069,7 +4069,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "947b2b77-7815-4ca6-9307-c1d98636deff.2.1711519910792",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Previous Day Active Users"
                                                 }
                                             }
@@ -4114,13 +4114,6 @@
                                             "FieldValue": "Previous Day Active User"
                                         },
                                         "Color": "#219FD7"
-                                    },
-                                    {
-                                        "Element": {
-                                            "FieldId": "947b2b77-7815-4ca6-9307-c1d98636deff.2.1711519910792",
-                                            "FieldValue": "Previous Day Active Users"
-                                        },
-                                        "Color": "#EEEEEE"
                                     }
                                 ]
                             },
@@ -4205,7 +4198,7 @@
                             }
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw"
+                        "DataSetIdentifier": "Day_Traffic_Source_User"
                     }
                 },
                 {
@@ -4228,7 +4221,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.geo_country.0.1711680904000",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Country_New_User",
                                                     "ColumnName": "geo_country"
                                                 }
                                             }
@@ -4237,7 +4230,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.geo_city.2.1712061176423",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Country_New_User",
                                                     "ColumnName": "geo_city"
                                                 }
                                             }
@@ -4249,7 +4242,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_count.1.1711680906700",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Country_New_User",
                                                     "ColumnName": "user_count"
                                                 },
                                                 "AggregationFunction": {
@@ -4424,7 +4417,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1713677344090",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Intra_Day_User",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "DateGranularity": "HOUR",
@@ -4435,10 +4428,10 @@
                                     "Values": [
                                         {
                                             "CategoricalMeasureField": {
-                                                "FieldId": "LogicalTable1.active user.3.1713698173577",
+                                                "FieldId": "LogicalTable1.active_user.3.1713698173577",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
-                                                    "ColumnName": "active user"
+                                                    "DataSetIdentifier": "Intra_Day_User",
+                                                    "ColumnName": "Active User"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
                                             }
@@ -4447,7 +4440,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "9f5c05c5-fef9-401a-9223-0c173e922e3a.2.1713698362865",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Intra_Day_User",
                                                     "ColumnName": "Previous Day Active Users"
                                                 }
                                             }
@@ -4502,7 +4495,7 @@
                                         },
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "LogicalTable1.active user.3.1713698173577",
+                                                "FieldId": "LogicalTable1.active_user.3.1713698173577",
                                                 "Visibility": "VISIBLE"
                                             }
                                         }
@@ -5092,7 +5085,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.1.1713681832333",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Name",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5103,7 +5096,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.2.1713681836483",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Name",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -5183,7 +5176,7 @@
                             }
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw"
+                        "DataSetIdentifier": "Day_Traffic_Source_User"
                     }
                 },
                 {
@@ -5202,7 +5195,7 @@
                             }
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw"
+                        "DataSetIdentifier": "Day_Traffic_Source_User"
                     }
                 },
                 {
@@ -5221,7 +5214,7 @@
                             }
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw"
+                        "DataSetIdentifier": "Day_Traffic_Source_User"
                     }
                 },
                 {
@@ -5244,7 +5237,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711008537213",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View_Engagement",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "87e2b868-c046-4e87-88f6-d6a417fbc619"
@@ -5256,7 +5249,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "96aab19b-9a34-4ab2-a8cf-75c545b27f6d.2.1711612796223",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View_Engagement",
                                                     "ColumnName": "Other events"
                                                 },
                                                 "AggregationFunction": {
@@ -5268,7 +5261,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.2.1711008548112",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Day_User_View_Engagement",
                                                     "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
@@ -5399,7 +5392,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711008857519",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "1c55d165-211e-4a90-b7e4-a1427e7c1eaa"
@@ -5411,7 +5404,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_session_per_user.1.1711008930258",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_session_per_user"
                                                 },
                                                 "AggregationFunction": {
@@ -5423,7 +5416,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_engagement_time_per_user.2.1711008934769",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_engagement_time_per_user_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -5435,7 +5428,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.avg_engagement_time_per_session.3.1711008937937",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Engagement_KPI",
                                                     "ColumnName": "avg_engagement_time_per_session_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -5567,7 +5560,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_timestamp.0.1711009016829",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp"
                                                 },
                                                 "HierarchyId": "88043983-b639-4fb2-a2b0-4a820c381977"
@@ -5579,7 +5572,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_id.1.1711009027877",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5591,7 +5584,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.2.1711009034858",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5688,7 +5681,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.0.1711009123119",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5699,7 +5692,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_id.1.1711009128864",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -5803,7 +5796,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.0.1711009394076",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5815,7 +5808,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_id.1.1711009400507",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5825,7 +5818,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.4.1711009650709",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -5835,7 +5828,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "8f843569-14af-401a-ad58-20b772c11c36.3.1711009595738",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Event / User"
                                                 }
                                             }
@@ -5844,7 +5837,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_value.2.1711009421843",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_value"
                                                 },
                                                 "AggregationFunction": {
@@ -6005,7 +5998,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711009781584",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "2489c02b-9c20-4678-b6a5-2969c3dec81b"
@@ -6017,7 +6010,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.1.1711009788797",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
@@ -6031,7 +6024,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.2.1711009802866",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -6128,7 +6121,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.0.1711009888326",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -6139,7 +6132,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.1.1711009898756",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View",
                                                     "ColumnName": "view_count"
                                                 },
                                                 "AggregationFunction": {
@@ -6233,7 +6226,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_type.6.1711010220481",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "aggregation_type"
                                                 }
                                             }
@@ -6242,7 +6235,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.0.1711009975827",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -6254,7 +6247,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "9861ba96-1421-4306-baca-5900074f2420.4.1711010080629",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "View"
                                                 }
                                             }
@@ -6263,7 +6256,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.2.1711010012961",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -6273,7 +6266,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "87b5e7cc-3065-4ae0-bb24-8d008c592552.5.1711010161446",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "View / User"
                                                 }
                                             }
@@ -6282,7 +6275,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_engagement_time_msec.3.1711010034447",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "user_engagement_time_minutes"
                                                 },
                                                 "AggregationFunction": {
@@ -6294,7 +6287,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_id.4.1711010099383",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -6446,7 +6439,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.1.1711010396213",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Entrance",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -6457,7 +6450,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.entrance_count.1.1711010293936",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Entrance",
                                                     "ColumnName": "entrance_count"
                                                 },
                                                 "AggregationFunction": {
@@ -6544,7 +6537,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.aggregation_dim.0.1711010458577",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Exit",
                                                     "ColumnName": "aggregation_dim"
                                                 }
                                             }
@@ -6555,7 +6548,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.exit_count.1.1711010461307",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Exit",
                                                     "ColumnName": "exit_count"
                                                 },
                                                 "AggregationFunction": {
@@ -6642,7 +6635,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1713681828167",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Name",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "LogicalTable1.event_date.0.1713681828167"
@@ -6654,7 +6647,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.2.1713681836483",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Name",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -6668,7 +6661,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.1.1713681832333",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Name",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -7195,7 +7188,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "266592ff-5da4-4788-8407-9edf87c2cf7c.3.1713683105546",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "Active Date"
                                                 }
                                             }
@@ -7206,7 +7199,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.4.1713683109182",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "event_date"
                                                 }
                                             }
@@ -7217,7 +7210,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "a3c692a3-6994-4442-a8bd-3116d3e9b27d.2.1713683119660",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -7448,7 +7441,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.first_date.1.1711697512990",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "first_date"
                                                 },
                                                 "HierarchyId": "7569c4c3-6eda-4fc1-918c-713aacf02199"
@@ -7460,7 +7453,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "2459d606-0ed6-444c-a155-a57eeeea163a.1.1711696804166",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "AggregationFunction": {
@@ -7575,7 +7568,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711010582849",
                                                 "Column": {
-                                                    "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "User_New_Return",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "0c4e6e62-855c-4a71-adb9-a6489cd8379a"
@@ -7587,7 +7580,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.view_count.1.1711010591368",
                                                 "Column": {
-                                                    "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "User_New_Return",
                                                     "ColumnName": "user_count"
                                                 },
                                                 "AggregationFunction": {
@@ -7601,7 +7594,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_type.2.1711010596699",
                                                 "Column": {
-                                                    "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "User_New_Return",
                                                     "ColumnName": "user_type"
                                                 }
                                             }
@@ -7705,7 +7698,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711010704906",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Overtime",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "ebc59a53-1a4c-4d5e-9f83-dab769329d09"
@@ -7717,7 +7710,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.1.1711010755874",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Overtime",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -7729,7 +7722,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "0679e7b9-c8f1-4c4a-bb9e-f77ced29c8c8.2.1711010917530",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Overtime",
                                                     "ColumnName": "User Activity in Last 30 Days"
                                                 }
                                             }
@@ -7738,7 +7731,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "13a55ce8-8d67-482a-98f1-cd0513dfcec2.3.1711010966053",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_Overtime",
                                                     "ColumnName": "User Activity in Last 7 Days"
                                                 }
                                             }
@@ -7848,7 +7841,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711011135099",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "13d47d71-b182-4a44-a020-bb126be00e03"
@@ -7860,7 +7853,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "f65a58c6-69a1-445e-abb8-f85c56702e75.1.1711011369192",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "DAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -7889,7 +7882,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "0dcd1fed-1f28-40d0-bade-b0510dfb800b.2.1711011373088",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "DAU/WAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -7918,7 +7911,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "668bea69-b284-41d1-855f-b2b37a5d73af.3.1711011376507",
                                                 "Column": {
-                                                    "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "DAU_WAU",
                                                     "ColumnName": "WAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -8042,7 +8035,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "f674c811-6d20-4dc8-994d-d57ce0b3792e.2.1712814433901",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "First Action Date"
                                                 }
                                             }
@@ -8053,7 +8046,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.0.1711015080343",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 }
                                             }
@@ -8064,7 +8057,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "daefa508-b5bd-4289-bca2-1726608b0d77.2.1711015160550",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -8346,7 +8339,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "LogicalTable1.day_diff.0.1711696674313",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "day_diff"
                                                 },
                                                 "FormatConfiguration": {
@@ -8376,7 +8369,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "2459d606-0ed6-444c-a155-a57eeeea163a.1.1711696804166",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Retention_View",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "AggregationFunction": {
@@ -8479,7 +8472,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.time_period.0.1711698952421",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "time_period"
                                                 },
                                                 "HierarchyId": "e3b731c0-cec9-42ff-96cf-859cff5bc0f9"
@@ -8491,7 +8484,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.sum.1.1711698955185",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "sum"
                                                 },
                                                 "AggregationFunction": {
@@ -8505,7 +8498,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.this_week_value.2.1711698957569",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Lifecycle_Weekly_View",
                                                     "ColumnName": "this_week_value"
                                                 }
                                             }
@@ -8793,7 +8786,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.2.1711012009321",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "439db3ee-bf86-4a64-bf9a-9db3fd738d2e"
@@ -8805,7 +8798,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.0.1711011974472",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -8817,7 +8810,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_ua_browser.2.1711702064454",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "device_ua_browser"
                                                 }
                                             }
@@ -8914,7 +8907,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1711011505280",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -8925,7 +8918,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711011516067",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9006,7 +8999,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.2.1711700330552",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "187011a1-5436-453b-ac19-fd474739a68b"
@@ -9018,7 +9011,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711011876922",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9030,7 +9023,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.2.1712813109003",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -9131,7 +9124,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.2.1711012009321",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "2659ebae-59e6-4cb3-a459-3ccd209923d6"
@@ -9143,7 +9136,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.0.1711011974472",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9155,7 +9148,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_version.1.1711011982075",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "app_version"
                                                 }
                                             }
@@ -9255,7 +9248,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "f4498144-9baa-4966-831b-9346039fc96d.0.1711012386599",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Device"
                                                 }
                                             }
@@ -9266,7 +9259,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.2.1711012402581",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9278,7 +9271,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_id.1.1711012394582",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -9304,7 +9297,7 @@
                                         "ApplyTo": {
                                             "FieldId": "LogicalTable1.merged_user_id.2.1711012402581",
                                             "Column": {
-                                                "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Event_View",
                                                 "ColumnName": "merged_user_id"
                                             }
                                         }
@@ -9318,7 +9311,7 @@
                                         "ApplyTo": {
                                             "FieldId": "LogicalTable1.event_id.1.1711012394582",
                                             "Column": {
-                                                "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                "DataSetIdentifier": "Event_View",
                                                 "ColumnName": "event_id"
                                             }
                                         }
@@ -9390,7 +9383,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1711012483644",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -9399,7 +9392,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_version.4.1711460559852",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "app_version"
                                                 }
                                             }
@@ -9411,7 +9404,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711012493097",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9421,7 +9414,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.crashed_user_id.2.1711012496897",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "crashed_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9431,7 +9424,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "7b1d8b8c-164c-40ea-8b89-9fa4d570ca94.3.1711012554551",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "Crash Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -9606,7 +9599,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "4c4b06db-34da-40e8-9283-7c1bdf264f58.0.1711701438936",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Operating System / Version"
                                                 }
                                             }
@@ -9617,7 +9610,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711701455233",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -9709,7 +9702,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "2d61831e-7d62-4653-95cd-930a121d728d.0.1711702571578",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Device Screen Resolution"
                                                 }
                                             }
@@ -9720,7 +9713,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711702577390",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -10222,7 +10215,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_pseudo_id.2.1712806226840",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -10231,7 +10224,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_id.2.1712806247149",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -10240,7 +10233,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_properties_json_str.2.1712806240485",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_properties_json_str"
                                                 }
                                             }
@@ -10249,7 +10242,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_app_install_source.4.1712807637157",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_app_install_source"
                                                 }
                                             }
@@ -10258,7 +10251,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.first_visit_date.17.1712807644663",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_visit_date"
                                                 }
                                             }
@@ -10267,7 +10260,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_touch_time_msec.6.1712807638374",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_touch_time_msec"
                                                 }
                                             }
@@ -10276,7 +10269,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_referrer.16.1712807667343",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_referrer"
                                                 }
                                             }
@@ -10285,7 +10278,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_campaign.7.1712807639483",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_campaign"
                                                 }
                                             }
@@ -10294,7 +10287,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_campaign_id.8.1712807640297",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_campaign_id"
                                                 }
                                             }
@@ -10303,7 +10296,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_category.9.1712807640751",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_category"
                                                 }
                                             }
@@ -10312,7 +10305,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_channel_group.10.1712807641144",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_channel_group"
                                                 }
                                             }
@@ -10321,7 +10314,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_clid.11.1712807641544",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_clid"
                                                 }
                                             }
@@ -10330,7 +10323,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_clid_platform.12.1712807642103",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_clid_platform"
                                                 }
                                             }
@@ -10339,7 +10332,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_content.13.1712807642502",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_content"
                                                 }
                                             }
@@ -10348,7 +10341,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_medium.14.1712807642978",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_medium"
                                                 }
                                             }
@@ -10357,7 +10350,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_source.15.1712807643562",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_source"
                                                 }
                                             }
@@ -10366,7 +10359,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.first_traffic_term.16.1712807643962",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "first_traffic_term"
                                                 }
                                             }
@@ -10418,7 +10411,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_timestamp.1.1712805646237",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp"
                                                 },
                                                 "DateGranularity": "SECOND",
@@ -10434,7 +10427,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_timestamp_local.2.1712805649636",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_timestamp_local"
                                                 },
                                                 "DateGranularity": "SECOND",
@@ -10450,7 +10443,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_id.3.1712805660395",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 }
                                             }
@@ -10459,7 +10452,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_name.2.1712805655383",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -10468,7 +10461,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_bundle_sequence_id.4.1712805667491",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_bundle_sequence_id"
                                                 }
                                             }
@@ -10477,7 +10470,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_id.16.1712805953100",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -10486,7 +10479,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_pseudo_id.15.1712805949063",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -10495,7 +10488,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.12.1712805758161",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -10504,7 +10497,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_id.5.1712805709908",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "app_id"
                                                 }
                                             }
@@ -10513,7 +10506,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_package_id.6.1712805713017",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "app_package_id"
                                                 }
                                             }
@@ -10522,7 +10515,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_version.7.1712805716621",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "app_version"
                                                 }
                                             }
@@ -10531,7 +10524,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "3ed35862-5bd9-4e82-9cde-140ca1ffe3b3.14.1712805894003",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "Operating System / Version"
                                                 }
                                             }
@@ -10540,7 +10533,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_carrier.8.1712805722705",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "device_carrier"
                                                 }
                                             }
@@ -10549,7 +10542,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_ua_browser.13.1712805849285",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "device_ua_browser"
                                                 }
                                             }
@@ -10558,7 +10551,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_manufacturer.9.1712805724030",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "device_manufacturer"
                                                 }
                                             }
@@ -10567,7 +10560,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.geo_country.13.1712805932263",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "geo_country"
                                                 }
                                             }
@@ -10576,7 +10569,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.geo_city.14.1712805934187",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "geo_city"
                                                 }
                                             }
@@ -10685,7 +10678,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.custom_parameters_json_str.0.1712806211513",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "custom_parameters_json_str"
                                                 }
                                             }
@@ -10694,7 +10687,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.event_id.1.1712806215965",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "event_id"
                                                 }
                                             }
@@ -10703,7 +10696,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.user_pseudo_id.2.1712806226840",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Event_View",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -10986,7 +10979,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device.1.1713699571010",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "device"
                                                 }
                                             }
@@ -10997,7 +10990,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676496324",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11009,7 +11002,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "LogicalTable1.event_count.2.1713699582092",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "event_count"
                                                 },
                                                 "AggregationFunction": {
@@ -11093,7 +11086,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1711012483644",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -11102,7 +11095,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_version.4.1711460559852",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "app_version"
                                                 }
                                             }
@@ -11114,7 +11107,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.merged_user_id.1.1711012493097",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "merged_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11124,7 +11117,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.crashed_user_id.2.1711012496897",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "crashed_user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11134,7 +11127,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "7b1d8b8c-164c-40ea-8b89-9fa4d570ca94.3.1711012554551",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Crash_Rate",
                                                     "ColumnName": "Crash Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -11312,7 +11305,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.app_version.1.1713685466210",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "app_version"
                                                 }
                                             }
@@ -11323,7 +11316,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676496324",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11408,7 +11401,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_ua_browser.1.1713685409582",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "device_ua_browser"
                                                 }
                                             }
@@ -11419,7 +11412,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676496324",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11501,7 +11494,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.device_screen_resolution.1.1713685362812",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "device_screen_resolution"
                                                 }
                                             }
@@ -11512,7 +11505,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676496324",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11604,7 +11597,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "LogicalTable1.event_date.1.1713685151246",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "LogicalTable1.event_date.1.1713685151246"
@@ -11616,7 +11609,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676396816",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11628,7 +11621,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.2.1713685156116",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -11720,7 +11713,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.platform.0.1713676394133",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "platform"
                                                 }
                                             }
@@ -11731,7 +11724,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676396816",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -11815,7 +11808,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "LogicalTable1.operating_system / version.0.1713676493478",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "operating_system / version"
                                                 }
                                             }
@@ -11826,7 +11819,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogicalTable1.user_id.1.1713676496324",
                                                 "Column": {
-                                                    "DataSetIdentifier": "Device-shop-shop_dvmw",
+                                                    "DataSetIdentifier": "Device",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -12002,132 +11995,132 @@
     ],
     "CalculatedFields": [
         {
-            "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+            "DataSetIdentifier": "Crash_Rate",
             "Name": "Crash Rate",
             "Expression": "distinct_count({crashed_user_id})/distinct_count({merged_user_id})"
         },
         {
-            "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+            "DataSetIdentifier": "DAU_WAU",
             "Name": "Active Date",
             "Expression": "minOver({event_date},[{merged_user_id}],PRE_FILTER)"
         },
         {
-            "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+            "DataSetIdentifier": "DAU_WAU",
             "Name": "DAU/MAU",
             "Expression": "distinct_count({merged_user_id})/windowSum(distinct_count({merged_user_id}),[truncDate('DD',{event_date}) ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+            "DataSetIdentifier": "DAU_WAU",
             "Name": "DAU/WAU",
             "Expression": "distinct_count({merged_user_id})/windowSum(distinct_count({merged_user_id}),[truncDate('DD',{event_date}) ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+            "DataSetIdentifier": "DAU_WAU",
             "Name": "Retention Rate",
             "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{Active Date}]))"
         },
         {
-            "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+            "DataSetIdentifier": "DAU_WAU",
             "Name": "WAU/MAU",
             "Expression": "windowSum(distinct_count({merged_user_id}),[truncDate('DD',{event_date}) ASC],6,0)/windowSum(distinct_count({merged_user_id}),[truncDate('DD',{event_date}) ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+            "DataSetIdentifier": "Day_User_Acquisition",
             "Name": "Active User",
             "Expression": "distinct_countIf({user_id},startsWith({aggregation_type}, \"Session\", CASE_INSENSITIVE))"
         },
         {
-            "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+            "DataSetIdentifier": "Day_User_Acquisition",
             "Name": "Engagement Rate",
             "Expression": "sum({engagement_session_count})/sum({session_count})"
         },
         {
-            "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+            "DataSetIdentifier": "Day_User_View_Engagement",
             "Name": "Other events",
             "Expression": "{event_count} - {view_count}"
         },
         {
-            "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_Overtime",
             "Name": "User Activity in Last 30 Days",
             "Expression": "windowSum(sum({event_count}),[truncDate('DD',{event_date}) ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_Overtime",
             "Name": "User Activity in Last 7 Days",
             "Expression": "windowSum(sum({event_count}),[truncDate('DD',{event_date}) ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Active users",
             "Expression": "distinct_count({merged_user_id})"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Device",
             "Expression": "coalesce({device_mobile_model_name},{device_ua_device})"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Device Screen Resolution",
             "Expression": "Concat (\n    toString({device_screen_height}),\n    'x',\n    toString({device_screen_width})\n)"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Event / User",
             "Expression": "count({event_id}) / distinct_count({merged_user_id})"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "First Action Date",
             "Expression": "minOver({event_date},[{merged_user_id}],PRE_FILTER)"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "New user",
             "Expression": "distinct_countIf({merged_user_id},{event_name}='_first_open')"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Operating System / Version",
             "Expression": "concat({device_operating_system},{device_ua_os}, ' / ', {device_operating_system_version}, {device_ua_os_version})"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Previous Day Active Users",
             "Expression": "periodOverPeriodLastValue(distinct_count({merged_user_id}), {event_timestamp_local},DAY, 1)"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Previous Day New Users",
             "Expression": "periodOverPeriodLastValue({New user}, {event_timestamp_local},DAY, 1)"
         },
         {
-            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Event_View",
             "Name": "Retention Rate",
             "Expression": "distinct_count({merged_user_id})/sum(distinct_count({merged_user_id},[{First Action Date}]))"
         },
         {
-            "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+            "DataSetIdentifier": "Intra_Day_User",
             "Name": "Previous Day Active Users",
-            "Expression": "periodOverPeriodLastValue(distinct_count({active user}), {event_date},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue(distinct_count({Active User}), {event_date},DAY, 1)"
         },
         {
-            "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+            "DataSetIdentifier": "Intra_Day_User",
             "Name": "Previous Day New User",
-            "Expression": "periodOverPeriodLastValue(distinct_count({new user}), {event_date},DAY, 1)"
+            "Expression": "periodOverPeriodLastValue(distinct_count({New User}), {event_date},DAY, 1)"
         },
         {
-            "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+            "DataSetIdentifier": "Page_Screen_View_Detail",
             "Name": "View",
             "Expression": "count(1)"
         },
         {
-            "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+            "DataSetIdentifier": "Page_Screen_View_Detail",
             "Name": "View / User",
             "Expression": "count(1) / distinct_count({user_id})"
         },
         {
-            "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+            "DataSetIdentifier": "Retention_View",
             "Name": "Retention Rate",
             "Expression": "{returned_user_count} / {total_users}"
         }
@@ -12243,79 +12236,79 @@
                 "TimeGranularity": "DAY",
                 "MappedDataSetParameters": [
                     {
-                        "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_View",
                         "DataSetParameterName": "startDate01"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_View",
                         "DataSetParameterName": "startDate02"
                     },
                     {
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_Traffic_Source_User",
                         "DataSetParameterName": "startDate05"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_Acquisition",
                         "DataSetParameterName": "startDate07"
                     },
                     {
-                        "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                        "DataSetIdentifier": "Country_New_User",
                         "DataSetParameterName": "startDate08"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_View_Engagement",
                         "DataSetParameterName": "startDate09"
                     },
                     {
-                        "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                        "DataSetIdentifier": "Engagement_KPI",
                         "DataSetParameterName": "startDate10"
                     },
                     {
-                        "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Page_Screen_View",
                         "DataSetParameterName": "startDate11"
                     },
                     {
-                        "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                        "DataSetIdentifier": "Crash_Rate",
                         "DataSetParameterName": "startDate18"
                     },
                     {
-                        "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                        "DataSetIdentifier": "DAU_WAU",
                         "DataSetParameterName": "startDate17"
                     },
                     {
-                        "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_Overtime",
                         "DataSetParameterName": "startDate16"
                     },
                     {
-                        "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                        "DataSetIdentifier": "User_New_Return",
                         "DataSetParameterName": "startDate15"
                     },
                     {
-                        "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                        "DataSetIdentifier": "Exit",
                         "DataSetParameterName": "startDate14"
                     },
                     {
-                        "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                        "DataSetIdentifier": "Page_Screen_View_Detail",
                         "DataSetParameterName": "startDate12"
                     },
                     {
-                        "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                        "DataSetIdentifier": "Entrance",
                         "DataSetParameterName": "startDate13"
                     },
                     {
-                        "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Retention_View",
                         "DataSetParameterName": "startDate19"
                     },
                     {
-                        "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
                         "DataSetParameterName": "startDate20"
                     },
                     {
-                        "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_Name",
                         "DataSetParameterName": "startDate22"
                     },
                     {
-                        "DataSetIdentifier": "Device-shop-shop_dvmw",
+                        "DataSetIdentifier": "Device",
                         "DataSetParameterName": "startDate21"
                     }
                 ]
@@ -12333,83 +12326,83 @@
                 "TimeGranularity": "DAY",
                 "MappedDataSetParameters": [
                     {
-                        "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_View",
                         "DataSetParameterName": "endDate01"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_View",
                         "DataSetParameterName": "endDate02"
                     },
                     {
-                        "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_Traffic_Source_User",
                         "DataSetParameterName": "endDate05"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_Acquisition",
                         "DataSetParameterName": "endDate07"
                     },
                     {
-                        "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                        "DataSetIdentifier": "Country_New_User",
                         "DataSetParameterName": "endDate08"
                     },
                     {
-                        "DataSetIdentifier": "Day_User_View_Engagement-shop-shop_dvmw",
+                        "DataSetIdentifier": "Day_User_View_Engagement",
                         "DataSetParameterName": "endDate09"
                     },
                     {
-                        "DataSetIdentifier": "Engagement_KPI-shop-shop_dvmw",
+                        "DataSetIdentifier": "Engagement_KPI",
                         "DataSetParameterName": "endDate10"
                     },
                     {
-                        "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Page_Screen_View",
                         "DataSetParameterName": "endDate11"
                     },
                     {
-                        "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                        "DataSetIdentifier": "Page_Screen_View_Detail",
                         "DataSetParameterName": "endDate12"
                     },
                     {
-                        "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                        "DataSetIdentifier": "Entrance",
                         "DataSetParameterName": "endDate13"
                     },
                     {
-                        "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                        "DataSetIdentifier": "Exit",
                         "DataSetParameterName": "endDate14"
                     },
                     {
-                        "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                        "DataSetIdentifier": "User_New_Return",
                         "DataSetParameterName": "endDate15"
                     },
                     {
-                        "DataSetIdentifier": "Event_Overtime-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_Overtime",
                         "DataSetParameterName": "endDate16"
                     },
                     {
-                        "DataSetIdentifier": "DAU_WAU-shop-shop_dvmw",
+                        "DataSetIdentifier": "DAU_WAU",
                         "DataSetParameterName": "endDate17"
                     },
                     {
-                        "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                        "DataSetIdentifier": "Crash_Rate",
                         "DataSetParameterName": "endDate18"
                     },
                     {
-                        "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Retention_View",
                         "DataSetParameterName": "endDate19"
                     },
                     {
-                        "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
                         "DataSetParameterName": "endDate20"
                     },
                     {
-                        "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                        "DataSetIdentifier": "Event_Name",
                         "DataSetParameterName": "endDate22"
                     },
                     {
-                        "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                        "DataSetIdentifier": "Intra_Day_User",
                         "DataSetParameterName": "endDate23"
                     },
                     {
-                        "DataSetIdentifier": "Device-shop-shop_dvmw",
+                        "DataSetIdentifier": "Device",
                         "DataSetParameterName": "endDate21"
                     }
                 ]
@@ -12424,7 +12417,7 @@
                     "CategoryFilter": {
                         "FilterId": "6a979501-566c-4bb0-b65b-6a528b793a13",
                         "Column": {
-                            "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_Traffic_Source_User",
                             "ColumnName": "aggregation_type"
                         },
                         "Configuration": {
@@ -12462,7 +12455,7 @@
                     "CategoryFilter": {
                         "FilterId": "92c44173-a4d4-4ff0-8be1-51a5de00806a",
                         "Column": {
-                            "DataSetIdentifier": "Country_New_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Country_New_User",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -12498,7 +12491,7 @@
                     "CategoryFilter": {
                         "FilterId": "355d7039-bda3-4cd6-b8ac-fb096c72bb89",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -12534,7 +12527,7 @@
                     "CategoryFilter": {
                         "FilterId": "e5daf788-82af-4a4d-96d4-ffa612f98623",
                         "Column": {
-                            "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                            "DataSetIdentifier": "User_New_Return",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -12567,7 +12560,7 @@
                     "CategoryFilter": {
                         "FilterId": "e114d486-7ca4-4384-9655-3ff4253774c5",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -12600,7 +12593,7 @@
                     "CategoryFilter": {
                         "FilterId": "063a30ee-3425-4c7e-b074-4554763b79e3",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Page_Screen_View",
                             "ColumnName": "aggregation_type"
                         },
                         "Configuration": {
@@ -12638,7 +12631,7 @@
                     "CategoryFilter": {
                         "FilterId": "0246eb9e-1875-4ad3-8253-3c985976c833",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Page_Screen_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -12671,7 +12664,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "2275335d-856b-459b-8aff-d84b30c92f6d",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_timestamp"
                         },
                         "IncludeMinimum": true,
@@ -12708,7 +12701,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "e36ed748-6c4d-4759-9f42-2f4fd623d3c9",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_timestamp"
                         },
                         "IncludeMinimum": true,
@@ -12745,13 +12738,13 @@
                     "TopBottomFilter": {
                         "FilterId": "065ca760-7645-4ef3-b635-3dafd518e604",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_Acquisition",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Day_User_Acquisition",
                                     "ColumnName": "new_user_count"
                                 },
                                 "SortDirection": "DESC",
@@ -12789,7 +12782,7 @@
                     "CategoryFilter": {
                         "FilterId": "1228232a-bb9e-4b83-a8fd-1da29d283dc7",
                         "Column": {
-                            "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_Traffic_Source_User",
                             "ColumnName": "aggregation_type"
                         },
                         "Configuration": {
@@ -12827,7 +12820,7 @@
                     "CategoryFilter": {
                         "FilterId": "0890bffa-0417-40d3-8c92-bb8384aa961d",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -12865,13 +12858,13 @@
                     "TopBottomFilter": {
                         "FilterId": "c1d272c5-4cc6-4d62-ad26-f0e63de02ab2",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_name"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Event_View",
                                     "ColumnName": "event_id"
                                 },
                                 "SortDirection": "DESC",
@@ -12909,13 +12902,13 @@
                     "TopBottomFilter": {
                         "FilterId": "a574e027-dffa-4141-96b8-adef1a0425cb",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Page_Screen_View",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Page_Screen_View",
                                     "ColumnName": "view_count"
                                 },
                                 "SortDirection": "DESC",
@@ -12954,7 +12947,7 @@
                     "CategoryFilter": {
                         "FilterId": "62b4d984-634c-4693-977b-341532448ee8",
                         "Column": {
-                            "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                            "DataSetIdentifier": "Entrance",
                             "ColumnName": "aggregation_type"
                         },
                         "Configuration": {
@@ -12991,13 +12984,13 @@
                     "TopBottomFilter": {
                         "FilterId": "4b205131-fe45-4eca-9125-fc1c92d5fd2a",
                         "Column": {
-                            "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                            "DataSetIdentifier": "Exit",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Exit-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Exit",
                                     "ColumnName": "exit_count"
                                 },
                                 "SortDirection": "DESC",
@@ -13035,13 +13028,13 @@
                     "TopBottomFilter": {
                         "FilterId": "5a5624d0-a104-4982-a032-380be5ac16e0",
                         "Column": {
-                            "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                            "DataSetIdentifier": "Entrance",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Entrance-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Entrance",
                                     "ColumnName": "entrance_count"
                                 },
                                 "SortDirection": "DESC",
@@ -13079,7 +13072,7 @@
                     "CategoryFilter": {
                         "FilterId": "bc6f9a7d-63b3-4e5b-911d-2249f963a371",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13117,7 +13110,7 @@
                     "CategoryFilter": {
                         "FilterId": "7fef7147-5d2e-4034-ae5f-ed8732c09b4b",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13155,7 +13148,7 @@
                     "CategoryFilter": {
                         "FilterId": "033fb410-cfdb-4884-9e98-cee56ff0bf67",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13193,7 +13186,7 @@
                     "CategoryFilter": {
                         "FilterId": "07a5abeb-ad97-4ac9-8ec7-57c52b96fe49",
                         "Column": {
-                            "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                            "DataSetIdentifier": "Crash_Rate",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13231,7 +13224,7 @@
                     "CategoryFilter": {
                         "FilterId": "471de145-ce86-440b-96c3-789778768605",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13272,7 +13265,7 @@
                     "CategoryFilter": {
                         "FilterId": "4864ce6f-f703-41ca-958f-409787c8aaa7",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Page_Screen_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13308,7 +13301,7 @@
                     "CategoryFilter": {
                         "FilterId": "c6154dfd-1a9d-443c-8015-d058a1ec4818",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13344,7 +13337,7 @@
                     "CategoryFilter": {
                         "FilterId": "1edcabe6-287f-45d9-a5f0-7638c12cab22",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13380,7 +13373,7 @@
                     "CategoryFilter": {
                         "FilterId": "d8d6f335-8cba-43c3-be26-69cc91c9da71",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13416,7 +13409,7 @@
                     "CategoryFilter": {
                         "FilterId": "07f8ca55-9e2d-4c4a-a23c-a0b450d18385",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13452,7 +13445,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "2c0dcbd2-8a8d-488f-8b25-5016b8518e29",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_View",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -13493,13 +13486,13 @@
                     "TopBottomFilter": {
                         "FilterId": "17e93569-4366-443b-b6bd-0b2ebe5b22e6",
                         "Column": {
-                            "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_Traffic_Source_User",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                     "ColumnName": "user_id"
                                 },
                                 "SortDirection": "DESC",
@@ -13536,13 +13529,13 @@
                     "TopBottomFilter": {
                         "FilterId": "c99683d5-5605-4ef0-acfb-30e9edf34b37",
                         "Column": {
-                            "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_Traffic_Source_User",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Day_Traffic_Source_User",
                                     "ColumnName": "user_id"
                                 },
                                 "SortDirection": "DESC",
@@ -13579,13 +13572,13 @@
                     "TopBottomFilter": {
                         "FilterId": "ae3d406f-1cc6-4869-8502-e8d0f231be76",
                         "Column": {
-                            "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_User_Acquisition",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Day_User_Acquisition-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Day_User_Acquisition",
                                     "ColumnName": "Active User"
                                 },
                                 "SortDirection": "DESC"
@@ -13618,7 +13611,7 @@
                     "CategoryFilter": {
                         "FilterId": "1f3b9928-068b-4aa8-b996-3aa2629f7cbf",
                         "Column": {
-                            "DataSetIdentifier": "Day_Traffic_Source_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Day_Traffic_Source_User",
                             "ColumnName": "aggregation_type"
                         },
                         "Configuration": {
@@ -13654,13 +13647,13 @@
                     "TopBottomFilter": {
                         "FilterId": "c1800243-b4c1-4b12-b853-536b3d3a93af",
                         "Column": {
-                            "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                            "DataSetIdentifier": "Page_Screen_View_Detail",
                             "ColumnName": "aggregation_dim"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Page_Screen_View_Detail-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Page_Screen_View_Detail",
                                     "ColumnName": "View"
                                 },
                                 "SortDirection": "DESC"
@@ -13693,7 +13686,7 @@
                     "CategoryFilter": {
                         "FilterId": "d552921c-f03c-48ef-a49c-2c477e15c27f",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "user_id"
                         },
                         "Configuration": {
@@ -13731,7 +13724,7 @@
                     "CategoryFilter": {
                         "FilterId": "e2934357-6efa-4771-9637-2053c852fa46",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "user_pseudo_id"
                         },
                         "Configuration": {
@@ -13769,7 +13762,7 @@
                     "CategoryFilter": {
                         "FilterId": "832dd07a-94a4-4d3c-951a-8f5684efb388",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -13807,7 +13800,7 @@
                     "CategoryFilter": {
                         "FilterId": "2f927341-70d6-4e98-b9ec-d15769f3411f",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -13847,7 +13840,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "01c72a81-39e3-43fd-8e2b-41650c01b77d",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_timestamp"
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -13880,7 +13873,7 @@
                     "CategoryFilter": {
                         "FilterId": "cf5c4bea-f76c-419a-89ab-39bd64eaccd8",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "app_version"
                         },
                         "Configuration": {
@@ -13918,7 +13911,7 @@
                     "CategoryFilter": {
                         "FilterId": "8736ecba-b921-4c55-bf83-573e31d1ef36",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "device_vendor_id"
                         },
                         "Configuration": {
@@ -13956,7 +13949,7 @@
                     "CategoryFilter": {
                         "FilterId": "a1fe4c54-d816-48d2-8f24-da8379844e64",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "device_advertising_id"
                         },
                         "Configuration": {
@@ -13994,7 +13987,7 @@
                     "CategoryFilter": {
                         "FilterId": "fddc8d5d-8efe-41c9-960f-8debc31d4dda",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "Operating System / Version"
                         },
                         "Configuration": {
@@ -14032,7 +14025,7 @@
                     "CategoryFilter": {
                         "FilterId": "4b0610f0-1815-4bba-928e-4bc2d2667463",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "sdk_version"
                         },
                         "Configuration": {
@@ -14070,7 +14063,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "4f6ce805-0ee6-44a5-bc1c-bde75a9b6032",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_timestamp_local"
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -14103,7 +14096,7 @@
                     "CategoryFilter": {
                         "FilterId": "5c4b3787-2d2b-4a35-8fac-815ecc4246b8",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "event_id"
                         },
                         "Configuration": {
@@ -14139,7 +14132,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "102ba07e-da1f-4a90-a450-15ed18abc4f2",
                         "Column": {
-                            "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_Name",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14178,13 +14171,13 @@
                     "TopBottomFilter": {
                         "FilterId": "d478d206-25df-48a3-a872-c0625cb94891",
                         "Column": {
-                            "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_Name",
                             "ColumnName": "event_name"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Event_Name",
                                     "ColumnName": "event_count"
                                 },
                                 "SortDirection": "DESC",
@@ -14222,7 +14215,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "696a7ee9-53ac-41e5-be79-6e9ed94cceb8",
                         "Column": {
-                            "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_Name",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14261,13 +14254,13 @@
                     "TopBottomFilter": {
                         "FilterId": "e8e8a5bf-fb39-4b75-bb3d-1d37ea880a6e",
                         "Column": {
-                            "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_Name",
                             "ColumnName": "event_name"
                         },
                         "AggregationSortConfigurations": [
                             {
                                 "Column": {
-                                    "DataSetIdentifier": "Event_Name-shop-shop_dvmw",
+                                    "DataSetIdentifier": "Event_Name",
                                     "ColumnName": "event_count"
                                 },
                                 "SortDirection": "DESC",
@@ -14305,7 +14298,7 @@
                     "CategoryFilter": {
                         "FilterId": "a71949b8-22d0-4565-bcc0-cc92603fd1a2",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14338,7 +14331,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "8ea1232c-bd42-4f36-b502-9405b1e43b40",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14374,7 +14367,7 @@
                     "CategoryFilter": {
                         "FilterId": "5e63dfb9-3c23-4396-8240-35cc19aa9791",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14412,7 +14405,7 @@
                     "CategoryFilter": {
                         "FilterId": "17acb6d1-8814-4754-89f5-ecfe38273c45",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14451,7 +14444,7 @@
                     "CategoryFilter": {
                         "FilterId": "037b2fca-95cb-40a0-a0ce-9eec887c4802",
                         "Column": {
-                            "DataSetIdentifier": "Event_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Event_View",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14487,7 +14480,7 @@
                     "CategoryFilter": {
                         "FilterId": "9021f9bf-3898-425d-95d8-a6e79b1c6d79",
                         "Column": {
-                            "DataSetIdentifier": "Crash_Rate-shop-shop_dvmw",
+                            "DataSetIdentifier": "Crash_Rate",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14525,7 +14518,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "1c00ce34-94bb-4881-9f0e-61e6459fd890",
                         "Column": {
-                            "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Intra_Day_User",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14568,7 +14561,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "d4c6ab24-d59f-4b0b-a4d4-8357cdf7aeec",
                         "Column": {
-                            "DataSetIdentifier": "Intra_Day_User-shop-shop_dvmw",
+                            "DataSetIdentifier": "Intra_Day_User",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14611,7 +14604,7 @@
                     "CategoryFilter": {
                         "FilterId": "8164f00b-1370-432f-b827-e84c5bedd5ae",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14650,7 +14643,7 @@
                     "CategoryFilter": {
                         "FilterId": "e787a9d6-6794-4cb1-a6e8-276dee46b37e",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -14686,7 +14679,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "117f0ba8-f023-4e3a-b4af-c69934367c6e",
                         "Column": {
-                            "DataSetIdentifier": "Device-shop-shop_dvmw",
+                            "DataSetIdentifier": "Device",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14725,7 +14718,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "ab13b5e2-d1e4-4645-a2a3-e8bb99d34e6c",
                         "Column": {
-                            "DataSetIdentifier": "User_New_Return-shop-shop_dvmw",
+                            "DataSetIdentifier": "User_New_Return",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -14761,7 +14754,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "5d8858ef-bfa6-4c15-bf9c-4e1dc3752bc3",
                         "Column": {
-                            "DataSetIdentifier": "Retention_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Retention_View",
                             "ColumnName": "first_date"
                         },
                         "IncludeMinimum": true,
@@ -14801,7 +14794,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "50850176-d944-4594-a727-03fad885e30c",
                         "Column": {
-                            "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Lifecycle_Weekly_View",
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,
@@ -14840,7 +14833,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "89a6085f-8916-4f06-a095-a52cff095de7",
                         "Column": {
-                            "DataSetIdentifier": "Lifecycle_Weekly_View-shop-shop_dvmw",
+                            "DataSetIdentifier": "Lifecycle_Weekly_View",
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,

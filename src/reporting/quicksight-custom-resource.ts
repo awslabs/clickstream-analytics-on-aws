@@ -412,6 +412,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'Active User',
           'New User',
         ],
@@ -1047,6 +1048,7 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
+          'device',
           'app_version',
           'user_id',
           'operating_system / version',
