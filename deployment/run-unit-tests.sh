@@ -8,6 +8,8 @@ cp src/common/model.ts src/control-plane/backend/lambda/api/common/model-ln.ts
 rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 
+export CI=true
+
 echo "pnpm install"
 npm install -g pnpm@8.15.3
 pnpm install
@@ -18,7 +20,6 @@ pnpm nx run-many --target=build
 echo "pnpm run test"
 pnpm run test
 
-export CI=true
 pnpm install --frozen-lockfile --dir frontend
 pnpm --dir frontend run test
 

@@ -19,6 +19,11 @@ import { TestApp, removeFolder } from '../common/jest';
 import { CFN_FN } from '../constants';
 import { findFirstResourceByKeyPrefix } from '../utils';
 
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+}
+
 describe('CloudFrontS3PortalStack - Default stack props for common features', () => {
 
   afterAll(() => {
@@ -260,9 +265,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
   test('Function for user authentication', () => {
     commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -273,6 +276,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Environment: {
         Variables: {
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
           ISSUER: {
             'Fn::Join': [
               '',
@@ -534,9 +541,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
 
     commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -547,6 +552,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Environment: {
         Variables: {
+          POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
+          POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
+          POWERTOOLS_LOGGER_LOG_EVENT: 'true',
+          LOG_LEVEL: 'WARN',
           ISSUER: {
             'Fn::Join': [
               '',
@@ -893,9 +902,7 @@ describe('CloudFrontS3PortalStack - China region', () => {
 
     template.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {

@@ -17,6 +17,11 @@ import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { validateSubnetsRule } from '../../rules';
 import { findResourceByCondition, getParameter, getParameterNamesFromParameterObject } from '../../utils';
 
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../../cdk-lambda-nodejs-mock'));
+}
+
 const app = new App();
 
 const kafkaStack = new IngestionServerStack(app, 'test-kafka-stack', {
