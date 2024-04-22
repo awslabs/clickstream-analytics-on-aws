@@ -57,7 +57,7 @@
   "first_traffic_clid_platform" : null,
   "first_traffic_clid" : null,
   "first_traffic_channel_group" : "Referral",
-  "first_traffic_category" : null,
+  "first_traffic_category" : "Unassigned",
   "first_app_install_source" : null,
   "process_info" : {
     "process_job_id" : "test-job",
