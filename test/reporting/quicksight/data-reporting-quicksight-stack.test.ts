@@ -2358,6 +2358,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DATETIME',
               },
               {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
                 Name: 'this_week_value',
                 Type: 'STRING',
               },
@@ -2378,6 +2382,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
             projectedColumns: [
               'time_period',
+              'platform',
               'this_week_value',
               'sum',
             ],
