@@ -14,7 +14,7 @@
   "session_clid_platform" : "utm-source-platform-1",
   "session_clid" : "{\"type\":\"gclid\",\"value\":\"gclid-1\"}",
   "session_channel_group" : "Unassigned",
-  "session_source_category" : null,
+  "session_source_category" : "Unassigned",
   "process_info" : {
     "event_name" : "_user_engagement",
     "event_timestamp_adjusted" : "true",

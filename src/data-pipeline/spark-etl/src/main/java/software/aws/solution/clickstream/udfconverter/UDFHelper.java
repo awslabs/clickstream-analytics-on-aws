@@ -47,7 +47,9 @@ import static software.aws.solution.clickstream.rowconv.EventGenericRowConverter
 import static software.aws.solution.clickstream.util.DatasetUtil.CORRUPT_RECORD;
 
 @Slf4j
-public class UDFHelper {
+public final class UDFHelper {
+    private UDFHelper() {
+    }
     public static UDF10<String, Long, Long, String, String, String, String, String, String, String, List<GenericRow>>
     getConvertDataUdf(final TransformerNameEnum name, final Map<String, RuleConfig> appRuleConfig) {
         return (String value,

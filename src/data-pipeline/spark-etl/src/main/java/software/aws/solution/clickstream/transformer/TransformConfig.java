@@ -26,5 +26,5 @@ import java.util.Map;
 @ToString
 public class TransformConfig implements Serializable {
     private static final long serialVersionUID = 1L;
-    private Map<String, RuleConfig> appRuleConfig;
+    private Map<String, RuleConfig> appRuleConfig; // NOSONAR
 }

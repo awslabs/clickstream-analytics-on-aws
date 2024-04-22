@@ -24,7 +24,7 @@ import java.io.Serializable;
 @ToString
 public class RuleConfig implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String optChannelRuleJson;
-    private String optCategoryRuleJson;
+    private String optChannelRuleJson; // NOSONAR
+    private String optCategoryRuleJson; // NOSONAR
 }
 

@@ -166,6 +166,7 @@
   "session_number" : 11,
   "session_start_time_msec" : 1693281865635,
   "traffic_source_campaign" : "Direct",
+  "traffic_source_category" : null,
   "traffic_source_channel_group" : "Direct",
   "traffic_source_source" : null,
   "user_engagement_time_msec" : 8129,
