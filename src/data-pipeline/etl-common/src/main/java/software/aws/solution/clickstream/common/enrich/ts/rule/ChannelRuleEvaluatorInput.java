@@ -60,6 +60,7 @@ public class ChannelRuleEvaluatorInput {
         evalInput.setTrafficSourceTerm(trafficSource.getTerm());
         evalInput.setPageViewLatestReferrer(pageViewLatestReferrer);
         evalInput.setPageViewLatestReferrerHost(pageViewLatestReferrerHost);
+        evalInput.setTrafficSourceCategory(trafficSourceCategory);
         return evalInput;
     }
 }

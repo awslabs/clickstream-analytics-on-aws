@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.aws.solution.clickstream.common.Constant;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public final class ChannelRuleEvaluator {
@@ -169,10 +170,15 @@ public final class ChannelRuleEvaluator {
 
         if (actualValue == null) {
             actualValue = "";
+        } else {
+            actualValue = actualValue.toLowerCase();
         }
-        if (value.equals(EMPTY_VALUE_FLAG)) {
+        if (EMPTY_VALUE_FLAG.equals(value)) {
             value = "";
+        } else {
+            value = value.toLowerCase();
         }
+
         if (op.equals(OpEnum.EQ.getOp())) {
             return actualValue.equals(value);
         } else if (op.equals(OpEnum.NOT_EQ.getOp())) {
@@ -198,10 +204,12 @@ public final class ChannelRuleEvaluator {
     }
 
     private boolean compareIn(final String expectedValue, final String op, final List<String> values) {
+        String expectedValueLower = expectedValue !=null? expectedValue.toLowerCase(): null;
+        List<String> valueListLower = values.stream().map(String::toLowerCase).collect(Collectors.toList());
         if (op.equals(OpEnum.IN.getOp())) {
-            return values.contains(expectedValue);
+            return valueListLower.contains(expectedValueLower);
         } else if (op.equals(OpEnum.NOT_IN.getOp())) {
-            return !values.contains(expectedValue);
+            return !valueListLower.contains(expectedValueLower);
         }
         return false;
     }
