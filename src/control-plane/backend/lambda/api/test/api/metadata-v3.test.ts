@@ -182,7 +182,7 @@ describe('Metadata Event Attribute test V3', () => {
       .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.totalCount).toEqual(79);
+    expect(res.body.data.totalCount).toEqual(80);
   });
   it('Get metadata event attribute for path nodes v3', async () => {
     ddbMock.on(QueryCommand, {

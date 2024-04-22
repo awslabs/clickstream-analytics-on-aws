@@ -415,8 +415,8 @@ export const getEventParameters = (
     return [];
   }
   if (metadataEventParameters?.[0]?.eventNames?.length > 0) {
-    const associatedParameters = metadataEventParameters.filter((p) =>
-      p.eventNames.includes(eventName)
+    const associatedParameters = metadataEventParameters.filter(
+      (p) => p.eventNames.includes(eventName) || p.eventNames.includes('*')
     );
     patchBuiltInMetadata(eventName, associatedParameters, builtInMetadata);
     return associatedParameters;
