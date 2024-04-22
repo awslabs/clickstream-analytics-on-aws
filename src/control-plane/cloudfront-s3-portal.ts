@@ -199,7 +199,7 @@ export class CloudFrontS3Portal extends Construct {
   }
 
   private getWebAssets(props: CloudFrontS3PortalProps, excludeIndexHtml: boolean) {
-    if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+    if (process.env.CI !== 'true') {
       return Source.data('test', 'test');
     } else {
       const commands = [...props.frontendProps.buildCommands];
