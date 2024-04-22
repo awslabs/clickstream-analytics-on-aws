@@ -104,8 +104,9 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  type GroupingCondition = IColumnAttribute & {
+  type GroupingCondition = {
     readonly applyTo?: 'FIRST' | 'ALL';
+    readonly conditions: IColumnAttribute[];
   };
 
   interface IExploreRequest {

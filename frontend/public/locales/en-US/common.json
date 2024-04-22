@@ -212,7 +212,8 @@
     "addSourceCategory": "Add new category",
     "addChannelGroup": "Add new group",
     "reorder": "Reorder",
-    "apply": "Apply"
+    "apply": "Apply",
+    "newGroup": "Add Group"
   },
   "item": "item",
   "items": "items",

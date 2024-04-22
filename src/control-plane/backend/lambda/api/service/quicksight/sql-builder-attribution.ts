@@ -14,7 +14,7 @@
 import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
 import { buildEventConditionPropsFromEvents, formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_USER_VIEW, EventAndCondition, buildAllConditionSql, buildColNameWithPrefix, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_USER_VIEW, EventAndCondition, buildAllConditionSql, buildColNameWithPrefixForOneCondtion, buildColumnConditionProps, buildColumnsSqlFromConditions, buildConditionProps, buildConditionSql, buildDateUnitsSql, buildEventDateSql, buildEventsNameFromConditions } from './sql-builder';
 import { defaultValueFunc } from '../../common/utils';
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
@@ -510,7 +510,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
   let sumValueColName = '';
   let sumValueColDummy = '';
   if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
-    sumValueColSql = `,${buildColNameWithPrefix(params.targetEventAndCondition.groupColumn!)} as sum_value`;
+    sumValueColSql = `,${buildColNameWithPrefixForOneCondtion(params.targetEventAndCondition.groupColumn!).colName} as sum_value`;
     sumValueColName = ',sum_value';
     sumValueColDummy = ',0 as sum_value';
   }

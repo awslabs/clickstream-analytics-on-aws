@@ -212,9 +212,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     }
   );
 
-  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
-    null
-  );
+  const [groupOptions, setGroupOptions] = useState<SelectProps.Option[]>([]);
 
   const [groupApplyToFirst, setGroupApplyToFirst] = React.useState(false);
 
@@ -279,7 +277,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       groupColumn: timeGranularity.value,
       groupCondition:
         chartType === QuickSightChartType.BAR
-          ? getGroupCondition(groupOption, groupApplyToFirst)
+          ? getGroupCondition(groupOptions, groupApplyToFirst)
           : undefined,
       ...dateRangeParams,
       ...saveParams,
@@ -452,7 +450,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   useEffect(() => {
     if (chartType === 'funnel') {
       setGroupDisabled(true);
-      setGroupOption(null);
+      setGroupOptions([]);
       setGroupApplyToFirst(false);
     } else {
       setGroupDisabled(false);
@@ -617,8 +615,8 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <AttributeGroup
                 disabled={groupDisabled}
                 groupParameters={groupParameters}
-                groupOption={groupOption}
-                setGroupOption={setGroupOption}
+                groupOptions={groupOptions}
+                setGroupOptions={setGroupOptions}
               />
 
               <InfoTitle

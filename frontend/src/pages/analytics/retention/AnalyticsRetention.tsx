@@ -147,9 +147,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     }
   );
 
-  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
-    null
-  );
+  const [groupOptions, setGroupOptions] = useState<SelectProps.Option[]>([]);
 
   const [startDate, setStartDate] = useState<string>(
     getAbsoluteStartEndRange().startDate
@@ -239,7 +237,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       pairEventAndConditions: getPairEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       groupColumn: timeGranularity.value,
-      groupCondition: getGroupCondition(groupOption, null),
+      groupCondition: getGroupCondition(groupOptions, null),
       ...dateRangeParams,
       ...saveParams,
     };
@@ -675,8 +673,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               />
               <AttributeGroup
                 groupParameters={groupParameters}
-                groupOption={groupOption}
-                setGroupOption={setGroupOption}
+                groupOptions={groupOptions}
+                setGroupOptions={setGroupOptions}
               />
             </SpaceBetween>
           </ColumnLayout>
