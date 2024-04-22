@@ -917,6 +917,10 @@ export function createQuicksightCustomResource(
             Type: 'DATETIME',
           },
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'this_week_value',
             Type: 'STRING',
           },
@@ -939,6 +943,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'time_period',
+          'platform',
           'this_week_value',
           'sum',
         ],
