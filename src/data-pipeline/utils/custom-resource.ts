@@ -23,6 +23,7 @@ import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
+import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { getShortIdOfStack } from '../../common/stack';
 import { EmrApplicationArchitectureType } from '../../data-pipeline-stack';
 import { SolutionNodejsFunction } from '../../private/function';
@@ -204,6 +205,8 @@ function createEMRServerlessApplicationLambda(
       actions: [
         'emr-serverless:CreateApplication',
         'emr-serverless:DeleteApplication',
+        'emr-serverless:TagResource',
+        'emr-serverless:UntagResource',
       ],
       resources: [`${ermAppArn}`],
     }),
@@ -250,6 +253,7 @@ function createEMRServerlessApplicationLambda(
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
     rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
+  attachListTagsPolicyForFunction(scope, 'CreateEMRServerlessApplicationLambdaFn', fn);
   return fn;
 }
 
