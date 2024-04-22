@@ -58,7 +58,11 @@ const AddUserSegments: React.FC<AddUserSegmentsProps> = ({
       href: `/analytics/${projectId}/app/${appId}/segments`,
     },
     {
-      text: ternary(actionType === 'edit', t('breadCrumb.editSegment'), t('breadCrumb.createSegment')),
+      text: ternary(
+        actionType === 'edit',
+        t('breadCrumb.editSegment'),
+        t('breadCrumb.createSegment')
+      ),
       href: '',
     },
   ];
