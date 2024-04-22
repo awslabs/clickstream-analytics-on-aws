@@ -3,13 +3,13 @@
     "VisualId":"{{visualId}}",
     "Title":{
         "FormatText": {
-            "PlainText": "{{title}}"
+            "PlainText": "{{{title}}}"
         },
         "Visibility":"VISIBLE"
     },
     "Subtitle":{
         "FormatText": {
-            "PlainText": "{{subTitle}}"
+            "PlainText": "{{{subTitle}}}"
         },
         "Visibility":"VISIBLE"
     },
