@@ -1,6 +1,8 @@
 version: 0.2
 
 env:
+  variables:
+    CI: true
   shell: bash
   exported-variables:
     - BSS_IMAGE_ASSET_REPOSITORY_NAME
