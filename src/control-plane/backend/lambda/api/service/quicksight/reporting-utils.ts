@@ -855,7 +855,7 @@ export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale:
       filterGroupId: uuidv4(),
       filterId: sourceFilterId,
       lastN: props.lastN!,
-      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit!),
+      dateGranularity: getQuickSightUnitFromTimeUnit(props.timeUnit),
     };
 
     filterGroup = JSON.parse(Mustache.render(filterGroupDef, mustacheRelativeDateFilterGroupType)) as FilterGroup;
@@ -1432,7 +1432,7 @@ export function formatDatesInObject(inputObject: any): any {
   }
 }
 
-export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
+export function getQuickSightUnitFromTimeUnit(timeUnit: string | undefined) : string {
   let unit = 'DAY';
   if (timeUnit == ExploreRelativeTimeUnit.WK) {
     unit = 'WEEK';
