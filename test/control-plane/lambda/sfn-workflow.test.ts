@@ -241,6 +241,141 @@ describe('SFN workflow Lambda Function', () => {
     });
   });
 
+  test('Create pipeline AppRegistry tags', async () => {
+    const event: WorkFlowStack = {
+      ...baseStackWorkflowEvent,
+      Data: {
+        ...baseStackWorkflowEvent.Data,
+        Input: {
+          ...baseStackWorkflowEvent.Data.Input,
+          Tags: [
+            {
+              Value: '#.Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8.ServiceCatalogAppRegistryApplicationTagValue',
+              Key: '#.Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8.ServiceCatalogAppRegistryApplicationTagKey',
+            },
+          ],
+        },
+      },
+    };
+    const obj = {
+      'Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8': {
+        StackName: 'Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8',
+        Outputs: [
+          {
+            OutputKey: 'xxxx-ServiceCatalogAppRegistryApplicationTagKey',
+            OutputValue: 'appKey',
+          },
+          {
+            OutputKey: 'xxxx-ServiceCatalogAppRegistryApplicationTagValue',
+            OutputValue: 'appValue',
+          },
+        ],
+      },
+    };
+
+    const info = JSON.stringify(obj);
+    s3Mock.on(GetObjectCommand).resolves({
+      Body: {
+        transformToString: async () => {
+          return info;
+        },
+      },
+    } as any);
+    const resp = await handler(event) as CdkCustomResourceResponse;
+    expect(resp).toEqual({
+      Data: {
+        Callback: {
+          BucketName: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+          BucketPrefix: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb',
+        },
+        Input: {
+          Action: 'Create',
+          Parameters: [
+            { ParameterKey: 'VpcId', ParameterValue: 'vpc-099adfb13a6ba6821' },
+            { ParameterKey: 'PrivateSubnetIds', ParameterValue: 'subnet-02b1c74d310e29d66,subnet-0f4d44b0cb5898403,subnet-02b77ab42fb6f6210' },
+            { ParameterKey: 'ProjectId', ParameterValue: 'demo_ervv' },
+            { ParameterKey: 'AppIds', ParameterValue: '' },
+          ],
+          Tags: [
+            {
+              Key: 'appKey',
+              Value: 'appValue',
+            },
+          ],
+          Region: 'ap-northeast-1',
+          StackName: 'Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa',
+          TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.1.0-dev-main-202309261209-a1094814/default/data-pipeline-stack.template.json',
+        },
+      },
+      Name: 'DataProcessing',
+      Type: 'Stack',
+    });
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8/output.json',
+    });
+  });
+
+  test('Create pipeline AppRegistry tags without stack output', async () => {
+    const event: WorkFlowStack = {
+      ...baseStackWorkflowEvent,
+      Data: {
+        ...baseStackWorkflowEvent.Data,
+        Input: {
+          ...baseStackWorkflowEvent.Data.Input,
+          Tags: [
+            {
+              Value: '#.Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8.ServiceCatalogAppRegistryApplicationTagValue',
+              Key: '#.Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8.ServiceCatalogAppRegistryApplicationTagKey',
+            },
+          ],
+        },
+      },
+    };
+    const obj = {
+      'Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8': {
+        StackName: 'Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8',
+      },
+    };
+
+    const info = JSON.stringify(obj);
+    s3Mock.on(GetObjectCommand).resolves({
+      Body: {
+        transformToString: async () => {
+          return info;
+        },
+      },
+    } as any);
+    const resp = await handler(event) as CdkCustomResourceResponse;
+    expect(resp).toEqual({
+      Data: {
+        Callback: {
+          BucketName: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+          BucketPrefix: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb',
+        },
+        Input: {
+          Action: 'Create',
+          Parameters: [
+            { ParameterKey: 'VpcId', ParameterValue: 'vpc-099adfb13a6ba6821' },
+            { ParameterKey: 'PrivateSubnetIds', ParameterValue: 'subnet-02b1c74d310e29d66,subnet-0f4d44b0cb5898403,subnet-02b77ab42fb6f6210' },
+            { ParameterKey: 'ProjectId', ParameterValue: 'demo_ervv' },
+            { ParameterKey: 'AppIds', ParameterValue: '' },
+          ],
+          Tags: [],
+          Region: 'ap-northeast-1',
+          StackName: 'Clickstream-DataProcessing-f00b00bdbabb4ea9a00e8e66f0f372fa',
+          TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.1.0-dev-main-202309261209-a1094814/default/data-pipeline-stack.template.json',
+        },
+      },
+      Name: 'DataProcessing',
+      Type: 'Stack',
+    });
+    expect(s3Mock).toHaveReceivedNthSpecificCommandWith(1, GetObjectCommand, {
+      Bucket: 'click-stream-control-pla-clickstreamsolutiondatab-tn5qj1l1w3e',
+      Key: 'clickstream/workflow/main-d1f8f94d-09ae-4b08-9758-98d21b84c2bb/Clickstream-ServiceCatalogAppRegistry-ce6e3bd5ecb341afbdac495a08c7e4c8/output.json',
+    });
+  });
+
   test('Pass stack', async () => {
     const event: WorkFlowStack = {
       ...baseStackWorkflowEvent,
