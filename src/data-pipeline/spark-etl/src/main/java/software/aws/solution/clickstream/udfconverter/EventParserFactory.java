@@ -23,7 +23,9 @@ import software.aws.solution.clickstream.transformer.TransformerNameEnum;
 
 import java.util.Map;
 
-public class EventParserFactory {
+public final class EventParserFactory {
+    private EventParserFactory() {
+    }
 
     public static EventParser getEventParser(final TransformerNameEnum parserName, final Map<String, RuleConfig> appRuleConfig) {
         switch (parserName) {

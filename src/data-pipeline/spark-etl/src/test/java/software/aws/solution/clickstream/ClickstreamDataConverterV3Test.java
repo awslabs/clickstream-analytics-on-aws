@@ -34,7 +34,7 @@ public class ClickstreamDataConverterV3Test extends BaseSparkTest {
     }
     @Test
     public void test_convert_data_v3() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.DataConverterV3Test.test_convert_data_v3
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.ClickstreamDataConverterV3Test.test_convert_data_v3
 
         String filePath = "/original_data_nozip_upload_time.json";
         Dataset<Row> dataset = readJsonDataset(filePath);
@@ -52,7 +52,7 @@ public class ClickstreamDataConverterV3Test extends BaseSparkTest {
 
     @Test
     public void test_convert_data_v3_invalid_data() throws IOException {
-        // ./gradlew clean test --info --tests software.aws.solution.clickstream.DataConverterV3Test.test_convert_data_v3_invalid_data
+        // ./gradlew clean test --info --tests software.aws.solution.clickstream.ClickstreamDataConverterV3Test.test_convert_data_v3_invalid_data
 
         String whDir = setWarehouseDir("test_convert_data_v3_invalid_data");
 
