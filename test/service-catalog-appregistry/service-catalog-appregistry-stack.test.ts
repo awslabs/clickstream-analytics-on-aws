@@ -16,6 +16,11 @@ import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { ServiceCatalogAppregistryStack } from '../../src/service-catalog-appregistry-stack';
 
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../cdk-lambda-nodejs-mock'));
+}
+
 const app = new App();
 const stack = new ServiceCatalogAppregistryStack(app, 'test-service-catalog-appregistry-stack');
 const template = Template.fromStack(stack);

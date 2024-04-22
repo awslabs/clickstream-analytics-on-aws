@@ -46,6 +46,11 @@ import {
   RefGetAtt,
 } from '../../utils';
 
+if (process.env.CI !== 'true') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  jest.mock('aws-cdk-lib/aws-lambda-nodejs', () => require('../../cdk-lambda-nodejs-mock'));
+}
+
 describe('DataAnalyticsRedshiftStack common parameter test', () => {
   const app = new App();
   const testId = 'test-1';
@@ -884,9 +889,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     for (const nestedTemplate of allNestedTemplates) {
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
         Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
+          S3Bucket: Match.anyValue(),
           S3Key: Match.anyValue(),
         },
         Role: {
@@ -925,9 +928,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     for (const nestedTemplate of allNestedTemplates) {
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
         Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
+          S3Bucket: Match.anyValue(),
           S3Key: Match.anyValue(),
         },
         Role: {
@@ -1337,9 +1338,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     for (const nestedTemplate of allNestedTemplates) {
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
         Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
+          S3Bucket: Match.anyValue(),
           S3Key: Match.anyValue(),
         },
         Role: {
@@ -1480,9 +1479,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFn', () => {
     newServerlessTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -1539,9 +1536,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     });
     provisionedTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -1697,9 +1692,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFn', () => {
     newServerlessTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -1750,9 +1743,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
 
     provisionedTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -2155,9 +2146,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check ClearExpiredEventsWorkflowClearExpiredEventsFn', () => {
     newServerlessTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -2206,9 +2195,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
 
     provisionedTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -2311,9 +2298,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFn', () => {
     newServerlessTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -2362,9 +2347,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
 
     provisionedTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
@@ -2511,9 +2494,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
     const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
     nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
+        S3Bucket: Match.anyValue(),
         S3Key: Match.anyValue(),
       },
       Role: {
