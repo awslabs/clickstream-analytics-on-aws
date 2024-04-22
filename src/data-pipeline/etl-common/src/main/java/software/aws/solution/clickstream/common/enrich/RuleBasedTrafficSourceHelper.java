@@ -184,8 +184,16 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
 
 
 
-    private TrafficSourceUtm getUtmSourceFromUrl(final String url) {
+    private TrafficSourceUtm getUtmSourceFromUrl(final String urlIput) {
         TrafficSourceUtm trafficSourceUtm = new TrafficSourceUtm();
+        if (urlIput == null) {
+            return trafficSourceUtm;
+        }
+
+        String url = urlIput;
+        if (!urlIput.contains("://")) {
+            url = "http://" + url;
+        }
 
         Map<String, List<String>> params = getUriParams(url);
         String utmId = getFirst(params.get("utm_id"));
@@ -227,25 +235,10 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         return trafficSourceUtm;
     }
 
-    @Override
-    public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
-        log.info("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
 
+    public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String theReferrer, final String theReferrerHost) {
+        log.info("trafficSourceUtmInput: {}, theReferrer: {}, theReferrerHost: {}", trafficSourceUtmInput, theReferrer, theReferrerHost);
         TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
-
-        String theReferrer = null;
-        String theReferrerHost = null;
-        if (pageReferrer != null && !pageReferrer.isEmpty()) {
-            theReferrer = pageReferrer;
-        } else {
-            theReferrer = latestReferrer;
-            theReferrerHost = latestReferrerHost;
-        }
-        if (theReferrerHost == null && theReferrer != null) {
-            theReferrerHost = parseUrl(theReferrer).getHostName();
-        }
-
-        log.info("theReferrer: {}, theReferrerHost: {}", theReferrer, theReferrerHost);
 
         SourceCategoryAndTerms sourceCategoryAndTerms = this.categoryListEvaluator.evaluate(theReferrer);
 
@@ -287,6 +280,48 @@ public final class RuleBasedTrafficSourceHelper implements TrafficSourceHelper {
         log.info("return categoryTrafficSource: {}", categoryTrafficSource);
         return categoryTrafficSource;
 
+    }
+
+    @Override
+    public CategoryTrafficSource parse(final TrafficSourceUtm trafficSourceUtmInput, final String pageReferrer, final String latestReferrer, final String latestReferrerHost) {
+        log.info("parser() enter trafficSourceUtm: {}, pageReferrer: {}, latestReferrer: {}, latestReferrerHost: {}", trafficSourceUtmInput, pageReferrer, latestReferrer, latestReferrerHost);
+
+        TrafficSourceUtm trafficSourceUtm = normEmptyInTrafficSourceUtm(trafficSourceUtmInput);
+
+        if (trafficSourceUtm.getSource() == null) {
+            trafficSourceUtm = getUtmSourceFromUrl(pageReferrer);
+        }
+
+        if (trafficSourceUtm.getSource() == null) {
+            trafficSourceUtm = getUtmSourceFromUrl(latestReferrer);
+        }
+
+        String theReferrer = null;
+        String theReferrerHost = null;
+        CategoryTrafficSource categoryTrafficSource = null;
+
+        if (latestReferrer != null && !latestReferrer.isEmpty()) {
+            theReferrer = latestReferrer;
+            theReferrerHost = latestReferrerHost;
+        }
+        categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+
+        if (categoryTrafficSource.getSource() == null && pageReferrer != null && !pageReferrer.isEmpty()) {
+            theReferrer = pageReferrer;
+            theReferrerHost = parseUrl(theReferrer).getHostName();
+            categoryTrafficSource = parse(trafficSourceUtm, theReferrer, theReferrerHost);
+        }
+
+        if (categoryTrafficSource.getSource() != null) {
+            if (categoryTrafficSource.getCategory() == null) {
+                categoryTrafficSource.setCategory(CategoryListEvaluator.UNASSIGNED);
+            }
+            if (categoryTrafficSource.getChannelGroup() == null) {
+                categoryTrafficSource.setChannelGroup(ChannelListEvaluator.UNASSIGNED);
+            }
+        }
+
+        return categoryTrafficSource;
     }
 
     private static boolean isEmpty(final String v, final String emtpyValue) {
