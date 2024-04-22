@@ -15,8 +15,8 @@
 //@ts-nocheck
 
 import { CreateApplicationCommand, DeleteApplicationCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-
 
 import { CloudFormationCustomResourceEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -24,6 +24,7 @@ import 'aws-sdk-client-mock-jest';
 
 const s3ClientMock = mockClient(S3Client);
 const emrClientMock = mockClient(EMRServerlessClient);
+const lambdaMock = mockClient(LambdaClient);
 
 process.env.AWS_REGION = 'cn-northwest-1';
 process.env.STACK_ID = 'test-stack-001';
@@ -36,9 +37,15 @@ import { handler } from '../../src/data-pipeline/lambda/emr-serverless-app';
 import { getMockContext } from '../common/lambda-context';
 import { basicCloudFormationEvent } from '../common/lambda-events';
 
+const functionTags = {
+  project_id: 'project_007',
+  tag_key1: 'tag_value1',
+};
+
 beforeEach(() => {
   s3ClientMock.reset();
   emrClientMock.reset();
+  lambdaMock.reset();
 });
 
 test('should create EMR-serverless application X86_64 architecture with java 17', async () => {
@@ -58,6 +65,7 @@ test('should create EMR-serverless application X86_64 architecture with java 17'
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -108,6 +116,7 @@ test('should create EMR-serverless application X86_64 architecture with java 17'
         },
       },
     ],
+    tags: functionTags,
   });
 });
 
@@ -129,6 +138,7 @@ test('should create EMR-serverless application with ARM64 architecture', async (
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -170,6 +180,7 @@ test('should create EMR-serverless application with ARM64 architecture', async (
     },
     releaseLabel: 'emr-6.10.0',
     type: 'SPARK',
+    tags: functionTags,
   });
 });
 
@@ -191,6 +202,7 @@ test('should create EMR-serverless application with X86_64 architecture', async 
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -232,5 +244,6 @@ test('should create EMR-serverless application with X86_64 architecture', async 
     },
     releaseLabel: 'emr-6.10.0',
     type: 'SPARK',
+    tags: functionTags,
   });
 });

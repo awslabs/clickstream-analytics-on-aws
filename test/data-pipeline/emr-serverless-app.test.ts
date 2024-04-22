@@ -15,6 +15,7 @@
 //@ts-nocheck
 
 import { CreateApplicationCommand, DeleteApplicationCommand, EMRServerlessClient } from '@aws-sdk/client-emr-serverless';
+import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 
@@ -24,6 +25,7 @@ import 'aws-sdk-client-mock-jest';
 
 const s3ClientMock = mockClient(S3Client);
 const emrClientMock = mockClient(EMRServerlessClient);
+const lambdaMock = mockClient(LambdaClient);
 
 process.env.AWS_REGION = 'us-east-1';
 process.env.STACK_ID = 'test-stack-001';
@@ -36,9 +38,17 @@ import { handler } from '../../src/data-pipeline/lambda/emr-serverless-app';
 import { getMockContext } from '../common/lambda-context';
 import { basicCloudFormationEvent } from '../common/lambda-events';
 
+
+const functionTags = {
+  project_id: 'project_007',
+  tag_key1: 'tag_value1',
+};
+
+
 beforeEach(() => {
   s3ClientMock.reset();
   emrClientMock.reset();
+  lambdaMock.reset();
 });
 
 test('should create EMR-serverless application with java 17 when create emr-6.15.0', async () => {
@@ -58,6 +68,7 @@ test('should create EMR-serverless application with java 17 when create emr-6.15
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -108,6 +119,7 @@ test('should create EMR-serverless application with java 17 when create emr-6.15
         },
       },
     ],
+    tags: functionTags,
   });
 });
 
@@ -129,6 +141,7 @@ test('should create EMR-serverless application with java 8 when emr-6.10.0', asy
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -179,6 +192,7 @@ test('should create EMR-serverless application with java 8 when emr-6.10.0', asy
         },
       },
     ],
+    tags: functionTags,
   });
 
   expect(s3ClientMock).toHaveReceivedNthCommandWith(2, PutObjectCommand,
@@ -215,6 +229,7 @@ test('should delete EMR-serverless application when RequestType is Delete', asyn
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   const applicationIdsConfig = JSON.stringify({
     applicationIds: [
@@ -268,6 +283,7 @@ test('should create EMR-serverless application when RequestType is Update ', asy
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-002',
@@ -342,6 +358,7 @@ test('should handle delete error', async () => {
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   const applicationIdsConfig = JSON.stringify({
     applicationIds: [
@@ -399,6 +416,7 @@ test('should handle create error', async () => {
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   const applicationIdsConfig = JSON.stringify({
     applicationIds: [
@@ -446,6 +464,7 @@ test('EMR-serverless application name should not more than 64', async () => {
     },
   };
   const context = getMockContext();
+  lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
 
   emrClientMock.on(CreateApplicationCommand).resolvesOnce({
     applicationId: 'applicationId-001',
@@ -478,6 +497,7 @@ test('EMR-serverless application name should not more than 64', async () => {
     },
     releaseLabel: 'emr-6.10.0',
     type: 'SPARK',
+    tags: functionTags,
   });
 
 });
