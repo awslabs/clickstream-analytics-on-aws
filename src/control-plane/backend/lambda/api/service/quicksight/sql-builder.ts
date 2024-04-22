@@ -13,7 +13,7 @@
 
 import { ConditionCategory, ExploreAggregationMethod, ExploreAnalyticsOperators, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataValueType } from '@aws/clickstream-base-lib';
 import { format } from 'sql-formatter';
-import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks } from './reporting-utils';
+import { formatDateToYYYYMMDD, getFirstDayOfLastNMonths, getFirstDayOfLastNYears, getMondayOfLastNWeeks, isValidGroupingCondition } from './reporting-utils';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -74,8 +74,9 @@ export interface ColumnAttribute {
 }
 
 export type RetentionJoinColumn = ColumnAttribute;
-export type GroupingCondition = ColumnAttribute & {
+export type GroupingCondition = {
   readonly applyTo?: 'FIRST' | 'ALL';
+  readonly conditions: ColumnAttribute[];
 };
 
 export interface PairEventAndCondition {
@@ -193,10 +194,10 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   let eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
   let groupCondition: GroupingCondition | undefined = undefined;
   let appendGroupingCol = false;
-  let colNameWithPrefix = '';
+  let colNameAndAlias:ColNameWithAlias | undefined = undefined;
 
-  if (sqlParameters.groupCondition !== undefined) {
-    colNameWithPrefix = buildColNameWithPrefix(sqlParameters.groupCondition);
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    colNameAndAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupCondition = sqlParameters.groupCondition;
     appendGroupingCol = true;
   }
@@ -222,12 +223,12 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   sql = sql.concat(`
     select 
       ${sqlParameters.groupColumn}
-      ${appendGroupingCol ? `, ${colNameWithPrefix} as ${sqlParameters.groupCondition?.property}` : ''}
+      ${appendGroupingCol ? `, ${colNameAndAlias?.ColNameWithAlias.join(',')}` : ''}
       ${resultCntSQL}
     from join_table
     group by 
       ${sqlParameters.groupColumn}
-      ${appendGroupingCol ? `, ${colNameWithPrefix}` : ''}
+      ${appendGroupingCol ? `, ${colNameAndAlias?.colNames.join(',')}` : ''}
     order by 
       ${sqlParameters.groupColumn}
       ,"1_${eventNames[0]}" desc
@@ -255,11 +256,11 @@ function _buildFunnelChartViewNestCaseWhenSql(prefix: string, cnt: number, isNam
   return sql;
 }
 
-function _buildFunnelChartViewGroupingNestCaseWhenSql(cnt: number, groupColNameWithPrefix: string) : string {
+function _buildFunnelChartViewGroupingNestCaseWhenSql(cnt: number, colName: string) : string {
 
   let sql = '';
   for (let i = 0; i < cnt; i++) {
-    sql += `when seq = ${i} then ${groupColNameWithPrefix}_${i} \n`;
+    sql += `when seq = ${i} then ${colName}_${i} \n`;
   }
 
   return sql;
@@ -285,7 +286,7 @@ function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, i
   return sql;
 }
 
-function _buildFunnelChartViewGroupingSql(prefix: string, eventCount: number, index: number, groupColNameWithPrefix: string) : string {
+function _buildFunnelChartViewGroupingSql(prefix: string, eventCount: number, index: number, colName: string) : string {
 
   let sql = ' when ';
   for (let i = 1; i < eventCount; i++) {
@@ -298,7 +299,7 @@ function _buildFunnelChartViewGroupingSql(prefix: string, eventCount: number, in
 
   sql += `then 
     case 
-      ${_buildFunnelChartViewGroupingNestCaseWhenSql(index, groupColNameWithPrefix)}
+      ${_buildFunnelChartViewGroupingNestCaseWhenSql(index, colName)}
     else null 
     end
   `;
@@ -331,26 +332,49 @@ function _buildFunnelChartViewResultCaseWhenSql(prefix: string, eventCount: numb
   return resultColSql;
 }
 
-function _buildFunnelChartViewResultGroupingSql(prefix: string,
-  appendGroupingCol: boolean, applyToFirst: boolean, groupColNameWithPrefix: string, eventCount: number) : string {
+function _buildResultSqlForGrouping(colNameWithAlias: ColNameWithAlias, eventCount: number, prefix: string) : string {
 
   let resultColSql = '';
-
-  if (applyToFirst) {
-    resultColSql = `
-      ${ appendGroupingCol ? `,${groupColNameWithPrefix}_0 as group_col` : ''}
-    `;
-  } else if (appendGroupingCol) {
-    resultColSql = `
+  for ( const colName of colNameWithAlias.colNames) {
+    resultColSql += `
       ,case
     `;
     for (let index = eventCount; index > 0; index--) {
-      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, index, groupColNameWithPrefix);
+      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, index, colName);
     }
     resultColSql += `
-      end
-    as group_col
+      end as ${colName}
     `;
+  }
+
+  return resultColSql;
+}
+
+function _buildFunnelChartViewResultGroupingSql(
+  prefix: string,
+  appendGroupingCol: boolean,
+  applyToFirst: boolean,
+  colNameWithAlias: ColNameWithAlias | undefined,
+  eventCount: number,
+) : string {
+
+  let resultColSql = '';
+
+  if ( colNameWithAlias !== undefined ) {
+    if (applyToFirst) {
+
+      let colNameSql = '';
+      for ( const colName of colNameWithAlias.colNames) {
+        colNameSql += `
+          ,${colName}_0 as ${colName}
+        `;
+      }
+      resultColSql = `
+        ${ appendGroupingCol ? `${colNameSql}` : ''}
+      `;
+    } else if (appendGroupingCol) {
+      resultColSql = _buildResultSqlForGrouping(colNameWithAlias, eventCount, prefix);
+    }
   }
 
   return resultColSql;
@@ -381,7 +405,7 @@ function _buildFunnelChartIdList(count: number, prefix: string) : string {
 }
 
 function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: string,
-  appendGroupingCol: boolean, applyToFirst: boolean, groupColNameWithPrefix: string) : string {
+  appendGroupingCol: boolean, applyToFirst: boolean, colNameWithAlias: ColNameWithAlias | undefined) : string {
 
   const count = sqlParameters.eventAndConditions!.length;
   const seqTable = `,
@@ -397,15 +421,22 @@ function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: st
       ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, false)}
       ,
       ${_buildFunnelChartViewResultCaseWhenSql(prefix, count, true)}
-      ${_buildFunnelChartViewResultGroupingSql(prefix, appendGroupingCol, applyToFirst, groupColNameWithPrefix, count)}
+      ${_buildFunnelChartViewResultGroupingSql(prefix, appendGroupingCol, applyToFirst, colNameWithAlias, count)}
       from join_table join seq_table on 1=1
     )
   `;
 
+  const groupCols = [];
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    for (const colName of colNameWithAlias!.colNames) {
+      groupCols.push(colName);
+    }
+  }
+
   return `
     ${seqTable}
     ${resultColSql}
-    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',group_col' : ''} 
+    select day::date as event_date, event_name, ${prefix} ${appendGroupingCol ? ',' + groupCols.join(',') : ''} 
     from final_table where event_name is not null
   `;
 }
@@ -421,19 +452,18 @@ export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: b
 
   let groupCondition: GroupingCondition | undefined = undefined;
   let appendGroupingCol = false;
-  let colNameWithPrefix = '';
+  let colNameWithAlias: ColNameWithAlias | undefined = undefined;
 
-
-  if (isMultipleChart && sqlParameters.groupCondition?.property !== undefined) {
-    colNameWithPrefix = buildColNameWithPrefix(sqlParameters.groupCondition);
+  if (isMultipleChart && isValidGroupingCondition(sqlParameters.groupCondition)) {
+    colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupCondition = sqlParameters.groupCondition;
     appendGroupingCol = true;
   }
 
-  const applyToFirst = appendGroupingCol && (sqlParameters.groupCondition?.applyTo === 'FIRST');
+  const applyToFirst = isValidGroupingCondition(sqlParameters.groupCondition) && (sqlParameters.groupCondition?.applyTo === 'FIRST');
 
   let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, applyToFirst, groupCondition);
-  const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithPrefix);
+  const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithAlias);
 
   let sql = `
    ${baseSQL}
@@ -455,10 +485,12 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   let groupColSQL = '';
   let groupCol = '';
 
-  if (sqlParameters.groupCondition !== undefined) {
-    const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
-    groupColSQL = `${colName}::varchar as group_col,`;
-    groupCol = `${colName}::varchar,`;
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
+    for (const colName of colNameWithAlias.colNames) {
+      groupColSQL += `${colName}::varchar as ${colName},`;
+      groupCol += `${colName}::varchar,`;
+    }
   }
 
   resultSql = resultSql.concat(`
@@ -491,16 +523,17 @@ export function buildEventPropertyAnalysisView(sqlParameters: SQLParameters) : s
 
   let groupColSQL = '';
   let groupBySQL = '';
-  if (sqlParameters.groupCondition !== undefined) {
-    const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
-    groupColSQL = `${colName}::varchar as ${colName},`;
-    groupBySQL = `${colName},`;
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
+    for ( const colName of colNameWithAlias.colNames) {
+      groupColSQL += `${colName}::varchar as ${colName},`;
+      groupBySQL += `${colName},`;
+    }
   }
 
   const computeMethodProps = getComputeMethodProps(sqlParameters);
   if (!computeMethodProps.isMixedMethod) {
     if (computeMethodProps.hasAggregationPropertyMethod) {
-
       if (!computeMethodProps.isSameAggregationMethod) {
         resultSql = resultSql.concat(`
           select 
@@ -1016,13 +1049,13 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   const dateListSql = _buildDateListSQL(sqlParameters);
   const { tableSql, resultSql } = _buildRetentionAnalysisSQLs(sqlParameters);
 
-  let groupingCol = '';
   let groupingColSql = '';
   let groupByColSql = '';
-  if (sqlParameters.groupCondition !== undefined) {
-    groupByColSql = `${buildColNameWithPrefix(sqlParameters.groupCondition)}::varchar,`;
-    groupingCol = buildColNameWithPrefix(sqlParameters.groupCondition);
-    groupingColSql = `${groupingCol}::varchar as group_col,`;
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
+      groupByColSql += `${colName}::varchar,`;
+      groupingColSql += `${colName}::varchar as ${colName},`;
+    }
   }
 
   const sql = `
@@ -1048,24 +1081,28 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
-function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: GroupingCondition|undefined) {
+function _buildTableListColumnSql(sqlParameters: SQLParameters, groupCondition: GroupingCondition | undefined) {
 
   let firstTableColumns = '';
   let sql = '';
-  let groupCol = '';
+  let groupColSuffix = '';
   let newColumnTemplate = columnTemplateForFunnelVisual;
-  if (groupCondition !== undefined && groupCondition.applyTo !== 'FIRST') {
-    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null)`;
-    newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(groupCondition)}####`;
+  if (isValidGroupingCondition(groupCondition) && groupCondition!.applyTo !== 'FIRST') {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      newColumnTemplate += `,COALESCE(${colName}::varchar, null) as ${colName}####`;
+    }
   }
 
-  if (groupCondition !== undefined && groupCondition.applyTo === 'FIRST') {
+  if (isValidGroupingCondition(groupCondition) && groupCondition!.applyTo === 'FIRST') {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      groupColSuffix += `,COALESCE(${colName}::varchar, null) as ${colName}_0`;
+    }
     firstTableColumns = `
        month
       ,week
       ,day
       ,hour
-      ,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null) as ${buildColNameWithPrefix(groupCondition)}_0
+      ${groupColSuffix}
       ,${newColumnTemplate.replace(/####/g, '_0').replace(/%%%%/g, '\'1_\' || ')}
     `;
   } else {
@@ -1125,9 +1162,11 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
       joinCondition = `on table_${index-1}.user_pseudo_id_${index-1} = table_${index}.user_pseudo_id_${index}`;
     }
 
-    if (groupCondition !== undefined && !applyToFirst ) {
-      joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${buildColNameWithPrefix(groupCondition)}_${index} \n`);
-      joinCondition = joinCondition.concat(` and table_${index-1}.${buildColNameWithPrefix(groupCondition)}_${index-1} = table_${index}.${buildColNameWithPrefix(groupCondition)}_${index}`);
+    if (isValidGroupingCondition(groupCondition) && !applyToFirst ) {
+      for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
+        joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${colName}_${index} \n`);
+        joinCondition = joinCondition.concat(` and table_${index-1}.${colName}_${index-1} = table_${index}.${colName}_${index}`);
+      }
     }
 
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
@@ -1149,14 +1188,21 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
   return sql;
 };
 
-function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, groupCondition: GroupingCondition | undefined = undefined ) {
+function _buildColumnsForFunnelTableViews(index: number, groupCondition: GroupingCondition | undefined) {
 
   let groupCol = '';
   let newColumnTemplate = columnTemplateForFunnelVisual;
 
-  if (groupCondition !== undefined && !applyToFirst) {
-    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, null) as ${buildColNameWithPrefix(groupCondition)}`;
-    newColumnTemplate += `${groupCol}`;
+  if (isValidGroupingCondition(groupCondition) && groupCondition!.applyTo !== 'FIRST') {
+    const colNameAndAlias = buildColNameWithPrefix(groupCondition);
+    for (const colName of colNameAndAlias.colNames) {
+      newColumnTemplate += `,COALESCE(${colName}::varchar, null) as ${colName}`;
+    }
+  } else {
+    const colNameAndAlias = buildColNameWithPrefix(groupCondition);
+    for (const colName of colNameAndAlias.colNames) {
+      groupCol += `,COALESCE(${colName}::varchar, null) as ${colName}`;
+    }
   }
 
   const firstTableColumns = `
@@ -1164,7 +1210,7 @@ function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, 
     ,week
     ,day
     ,hour
-    ${ applyToFirst ? `,COALESCE(${buildColNameWithPrefix(groupCondition!)}::varchar, null) as ${buildColNameWithPrefix(groupCondition!)}` : ''}
+    ${ isValidGroupingCondition(groupCondition) && groupCondition!.applyTo === 'FIRST' ? `${groupCol}` : ''}
     ,${newColumnTemplate.replace(/####/g, '_0').replace(/%%%%/g, '\'1_\' || ')}
   `;
 
@@ -1189,8 +1235,10 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
     joinCondition = `on table_${index-1}.user_pseudo_id_${index-1} = table_${index}.user_pseudo_id_${index}`;
   }
 
-  if (groupCondition !== undefined && !applyToFirst) {
-    groupingJoinSQL = `and table_${index-1}.${buildColNameWithPrefix(groupCondition)} = table_${index}.${buildColNameWithPrefix(groupCondition)}`;
+  if (isValidGroupingCondition(groupCondition) && !applyToFirst) {
+    for (const colName of buildColNameWithPrefix(groupCondition).colNames) {
+      groupingJoinSQL += ` and table_${index-1}.${colName} = table_${index}.${colName}`;
+    }
   }
 
   if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
@@ -1207,7 +1255,6 @@ function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: 
   groupCondition: GroupingCondition | undefined = undefined) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.FUNNEL, eventNames, sqlParameters);
-
   const applyToFirst = groupCondition?.applyTo === 'FIRST';
 
   for (const [index, event] of sqlParameters.eventAndConditions!.entries()) {
@@ -1220,7 +1267,7 @@ function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: 
     sql = sql.concat(`
     table_${index} as (
       select 
-        ${_buildColumnsForFunnelTableViews(index, applyToFirst, groupCondition)}
+        ${_buildColumnsForFunnelTableViews(index, groupCondition)}
       from base_data base
       where event_name = '${event.eventName}'
       ${filterSql}
@@ -1275,10 +1322,10 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
       idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
     }
     let groupColSql = '';
-    let groupCol = '';
-    if (sqlParameters.groupCondition !== undefined) {
-      groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
-      groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+    if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+      for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
+        groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
+      }
     }
 
     joinTableSQL = joinTableSQL.concat(`
@@ -1421,10 +1468,10 @@ function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, e
     let idSql = _buildIDColumnSql(index, item, extParamProps);
 
     let groupColSql = '';
-    let groupCol = '';
-    if (sqlParameters.groupCondition !== undefined) {
-      groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
-      groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+    if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+      for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
+        groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
+      }
     }
 
     joinTableSQL = joinTableSQL.concat(`
@@ -1447,6 +1494,23 @@ function _buildEventPropertyAnalysisBaseSqlCase1(sqlParameters: SQLParameters, e
 
 }
 
+function _buildSqlForGrouping(groupCondition: GroupingCondition | undefined, index: number) {
+  let groupColSql = '';
+  let groupCol = '';
+  if (isValidGroupingCondition(groupCondition)) {
+    const colNameAndAlias = buildColNameWithPrefix(groupCondition);
+    groupCol = colNameAndAlias.colNames.join(',');
+    for (const colName of colNameAndAlias.colNames) {
+      groupColSql += `, table_${index}.${colName}_${index} as ${colName}`;
+    }
+  }
+
+  return {
+    groupCol,
+    groupColSql,
+  };
+}
+
 function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildCommonPartSql(ExploreAnalyticsType.EVENT, eventNames, sqlParameters);
@@ -1463,15 +1527,9 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
         unionSql = 'union all';
       }
 
-      let groupColSql = '';
-      let groupCol = '';
-      if (sqlParameters.groupCondition !== undefined) {
-        groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
-        groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
-      }
-
+      const groupingSql = _buildSqlForGrouping(sqlParameters.groupCondition, index);
       const idSql = _buildIDColumnSqlMixedMode(index, item);
-      const query = _buildQueryColumnSqlMixedMode(item, groupCol, sqlParameters.groupColumn);
+      const query = _buildQueryColumnSqlMixedMode(item, groupingSql.groupCol, sqlParameters.groupColumn);
 
       joinTableSQL = joinTableSQL.concat(`
       ${unionSql}
@@ -1486,10 +1544,10 @@ function _buildEventPropertyAnalysisBaseSql(eventNames: string[], sqlParameters:
           , ${index+1} || '_' || table_${index}.event_name_${index} as event_name
           , table_${index}.event_timestamp_${index} as event_timestamp
           ${idSql}
-          ${groupColSql}
+          ${groupingSql.groupColSql}
           from table_${index}
         ) as union_table_${index}
-        group by ${sqlParameters.groupColumn}, event_name ${groupCol === '' ? '': ',' + groupCol} ${query.groupby}
+        group by ${sqlParameters.groupColumn}, event_name ${groupingSql.groupCol === '' ? '': ',' + groupingSql.groupCol} ${query.groupby}
       `);
     }
   } else {
@@ -1929,16 +1987,54 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   return eventDateSQL;
 }
 
-export function buildColNameWithPrefix(groupCondition: ColumnAttribute) {
+export type ColNameWithAlias = {
+  colNames: string[];
+  ColNameWithAlias: string[];
+}
 
+export type NameWithAlia = {
+  colName: string;
+  ColNameWithAlia: string;
+}
+
+export function buildColNameWithPrefix(groupCondition: GroupingCondition | undefined): ColNameWithAlias {
+
+  let colNames = [];
+  let ColNameWithAlias = [];
+  if (groupCondition !== undefined) {
+    for (const condition of groupCondition?.conditions) {
+      let prefix = '';
+      if (condition.category === ConditionCategory.EVENT) {
+        prefix = 'e_';
+      } else if (condition.category === ConditionCategory.USER) {
+        prefix = 'u_';
+      }
+      colNames.push(`${prefix}${condition.property}`);
+      ColNameWithAlias.push(`${prefix}${condition.property} as ${condition.property}`);
+    }
+  }
+  return {
+    colNames,
+    ColNameWithAlias,
+  };
+}
+
+export function buildColNameWithPrefixForOneCondtion(condition: ColumnAttribute): NameWithAlia {
   let prefix = '';
-  if (groupCondition.category === ConditionCategory.EVENT) {
+  let colName = '';
+  let ColNameWithAlia = '';
+  if (condition.category === ConditionCategory.EVENT) {
     prefix = 'e_';
-  } else if (groupCondition.category === ConditionCategory.USER) {
+  } else if (condition.category === ConditionCategory.USER) {
     prefix = 'u_';
   }
+  colName = `${prefix}${condition.property}`;
+  ColNameWithAlia = `${prefix}${condition.property} as ${condition.property}`;
 
-  return `${prefix}${groupCondition.property}`;
+  return {
+    colName,
+    ColNameWithAlia,
+  };
 }
 
 export function getComputeMethodProps(sqlParameters: SQLParameters): EventComputeMethodsProps {
@@ -2004,9 +2100,11 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
   let sql = baseSQL;
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
-  if (sqlParameters.groupCondition !== undefined) {
-    groupCol = `,${buildColNameWithPrefix(sqlParameters.groupCondition)}`;
-    newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(sqlParameters.groupCondition)}####`;
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
+      groupCol = `,${colName}`;
+      newColumnTemplate += `${groupCol} as ${colName}####`;
+    }
   }
 
   const extParamProps = getComputeMethodProps(sqlParameters);
@@ -2015,7 +2113,7 @@ function _buildEventCondition(sqlParameters: SQLParameters, baseSQL: string) {
     let extCol = '';
     if (extParamProps.hasExtParameter) {
       if (event.eventExtParameter !== undefined) {
-        extCol = `,${buildColNameWithPrefix(event.eventExtParameter.targetProperty)} as custom_attr_${index}`;
+        extCol = `,${buildColNameWithPrefixForOneCondtion(event.eventExtParameter.targetProperty).colName} as custom_attr_${index}`;
       } else {
         extCol = `,null as custom_attr_${index}`;
       }
@@ -2068,14 +2166,13 @@ function _buildRetentionAnalysisSQLs(sqlParameters: SQLParameters) {
   let resultSql = '';
 
   let groupColSql = '';
-  let resultGroupColSql = '';
   let groupJoinCol = '';
-  let colName = '';
-  if (sqlParameters.groupCondition !== undefined) {
-    const groupCondition = sqlParameters.groupCondition;
-    colName = buildColNameWithPrefix(groupCondition);
-    groupColSql = `${colName},`;
-    groupJoinCol = `and first_table_####.${colName} = second_table_####.${colName}`;
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    const colNameWithAlias = buildColNameWithPrefix(sqlParameters.groupCondition);
+    for (const colName of colNameWithAlias.colNames) {
+      groupColSql += `${colName},`;
+      groupJoinCol += `and first_table_####.${colName} = second_table_####.${colName} `;
+    }
   }
 
   for (const [index, pair] of sqlParameters.pairEventAndConditions!.entries()) {
@@ -2116,8 +2213,11 @@ function _buildRetentionAnalysisSQLs(sqlParameters: SQLParameters) {
       `);
     }
 
-    if (sqlParameters.groupCondition !== undefined) {
-      resultGroupColSql = `first_table_${index}.${colName},`;
+    let resultGroupColSql = '';
+    if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+      for (const colName of buildColNameWithPrefix(sqlParameters.groupCondition).colNames) {
+        resultGroupColSql += `first_table_${index}.${colName},`;
+      }
     }
 
     resultSql = resultSql.concat(`
@@ -2498,34 +2598,36 @@ function _getGroupingConditionProps(groupCondition: GroupingCondition) {
   const userOuterAttributes: ColumnAttribute[] = [];
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
-  if (groupCondition.category === ConditionCategory.USER) {
-    hasUserAttribute = true;
-    userAttributes.push({
-      property: groupCondition.property,
-      category: groupCondition.category,
-      dataType: groupCondition.dataType,
-    });
-  } else if (groupCondition.category === ConditionCategory.EVENT) {
-    hasEventAttribute = true;
-    eventAttributes.push({
-      property: groupCondition.property,
-      category: groupCondition.category,
-      dataType: groupCondition.dataType,
-    });
-  } else if (groupCondition.category === ConditionCategory.USER_OUTER) {
-    hasUserOuterAttribute = true;
-    userOuterAttributes.push({
-      property: groupCondition.property,
-      category: groupCondition.category,
-      dataType: groupCondition.dataType,
-    });
-  } else {
-    hasEventNonNestAttribute = true;
-    eventNonNestAttributes.push({
-      property: groupCondition.property,
-      category: groupCondition.category,
-      dataType: groupCondition.dataType,
-    });
+  for (const condition of groupCondition.conditions) {
+    if (condition.category === ConditionCategory.USER) {
+      hasUserAttribute = true;
+      userAttributes.push({
+        property: condition.property,
+        category: condition.category,
+        dataType: condition.dataType,
+      });
+    } else if (condition.category === ConditionCategory.EVENT) {
+      hasEventAttribute = true;
+      eventAttributes.push({
+        property: condition.property,
+        category: condition.category,
+        dataType: condition.dataType,
+      });
+    } else if (condition.category === ConditionCategory.USER_OUTER) {
+      hasUserOuterAttribute = true;
+      userOuterAttributes.push({
+        property: condition.property,
+        category: condition.category,
+        dataType: condition.dataType,
+      });
+    } else {
+      hasEventNonNestAttribute = true;
+      eventNonNestAttributes.push({
+        property: condition.property,
+        category: condition.category,
+        dataType: condition.dataType,
+      });
+    }
   }
 
   return {
@@ -2599,8 +2701,8 @@ function _getEventConditionProps(sqlParameters: SQLParameters) {
     eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
   }
 
-  if (sqlParameters.groupCondition) {
-    const groupingCondition = _getGroupingConditionProps(sqlParameters.groupCondition);
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    const groupingCondition = _getGroupingConditionProps(sqlParameters.groupCondition!);
     hasEventAttribute = hasEventAttribute || groupingCondition.hasEventAttribute;
     eventAttributes.push(...groupingCondition.eventAttributes);
 
@@ -2700,8 +2802,8 @@ function _getUserConditionProps(analyticsType: ExploreAnalyticsType, sqlParamete
     userAttributes.push(...conditionProps.userOuterAttributes);
   }
 
-  if (sqlParameters.groupCondition) {
-    const groupingCondition = _getGroupingConditionProps(sqlParameters.groupCondition);
+  if (isValidGroupingCondition(sqlParameters.groupCondition)) {
+    const groupingCondition = _getGroupingConditionProps(sqlParameters.groupCondition!);
     hasNestUserAttribute = hasNestUserAttribute || groupingCondition.hasUserAttribute;
     userAttributes.push(...groupingCondition.userAttributes);
     hasOuterUserAttribute = hasOuterUserAttribute || groupingCondition.hasUserOuterAttribute;

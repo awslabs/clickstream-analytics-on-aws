@@ -22,16 +22,7 @@
                                   "ColumnName": "event_name"
                               }
                           }
-                      },
-                      {
-                        "CategoricalDimensionField": {
-                            "FieldId": "{{smalMultiplesFieldId}}",
-                            "Column": {
-                                "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                "ColumnName": "group_col"
-                            }
-                        }
-                    }
+                      }
                   ],
                   "Columns": [
                       {
@@ -84,10 +75,6 @@
           },
           "FieldOptions": {
               "SelectedFieldOptions": [
-                  {
-                    "FieldId": "{{smalMultiplesFieldId}}",
-                    "Visibility": "VISIBLE"
-                  },
                   {
                       "FieldId": "{{catDimFieldId}}",
                       "Visibility": "VISIBLE"

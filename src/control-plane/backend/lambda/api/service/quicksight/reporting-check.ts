@@ -73,21 +73,27 @@ export class ReportingCheck {
   }
 
   public GroupCondition() {
-    if (this.params.groupCondition !== undefined && this.params.groupCondition.property === '') {
-      this.status = {
-        success: false,
-        message: '\'property\' attribute of grouping condition is empty.',
-      };
+
+    if (this.params.groupCondition !== undefined) {
+      for (const condition of this.params.groupCondition.conditions) {
+        if (condition.property === undefined || condition.property === '') {
+          this.status = {
+            success: false,
+            message: '\'property\' attribute of grouping condition is empty.',
+          };
+          break;
+        }
+
+        if (condition.dataType !== MetadataValueType.STRING) {
+          this.status = {
+            success: false,
+            message: 'Grouping function only supports string data type.',
+          };
+          break;
+        }
+      }
     }
 
-    if (this.params.groupCondition !== undefined &&
-       !(this.params.groupCondition.dataType === MetadataValueType.STRING ||
-        this.params.groupCondition.dataType === MetadataValueType.BOOLEAN)) {
-      this.status = {
-        success: false,
-        message: 'Grouping function only supports string and boolean data type.',
-      };
-    }
     return this;
   }
 
