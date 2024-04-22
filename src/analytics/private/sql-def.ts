@@ -19,8 +19,7 @@ import {
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
   CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
   CLICKSTREAM_ACQUISITION_DAY_USER_VIEW_CNT_MV,
-  CLICKSTREAM_ACQUISITION_INTRA_DAY,
-  CLICKSTREAM_ACQUISITION_INTRA_DAY_SP,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
   CLICKSTREAM_DEVICE_CRASH_RATE,
   CLICKSTREAM_DEVICE_CRASH_RATE_SP,
   CLICKSTREAM_DEVICE_USER_DEVICE,
@@ -63,7 +62,10 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_ACQUISITION_COUNTRY_NEW_USER,
   },
   {
-    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY,
+    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
+    type: 'mv',
+    scheduleRefresh: 'true',
+    timezoneSensitive: 'true',
   },
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_TRAFFIC_SOURCE_USER,
@@ -130,13 +132,6 @@ export const reportingViewsDef: SQLViewDef[] = [
   {
     viewName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION,
     spName: CLICKSTREAM_ACQUISITION_DAY_USER_ACQUISITION_SP,
-    type: 'sp',
-    scheduleRefresh: 'true',
-    timezoneSensitive: 'true',
-  },
-  {
-    viewName: CLICKSTREAM_ACQUISITION_INTRA_DAY,
-    spName: CLICKSTREAM_ACQUISITION_INTRA_DAY_SP,
     type: 'sp',
     scheduleRefresh: 'true',
     timezoneSensitive: 'true',

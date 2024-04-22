@@ -52,7 +52,7 @@ import {
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME_PLACEHOLDER,
   CLICKSTREAM_ENGAGEMENT_EVENT_NAME,
   CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
-  CLICKSTREAM_ACQUISITION_INTRA_DAY,
+  CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV,
 } from '@aws/clickstream-base-lib';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
@@ -384,11 +384,15 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY} where event_date >= <<$startDate23>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>)) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
         columns: [
           {
             Name: 'event_date',
             Type: 'DATETIME',
+          },
+          {
+            Name: 'platform',
+            Type: 'STRING',
           },
           {
             Name: 'Active User',
@@ -401,11 +405,6 @@ export function createQuicksightCustomResource(
         ],
         dateTimeDatasetParameter: [
           {
-            name: 'startDate23',
-            timeGranularity: TimeGranularity.DAY,
-            defaultValue: tenYearsAgo,
-          },
-          {
             name: 'endDate23',
             timeGranularity: TimeGranularity.DAY,
             defaultValue: futureDate,
@@ -413,6 +412,7 @@ export function createQuicksightCustomResource(
         ],
         projectedColumns: [
           'event_date',
+          'platform',
           'Active User',
           'New User',
         ],
@@ -1005,6 +1005,10 @@ export function createQuicksightCustomResource(
             Type: 'STRING',
           },
           {
+            Name: 'device',
+            Type: 'STRING',
+          },
+          {
             Name: 'app_version',
             Type: 'STRING',
           },
@@ -1044,6 +1048,7 @@ export function createQuicksightCustomResource(
         projectedColumns: [
           'event_date',
           'platform',
+          'device',
           'app_version',
           'user_id',
           'operating_system / version',

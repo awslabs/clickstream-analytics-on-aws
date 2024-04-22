@@ -1852,11 +1852,15 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Intra_Day_User',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day where event_date >= <<$startDate23>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv where event_date >= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>)) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))",
             columns: [
               {
                 Name: 'event_date',
                 Type: 'DATETIME',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
               },
               {
                 Name: 'Active User',
@@ -1869,16 +1873,13 @@ describe('DataReportingQuickSightStack resource test', () => {
             ],
             dateTimeDatasetParameter: [
               {
-                name: 'startDate23',
-                timeGranularity: 'DAY',
-              },
-              {
                 name: 'endDate23',
                 timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
               'event_date',
+              'platform',
               'Active User',
               'New User',
             ],
@@ -2439,6 +2440,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'device',
+                Type: 'STRING',
+              },
+              {
                 Name: 'app_version',
                 Type: 'STRING',
               },
@@ -2476,6 +2481,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             projectedColumns: [
               'event_date',
               'platform',
+              'device',
               'app_version',
               'user_id',
               'operating_system / version',
