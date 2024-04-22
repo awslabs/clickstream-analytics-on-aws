@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS {{database_name}}.{{schema}}.{{viewName}}(
     event_date date,
     user_id varchar(255),
     platform varchar(255),
+    device varchar(255),
     app_version varchar(65535),
     "operating_system / version" varchar(65535),
     device_ua_browser varchar(65535),
