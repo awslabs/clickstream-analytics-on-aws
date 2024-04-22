@@ -98,9 +98,6 @@ async function createEMRServerlessApp(props: ResourcePropertiesType, funcTags: R
   let javaPathSuffix = 'x86_64';
   if (props.architecture === EMR_ARCHITECTURE_AUTO) {
     architecture = Architecture.ARM64;
-    if (region.startsWith('cn-')) {
-      architecture = Architecture.X86_64;
-    }
   }
   if (architecture == Architecture.ARM64) {
     javaPathSuffix = 'aarch64';

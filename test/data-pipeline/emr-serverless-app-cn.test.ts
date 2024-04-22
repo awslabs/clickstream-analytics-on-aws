@@ -87,7 +87,7 @@ test('should create EMR-serverless application X86_64 architecture with java 17'
   expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
 
   expect(emrClientMock).toHaveReceivedNthCommandWith(1, CreateApplicationCommand, {
-    architecture: 'X86_64',
+    architecture: 'ARM64',
     autoStartConfiguration: {
       enabled: true,
     },
@@ -111,8 +111,8 @@ test('should create EMR-serverless application X86_64 architecture with java 17'
       {
         classification: 'spark-defaults',
         properties: {
-          'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.x86_64/',
-          'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.x86_64/',
+          'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
+          'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.aarch64/',
         },
       },
     ],
