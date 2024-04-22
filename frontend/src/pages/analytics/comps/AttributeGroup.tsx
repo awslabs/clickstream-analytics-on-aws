@@ -66,20 +66,18 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
                   />
                 </div>
                 <div className="event-delete">
-                  {groupOptions.length > 1 && (
-                    <span className="remove-icon">
-                      <Button
-                        onClick={() => {
-                          // remove index option from groupOptions
-                          const newGroupOptions = [...groupOptions];
-                          newGroupOptions.splice(index, 1);
-                          setGroupOptions(newGroupOptions);
-                        }}
-                        variant="link"
-                        iconName="close"
-                      />
-                    </span>
-                  )}
+                  <span className="remove-icon">
+                    <Button
+                      onClick={() => {
+                        // remove index option from groupOptions
+                        const newGroupOptions = [...groupOptions];
+                        newGroupOptions.splice(index, 1);
+                        setGroupOptions(newGroupOptions);
+                      }}
+                      variant="link"
+                      iconName="close"
+                    />
+                  </span>
                 </div>
               </div>
             </div>
@@ -98,7 +96,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
             });
             setGroupOptions(newGroupOptions);
           }}
-          disabled={groupOptions.length >= 5}
+          disabled={groupOptions.length >= 5 || disabled}
         >
           {t('button.newGroup')}
         </Button>

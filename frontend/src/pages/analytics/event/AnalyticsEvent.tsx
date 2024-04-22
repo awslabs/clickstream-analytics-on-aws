@@ -510,7 +510,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               }
               options={chartTypeOptions.map((obj) => ({
                 ...obj,
-                disabled: loadingChart || disableSwitchChart,
+                disabled: loadingChart || disableSwitchChart || groupOptions.length > 1,
               }))}
             />
           </div>
