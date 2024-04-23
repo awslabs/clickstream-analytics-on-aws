@@ -1672,8 +1672,35 @@ describe('Metadata Event Attribute test V2', () => {
               { value: 'value-02', displayValue: 'value-02' },
             ],
           },
+          {
+            associatedEvents: [],
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT_OUTER}#is_first_day_event#${MetadataValueType.STRING}`,
+            month: 'latest',
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: 'is_first_day_event',
+            displayName: {
+              'en-US': 'Is first day event',
+              'zh-CN': '是否首日事件',
+            },
+            description: {
+              'en-US': 'Is first day event',
+              'zh-CN': '是否首日事件',
+            },
+            eventNames: ['*'],
+            category: ConditionCategory.EVENT_OUTER,
+            metadataSource: MetadataSource.PRESET,
+            parameterType: MetadataParameterType.PUBLIC,
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS, MetadataPlatform.WEB, MetadataPlatform.WECHAT_MINIPROGRAM],
+            valueType: MetadataValueType.STRING,
+            values: [
+              { value: 'true', displayValue: 'true' },
+              { value: 'false', displayValue: 'false' },
+            ],
+          },
         ],
-        totalCount: 2,
+        totalCount: 3,
       },
     });
   });
@@ -1701,7 +1728,7 @@ describe('Metadata Event Attribute test V2', () => {
       .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.totalCount).toEqual(80);
+    expect(res.body.data.totalCount).toEqual(81);
   });
   it('Get metadata event attribute for path nodes', async () => {
     ddbMock.on(QueryCommand, {

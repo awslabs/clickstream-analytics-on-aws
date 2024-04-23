@@ -42,7 +42,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
         return (
           <div key={identity(index)}>
             <div className="cs-analytics-parameter">
-              <div className="flex w-75p">
+              <div className="flex w-85p">
                 <div className="cs-para-name">{index + 1}</div>
                 <div className="flex-1">
                   <EventItem
