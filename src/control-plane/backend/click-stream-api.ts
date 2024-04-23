@@ -341,6 +341,7 @@ export class ClickStreamApiConstruct extends Construct {
         WITH_VALIDATE_ROLE: 'true',
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         LISTEN_STACK_QUEUE_ARN: this.backendEventBus.listenStackQueue.queueArn,
+        IAM_ROLE_PREFIX: props.iamRolePrefix,
         IAM_ROLE_BOUNDARY_ARN: props.iamRoleBoundaryArn,
         API_FUNCTION_LAMBDA_ROLE: role.roleArn,
         TEMPLATE_FILE: `${Stack.of(this).stackName}.template.json`,
