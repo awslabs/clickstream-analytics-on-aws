@@ -33,13 +33,21 @@
 
         * **VPC**：基于 Amazon VPC 服务的虚拟私有云（VPC）是您在 AWS 云中的私有、逻辑隔离的网络。
 
-            > **注意**：如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。
+            !!! info "注意"
+            
+                如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。
 
         * **安全组**：此 VPC 安全组定义了可以在 VPC 中使用的哪些子网和 IP 范围可访问 Redshift 服务端点。
 
         * **子网**：选择至少三个现有的 VPC 子网。
 
-            > **注意**：我们建议出于最佳安全实践使用私有子网进行部署。
+            !!! info "注意"
+            
+                我们建议出于最佳安全实践使用私有子网进行部署。
+
+            !!! info "注意"
+            
+                请确保您的子网有足够的可用 IP 地址来创建 Redshift Serverless，请查阅[每个子网所需的可用 IP 地址数量][serverless-usage-considerations]。
 
     * **预设模式**
 
@@ -50,3 +58,5 @@
     * **数据范围**：考虑到让 Redshift 保存所有数据的成本效益问题，我们建议 Redshift 仅保存热数据，而所有数据都存储在 S3 中。需要定期在 Redshift 中删除过期数据。
 
 * **Athena**：选择 Athena 使用在 Glue 数据目录中创建的表查询 S3 上的所有数据。
+
+[serverless-usage-considerations]: https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-usage-considerations.html

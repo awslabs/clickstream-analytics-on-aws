@@ -37,6 +37,7 @@ nav:
       - 步骤4. 分析数据: getting-started/4.view-dashboard.md
     - 管道管理:
       - 概述: pipeline-mgmt/index.md
+      - 基本配置: pipeline-mgmt/basic.md
       - 数据摄取:
         - 概述: pipeline-mgmt/ingestion/index.md
         - 摄取端点: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md

@@ -33,6 +33,7 @@ nav:
       - Step 4. Analyze data: getting-started/4.view-dashboard.md
     - Pipeline management:
       - Overview: pipeline-mgmt/index.md
+      - Basic configuration: pipeline-mgmt/basic.md
       - Data ingestion:
         - Overview: pipeline-mgmt/ingestion/index.md
         - Ingestion endpoint: pipeline-mgmt/ingestion/configure-ingestion-endpoint.md
