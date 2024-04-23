@@ -87,7 +87,7 @@ nav:
     - 身份管理: identity-mgmt.md
     - 升级解决方案: upgrade.md
     - 附加资源:
-      - AWS中国区域实施的先决条件: resources/aws-china-preconditions.md
+      - AWS中国区域实施的先决条件: resources/aws-china-prerequisites.md
       - 上传证书: resources/upload-ssl-certificate.md
     - 常见问题: faq.md
     - 故障排除: troubleshooting.md
