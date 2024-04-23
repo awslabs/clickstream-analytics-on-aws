@@ -384,7 +384,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>)) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date <= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))`,
         columns: [
           {
             Name: 'event_date',
