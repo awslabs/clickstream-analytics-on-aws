@@ -87,6 +87,7 @@ describe('Dictionary Data', () => {
     ddbMock.on(BatchWriteItemCommand).resolvesOnce({});
     const resp = await handler(updateDictionaryEvent, context) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(resp.PhysicalResourceId).toEqual('physical-resource-id');
     expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(DeleteCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(BatchWriteItemCommand, 1);
@@ -109,6 +110,7 @@ describe('Dictionary Data', () => {
     };
     const resp = await handler(event, context) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
+    expect(resp.PhysicalResourceId).toEqual('physical-resource-id');
     expect(docMock).toHaveReceivedCommandTimes(ScanCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(DeleteCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(BatchWriteItemCommand, 1);
