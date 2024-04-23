@@ -1497,6 +1497,23 @@ function getTemplateUrl(templateName: string, solutionMetadata?: IDictionary, us
   return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
 }
 
+export function checkAppTimezone(pipeline: IPipeline, appIds: string[]): string[] {
+  if (appIds.length === 0) {
+    return [];
+  }
+  const hadTimezoneAppIds: string[] = [];
+  for (const tz of pipeline?.timezone ?? []) {
+    if (tz.timezone.trim()) {
+      hadTimezoneAppIds.push(tz.appId);
+    }
+  }
+  // find ip in appIds but not in hadTimezoneAppIds
+  const needUpgradeAppIds = appIds?.filter(
+    (id) => !hadTimezoneAppIds.includes(id),
+  );
+  return needUpgradeAppIds;
+}
+
 export {
   isEmpty,
   isEmail,

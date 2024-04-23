@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PipelineStackType, PipelineStatusType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import {
+  checkAppTimezone,
   filterDynamicPipelineTags,
   getPipelineStatusType,
   getReportingDashboardsUrl,
@@ -186,6 +187,13 @@ export class PipelineServ {
       const templateInfo = pipeline.getTemplateInfo();
       if (templateInfo.isLatest) {
         return res.status(400).send(new ApiFail('Pipeline is already the latest version.'));
+      }
+      // Check app timezone
+      const apps = await store.listApplication(newPipeline.projectId, 'asc');
+      const appIds = apps.map(a => a.appId);
+      const needUpgradeAppIds = checkAppTimezone(newPipeline, appIds);
+      if (needUpgradeAppIds.length > 0) {
+        return res.status(400).send(new ApiFail(`To upgrade the pipeline, please specify a reporting time zone for the app(s): ${needUpgradeAppIds.join(',')} registered in this pipeline.`));
       }
       await pipeline.upgrade(curPipeline);
       return res.status(201).send(new ApiSuccess({ id }, 'Pipeline upgraded.'));
