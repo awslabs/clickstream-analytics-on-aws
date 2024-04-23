@@ -15,21 +15,19 @@ helpFunction()
    echo "Usage: $0 -n <stack name key> -s <stack name or stack arn> -c -profile <AWS profile> -region <AWS region>"
    echo -e "\t-n: The key of stack name. Check main.ts for the detailed keys for different stacks."
    echo -e "\t-s: Stack Name or stack arn. Must specify stack arn when retrieving parameters from deleted stack"
-   echo -e "\t-c: Indicate if deploying web console stack. Will deploy data pipeline stack without this option."
    echo -e "\t-p: explicitly specify the AWS Profile. Use the default behavior without specifying it."
    echo -e "\t-r: explicitly specify AWS Region. Use the default behavior without specifying it."
    exit 1;
 }
 
 # Set the options of this bash script, get the 
-while getopts ":cn:s:p:r:" opt
+while getopts ":n:s:p:r:" opt
 do
    case "$opt" in
       n ) stackNameKey="$OPTARG" ;;
       s ) stackName="$OPTARG" ;;
       r ) region="$OPTARG" ;;
       p ) profile="$OPTARG" ;;
-      c ) deployWebConsole="true" ;;
       ? ) helpFunction ;;
    esac
 done
@@ -103,16 +101,11 @@ for tag in $(echo "$tags" | jq -c '.[]'); do
   tag_string="${tag_string} --tags ${tag_key}=\"${tag_value}\""
 done
 
-context_string=""
-if [ "$deployWebConsole" != "true" ]; then
-  context_string="${context_string} -c ignoreWebConsoleSynth=true"
-fi
-
 # Print the concatenated parameter string
 echo "Concatenated parameters: $param_string"
 
 echo "Concatenated tags: $tag_string"
 
-echo "Final command: $envs_string npx cdk deploy $profile_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+echo "Final command: $envs_string npx cdk deploy $profile_options_string $stackName -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
 
-bash -c "npx cdk deploy $profile_options_string $stackName $context_string -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
+bash -c "npx cdk deploy $profile_options_string $stackName -c $stackNameKey=$stackName $param_string  $tag_string --require-approval never"
