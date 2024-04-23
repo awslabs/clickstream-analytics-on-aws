@@ -201,7 +201,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/basic/</loc>
+         <lastmod>2024-04-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/pipe-mgmt/</loc>
+         <lastmod>2024-04-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/vpc-prerequisites/</loc>
          <lastmod>2024-04-23</lastmod>
          <changefreq>daily</changefreq>
     </url>

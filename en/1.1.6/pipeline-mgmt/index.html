@@ -14,7 +14,7 @@
         <link rel="prev" href="../getting-started/4.view-dashboard/">
       
       
-        <link rel="next" href="ingestion/">
+        <link rel="next" href="basic/">
       
       
       <link rel="icon" href="../images/favicon.ico">
@@ -1263,6 +1263,27 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="basic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1274,10 +1295,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1288,8 +1309,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
             <span class="md-nav__icon md-icon"></span>
             Data ingestion
           </label>
@@ -1425,10 +1446,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
         
           
-          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_7_4" id="__nav_1_7_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1439,8 +1460,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_4">
             <span class="md-nav__icon md-icon"></span>
             Data processing
           </label>
@@ -2889,14 +2910,20 @@
 <p>Before you start to configure the pipeline in a specific region, make sure you have the following in the target region:</p>
 <ul>
 <li>At least one Amazon VPC.</li>
-<li>At least two public subnets across two AZs in the VPC.</li>
-<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoints</a> for below AWS services,<ul>
+</ul>
+<!-- BEGIN INCLUDE ./vpc-prerequisites.md -->
+<ul>
+<li>At least two public subnets across two availability zones (AZs) in the VPC.</li>
+<li>At least two private (with NAT gateways or instances) subnets across two AZs, or at least two isolated subnets across two AZs in the VPC. If you want to deploy the solution resources in the isolated subnets, you have to create <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoints</a> for the AWS services below.<ul>
 <li><code>s3</code>, <code>logs</code>, <code>ecr.api</code>, <code>ecr.dkr</code>, <code>ecs</code>, <code>ecs-agent</code>, <code>ecs-telemetry</code>.</li>
-<li><code>kinesis-streams</code> if you use KDS as sink buffer in ingestion module.</li>
-<li><code>emr-serverless</code>, <code>glue</code> if you enable data processing module.</li>
-<li><code>redshift-data</code>, <code>sts</code>, <code>dynamodb</code>, <code>states</code> and <code>lambda</code> if you enable Redshift as analytics engine in data modeling module.</li>
+<li><code>kinesis-streams</code> if you use KDS as a sink buffer in the ingestion module.</li>
+<li><code>emr-serverless</code>, <code>glue</code> if you enable the data processing module.</li>
+<li><code>redshift-data</code>, <code>sts</code>, <code>dynamodb</code>, <code>states</code> and <code>lambda</code> if you enable Redshift as an analytics engine in the data modeling module.</li>
 </ul>
 </li>
+</ul>
+<!-- END INCLUDE -->
+<ul>
 <li>an Amazon S3 bucket located in the same Region.</li>
 <li>If you need to enable Redshift Serverless as analytics engine in data modeling module, you need have subnets across at least three AZs.</li>
 <li>QuickSight Enterprise edition subscription is required if the reporting is enable.</li>
