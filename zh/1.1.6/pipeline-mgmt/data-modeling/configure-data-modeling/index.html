@@ -1165,6 +1165,27 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../basic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    基本配置
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -1176,10 +1197,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
         
           
-          <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1190,8 +1211,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7_2">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
             <span class="md-nav__icon md-icon"></span>
             数据摄取
           </label>
@@ -1327,10 +1348,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
         
           
-          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_7_4" id="__nav_1_7_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1341,8 +1362,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1_7_3">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_4">
             <span class="md-nav__icon md-icon"></span>
             数据处理
           </label>
@@ -2820,18 +2841,24 @@
 </li>
 <li>
 <p><strong>VPC</strong>：基于 Amazon VPC 服务的虚拟私有云（VPC）是您在 AWS 云中的私有、逻辑隔离的网络。</p>
-<blockquote>
-<p><strong>注意</strong>：如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">注意</p>
+<p>如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。</p>
+</div>
 </li>
 <li>
 <p><strong>安全组</strong>：此 VPC 安全组定义了可以在 VPC 中使用的哪些子网和 IP 范围可访问 Redshift 服务端点。</p>
 </li>
 <li>
 <p><strong>子网</strong>：选择至少三个现有的 VPC 子网。</p>
-<blockquote>
-<p><strong>注意</strong>：我们建议出于最佳安全实践使用私有子网进行部署。</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">注意</p>
+<p>我们建议出于最佳安全实践使用私有子网进行部署。</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">注意</p>
+<p>请确保您的子网有足够的可用 IP 地址来创建 Redshift Serverless，请查阅<a href="https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-usage-considerations.html">每个子网所需的可用 IP 地址数量</a>。</p>
+</div>
 </li>
 </ul>
 </li>

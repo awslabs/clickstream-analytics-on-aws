@@ -10,28 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/ingestion/create-data-sink-w-kinesis/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.6/pipeline-mgmt/vpc-prerequisites/">
       
       
-        <link rel="prev" href="../create-data-sink-w-kafka/">
       
       
-        <link rel="next" href="../create-data-sink-w-s3/">
-      
-      
-      <link rel="icon" href="../../../images/favicon.ico">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
     
     
       
-        <title>数据宿 - Kinesis - 亚马逊云科技点击流分析解决方案</title>
+        <title>Vpc prerequisites - 亚马逊云科技点击流分析解决方案</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,7 +48,7 @@
     
       <link rel="stylesheet" href="/stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -76,7 +72,7 @@
     
     
     
-   <link href="../../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
     html.glightbox-open { overflow: initial; height: 100%; }
     .gslide-title { margin-top: 0px; user-select: text; }
     .gslide-desc { color: #666; user-select: text; }
@@ -85,7 +81,7 @@
     .gdesc-inner { font-size: 0.75rem; }
     body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
     body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
-    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../../assets/javascripts/glightbox.min.js"></script></head>
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -103,11 +99,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#amazon-kinesis-data-stream" class="md-skip">
-          跳转至
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -122,7 +113,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../../.." title="亚马逊云科技点击流分析解决方案" class="md-header__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
+    <a href="../.." title="亚马逊云科技点击流分析解决方案" class="md-header__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -142,7 +133,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              数据宿 - Kinesis
+              Vpc prerequisites
             
           </span>
         </div>
@@ -290,21 +281,17 @@
         
   
   
-    
-  
   
     
     
       
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../solution-overview/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../solution-overview/" class="md-tabs__link">
           
   
   实施指南
@@ -357,7 +344,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="亚马逊云科技点击流分析解决方案" class="md-nav__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
+    <a href="../.." title="亚马逊云科技点击流分析解决方案" class="md-nav__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -384,28 +371,23 @@
       
   
   
-    
   
   
-  
     
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -416,7 +398,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             实施指南
@@ -468,7 +450,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/" class="md-nav__link">
+      <a href="../../solution-overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -489,7 +471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/features-and-benefits/" class="md-nav__link">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -510,7 +492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/use-cases/" class="md-nav__link">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -577,7 +559,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture/" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -598,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../well-architected-pillars/" class="md-nav__link">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -665,7 +647,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../aws-services/" class="md-nav__link">
+      <a href="../../aws-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -686,7 +668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture-details/" class="md-nav__link">
+      <a href="../../architecture-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -753,7 +735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/cost/" class="md-nav__link">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -774,7 +756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/security/" class="md-nav__link">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -795,7 +777,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/regions/" class="md-nav__link">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -862,7 +844,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/" class="md-nav__link">
+      <a href="../../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -883,7 +865,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/with-cognito/" class="md-nav__link">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -904,7 +886,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/with-oidc/" class="md-nav__link">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -925,7 +907,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/within-vpc/" class="md-nav__link">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -992,7 +974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1013,7 +995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/1.create-project/" class="md-nav__link">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1034,7 +1016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/2.config-pipeline/" class="md-nav__link">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1055,7 +1037,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/3.integrate-sdk/" class="md-nav__link">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1076,7 +1058,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/4.view-dashboard/" class="md-nav__link">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1102,8 +1084,6 @@
                 
   
   
-    
-  
   
   
     
@@ -1113,11 +1093,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
         
           
           <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
@@ -1131,92 +1111,10 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_7">
             <span class="md-nav__icon md-icon"></span>
             管道管理
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    概述
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../basic/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    基本配置
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    数据摄取
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_1_7_3">
-            <span class="md-nav__icon md-icon"></span>
-            数据摄取
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1248,7 +1146,87 @@
   
   
     <li class="md-nav__item">
-      <a href="../configure-ingestion-endpoint/" class="md-nav__link">
+      <a href="../basic/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    基本配置
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    数据摄取
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            数据摄取
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ingestion/configure-ingestion-endpoint/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1269,7 +1247,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create-data-sink-w-kafka/" class="md-nav__link">
+      <a href="../ingestion/create-data-sink-w-kafka/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1287,30 +1265,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    数据宿 - Kinesis
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1319,44 +1277,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      配置模式
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      其他设置
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1369,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../create-data-sink-w-s3/" class="md-nav__link">
+      <a href="../ingestion/create-data-sink-w-s3/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1436,7 +1356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/" class="md-nav__link">
+      <a href="../data-processing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1457,7 +1377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/data-schema/" class="md-nav__link">
+      <a href="../data-processing/data-schema/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1478,7 +1398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/configure-execution-para/" class="md-nav__link">
+      <a href="../data-processing/configure-execution-para/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1499,7 +1419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/configure-plugin/" class="md-nav__link">
+      <a href="../data-processing/configure-plugin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1528,7 +1448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-modeling/configure-data-modeling/" class="md-nav__link">
+      <a href="../data-modeling/configure-data-modeling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1549,7 +1469,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quicksight/configure-quicksight/" class="md-nav__link">
+      <a href="../quicksight/configure-quicksight/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1570,7 +1490,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipe-mgmt/" class="md-nav__link">
+      <a href="../pipe-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1637,7 +1557,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/" class="md-nav__link">
+      <a href="../../sdk-manual/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1658,7 +1578,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/android/" class="md-nav__link">
+      <a href="../../sdk-manual/android/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1679,7 +1599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/swift/" class="md-nav__link">
+      <a href="../../sdk-manual/swift/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1700,7 +1620,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/web/" class="md-nav__link">
+      <a href="../../sdk-manual/web/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1721,7 +1641,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/flutter/" class="md-nav__link">
+      <a href="../../sdk-manual/flutter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1742,7 +1662,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/react-native/" class="md-nav__link">
+      <a href="../../sdk-manual/react-native/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1763,7 +1683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/wechat/" class="md-nav__link">
+      <a href="../../sdk-manual/wechat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1784,7 +1704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/http-api/" class="md-nav__link">
+      <a href="../../sdk-manual/http-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1805,7 +1725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/user-identifier/" class="md-nav__link">
+      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1872,7 +1792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/" class="md-nav__link">
+      <a href="../../analytics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1931,7 +1851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/" class="md-nav__link">
+      <a href="../../analytics/dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1952,7 +1872,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/acquisition/" class="md-nav__link">
+      <a href="../../analytics/dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1973,7 +1893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/engagement/" class="md-nav__link">
+      <a href="../../analytics/dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1994,7 +1914,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/activity/" class="md-nav__link">
+      <a href="../../analytics/dashboard/activity/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2015,7 +1935,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/retention/" class="md-nav__link">
+      <a href="../../analytics/dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2036,7 +1956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/device/" class="md-nav__link">
+      <a href="../../analytics/dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2057,7 +1977,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/user/" class="md-nav__link">
+      <a href="../../analytics/dashboard/user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2078,7 +1998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/crash/" class="md-nav__link">
+      <a href="../../analytics/dashboard/crash/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2099,7 +2019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../../analytics/dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2166,7 +2086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/" class="md-nav__link">
+      <a href="../../analytics/explore/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2187,7 +2107,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/event/" class="md-nav__link">
+      <a href="../../analytics/explore/event/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2208,7 +2128,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/funnel/" class="md-nav__link">
+      <a href="../../analytics/explore/funnel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2229,7 +2149,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/path/" class="md-nav__link">
+      <a href="../../analytics/explore/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2250,7 +2170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/retention/" class="md-nav__link">
+      <a href="../../analytics/explore/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2317,7 +2237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/analyzes/" class="md-nav__link">
+      <a href="../../analytics/analyzes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2384,7 +2304,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/data-mgmt/" class="md-nav__link">
+      <a href="../../analytics/data-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2421,7 +2341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../identity-mgmt/" class="md-nav__link">
+      <a href="../../identity-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2442,7 +2362,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../upgrade/" class="md-nav__link">
+      <a href="../../upgrade/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2501,7 +2421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../resources/upload-ssl-certificate/" class="md-nav__link">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2530,7 +2450,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2551,7 +2471,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2572,7 +2492,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../uninstall/" class="md-nav__link">
+      <a href="../../uninstall/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2631,7 +2551,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../source/" class="md-nav__link">
+      <a href="../../source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2660,7 +2580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../revisions/" class="md-nav__link">
+      <a href="../../revisions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2681,7 +2601,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../notices/" class="md-nav__link">
+      <a href="../../notices/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2739,34 +2659,6 @@
   
   
   
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      配置模式
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      其他设置
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -2784,25 +2676,17 @@
   
 
 
-<h1 id="amazon-kinesis-data-stream">Amazon Kinesis Data Stream</h1>
-<p>该数据宿将从摄取端点收集的点击流数据流式传输到 KDS。该解决方案将根据您的规格在您的 AWS 账户中创建一个 KDS。</p>
-<h2 id="_1">配置模式</h2>
-<p>提供两种模式：<strong>按需</strong>和<strong>预配置</strong></p>
+  <h1>Vpc prerequisites</h1>
+
 <ul>
-<li>
-<p><strong>按需</strong>：在此模式下，KDS 分片是根据研讨会自动配置的。按需模式适用于具有不可预测和高度可变流量模式的工作负载。</p>
-</li>
-<li>
-<p><strong>预配置</strong>：在此模式下，KDS 分片在创建时设置。预配置模式适用于具有容量需求易于预测的可预测流量。如果您想对数据在分片之间的分布方式进行精细控制，也可以使用预配置模式。</p>
-<ul>
-<li>分片数：在预配置模式下，您必须指定数据流的分片数量。有关分片的更多信息，请参阅<a href="https://docs.aws.amazon.com/streams/latest/dev/how-do-i-size-a-stream.html#provisionedmode">预配置模式</a>。</li>
+<li>在 VPC 中至少有两个公共子网跨越两个可用区。</li>
+<li>在 VPC 中至少有两个私有子网（带 NAT 网关或实例）跨越两个可用区，或者在 VPC 中至少有两个隔离子网跨越两个可用区。如果您想将解决方案资源部署在隔离子网中，则必须为以下 AWS 服务创建 <a href="https://docs.aws.amazon.com/zh_cn/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC 终端</a>，<ul>
+<li><code>s3</code>、<code>logs</code>、<code>ecr.api</code>、<code>ecr.dkr</code>、<code>ecs</code>、<code>ecs-agent</code>、<code>ecs-telemetry</code>。</li>
+<li>如果您在摄取模块中使用 KDS 作为缓冲器，则为 <code>kinesis-streams</code>。</li>
+<li>如果您启用数据处理模块，则为 <code>emr-serverless</code>、<code>glue</code>。</li>
+<li>如果您在数据建模模块中启用 Redshift 作为分析引擎，则为 <code>redshift-data</code>、<code>sts</code>、<code>dynamodb</code>、<code>states</code> 和 <code>lambda</code>。</li>
 </ul>
 </li>
-</ul>
-<h2 id="_2">其他设置</h2>
-<ul>
-<li><strong>接收器最大间隔：</strong> 使用此配置，您可以指定记录在流式传输到 AWS 服务之前应缓冲的最长时间（以秒为单位）。</li>
-<li><strong>批处理大小：</strong> 使用此配置，您可以指定单个批次中传递的记录数的最大值。</li>
 </ul>
 
 
@@ -2857,10 +2741,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      <script src="../../assets/javascripts/bundle.3220b9d7.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
