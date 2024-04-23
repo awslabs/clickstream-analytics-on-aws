@@ -54,6 +54,7 @@ import {
   createPipelineMockForBJSRegion,
   createSNSTopicMock,
   dictionaryMock,
+  MOCK_APP_ID,
   MOCK_EXECUTION_ID,
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,
@@ -3793,6 +3794,16 @@ describe('Pipeline test', () => {
       update: true,
       updatePipeline: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        timezone: [
+          {
+            appId: `${MOCK_APP_ID}_1`,
+            timezone: 'Asia/Shanghai',
+          },
+          {
+            appId: `${MOCK_APP_ID}_2`,
+            timezone: 'Asia/Shanghai',
+          },
+        ],
       },
     });
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
@@ -3850,6 +3861,16 @@ describe('Pipeline test', () => {
         templateVersion: 'v1.0.0',
         tags: [
           { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+        ],
+        timezone: [
+          {
+            appId: `${MOCK_APP_ID}_1`,
+            timezone: 'Asia/Shanghai',
+          },
+          {
+            appId: `${MOCK_APP_ID}_2`,
+            timezone: 'Asia/Shanghai',
+          },
         ],
       },
     });
@@ -3915,6 +3936,16 @@ describe('Pipeline test', () => {
           },
         },
         templateVersion: 'v2.0.0',
+        timezone: [
+          {
+            appId: `${MOCK_APP_ID}_1`,
+            timezone: 'Asia/Shanghai',
+          },
+          {
+            appId: `${MOCK_APP_ID}_2`,
+            timezone: 'Asia/Shanghai',
+          },
+        ],
       },
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
@@ -3949,6 +3980,16 @@ describe('Pipeline test', () => {
       updatePipeline: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
         reporting: {},
+        timezone: [
+          {
+            appId: `${MOCK_APP_ID}_1`,
+            timezone: 'Asia/Shanghai',
+          },
+          {
+            appId: `${MOCK_APP_ID}_2`,
+            timezone: 'Asia/Shanghai',
+          },
+        ],
       },
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
@@ -3973,6 +4014,42 @@ describe('Pipeline test', () => {
       },
       success: true,
       message: 'Pipeline upgraded.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
+  });
+  it('Upgrade pipeline without some app timezone', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(mockClients, {
+      publicAZContainPrivateAZ: true,
+      subnetsCross3AZ: true,
+      subnetsIsolated: true,
+      update: true,
+      updatePipeline: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+        reporting: {},
+      },
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      success: false,
+      message: 'To upgrade the pipeline, please specify a reporting time zone for the app(s): app_7777_7777_1,app_7777_7777_2 registered in this pipeline.',
     });
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
   });
