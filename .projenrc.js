@@ -221,6 +221,7 @@ const devDepsForFrontendProject = [
   'console-browserify@^1.2.0',
   'assert-browserify@^2.0.0',
   'vm-browserify@^1.1.2',
+  'nock@^13.5.4',
 ];
 
 const depsForApiProject = [
