@@ -384,7 +384,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_ACQUISITION_INTRA_DAY_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date <= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>))`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ACQUISITION_INTRA_DAY_USER_MV} where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))`,
         columns: [
           {
             Name: 'event_date',
@@ -872,6 +872,10 @@ export function createQuicksightCustomResource(
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME} where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))`,
         columns: [
           {
+            Name: 'platform',
+            Type: 'STRING',
+          },
+          {
             Name: 'first_date',
             Type: 'DATETIME',
           },
@@ -901,6 +905,7 @@ export function createQuicksightCustomResource(
           },
         ],
         projectedColumns: [
+          'platform',
           'first_date',
           'day_diff',
           'returned_user_count',
