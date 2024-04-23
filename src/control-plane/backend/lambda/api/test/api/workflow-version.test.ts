@@ -120,10 +120,9 @@ const InitTags = [
     Value: 'tagValue2',
   },
 ];
-
 const appRegistryApplicationTag = {
-  Key: `#.Clickstream-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
-  Value: `#.Clickstream-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
+  Key: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_KEY}`,
+  Value: `#.${getStackPrefix()}-ServiceCatalogAppRegistry-6666-6666.${OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_TAG_VALUE}`,
 };
 
 const Tags = [
