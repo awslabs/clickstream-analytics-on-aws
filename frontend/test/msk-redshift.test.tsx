@@ -12,7 +12,7 @@
  */
 
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import nock from 'nock';
 import DataProcessing from 'pages/pipelines/create/steps/DataProcessing';
 import Reporting from 'pages/pipelines/create/steps/Reporting';
@@ -321,29 +321,36 @@ describe('Test redshift settings', () => {
         QUICK_SIGHT: false,
       },
     };
-    render(
-      <Reporting
-        update={false}
-        pipelineInfo={pipelineData}
-        changeEnableReporting={() => {
-          return;
-        }}
-        changeQuickSightAccountName={() => {
-          return;
-        }}
-        quickSightUserEmptyError={false}
-        changeQuickSightDisabled={function (disabled: boolean): void {
-          throw new Error('Function not implemented.');
-        }}
-        changeQuickSightSelectedUser={function (user: OptionDefinition): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('test-quicksight-id')).toBeDisabled();
+    let reportingDom;
+    await act(async () => {
+      reportingDom = render(
+        <Reporting
+          update={false}
+          pipelineInfo={pipelineData}
+          changeEnableReporting={() => {
+            return;
+          }}
+          changeQuickSightAccountName={() => {
+            return;
+          }}
+          quickSightUserEmptyError={false}
+          changeQuickSightDisabled={function (disabled: boolean): void {
+            throw new Error('Function not implemented.');
+          }}
+          changeQuickSightSelectedUser={function (
+            user: OptionDefinition
+          ): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
     });
+
+    const reportingCheckbox = reportingDom.container.querySelector(
+      '#test-quicksight-id'
+    );
+    expect(reportingCheckbox).toBeInTheDocument();
+    expect(reportingCheckbox).toBeDisabled();
   });
 
   test('Should enable athena and enable quicksight when enable redshift with emr and quicksight service available', async () => {
