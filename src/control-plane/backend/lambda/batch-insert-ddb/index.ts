@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { aws_sdk_client_common_config, logger, marshallOptions, unmarshallOptions } from '@aws/clickstream-base-lib';
+import { aws_sdk_client_common_config, generateRandomStr, logger, marshallOptions, unmarshallOptions } from '@aws/clickstream-base-lib';
 import {
   DynamoDBClient,
   BatchWriteItemCommand,
@@ -48,15 +48,17 @@ interface DicItem {
 
 export const handler = async (
   event: CdkCustomResourceEvent,
-  context: Context,
+  _context: Context,
 ): Promise<CdkCustomResourceResponse> => {
   logger.debug('dictionary:', { dictionary });
 
+  const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
+    `batchInsertDDB${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,
     RequestId: event.RequestId,
     LogicalResourceId: event.LogicalResourceId,
-    PhysicalResourceId: context.logGroupName,
+    PhysicalResourceId: physicalId,
     Data: {
       TableName: event.ResourceProperties.tableName,
     },
