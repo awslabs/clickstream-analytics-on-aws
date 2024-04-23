@@ -84,7 +84,7 @@ export function uploadBuiltInJarsAndRemoteFiles(
 }
 
 function getSourceAsset(props: BuildJarProps, bundling: BundlingOptions) {
-  if (process.env.CI !== 'true') {
+  if (process.env.LOCAL_TESTING === 'true') {
     return [Source.data('test', 'test')];
   } else {
     return [
