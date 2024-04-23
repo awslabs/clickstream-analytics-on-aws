@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataValueType } from '@aws/clickstream-base-lib';
+import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '@aws/clickstream-base-lib';
 import {
   UpdateCommand,
   QueryCommandInput,
@@ -214,6 +214,39 @@ export class DynamoDbMetadataStore implements MetadataStore {
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER', version);
     }
     const parameters = rawToParameter(records, false);
+    // Add view parameters
+    parameters.push({
+      id: `${projectId}#${appId}#${ConditionCategory.EVENT_OUTER}#is_first_day_event#${MetadataValueType.STRING}`,
+      month: 'latest',
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+      projectId: projectId,
+      appId: appId,
+      name: 'is_first_day_event',
+      platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS, MetadataPlatform.WEB, MetadataPlatform.WECHAT_MINIPROGRAM],
+      category: ConditionCategory.EVENT_OUTER,
+      valueType: MetadataValueType.STRING,
+      metadataSource: MetadataSource.PRESET,
+      parameterType: MetadataParameterType.PUBLIC,
+      displayName: {
+        'en-US': 'Is first day event',
+        'zh-CN': '是否首日事件',
+      },
+      description: {
+        'en-US': 'Is first day event',
+        'zh-CN': '是否首日事件',
+      },
+      valueEnum: [
+        {
+          value: 'true',
+          count: 0,
+        },
+        {
+          value: 'false',
+          count: 0,
+        },
+      ],
+      eventNames: ['*'],
+    });
     return parameters;
   };
 

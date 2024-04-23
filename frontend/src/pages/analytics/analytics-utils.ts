@@ -680,6 +680,7 @@ const categoryMapping = (category: ConditionCategoryFrontend | undefined) => {
     case ConditionCategoryFrontend.GEO:
     case ConditionCategoryFrontend.SDK:
     case ConditionCategoryFrontend.OTHER:
+    case ConditionCategoryFrontend.EVENT_OUTER:
       return ConditionCategory.EVENT_OUTER;
     default:
       return ConditionCategory.EVENT;
