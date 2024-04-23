@@ -1852,7 +1852,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Intra_Day_User',
             importMode: 'DIRECT_QUERY',
-            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv where event_date >= DATEADD(DAY, 1, date_trunc('day', <<$endDate23>>)) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))",
+            customSql: "SELECT * FROM {{schema}}.clickstream_acquisition_intra_day_user_mv where event_date >= date_trunc('day', <<$endDate23>>) and event_date < DATEADD(DAY, 2, date_trunc('day', <<$endDate23>>))",
             columns: [
               {
                 Name: 'event_date',
@@ -2315,6 +2315,10 @@ describe('DataReportingQuickSightStack resource test', () => {
             customSql: "SELECT * FROM {{schema}}.clickstream_retention_view_v3 where first_date >= <<$startDate19>> and first_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate19>>))",
             columns: [
               {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
                 Name: 'first_date',
                 Type: 'DATETIME',
               },
@@ -2342,6 +2346,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
             ],
             projectedColumns: [
+              'platform',
               'first_date',
               'day_diff',
               'returned_user_count',
